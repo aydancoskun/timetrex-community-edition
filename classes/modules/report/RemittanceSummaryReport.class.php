@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,9 @@ class RemittanceSummaryReport extends Report {
 
 	protected $user_ids = array();
 
+	/**
+	 * RemittanceSummaryReport constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('Remittance Summary Report');
 		$this->file_name = 'remittance_summary';
@@ -51,6 +54,11 @@ class RemittanceSummaryReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
 				AND $this->getPermissionObject()->Check('report', 'view_remittance_summary', $user_id, $company_id ) ) {
@@ -60,6 +68,11 @@ class RemittanceSummaryReport extends Report {
 		return FALSE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|mixed|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -79,7 +92,7 @@ class RemittanceSummaryReport extends Report {
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
 										'-1010-time_period' => TTi18n::gettext('Time Period'),
-
+										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -491,6 +504,9 @@ class RemittanceSummaryReport extends Report {
 		return $retval;
 	}
 
+	/**
+	 * @return array
+	 */
 	function formatFormConfig() {
 		$default_include_exclude_arr = array( 'include_pay_stub_entry_account' => array(), 'exclude_pay_stub_entry_account' => array() );
 
@@ -505,6 +521,11 @@ class RemittanceSummaryReport extends Report {
 	}
 
 	//Get raw data for report
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array( 'user' => array(), 'pay_stub_entry' => array(), 'pay_period' => array() );
 
@@ -665,7 +686,7 @@ class RemittanceSummaryReport extends Report {
 			$ppslf->getByCompanyIdAndUserId( $this->getUserObject()->getCompany(), $this->user_ids );
 			if ( $ppslf->getRecordCount() > 0 ) {
 				foreach( $ppslf as $pps_obj ) {
-					$this->tmp_data['pay_period_schedule'][(int)$pps_obj->getColumn('user_id')] = $pps_obj->getAnnualPayPeriods();
+					$this->tmp_data['pay_period_schedule'][$pps_obj->getColumn('user_id')] = $pps_obj->getAnnualPayPeriods();
 				}
 			}
 
@@ -687,7 +708,11 @@ class RemittanceSummaryReport extends Report {
 					if ( $tmp_total_cpp_pay_periods < 1 ) {
 						$tmp_total_cpp_pay_periods = 1;
 					}
-					$tmp_cpp_pro_rate = bcdiv( $tmp_total_cpp_pay_periods, ( isset($this->tmp_data['pay_period_schedule'][$user_id]) ? $this->tmp_data['pay_period_schedule'][$user_id] : $tmp_total_cpp_pay_periods ) );
+
+					if ( !isset($this->tmp_data['pay_period_schedule'][$user_id]) ) {
+						$this->tmp_data['pay_period_schedule'][$user_id] = $tmp_total_cpp_pay_periods;
+					}
+					$tmp_cpp_pro_rate = bcdiv( $tmp_total_cpp_pay_periods, $this->tmp_data['pay_period_schedule'][$user_id] );
 					if ( $tmp_cpp_pro_rate > 1 ) {
 						$tmp_cpp_pro_rate = 1; //This can happen if last year they had 27PP and this year they have 26.
 					}
@@ -695,7 +720,7 @@ class RemittanceSummaryReport extends Report {
 					$tmp_gross_payroll = array_sum( Misc::arrayColumn($this->tmp_data['pay_stub_entry'][$user_id], 'gross_payroll') );
 					$tmp_cpp_total_earnings = array_sum( Misc::arrayColumn($this->tmp_data['pay_stub_entry'][$user_id], 'cpp_total_earnings') );
 					$tmp_ei_total_earnings = array_sum( Misc::arrayColumn($this->tmp_data['pay_stub_entry'][$user_id], 'ei_total_earnings') );
-					Debug::Text(' User ID: '. $user_id .' PPs: '. $tmp_total_cpp_pay_periods .' First Transaction Date: '. $first_date_stamp .' Last Transaction Date: '. $last_date_stamp .' CPP Earnings: '. $tmp_cpp_total_earnings .' CPP ProRate: '. $tmp_cpp_pro_rate, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text(' User ID: '. $user_id .' PPs: '. $tmp_total_cpp_pay_periods .'/'. $this->tmp_data['pay_period_schedule'][$user_id] .' First Transaction Date: '. TTDate::getDate('DATE+TIME', $first_date_stamp ) .' Last Transaction Date: '. TTDate::getDate('DATE+TIME', $last_date_stamp ).' CPP Earnings: '. $tmp_cpp_total_earnings .' CPP ProRate: '. $tmp_cpp_pro_rate, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Calculate both Employee and Employer amounts, so thats why we multiply by 2.
 					$tmp_cpp_total = ( ( $tmp_cpp_total_earnings - ( $pd_obj->getCPPBasicExemption() * $tmp_cpp_pro_rate ) ) * $pd_obj->getCPPEmployeeRate() );
@@ -744,6 +769,10 @@ class RemittanceSummaryReport extends Report {
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
+
+	/**
+	 * @return bool
+	 */
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
@@ -770,6 +799,9 @@ class RemittanceSummaryReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function _pdf_Header() {
 		if ( $this->pdf->getPage() == 1 ) {
 			//Draw separate table at the top showing the summarized data specifically for the form.
@@ -882,19 +914,19 @@ class RemittanceSummaryReport extends Report {
 
 				$this->pdf->Ln( 1.0 );
 
-				$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 16 ) );
-				$this->pdf->setTextColor(0);
-				$this->pdf->setDrawColor(255, 0, 0);
-				$this->pdf->setFillColor(240); //Grayscale only.
-				$this->pdf->setLineWidth( 1 );
-
-				$this->pdf->writeHTMLcell( 100, 5, ( ( $this->pdf->getPageWidth() - 100 ) / 2 ), $this->pdf->getY(), '<a href="https://www.timetrex.com/r.php?id=10100">PAY ONLINE NOW</>', 1, 0, FALSE, TRUE, 'C');
-
-				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize( $this->config['other']['table_row_font_size'] ) );
-				$this->pdf->SetTextColor(0);
-				$this->pdf->SetDrawColor(0);
-				$this->pdf->setFillColor(255);
-				$this->pdf->Ln( 2.0 );
+//				$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 16 ) );
+//				$this->pdf->setTextColor(0);
+//				$this->pdf->setDrawColor(255, 0, 0);
+//				$this->pdf->setFillColor(240); //Grayscale only.
+//				$this->pdf->setLineWidth( 1 );
+//
+//				$this->pdf->writeHTMLcell( 100, 5, ( ( $this->pdf->getPageWidth() - 100 ) / 2 ), $this->pdf->getY(), '<a href="https://www.timetrex.com/r.php?id=10100">PAY ONLINE NOW</>', 1, 0, FALSE, TRUE, 'C');
+//
+//				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize( $this->config['other']['table_row_font_size'] ) );
+//				$this->pdf->SetTextColor(0);
+//				$this->pdf->SetDrawColor(0);
+//				$this->pdf->setFillColor(255);
+//				$this->pdf->Ln( 2.0 );
 
 				$this->pdf->Ln();
 				$this->_pdf_drawLine( 0.75 ); //Slightly smaller than first/last lines.
@@ -905,6 +937,9 @@ class RemittanceSummaryReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function _html_Header() {
 		$column_options = array(
 								'cpp_total' => TTi18n::getText('CPP Contributions'),
@@ -974,15 +1009,15 @@ class RemittanceSummaryReport extends Report {
 			}
 			$this->html .= '</tr>';
 
-			$this->html .= '<tr><th class="pay-online" colspan="' . count($columns) . '"><a href="https://www.timetrex.com/r.php?id=10100" target="_blank">PAY ONLINE NOW</a></th></tr>';
+			//$this->html .= '<tr><th class="pay-online" colspan="' . count($columns) . '"><a href="https://www.timetrex.com/r.php?id=10100" target="_blank">PAY ONLINE NOW</a></th></tr>';
+			$this->html .= '<tr><th class="content-tbody bg-white grand-border font-weight-td" colspan="' . count($columns) . '"><br></th></tr>';
 			$this->html .= '</thead>';
 			$this->html .= '</table>';
 		}
 
 		parent::_html_Header();
+
 		return TRUE;
-
-
 	}
 }
 ?>

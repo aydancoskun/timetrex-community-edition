@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1426,7 +1426,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		foreach( $zones as $zone => $name ) {
 			$retval = TTDate::setTimeZone( Misc::trimSortPrefix( $zone ), TRUE, TRUE );
-			$this->assertEquals( $retval, TRUE );
+			$this->assertEquals( $retval, TRUE, 'Failed TZ: '. $name );
 		}
 	}
 
@@ -1951,6 +1951,60 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $date_arr[2], strtotime('17-Dec-2016'));
 		$this->assertEquals( $date_arr[3], strtotime('24-Dec-2016'));
 		$this->assertEquals( $date_arr[4], strtotime('31-Dec-2016'));
+	}
+
+	function testIsConsecutiveDays() {
+		//Use timezone that observes DST.
+		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+
+		//Spring DST change
+		$date_array = array(
+				strtotime('Fri, 10 Mar 2017 00:00:00 -0800'),
+				strtotime('Sat, 11 Mar 2017 00:00:00 -0800'),
+				strtotime('Sun, 12 Mar 2017 00:00:00 -0700'),
+		);
+		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), TRUE );
+
+
+		$date_array = array(
+				strtotime('Thu, 09 Mar 2017 00:00:00 -0800'),
+				strtotime('Sat, 10 Mar 2017 00:00:00 -0800'),
+				strtotime('Sun, 12 Mar 2017 00:00:00 -0700'),
+		);
+		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), FALSE );
+
+
+		$date_array = array(
+				strtotime('Thu, 09 Mar 2017 00:00:00 -0800'),
+				strtotime('Sat, 11 Mar 2017 00:00:00 -0800'),
+				strtotime('Sun, 12 Mar 2017 00:00:00 -0700'),
+		);
+		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), FALSE );
+
+		//FALL DST change.
+		$date_array = array(
+				1509692400, //strtotime('Fri, 03 Nov 2017 00:00:00 -0700'), //1509692400=Fri, 03 Nov 2017 00:00:00 -0700
+				1509778800, //strtotime('Sat, 04 Nov 2017 00:00:00 -0700'), //1509778800=Sat, 04 Nov 2017 00:00:00 -0700
+				//1509865200, //strtotime('Sun, 05 Nov 2017 00:00:00 -0800'), //1509912000=Sun, 05 Nov 2017 00:00:00 -0800
+				1509912000, //strtotime('Sun, 05 Nov 2017 00:00:00 -0800'), //1509912000=Sun, 05 Nov 2017 12:00:00 -0800
+		);
+		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), TRUE );
+
+		$date_array = array(
+				1509692400, //strtotime('Fri, 03 Nov 2017 00:00:00 -0700'), //1509692400=Fri, 03 Nov 2017 00:00:00 -0700
+				1509778800, //strtotime('Sat, 04 Nov 2017 00:00:00 -0700'), //1509778800=Sat, 04 Nov 2017 00:00:00 -0700
+				1509865200, //strtotime('Sun, 05 Nov 2017 00:00:00 -0800'), //1509912000=Sun, 05 Nov 2017 00:00:00 -0800
+				//1509912000, //strtotime('Sun, 05 Nov 2017 00:00:00 -0800'), //1509912000=Sun, 05 Nov 2017 12:00:00 -0800
+		);
+		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), TRUE );
+
+
+		$date_array = array(
+				strtotime('Fri, 03 Nov 2017 00:00:00 -0700'), //1509692400=Fri, 03 Nov 2017 00:00:00 -0700
+				strtotime('Sat, 04 Nov 2017 00:00:00 -0700'), //1509778800=Sat, 04 Nov 2017 00:00:00 -0700
+				strtotime('Sun, 05 Nov 2017 00:00:00 -0800'), //1509912000=Sun, 05 Nov 2017 00:00:00 -0800
+		);
+		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), TRUE );
 	}
 }
 ?>

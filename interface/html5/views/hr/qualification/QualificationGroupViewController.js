@@ -1,11 +1,14 @@
 QualificationGroupViewController = BaseViewController.extend( {
 	el: '#qualification_group_view_container',
+
+	_required_files:['APIQualificationGroup'],
+
 	tree_mode: null,
 	grid_table_name: null,
 	grid_select_id_array: null,
 	//Must set el here and can only set string, so events can work
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'QualificationGroupEditView.html';
 		this.permission_id = 'qualification';
 		this.viewId = 'QualificationGroup';

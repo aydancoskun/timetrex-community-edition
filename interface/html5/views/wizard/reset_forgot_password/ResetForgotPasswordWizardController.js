@@ -2,8 +2,8 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 
 	el: '.wizard',
 
-	initialize: function() {
-		this._super( 'initialize' );
+	init: function() {
+		//this._super('initialize' );
 
 		this.title = $.i18n._( 'Reset Password' );
 		this.steps = 1;

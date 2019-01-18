@@ -1,5 +1,8 @@
 KPIViewController = BaseViewController.extend( {
 	el: '#kpi_view_container',
+
+	_required_files: ['APIKPI', 'APIKPIGroup', 'APICompanyGenericTag'],
+
 	type_array: null,
 	status_array: null,
 
@@ -9,8 +12,8 @@ KPIViewController = BaseViewController.extend( {
 	sub_document_view_controller: null,
 
 	document_object_type_id: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'KPIEditView.html';
 		this.permission_id = 'kpi';
 		this.viewId = 'KPI';
@@ -334,7 +337,7 @@ KPIViewController = BaseViewController.extend( {
 	},
 
 	onTypeChange: function() {
-		if ( this.current_edit_record.type_id === 10 ) {
+		if ( this.current_edit_record.type_id == 10 ) {
 			this.attachElement( 'minimum_rate' );
 			this.attachElement( 'maximum_rate' );
 
@@ -398,41 +401,5 @@ KPIViewController = BaseViewController.extend( {
 			}
 		}
 	},
-
-	initSubDocumentView: function() {
-		var $this = this;
-
-		if ( this.sub_document_view_controller ) {
-			this.sub_document_view_controller.buildContextMenu( true );
-			this.sub_document_view_controller.setDefaultMenu();
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.initData();
-			return;
-		}
-
-		Global.loadScript( 'views/document/DocumentViewController.js', function() {
-			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
-			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
-			Global.trackView( 'Sub' + 'Document' + 'View' );
-			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_document_view_controller = subViewController;
-			$this.sub_document_view_controller.parent_key = 'object_id';
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.document_object_type_id = $this.document_object_type_id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.parent_view_controller = $this;
-			$this.sub_document_view_controller.initData();
-		}
-
-	}
 
 } );

@@ -1,12 +1,16 @@
 AboutViewController = BaseViewController.extend( {
 
+	_required_files: ['APIAbout'],
+
 	date_api: null,
 
 	employeeActive: [],
 
-	initialize: function( options ) {
+	_required_files: ['TImage','TImageBrowser','APIAbout', 'APIDate' ],
 
-		this._super( 'initialize', options );
+	init: function( options ) {
+
+		//this._super('initialize', options );
 		this.viewId = 'About';
 		this.script_name = 'AboutView';
 		this.context_menu_name = $.i18n._( 'About' );
@@ -398,8 +402,7 @@ AboutViewController = BaseViewController.extend( {
 
 		if ( LocalCacheData.productEditionId > 10 && APIGlobal.pre_login_data.primary_company_id == LocalCacheData.getCurrentCompany().id ) {
 			// Upload License
-			form_item_input = Global.loadWidgetByName( FormItemType.FILE_BROWSER );
-
+			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER);
 			this.file_browser = form_item_input.TImageBrowser( {
 				field: 'license_browser',
 				name: 'filedata',

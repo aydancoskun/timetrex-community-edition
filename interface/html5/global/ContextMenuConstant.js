@@ -112,6 +112,12 @@ ContextMenuIconName.schedule = 'scheduleIcon';
 
 ContextMenuIconName.pay_stub = 'PayStubIcon';
 
+ContextMenuIconName.edit_pay_stub = 'EditPayStubIcon';
+
+ContextMenuIconName.pay_stub_transaction = 'PayStubTransactionIcon';
+
+ContextMenuIconName.pay_stub_transaction_summary = 'PayStubTransactionSummaryIcon';
+
 ContextMenuIconName.pay_stub_summary = 'payStubSummaryIcon';
 
 ContextMenuIconName.edit_pay_period = 'EditPayPeriodIcon';
@@ -195,6 +201,8 @@ ContextMenuIconName.apply_job = 'applyJobIcon';
 ContextMenuIconName.job_application = 'jobApplicationIcon';
 
 ContextMenuIconName.portal_preview = 'portalPreviewIcon';
+ContextMenuIconName.tax_reports = 'taxReportsIcon';
+ContextMenuIconName.preferences = 'preferenceIcon';
 
 var Icons = function() {
 
@@ -279,3 +287,6 @@ Icons.wizard = 'wizard2-35x35.png';
 Icons.restart = 'restart-35x35.png';
 Icons.branches = 'branches-35x35.png';
 Icons.job_applicant = 'job_applicant-35x35.png';
+Icons.pay_stub_transaction = 'direct_deposit-35x35.png';
+Icons.tax_reports = 'tax_reports-35x35.png';
+Icons.preferences = 'preferences-35x35.png';

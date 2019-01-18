@@ -199,7 +199,7 @@ var ServiceCaller = Backbone.Model.extend( {
 
 				if ( cache_key && LocalCacheData.result_cache[cache_key] ) {
 					var result = LocalCacheData.result_cache[cache_key];
-					Debug.Arr(result, 'Response from cached result. Key: '+cache_key, 'ServiceCaller.js', 'ServiceCaller', 'call', 10);
+					//Debug.Arr(result, 'Response from cached result. Key: '+cache_key, 'ServiceCaller.js', 'ServiceCaller', 'call', 10);
 
 					apiReturnHandler = new APIReturnHandler();
 
@@ -253,7 +253,7 @@ var ServiceCaller = Backbone.Model.extend( {
 				break;
 		}
 
-		message_id = UUID.guid();
+			message_id = UUID.guid();
 		TTPromise.add('ServiceCaller', message_id);
 		if ( className !== 'APIProgressBar' && function_name !== 'Logout' ) {
 			url = url + '&MessageID=' + message_id;
@@ -323,17 +323,16 @@ var ServiceCaller = Backbone.Model.extend( {
 					apiReturnHandler.set( 'args', apiArgs );
 
 					if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'EXCEPTION' ) {
-						Debug.Text('API returned exception: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
+						//Debug.Text('API returned exception: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
 						TAlertManager.showAlert( apiReturnHandler.getDescription(), 'Error' );
 						//Error: Uncaught ReferenceError: promise_key is not defined
 						if ( typeof promise_key != 'undefined' ) {
-							TTPromise.reject('ServiceCaller', promise_key);
-						} else {
-							Debug.Text('ERROR: Unable to release promise beacuse key is NULL.', 'ServiceCaller.js', 'ServiceCaller', null, 10);
+						TTPromise.reject('ServiceCaller',message_id);} else {
+							Debug.Text('ERROR: Unable to release promise because key is NULL.', 'ServiceCaller.js', 'ServiceCaller', null, 10);
 						}
 						return;
 					} else if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'SESSION' ) {
-						Debug.Text('API returned session expired: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
+						//Debug.Text('API returned session expired: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
 						LocalCacheData.cleanNecessaryCache(); //make sure the cache is cleared when session is expired
 						ServiceCaller.cancelAllError = true;
 						LocalCacheData.login_error_string = $.i18n._( 'Session expired, please login again.' );
@@ -357,6 +356,12 @@ var ServiceCaller = Backbone.Model.extend( {
 							}
 						}
 						TTPromise.resolve('ServiceCaller',message_id);
+						return;
+					} else if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'DOWN_FOR_MAINTENANCE' ) {
+						//Before the location.replace because after that point we can't be sure of execution.
+						TTPromise.resolve('ServiceCaller',message_id);
+						//replace instead of assignment to ensure that the DOWN_FOR_MAINTENANCE page does not end up in the back button history.
+						window.location.replace( ServiceCaller.rootURL + LocalCacheData.loginData.base_url  + 'html5/DownForMaintenance.php?exception=DOWN_FOR_MAINTENANCE' );
 						return;
 					} else {
 						//Debug.Text('API returned result: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);

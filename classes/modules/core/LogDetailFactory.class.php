@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,109 +42,81 @@ class LogDetailFactory extends Factory {
 	protected $table = 'system_log_detail';
 	protected $pk_sequence_name = 'system_log_detail_id_seq'; //PK Sequence name
 
+	/**
+	 * @return mixed
+	 */
 	function getSystemLog() {
-		return (int)$this->data['system_log_id'];
-	}
-	function setSystemLog($id) {
-		$id = trim($id);
-
-		//Allow NULL ids.
-		if ( $id == '' OR $id == NULL ) {
-			$id = 0;
-		}
-
-		$llf = TTnew( 'LogListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'user',
-															$llf->getByID($id),
-															TTi18n::gettext('System log is invalid')
-															) ) {
-			$this->data['system_log_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'system_log_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setSystemLog( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' OR $value == NULL ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'system_log_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getField() {
-		if ( isset($this->data['field']) ) {
-			return $this->data['field'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'field' );
 	}
-	function setField($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setField( $value) {
 		$value = trim($value);
-
-		if (	$this->Validator->isString(		'field',
-												$value,
-												TTi18n::gettext('Field is invalid'))
-			) {
-			$this->data['field'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'field', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOldValue() {
-		if ( isset($this->data['old_value']) ) {
-			return $this->data['old_value'];
-		}
-
-		return FALSE;
-	}
-	function setOldValue($text) {
-		$text = trim($text);
-
-		if (
-				$this->Validator->isLength(		'old_value',
-												$text,
-												TTi18n::gettext('Old value is invalid'),
-												0,
-												1024)
-
-			) {
-			$this->data['old_value'] = $text;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'old_value' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOldValue( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'old_value', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getNewValue() {
-		if ( isset($this->data['new_value']) ) {
-			return $this->data['new_value'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'new_value' );
 	}
-	function setNewValue($text) {
-		$text = trim($text);
 
-		if (
-				$this->Validator->isLength(		'new_value',
-												$text,
-												TTi18n::gettext('New value is invalid'),
-												0,
-												1024)
-
-			) {
-			$this->data['new_value'] = $text;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setNewValue( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'new_value', $value );
 	}
 
 	//When comparing the two arrays, if there are sub-arrays, we need to *always* include those, as we can't actually
 	//diff the two, because they are already saved by the time we get to this function, so there will never be any changes to them.
 	//We don't want to include sub-arrays, as the sub-classes should handle the logging themselves.
+	/**
+	 * @param $arr1
+	 * @param $arr2
+	 * @return bool
+	 */
 	function diffData( $arr1, $arr2 ) {
 		if ( !is_array($arr1) OR !is_array($arr2) ) {
 			return FALSE;
@@ -160,6 +132,12 @@ class LogDetailFactory extends Factory {
 		return $retarr;
 	}
 
+	/**
+	 * @param int $action_id
+	 * @param string $system_log_id UUID
+	 * @param $object
+	 * @return bool
+	 */
 	function addLogDetail( $action_id, $system_log_id, $object ) {
 		$start_time = microtime(TRUE);
 
@@ -172,7 +150,7 @@ class LogDetailFactory extends Factory {
 			return FALSE;
 		}
 
-		if ( $system_log_id > 0 AND is_object($object) ) {
+		if ( TTUUID::isUUID($system_log_id) AND $system_log_id != TTUUID::getZeroID() AND $system_log_id != TTUUID::getNotExistID() AND is_object($object) ) {
 			//Remove "Plugin" from the end of the class name incase plugins are enabled.
 			$class = str_replace('Plugin', '', get_class( $object ) );
 			Debug::text('System Log ID: '. $system_log_id .' Class: '. $class, __FILE__, __LINE__, __METHOD__, 10);
@@ -187,8 +165,6 @@ class LogDetailFactory extends Factory {
 			//Debug::Arr($new_data, 'New Data Arr: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ( $action_id == 20 ) { //Edit
 				if ( method_exists( $object, 'setObjectFromArray' ) ) {
-					//Run the old data back through the objects own setObjectFromArray(), so any necessary values can be parsed.
-
 					if ( isset($object->old_data) AND isset( $object->old_data['password'] ) ) { //Password from old_data is encrypted, and if put back into the class always causes validation error.
 						$object->old_data['password'] = NULL;
 					}
@@ -205,6 +181,12 @@ class LogDetailFactory extends Factory {
 						unset($variable_to_function_map);
 					}
 
+					//Run the old data back through the objects own setObjectFromArray(), so any necessary values can be parsed.
+					//  However this can cause problems, specifically with PP Schedule TimeSheet Verification settings, as they are calculated going into the DB and coming out.
+					//  Shouldn't the diff just be strictly on the data changed in the DB itself, and not passed through setObjectFromArray()?
+					//  See the Delete case below as well.
+					//  setObjectFromArray() is needed for parsing date/time values back to epoch, otherwise these fields will always show as changed.
+					//$old_data = $object->old_data;
 					$tmp_class->setObjectFromArray( $object->old_data );
 					$old_data = $tmp_class->data;
 					unset($tmp_class);
@@ -258,6 +240,13 @@ class LogDetailFactory extends Factory {
 							$diff_arr['finger_print_4_updated_date']
 							);
 					break;
+				case 'UserPreferenceFactory':
+				case 'UserPreferenceListFactory':
+					unset(
+							$diff_arr['schedule_icalendar_event_name'],
+							$diff_arr['user_full_name_format']
+					);
+					break;
 				case 'PayPeriodScheduleFactory':
 				case 'PayPeriodScheduleListFactory':
 					unset(
@@ -277,6 +266,8 @@ class LogDetailFactory extends Factory {
 					break;
 				case 'PayStubEntryFactory':
 				case 'PayStubEntryListFactory':
+				case 'PayStubTransactionFactory':
+				case 'PayStubTransactionListFactory':
 					unset(
 							$diff_arr['pay_stub_id']
 							);
@@ -371,13 +362,21 @@ class LogDetailFactory extends Factory {
 
 						if ( isset($diff_arr['bank_account']) ) {
 							$old_data['bank_account'] = ( isset($old_data['bank_account']) ) ? $object->getSecureAccount( $old_data['bank_account'] ) : '';
-							$new_data['bank_account'] = ( isset($old_data['bank_account']) ) ? $object->getSecureAccount( $new_data['bank_account'] ) : '';
+							$new_data['bank_account'] = ( isset($new_data['bank_account']) ) ? $object->getSecureAccount( $new_data['bank_account'] ) : '';
 						}
 
 						if ( isset($diff_arr['cc_check']) ) {
 							$old_data['cc_check'] = ( isset($old_data['cc_check']) ) ? $object->getSecureCreditCardCheck( $old_data['cc_check'] ) : '';
-							$new_data['cc_check'] = ( isset($old_data['cc_check']) ) ? $object->getSecureCreditCardCheck( $new_data['cc_check'] ) : '';
+							$new_data['cc_check'] = ( isset($new_data['cc_check']) ) ? $object->getSecureCreditCardCheck( $new_data['cc_check'] ) : '';
 						}
+					}
+					break;
+				case 'RemittanceDestinationAccountFactory':
+				case 'RemittanceDestinationAccountListFactory':
+					//Only log secure values.
+					if ( isset($diff_arr['value3']) ) {
+						$old_data['value3'] = ( isset($old_data['value3']) ) ? $object->getSecureValue3( Misc::decrypt( $old_data['value3'] ) ) : '';
+						$new_data['value3'] = ( isset($new_data['value3']) ) ? $object->getSecureValue3( Misc::decrypt( $new_data['value3'] ) ) : '';
 					}
 					break;
 				case 'JobApplicantFactory':
@@ -392,6 +391,13 @@ class LogDetailFactory extends Factory {
 							//$diff_arr['latitude']
 							);
 					break;
+				case 'ReportScheduleFactory':
+				case 'ReportScheduleListFactory':
+					unset(
+							$diff_arr['user_report_data_id'],
+							$diff_arr['state_id']
+					);
+				break;
 			}
 
 			//Ignore specific columns here, like updated_date, updated_by, etc...
@@ -445,18 +451,19 @@ class LogDetailFactory extends Factory {
 
 					//Debug::Text('Old Value: '. $old_value .' New Value: '. $new_value, __FILE__, __LINE__, __METHOD__, 10);
 					if ( !($old_value == '' AND $new_value == '') ) {
-						$ph[] = (int)$system_log_id;
+						$ph[] = $this->getNextInsertId(); //This needs work before UUID and after.
+						$ph[] = TTUUID::castUUID($system_log_id);
 						$ph[] = $field;
 						$ph[] = $new_value;
 						$ph[] = $old_value;
-						$data[] = '(?, ?, ?, ?)';
+						$data[] = '(?, ?, ?, ?, ?)';
 					}
 				}
 				unset($value); //code standards
-				
+
 				if ( empty($data) == FALSE ) {
 					//Save data in a single SQL query.
-					$query = 'INSERT INTO '. $this->getTable() .'(SYSTEM_LOG_ID, FIELD, NEW_VALUE, OLD_VALUE) VALUES'. implode(',', $data );
+					$query = 'INSERT INTO '. $this->getTable() .'(ID, SYSTEM_LOG_ID, FIELD, NEW_VALUE, OLD_VALUE) VALUES'. implode(',', $data );
 					//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 					$this->db->Execute($query, $ph);
 
@@ -471,54 +478,156 @@ class LogDetailFactory extends Factory {
 		return FALSE;
 	}
 
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+
+		// System log
+		if ( $this->getSystemLog() !== FALSE AND $this->getSystemLog() != TTUUID::getZeroID() ) {
+			$llf = TTnew( 'LogListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+														$llf->getByID($this->getSystemLog()),
+														TTi18n::gettext('System log is invalid')
+													);
+		}
+		// Field
+		$this->Validator->isString(		'field',
+										$this->getField(),
+										TTi18n::gettext('Field is invalid')
+									);
+		// Old value
+		$this->Validator->isLength(		'old_value',
+												$this->getOldValue(),
+												TTi18n::gettext('Old value is invalid'),
+												0,
+												1024
+											);
+		// New value
+		$this->Validator->isLength(		'new_value',
+												$this->getNewValue(),
+												TTi18n::gettext('New value is invalid'),
+												0,
+												1024
+											);
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
+		return TRUE;
+	}
+
 	//This table doesn't have any of these columns, so overload the functions.
+
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
 		return FALSE;
 	}
-	function setDeleted($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCreatedDate() {
 		return FALSE;
 	}
-	function setCreatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getUpdatedBy() {
 		return FALSE;
 	}
-	function setUpdatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
 		return FALSE;
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {
-		return FALSE;
-	}
-	function getDeletedBy() {
-		return FALSE;
-	}
-	function setDeletedBy($id = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getDeletedBy() {
+		return FALSE;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
+		return FALSE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ($this->getDate() === FALSE ) {
 			$this->setDate();

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,11 @@ class ImportBranch extends Import {
 
 	public $class_name = 'APIBranch';
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -65,6 +70,11 @@ class ImportBranch extends Import {
 	}
 
 
+	/**
+	 * @param $row_number
+	 * @param $raw_row
+	 * @return mixed
+	 */
 	function _preParseRow( $row_number, $raw_row ) {
 		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getBranchDefaultData() );
 		$retval['manual_id'] += $row_number; //Auto increment manual_id automatically.
@@ -72,6 +82,10 @@ class ImportBranch extends Import {
 		return $retval;
 	}
 
+	/**
+	 * @param int $validate_only EPOCH
+	 * @return mixed
+	 */
 	function _import( $validate_only ) {
 		return $this->getObject()->setBranch( $this->getParsedData(), $validate_only );
 	}
@@ -79,6 +93,13 @@ class ImportBranch extends Import {
 	//
 	// Generic parser functions.
 	//
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return int
+	 */
 	function parse_status( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		if ( strtolower( $input ) == 'e'
 				OR strtolower( $input ) == 'enabled' ) {

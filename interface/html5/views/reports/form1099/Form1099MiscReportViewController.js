@@ -1,11 +1,12 @@
 Form1099MiscReportViewController = ReportBaseViewController.extend( {
 
+	_required_files: [ 'APIForm1099MiscReport', 'APIPayStubEntryAccount' ],
+
 	province_array: null,
 
 	state_field_array: null,
 
-	initialize: function( options ) {
-		this.__super( 'initialize', options );
+	initReport: function( options ) {
 		this.script_name = 'Form1099MiscReport';
 		this.viewId = 'Form1099MiscReport';
 		this.context_menu_name = $.i18n._( 'Form 1099-Misc' );
@@ -13,9 +14,6 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		this.view_file = 'Form1099MiscReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIForm1099MiscReport' ))();
 		this.include_form_setup = true;
-
-		this.buildContextMenu();
-
 	},
 
 	initOptions: function( callBack ) {
@@ -161,24 +159,24 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 			});
 		}
 
-		var print_print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
-			id: ContextMenuIconName.print,
-			group: form_setup_group,
-			icon: 'print-35x35.png',
-			type: RibbonSubMenuType.NAVIGATION,
-			items: [],
-			permission_result: true,
-			permission: true} );
-
-		var pdf_form_print_government = new RibbonSubMenuNavItem( {label: $.i18n._( 'Government (Multiple Employees/Page)' ),
-			id: 'pdf_form_print_government',
-			nav: print_print
-		} );
-
-		var pdf_form_print = new RibbonSubMenuNavItem( {label: $.i18n._( 'Employee (One Employee/Page)' ),
-			id: 'pdf_form_print',
-			nav: print_print
-		} );
+		// var print_print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
+		// 	id: ContextMenuIconName.print,
+		// 	group: form_setup_group,
+		// 	icon: 'print-35x35.png',
+		// 	type: RibbonSubMenuType.NAVIGATION,
+		// 	items: [],
+		// 	permission_result: true,
+		// 	permission: true} );
+		//
+		// var pdf_form_print_government = new RibbonSubMenuNavItem( {label: $.i18n._( 'Government (Multiple Employees/Page)' ),
+		// 	id: 'pdf_form_print_government',
+		// 	nav: print_print
+		// } );
+		//
+		// var pdf_form_print = new RibbonSubMenuNavItem( {label: $.i18n._( 'Employee (One Employee/Page)' ),
+		// 	id: 'pdf_form_print',
+		// 	nav: print_print
+		// } );
 
 		var save_setup = new RibbonSubMenu( {
 			label: $.i18n._( 'Save Setup' ),
@@ -209,13 +207,15 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 
 		switch ( id ) {
 			case ContextMenuIconName.view:
+				ProgressBar.showOverlay();
 				this.onViewClick();
 				break;
 			case ContextMenuIconName.view_html:
-
+				ProgressBar.showOverlay();
 				this.onViewClick('html');
 				break;
 			case ContextMenuIconName.view_html_new_window:
+				ProgressBar.showOverlay();
 				this.onViewClick('html', true);
 				break;
 			case ContextMenuIconName.export_excel:
@@ -366,64 +366,6 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		v_box.append( form_item );
 
 		this.addEditFieldToColumn( $.i18n._( 'Nonemployee compensation (Box 7)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
-
-		//Name
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab3_column1 );
-
-		form_item_input.parent().width( '45%' );
-
-		//Company Name
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'company_name', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Company Name' ), form_item_input, tab3_column1 );
-
-		form_item_input.parent().width( '45%' );
-
-		//Address
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Address' ), form_item_input, tab3_column1 );
-		form_item_input.parent().width( '45%' );
-
-		//City
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'city'} );
-		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab3_column1 );
-
-		//State
-
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'province', set_empty: true} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.province_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'State' ), form_item_input, tab3_column1 );
-
-		//ZIP Code
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'postal_code'} );
-		this.addEditFieldToColumn( $.i18n._( 'ZIP Code' ), form_item_input, tab3_column1 );
-
-		//Employer State ID Numbers
-		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Employer State ID Numbers' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab3_column1 );
-
-		this.state_field_array = new (APIFactory.getAPIClass( 'APIUser' ))().getUniqueUserProvinces( {async: false} ).getResult();
-
-		for ( var key in this.state_field_array ) {
-			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			form_item_input.TTextInput( {field: key} );
-
-			this.addEditFieldToColumn( this.state_field_array[key], form_item_input, tab3_column1 );
-
-		}
-
 	},
 
 
@@ -437,22 +379,6 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 
 		other.l7 = {include_pay_stub_entry_account: this.current_edit_record.l7_include_pay_stub_entry_account,
 			exclude_pay_stub_entry_account: this.current_edit_record.l7_exclude_pay_stub_entry_account};
-
-		other.name = this.current_edit_record.name;
-		other.company_name = this.current_edit_record.company_name;
-		other.city = this.current_edit_record.city;
-		other.province = this.current_edit_record.province;
-		other.postal_code = this.current_edit_record.postal_code;
-		other.address1 = this.current_edit_record.address1;
-
-		other.state = {};
-
-		for ( var key in this.state_field_array ) {
-			other.state[key] = {};
-
-			other.state[key].state_id = this.current_edit_record[key];
-
-		}
 
 		return other;
 	},
@@ -488,53 +414,6 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 				this.current_edit_record.l7_include_pay_stub_entry_account = res_Data.l7.include_pay_stub_entry_account;
 				this.current_edit_record.l7_exclude_pay_stub_entry_account = res_Data.l7.exclude_pay_stub_entry_account;
 			}
-
-			if ( res_Data.name ) {
-				this.edit_view_ui_dic.name.setValue( res_Data.name );
-
-				this.current_edit_record.name = res_Data.name;
-			}
-
-			if ( res_Data.company_name ) {
-				this.edit_view_ui_dic.company_name.setValue( res_Data.company_name );
-
-				this.current_edit_record.company_name = res_Data.company_name;
-			}
-
-			if ( res_Data.address1 ) {
-				this.edit_view_ui_dic.address1.setValue( res_Data.address1 );
-
-				this.current_edit_record.address1 = res_Data.address1;
-			}
-
-			if ( res_Data.city ) {
-				this.edit_view_ui_dic.city.setValue( res_Data.city );
-
-				this.current_edit_record.city = res_Data.city;
-			}
-
-			if ( res_Data.province ) {
-				this.edit_view_ui_dic.province.setValue( res_Data.province );
-
-				this.current_edit_record.province = res_Data.province;
-			}
-
-			if ( res_Data.postal_code ) {
-				this.edit_view_ui_dic.postal_code.setValue( res_Data.postal_code );
-
-				this.current_edit_record.postal_code = res_Data.postal_code;
-			}
-
-			for ( var key in this.state_field_array ) {
-
-				if ( res_Data.state && res_Data.state[key] ) {
-					this.edit_view_ui_dic[key].setValue( res_Data.state[key].state_id );
-
-					this.current_edit_record[key] = res_Data.state[key].state_id;
-				}
-
-			}
-
 		}
 	}
 	/* jshint ignore:end */

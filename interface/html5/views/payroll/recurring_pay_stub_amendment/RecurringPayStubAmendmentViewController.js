@@ -3,8 +3,8 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 	type_array: null,
 	filtered_status_array: null,
 	frequency_array: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'RecurringPayStubAmendmentEditView.html';
 		this.permission_id = 'pay_stub_amendment';
 		this.viewId = 'RecurringPayStubAmendment';
@@ -67,7 +67,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 	uniformVariable: function( records ) {
 
-		if ( records.type_id === 20 ) {
+		if ( records.type_id == 20 ) {
 			records.amount = records.percent_amount;
 		}
 
@@ -75,14 +75,14 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 	},
 
 	onTypeChange: function() {
-		if ( this.current_edit_record.type_id === 10 ) {
+		if ( this.current_edit_record.type_id == 10 ) {
 			this.detachElement( 'percent_amount' );
 			this.detachElement( 'percent_amount_entry_name_id' );
 			this.attachElement( 'rate' );
 			this.attachElement( 'units' );
 			this.attachElement( 'amount' );
 
-		} else if ( this.current_edit_record.type_id === 20 ) {
+		} else if ( this.current_edit_record.type_id == 20 ) {
 			this.attachElement( 'percent_amount' );
 			this.attachElement( 'percent_amount_entry_name_id' );
 			this.detachElement( 'rate' );

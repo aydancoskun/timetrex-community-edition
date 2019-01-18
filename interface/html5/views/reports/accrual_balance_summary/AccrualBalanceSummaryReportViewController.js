@@ -1,15 +1,14 @@
 AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function( options ) {
-		this.__super( 'initialize', options );
+	_required_files: ['APIAccrualBalanceSummaryReport', 'APIAccrualPolicyAccount', 'APIAccrual', 'APIAccrualPolicy'],
+
+	initReport: function ( options ) {
 		this.script_name = 'AccrualBalanceSummaryReport';
 		this.viewId = 'AccrualBalanceSummaryReport';
 		this.context_menu_name = $.i18n._( 'Accrual Balance Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'AccrualBalanceSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIAccrualBalanceSummaryReport' ))();
-		this.buildContextMenu();
-
 	},
 
 	buildContextMenuModels: function() {

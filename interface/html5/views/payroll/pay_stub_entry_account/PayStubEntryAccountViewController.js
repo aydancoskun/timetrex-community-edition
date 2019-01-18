@@ -1,10 +1,13 @@
 PayStubEntryAccountViewController = BaseViewController.extend( {
 	el: '#pay_stub_entry_account_view_container',
+
+	_required_files: ['APIPayStubEntryAccount'],
+
 	type_array: null,
 	status_array: null,
 	accrual_type_array: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayStubEntryAccountEditView.html';
 		this.permission_id = 'pay_stub_account';
 		this.viewId = 'PayStubEntryAccount';
@@ -59,7 +62,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 	},
 
 	onTypeChange: function() {
-		if ( this.current_edit_record.type_id === 50 ) {
+		if ( this.current_edit_record.type_id == 50 ) {
 			this.detachElement( 'accrual_pay_stub_entry_account_id' );
 			this.detachElement( 'accrual_type_id' );
 
@@ -106,7 +109,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 
 	onWizardClick: function() {
 		var $this = this;
-		IndexViewController.openWizard( 'PayStubAccountWizard', null, function(){
+		IndexViewController.openWizard( 'PayStubAccountWizard', null, function() {
 		} );
 	},
 

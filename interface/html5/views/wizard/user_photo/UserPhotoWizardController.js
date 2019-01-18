@@ -2,14 +2,22 @@ UserPhotoWizardController = BaseWizardController.extend( {
 
 	el: '.wizard',
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Image upload Wizard' );
 		this.steps = 3;
 		this.current_step = 1;
-
-		this.render();
+		var $this = this;
+		requirejs( [
+			'TImageBrowser', //only in the upload wizard
+			'CameraBrowser', //only in the upload wizard
+			'TImageAdvBrowser',//only in the upload wizard
+			'TImage',//only in the upload wizard
+			'TImageCutArea',//only in the upload wizard
+		], function( Masonry, jQueryBridget, interact ) {
+			$this.render();
+		});
 	},
 
 	render: function() {

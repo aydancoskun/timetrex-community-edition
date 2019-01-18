@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTemplateControlFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RecurringScheduleTemplateControlListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,7 +89,14 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RecurringScheduleTemplateControlListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -86,8 +106,8 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -104,7 +124,15 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		return $this;
 	}
 
-	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RecurringScheduleTemplateControlListFactory
+	 */
+	function getByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -117,7 +145,7 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -134,7 +162,12 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		return $this;
 	}
 
-	function getByCompanyIdArray($company_id, $include_blank = TRUE) {
+	/**
+	 * @param string $company_id UUID
+	 * @param bool $include_blank
+	 * @return array
+	 */
+	function getByCompanyIdArray( $company_id, $include_blank = TRUE) {
 
 		$rstclf = new RecurringScheduleTemplateControlListFactory();
 		$rstclf->getByCompanyId($company_id);
@@ -142,7 +175,7 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		$list = array();
 
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($rstclf as $obj) {
@@ -152,64 +185,15 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		return $list;
 	}
 
-	function getSearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		if ( !is_array($order) ) {
-			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
-			}
-		}
-
-		$additional_order_fields = array('a.name');
-		if ( $order == NULL ) {
-			$order = array( 'a.name' => 'asc' );
-			$strict = FALSE;
-		} else {
-			$strict = TRUE;
-		}
-		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
-
-
-		$ph = array(
-					'company_id' => (int)$company_id,
-					);
-
-		$query = '
-					select	a.*
-					from	'. $this->getTable() .' as a
-					where	a.company_id = ?
-					';
-
-		if ( isset($filter_data['created_by']) AND isset($filter_data['created_by'][0]) AND !in_array(-1, (array)$filter_data['created_by']) ) {
-			$query	.=	' AND a.created_by in ('. $this->getListSQL($filter_data['created_by'], $ph) .') ';
-		}
-		/*
-		if ( isset($filter_data['severity_id']) AND isset($filter_data['severity_id'][0]) AND !in_array(-1, (array)$filter_data['severity_id']) ) {
-			$query	.=	' AND i.severity_id in ('. $this->getListSQL($filter_data['severity_id'], $ph) .') ';
-		}
-		*/
-
-		if ( isset($filter_data['name']) AND !is_array($filter_data['name']) AND trim($filter_data['name']) != '' ) {
-			$ph[] = strtolower( trim($filter_data['name']) );
-			$query	.=	' AND lower(a.name) LIKE ?';
-		}
-
-		$query .=	'
-						AND a.deleted = 0
-					';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
-
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		return $this;
-	}
-
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RecurringScheduleTemplateControlListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -247,7 +231,7 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		$rscf = new RecurringScheduleControlFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -273,13 +257,13 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
-					
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
+
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
-		
+
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 

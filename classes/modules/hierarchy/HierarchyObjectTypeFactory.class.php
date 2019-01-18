@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,11 @@ class HierarchyObjectTypeFactory extends Factory {
 
 	var $hierarchy_control_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
 		$product_edition_id = Misc::getCurrentCompanyProductEdition();
@@ -101,6 +106,9 @@ class HierarchyObjectTypeFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getHierarchyControlObject() {
 		if ( is_object($this->hierarchy_control_obj) ) {
 			return $this->hierarchy_control_obj;
@@ -112,33 +120,32 @@ class HierarchyObjectTypeFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getHierarchyControl() {
-		if ( isset($this->data['hierarchy_control_id']) ) {
-			return (int)$this->data['hierarchy_control_id'];
-		}
-
-		return FALSE;
-	}
-	function setHierarchyControl($id) {
-		$id = trim($id);
-
-		$hclf = TTnew( 'HierarchyControlListFactory' );
-		Debug::Text('Hierarchy Control ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( $id != 0
-				OR $this->Validator->isResultSetWithRows(	'hierarchy_control_id',
-															$hclf->getByID($id),
-															TTi18n::gettext('Invalid Hierarchy Control')
-															) ) {
-			$this->data['hierarchy_control_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'hierarchy_control_id' );
 	}
 
-	function isUniqueObjectType($object_type) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setHierarchyControl( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('Hierarchy Control ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'hierarchy_control_id', $value );
+	}
+
+	/**
+	 * @param $object_type
+	 * @return bool
+	 */
+	function isUniqueObjectType( $object_type) {
 /*
 		$company_id = $this->getHierarchyControlObject()->getCompany();
 
@@ -157,31 +164,58 @@ class HierarchyObjectTypeFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getObjectType() {
-		return (int)$this->data['object_type_id'];
+		return $this->getGenericDataValue( 'object_type_id' );
 	}
-	function setObjectType($id) {
-		$id = trim($id);
 
-		if ( $this->Validator->inArrayKey(	'object_type',
-											$id,
-											TTi18n::gettext('Object Type is invalid'),
-											$this->getOptions('object_type'))
-				AND
-						$this->Validator->isTrue(		'object_type',
-														$this->isUniqueObjectType($id),
-														TTi18n::gettext('Object Type is already assigned to another hierarchy'))
-
-			) {
-
-			$this->data['object_type_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setObjectType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'object_type_id', $value );
+	}
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Hierarchy Control
+		if ( $this->getHierarchyControl() == TTUUID::getZeroID() ) {
+			$hclf = TTnew( 'HierarchyControlListFactory' );
+			$this->Validator->isResultSetWithRows(	'hierarchy_control_id',
+															$hclf->getByID($this->getHierarchyControl()),
+															TTi18n::gettext('Invalid Hierarchy Control')
+														);
+		}
+		// Object Type
+		$this->Validator->inArrayKey(	'object_type',
+												$this->getObjectType(),
+												TTi18n::gettext('Object Type is invalid'),
+												$this->getOptions('object_type')
+											);
+		if ( $this->Validator->isError('object_type') == FALSE ) {
+			$this->Validator->isTrue(		'object_type',
+													$this->isUniqueObjectType($this->getObjectType()),
+													TTi18n::gettext('Object Type is already assigned to another hierarchy')
+												);
 		}
 
-		return FALSE;
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$cache_id = $this->getHierarchyControlObject()->getCompany().$this->getObjectType();
 		$this->removeCache( $cache_id );
@@ -190,53 +224,117 @@ class HierarchyObjectTypeFactory extends Factory {
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
+
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
 		return FALSE;
 	}
-	function setDeleted($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCreatedDate() {
 		return FALSE;
 	}
-	function setCreatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getUpdatedBy() {
 		return FALSE;
 	}
-	function setUpdatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
 		return FALSE;
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {
-		return FALSE;
-	}
-	function getDeletedBy() {
-		return FALSE;
-	}
-	function setDeletedBy($id = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getDeletedBy() {
+		return FALSE;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
+		return FALSE;
+	}
+
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		$object_type = Option::getByKey($this->getObjectType(), Misc::TrimSortPrefix( $this->getOptions('object_type') ) );
 		return TTLog::addEntry( $this->getHierarchyControl(), $log_action, TTi18n::getText('Object').': '. $object_type, NULL, $this->getTable() );

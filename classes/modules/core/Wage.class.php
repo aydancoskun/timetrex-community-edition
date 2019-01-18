@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -57,21 +57,35 @@ class Wage {
 	var $labor_standard_obj = NULL;
 	var $holiday_obj = NULL;
 
-	function __construct($user_id, $pay_period_id) {
+	/**
+	 * Wage constructor.
+	 * @param string $user_id UUID
+	 * @param string $pay_period_id UUID
+	 */
+	function __construct( $user_id, $pay_period_id) {
 		$this->user_id = $user_id;
 		$this->pay_period_id = $pay_period_id;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getUser() {
 		return $this->user_id;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getPayPeriod() {
 		return $this->pay_period_id;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getAdvance() {
 		if ( isset($this->advance) ) {
 			return $this->advance;
@@ -79,13 +93,22 @@ class Wage {
 
 		return FALSE;
 	}
-	function setAdvance($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setAdvance( $bool) {
 		$this->advance = $bool;
 
 		return TRUE;
 	}
 
 	//Because this class doesn't extend the original Factory class, we have to duplicate the getGenericObject() code here.
+
+	/**
+	 * @return bool|null
+	 */
 	function getUserObject() {
 		if ( isset($this->user_obj) AND is_object($this->user_obj) AND $this->getUser() == $this->user_obj->getID() ) {
 			return $this->user_obj;
@@ -101,6 +124,9 @@ class Wage {
 		}
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getPayPeriodObject() {
 		if ( isset($this->pay_period_obj) AND is_object($this->pay_period_obj) AND $this->getPayPeriod() == $this->pay_period_obj->getID() ) {
 			return $this->pay_period_obj;
@@ -116,8 +142,11 @@ class Wage {
 		}
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getPayPeriodScheduleObject() {
-		$pay_period_schedule_id = 0;
+		$pay_period_schedule_id = TTUUID::getZeroID();
 		if ( is_object( $this->getPayPeriodObject() ) ) {
 			$pay_period_schedule_id = $this->getPayPeriodObject()->getPayPeriodSchedule();
 		}
@@ -135,8 +164,11 @@ class Wage {
 		}
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getPayStubEntryAccountLinkObject() {
-		$company_id = 0;
+		$company_id = TTUUID::getZeroID();
 		if ( is_object( $this->getUserObject() ) ) {
 			$company_id = $this->getUserObject()->getCompany();
 		}
@@ -155,7 +187,12 @@ class Wage {
 		}
 	}
 
-	static function getRemittanceDueDate($transaction_epoch, $avg_monthly_remittance) {
+	/**
+	 * @param int $transaction_epoch EPOCH
+	 * @param $avg_monthly_remittance
+	 * @return bool|false|int
+	 */
+	static function getRemittanceDueDate( $transaction_epoch, $avg_monthly_remittance) {
 		Debug::text('Transaction Date: '. TTDate::getDate('DATE+TIME', $transaction_epoch), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $transaction_epoch > 0 ) {
 			if ( $avg_monthly_remittance < 15000 ) {
@@ -193,7 +230,12 @@ class Wage {
 		return $due_date;
 	}
 
-	function getWage($seconds, $rate ) {
+	/**
+	 * @param $seconds
+	 * @param $rate
+	 * @return int|string
+	 */
+	function getWage( $seconds, $rate ) {
 		if ( $seconds == '' OR empty($seconds) ) {
 			return 0;
 		}
@@ -205,6 +247,10 @@ class Wage {
 		return bcmul( TTDate::getHours( $seconds ), $rate );
 	}
 
+	/**
+	 * @param object $user_wage_obj
+	 * @return string
+	 */
 	function getMaximumPayPeriodWage( $user_wage_obj ) {
 		Debug::text('Absolute Maximum Pay Period NO Advance: User Wage ID: '. $user_wage_obj->getId() .' Annual Wage: '. $user_wage_obj->getAnnualWage() .' Annual Pay Periods: '. $this->getPayPeriodScheduleObject()->getAnnualPayPeriods(), __FILE__, __LINE__, __METHOD__, 10);
 		$maximum_pay_period_wage = bcdiv( $user_wage_obj->getAnnualWage(), $this->getPayPeriodScheduleObject()->getAnnualPayPeriods() );
@@ -213,6 +259,9 @@ class Wage {
 		return $maximum_pay_period_wage;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getPayStubAmendmentEarnings() {
 		//Get pay stub amendments here.
 		$psalf = TTnew( 'PayStubAmendmentListFactory' );
@@ -241,6 +290,9 @@ class Wage {
 		return $pos_sum;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getPayStubAmendmentDeductions() {
 		//Get pay stub amendments here.
 		$psalf = TTnew( 'PayStubAmendmentListFactory' );
@@ -270,6 +322,9 @@ class Wage {
 		return bcmul( $neg_sum, -1 );
 	}
 
+	/**
+	 * @return int
+	 */
 	function getRawGrossWage() {
 		$wage = 0;
 
@@ -286,6 +341,9 @@ class Wage {
 		return $wage;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getGrossWage() {
 
 		$wage = $this->getRawGrossWage();
@@ -295,6 +353,9 @@ class Wage {
 		return $wage;
 	}
 
+	/**
+	 * @return array|bool|null
+	 */
 	function getUserDateTotalArray() {
 		if ( isset($this->user_date_total_arr) ) {
 			return $this->user_date_total_arr;
@@ -304,7 +365,10 @@ class Wage {
 		return $this->setUserDateTotalArray();
 		//return FALSE;
 	}
-	
+
+	/**
+	 * @return array|bool
+	 */
 	function setUserDateTotalArray() {
 		//Loop through unique UserDateTotal rows... Adding entries to pay stubs.
 		$udtlf = TTnew( 'UserDateTotalListFactory' );
@@ -335,7 +399,7 @@ class Wage {
 								AND $udt_obj->getPayCodeObject()->getPayStubEntryAccountID() != '') { //Paid
 							Debug::text('Paid Absence Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 
-							$pay_stub_entry = (int)$udt_obj->getPayCodeObject()->getPayStubEntryAccountID();
+							$pay_stub_entry = $udt_obj->getPayCodeObject()->getPayStubEntryAccountID();
 							$total_time = $udt_obj->getTotalTime();
 							$rate = $udt_obj->getColumn('hourly_rate');
 							$amount = $udt_obj->getTotalTimeAmount();
@@ -466,7 +530,7 @@ class Wage {
 							$rate = NULL;
 							$pay_stub_entry = $this->getPayStubEntryAccountLinkObject()->getRegularTime();
 							unset($dock_absence_wage, $paid_absence_wage);
-							
+
 							$salary_dates = UserWageFactory::proRateSalaryDates( $uw_obj->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getHireDate(), $this->getUserObject()->getTerminationDate() );
 							if ( is_array($salary_dates) AND isset($salary_dates['percent']) AND $salary_dates['percent'] < 100 ) {
 								$description = TTi18n::getText('Prorate Salary').': '. TTDate::getDate('DATE', $salary_dates['start_date'] ) .' - '. TTDate::getDate('DATE', $salary_dates['end_date'] ) .' ('. $salary_dates['percent'].'%)';

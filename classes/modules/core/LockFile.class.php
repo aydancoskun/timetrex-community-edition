@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,17 +44,28 @@ class LockFile {
 	var $max_lock_file_age = 86400;
 	var $use_pid = TRUE;
 
+	/**
+	 * LockFile constructor.
+	 * @param $file_name
+	 */
 	function __construct( $file_name ) {
 		$this->file_name = $file_name;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getFileName( ) {
 		return $this->file_name;
 	}
 
-	function setFileName($file_name) {
+	/**
+	 * @param $file_name
+	 * @return bool
+	 */
+	function setFileName( $file_name) {
 		if ( $file_name != '') {
 			$this->file_name = $file_name;
 
@@ -64,6 +75,9 @@ class LockFile {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getCurrentPID() {
 		if ( $this->use_pid == TRUE AND function_exists('getmypid') == TRUE ) {
 			$retval = getmypid();
@@ -75,6 +89,10 @@ class LockFile {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $pid Process ID
+	 * @return bool|null
+	 */
 	function isPIDRunning( $pid ) {
 		if ( $this->use_pid == TRUE AND (int)$pid > 0 AND function_exists('posix_getpgid') == TRUE ) {
 			Debug::Text( 'Checking if PID is running: ' . $pid, __FILE__, __LINE__, __METHOD__, 10 );
@@ -113,6 +131,9 @@ class LockFile {
 		return NULL; //Assuming the process is still running if the file exists and PID is invalid.
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function create() {
 		//Attempt to create directory if it does not already exist.
 		if ( file_exists( dirname( $this->getFileName() ) ) == FALSE ) {
@@ -129,6 +150,9 @@ class LockFile {
 		return @file_put_contents( $this->getFileName(), $this->getCurrentPID() );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function delete() {
 		if ( file_exists( $this->getFileName() ) ) {
 			return @unlink( $this->getFileName() );
@@ -139,6 +163,9 @@ class LockFile {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function exists() {
 		//Ignore lock files older than max_lock_file_age, so if the server crashes or is rebooted during an operation, it will start again the next day.
 		clearstatcache();

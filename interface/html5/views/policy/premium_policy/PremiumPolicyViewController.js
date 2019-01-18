@@ -1,5 +1,11 @@
-PremiumPolicyViewController = BaseViewController.extend( {
+PremiumPolicyViewController = BaseViewController.extend({
 	el: '#premium_policy_view_container',
+
+	_required_files: {
+		10: ["APIPremiumPolicy", "APIPayCode", "APIPayFormulaPolicy", "APIContributingShiftPolicy", "APIBranch", "APIDepartment"],
+		20: [ "APIJob", "APIJobItem", "APIJobGroup", "APIJobItemGroup",],
+	},
+
 	type_array: null,
 	//pay_type_array: null,
 	include_holiday_type_array: null,
@@ -20,8 +26,8 @@ PremiumPolicyViewController = BaseViewController.extend( {
 	job_item_group_api: null,
 	date_api: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'PremiumPolicyEditView.html';
 		this.permission_id = 'premium_policy';
 		this.viewId = 'PremiumPolicy';
@@ -205,7 +211,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			field: 'pay_formula_policy_id',
 			custom_first_label: $.i18n._( '-- Defined By Pay Code --' ),
 			added_items: [
-				{value: 0, label: $.i18n._( '-- Defined By Pay Code --' )}
+				{value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Pay Code --' )}
 			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_premium_policy_column1 );
@@ -720,7 +726,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 	},
 
 	onBranchSelectionTypeChange: function() {
-		if ( this.current_edit_record['branch_selection_type_id'] === 10 || this.is_viewing ) {
+		if ( this.current_edit_record['branch_selection_type_id'] == 10 || this.is_viewing ) {
 			this.edit_view_ui_dic['branch'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['branch'].setEnabled( true );
@@ -728,7 +734,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 	},
 
 	onDepartmentSelectionTypeChange: function() {
-		if ( this.current_edit_record['department_selection_type_id'] === 10 || this.is_viewing ) {
+		if ( this.current_edit_record['department_selection_type_id'] == 10 || this.is_viewing ) {
 			this.edit_view_ui_dic['department'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['department'].setEnabled( true );
@@ -739,7 +745,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 
-			if ( this.current_edit_record['job_group_selection_type_id'] === 10 || this.is_viewing ) {
+			if ( this.current_edit_record['job_group_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_group'].setEnabled( false );
 			} else {
 				this.edit_view_ui_dic['job_group'].setEnabled( true );
@@ -749,7 +755,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 	onJobSelectionTypeChange: function() {
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-			if ( this.current_edit_record['job_selection_type_id'] === 10 || this.is_viewing ) {
+			if ( this.current_edit_record['job_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job'].setEnabled( false );
 			} else {
 				this.edit_view_ui_dic['job'].setEnabled( true );
@@ -759,7 +765,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 	onJobItemGroupSelectionTypeChange: function() {
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-			if ( this.current_edit_record['job_item_group_selection_type_id'] === 10 || this.is_viewing ) {
+			if ( this.current_edit_record['job_item_group_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_item_group'].setEnabled( false );
 			} else {
 				this.edit_view_ui_dic['job_item_group'].setEnabled( true );
@@ -769,7 +775,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 	onJobItemSelectionTypeChange: function() {
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-			if ( this.current_edit_record['job_item_selection_type_id'] === 10 || this.is_viewing ) {
+			if ( this.current_edit_record['job_item_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_item'].setEnabled( false );
 			} else {
 				this.edit_view_ui_dic['job_item'].setEnabled( true );
@@ -778,17 +784,17 @@ PremiumPolicyViewController = BaseViewController.extend( {
 	},
 
 	onPayTypeChange: function() {
-		if ( this.current_edit_record['pay_type_id'] === 10 || this.current_edit_record['pay_type_id'] === 42 ) {
+		if ( this.current_edit_record['pay_type_id'] == 10 || this.current_edit_record['pay_type_id'] == 42 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ')' );
 			this.attachElement( 'wage_group_id' );
 
-		} else if ( this.current_edit_record['pay_type_id'] === 20 ) {
+		} else if ( this.current_edit_record['pay_type_id'] == 20 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Premium' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '0.75 for 75 cent/hr' ) + ')' );
 			this.detachElement( 'wage_group_id' );
 
-		} else if ( this.current_edit_record['pay_type_id'] === 30 || this.current_edit_record['pay_type_id'] === 32 || this.current_edit_record['pay_type_id'] === 40 ) {
+		} else if ( this.current_edit_record['pay_type_id'] == 30 || this.current_edit_record['pay_type_id'] == 32 || this.current_edit_record['pay_type_id'] == 40 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
 			this.attachElement( 'wage_group_id' );
@@ -807,13 +813,13 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		this.attachElement( 'include_partial_punch' );
 
-		if ( this.current_edit_record['type_id'] === 10 ) {
+		if ( this.current_edit_record['type_id'] == 10 ) {
 			$( this.edit_view_tab.find( 'ul li' )[1] ).show();
 			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[3] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[4] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[5] ).hide();
-		} else if ( this.current_edit_record['type_id'] === 20 ) {
+		} else if ( this.current_edit_record['type_id'] == 20 ) {
 
 			this.detachElement( 'include_partial_punch' );
 
@@ -822,7 +828,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			$( this.edit_view_tab.find( 'ul li' )[3] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[4] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[5] ).hide();
-		} else if ( this.current_edit_record['type_id'] === 30 ) {
+		} else if ( this.current_edit_record['type_id'] == 30 ) {
 
 			this.detachElement( 'include_partial_punch' );
 
@@ -831,7 +837,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			$( this.edit_view_tab.find( 'ul li' )[3] ).show();
 			$( this.edit_view_tab.find( 'ul li' )[4] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[5] ).hide();
-		} else if ( this.current_edit_record['type_id'] === 40 ) {
+		} else if ( this.current_edit_record['type_id'] == 40 ) {
 
 			this.detachElement( 'include_partial_punch' );
 
@@ -841,7 +847,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			$( this.edit_view_tab.find( 'ul li' )[4] ).show();
 			$( this.edit_view_tab.find( 'ul li' )[5] ).hide();
 
-		} else if ( this.current_edit_record['type_id'] === 50 ) {
+		} else if ( this.current_edit_record['type_id'] == 50 ) {
 
 			this.detachElement( 'include_partial_punch' );
 
@@ -850,13 +856,13 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			$( this.edit_view_tab.find( 'ul li' )[3] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[4] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[5] ).show();
-		} else if ( this.current_edit_record['type_id'] === 90 ) {
+		} else if ( this.current_edit_record['type_id'] == 90 ) {
 			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[3] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[4] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[5] ).hide();
-		} else if ( this.current_edit_record['type_id'] === 100 ) {
+		} else if ( this.current_edit_record['type_id'] == 100 ) {
 			$( this.edit_view_tab.find( 'ul li' )[1] ).show();
 			$( this.edit_view_tab.find( 'ul li' )[2] ).show();
 			$( this.edit_view_tab.find( 'ul li' )[3] ).hide();

@@ -1,5 +1,8 @@
 PermissionControlViewController = BaseViewController.extend( {
 	el: '#permission_control_view_container',
+
+	_required_files: [],
+
 	level_array: null,
 	user_api: null,
 	permission_array: null,
@@ -12,8 +15,8 @@ PermissionControlViewController = BaseViewController.extend( {
 	//use to juedge if need to clear quick_search_this.quick_search_typed_keyss
 	quick_search_timer: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'PermissionControlEditView.html';
 		this.permission_id = 'permission';
 		this.viewId = 'PermissionControl';
@@ -149,6 +152,7 @@ PermissionControlViewController = BaseViewController.extend( {
 
 				return filter;
 			};
+
 			$this.sub_log_view_controller.initData();
 			return;
 		}
@@ -177,8 +181,9 @@ PermissionControlViewController = BaseViewController.extend( {
 				return filter;
 			};
 			$this.sub_log_view_controller.parent_view_controller = $this;
-			$this.sub_log_view_controller.initData();
-
+			$this.sub_log_view_controller.postInit = function() {
+				this.initData();
+			}
 		}
 	},
 

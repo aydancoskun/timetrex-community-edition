@@ -46,12 +46,19 @@ class GeneralLedgerExport {
 	var $set_journal_entry_errors = 0;
 	var $journal_entry_error_msgs = array();
 
+	/**
+	 * GeneralLedgerExport constructor.
+	 */
 	function __construct() {
 		Debug::Text(' Contruct... ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function isFloat( $value ) {
 		if ( preg_match('/^[-0-9\.]+$/', $value) ) {
 			return TRUE;
@@ -60,6 +67,9 @@ class GeneralLedgerExport {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getFileFormat() {
 		if ( isset($this->file_format) ) {
 			return $this->file_format;
@@ -67,12 +77,21 @@ class GeneralLedgerExport {
 
 		return FALSE;
 	}
-	function setFileFormat($format) {
+
+	/**
+	 * @param $format
+	 * @return bool
+	 */
+	function setFileFormat( $format) {
 		$this->file_format = $format;
 
 		return TRUE;
 	}
 
+	/**
+	 * @param object $obj
+	 * @return bool
+	 */
 	function setJournalEntry( $obj ) {
 		//Make sure accounts balance.
 
@@ -94,6 +113,9 @@ class GeneralLedgerExport {
 	Functions to help process the data.
 	*/
 
+	/**
+	 * @return bool
+	 */
 	function getCompiledData() {
 		if ( isset($this->compiled_data) AND $this->compiled_data !== NULL AND $this->compiled_data !== FALSE ) {
 			return $this->compiled_data;
@@ -102,6 +124,9 @@ class GeneralLedgerExport {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function compile() {
 		if ( !isset( $this->data) OR $this->set_journal_entry_errors > 0 ) {
 			Debug::Text(' No Data, or Journal Entry did not balance: Errors: '. $this->set_journal_entry_errors, __FILE__, __LINE__, __METHOD__, 10);
@@ -138,7 +163,11 @@ class GeneralLedgerExport {
 	}
 
 
-	function save($file_name) {
+	/**
+	 * @param $file_name
+	 * @return bool
+	 */
+	function save( $file_name) {
 		//saves processed data to a file.
 
 		if ( $this->getCompiledData() !== FALSE ) {
@@ -171,12 +200,19 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 	var $journal_entry_error_msg = NULL;
 	var $ignore_balance_check = FALSE;
 
+	/**
+	 * GeneralLedgerExport_JournalEntry constructor.
+	 * @param bool $ignore_balance_check
+	 */
 	function __construct( $ignore_balance_check = FALSE ) {
 		Debug::Text(' GLE_JournalEntry Contruct... ', __FILE__, __LINE__, __METHOD__, 10);
 		$this->ignore_balance_check = $ignore_balance_check;
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getDate() {
 		if ( isset($this->journal_entry_data['date']) ) {
 			return $this->journal_entry_data['date'];
@@ -185,7 +221,11 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		return FALSE;
 	}
 
-	function setDate($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDate( $value) {
 		if ( $value != '' ) {
 			$this->journal_entry_data['date'] = $value;
 
@@ -195,6 +235,9 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getSource() {
 		if ( isset($this->journal_entry_data['source']) ) {
 			return $this->journal_entry_data['source'];
@@ -203,7 +246,11 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		return FALSE;
 	}
 
-	function setSource($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSource( $value) {
 		$value = trim($value);
 
 		$this->journal_entry_data['source'] = substr( $value, 0, 13);
@@ -211,6 +258,9 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getComment() {
 		if ( isset($this->journal_entry_data['comment']) ) {
 			return $this->journal_entry_data['comment'];
@@ -219,7 +269,11 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		return FALSE;
 	}
 
-	function setComment($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setComment( $value) {
 		$value = trim($value);
 
 		if ( strlen( $value ) <= 39 ) {
@@ -231,6 +285,9 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getRecords() {
 		if ( isset($this->journal_entry_data['records']) AND $this->journal_entry_data['records'] != NULL ) {
 			return $this->journal_entry_data['records'];
@@ -239,6 +296,10 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		return FALSE;
 	}
 
+	/**
+	 * @param object $obj
+	 * @return bool
+	 */
 	function setRecord( $obj ) {
 		if ( $obj->Validate() == TRUE ) {
 			$this->journal_entry_data['records'][] = $obj;
@@ -248,6 +309,9 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function combineRecords() {
 		//See if there are multiple records with the same type AND account
 		//If so, combine them in to one.
@@ -285,6 +349,9 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		return $this->checkBalance();
 	}
 
+	/**
+	 * @return bool
+	 */
 	function checkBalance() {
 		Debug::Text(' Checking Balance of Journal Entry...', __FILE__, __LINE__, __METHOD__, 10);
 		$records = $this->getRecords();
@@ -322,7 +389,7 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 			return TRUE;
 		} else {
 			$this->journal_entry_error_msg = TTi18n::getText('Debit: %1 Credit: %2', array( $debit_amount, $credit_amount ) );
-	
+
 			return FALSE;
 		}
 	}
@@ -344,6 +411,9 @@ class GeneralLedgerExport_Record extends GeneralLedgerExport_JournalEntry {
 		return TRUE;
 	}
 */
+	/**
+	 * @return bool
+	 */
 	function getType() {
 		if ( isset($this->record_data['type']) ) {
 			return $this->record_data['type'];
@@ -352,7 +422,11 @@ class GeneralLedgerExport_Record extends GeneralLedgerExport_JournalEntry {
 		return FALSE;
 	}
 
-	function setType($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value) {
 		$value = strtolower($value);
 
 		if ( $value == 'credit' OR $value == 'debit' ) {
@@ -364,6 +438,9 @@ class GeneralLedgerExport_Record extends GeneralLedgerExport_JournalEntry {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getAmount() {
 		if ( isset($this->record_data['amount']) ) {
 			return number_format($this->record_data['amount'], 2, '.', '');
@@ -372,7 +449,11 @@ class GeneralLedgerExport_Record extends GeneralLedgerExport_JournalEntry {
 		return FALSE;
 	}
 
-	function setAmount($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAmount( $value) {
 		//Allow negative values, for example if someone is trying to export negative values (for things like vacation accrual)
 		//Used to check: strlen( $value ) <= 10, however that would break foriegn currencies that use large amounts.
 		if ( $this->isFloat( $value ) AND $value != 0 ) {
@@ -384,6 +465,9 @@ class GeneralLedgerExport_Record extends GeneralLedgerExport_JournalEntry {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getAccount() {
 		if ( isset($this->record_data['account']) ) {
 			return $this->record_data['account'];
@@ -392,7 +476,11 @@ class GeneralLedgerExport_Record extends GeneralLedgerExport_JournalEntry {
 		return FALSE;
 	}
 
-	function setAccount($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAccount( $value) {
 		$value = trim($value);
 
 		if ( strlen( $value ) <= 100 ) { //Allow long account values for more job tracking.
@@ -404,6 +492,10 @@ class GeneralLedgerExport_Record extends GeneralLedgerExport_JournalEntry {
 		return FALSE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getType() == FALSE OR $this->getAccount() == FALSE OR $this->getAmount() == FALSE ) {
 			Debug::Text(' ERROR: Validation Failed! Amount: '. $this->getAmount() .' Type: '. $this->getType()  .' Account: '. $this->getAccount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -422,6 +514,10 @@ class GeneralLedgerExport_Record extends GeneralLedgerExport_JournalEntry {
 class GeneralLedgerExport_File_Format_Simply Extends GeneralLedgerExport {
 	var $data = NULL;
 
+	/**
+	 * GeneralLedgerExport_File_Format_Simply constructor.
+	 * @param $data
+	 */
 	function __construct( $data ) {
 		Debug::Text(' General Ledger Format Simply Contruct... ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -430,11 +526,18 @@ class GeneralLedgerExport_File_Format_Simply Extends GeneralLedgerExport {
 		return TRUE;
 	}
 
-	private function toDate($epoch) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
+	private function toDate( $epoch) {
 		return date('m-d-y', $epoch);
 	}
 
 
+	/**
+	 * @return array|bool
+	 */
 	private function compileRecords() {
 		//gets all Detail records.
 
@@ -484,6 +587,9 @@ class GeneralLedgerExport_File_Format_Simply Extends GeneralLedgerExport {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function _compile() {
 		//Processes all the data, padding it, converting dates to julian, incrementing
 		//record numbers.
@@ -508,6 +614,10 @@ class GeneralLedgerExport_File_Format_Simply Extends GeneralLedgerExport {
 class GeneralLedgerExport_File_Format_CSV Extends GeneralLedgerExport {
 	var $data = NULL;
 
+	/**
+	 * GeneralLedgerExport_File_Format_CSV constructor.
+	 * @param $data
+	 */
 	function __construct( $data ) {
 		Debug::Text(' General Ledger Format CSV Contruct... ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -516,11 +626,18 @@ class GeneralLedgerExport_File_Format_CSV Extends GeneralLedgerExport {
 		return TRUE;
 	}
 
-	private function toDate($epoch) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
+	private function toDate( $epoch) {
 		return date('m-d-y', $epoch);
 	}
 
 
+	/**
+	 * @return array|bool
+	 */
 	private function compileRecords() {
 		//gets all Detail records.
 
@@ -581,6 +698,9 @@ class GeneralLedgerExport_File_Format_CSV Extends GeneralLedgerExport {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function _compile() {
 		//Processes all the data, padding it, converting dates to julian, incrementing
 		//record numbers.
@@ -604,6 +724,10 @@ class GeneralLedgerExport_File_Format_CSV Extends GeneralLedgerExport {
 class GeneralLedgerExport_File_Format_QuickBooks Extends GeneralLedgerExport {
 	var $data = NULL;
 
+	/**
+	 * GeneralLedgerExport_File_Format_QuickBooks constructor.
+	 * @param $data
+	 */
 	function __construct( $data ) {
 		Debug::Text(' General Ledger Format QuickBooks Contruct... ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -612,11 +736,18 @@ class GeneralLedgerExport_File_Format_QuickBooks Extends GeneralLedgerExport {
 		return TRUE;
 	}
 
-	private function toDate($epoch) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
+	private function toDate( $epoch) {
 		return date('m/d/y', $epoch);
 	}
 
 
+	/**
+	 * @return array|bool
+	 */
 	private function compileRecords() {
 		//gets all Detail records.
 
@@ -690,6 +821,9 @@ class GeneralLedgerExport_File_Format_QuickBooks Extends GeneralLedgerExport {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function _compile() {
 		//Processes all the data, padding it, converting dates to julian, incrementing
 		//record numbers.
@@ -713,6 +847,10 @@ class GeneralLedgerExport_File_Format_QuickBooks Extends GeneralLedgerExport {
 class GeneralLedgerExport_File_Format_Sage300 Extends GeneralLedgerExport {
 	var $data = NULL;
 
+	/**
+	 * GeneralLedgerExport_File_Format_Sage300 constructor.
+	 * @param $data
+	 */
 	function __construct( $data ) {
 		Debug::Text(' General Ledger Format Sage300 Contruct... ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -721,10 +859,17 @@ class GeneralLedgerExport_File_Format_Sage300 Extends GeneralLedgerExport {
 		return TRUE;
 	}
 
-	private function toDate($epoch) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
+	private function toDate( $epoch) {
 		return date('Ymd', $epoch);
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	private function compileRecords() {
 		//gets all Detail records.
 
@@ -775,7 +920,7 @@ class GeneralLedgerExport_File_Format_Sage300 Extends GeneralLedgerExport {
 				$line[] = '000001'; //BatchID
 				$line[] = str_pad( $entry_number, 5, '0', STR_PAD_LEFT ); //BatchEntry
 				$line[] = str_pad( $transaction_number, 5, '0', STR_PAD_LEFT ); //TransNBR
-					
+
 				$line[] = $record->getAccount();
 				if ( $record->getType() == 'debit' ) {
 					$line[] = $record->getAmount(); //Positive on DEBIT
@@ -803,6 +948,9 @@ class GeneralLedgerExport_File_Format_Sage300 Extends GeneralLedgerExport {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function _compile() {
 		//Processes all the data, padding it, converting dates to julian, incrementing
 		//record numbers.

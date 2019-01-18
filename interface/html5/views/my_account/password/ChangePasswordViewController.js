@@ -1,14 +1,16 @@
 ChangePasswordViewController = BaseViewController.extend( {
 
+	_required_files: ['APIUser'],
+
 	showPassword: null,
 
 	showPhonePassword: null,
 
 	result_data: [],
 
-	initialize: function( options ) {
+	init: function( options ) {
 
-		this._super( 'initialize', options );
+		//this._super('initialize', options );
 
 		this.permission_id = 'user';
 		this.viewId = 'ChangePassword';

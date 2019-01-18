@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	var $user_obj = NULL;
 	var $pay_period_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -120,6 +125,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -147,184 +156,182 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPayPeriodObject() {
 		return $this->getGenericObject( 'PayPeriodListFactory', $this->getPayPeriod(), 'pay_period_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayPeriod() {
-		if ( isset($this->data['pay_period_id']) ) {
-			return (int)$this->data['pay_period_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_period_id' );
 	}
-	function setPayPeriod($id = NULL) {
-		$id = trim($id);
 
-		if ( $id == NULL ) {
-			$id = $this->findPayPeriod();
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayPeriod( $value = NULL) {
+		$value = trim($value);
+
+		if ( $value == NULL ) {
+			$value = $this->findPayPeriod();
 		}
-
-		$pplf = TTnew( 'PayPeriodListFactory' );
-
-		if (
-				$this->Validator->isResultSetWithRows(	'pay_period',
-														$pplf->getByID($id),
-														TTi18n::gettext('Invalid Pay Period')
-														) ) {
-			$this->data['pay_period_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'pay_period_id', $value );
 	}
 
 	//Stores the current user in memory, so we can determine if its the employee verifying, or a superior.
+
+	/**
+	 * @return mixed
+	 */
 	function getCurrentUser() {
-		if ( isset($this->tmp_data['current_user_id']) ) {
-			return $this->tmp_data['current_user_id'];
-		}
-	}
-	function setCurrentUser($id) {
-		$id = trim($id);
-
-		$this->tmp_data['current_user_id'] = $id;
-
-		return TRUE;
+		return $this->getGenericTempDataValue( 'current_user_id' );
 	}
 
-	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($value) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCurrentUser( $value) {
 		$value = trim($value);
+		return $this->setGenericTempDataValue( 'current_user_id', $value );
+	}
 
-		if ( $this->Validator->inArrayKey(	'status',
-											$value,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
+	/**
+	 * @return mixed
+	 */
+	function getUser() {
+		return $this->getGenericDataValue( 'user_id' );
+	}
 
-			$this->data['status_id'] = $value;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
 
-		return FALSE;
+	/**
+	 * @return bool|int
+	 */
+	function getStatus() {
+		return $this->getGenericDataValue( 'status_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'status_id', $value );
 	}
 
 	//Set this to TRUE when the user has actually verified their own timesheets.
+
+	/**
+	 * @return bool|null
+	 */
 	function getUserVerified() {
-		if ( isset($this->data['user_verified']) AND $this->data['user_verified'] !== NULL) {
-			return $this->fromBool( $this->data['user_verified'] );
+		$value = $this->getGenericDataValue( 'user_verified' );
+		if ( $value !== FALSE AND $value !== NULL ) {
+			return $this->fromBool( $value );
 		}
 
 		return NULL;
 	}
-	function setUserVerified($bool) {
-		$this->data['user_verified'] = $this->toBool($bool);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserVerified( $value) {
+		$this->setGenericDataValue('user_verified', $this->toBool($value) );
 		$this->setUserVerifiedDate();
 
 		return TRUE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserVerifiedDate() {
-		if ( isset($this->data['user_verified_date']) ) {
-			return $this->data['user_verified_date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_verified_date' );
 	}
-	function setUserVerifiedDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setUserVerifiedDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+
+		if ($value == NULL) {
+			$value = TTDate::getTime();
 		}
-
-		if	(	$this->Validator->isDate(		'user_verified_date',
-												$epoch,
-												TTi18n::gettext('Incorrect Date')) ) {
-
-			$this->data['user_verified_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_verified_date', $value );
 
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getAuthorized() {
-		if ( isset($this->data['authorized']) AND $this->data['authorized'] !== NULL) {
-			return $this->fromBool( $this->data['authorized'] );
+		$value = $this->getGenericDataValue( 'authorized' );
+		if ( $value !== FALSE AND $value !== NULL) {
+			return $this->fromBool( $value );
 		}
 
 		return NULL;
 	}
-	function setAuthorized($bool) {
-		$this->data['authorized'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAuthorized( $value) {
+		return $this->setGenericDataValue( 'authorized', $this->toBool($value) );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getAuthorizationLevel() {
-		if ( isset($this->data['authorization_level']) ) {
-			return $this->data['authorization_level'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'authorization_level' );
 	}
-	function setAuthorizationLevel($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAuthorizationLevel( $value) {
 		$value = (int)trim( $value );
 
 		if ( $value < 0 ) {
 			$value = 0;
 		}
-
-		if ( $this->Validator->isNumeric(	'authorization_level',
-											$value,
-											TTi18n::gettext('Incorrect authorization level') ) ) {
-
-			$this->data['authorization_level'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'authorization_level', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getVerificationType() {
 		if ( is_object( $this->getPayPeriodObject() ) AND $this->getPayPeriodObject()->getPayPeriodScheduleObject() != FALSE ) {
 			$time_sheet_verification_type_id = $this->getPayPeriodObject()->getPayPeriodScheduleObject()->getTimeSheetVerifyType();
@@ -336,6 +343,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	}
 
 	//Returns the start and end date of the verification window.
+
+	/**
+	 * @return array|bool
+	 */
 	function getVerificationWindowDates() {
 		if ( is_object( $this->getPayPeriodObject() ) ) {
 			return array( 'start' => $this->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate(), 'end' => $this->getPayPeriodObject()->getTimeSheetVerifyWindowEndDate() );
@@ -345,6 +356,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	}
 
 	//Determines the color of the verification box.
+
+	/**
+	 * @return bool|string
+	 */
 	function getVerificationBoxColor() {
 		$retval = FALSE;
 		if ( is_object( $this->getPayPeriodObject() )
@@ -361,6 +376,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param int $status_id ID
+	 * @return string
+	 */
 	function getVerificationStatusShortDisplay( $status_id = NULL ) {
 		if ( $status_id == '' ) {
 			$status_id = $this->getStatus();
@@ -380,6 +399,9 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getVerificationStatusDisplay() {
 		$retval = TTi18n::getText('Not Verified');
 		if ( $this->getUserVerifiedDate() == TRUE AND $this->getAuthorized() == TRUE ) {
@@ -413,6 +435,9 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getVerificationConfirmationMessage() {
 		$pp_obj = $this->getPayPeriodObject();
 		if ( is_object( $pp_obj ) ) {
@@ -424,6 +449,9 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPreviousPayPeriodObject() {
 		$pplf = TTnew( 'PayPeriodListFactory' );
 		$pplf->getPreviousPayPeriodById( $this->getPayPeriod() );
@@ -434,6 +462,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function isPreviousPayPeriodVerified( $user_id = NULL ) {
 		if ( $user_id == '' ) {
 			$user_id = $this->getUser();
@@ -470,6 +502,11 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $is_previous_time_sheet_verified;
 	}
 
+	/**
+	 * @param string $current_user_id UUID
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function displayPreviousPayPeriodVerificationNotice( $current_user_id = NULL, $user_id = NULL ) {
 		if ( $current_user_id == '' ) {
 			$current_user_id = $this->getCurrentUser();
@@ -506,6 +543,12 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 	}
 	//Determine if we need to display the verification button or not.
+
+	/**
+	 * @param string $current_user_id UUID
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function displayVerifyButton( $current_user_id = NULL, $user_id = NULL ) {
 		if ( $current_user_id == '' ) {
 			$current_user_id = $this->getCurrentUser();
@@ -552,6 +595,11 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $current_user_id UUID
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function isHierarchySuperior( $current_user_id = NULL, $user_id = NULL ) {
 		if ( $current_user_id == '' ) {
 			$current_user_id = $this->getCurrentUser();
@@ -587,6 +635,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	}
 
 	//Returns all superiors that have authorized this timesheet so far.
+
+	/**
+	 * @return array
+	 */
 	function getAuthorizedUsers() {
 		$retarr = array();
 
@@ -604,6 +656,9 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function calcStatus() {
 		//Get pay period schedule verification type.
 		$time_sheet_verification_type_id = $this->getVerificationType();
@@ -665,7 +720,57 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Pay Period
+		$pplf = TTnew( 'PayPeriodListFactory' );
+		$this->Validator->isResultSetWithRows(	'pay_period',
+														$pplf->getByID($this->getPayPeriod()),
+														TTi18n::gettext('Invalid Pay Period')
+													);
+		// User
+		if ( $this->getUser() != TTUUID::getZeroID() ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+															$ulf->getByID($this->getUser()),
+															TTi18n::gettext('Invalid Employee')
+														);
+		}
+
+		// Status
+		if ( $this->getStatus() !== FALSE ) {
+			$this->Validator->inArrayKey( 'status',
+										  $this->getStatus(),
+										  TTi18n::gettext( 'Incorrect Status' ),
+										  $this->getOptions( 'status' )
+			);
+		}
+
+		// Date
+		if ( $this->getUserVerifiedDate() !== FALSE ) {
+			$this->Validator->isDate( 'user_verified_date',
+									  $this->getUserVerifiedDate(),
+									  TTi18n::gettext( 'Incorrect Date' )
+			);
+		}
+
+		// Authorization level
+		if ( $this->getAuthorizationLevel() !== FALSE ) {
+			$this->Validator->isNumeric( 'authorization_level',
+										 $this->getAuthorizationLevel(),
+										 TTi18n::gettext( 'Incorrect authorization level' )
+			);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		$this->calcStatus();
 
 		if ( $this->getStatus() == '' ) {
@@ -690,6 +795,9 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		$this->calcStatus();
 
@@ -700,6 +808,9 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		//If status is pending auth (55=declined) delete all authorization history, because they could be re-verifying.
 		if ( $this->getCurrentUser() != FALSE AND $this->getStatus() == 55 ) {
@@ -792,6 +903,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -817,6 +932,11 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param string $permission_children_ids UUID
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -864,6 +984,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		//Should the object_id be the pay period ID instead, that way its easier to find the audit logs?
 		if ( is_object( $this->getPayPeriodObject() ) ) {

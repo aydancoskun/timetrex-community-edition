@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,11 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 
 	protected $company_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -84,6 +89,10 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -97,87 +106,119 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value ) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
-	function setName($name) {
-		$name = trim($name);
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value ) {
+		$value = trim($value);
 /*
 				AND	$this->Validator->isTrue(	'name',
 												$this->isUniqueName($name),
 												TTi18n::gettext('Name is already in use')
 												)
 */
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is invalid'),
-											2, 50)
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'name', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'description' );
 	}
-	function setDescription($description) {
-		$description = trim($description);
 
-		if (	$this->Validator->isLength(	'description',
-											$description,
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		// Name
+		if ( $this->getName() !== FALSE ) {
+			$this->Validator->isLength(	'name',
+												$this->getName(),
+												TTi18n::gettext('Name is invalid'),
+												2, 50
+											);
+		}
+		// Description
+		$this->Validator->isLength(	'description',
+											$this->getDescription(),
 											TTi18n::gettext('Description is invalid'),
-											0, 255) ) {
+											0, 255
+										);
 
-			$this->data['description'] = $description;
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 
-			return TRUE;
+		if ( $this->getDeleted() == TRUE ) {
+			//Check to make sure nothing else references this, so we can be sure its okay to delete it.
+			$rsclf = TTnew('RecurringScheduleControlListFactory');
+			$rsclf->getByCompanyIdAndTemplateID( $this->getCompany(), $this->getId() );
+			if ( $rsclf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE( 'in_use',
+										  FALSE,
+										  TTi18n::gettext( 'This recurring template is currently in use' ) );
+			}
 		}
 
-		return FALSE;
+		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		//
 		//**THIS IS DONE IN RecurringScheduleControlFactory, RecurringScheduleTemplateControlFactory, HolidayFactory postSave() as well.
@@ -216,6 +257,10 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -241,6 +286,10 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		$data = array();
@@ -269,6 +318,10 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Recurring Schedule Template').': '. $this->getName(), NULL, $this->getTable(), $this );
 	}

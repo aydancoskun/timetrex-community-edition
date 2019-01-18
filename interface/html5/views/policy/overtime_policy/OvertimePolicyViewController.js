@@ -1,5 +1,11 @@
 OvertimePolicyViewController = BaseViewController.extend( {
 	el: '#overtime_policy_view_container',
+
+	_required_files:{
+		10:['APIOvertimePolicy','APIPayCode', 'APIPayFormulaPolicy', 'APIContributingShiftPolicy', 'APIBranch', 'APIDepartment' ],
+		20:['APIJob', 'APIJobItem', 'APIJobGroup', 'APIJobItemGroup' ]
+	},
+
 	type_array: null,
 
 	branch_selection_type_array: null,
@@ -17,8 +23,8 @@ OvertimePolicyViewController = BaseViewController.extend( {
 	job_group_api: null,
 	job_item_group_api: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'OvertimePolicyEditView.html';
 		this.permission_id = 'over_time_policy';
 		this.viewId = 'OvertimePolicy';
@@ -182,7 +188,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 			field: 'pay_formula_policy_id',
 			custom_first_label: $.i18n._( '-- Defined By Pay Code --' ),
 			added_items: [
-				{value: 0, label: $.i18n._( '-- Defined By Pay Code --' )}
+				{value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Pay Code --' )}
 			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_overtime_policy_column1 );
@@ -483,7 +489,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 	},
 
 	onBranchSelectionTypeChange: function() {
-		if ( this.current_edit_record['branch_selection_type_id'] === 10 ) {
+		if ( this.current_edit_record['branch_selection_type_id'] == 10 ) {
 			this.edit_view_ui_dic['branch'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['branch'].setEnabled( true );
@@ -491,7 +497,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 	},
 
 	onDepartmentSelectionTypeChange: function() {
-		if ( this.current_edit_record['department_selection_type_id'] === 10 ) {
+		if ( this.current_edit_record['department_selection_type_id'] == 10 ) {
 			this.edit_view_ui_dic['department'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['department'].setEnabled( true );
@@ -502,7 +508,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 
-			if ( this.current_edit_record['job_group_selection_type_id'] === 10 || this.is_viewing ) {
+			if ( this.current_edit_record['job_group_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_group'].setEnabled( false );
 			} else {
 				this.edit_view_ui_dic['job_group'].setEnabled( true );
@@ -512,7 +518,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 
 	onJobSelectionTypeChange: function() {
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-			if ( this.current_edit_record['job_selection_type_id'] === 10 || this.is_viewing ) {
+			if ( this.current_edit_record['job_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job'].setEnabled( false );
 			} else {
 				this.edit_view_ui_dic['job'].setEnabled( true );
@@ -522,7 +528,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 
 	onJobItemGroupSelectionTypeChange: function() {
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-			if ( this.current_edit_record['job_item_group_selection_type_id'] === 10 || this.is_viewing ) {
+			if ( this.current_edit_record['job_item_group_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_item_group'].setEnabled( false );
 			} else {
 				this.edit_view_ui_dic['job_item_group'].setEnabled( true );
@@ -532,7 +538,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 
 	onJobItemSelectionTypeChange: function() {
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-			if ( this.current_edit_record['job_item_selection_type_id'] === 10 || this.is_viewing ) {
+			if ( this.current_edit_record['job_item_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_item'].setEnabled( false );
 			} else {
 				this.edit_view_ui_dic['job_item'].setEnabled( true );

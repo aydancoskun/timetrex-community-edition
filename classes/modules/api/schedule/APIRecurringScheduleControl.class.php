@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIRecurringScheduleControl extends APIFactory {
 	protected $main_class = 'RecurringScheduleControlFactory';
 
+	/**
+	 * APIRecurringScheduleControl constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -69,7 +72,7 @@ class APIRecurringScheduleControl extends APIFactory {
 						'start_date' =>	TTDate::getAPIDate( 'DATE', TTDate::getBeginWeekEpoch( TTDate::getTime() ) ),
 						'end_date' => NULL,
 						'display_weeks' => $default_display_weeks,
-						'user' => -1, //None
+						'user' => TTUUID::getNotExistID(), //None
 					);
 
 		return $this->returnHandler( $data );
@@ -78,7 +81,9 @@ class APIRecurringScheduleControl extends APIFactory {
 	/**
 	 * Get recurring_schedule_control data for one or more recurring_schedule_controles.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @param bool $expanded_mode
+	 * @return array|bool
 	 */
 	function getRecurringScheduleControl( $data = NULL, $disable_paging = FALSE, $expanded_mode = TRUE ) {
 		if ( !$this->getPermissionObject()->Check('recurring_schedule', 'enabled')
@@ -93,10 +98,10 @@ class APIRecurringScheduleControl extends APIFactory {
 		//If we don't have permissions to view open shifts, exclude user_id = 0;
 		//FIXME: Make separate permissions for viewing OPEN recurring schedules?
 		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == FALSE ) {
-			$data['filter_data']['exclude_id'] = array(0);
+			$data['filter_data']['exclude_id'] = array( TTUUID::getZeroID() );
 		} elseif ( count($data['filter_data']['permission_children_ids']) > 0 ) {
 			//If schedule, view_open is allowed but they are also only allowed to see their subordinates (which they have some of), add "open" employee as if they are a subordinate.
-			$data['filter_data']['permission_children_ids'][] = 0;
+			$data['filter_data']['permission_children_ids'][] = TTUUID::getZeroID();
 		}
 
 		$blf = TTnew( 'RecurringScheduleControlListFactory' );
@@ -128,8 +133,10 @@ class APIRecurringScheduleControl extends APIFactory {
 
 	/**
 	 * Export data to csv
-	 * @param array $data filter data
 	 * @param string $format file format (csv)
+	 * @param array $data filter data
+	 * @param bool $disable_paging
+	 * @param bool $expanded_mode
 	 * @return array
 	 */
 	function exportRecurringScheduleControl( $format = 'csv', $data = NULL, $disable_paging = TRUE, $expanded_mode = TRUE ) {
@@ -158,7 +165,9 @@ class APIRecurringScheduleControl extends APIFactory {
 	/**
 	 * Set recurring_schedule_control data for one or more recurring_schedule_controles.
 	 * @param array $data recurring_schedule_control data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setRecurringScheduleControl( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -181,12 +190,12 @@ class APIRecurringScheduleControl extends APIFactory {
 			$permission_children_ids = $this->getPermissionChildren();
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' RecurringScheduleControls', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -194,7 +203,7 @@ class APIRecurringScheduleControl extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'RecurringScheduleControlListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get recurring_schedule_control object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -212,7 +221,7 @@ class APIRecurringScheduleControl extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('recurring_schedule', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -279,10 +288,10 @@ class APIRecurringScheduleControl extends APIFactory {
 	/**
 	 * Delete one or more recurring_schedule_controls.
 	 * @param array $data recurring_schedule_control data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteRecurringScheduleControl( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -302,7 +311,7 @@ class APIRecurringScheduleControl extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -322,7 +331,7 @@ class APIRecurringScheduleControl extends APIFactory {
 					$user_id = FALSE;
 				}
 
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get recurring_schedule_control object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -333,7 +342,7 @@ class APIRecurringScheduleControl extends APIFactory {
 								OR ( $this->getPermissionObject()->Check('recurring_schedule', 'delete_child') AND $this->getPermissionObject()->isChild( $user_id, $permission_children_ids ) === TRUE )) {
 						//if ( $this->getPermissionObject()->Check('recurring_schedule', 'delete')
 						//		OR ( $this->getPermissionObject()->Check('recurring_schedule', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -351,7 +360,7 @@ class APIRecurringScheduleControl extends APIFactory {
 				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10);
-					if ( $user_id > 0 ) {
+					if ( $user_id != '' ) {
 						//Remove this user_id from the user array.
 						$new_user_ids = array_diff( (array)$lf->getUser(), (array)$user_id );
 						Debug::Arr($new_user_ids, 'Removing individual users from schedule, remaining users are: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -402,7 +411,7 @@ class APIRecurringScheduleControl extends APIFactory {
 	 * @return array
 	 */
 	function copyRecurringScheduleControl( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 

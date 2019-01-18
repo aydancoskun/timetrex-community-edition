@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,11 @@ class LogFactory extends Factory {
 
 	var $user_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -87,7 +92,6 @@ class LogFactory extends Factory {
 											'station_department'				=> TTi18n::getText('Station Department'),
 											'station_include_user'				=> TTi18n::getText('Station Include Employee'),
 											'station_exclude_user'				=> TTi18n::getText('Station Exclude Employee'),
-											'station'							=> TTi18n::getText('Station'),
 											'punch'								=> TTi18n::getText('Punch'),
 											'punch_control'						=> TTi18n::getText('Punch Control'),
 											'exception'							=> TTi18n::getText('Exceptions'),
@@ -218,6 +222,10 @@ class LogFactory extends Factory {
 											'job_applicant_language'			=> TTi18n::getText('Job Applicant Languages'),
 											'job_applicant_membership'			=> TTi18n::getText('Job Applicant Memberships'),
 											'ethnic_group'						=> TTi18n::getText('Ethnic Group'),
+											'legal_entity'						=> TTi18n::getText('Legal Entity'),
+											'payroll_remittance_agency'			=> TTi18n::getText('Payroll Remittance Agency'),
+											'remittance_source_account'			=> TTi18n::getText('Remittance Source Account'),
+											'remittance_destination_account'	=> TTi18n::getText('Remittance Destination Account'),
 											'geo_fence'							=> TTi18n::getText('GEO Fence')
 									);
 				asort( $retval ); //Sort by name so its easier to find objects.
@@ -244,7 +252,6 @@ class LogFactory extends Factory {
 											'station_department'				=> array('station'),
 											'station_include_user'				=> array('station'),
 											'station_exclude_user'				=> array('station'),
-											'station'							=> array('station'),
 											'punch'								=> array('punch'),
 											'punch_control'						=> array('punch'),
 											'exception'							=> array('punch'),
@@ -292,6 +299,7 @@ class LogFactory extends Factory {
 
 											'pay_stub'							=> array('pay_stub'),
 											'pay_stub_entry'					=> array('pay_stub'),
+											'pay_stub_transaction'				=> array('pay_stub'),
 											'government_document'				=> array('government_document'),
 											'pay_stub_amendment'				=> array('pay_stub_amendment'),
 											'pay_stub_entry_account'			=> array('pay_stub_account'),
@@ -310,6 +318,7 @@ class LogFactory extends Factory {
 											'user_generic_data'					=> array('user'),
 											'user_preference'					=> array('user_preference'),
 											'users'								=> array('user'),
+											'user_group'						=> array('user'),
 											'user_identification'				=> array('user'),
 											'company_deduction'					=> array('company_tax_deduction'),
 											'company_deduction_pay_stub_entry_account' => array('company_tax_deduction'),
@@ -328,6 +337,7 @@ class LogFactory extends Factory {
 											'report_custom_column'				=> array('report_custom_column'),
 
 											'job'								=> array('job'),
+											'job_group'							=> array('job'),
 											'job_user_branch'					=> array('job'),
 											'job_user_department'				=> array('job'),
 											'job_user_group'					=> array('job'),
@@ -336,17 +346,21 @@ class LogFactory extends Factory {
 											'job_job_item_group'				=> array('job'),
 											'job_include_job_item'				=> array('job'),
 											'job_exclude_job_item'				=> array('job'),
-											'job_item'							=> array('job'),
-											'job_item_amendment'				=> array('job'),
+											'job_item'							=> array('job_item'),
+											'job_item_group'					=> array('job_item'),
+											'job_item_amendment'				=> array('job'), //This is part of the Edit Job view.
 											'document'							=> array('document'),
+											'document_group'					=> array('document'),
 											'document_revision'					=> array('document'),
 											'client'							=> array('client'),
+											'client_group'						=> array('client'),
 											'client_contact'					=> array('client_contact'),
 											'client_payment'					=> array('client_payment'),
 											'invoice'							=> array('invoice'),
 											'invoice_config'					=> array('invoice_config'),
 											'invoice_transaction'				=> array('invoice'),
 											'product'							=> array('product'),
+											'product_group'						=> array('product'),
 											'product_price'						=> array('product'),
 											'product_tax_policy'				=> array('product'),
 											'tax_area_policy'					=> array('area_policy'),
@@ -358,7 +372,9 @@ class LogFactory extends Factory {
 											'user_review'						=> array('user_review'),
 											'user_review_control'				=> array('user_review'),
 											'kpi'								=> array('kpi'),
+											'kpi_group'							=> array('kpi'),
 											'qualification'						=> array('qualification'),
+											'qualification_group'				=> array('qualification'),
 											'user_skill'						=> array('user_skill'),
 											'user_education'					=> array('user_education'),
 											'user_membership'					=> array('user_membership'),
@@ -376,6 +392,10 @@ class LogFactory extends Factory {
 											'job_applicant_language'			=> array('job_applicant'),
 											'job_applicant_membership'			=> array('job_applicant'),
 											'ethnic_group'						=> array('user'),
+											'legal_entity'						=> array('legal_entity'),
+											'payroll_remittance_agency'			=> array('payroll_remittance_agency'),
+											'remittance_source_account'			=> array('remittance_source_account'),
+											'remittance_destination_account'	=> array('remittance_destination_account'),
 											'geo_fence'							=> array('geo_fence')
 									);
 
@@ -415,6 +435,10 @@ class LogFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -437,6 +461,9 @@ class LogFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getUserObject() {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
@@ -448,6 +475,9 @@ class LogFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getLink() {
 
 		$link = FALSE;
@@ -635,148 +665,119 @@ class LogFactory extends Factory {
 		return $link;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getUser() {
-		return (int)$this->data['user_id'];
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		//Allow NULL ids.
-		if ( $id == '' OR $id == NULL ) {
-			$id = 0;
-		}
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('User is invalid')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' OR $value == NULL  ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getObject() {
-		if ( isset($this->data['object_id']) ) {
-			return (int)$this->data['object_id'];
-		}
-
-		return FALSE;
-	}
-	function setObject($id) {
-		$id = trim($id);
-
-		if (	$this->Validator->isNumeric(	'object',
-												$id,
-												TTi18n::gettext('Object is invalid'))
-			) {
-			$this->data['object_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'object_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setObject( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' OR $value == NULL  ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'object_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTableName() {
-		if ( isset($this->data['table_name']) ) {
-			return $this->data['table_name'];
-		}
-
-		return FALSE;
-	}
-	function setTableName($text) {
-		$text = trim($text);
-
-		if (
-				$this->Validator->isLength(		'table',
-												$text,
-												TTi18n::gettext('Table is invalid'),
-												2,
-												250)
-
-			) {
-			$this->data['table_name'] = $text;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'table_name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTableName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'table_name', $value );
+	}
+
+	/**
+	 * @return int
+	 */
 	function getAction() {
-		return (int)$this->data['action_id'];
-	}
-	function setAction($action) {
-		$action = trim($action);
-
-		if ( $this->Validator->inArrayKey(	'action',
-											$action,
-											TTi18n::gettext('Incorrect Action'),
-											$this->getOptions('action')) ) {
-
-			$this->data['action_id'] = $action;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'action_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAction( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'action_id', $value );
+	}
+
+	/**
+	 * @return mixed
+	 */
 	function getDescription() {
-		return $this->data['description'];
-	}
-	function setDescription($text) {
-		$text = trim($text);
-
-		if (
-				$this->Validator->isLength(		'description',
-												$text,
-												TTi18n::gettext('Description is invalid'),
-												2,
-												2000)
-
-			) {
-			$this->data['description'] = $text;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'description' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDate() {
-		if ( isset($this->data['date']) ) {
-			return $this->data['date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'date' );
 	}
 
-	function setDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ($epoch == '') {
-			$epoch = TTDate::getTime();
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ($value == '') {
+			$value = TTDate::getTime();
 		}
-
-		if	(	$this->Validator->isDate(		'date',
-												$epoch,
-												TTi18n::gettext('Date is invalid')) ) {
-
-			$this->data['date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'date', $value );
 	}
 
+	/**
+	 * @param string $object_id UUID
+	 * @param int $action_id
+	 * @param null $description
+	 * @param string $user_id UUID
+	 * @param null $table
+	 * @return bool
+	 */
 	function addEntry( $object_id, $action_id, $description = NULL, $user_id = NULL, $table = NULL) {
 		if ($object_id == '' ) {
 			return FALSE;
@@ -791,7 +792,7 @@ class LogFactory extends Factory {
 			if ( is_object($current_user) ) {
 				$user_id = $current_user->getId();
 			} else {
-				$user_id = 0;
+				$user_id = TTUUID::getZeroID();
 			}
 		}
 
@@ -802,7 +803,7 @@ class LogFactory extends Factory {
 		$this->setObject( $object_id );
 		$this->setAction( $action_id );
 		$this->setTable( $table );
-		$this->setUser( (int)$user_id );
+		$this->setUser( TTUUID::castUUID($user_id) );
 		$this->setDescription( $description );
 
 		if ( $this->isValid() === TRUE ) {
@@ -814,6 +815,9 @@ class LogFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return array|bool|mixed
+	 */
 	function getDetails() {
 		if ( getTTProductEdition() > 10 AND $this->isNew() == FALSE AND is_object( $this->getUserObject() ) ) {
 			$global_table_map = array();
@@ -830,7 +834,7 @@ class LogFactory extends Factory {
 				if ( $ldlf->getRecordCount() > 0 ) {
 					$detail_row = array();
 					foreach( $ldlf as $ld_obj ) {
-						if ( $this->getObject() > 0 ) {
+						if ( TTUUID::isUUID( $this->getObject() ) AND $this->getObject() != TTUUID::getZeroID() AND $this->getObject() != TTUUID::getNotExistID() ) {
 							$class->setID( $this->getObject() ); //Set the object id of the class so we can reference it later if needed.
 						}
 						$detail_row[] = array(
@@ -854,6 +858,11 @@ class LogFactory extends Factory {
 	}
 
 	//Don't allow remote API calls to set audit trail records.
+
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -879,6 +888,10 @@ class LogFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		$data = array();
@@ -924,53 +937,164 @@ class LogFactory extends Factory {
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
+
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
 		return FALSE;
 	}
-	function setDeleted($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCreatedDate() {
 		return FALSE;
 	}
-	function setCreatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getUpdatedBy() {
 		return FALSE;
 	}
-	function setUpdatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
 		return FALSE;
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {
-		return FALSE;
-	}
-	function getDeletedBy() {
-		return FALSE;
-	}
-	function setDeletedBy($id = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getDeletedBy() {
+		return FALSE;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
+		return FALSE;
+	}
+
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// User
+		if ( $this->getUser() !== FALSE AND $this->getUser() != TTUUID::getZeroID() ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+															$ulf->getByID($this->getUser()),
+															TTi18n::gettext('User is invalid')
+														);
+		}
+		// Object
+		$this->Validator->isUUID(	'object',
+											$this->getObject(),
+											TTi18n::gettext('Object is invalid')
+										);
+		// Table
+		$this->Validator->isLength(		'table',
+												$this->getTableName(),
+												TTi18n::gettext('Table is invalid'),
+												2,
+												250
+											);
+		// Action
+		$this->Validator->inArrayKey(	'action',
+												$this->getAction(),
+												TTi18n::gettext('Incorrect Action'),
+												$this->getOptions('action')
+											);
+		// Description
+		$this->Validator->isLength(		'description',
+												$this->getDescription(),
+												TTi18n::gettext('Description is invalid'),
+												2,
+												2000
+											);
+		// Date
+		$this->Validator->isDate(		'date',
+												$this->getDate(),
+												TTi18n::gettext('Date is invalid')
+											);
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ($this->getDate() === FALSE ) {
 			$this->setDate();

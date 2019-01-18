@@ -2,8 +2,8 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 
 	el: '.wizard',
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.title = $.i18n._( 'Migrate PS Accounts' );
 		this.steps = 2;
 		this.current_step = 1;

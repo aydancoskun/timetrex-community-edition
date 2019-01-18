@@ -1,8 +1,9 @@
 HolidayViewController = BaseViewController.extend( {
 	el: '#holiday_view_container',
+	_required_files: ['APIHoliday'],
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'HolidayEditView.html';
 		this.permission_id = 'holiday_policy';
 		this.viewId = 'Holiday';
@@ -95,7 +96,7 @@ HolidayViewController.loadSubView = function( container, beforeViewLoadedFun, af
 		if ( Global.isSet( container ) ) {
 			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				afterViewLoadedFun( sub_holiday_view_controller );
+TTPromise.wait('BaseViewController', 'initialize',function() {				afterViewLoadedFun( sub_holiday_view_controller );});
 			}
 		}
 	} )

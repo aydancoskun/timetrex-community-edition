@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -52,11 +52,42 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	 * @group testEncryptionA
 	 */
 	function testEncryptionA() {
+		//Make sure we force the salt so its consistent even when the timetrex.ini.php is not.
+		global $config_vars;
+		$config_vars['other']['salt'] = 'f0328b0863222ff98b848537fe1038b2';
+
 		$str = 'This is a sample string to be encrypted and decrytped.';
 		$encrypted_str = Misc::encrypt( $str );
 		$decrypted_str = Misc::decrypt( $encrypted_str );
 
 		$this->assertEquals( $str, $decrypted_str );
+
+		//can we still decrypt version 1?
+		$mastercard_unencrypted = 5454545454545454;
+		$mastercard_old_encrypted = 'oqp5HtmFgYCiqnke2YWBgA==';
+		$decrypted_str = Misc::decrypt( $mastercard_old_encrypted );
+		$this->assertEquals( $mastercard_unencrypted, $decrypted_str );
+
+		$visa_unencrypted = 4111111111111111;
+		$visa_old_encrypted = '4G30xI80TEZf8RFMRPE56w==';
+
+		//testing upgrading encryption from version1 to version2
+		$decrypted_str = Misc::decrypt( $visa_old_encrypted );
+
+		//does v1 decryption work?
+		$this->assertEquals( $visa_unencrypted, $decrypted_str );
+
+		//does v1 upgrade cleanly to v2 encrypt?
+		$new_encrypted_value = Misc::encrypt($decrypted_str);
+		$decrypted_str = Misc::decrypt( $new_encrypted_value );
+		$this->assertEquals( $visa_unencrypted, $decrypted_str );
+
+		//decrypt unencrypted data
+		$this->assertEquals( $visa_unencrypted,  Misc::decrypt( $visa_unencrypted ) );
+		//check the case for the colon.
+		$x = 'x:z';
+		$this->assertEquals( $x,  Misc::decrypt( $x ) );
+
 	}
 
 	/**
@@ -296,7 +327,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 250, $retarr[1] );
 		$this->assertLessThan( 400, $retarr[1] );
 
-		$this->assertGreaterThan( 600, $retarr[2] );
+		$this->assertGreaterThan( 550, $retarr[2] );
 		$this->assertLessThan( 750, $retarr[2] );
 	}
 
@@ -958,6 +989,9 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $lock_file->exists(), FALSE );
 	}
 
+	/**
+	 * @group testRemoteHTTP
+	 */
 	function testRemoteHTTP() {
 		$url = 'www.timetrex.com/blank.html';
 
@@ -1003,6 +1037,9 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		@unlink($temp_file_name);
 	}
 
+	/**
+	 * @group testgetAmountUpToLimit
+	 */
 	function testgetAmountUpToLimit() {
 		//Positive Amount and Positive Limit, should return amount up to the limit.
 		$this->assertEquals( Misc::getAmountUpToLimit( 0, 100 ), 0 );
@@ -1071,6 +1108,9 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -0, -100 ), -100 );
 	}
 
+	/**
+	 * @group testIsSubDirectory
+	 */
 	function testIsSubDirectory() {
 		$parent_dir = '/';
 		$child_dir = '/var';
@@ -1116,9 +1156,105 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
 	}
 
+	/**
+	 * @group testSOAPClient
+	 */
 	function testSOAPClient() {
 		$ttsc = TTnew('TimeTrexSoapClient');
 		$this->assertEquals( $ttsc->ping(), TRUE );
 	}
+
+	/**
+	 * @group testCensorString
+	 */
+	function testCensorString() {
+		$this->assertEquals( Misc::censorString('0'), 'X' );
+		$this->assertEquals( Misc::censorString('00'), 'XX' );
+		$this->assertEquals( Misc::censorString('000'), '0X0' );
+		$this->assertEquals( Misc::censorString('0000'), '0XX0' );
+		$this->assertEquals( Misc::censorString('00000'), '0XXX0' );
+		$this->assertEquals( Misc::censorString('000000'), '00XX00' );
+		$this->assertEquals( Misc::censorString('0000000'), '00XXX00' );
+		$this->assertEquals( Misc::censorString('00000000'), '00XXXX00' );
+		$this->assertEquals( Misc::censorString('000000000'), '000XXX000' );
+		$this->assertEquals( Misc::censorString('123456789'), '123XXX789' );
+		$this->assertEquals( Misc::censorString('12345678901234567890'), '123456XXXXXXXX567890' );
+
+		//censorString( $str, $censor_char = 'X', $min_first_chunk_size = NULL, $max_first_chunk_size = NULL, $min_last_chunk_size = NULL, $max_last_chunk_size = NULL )
+		$this->assertEquals( Misc::censorString('4111222233334444', 'X', 4, 4, 4, 4), '4111XXXXXXXX4444' );
+
+		$uf = TTnew('UserFactory');
+		$this->assertEquals( $uf->getSecureSIN('0'), 'X' );
+		$this->assertEquals( $uf->getSecureSIN('00'), 'XX' );
+		$this->assertEquals( $uf->getSecureSIN('000'), 'XXX' );
+		$this->assertEquals( $uf->getSecureSIN('0000'), 'XXXX' );
+		$this->assertEquals( $uf->getSecureSIN('00000'), 'XXXXX' );
+		$this->assertEquals( $uf->getSecureSIN('000000'), 'XXXXXX' );
+		$this->assertEquals( $uf->getSecureSIN('0000000'), '0XX0000' );
+		$this->assertEquals( $uf->getSecureSIN('00000000'), '0XXX0000' );
+		$this->assertEquals( $uf->getSecureSIN('000000000'), '0XXXX0000' );
+		$this->assertEquals( $uf->getSecureSIN('123456789'), '1XXXX6789' );
+	}
+
+	/**
+	 * @group testUUID
+	 */
+	function testUUID() {
+		//Make sure UUIDs are unique at least across 1 million tight iterations.
+		$max = 1000000;
+		for( $i = 0; $i < $max; $i++ ) {
+			$uuid_arr[] = TTUUID::generateUUID();
+		}
+		$unique_uuid_arr = array_unique($uuid_arr);
+
+		$this->assertEquals( count($uuid_arr) , count($unique_uuid_arr) );
+		unset( $uuid_arr, $unique_uuid_arr );
+	}
+
+	/**
+	 * @group testTruncateUUID
+	 */
+	function testTruncateUUID() {
+		//Make sure UUIDs converted from INTs still get the most unique UUID data first.
+		$this->assertEquals( TTUUID::truncateUUID( TTUUID::getConversionPrefix().'-000000192136', 12, FALSE ), '000000192136' );
+		$this->assertEquals( TTUUID::truncateUUID( TTUUID::getConversionPrefix().'-000000191922', 12, FALSE ), '000000191922' );
+		$this->assertEquals( TTUUID::truncateUUID( '11e7b349-9af4-7bc0-af20-999999191922', 12, FALSE ), '9af47bc0af20' );
+		$this->assertEquals( TTUUID::truncateUUID( '11e7b349-24dc-7bc0-af20-21ea65522ba3', 12, FALSE ), '24dc7bc0af20' );
+		$this->assertEquals( TTUUID::truncateUUID( '11e7a84a-9af4-e9e0-b077-21ea65522ba3', 12, FALSE ), '9af4e9e0b077' );
+	}
+
+	/**
+	 * @group testUUIDSorting
+	 */
+	function testUUIDSorting() {
+		//Make sure UUIDs can be sorted and appear in time order as they were created.
+		$max = 10000;
+		for( $i = 0; $i < $max; $i++ ) {
+			$uuid_arr[] = TTUUID::generateUUID();
+		}
+		$sorted_uuid_arr = $uuid_arr;
+
+		sort($sorted_uuid_arr);
+		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr);
+		$this->assertEquals( count($diff_uuid_arr), 0 );
+
+		//Reverse the sort and confirm all differences.
+		rsort($sorted_uuid_arr);
+		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr);
+		$this->assertEquals( count($diff_uuid_arr), $max );
+
+		//Use a strcmp sort and confirm it still is in the correct order.
+		usort($sorted_uuid_arr, 'strcmp');
+		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr);
+		$this->assertEquals( count($diff_uuid_arr), 0 );
+
+		//Natural sort will be the wrong order and therefore have many differences.
+		usort($sorted_uuid_arr, 'strnatcasecmp');
+		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr);
+		$this->assertGreaterThan( 0, count($diff_uuid_arr) );
+
+		unset( $uuid_arr, $sorted_uuid_arr, $diff_uuid_arr );
+	}
+
 }
 ?>

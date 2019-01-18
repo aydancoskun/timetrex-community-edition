@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,6 +48,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
+		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$dd->createCurrency( $this->company_id, 10 );
@@ -56,10 +57,9 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createUserWageGroups( $this->company_id );
 
-		$this->user_id = $dd->createUser( $this->company_id, 100 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
 
 		$dd->createPayStubAccount( $this->company_id );
-		$this->createPayStubAccrualAccount();
 		$dd->createPayStubAccountLink( $this->company_id );
 		$this->getPayStubAccountLinkArray();
 
@@ -180,39 +180,6 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	function createPayStubAccrualAccount() {
-		Debug::text('Saving.... Vacation Accrual', __FILE__, __LINE__, __METHOD__, 10);
-		$pseaf = new PayStubEntryAccountFactory();
-		$pseaf->setCompany( $this->company_id );
-		$pseaf->setStatus(10);
-		$pseaf->setType(50);
-		$pseaf->setName('Vacation Accrual');
-		$pseaf->setOrder(400);
-
-		if ( $pseaf->isValid() ) {
-			$vacation_accrual_id = $pseaf->Save();
-
-			Debug::text('Saving.... Earnings - Vacation Accrual Release', __FILE__, __LINE__, __METHOD__, 10);
-			$pseaf = new PayStubEntryAccountFactory();
-			$pseaf->setCompany( $this->company_id );
-			$pseaf->setStatus(10);
-			$pseaf->setType(10);
-			$pseaf->setName('Vacation Accrual Release');
-			$pseaf->setOrder(180);
-			$pseaf->setAccrual($vacation_accrual_id);
-
-			if ( $pseaf->isValid() ) {
-				$pseaf->Save();
-			}
-
-			unset($vaction_accrual_id);
-		}
-
-
-		return TRUE;
-	}
-
-
 	function getPayStubEntryArray( $pay_stub_id ) {
 		//Check Pay Stub to make sure it was created correctly.
 		$pself = new PayStubEntryListFactory();
@@ -316,6 +283,8 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[0]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
+
 
 		//$pay_stub->setStartDate( $this->pay_period_objs[0]->getStartDate() );
 		//$pay_stub->setEndDate( $this->pay_period_objs[0]->getEndDate() );
@@ -328,7 +297,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -414,6 +383,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[0]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 
 		//$pay_stub->setStartDate( $this->pay_period_objs[0]->getStartDate() );
 		//$pay_stub->setEndDate( $this->pay_period_objs[0]->getEndDate() );
@@ -426,7 +396,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -522,6 +492,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 
 		$pay_stub->setDefaultDates();
 
@@ -529,7 +500,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -615,6 +586,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 
 		$pay_stub->setDefaultDates();
 
@@ -622,7 +594,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -699,6 +671,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 2)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 
 		$pay_stub->setDefaultDates();
 
@@ -706,7 +679,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -798,6 +771,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 		$pay_stub->setRun( 1 );
 
 		$pay_stub->setDefaultDates();
@@ -806,7 +780,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -892,6 +866,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 		$pay_stub->setRun( 1 );
 
 		$pay_stub->setDefaultDates();
@@ -900,7 +875,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -975,6 +950,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 20 ); //Normal In-Cycle
 		$pay_stub->setRun( 2 );
 
 		$pay_stub->setDefaultDates();
@@ -983,7 +959,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -1058,6 +1034,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 20 ); //Normal In-Cycle
 		$pay_stub->setRun( 3 );
 
 		$pay_stub->setDefaultDates();
@@ -1066,7 +1043,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -1141,6 +1118,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 2)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 		$pay_stub->setRun( 1 );
 
 		$pay_stub->setDefaultDates();
@@ -1149,7 +1127,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -1240,6 +1218,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 		$pay_stub->setRun( 1 );
 
 		$pay_stub->setDefaultDates();
@@ -1248,7 +1227,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -1334,6 +1313,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 		$pay_stub->setRun( 1 );
 
 		$pay_stub->setDefaultDates();
@@ -1342,7 +1322,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -1417,6 +1397,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 20 ); //Normal In-Cycle
 		$pay_stub->setRun( 2 );
 
 		$pay_stub->setDefaultDates();
@@ -1425,7 +1406,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -1503,6 +1484,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 20 ); //Normal In-Cycle
 		$pay_stub->setRun( 3 );
 
 		$pay_stub->setDefaultDates();
@@ -1513,7 +1495,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -1585,6 +1567,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 2)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 20 ); //Normal In-Cycle
 		$pay_stub->setRun( 1 );
 
 		$pay_stub->setDefaultDates();
@@ -1593,7 +1576,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -1682,6 +1665,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 
 		$pay_stub->setDefaultDates();
 
@@ -1689,7 +1673,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -1766,6 +1750,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 
 		$pay_stub->setDefaultDates();
 
@@ -1773,7 +1758,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -1848,6 +1833,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 2)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 
 		$pay_stub->setDefaultDates();
 
@@ -1855,7 +1841,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -2106,6 +2092,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 
 		$pay_stub->setDefaultDates();
 
@@ -2113,7 +2100,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -2199,6 +2186,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 
 		$pay_stub->setDefaultDates();
 
@@ -2206,7 +2194,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
@@ -2281,6 +2269,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
 		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 2)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
+		$pay_stub->setType( 10 ); //Normal In-Cycle
 
 		$pay_stub->setDefaultDates();
 
@@ -2288,7 +2277,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_accounts = array(
 							'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
 							'over_time_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Over Time 1'),
-							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+							'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
 							'federal_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'US - Federal Income Tax'),
 							'state_income_tax' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'NY - State Income Tax'),
 							'medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),

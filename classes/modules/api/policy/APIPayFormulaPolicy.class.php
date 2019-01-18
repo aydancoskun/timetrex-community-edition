@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIPayFormulaPolicy extends APIFactory {
 	protected $main_class = 'PayFormulaPolicyFactory';
 
+	/**
+	 * APIPayFormulaPolicy constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APIPayFormulaPolicy extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -84,6 +87,7 @@ class APIPayFormulaPolicy extends APIFactory {
 	/**
 	 * Get PayFormulaPolicy policy data for one or more PayFormulaPolicy policyes.
 	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function getPayFormulaPolicy( $data = NULL, $disable_paging = FALSE ) {
@@ -115,8 +119,9 @@ class APIPayFormulaPolicy extends APIFactory {
 
 	/**
 	 * Export data to csv
-	 * @param array $data filter data
 	 * @param string $format file format (csv)
+	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function exportPayFormulaPolicy( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
@@ -145,7 +150,9 @@ class APIPayFormulaPolicy extends APIFactory {
 	/**
 	 * Set PayFormulaPolicy policy data for one or more PayFormulaPolicy policyes.
 	 * @param array $data PayFormulaPolicy policy data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setPayFormulaPolicy( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -164,18 +171,18 @@ class APIPayFormulaPolicy extends APIFactory {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' PayFormulaPolicys', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'PayFormulaPolicyListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get PayFormulaPolicy policy object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -189,7 +196,7 @@ class APIPayFormulaPolicy extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('pay_formula_policy', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -250,10 +257,10 @@ class APIPayFormulaPolicy extends APIFactory {
 	/**
 	 * Delete one or more PayFormulaPolicy policys.
 	 * @param array $data PayFormulaPolicy policy data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deletePayFormulaPolicy( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -270,14 +277,14 @@ class APIPayFormulaPolicy extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'PayFormulaPolicyListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get PayFormulaPolicy policy object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -285,7 +292,7 @@ class APIPayFormulaPolicy extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('pay_formula_policy', 'delete')
 								OR ( $this->getPermissionObject()->Check('pay_formula_policy', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -336,7 +343,7 @@ class APIPayFormulaPolicy extends APIFactory {
 	 * @return array
 	 */
 	function copyPayFormulaPolicy( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 

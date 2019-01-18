@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1009,9 +1009,10 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		}
 
 
-		Debug::Text( 'RS Record State: ' . $this->efile_state, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::Text( 'RS Record State: '. $this->efile_state, __FILE__, __LINE__, __METHOD__, 10 );
 		switch ( strtolower( $this->efile_state ) ) {
 			case 'ga': //Georgia
+				// File Format Specifications: https://dor.georgia.gov/sites/dor.georgia.gov/files/related_files/document/Federal%20Format%20Specs%202015.pdf
 				$line[] = 'RS'; //RS Record
 				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' ); //State Code
 				$line[] = $this->padRecord( '', 5, 'AN' ); //Tax Entity Code (Leave Blank)
@@ -1432,8 +1433,6 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 
 			$e = 0;
 			foreach ( $records as $w2_data ) {
-
-
 				$w2_data['control_number'] = ( $e + 1 );
 				$this->arrayToObject( $w2_data ); //Convert record array to object
 

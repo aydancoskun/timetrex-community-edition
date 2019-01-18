@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APILog extends APIFactory {
 	protected $main_class = 'LogFactory';
 
+	/**
+	 * APILog constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -50,6 +53,7 @@ class APILog extends APIFactory {
 	/**
 	 * Get log data for one or more logs.
 	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function getLog( $data = NULL, $disable_paging = FALSE ) {
@@ -148,6 +152,8 @@ class APILog extends APIFactory {
 	/**
 	 * Set log data for one or more logs.
 	 * @param array $data log data
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
 	 * @return array
 	 */
 	function setLog( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
@@ -161,12 +167,12 @@ class APILog extends APIFactory {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' Logs', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 

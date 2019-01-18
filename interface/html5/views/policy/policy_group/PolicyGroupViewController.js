@@ -1,10 +1,16 @@
 PolicyGroupViewController = BaseViewController.extend( {
 	el: '#policy_group_view_container',
+
+	_required_files: {
+		10: ['APIPolicyGroup', 'APIExceptionPolicyControl', 'APIOvertimePolicy', 'APIRoundIntervalPolicy', 'APIAbsencePolicy', 'APIAccrualPolicy', 'APIPremiumPolicy', 'APIHolidayPolicy', 'APIRegularTimePolicy', 'APIMealPolicy', 'APIBreakPolicy'],
+		20: ['APIExpensePolicy']
+	},
+
 	sub_document_view_controller: null,
 	document_object_type_id: null,
 	exception_policy_control_api: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'PolicyGroupEditView.html';
 		this.permission_id = 'policy_group';
 		this.viewId = 'PolicyGroup';
@@ -344,43 +350,6 @@ PolicyGroupViewController = BaseViewController.extend( {
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
-	},
-
-	initSubDocumentView: function() {
-		var $this = this;
-
-		if ( this.sub_document_view_controller ) {
-			this.sub_document_view_controller.buildContextMenu( true );
-			this.sub_document_view_controller.setDefaultMenu();
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.initData();
-			return;
-		}
-
-		Global.loadScript( 'views/document/DocumentViewController.js', function() {
-			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
-			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
-
-			Global.trackView( 'Sub' + 'Document' + 'View' );
-			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_document_view_controller = subViewController;
-			$this.sub_document_view_controller.parent_key = 'object_id';
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.document_object_type_id = $this.document_object_type_id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.parent_view_controller = $this;
-			$this.sub_document_view_controller.initData();
-		}
-
 	},
 
 	removeEditView: function() {

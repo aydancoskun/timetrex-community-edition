@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,12 @@ class UserEducationFactory extends Factory {
 	protected $pk_sequence_name = 'user_education_id_seq'; //PK Sequence name
 	protected $qualification_obj = NULL;
 	//protected $grade_score_validator_regex = '/^[0-9]{1,250}$/i';
+
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -104,6 +110,10 @@ class UserEducationFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -133,277 +143,306 @@ class UserEducationFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getQualificationObject() {
 		return $this->getGenericObject( 'QualificationListFactory', $this->getQualification(), 'qualification_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-		return FALSE;
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'user_id',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid Employee')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getQualification() {
-		if ( isset( $this->data['qualification_id'] ) ) {
-			return (int)$this->data['qualification_id'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'qualification_id' );
 	}
 
-	function setQualification( $id ) {
-		$id = trim( $id );
-
-		$qlf = TTnew( 'QualificationListFactory' );
-
-		if( $this->Validator->isResultSetWithRows( 'qualification_id',
-																	$qlf->getById( $id ),
-																	TTi18n::gettext('Invalid Qualification')
-																	) ) {
-			$this->data['qualification_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setQualification( $value ) {
+		$value = trim( $value );
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'qualification_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getInstitute() {
-		if ( isset($this->data['institute']) ) {
-			return $this->data['institute'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'institute' );
 	}
 
-	function setInstitute( $institute ) {
-		$institute = trim($institute);
-
-		if (	$institute == ''
-				OR
-				$this->Validator->isLength( 'institute',
-											$institute,
-											TTi18n::gettext('Institute is invalid'),
-											2, 255 )  ) {
-				$this->data['institute'] = $institute;
-				return	TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $institute
+	 * @return bool
+	 */
+	function setInstitute( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'institute', $value );
 	}
 
 
-
+	/**
+	 * @return bool
+	 */
 	function getMajor() {
-		if ( isset( $this->data['major'] ) ) {
-			return $this->data['major'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'major' );
 	}
 
-	function setMajor( $major ) {
-		$major = trim($major);
-
-		if (	$major == ''
-				OR
-				$this->Validator->isLength( 'major',
-											$major,
-											TTi18n::gettext('Major/Specialization is invalid'),
-											2, 255 )  ) {
-				$this->data['major'] = $major;
-				return	TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $major
+	 * @return bool
+	 */
+	function setMajor( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'major', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getMinor() {
-		if ( isset( $this->data['minor'] ) ) {
-			return $this->data['minor'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'minor' );
 	}
 
 
-	function setMinor( $minor ) {
-		$minor = trim($minor);
-
-		if (	$minor == ''
-				OR
-				$this->Validator->isLength( 'minor',
-											$minor,
-											TTi18n::gettext('Minor is invalid'),
-											2, 255 )  ) {
-				$this->data['minor'] = $minor;
-				return	TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $minor
+	 * @return bool
+	 */
+	function setMinor( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'minor', $value );
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getGraduateDate( ) {
-		if ( isset($this->data['graduate_date']) ) {
-			return (int)$this->data['graduate_date'];
-		}
-
-		return FALSE;
-	}
-	function setGraduateDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-		if ( $epoch == '' ) {
-			$epoch = NULL;
-		}
-		if	( $epoch == NULL
-				OR
-				$this->Validator->isDate(		'graduate_date',
-												$epoch,
-												TTi18n::gettext('Incorrect graduation date'))
-			) {
-
-			$this->data['graduate_date'] = $epoch;
-
-			return TRUE;
-
-
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'graduate_date' );
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setGraduateDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'graduate_date', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getGradeScore() {
-		if ( isset( $this->data['grade_score'] ) ) {
-			return $this->data['grade_score'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'grade_score' );
 	}
 
-	function setGradeScore( $grade_score ) {
-		$grade_score = trim($grade_score);
+	/**
+	 * @param $grade_score
+	 * @return bool
+	 */
+	function setGradeScore( $value ) {
+		$value = trim($value);
 		// $grade_score = $this->Validator->stripNonFloat( $grade_score );
-		if ( (	$grade_score != ''
-				AND
-				( $this->Validator->isNumeric(	'grade_score',
-													$grade_score,
-													TTi18n::gettext('Grade/Score must only be digits')
-										)
-				AND
-				$this->Validator->isLengthAfterDecimal( 'grade_score',
-													$grade_score,
-													TTi18n::gettext('Invalid Grade/Score'),
-													0,
-													2
-										) ) )
-				OR $grade_score == ''
-
-			) {
-				$this->data['grade_score'] = $grade_score;
-				return	TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'grade_score', $value );
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getStartDate() {
-		if ( isset($this->data['start_date']) ) {
-			return (int)$this->data['start_date'];
-		}
-
-		return FALSE;
-	}
-	function setStartDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ( $epoch == '' ) {
-			$epoch = NULL;
-		}
-
-		if	( $epoch == NULL
-				OR
-				$this->Validator->isDate(		'start_date',
-												$epoch,
-												TTi18n::gettext('Incorrect start date'))
-			) {
-
-			$this->data['start_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'start_date' );
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setStartDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'start_date', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getEndDate() {
-		if ( isset($this->data['end_date']) ) {
-			return (int)$this->data['end_date'];
-		}
-
-		return FALSE;
-	}
-	function setEndDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ( $epoch == '' ) {
-			$epoch = NULL;
-		}
-
-		if	(	$epoch == NULL
-				OR
-				$this->Validator->isDate(		'end_date',
-												$epoch,
-												TTi18n::gettext('Incorrect end date'))
-			) {
-
-			$this->data['end_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'end_date' );
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setEndDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'end_date', $value );
+	}
+
+	/**
+	 * @return bool|string
+	 */
 	function getTag() {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
-		if ( isset($this->tmp_data['tags']) ) {
-			return $this->tmp_data['tags'];
-		} elseif ( is_object( $this->getQualificationObject() ) AND $this->getQualificationObject()->getCompany() > 0 AND $this->getID() > 0 ) {
+		$value = $this->getGenericTempDataValue( 'tags' );
+		if ( $value !== FALSE ) {
+			return $value;
+		} elseif ( is_object( $this->getQualificationObject() )
+				AND TTUUID::isUUID( $this->getQualificationObject()->getCompany() ) AND $this->getQualificationObject()->getCompany() != TTUUID::getZeroID() AND $this->getQualificationObject()->getCompany() != TTUUID::getNotExistID()
+				AND TTUUID::isUUID( $this->getID() ) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
 			return CompanyGenericTagMapListFactory::getStringByCompanyIDAndObjectTypeIDAndObjectID( $this->getQualificationObject()->getCompany(), 252, $this->getID() );
 		}
 
 		return FALSE;
 	}
-	function setTag( $tags ) {
-		$tags = trim($tags);
 
+	/**
+	 * @param $tags
+	 * @return bool
+	 */
+	function setTag( $value ) {
+		$value = trim($value);
 		//Save the tags in temporary memory to be committed in postSave()
-		$this->tmp_data['tags'] = $tags;
-
-		return TRUE;
+		return $this->setGenericTempDataValue( 'tags', $value );
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Employee
+		if ( $this->getUser() !== FALSE ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user_id',
+															$ulf->getByID($this->getUser()),
+															TTi18n::gettext('Employee must be specified')
+														);
+		}
+		// Qualification
+		if ( $this->getQualification() !== FALSE ) {
+			$qlf = TTnew( 'QualificationListFactory' );
+			$this->Validator->isResultSetWithRows( 'qualification_id',
+															$qlf->getById( $this->getQualification() ),
+															TTi18n::gettext('Course must be specified')
+														);
+		}
+
+//		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing, but must check when adding a new record.
+//			if ( $this->getInstitute() == '' ) {
+//				$this->Validator->isTRUE( 'institute',
+//										  FALSE,
+//										  TTi18n::gettext( 'Please specify a Institute' ) );
+//			}
+//		}
+
+		// Institute
+		if ( $this->getInstitute() != '' AND $this->Validator->isError('institute') == FALSE ) {
+			$this->Validator->isLength( 'institute',
+												$this->getInstitute(),
+												TTi18n::gettext('Institute is too short or too long'),
+												2, 255
+											);
+		}
+		// Major/Specialization
+		if ( $this->getMajor() != '' AND $this->Validator->isError('major') == FALSE ) {
+			$this->Validator->isLength( 'major',
+												$this->getMajor(),
+												TTi18n::gettext('Major/Specialization is too short or too long'),
+												2, 255
+											);
+		}
+		// Minor
+		if ( $this->getMinor() != '' AND $this->Validator->isError('minor') == FALSE ) {
+			$this->Validator->isLength( 'minor',
+												$this->getMinor(),
+												TTi18n::gettext('Minor is too short or too long'),
+												2, 255
+											);
+		}
+		// Graduation date
+		if ( $this->getGraduateDate() != '' ) {
+			$this->Validator->isDate(		'graduate_date',
+												$this->getGraduateDate(),
+												TTi18n::gettext('Incorrect graduation date')
+											);
+		}
+		// Grade/Score
+		if ( $this->getGradeScore() != '' ) {
+			$this->Validator->isNumeric(	'grade_score',
+												$this->getGradeScore(),
+												TTi18n::gettext('Grade/Score must only be digits')
+											);
+			if ( $this->Validator->isError('grade_score') == FALSE ) {
+				$this->Validator->isLengthAfterDecimal( 'grade_score',
+															$this->getGradeScore(),
+															TTi18n::gettext('Invalid Grade/Score'),
+															0,
+															2
+														);
+			}
+		}
+		// Start date
+		if ( $this->getStartDate() != '' ) {
+			$this->Validator->isDate(		'start_date',
+													$this->getStartDate(),
+													TTi18n::gettext('Incorrect start date')
+												);
+		}
+		// End date
+		if ( $this->getEndDate() != '' ) {
+			$this->Validator->isDate(		'end_date',
+													$this->getEndDate(),
+													TTi18n::gettext('Incorrect end date')
+												);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 		$this->removeCache( $this->getUser().$this->getQualification() );
@@ -416,6 +455,10 @@ class UserEducationFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 
 		if ( is_array( $data ) ) {
@@ -451,6 +494,11 @@ class UserEducationFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 
 		$data = array();
@@ -499,6 +547,10 @@ class UserEducationFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Education'), NULL, $this->getTable(), $this );
 	}

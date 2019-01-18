@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIUserContact extends APIFactory {
 	protected $main_class = 'UserContactFactory';
 
+	/**
+	 * APIUserContact constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APIUserContact extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -96,7 +99,7 @@ class APIUserContact extends APIFactory {
 	 * Get user data for one or more users.
 	 * @param array $data filter data
 	 * @param boolean $disable_paging disables paging and returns all records.
-	 * @return array
+	 * @return array|bool
 	 */
 	function getUserContact( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('user_contact', 'enabled')
@@ -131,7 +134,7 @@ class APIUserContact extends APIFactory {
 			}
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
-			
+
 			return $this->returnHandler( $retarr );
 		}
 
@@ -140,8 +143,9 @@ class APIUserContact extends APIFactory {
 
 	/**
 	 * Export data to csv
-	 * @param array $data filter data
 	 * @param string $format file format (csv)
+	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function exportUserContact( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
@@ -171,7 +175,9 @@ class APIUserContact extends APIFactory {
 	/**
 	 * Set user data for one or more users.
 	 * @param array $data user data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setUserContact( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -193,12 +199,12 @@ class APIUserContact extends APIFactory {
 			$permission_children_ids = $this->getPermissionChildren();
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' Users', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -206,7 +212,7 @@ class APIUserContact extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserContactListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get user object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -222,7 +228,7 @@ class APIUserContact extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('user_contact', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent(); //Make the current $lf variable the current object, so we can ignore some fields if needed.
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -314,10 +320,10 @@ class APIUserContact extends APIFactory {
 	/**
 	 * Delete one or more users.
 	 * @param array $data user data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteUserContact( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -337,7 +343,7 @@ class APIUserContact extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -346,7 +352,7 @@ class APIUserContact extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserContactListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get user object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -357,7 +363,7 @@ class APIUserContact extends APIFactory {
 								OR ( $this->getPermissionObject()->Check('user_contact', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
 								OR ( $this->getPermissionObject()->Check('user_contact', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )) {
 
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );

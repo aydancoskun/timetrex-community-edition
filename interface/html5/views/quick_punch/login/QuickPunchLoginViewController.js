@@ -8,16 +8,28 @@ QuickPunchLoginViewController = Backbone.View.extend({
         this.template = _.template(row);
         this.setElement( this.template({}) );
         Global.contentContainer().html( this.$el );
-        this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
-        this.authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
-        this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
-        // this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
-        this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
-        this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
-        this.permission_api = new (APIFactory.getAPIClass( 'APIPermission' ))();
-        this.edit_view_error_ui_dic = {};
-        LocalCacheData.all_url_args = {};
-        this.render();
+
+        var $this = this;
+        require([
+            'APIPunch',
+            'APIAuthentication',
+            'APICurrentUser',
+            //'APICurrency',
+            'APIUserPreference',
+            'APIDate',
+            'APIPermission',
+        ], function(){
+			$this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
+			$this.authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
+			$this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
+            // this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
+			$this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
+			$this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
+			$this.permission_api = new (APIFactory.getAPIClass( 'APIPermission' ))();
+			$this.edit_view_error_ui_dic = {};
+            LocalCacheData.all_url_args = {};
+			$this.render();
+		});
     },
     render: function() {
         var $this = this;
@@ -86,43 +98,45 @@ QuickPunchLoginViewController = Backbone.View.extend({
         var $this = this;
 
         var station_id = Global.getStationID();
-        var api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
+        require(['APIStation'], function(){
+            var api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
 
-        if ( station_id ) {
-            api_station.getCurrentStation( station_id, '10', {
-                onResult: function( result ) {
-                    doNext( result );
-                }
-            } );
-        } else {
-            api_station.getCurrentStation( '', '10', {
-                onResult: function( result ) {
-                    doNext( result );
-                }
-            } );
-        }
-
-        function doNext( result ) {
-            if ( !$this.api || typeof $this.api['getUserPunch'] !== 'function' ) {
-                return;
+            if ( station_id ) {
+                api_station.getCurrentStation( station_id, '10', {
+                    onResult: function( result ) {
+                        doNext( result );
+                    }
+                } );
+            } else {
+                api_station.getCurrentStation( '', '10', {
+                    onResult: function( result ) {
+                        doNext( result );
+                    }
+                } );
             }
-            var res_data = result.getResult();
-            // $.cookie( 'StationID', res_data, {expires: 10000, path: LocalCacheData.cookie_path} );
-            Global.setStationID( res_data );
 
-            $this.api.getUserPunch( {
-                onResult: function( result ) {
-                    var result_data = result.getResult();
-                    if ( !result.isValid() ) {
-                        $this.setErrorTips( result );
-                        return
-                    }
-                    if ( Global.isSet( result_data ) ) {
-                        callBack( result_data );
-                    }
+            function doNext( result ) {
+                if ( !$this.api || typeof $this.api['getUserPunch'] !== 'function' ) {
+                    return;
                 }
-            } );
-        }
+                var res_data = result.getResult();
+                // $.cookie( 'StationID', res_data, {expires: 10000, path: LocalCacheData.cookie_path} );
+                Global.setStationID( res_data );
+
+                $this.api.getUserPunch( {
+                    onResult: function( result ) {
+                        var result_data = result.getResult();
+                        if ( !result.isValid() ) {
+                            $this.setErrorTips( result );
+                            return
+                        }
+                        if ( Global.isSet( result_data ) ) {
+                            callBack( result_data );
+                        }
+                    }
+                } );
+            }
+		});
     },
 
     onGetCurrentUser: function( e ) {
@@ -378,7 +392,7 @@ QuickPunchLoginViewController = Backbone.View.extend({
         }
         if ( !source_data ) {
             source_data = LocalCacheData.getLoginData().language_options;
-            source_data = Global.removeSortPrefix( (LocalCacheData.getLoginData().language_options) )
+            source_data = Global.removeSortPrefixFromArray( (LocalCacheData.getLoginData().language_options) )
         }
         if ( _.size( source_data ) == 0 ) {
             set_empty = true;

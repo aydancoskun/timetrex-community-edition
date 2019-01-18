@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,7 @@ if ( isset($argv) AND in_array('--config', $argv) ) {
 if ( isset($argv) AND in_array('--requirements_only', $argv) ) {
 	$disable_database_connection = TRUE;
 }
+
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 
 //Always enable debug logging during upgrade.
@@ -295,6 +296,12 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 		} else {
 			$install_obj->cleanCacheDirectory();
 			if ( $install_obj->checkAllRequirements( TRUE ) == 0 ) {
+				//Check to see if the DB schema is before the UUID upgrade (schema 1070 or older) and set the $PRIMARY_KEY_IS_UUID accordingly.
+				//  THIS IS in tools/unattended_install.php, tools/unattended_upgrade.php, includes/database.inc.php  as well.
+				if ( (int)SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_A' ) < 1100 ) {
+					$PRIMARY_KEY_IS_UUID = FALSE;
+				}
+
 				$install_obj->setDatabaseConnection( $db ); //Default connection
 
 				//Make sure at least one company exists in the database, this only works for upgrades, not initial installs.
@@ -527,6 +534,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 
 					if ( isset($manual_upgrade_file_name) AND $manual_upgrade_file_name != '' AND file_exists( $manual_upgrade_file_name ) AND filesize( $manual_upgrade_file_name ) > 0 ) {
 						Debug::Text( 'Using manual upgrade file: '. $manual_upgrade_file_name .' Current Size: ' . filesize( $manual_upgrade_file_name ), __FILE__, __LINE__, __METHOD__, 10 );
+						echo 'Using Manual Upgrade File: '. $manual_upgrade_file_name . "...\n";
 						$upgrade_file_name = $manual_upgrade_file_name;
 					} else {
 						if ( file_exists( $upgrade_file_name ) == FALSE OR ( isset( $file_url_size ) AND filesize( $upgrade_file_name ) != $file_url_size ) ) {
@@ -645,16 +653,31 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 											$handle = @fopen('http://www.timetrex.com/'. URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_launch_stage2' ), 'pre_install.php'), 'r');
 											@fclose($handle);
 
+											$global_class_map['TTUUID'] = 'core/TTUUID.class.php'; //Need to manually map the TTUUID class as it may be required by autoloaded classes in this process.
+
 											//Run separate process to finish stage2 of installer so it can be run with the new scripts.
 											//This allows us more flexibility if an error occurs to finish the install or have the latest version correct problems.
 											echo "Launching Stage 2...\n";
 											sleep(5);
 											$command = $php_cli .' '. __FILE__ .' --config '. CONFIG_FILE .' --stage2';
+
+											//Pass along force argument if it was originally supplied.
+											if ( $full_force == TRUE ) {
+												$command .= ' -ff';
+											} elseif ( $force == TRUE ) {
+												$command .= ' -f';
+											}
+
+											Debug::Text('Stage2 Command: '. $command, __FILE__, __LINE__, __METHOD__, 10);
 											system( $command, $exit_code );
 											if ( $exit_code == 0 ) {
 												Debug::Text('Stage2 success!', __FILE__, __LINE__, __METHOD__, 10);
 
 												echo "Upgrade successfull!\n";
+
+												//Since the --stage2 SQL upgrade is performed in a different process, we have to manually turn UUIDs on for this process before calling any other SQL query like setAutoUpgradeFailed( 0 )
+												global $PRIMARY_KEY_IS_UUID;
+												$PRIMARY_KEY_IS_UUID = TRUE;
 
 												setAutoUpgradeFailed( 0 ); //Clear auto_upgrade_failed setting if it isn't already.
 												CLIExit(0);

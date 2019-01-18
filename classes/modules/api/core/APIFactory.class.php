@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -55,6 +55,9 @@ abstract class APIFactory {
 
 	protected $progress_bar_obj = NULL;
 
+	/**
+	 * APIFactory constructor.
+	 */
 	function __construct() {
 		global $current_company, $current_user, $current_user_prefs;
 
@@ -66,6 +69,9 @@ abstract class APIFactory {
 		return TRUE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getProtocolVersion() {
 		if ( isset($_GET['v']) AND $_GET['v'] != '' ) {
 			return (int)$_GET['v'];	 //1=Initial, 2=Always return detailed
@@ -75,12 +81,21 @@ abstract class APIFactory {
 	}
 
 	//Returns the AMF messageID for each individual call.
+
+	/**
+	 * @return bool|null
+	 */
 	function getAMFMessageID() {
 		if ( $this->AMF_message_id != NULL ) {
 			return $this->AMF_message_id;
 		}
 		return FALSE;
 	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
 	function setAMFMessageID( $id ) {
 		if ( $id != '' ) {
 			global $amf_message_id; //Make this global so Debug() class can reference it on Shutdown()
@@ -91,24 +106,39 @@ abstract class APIFactory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|CompanyFactory
+	 */
 	function getCurrentCompanyObject() {
 		if ( is_object($this->current_company) ) {
 			return $this->current_company;
 		}
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|UserFactory
+	 */
 	function getCurrentUserObject() {
 		if ( is_object($this->current_user) ) {
 			return $this->current_user;
 		}
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|UserPreferenceFactory
+	 */
 	function getCurrentUserPreferenceObject() {
 		if ( is_object($this->current_user_prefs) ) {
 			return $this->current_user_prefs;
 		}
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|null|Permission
+	 */
 	function getPermissionObject() {
 		if ( is_object($this->permission) ) {
 			return $this->permission;
@@ -116,6 +146,9 @@ abstract class APIFactory {
 		return FALSE;
 	}
 
+	/**
+	 * @return null|ProgressBar
+	 */
 	function getProgressBarObject() {
 		if	( !is_object( $this->progress_bar_obj ) ) {
 			$this->progress_bar_obj = new ProgressBar();
@@ -124,6 +157,10 @@ abstract class APIFactory {
 		return $this->progress_bar_obj;
 	}
 
+	/**
+	 * @param object $lf
+	 * @return bool
+	 */
 	function setPagerObject( $lf ) {
 		if	( is_object( $lf ) ) {
 			$this->pager_obj = new Pager($lf);
@@ -131,6 +168,10 @@ abstract class APIFactory {
 
 		return TRUE;
 	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getPagerData() {
 		if ( is_object( $this->pager_obj ) ) {
 			return $this->pager_obj->getPageVariables();
@@ -141,6 +182,10 @@ abstract class APIFactory {
 
 	//Allow storing the main class object persistently in memory, so we can build up other variables to help out things like getOptions()
 	//Mainly used for the APIReport class.
+	/**
+	 * @param object $obj
+	 * @return bool
+	 */
 	function setMainClassObject( $obj ) {
 		if ( is_object( $obj ) ) {
 			$this->main_class_obj =	$obj;
@@ -149,6 +194,10 @@ abstract class APIFactory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return string
+	 */
 	function getMainClassObject() {
 		if ( !is_object( $this->main_class_obj ) ) {
 			$this->main_class_obj = new $this->main_class;
@@ -156,10 +205,13 @@ abstract class APIFactory {
 		} else {
 			return $this->main_class_obj;
 		}
-
-		return FALSE;
 	}
 
+	/**
+	 * @param array $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
 	function initializeFilterAndPager( $data, $disable_paging = FALSE ) {
 		//If $data is not an array, it will trigger PHP errors, so force it that way and report an error so we can troubleshoot if needed.
 		//This will avoid the PHP fatal errors that look like the below, but it doesn't actually fix the root cause, which is currently unknown.
@@ -195,6 +247,11 @@ abstract class APIFactory {
 
 	//In cases where data can be displayed in just a list_view (dropdown boxes), ie: branch, department, job, task in In/Out punch view
 	//restrict the dropdown box to just a subset of columns, so not all data is shown.
+	/**
+	 * @param array $filter_columns
+	 * @param array $allowed_columns
+	 * @return array|null
+	 */
 	function handlePermissionFilterColumns( $filter_columns, $allowed_columns ) {
 		//Always allow these columns to be returned.
 		$allowed_columns['id'] = TRUE;
@@ -218,6 +275,10 @@ abstract class APIFactory {
 		return $retarr;
 	}
 
+	/**
+	 * @param array $data
+	 * @return mixed
+	 */
 	function convertToSingleRecord( $data ) {
 		if ( isset($data[0]) AND !isset($data[1]) ) {
 			return $data[0];
@@ -225,16 +286,27 @@ abstract class APIFactory {
 			return $data;
 		}
 	}
+
+	/**
+	 * @param array $data
+	 * @return array
+	 */
 	function convertToMultipleRecords( $data ) {
 		if ( isset($data[0]) AND is_array($data[0]) ) {
 			$retarr = array(
-							'data' => $data,
-							'total_records' => count($data)
+							//'data' => $data,
+							//'total_records' => count($data)
+							//Switch to an array that is compatible with list() rather than extract() as it allows IDEs to better inspect code.
+							$data,
+							count($data)
 							);
 		} else {
 			$retarr = array(
-							'data' => array( 0 => $data ),
-							'total_records' => 1
+							//'data' => array( 0 => $data ),
+							//'total_records' => 1
+							//Switch to an array that is compatible with list() rather than extract() as it allows IDEs to better inspect code.
+							array( 0 => $data ),
+							1
 							);
 		}
 
@@ -245,9 +317,10 @@ abstract class APIFactory {
 
 	/**
 	 * downloaded a result_set as a csv.
-	 * @param $format
-	 * @param $file_name
-	 * @param $result
+	 * @param string $format
+	 * @param string $file_name
+	 * @param array $result
+	 * @param array $filter_columns
 	 * @return array|bool
 	 */
 	function exportRecords( $format, $file_name, $result, $filter_columns ) {
@@ -273,10 +346,16 @@ abstract class APIFactory {
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
 
+	/**
+	 * @return string
+	 */
 	function getNextInsertID() {
 		return $this->getMainClassObject()->getNextInsertId();
 	}
 
+	/**
+	 * @return array
+	 */
 	function getPermissionChildren() {
 		return $this->getPermissionObject()->getPermissionHierarchyChildren( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId() );
 		/*
@@ -297,6 +376,16 @@ abstract class APIFactory {
 	//		 The above will require too many changes, just add two more variables at the end, as it will only really be used by API->get*() functions.
 	//FIXME: Use a requestHandler() to handle all input requests, so we can parse out things like validate_only, ignore_warning (for user acknowledgable warnings) and handling all parameter parsing in a central place.
 	//		 static function returnHandler( $retval = TRUE, $code = FALSE, $description = FALSE, $details = FALSE, $validator_stats = FALSE, $user_generic_status_batch_id = FALSE, $request = FALSE, $pager = FALSE ) {
+	/**
+	 * @param bool $retval
+	 * @param bool $code
+	 * @param bool $description
+	 * @param bool $details
+	 * @param bool $validator_stats
+	 * @param bool $user_generic_status_batch_id
+	 * @param bool $request_data
+	 * @return array|bool
+	 */
 	function returnHandler( $retval = TRUE, $code = FALSE, $description = FALSE, $details = FALSE, $validator_stats = FALSE, $user_generic_status_batch_id = FALSE, $request_data = FALSE ) {
 		if ( $this->getProtocolVersion() == 1 ) {
 			if ( $retval === FALSE OR ( $retval === TRUE AND $code !== FALSE ) OR ( $user_generic_status_batch_id !== FALSE ) ) {
@@ -396,6 +485,11 @@ abstract class APIFactory {
 			return $retarr;
 		}
 	}
+
+	/**
+	 * @param mixed $retarr
+	 * @return mixed
+	 */
 	function stripReturnHandler( $retarr ) {
 		if ( isset($retarr['api_retval']) ) {
 			return $retarr['api_retval'];
@@ -405,6 +499,12 @@ abstract class APIFactory {
 	}
 
 	//Bridge to main class getOptions factory.
+
+	/**
+	 * @param bool $name
+	 * @param string|int $parent
+	 * @return array|bool
+	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name != '' ) {
 			if ( method_exists($this->getMainClassObject(), 'getOptions') ) {
@@ -420,12 +520,23 @@ abstract class APIFactory {
 	}
 
 	//Bridge to main class getVariableToFunctionMap factory.
+
+	/**
+	 * @param string $name
+	 * @param string|int $parent
+	 * @return array
+	 */
 	function getVariableToFunctionMap( $name, $parent = NULL ) {
 		return $this->getMainClassObject()->getVariableToFunctionMap($name, $parent);
 	}
 
 	//Take a API ReturnHandler array and pulls out the Validation errors/warnings to be merged back into another Validator
 	//This is useful for calling one API function from another one when their are sub-classes.
+	/**
+	 * @param $api_retarr
+	 * @param bool $validator_obj
+	 * @return bool|Validator
+	 */
 	function convertAPIReturnHandlerToValidatorObject( $api_retarr, $validator_obj = FALSE ) {
 		if ( is_object( $validator_obj ) ) {
 			$validator = $validator_obj;
@@ -460,6 +571,12 @@ abstract class APIFactory {
 		return $validator;
 	}
 
+	/**
+	 * @param string $primary_validator UUID
+	 * @param string $secondary_validator UUID
+	 * @param bool $tertiary_validator
+	 * @return array|bool
+	 */
 	function setValidationArray( $primary_validator, $secondary_validator, $tertiary_validator = FALSE ) {
 		//Handle primary validator first
 		$validator = array();
@@ -517,6 +634,13 @@ abstract class APIFactory {
 	}
 
 
+	/**
+	 * @param object|bool $validator
+	 * @param array $validator_stats
+	 * @param int $key
+	 * @param array|bool $save_result
+	 * @return array
+	 */
 	function handleRecordValidationResults( $validator, $validator_stats, $key, $save_result ) {
 		if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
 			if ( $validator_stats['total_records'] == 1 ) {

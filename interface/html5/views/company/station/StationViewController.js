@@ -1,6 +1,11 @@
 StationViewController = BaseViewController.extend( {
 	el: '#station_view_container',
 
+	_required_files: {
+		10: ["APIStation", "APIUserGroup", "APIUserPreference", "APIBranch", "APIDepartment"],
+		20: ["APIJob", "APIJobItem", ],
+	},
+
 	user_group_api: null,
 	status_array: null,
 	type_array: null,
@@ -18,8 +23,8 @@ StationViewController = BaseViewController.extend( {
 
 	user_preference_api: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'StationEditView.html';
 		this.permission_id = 'station';
 		this.viewId = 'Station';
@@ -230,7 +235,7 @@ StationViewController = BaseViewController.extend( {
 
 	onEmployeeGroupSelectionTypeChange: function() {
 
-		if ( parseInt( this.current_edit_record['user_group_selection_type_id'] ) === 10 ) {
+		if ( parseInt( this.current_edit_record['user_group_selection_type_id'] ) == 10 ) {
 			this.edit_view_ui_dic['group'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['user_group_selection_type_id'].setValue( this.current_edit_record['user_group_selection_type_id'] );
@@ -238,7 +243,7 @@ StationViewController = BaseViewController.extend( {
 		}
 	},
 	onBranchSelectionTypeChange: function() {
-		if ( parseInt( this.current_edit_record['branch_selection_type_id'] ) === 10 ) {
+		if ( parseInt( this.current_edit_record['branch_selection_type_id'] ) == 10 ) {
 
 			this.edit_view_ui_dic['branch'].setEnabled( false );
 		} else {
@@ -247,7 +252,7 @@ StationViewController = BaseViewController.extend( {
 		}
 	},
 	onDepartmentSelectionTypeChange: function() {
-		if ( parseInt( this.current_edit_record['department_selection_type_id'] ) === 10 ) {
+		if ( parseInt( this.current_edit_record['department_selection_type_id'] ) == 10 ) {
 			this.edit_view_ui_dic['department'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['department_selection_type_id'].setValue( this.current_edit_record['department_selection_type_id'] );
@@ -256,19 +261,19 @@ StationViewController = BaseViewController.extend( {
 	},
 
 	onTypeChange: function() {
-		if ( parseInt( this.current_edit_record['type_id'] ) === 100 ||
-			parseInt( this.current_edit_record['type_id'] ) === 150 ||
-			parseInt( this.current_edit_record['type_id'] ) === 28 ||
-			parseInt( this.current_edit_record['type_id'] ) === 65 ) {
+		if ( parseInt( this.current_edit_record['type_id'] ) == 100 ||
+			parseInt( this.current_edit_record['type_id'] ) == 150 ||
+			parseInt( this.current_edit_record['type_id'] ) == 28 ||
+			parseInt( this.current_edit_record['type_id'] ) == 65 ) {
 
 			$( this.edit_view_tab.find( 'ul li' )[2] ).show();
 			var tab_2_label = this.edit_view.find( 'a[ref=tab_time_clock]' );
 
-			if ( parseInt( this.current_edit_record['type_id'] ) === 100 ||
-				parseInt( this.current_edit_record['type_id'] ) === 150 ) {
+			if ( parseInt( this.current_edit_record['type_id'] ) == 100 ||
+				parseInt( this.current_edit_record['type_id'] ) == 150 ) {
 				tab_2_label.text( $.i18n._( 'TimeClock' ) );
 
-				if ( parseInt( this.current_edit_record['type_id'] ) !== 150 ) {
+				if ( parseInt( this.current_edit_record['type_id'] ) != 150 ) {
 					this.attachElement( 'manual_command' );
 					this.attachElement( 'push_frequency' );
 					this.attachElement( 'partial_push_frequency' );
@@ -365,7 +370,7 @@ StationViewController = BaseViewController.extend( {
 			this.edit_view_ui_dic['manual_command'].setEnabled( false );
 			runButton.attr( 'disabled', true );
 		} else {
-			runButton.click( function() {
+			runButton.off('click').on('click', function() {
 				$this.onSaveAndContinue( true );
 			} );
 		}

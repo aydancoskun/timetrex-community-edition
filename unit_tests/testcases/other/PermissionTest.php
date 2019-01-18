@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -51,6 +51,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
+		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertGreaterThan( 0, $this->company_id );
 
@@ -65,7 +66,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->policy_ids['pay_formula_policy'][100] = $dd->createPayFormulaPolicy( $this->company_id, 100 ); //Reg 1.0x
 		$this->policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $this->policy_ids['pay_formula_policy'][100] ); //Regular
 
-		$this->user_id = $dd->createUser( $this->company_id, 100 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
@@ -246,16 +247,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 		//Create Supervisor Subordinates Only
 
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );
@@ -317,16 +318,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		//Create Supervisor Subordinates Only
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );
@@ -358,16 +359,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		//Create Supervisor Subordinates Only
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );
@@ -400,16 +401,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		//Create Supervisor Subordinates Only
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );
@@ -443,16 +444,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 		//Create Supervisor Subordinates Only
 
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );
@@ -484,16 +485,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		//Create Supervisor Subordinates Only
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );
@@ -527,16 +528,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		//Create Supervisor Subordinates Only
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );
@@ -593,16 +594,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		//Create Supervisor Subordinates Only
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );
@@ -640,7 +641,9 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 7, count($output_data) );
 		$this->assertArrayHasKey('employee_number', $output_data[0] );
 		$this->assertArrayHasKey('hourly_rate', $output_data[0] );
-		$this->assertEquals( 21.50, $output_data[0]['hourly_rate'] );
+		//$this->assertEquals( 21.50, $output_data[0]['hourly_rate'] );
+		$this->assertGreaterThanOrEqual( 21.00, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertLessThanOrEqual( 21.99, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[1] );
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[2] );
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[3] );
@@ -659,16 +662,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		//Create Supervisor Subordinates Only
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );
@@ -708,16 +711,22 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[0] );
 
 		$this->assertArrayHasKey('hourly_rate', $output_data[1] );
-		$this->assertEquals( 21.50, $output_data[1]['hourly_rate'] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[2] );
-		$this->assertEquals( 21.50, $output_data[2]['hourly_rate'] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[3] );
-		$this->assertEquals( 21.50, $output_data[3]['hourly_rate'] );
+		//$this->assertEquals( 21.50, $output_data[1]['hourly_rate'] );
+		$this->assertGreaterThanOrEqual( 21.00, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertLessThanOrEqual( 21.99, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
 
+		$this->assertArrayHasKey('hourly_rate', $output_data[2] );
+		//$this->assertEquals( 21.50, $output_data[2]['hourly_rate'] );
+		$this->assertGreaterThanOrEqual( 21.00, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertLessThanOrEqual( 21.99, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
+
+		$this->assertArrayHasKey('hourly_rate', $output_data[3] );
+		//$this->assertEquals( 21.50, $output_data[3]['hourly_rate'] );
+		$this->assertGreaterThanOrEqual( 21.00, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertLessThanOrEqual( 21.99, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[4] );
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[5] );
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[6] );
-
 
 		return TRUE;
 	}
@@ -730,16 +739,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		//Create Supervisor Subordinates Only
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );
@@ -777,13 +786,21 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 7, count($output_data) );
 		$this->assertArrayHasKey('employee_number', $output_data[0] );
 		$this->assertArrayHasKey('hourly_rate', $output_data[0] );
-		$this->assertEquals( 21.50, $output_data[0]['hourly_rate'] );
+		//$this->assertEquals( 21.50, $output_data[0]['hourly_rate'] );
+		$this->assertGreaterThanOrEqual( 21.00, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertLessThanOrEqual( 21.99, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertArrayHasKey('hourly_rate', $output_data[1] );
-		$this->assertEquals( 21.50, $output_data[1]['hourly_rate'] );
+		//$this->assertEquals( 21.50, $output_data[1]['hourly_rate'] );
+		$this->assertGreaterThanOrEqual( 21.00, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertLessThanOrEqual( 21.99, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertArrayHasKey('hourly_rate', $output_data[2] );
-		$this->assertEquals( 21.50, $output_data[2]['hourly_rate'] );
+		//$this->assertEquals( 21.50, $output_data[2]['hourly_rate'] );
+		$this->assertGreaterThanOrEqual( 21.00, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertLessThanOrEqual( 21.99, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertArrayHasKey('hourly_rate', $output_data[3] );
-		$this->assertEquals( 21.50, $output_data[3]['hourly_rate'] );
+		//$this->assertEquals( 21.50, $output_data[3]['hourly_rate'] );
+		$this->assertGreaterThanOrEqual( 21.00, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertLessThanOrEqual( 21.99, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
 
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[4] );
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[5] );
@@ -800,16 +817,16 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		//Create Supervisor Subordinates Only
-		$superior_user_id = $dd->createUser( $this->company_id, 10 );
+		$superior_user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		//Create Subordinates
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 20 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 21 );
-		$subordinate_user_ids[] = $dd->createUser( $this->company_id, 23 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21 );
+		$subordinate_user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 23 );
 
 		//Create non-subordinates.
-		$dd->createUser( $this->company_id, 24 );
-		$dd->createUser( $this->company_id, 25 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 24 );
+		$dd->createUser( $this->company_id, $this->legal_entity_id, 25 );
 
 		//Create authorization hierarchy
 		$hierarchy_control_id = $dd->createAuthorizationHierarchyControl( $this->company_id, $subordinate_user_ids );

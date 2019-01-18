@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,11 @@ class MessageFactory extends Factory {
 	protected $pk_sequence_name = 'message_id_seq'; //PK Sequence name
 	protected $obj_handler = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -105,35 +110,28 @@ class MessageFactory extends Factory {
 	}
 
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getParent() {
-		if ( isset($this->data['parent_id']) ) {
-			return (int)$this->data['parent_id'];
-		}
-
-		return FALSE;
-	}
-	function setParent($id) {
-		$id = trim($id);
-
-		if ( empty($id) ) {
-			$id = 0;
-		}
-
-		$mlf = TTnew( 'MessageListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'parent',
-															$mlf->getByID($id),
-															TTi18n::gettext('Parent is invalid')
-															) ) {
-			$this->data['parent_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'parent_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setParent( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' OR empty($value) ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'parent_id', $value );
+	}
+
+	/**
+	 * @return null|object
+	 */
 	function getObjectHandler() {
 		if ( is_object($this->obj_handler) ) {
 			return $this->obj_handler;
@@ -158,181 +156,134 @@ class MessageFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getObjectType() {
-		if ( isset($this->data['object_type_id']) ) {
-			return (int)$this->data['object_type_id'];
-		}
-
-		return FALSE;
-	}
-	function setObjectType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'object_type',
-											$type,
-											TTi18n::gettext('Object Type is invalid'),
-											$this->getOptions('type')) ) {
-
-			$this->data['object_type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'object_type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setObjectType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'object_type_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getObject() {
-		if ( isset($this->data['object_id']) ) {
-			return (int)$this->data['object_id'];
-		}
-
-		return FALSE;
-	}
-	function setObject($id) {
-		$id = trim($id);
-
-		if ( $this->Validator->isResultSetWithRows(	'object',
-													$this->getObjectHandler()->getByID($id),
-													TTi18n::gettext('Object ID is invalid')
-													) ) {
-			$this->data['object_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'object_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setObject( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'object_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getPriority() {
-		if ( isset($this->data['priority_id']) ) {
-			return (int)$this->data['priority_id'];
-		}
-
-		return FALSE;
-	}
-	function setPriority($priority = NULL) {
-		$priority = trim($priority);
-
-		if ( empty($priority) ) {
-			$priority = 50;
-		}
-
-		if ( $this->Validator->inArrayKey(	'priority',
-											$priority,
-											TTi18n::gettext('Invalid Priority'),
-											$this->getOptions('priority')) ) {
-
-			$this->data['priority_id'] = $priority;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'priority_id' );
 	}
 
+	/**
+	 * @param null $value
+	 * @return bool
+	 */
+	function setPriority( $value = NULL) {
+		$value = (int)trim($value);
+		if ( empty($value) ) {
+			$value = 50;
+		}
+		return $this->setGenericDataValue( 'priority_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->setStatusDate();
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		$this->setStatusDate();
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getStatusDate() {
-		if ( isset($this->data['status_date']) ) {
-			return $this->data['status_date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_date' );
 	}
-	function setStatusDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setStatusDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ($value == NULL) {
+			$value = TTDate::getTime();
 		}
-
-		if	(	$this->Validator->isDate(		'status_date',
-												$epoch,
-												TTi18n::gettext('Incorrect Date')) ) {
-
-			$this->data['status_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'status_date', $value );
 
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getSubject() {
-		if ( isset($this->data['subject']) ) {
-			return $this->data['subject'];
-		}
-
-		return FALSE;
-	}
-	function setSubject($text) {
-		$text = trim($text);
-
-		if	(	strlen($text) == 0
-				OR
-				$this->Validator->isLength(		'subject',
-												$text,
-												TTi18n::gettext('Invalid Subject length'),
-												2,
-												100) ) {
-
-			$this->data['subject'] = $text;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'subject' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSubject( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'subject', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getBody() {
-		if ( isset($this->data['body']) ) {
-			return $this->data['body'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'body' );
 	}
-	function setBody($text) {
-		$text = trim($text);
 
-		if	(	$this->Validator->isLength(		'body',
-												$text,
-												TTi18n::gettext('Invalid Body length'),
-												2, //Allow the word: "ok", or "done" to at least be a response.
-												1024) ) {
-
-			$this->data['body'] = $text;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setBody( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'body', $value );
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function isAck() {
 		if ($this->getRequireAck() == TRUE AND $this->getAckDate() == '' ) {
 			return FALSE;
@@ -341,21 +292,34 @@ class MessageFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getRequireAck() {
-		return $this->fromBool( $this->data['require_ack'] );
-	}
-	function setRequireAck($bool) {
-		$this->data['require_ack'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'require_ack' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setRequireAck( $value) {
+		return $this->setGenericDataValue( 'require_ack', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getAck() {
-		return $this->fromBool( $this->data['ack'] );
+		return $this->fromBool( $this->getGenericDataValue( 'ack' ) );
 	}
-	function setAck($bool) {
-		$this->data['ack'] = $this->toBool($bool);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAck( $value) {
+		$this->setGenericDataValue( 'ack', $this->toBool($value) );
 		if ( $this->getAck() == TRUE ) {
 			$this->setAckDate();
 			$this->setAckBy();
@@ -364,68 +328,56 @@ class MessageFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getAckDate() {
-		if ( isset($this->data['ack_date']) ) {
-			return $this->data['ack_date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'ack_date' );
 	}
-	function setAckDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setAckDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+
+		if ($value == NULL) {
+			$value = TTDate::getTime();
 		}
-
-		if	(	$this->Validator->isDate(		'ack_date',
-												$epoch,
-												TTi18n::gettext('Invalid Acknowledge Date') ) ) {
-
-			$this->data['ack_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ack_date', $value );
 
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getAckBy() {
-		if ( isset($this->data['ack_by']) ) {
-			return $this->data['ack_by'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'ack_by' );
 	}
-	function setAckBy($id = NULL) {
-		$id = trim($id);
 
-		if ( empty($id) ) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setAckBy( $value = NULL) {
+		$value = trim($value);
+
+		if ( empty($value) ) {
 			global $current_user;
 
 			if ( is_object($current_user) ) {
-				$id = $current_user->getID();
+				$value = $current_user->getID();
 			} else {
 				return FALSE;
 			}
 		}
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'ack_by',
-													$ulf->getByID($id),
-													TTi18n::gettext('Incorrect User')
-													) ) {
-
-			$this->data['ack_by'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ack_by', $value );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getEmailMessageAddresses() {
 		$olf = $this->getObjectHandler();
 		if ( is_object( $olf ) ) {
@@ -439,7 +391,7 @@ class MessageFactory extends Factory {
 					case 5:
 					case 100:
 						Debug::Text('Email Object Type... Parent ID: '. $this->getParent(), __FILE__, __LINE__, __METHOD__, 10);
-						if ( $this->getParent() == 0 ) {
+						if ( $this->getParent() == TTUUID::getZeroID() ) {
 							$user_ids[] = $obj->getId();
 						} else {
 							$mlf = TTnew( 'MessageListFactory' );
@@ -470,7 +422,7 @@ class MessageFactory extends Factory {
 
 						//Only alert direct supervisor to request at this point. Because we need to take into account
 						//if the request was authorized or not to determine if we should email the next higher level in the hierarchy.
-						if ( $this->getParent() == 0 ) {
+						if ( $this->getParent() == TTUUID::getZeroID() ) {
 							//Get direct parent in hierarchy.
 							$u_obj = $obj->getUserObject();
 
@@ -532,6 +484,9 @@ class MessageFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function emailMessage() {
 		Debug::Text('emailMessage: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -606,6 +561,85 @@ class MessageFactory extends Factory {
 		return TRUE; //Always return true
 	}
 
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Parent
+		if ( $this->getParent() != TTUUID::getZeroID() ) {
+			$mlf = TTnew( 'MessageListFactory' );
+			$this->Validator->isResultSetWithRows(	'parent',
+															$mlf->getByID($this->getParent()),
+															TTi18n::gettext('Parent is invalid')
+														);
+		}
+		// Object Type
+		$this->Validator->inArrayKey(	'object_type',
+												$this->getObjectType(),
+												TTi18n::gettext('Object Type is invalid'),
+												$this->getOptions('type')
+											);
+		// Object ID
+		$this->Validator->isResultSetWithRows(	'object',
+														$this->getObjectHandler()->getByID($this->getObject()),
+														TTi18n::gettext('Object ID is invalid')
+													);
+		// Priority
+		$this->Validator->inArrayKey(	'priority',
+												$this->getPriority(),
+												TTi18n::gettext('Invalid Priority'),
+												$this->getOptions('priority')
+											);
+		// Status
+		$this->Validator->inArrayKey(	'status',
+												$this->getStatus(),
+												TTi18n::gettext('Incorrect Status'),
+												$this->getOptions('status')
+											);
+		// Date
+		$this->Validator->isDate(		'status_date',
+												$this->getStatusDate(),
+												TTi18n::gettext('Incorrect Date')
+											);
+		// Subject
+		if ( $this->getSubject() != '' ) {
+			$this->Validator->isLength(		'subject',
+													$this->getSubject(),
+													TTi18n::gettext('Invalid Subject length'),
+													2,
+													100
+												);
+		}
+		// Body
+		$this->Validator->isLength(		'body',
+												$this->getBody(),
+												TTi18n::gettext('Invalid Body length'),
+												2, //Allow the word: "ok", or "done" to at least be a response.
+												1024
+											);
+		// Acknowledge Date
+		$this->Validator->isDate(		'ack_date',
+												$this->getAckDate(),
+												TTi18n::gettext('Invalid Acknowledge Date')
+											);
+		// User
+		$ulf = TTnew( 'UserListFactory' );
+		$this->Validator->isResultSetWithRows(	'ack_by',
+														$ulf->getByID($this->getAckBy()),
+														TTi18n::gettext('Incorrect User')
+													);
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		//Only email message notifications when they are not deleted and UNREAD still. Other it may email when a message is marked as read as well.
 		//Don't email messages when they are being deleted.

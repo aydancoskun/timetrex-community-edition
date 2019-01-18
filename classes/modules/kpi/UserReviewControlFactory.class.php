@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,12 @@ class UserReviewControlFactory extends Factory {
 	protected $table = 'user_review_control';
 	protected $pk_sequence_name = 'user_review_control_id_seq'; //PK Sequence name
 	protected $user_obj = NULL;
+
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -129,6 +135,10 @@ class UserReviewControlFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -156,304 +166,324 @@ class UserReviewControlFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
-	function setUser($id) {
-		$id = trim($id);
-		$ulf = TTnew( 'UserListFactory' );
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
 		//$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
-		if ( $this->Validator->isResultSetWithRows(	'user_id',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid employee')
-															) ) {
-				$this->data['user_id'] = $id;
-
-				return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getReviewerUser() {
-		if ( isset($this->data['reviewer_user_id']) ) {
-			return (int)$this->data['reviewer_user_id'];
-		}
-		return FALSE;
-	}
-	function setReviewerUser($id) {
-		$id = trim($id);
-		$ulf = TTnew( 'UserListFactory' );
-		if ( $this->Validator->isResultSetWithRows( 'reviewer_user_id',
-													$ulf->getByID($id),
-													TTi18n::gettext('Invalid reviewer')
-													) ) {
-			$this->data['reviewer_user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'reviewer_user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setReviewerUser( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'reviewer_user_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getType() {
-		if ( isset($this->data['type_id']) ) {
-			return (int)$this->data['type_id'];
-		}
-
-		return FALSE;
-	}
-	function setType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'type',
-											$type,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
-			$this->data['type_id'] = $type;
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'type_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getTerm() {
-		if ( isset($this->data['term_id']) ) {
-			return (int)$this->data['term_id'];
-		}
-
-		return FALSE;
-	}
-	function setTerm($value) {
-		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'term',
-											$value,
-											TTi18n::gettext('Incorrect Terms'),
-											$this->getOptions('term')) ) {
-			$this->data['term_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'term_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTerm( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'term_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getSeverity() {
-		if ( isset($this->data['severity_id']) ) {
-			return (int)$this->data['severity_id'];
-		}
-
-		return FALSE;
-	}
-	function setSeverity($value) {
-		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'severity',
-											$value,
-											TTi18n::gettext('Incorrect Severity'),
-											$this->getOptions('severity')) ) {
-
-			$this->data['severity_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'severity_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSeverity( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'severity_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-			$this->data['status_id'] = $status;
-			Debug::Text('Setting status_id data...	  ' . $this->data['status_id'], __FILE__, __LINE__, __METHOD__, 10);
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		Debug::Text('Setting status_id data...	  ' . $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getStartDate() {
-		if ( isset($this->data['start_date']) ) {
-			return (int)$this->data['start_date'];
-		}
-
-		return FALSE;
-	}
-	function setStartDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ($epoch == '') {
-			$epoch == NULL;
-		}
-
-		if	(	$epoch == NULL
-				OR
-				$this->Validator->isDate(		'start_date',
-												$epoch,
-												TTi18n::gettext('Incorrect start date'))
-		) {
-
-			$this->data['start_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'start_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setStartDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'start_date', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getEndDate() {
-		if ( isset($this->data['end_date']) ) {
-			return (int)$this->data['end_date'];
-		}
-
-		return FALSE;
-	}
-	function setEndDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-		if ($epoch == '') {
-			$epoch == NULL;
-		}
-		if (  $epoch == NULL
-				OR
-			$this->Validator->isDate(		'end_date',
-												$epoch,
-												TTi18n::gettext('Incorrect end date'))
-		) {
-
-			$this->data['end_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'end_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setEndDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'end_date', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getDueDate() {
-		if ( isset($this->data['due_date']) ) {
-			return (int)$this->data['due_date'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'due_date' );
 	}
 
-	function setDueDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-		if ( $epoch == '' ) {
-			$epoch == NULL;
-		}
-		if	(	$epoch == NULL
-				OR
-				$this->Validator->isDate(		'due_date',
-												$epoch,
-												TTi18n::gettext('Incorrect due date'))
-		) {
-
-			$this->data['due_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setDueDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'due_date', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getRating() {
-		if ( isset($this->data['rating']) ) {
-			return $this->data['rating'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'rating' );
 	}
 
-	function setRating($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setRating( $value) {
 		$value = trim($value);
-
 		if ( $value == '' ) {
 			$value = NULL;
 		}
-		if ( (
-				$value == NULL
-				OR
-				( $this->Validator->isNumeric(	'rating',
-													$value,
-													TTi18n::gettext('Rating must only be digits')
-										)
-				AND
-				$this->Validator->isLengthAfterDecimal( 'rating',
-														$value,
-														TTi18n::gettext('Invalid Rating'),
-														0,
-														2
-										) ) )
-			) {
-			$this->data['rating'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'rating', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getNote() {
-		if ( isset($this->data['note']) ) {
-			return $this->data['note'];
-		}
-		return FALSE;
-	}
-	function setNote($note) {
-		$note = trim($note);
-
-		if (	$note == ''
-				OR
-				$this->Validator->isLength( 'note',
-											$note,
-											TTi18n::gettext('Note is too short or too long'),
-											2, 2048 )  ) {
-				$this->data['note'] = $note;
-				return	TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'note' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setNote( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'note', $value );
+	}
+
+	/**
+	 * @return bool|string
+	 */
 	function getTag() {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
-		if ( isset($this->tmp_data['tags']) ) {
-			return $this->tmp_data['tags'];
-		} elseif ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getCompany() > 0 AND $this->getID() > 0	) {
+		$value = $this->getGenericTempDataValue( 'tags' );
+		if ( $value !== FALSE ) {
+			return $value;
+		} elseif ( is_object( $this->getUserObject() )
+			AND TTUUID::isUUID( $this->getUserObject()->getCompany() ) AND $this->getUserObject()->getCompany() != TTUUID::getZeroID() AND $this->getUserObject()->getCompany() != TTUUID::getNotExistID()
+			AND TTUUID::isUUID( $this->getID() ) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID()
+		) {
 			return CompanyGenericTagMapListFactory::getStringByCompanyIDAndObjectTypeIDAndObjectID( $this->getUserObject()->getCompany(), 320, $this->getID() );
 		}
 		return FALSE;
 	}
-	function setTag( $tags ) {
-		$tags = trim($tags);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTag( $value ) {
+		$value = trim($value);
 		//Save the tags in temporary memory to be committed in postSave()
-		$this->tmp_data['tags'] = $tags;
-
-		return TRUE;
+		return $this->setGenericTempDataValue( 'tags', $value );
 	}
 
-
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+
+		// employee
+		$ulf = TTnew( 'UserListFactory' );
+		$this->Validator->isResultSetWithRows(	'user_id',
+														$ulf->getByID($this->getUser()),
+														TTi18n::gettext('Invalid employee')
+													);
+		// reviewer
+		$ulf = TTnew( 'UserListFactory' );
+		$this->Validator->isResultSetWithRows( 'reviewer_user_id',
+														$ulf->getByID($this->getReviewerUser()),
+														TTi18n::gettext('Invalid reviewer')
+													);
+		// Type
+		$this->Validator->inArrayKey(	'type',
+												$this->getType(),
+												TTi18n::gettext('Incorrect Type'),
+												$this->getOptions('type')
+											);
+		// Terms
+		$this->Validator->inArrayKey(	'term',
+												$this->getTerm(),
+												TTi18n::gettext('Incorrect Terms'),
+												$this->getOptions('term')
+											);
+		// Severity
+		$this->Validator->inArrayKey(	'severity',
+												$this->getSeverity(),
+												TTi18n::gettext('Incorrect Severity'),
+												$this->getOptions('severity')
+											);
+		// Status
+		$this->Validator->inArrayKey(	'status',
+												$this->getStatus(),
+												TTi18n::gettext('Incorrect Status'),
+												$this->getOptions('status')
+											);
+		// start date
+		if ( $this->getStartDate() != '' ) {
+			$this->Validator->isDate(		'start_date',
+													$this->getStartDate(),
+													TTi18n::gettext('Incorrect start date')
+												);
+		}
+		// end date
+		if ( $this->getEndDate() != '' ) {
+			$this->Validator->isDate(		'end_date',
+													$this->getEndDate(),
+													TTi18n::gettext('Incorrect end date')
+												);
+		}
+		// due date
+		if ( $this->getDueDate() != '' ) {
+			$this->Validator->isDate(		'due_date',
+													$this->getDueDate(),
+													TTi18n::gettext('Incorrect due date')
+												);
+		}
+
+		// Rating
+		if ( $this->getRating() != NULL ) {
+			$this->Validator->isNumeric(	'rating',
+													$this->getRating(),
+													TTi18n::gettext('Rating must only be digits')
+												);
+			if ( $this->Validator->isError('rating') == FALSE ) {
+				$this->Validator->isLengthAfterDecimal( 'rating',
+																$this->getRating(),
+																TTi18n::gettext('Invalid Rating'),
+																0,
+																2
+															);
+			}
+		}
+		// Note
+		if ( $this->getNote() != '' ) {
+			$this->Validator->isLength( 'note',
+												$this->getNote(),
+												TTi18n::gettext('Note is too short or too long'),
+												2, 2048
+											);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 
 		$start_date = $this->getStartDate();
 		$end_date = $this->getEndDate();
@@ -475,11 +505,16 @@ class UserReviewControlFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
-
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
@@ -492,6 +527,10 @@ class UserReviewControlFactory extends Factory {
 
 	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		Debug::Arr($data, 'setObjectFromArray...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array( $data ) ) {
@@ -526,6 +565,11 @@ class UserReviewControlFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -577,6 +621,10 @@ class UserReviewControlFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Employee Review') .' - '. TTi18n::getText('Type') .': '. Option::getByKey($this->getType(), $this->getOptions('type')) .', '. TTi18n::getText('Status') .': '. Option::getByKey($this->getStatus(), $this->getOptions('status')), NULL, $this->getTable(), $this );
 	}

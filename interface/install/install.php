@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -61,8 +61,8 @@ echo " 3...";
 
 echo " 4...";
 $redir = TRUE;
-if ( version_compare( PHP_VERSION, '5.3.0', '<') == 1 ) {
-	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.3</b> or greater!<br><br>\n";
+if ( version_compare( PHP_VERSION, '5.4.0', '<') == 1 ) {
+	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.4</b> or greater!<br><br>\n";
 	$redir = FALSE;
 }
 if ( version_compare( PHP_VERSION, '7.0.99', '>') == 1 ) {

@@ -1,6 +1,7 @@
 RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	el: '#recurring_schedule_template_control_view_container',
 
+	_required_files: ['APIRecurringScheduleTemplateControl', 'APISchedule', 'APIRecurringScheduleTemplate'],
 	sub_document_view_controller: null,
 
 	document_object_type_id: null,
@@ -11,8 +12,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 	recurring_schedule_status_array: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'RecurringScheduleTemplateControlEditView.html';
 		this.permission_id = 'recurring_schedule_template';
 		this.viewId = 'RecurringScheduleTemplateControl';
@@ -259,6 +260,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		if ( !data ) {
 			this.getDefaultData( index );
 		} else {
+
+			var row_id = (data.id && this.parent_controller.current_edit_record.id) ? data.id : TTUUID.generateUUID();
 			var row = this.getRowRender(); //Get Row render
 			var render = this.getRender(); //get render, should be a table
 			var widgets = {}; //Save each row's widgets
@@ -271,7 +274,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			form_item_input.setValue( data.week ? data.week : 1 );
 			widgets[form_item_input.getField()] = form_item_input;
 			row.children().eq( 0 ).append( form_item_input );
-			form_item_input.attr( 'recurring_schedule_template_id', (data.id && this.parent_controller.current_edit_record.id) ? data.id : '' );
+			form_item_input.attr( 'recurring_schedule_template_id', row_id );
 
 			this.setWidgetEnableBaseOnParentController( form_item_input );
 
@@ -286,9 +289,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			widgets[form_item_input.getField()] = form_item_input;
 
 			form_item_input.bind( 'formItemChange', function( e, target ) {
-				if ( target.getValue() === 10 ) {
+				if ( target.getValue() == 10 ) {
 					widgets['absence_policy_id'].hide();
-				} else if ( target.getValue() === 20 ) {
+				} else if ( target.getValue() == 20 ) {
 					widgets['absence_policy_id'].show();
 				}
 			} )
@@ -392,7 +395,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				$this.parent_controller.onRowChanges( rows_widgets )
 			} )
 
-			widgets[form_item_input.getField()] = form_item_input;
+			widgets[form_item_input.getField()+row_id] = form_item_input;
+			this.parent_controller.edit_view_ui_validation_field_dic[form_item_input.getField()+row_id] = form_item_input;
 
 			divContainer1.append( label_1 );
 			divContainer1.append( form_item_input );
@@ -413,7 +417,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				$this.parent_controller.onRowChanges( rows_widgets )
 			} );
 
-			widgets[form_item_input.getField()] = form_item_input;
+			widgets[form_item_input.getField()+row_id] = form_item_input;
+			this.parent_controller.edit_view_ui_validation_field_dic[form_item_input.getField()+row_id] = form_item_input;
 
 			divContainer2.append( label_2 );
 			divContainer2.append( form_item_input );
@@ -477,7 +482,12 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				field: 'branch_id',
 				custom_first_label: Global.default_item
 			} );
-			form_item_input.setValue( data.branch_id ? data.branch_id : '' );
+
+			if ( data.branch_id.toUpperCase() === TTUUID.not_exist_id.toUpperCase() ) {
+				form_item_input.set_default_value = true;
+			} else {
+				form_item_input.setValue(data.branch_id ? data.branch_id : '');
+			}
 			widgets[form_item_input.getField()] = form_item_input;
 
 			divContainer1.append( label_1 );
@@ -604,9 +614,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				row.find( '.control-icon' ).hide();
 			}
 
-			if ( widgets.status_id.getValue() === 10 ) {
+			if ( widgets.status_id.getValue() == 10 ) {
 				widgets.absence_policy_id.css( 'display', 'none' );
-			} else if ( widgets.status_id.getValue() === 20 ) {
+			} else if ( widgets.status_id.getValue() == 20 ) {
 				widgets.absence_policy_id.css( 'display', 'block' );
 			}
 
@@ -617,15 +627,18 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	},
 
 	onRowChanges: function( row_widgets ) {
+		var recurring_schedule_template_id = row_widgets.week.attr( 'recurring_schedule_template_id' );
 
-		var startTime = row_widgets.start_time.getValue();
-		var endTime = row_widgets.end_time.getValue();
+		var startTime = row_widgets['start_time' + recurring_schedule_template_id].getValue();
+		var endTime = row_widgets['end_time' + recurring_schedule_template_id].getValue();
+
 		var schedulePolicyId = row_widgets.schedule_policy_id.getValue();
 
 		if ( startTime !== '' && endTime !== '' && schedulePolicyId !== '' ) {
 			var total_time = this.schedule_api.getScheduleTotalTime( startTime, endTime, schedulePolicyId, {async: false} ).getResult();
 			row_widgets.total_time.setValue( Global.secondToHHMMSS( total_time ) );
 		}
+		this.validate();
 	},
 
 	insideEditorGetValue: function( current_edit_item_id ) {
@@ -636,6 +649,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		for ( var i = 0; i < len; i++ ) {
 			var row = this.rows_widgets_array[i];
+
+			var recurring_schedule_template_id = row.week.attr( 'recurring_schedule_template_id' );
 
 			var data = {
 				tue: row.tue.getValue(),
@@ -648,13 +663,13 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				week: row.week.getValue(),
 				thu: row.thu.getValue(),
 				department_id: row.department_id.getValue(),
-				start_time: row.start_time.getValue(),
+				start_time: row[ 'start_time' + recurring_schedule_template_id ].getValue(),
 				branch_id: row.branch_id.getValue(),
-				end_time: row.end_time.getValue(),
+				end_time: row[ 'end_time' + recurring_schedule_template_id ].getValue(),
 				sun: row.sun.getValue(),
 				sat: row.sat.getValue(),
 				wed: row.wed.getValue(),
-				id: row.week.attr( 'recurring_schedule_template_id' )
+				id: recurring_schedule_template_id
 			};
 
 			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
@@ -696,7 +711,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	insideEditorRemoveRow: function( row ) {
 		var index = row[0].rowIndex - 1;
 		var remove_id = this.rows_widgets_array[index].week.attr( 'recurring_schedule_template_id' );
-		if ( remove_id > 0 ) {
+        if ( TTUUID.isUUID( remove_id ) && remove_id != TTUUID.zero_id && remove_id != TTUUID.not_exist_id ) {
 			this.delete_ids.push( remove_id );
 		}
 		row.remove();
@@ -890,42 +905,6 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
-	},
-
-	initSubDocumentView: function() {
-		var $this = this;
-
-		if ( this.sub_document_view_controller ) {
-			this.sub_document_view_controller.buildContextMenu( true );
-			this.sub_document_view_controller.setDefaultMenu();
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.initData();
-			return;
-		}
-
-		Global.loadScript( 'views/document/DocumentViewController.js', function() {
-			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
-			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
-			Global.trackView( 'Sub' + 'Document' + 'View' );
-			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_document_view_controller = subViewController;
-			$this.sub_document_view_controller.parent_key = 'object_id';
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.document_object_type_id = $this.document_object_type_id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.parent_view_controller = $this;
-			$this.sub_document_view_controller.initData();
-		}
-
 	},
 
 	buildContextMenuModels: function() {
@@ -1411,5 +1390,4 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		}
 
 	}
-
 } );

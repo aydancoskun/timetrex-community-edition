@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -36,9 +36,17 @@
 
 
 //This class extends the built-in PHP SoapClient class to use CURL with proper timeout periods.
+
+/**
+ * Class SoapClientTimeout
+ */
 class SoapClientTimeout extends SoapClient {
 	private $timeout;
 
+	/**
+	 * @param $timeout
+	 * @throws Exception
+	 */
 	public function __setTimeout( $timeout ) {
 		if ( !is_int($timeout) AND !is_null($timeout) ) {
 			throw new Exception("Invalid timeout value");
@@ -46,6 +54,15 @@ class SoapClientTimeout extends SoapClient {
 		$this->timeout = $timeout;
 	}
 
+	/**
+	 * @param string $request
+	 * @param string $location
+	 * @param string $action
+	 * @param int $version
+	 * @param bool $one_way
+	 * @return mixed|string
+	 * @throws Exception
+	 */
 	public function __doRequest( $request, $location, $action, $version, $one_way = FALSE ) {
 		if ( !$this->timeout ) {
 			// Call via parent because we require no timeout

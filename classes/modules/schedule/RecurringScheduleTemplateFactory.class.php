@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class RecurringScheduleTemplateFactory extends Factory {
 	protected $schedule_policy_obj = NULL;
 	protected $recurring_schedule_template_control_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -117,6 +122,10 @@ class RecurringScheduleTemplateFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -145,230 +154,235 @@ class RecurringScheduleTemplateFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getRecurringScheduleTemplateControlObject() {
 		return $this->getGenericObject( 'RecurringScheduleTemplateControlListFactory', $this->getRecurringScheduleTemplateControl(), 'recurring_schedule_template_control_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getSchedulePolicyObject() {
 		return $this->getGenericObject( 'SchedulePolicyListFactory', $this->getSchedulePolicyID(), 'schedule_policy_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getRecurringScheduleTemplateControl() {
-		if ( isset($this->data['recurring_schedule_template_control_id']) ) {
-			return (int)$this->data['recurring_schedule_template_control_id'];
-		}
-
-		return FALSE;
-	}
-	function setRecurringScheduleTemplateControl($id) {
-		$id = trim($id);
-
-		$rstclf = TTnew( 'RecurringScheduleTemplateControlListFactory' );
-
-		if ( $id != 0
-				OR $this->Validator->isResultSetWithRows(	'recurring_schedule_template_control',
-													$rstclf->getByID($id),
-													TTi18n::gettext('Recurring Schedule Template Control is invalid')
-													) ) {
-
-			$this->data['recurring_schedule_template_control_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'recurring_schedule_template_control_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setRecurringScheduleTemplateControl( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'recurring_schedule_template_control_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getWeek() {
-		if ( isset($this->data['week']) ) {
-			return (int)$this->data['week'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'week' );
 	}
-	function setWeek($int) {
-		$int = trim($int);
 
-		if	(	$int > 0
-				AND
-				$this->Validator->isNumeric(		'week'.$this->getLabelID(),
-													$int,
-													TTi18n::gettext('Week is invalid')) ) {
-			$this->data['week'] = $int;
-
-			return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setWeek( $value ) {
+		$value = (int)trim($value);
+		if ( $value > 0 ) {
+			return $this->setGenericDataValue( 'week', $value );
 		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getSun() {
-		if ( isset($this->data['sun']) ) {
-			return $this->fromBool( $this->data['sun'] );
-		}
-
-		return FALSE;
-	}
-	function setSun($bool) {
-		$this->data['sun'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'sun' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSun( $value ) {
+		return $this->setGenericDataValue( 'sun', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getMon() {
-		if ( isset($this->data['mon']) ) {
-			return $this->fromBool( $this->data['mon'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'mon' ) );
 	}
-	function setMon($bool) {
-		$this->data['mon'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMon( $value) {
+		return $this->setGenericDataValue( 'mon', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getTue() {
-		if ( isset($this->data['tue']) ) {
-			return $this->fromBool( $this->data['tue'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'tue' ) );
 	}
-	function setTue($bool) {
-		$this->data['tue'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTue( $value) {
+		return $this->setGenericDataValue( 'tue', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getWed() {
-		if ( isset($this->data['wed']) ) {
-			return $this->fromBool( $this->data['wed'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'wed' ) );
 	}
-	function setWed($bool) {
-		$this->data['wed'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setWed( $value) {
+		return $this->setGenericDataValue( 'wed', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getThu() {
-		if ( isset($this->data['thu']) ) {
-			return $this->fromBool( $this->data['thu'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'thu' ) );
 	}
-	function setThu($bool) {
-		$this->data['thu'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setThu( $value) {
+		return $this->setGenericDataValue( 'thu', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getFri() {
-		if ( isset($this->data['fri']) ) {
-			return $this->fromBool( $this->data['fri'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'fri' ) );
 	}
-	function setFri($bool) {
-		$this->data['fri'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setFri( $value) {
+		return $this->setGenericDataValue( 'fri', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getSat() {
-		if ( isset($this->data['sat']) ) {
-			return $this->fromBool( $this->data['sat'] );
-		}
-
-		return FALSE;
-	}
-	function setSat($bool) {
-		$this->data['sat'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'sat' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSat( $value) {
+		return $this->setGenericDataValue( 'sat', $this->toBool($value) );
+	}
+
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getStartTime( $raw = FALSE ) {
-		if ( isset($this->data['start_time']) ) {
+		$value = $this->getGenericDataValue( 'start_time' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE) {
-				return $this->data['start_time'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['start_time'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setStartTime($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		Debug::Text('Start Time: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
-
-		if	(	$this->Validator->isDate(		'start_time'.$this->getLabelID(),
-												$epoch,
-												TTi18n::gettext('Incorrect In time'))
-
-			) {
-
-			$this->data['start_time'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setStartTime( $value ) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		Debug::Text('Start Time: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'start_time', $value );
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getEndTime( $raw = FALSE ) {
-		if ( isset($this->data['end_time']) ) {
+		$value = $this->getGenericDataValue( 'end_time' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE) {
-				return $this->data['end_time'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['end_time'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setEndTime($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if	(	$this->Validator->isDate(		'end_time'.$this->getLabelID(),
-												$epoch,
-												TTi18n::gettext('Incorrect Out time'))
-
-			) {
-
-			$this->data['end_time'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setEndTime( $value ) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'end_time', $value );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getTotalTime() {
 		$sf = TTnew( 'ScheduleFactory' );
 
@@ -384,213 +398,151 @@ class RecurringScheduleTemplateFactory extends Factory {
 		return $sf->getTotalTime();
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getSchedulePolicyID() {
-		if ( isset($this->data['schedule_policy_id']) ) {
-			return (int)$this->data['schedule_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setSchedulePolicyID($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$splf = TTnew( 'SchedulePolicyListFactory' );
-
-		if ( $id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'schedule_policy',
-														$splf->getByID($id),
-														TTi18n::gettext('Schedule Policy is invalid')
-													) ) {
-
-			$this->data['schedule_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'schedule_policy_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setSchedulePolicyID( $value ) {
+		$value = TTUUID::castUUID( $value );
+		if ( $value == NULL OR $value == '' OR empty($value) ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'schedule_policy_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getBranch() {
-		if ( isset($this->data['branch_id']) ) {
-			return (int)$this->data['branch_id'];
-		}
-
-		return FALSE;
-	}
-	function setBranch($id) {
-		$id = trim($id);
-
-		$blf = TTnew( 'BranchListFactory' );
-
-		Debug::text('Branch ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-
-		//-1 is for user default branch.
-		if (  $id == 0 OR $id == -1
-				OR
-				$this->Validator->isResultSetWithRows(	'branch',
-														$blf->getByID($id),
-														TTi18n::gettext('Branch does not exist')
-														) ) {
-			$this->data['branch_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'branch_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setBranch( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::text('Branch ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		//not_exist_id is for user default branch.
+		return $this->setGenericDataValue( 'branch_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDepartment() {
-		if ( isset($this->data['department_id']) ) {
-			return (int)$this->data['department_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'department_id' );
 	}
-	function setDepartment($id) {
-		$id = trim($id);
 
-		$dlf = TTnew( 'DepartmentListFactory' );
-
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setDepartment( $value ) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
 		//-1 is for user default department.
-		if (  $id == 0 OR $id == -1
-				OR
-				$this->Validator->isResultSetWithRows(	'department',
-														$dlf->getByID($id),
-														TTi18n::gettext('Department does not exist')
-														) ) {
-			$this->data['department_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'department_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getJob() {
-		if ( isset($this->data['job_id']) ) {
-			return (int)$this->data['job_id'];
-		}
-
-		return FALSE;
-	}
-	function setJob($id) {
-		$id = trim($id);
-
-		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
-			$id = 0;
-		}
-
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$jlf = TTnew( 'JobListFactory' );
-		} else {
-			$id = 0;
-		}
-
-		if (  $id == 0 OR $id == -1
-				OR
-				$this->Validator->isResultSetWithRows(	'job',
-														$jlf->getByID($id),
-														TTi18n::gettext('Job does not exist')
-														) ) {
-			$this->data['job_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'job_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setJob( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+			$value = TTUUID::getZeroID();
+
+		}
+		return $this->setGenericDataValue( 'job_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getJobItem() {
-		if ( isset($this->data['job_item_id']) ) {
-			return (int)$this->data['job_item_id'];
-		}
-
-		return FALSE;
-	}
-	function setJobItem($id) {
-		$id = trim($id);
-
-		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
-			$id = 0;
-		}
-
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$jilf = TTnew( 'JobItemListFactory' );
-		} else {
-			$id = 0;
-		}
-
-		if (  $id == 0 OR $id == -1
-				OR
-				$this->Validator->isResultSetWithRows(	'job_item',
-														$jilf->getByID($id),
-														TTi18n::gettext('Job Item does not exist')
-														) ) {
-			$this->data['job_item_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'job_item_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setJobItem( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'job_item_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getAbsencePolicyID() {
-		if ( isset($this->data['absence_policy_id']) ) {
-			return (int)$this->data['absence_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setAbsencePolicyID($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = 0;
-		}
-
-		$aplf = TTnew( 'AbsencePolicyListFactory' );
-
-		if (	$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'absence_policy',
-														$aplf->getByID($id),
-														TTi18n::gettext('Invalid Absence Policy ID')
-														) ) {
-			$this->data['absence_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'absence_policy_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setAbsencePolicyID( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' OR empty($value) ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'absence_policy_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getOpenShiftMultiplier() {
-		if ( isset($this->data['open_shift_multiplier']) ) {
-			return $this->data['open_shift_multiplier'];
-		}
-
-		return FALSE;
-	}
-	function setOpenShiftMultiplier($int) {
-		$int = (int)trim($int);
-
-		if (	$this->Validator->isNumeric(	'open_shift_multiplier',
-												$int,
-												TTi18n::gettext('Invalid Open Shift Multiplier')
-														) ) {
-			$this->data['open_shift_multiplier'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'open_shift_multiplier' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOpenShiftMultiplier( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'open_shift_multiplier', $value );
+	}
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
 	function isActiveShiftDay( $epoch ) {
 		$day_of_week = strtolower( date('D', $epoch) );
 		if ( isset( $this->data[$day_of_week] ) ) {
@@ -601,6 +553,18 @@ class RecurringScheduleTemplateFactory extends Factory {
 	}
 
 	//function getShifts( $start_date, $end_date, &$holiday_data = array(), &$branch_options = array(), &$department_options = array(), &$n, &$shifts = array(), &$shifts_index = array(), $open_shift_conflict_index = array(), $permission_children_ids = NULL ) {
+
+	/**
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $holiday_data
+	 * @param $n
+	 * @param array $shifts
+	 * @param array $shifts_index
+	 * @param array $open_shift_conflict_index
+	 * @param string $permission_children_ids UUID
+	 * @return array|bool
+	 */
 	function getShifts( $start_date, $end_date, &$holiday_data = array(), &$n, &$shifts = array(), &$shifts_index = array(), $open_shift_conflict_index = array(), $permission_children_ids = NULL ) {
 		//Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $start_date) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -614,6 +578,8 @@ class RecurringScheduleTemplateFactory extends Factory {
 		if ( $recurring_schedule_control_start_date == ''  ) {
 			return FALSE;
 		}
+
+		$ppsf = TTnew('PayPeriodScheduleFactory');
 
 		//Get week of start_date
 		$start_date_week = TTDate::getBeginWeekEpoch( $recurring_schedule_control_start_date, 0 ); //Start week on Sunday to match Recurring Schedule.
@@ -654,13 +620,14 @@ class RecurringScheduleTemplateFactory extends Factory {
 						//Debug::text('    Schedule spans day boundary, bumping endtime to next day...', __FILE__, __LINE__, __METHOD__, 10);
 					}
 
-					$iso_date_stamp = TTDate::getISODateStamp( PayPeriodScheduleFactory::getShiftAssignedDate( $start_time, $end_time, $this->getColumn('shift_assigned_day_id') ) );
+					$iso_date_stamp = TTDate::getISODateStamp( $ppsf->getShiftAssignedDate( $start_time, $end_time, $this->getColumn('shift_assigned_day_id') ) );
 
 					$open_shift_multiplier = ( $this->getColumn('user_id') == 0 ) ? ( ( getTTProductEdition() == TT_PRODUCT_COMMUNITY OR $this->getRecurringScheduleTemplateControlObject()->getCompanyObject()->getProductEdition() == 10 ) ) ? 0 : $this->getOpenShiftMultiplier() : 1;
 					//Debug::text('Open Shift Multiplier: '. $open_shift_multiplier, __FILE__, __LINE__, __METHOD__, 10);
 					for( $x = 0; $x < $open_shift_multiplier; $x++ ) {
 						//Check all non-OPEN shifts for conflicts.
-						if ( $this->getColumn('user_id') > 0 AND isset($shifts_index[$iso_date_stamp][$this->getColumn('user_id')]) ) {
+						if ( TTUUID::isUUID( $this->getColumn('user_id') ) AND $this->getColumn('user_id') != TTUUID::getZeroID() AND $this->getColumn('user_id') != TTUUID::getNotExistID()
+								AND isset($shifts_index[$iso_date_stamp][$this->getColumn('user_id')]) ) {
 							//User has previous recurring schedule shifts, check for overlap.
 							//Loop over each employees shift for this day and check for conflicts
 							foreach( $shifts_index[$iso_date_stamp][$this->getColumn('user_id')] as $shift_key ) {
@@ -676,7 +643,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 								}
 							}
 							unset($shift_key);
-						} elseif ( $this->getColumn('user_id') == 0 AND isset($shifts_index[$iso_date_stamp]) ) {
+						} elseif ( $this->getColumn('user_id') == TTUUID::getZeroID() AND isset($shifts_index[$iso_date_stamp]) ) {
 							//Debug::text('	   Checking OPEN shift conflicts... Date: '. $iso_date_stamp, __FILE__, __LINE__, __METHOD__, 10);
 
 							//Check all OPEN shifts for conflicts.
@@ -693,7 +660,11 @@ class RecurringScheduleTemplateFactory extends Factory {
 									$tmp_start_date = ( defined('TIMETREX_API') ) ? TTDate::parseDateTime($shifts[$iso_date_stamp][$shift_key]['start_date']) : $shifts[$iso_date_stamp][$shift_key]['start_date'];
 									$tmp_end_date = ( defined('TIMETREX_API') ) ? TTDate::parseDateTime($shifts[$iso_date_stamp][$shift_key]['end_date']) : $shifts[$iso_date_stamp][$shift_key]['end_date'];
 									if (
-											( $shifts[$iso_date_stamp][$shift_key]['user_id'] > 0 OR ( isset($shifts[$iso_date_stamp][$shift_key]['id']) AND $shifts[$iso_date_stamp][$shift_key]['id'] > 0 ) )
+											(
+													( TTUUID::isUUID( $shifts[$iso_date_stamp][$shift_key]['user_id'] ) AND $shifts[$iso_date_stamp][$shift_key]['user_id'] != TTUUID::getZeroID() AND $shifts[$iso_date_stamp][$shift_key]['user_id'] != TTUUID::getNotExistID() )
+													OR ( isset($shifts[$iso_date_stamp][$shift_key]['id']) AND
+															TTUUID::isUUID( $shifts[$iso_date_stamp][$shift_key]['id'] ) AND $shifts[$iso_date_stamp][$shift_key]['id'] != TTUUID::getNotExistID() AND $shifts[$iso_date_stamp][$shift_key]['id'] != TTUUID::getZeroID()
+															) )
 											AND ( !isset($open_shift_conflict_index['open'][$this->getID()][$shift_key]) AND ( isset( $shifts[$iso_date_stamp][$shift_key]['id'] ) AND !isset($open_shift_conflict_index['scheduled'][$shifts[$iso_date_stamp][$shift_key]['id']]) ) )
 											AND $this->getColumn('schedule_branch_id') == $shifts[$iso_date_stamp][$shift_key]['branch_id']
 											AND $this->getColumn('schedule_department_id') == $shifts[$iso_date_stamp][$shift_key]['department_id']
@@ -736,23 +707,24 @@ class RecurringScheduleTemplateFactory extends Factory {
 						//Debug::text('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start Date: '. TTDate::getDate('DATE+TIME', $start_time) .' End Date: '. TTDate::getDate('DATE+TIME', $end_time), __FILE__, __LINE__, __METHOD__, 10);
 
 						$status_id = (int)$this->getColumn('status_id');
-						$absence_policy_id = (int)$this->getColumn('absence_policy_id');
-						
-						if ( isset($holiday_data[(int)$this->getColumn('policy_group_id')][$iso_date_stamp]) ) {
+						$absence_policy_id = TTUUID::castUUID($this->getColumn('absence_policy_id'));
+						$policy_group_id = TTUUID::castUUID($this->getColumn('policy_group_id'));
+
+						if ( isset($holiday_data[$policy_group_id][$iso_date_stamp]) ) {
 							//We have to assume they are eligible, because we really won't know
 							//if they will have worked enough days or not. We could assume they
 							//work whatever their schedule is, but chances are they will be eligible then anyways.
 							//Debug::text('&nbsp;&nbsp;Found Holiday on this day...', __FILE__, __LINE__, __METHOD__, 10);
-							$status_id = $holiday_data[(int)$this->getColumn('policy_group_id')][$iso_date_stamp]['status_id'];
-							if ( isset($holiday_data[(int)$this->getColumn('policy_group_id')][$iso_date_stamp]['absence_policy_id']) ) {
-								$absence_policy_id = (int)$holiday_data[(int)$this->getColumn('policy_group_id')][$iso_date_stamp]['absence_policy_id'];
+							$status_id = (int)$holiday_data[$policy_group_id][$iso_date_stamp]['status_id'];
+							if ( isset($holiday_data[$policy_group_id][$iso_date_stamp]['absence_policy_id']) ) {
+								$absence_policy_id = TTUUID::castUUID($holiday_data[$policy_group_id][$iso_date_stamp]['absence_policy_id']);
 							}
 						}
 
 						/*
 						$hourly_rate = Misc::MoneyFormat( $this->getColumn('user_wage_hourly_rate'), FALSE );
 
-						if ( $absence_policy_id > 0
+						if ( TTUUID::isUUID($absence_policy_id) AND $absence_policy_id != TTUUID::getZeroID() AND $absence_policy_id != TTUUID::getNotExistID()
 								AND in_array( $absence_policy_type_id, $absence_policy_paid_type_options ) == FALSE ) {
 							//UnPaid Absence.
 							$total_time_wage = Misc::MoneyFormat(0);
@@ -765,7 +737,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 						//$shifts[$iso_date_stamp][$this->getColumn('user_id').$start_time] = array(
 						$shifts[$iso_date_stamp][$n] = array(
 															'pay_period_id' => FALSE,
-															'user_id' => (int)$this->getColumn('user_id'),
+															'user_id' => TTUUID::castUUID( $this->getColumn('user_id') ),
 															//'user_created_by' => (int)$this->getColumn('user_created_by'),
 															//'user_full_name' => ( $this->getColumn('user_id') > 0 ) ? Misc::getFullName( $this->getColumn('first_name'), NULL, $this->getColumn('last_name'), FALSE, FALSE ) : TTi18n::getText('OPEN'),
 															//'user_full_name' => Misc::getFullName( $this->getColumn('first_name'), NULL, $this->getColumn('last_name'), FALSE, FALSE ),
@@ -819,21 +791,21 @@ class RecurringScheduleTemplateFactory extends Factory {
 
 															'note' => FALSE,
 
-															'schedule_policy_id' => (int)$this->getSchedulePolicyID(),
-															'absence_policy_id' => (int)$absence_policy_id,
+															'schedule_policy_id' => TTUUID::castUUID($this->getSchedulePolicyID()),
+															'absence_policy_id' => $absence_policy_id,
 															//'absence_policy' => $absence_policy,
 															//'branch_id' => (int)$this->getColumn('schedule_branch_id'),
 															//'branch' => $this->getColumn('schedule_branch'),
 															//'department_id' => (int)$this->getColumn('schedule_department_id'),
 															//'department' => $this->getColumn('schedule_department'),
 
-															'created_by_id' => (int)$this->getColumn('recurring_schedule_control_created_by'), //Whoever created the recurring schedule control object is consider the owner.
+															'created_by_id' => $this->getColumn('recurring_schedule_control_created_by'), //Whoever created the recurring schedule control object is consider the owner.
 															'created_date' => $this->getCreatedDate(),
 															'updated_date' => $this->getUpdatedDate(),
 															);
 
 						//Make sure we add in permission columns.
-						$this->getPermissionColumns( $shifts[$iso_date_stamp][$n], (int)$this->getColumn('user_id'), $this->getColumn('recurring_schedule_control_created_by'), $permission_children_ids );
+						$this->getPermissionColumns( $shifts[$iso_date_stamp][$n], TTUUID::castUUID( $this->getColumn('user_id') ), $this->getColumn('recurring_schedule_control_created_by'), $permission_children_ids );
 
 						//$shifts_index[$iso_date_stamp][$this->getColumn('user_id')][] = $this->getColumn('user_id').$start_time;
 						$shifts_index[$iso_date_stamp][$this->getColumn('user_id')][] = $n;
@@ -854,6 +826,10 @@ class RecurringScheduleTemplateFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -885,6 +861,10 @@ class RecurringScheduleTemplateFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		$data = array();
@@ -907,17 +887,6 @@ class RecurringScheduleTemplateFactory extends Factory {
 							//Need to include the raw_start_time, raw_end_time columns that are in EPOCH format so getShiftsByStartDateAndEndDate() can convert them as needed.
 							$data['raw_'.$variable] = $this->$function();
 							break;
-						case 'sun':
-						case 'mon':
-						case 'tue':
-						case 'wed':
-						case 'thu':
-						case 'fri':
-						case 'sat':
-							//For backwards compatibility, put all days inside the "days" array, AS WELL as in their own column for the API to use.
-							if ( method_exists( $this, $function ) ) {
-								$data['days'][$variable] = $this->$function();
-							}
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();
@@ -932,11 +901,22 @@ class RecurringScheduleTemplateFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
+		if ( $this->getStatus() == '' ) {
+			$this->setStatus(10); //Working
+		}
+
 		if ( $this->getWeek() == '' ) {
 			$this->setWeek(1);
 		}
-		
+
+		if ( $this->getOpenShiftMultiplier() == '' ) {
+			$this->setOpenShiftMultiplier(1);
+		}
+
 		if ( $this->getEndTime() < $this->getStartTime() ) {
 			Debug::Text('EndTime spans midnight boundary! Increase by 24hrs ', __FILE__, __LINE__, __METHOD__, 10);
 			$this->setEndTime( $this->getEndTime() + 86400 ); //End time spans midnight, add 24hrs.
@@ -949,7 +929,106 @@ class RecurringScheduleTemplateFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Recurring Schedule Template Control
+		if ( $this->getRecurringScheduleTemplateControl() == TTUUID::getZeroID() ) {
+			$rstclf = TTnew( 'RecurringScheduleTemplateControlListFactory' );
+			$this->Validator->isResultSetWithRows(	'recurring_schedule_template_control',
+															$rstclf->getByID($this->getRecurringScheduleTemplateControl()),
+															TTi18n::gettext('Recurring Schedule Template Control is invalid')
+														);
+		}
+		// Status
+		if ( $this->getStatus() != '' ) {
+			$this->Validator->inArrayKey( 'status',
+										  $this->getStatus(),
+										  TTi18n::gettext( 'Incorrect Status' ),
+										  $this->getOptions( 'status' )
+			);
+		}
+		// Week
+		if ( $this->getWeek() > 0 ) {
+			$this->Validator->isNumeric('week'.$this->getLabelID(),
+												$this->getWeek(),
+												TTi18n::gettext('Week is invalid')
+											);
+		}
+		// In time
+		$this->Validator->isDate(		'start_time'.$this->getLabelID(),
+												$this->getStartTime(),
+												TTi18n::gettext('Incorrect In time')
+											);
+		// Out time
+		$this->Validator->isDate(		'end_time'.$this->getLabelID(),
+												$this->getEndTime(),
+												TTi18n::gettext('Incorrect Out time')
+											);
+		// Schedule Policy
+		if ( $this->getSchedulePolicyID() != '' AND $this->getSchedulePolicyID() != TTUUID::getZeroID() ) {
+			$splf = TTnew( 'SchedulePolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'schedule_policy',
+															$splf->getByID($this->getSchedulePolicyID()),
+															TTi18n::gettext('Schedule Policy is invalid')
+														);
+		}
+		// Branch
+		if ( $this->getBranch() != '' AND $this->getBranch() != TTUUID::getZeroID() AND $this->getBranch() != TTUUID::getNotExistID() ) {
+			$blf = TTnew( 'BranchListFactory' );
+			$this->Validator->isResultSetWithRows(	'branch',
+															$blf->getByID($this->getBranch()),
+															TTi18n::gettext('Branch does not exist')
+														);
+		}
+		// Department
+		if ( $this->getDepartment() != '' AND $this->getDepartment() != TTUUID::getZeroID() AND $this->getDepartment() != TTUUID::getNotExistID() ) {
+			$dlf = TTnew( 'DepartmentListFactory' );
+			$this->Validator->isResultSetWithRows(	'department',
+															$dlf->getByID($this->getDepartment()),
+															TTi18n::gettext('Department does not exist')
+														);
+		}
+		// Job
+		if ( $this->getJob() != '' AND $this->getJob() != TTUUID::getZeroID() AND $this->getJob() != TTUUID::getNotExistID() ) {
+			$jlf = TTnew( 'JobListFactory' );
+			$this->Validator->isResultSetWithRows(	'job',
+															$jlf->getByID($this->getJob()),
+															TTi18n::gettext('Job does not exist')
+														);
+		}
+		// Job Item
+		if ( $this->getJobItem() != '' AND $this->getJobItem() != TTUUID::getZeroID() AND $this->getJobItem() != TTUUID::getNotExistID() ) {
+			$jilf = TTnew( 'JobItemListFactory' );
+			$this->Validator->isResultSetWithRows(	'job_item',
+															$jilf->getByID($this->getJobItem()),
+															TTi18n::gettext('Job Item does not exist')
+														);
+		}
+		// Absence Policy ID
+		if ( $this->getAbsencePolicyID()  != '' AND $this->getAbsencePolicyID() != TTUUID::getZeroID() ) {
+			$aplf = TTnew( 'AbsencePolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'absence_policy',
+															$aplf->getByID($this->getAbsencePolicyID()),
+															TTi18n::gettext('Invalid Absence Policy ID')
+														);
+		}
+		// Open Shift Multiplier
+		if ( $this->getOpenShiftMultiplier() != '' ) {
+			$this->Validator->isNumeric( 'open_shift_multiplier',
+										 $this->getOpenShiftMultiplier(),
+										 TTi18n::gettext( 'Invalid Open Shift Multiplier' )
+			);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( $this->getRecurringScheduleTemplateControl() == FALSE ) {
 			$this->Validator->isTRUE(		'recurring_schedule_template_control_id',
 											FALSE,
@@ -959,6 +1038,10 @@ class RecurringScheduleTemplateFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getRecurringScheduleTemplateControl(), $log_action, TTi18n::getText('Recurring Schedule Week').': '. $this->getWeek() .' '. TTi18n::getText('from') .' '. TTDate::getDate('TIME', $this->getStartTime() ) .' - '. TTDate::getDate('TIME', $this->getEndTime() ), NULL, $this->getTable(), $this );
 	}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -50,20 +50,28 @@ class CalculatePayStub extends PayStubFactory {
 	var $pay_stub_entry_account_link_obj = NULL;
 	var $pay_stub_entry_accounts_type_obj = NULL;
 
+	/**
+	 * @return mixed
+	 */
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
+			return $this->data['user_id'];
 		}
 	}
-	function setUser($id) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUser( $id) {
 		$id = trim($id);
 
 		$ulf = TTnew( 'UserListFactory' );
 
-		if ( $id == 0
+		if ( $id == TTUUID::getZeroID()
 				OR $this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
+															TTi18n::gettext('Invalid Employee')
 															) ) {
 			$this->data['user_id'] = $id;
 
@@ -73,15 +81,23 @@ class CalculatePayStub extends PayStubFactory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPayPeriod() {
 		if ( isset($this->data['pay_period_id']) ) {
-			return (int)$this->data['pay_period_id'];
+			return $this->data['pay_period_id'];
 		}
 
 		return FALSE;
 	}
-	function setPayPeriod($id) {
-		$id = trim($id);
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setPayPeriod( $id) {
+		$id = TTUUID::castUUID($id);
 
 		$pplf = TTnew( 'PayPeriodListFactory' );
 
@@ -97,6 +113,9 @@ class CalculatePayStub extends PayStubFactory {
 		return FALSE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getRun() {
 		if ( isset($this->run) ) {
 			return $this->run;
@@ -104,12 +123,20 @@ class CalculatePayStub extends PayStubFactory {
 
 		return 1;
 	}
-	function setRun($id) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setRun( $id) {
 		$this->run = (int)$id;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getType() {
 		if ( isset($this->type_id) ) {
 			return $this->type_id;
@@ -117,12 +144,21 @@ class CalculatePayStub extends PayStubFactory {
 
 		return 10; //Periodic
 	}
-	function setType($id) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setType( $id) {
 		$this->type_id = (int)$id;
 
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool
+	 */
 	function getTransactionDate( $raw = FALSE ) {
 		if ( isset($this->transaction_date) ) {
 			return $this->transaction_date;
@@ -130,7 +166,12 @@ class CalculatePayStub extends PayStubFactory {
 
 		return FALSE;
 	}
-	function setTransactionDate($epoch) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setTransactionDate( $epoch) {
 		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch != '' ) {
@@ -151,6 +192,9 @@ class CalculatePayStub extends PayStubFactory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnablePostTerminationCalculation() {
 		if ( isset($this->post_termination_calc) ) {
 			return $this->post_termination_calc;
@@ -158,12 +202,20 @@ class CalculatePayStub extends PayStubFactory {
 
 		return FALSE;
 	}
-	function setEnablePostTerminationCalculation($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnablePostTerminationCalculation( $bool) {
 		$this->post_termination_calc = (bool)$bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableCorrection() {
 		if ( isset($this->correction) ) {
 			return $this->correction;
@@ -171,12 +223,20 @@ class CalculatePayStub extends PayStubFactory {
 
 		return FALSE;
 	}
-	function setEnableCorrection($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableCorrection( $bool) {
 		$this->correction = (bool)$bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getUserObject() {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
@@ -194,6 +254,9 @@ class CalculatePayStub extends PayStubFactory {
 		}
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getPayStubEntryAccountLinkObject() {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
@@ -209,6 +272,9 @@ class CalculatePayStub extends PayStubFactory {
 		}
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getPayPeriodObject() {
 		if ( is_object($this->pay_period_obj) ) {
 			return $this->pay_period_obj;
@@ -226,6 +292,9 @@ class CalculatePayStub extends PayStubFactory {
 		}
 	}
 
+	/**
+	 * @return null
+	 */
 	function getPayPeriodScheduleObject() {
 		if ( is_object($this->pay_period_schedule_obj) ) {
 			return $this->pay_period_schedule_obj;
@@ -237,6 +306,9 @@ class CalculatePayStub extends PayStubFactory {
 		}
 	}
 
+	/**
+	 * @return null|Wage
+	 */
 	function getWageObject() {
 		if ( is_object($this->wage_obj) ) {
 			return $this->wage_obj;
@@ -248,6 +320,9 @@ class CalculatePayStub extends PayStubFactory {
 		}
 	}
 
+	/**
+	 * @return array|bool|null
+	 */
 	function getPayStubEntryAccountsTypeArray() {
 		if ( is_array($this->pay_stub_entry_accounts_type_obj) ) {
 			//Debug::text('Returning Cached data...', __FILE__, __LINE__, __METHOD__, 10);
@@ -265,20 +340,30 @@ class CalculatePayStub extends PayStubFactory {
 		}
 	}
 
+	/**
+	 * @param $type_order
+	 * @param $calculation_order
+	 * @param string $id UUID
+	 * @return int
+	 */
 	function getDeductionObjectSortValue( $type_order, $calculation_order, $id ) {
 		if ( PHP_INT_MAX == 2147483647 ) {
 			//32bit, can't handle using $id fields as well as it will exceed the largest int value.
 			//This can't exceed 9 digits in total.
-			$retval = (int)($type_order . str_pad( $calculation_order, 5, 0, STR_PAD_LEFT) . str_pad( substr( $id, -2), 2, 0, STR_PAD_LEFT));
+			$retval = (int)($type_order . str_pad( $calculation_order, 5, 0, STR_PAD_LEFT) . str_pad( substr( TTUUID::convertUUIDToInt($id), -2), 2, 0, STR_PAD_LEFT));
 		} else {
 			//This can't exceed 9223372036854775807 (19 digits)
-			$retval = (int)($type_order . str_pad( $calculation_order, 5, 0, STR_PAD_LEFT) . str_pad( substr( $id, -10), 10, 0, STR_PAD_LEFT));
+			$retval = (int)($type_order . str_pad( $calculation_order, 5, 0, STR_PAD_LEFT) . str_pad( substr( TTUUID::convertUUIDToInt($id), -10), 10, 0, STR_PAD_LEFT));
 		}
 		//Debug::text('Type Order: '. $type_order .' Calculation Order: '. $calculation_order .' Deduction Object Sort Value: '. $retval .' INT Max: '. PHP_INT_MAX, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
 
+	/**
+	 * @param object $obj
+	 * @return array|bool
+	 */
 	function getDeductionObjectArrayForSorting( $obj ) {
 		$type_map_arr = $this->getPayStubEntryAccountsTypeArray();
 		//Debug::Arr($type_map_arr, 'PS Account Type Map Array: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -379,6 +464,12 @@ class CalculatePayStub extends PayStubFactory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $udlf
+	 * @param $psalf
+	 * @param $uelf
+	 * @return array|bool
+	 */
 	function getOrderedDeductionAndPSAmendment( $udlf, $psalf, $uelf ) {
 		global $profiler;
 
@@ -458,17 +549,16 @@ class CalculatePayStub extends PayStubFactory {
 		return FALSE;
 	}
 
-	function calculate($epoch = NULL) {
+	/**
+	 * @return bool
+	 */
+	function calculate() {
 		if ( $this->getUserObject() == FALSE ) {
 			return FALSE;
 		}
 
 		if (  $this->getPayPeriodObject() == FALSE ) {
 			return FALSE;
-		}
-
-		if ( $epoch == NULL OR $epoch == '' ) {
-			$epoch = TTDate::getTime();
 		}
 
 		//Use User Termination Date instead of ROE.
@@ -665,11 +755,13 @@ class CalculatePayStub extends PayStubFactory {
 					if ( $data_arr['type'] == 'UserDeductionListFactory' ) {
 						$ud_obj = $data_arr['obj'];
 
+						//Ensure that the employee was hired before the end day of the pay period. Especially important if they are using Tax/Deductions to affect earnings to prevent the employee from being paid before their hire date.
 						//Determine if this deduction is valid based on start/end dates.
 						//Determine if this deduction is valid based on min/max length of service.
 						//Determine if this deduction is valid based on min/max user age.
 						//Determine if the Payroll Run Type matches.
-						if ( $ud_obj->getCompanyDeductionObject()->isActiveDate( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
+						if ( $this->getUserObject()->getHireDate() == '' OR ( TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) <= TTDate::getMiddleDayEpoch( $pay_stub->getPayPeriodObject()->getEndDate() ) )
+								AND $ud_obj->getCompanyDeductionObject()->isActiveDate( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->isActiveLengthOfService( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getPayPeriodObject()->getStartDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->isActiveUserAge( $this->getUserObject()->getBirthDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->inApplyFrequencyWindow( $pay_stub->getPayPeriodObject()->getStartDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getHireDate(), $this->getUserObject()->getTerminationDate(), $this->getUserObject()->getBirthDate() ) == TRUE
@@ -724,6 +816,11 @@ class CalculatePayStub extends PayStubFactory {
 
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
+
+		$pay_stub->setEnableProcessTransactions(TRUE);
+		$pay_stub->calculateDefaultTransactions();
+		//$pay_stub->processTransactions();
+
 		if ( $pay_stub->isValid() == TRUE ) {
 			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub->setEnableCalcYTD( TRUE ); //When recalculating old pay stubs in the middle of the year, we need to make sure YTD values are updated.

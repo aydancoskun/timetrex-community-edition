@@ -104,20 +104,20 @@ LocalCacheData.domain_name = '';
 
 LocalCacheData.fullUrlParameterStr = '';
 
+LocalCacheData.PayrollRemittanceAgencyEventWizard = null;
+
 LocalCacheData.setLocalCache = function( key, val, format ) {
 	if ( LocalCacheData.isSupportHTML5LocalCache ) {
-
 		if ( format === 'JSON' ) {
-
 			sessionStorage.setItem( key, JSON.stringify( val ) );
 		} else {
 			sessionStorage.setItem( key, val );
 		}
-
 	}
 
 	LocalCacheData[key] = val;
 };
+
 /**
  * BUG#2066
  * JavaScript was reporting: TypeError: Cannot read property 'product_edition_id' of null
@@ -334,8 +334,8 @@ LocalCacheData.cleanNecessaryCache =  function() {
 	//JS load Optimize
 	if ( LocalCacheData.loadViewRequiredJSReady ) {
 		if ( typeof ALayoutCache !== 'undefined' ) {
-			ALayoutCache.layout_dic = {};
-		}
+		ALayoutCache.layout_dic = {};
+	}
 	}
 	LocalCacheData.view_layout_cache = {};
 	LocalCacheData.result_cache = {};

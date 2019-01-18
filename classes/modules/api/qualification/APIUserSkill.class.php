@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIUserSkill extends APIFactory {
 	protected $main_class = 'UserSkillFactory';
 
+	/**
+	 * APIUserSkill constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APIUserSkill extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -76,7 +79,8 @@ class APIUserSkill extends APIFactory {
 	/**
 	 * Get user skill data for one or more skills.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getUserSkill( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('user_skill', 'enabled')
@@ -88,7 +92,7 @@ class APIUserSkill extends APIFactory {
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_skill', 'view' );
 
 		if ( isset($data['filter_data']['company_id'])
-				AND $data['filter_data']['company_id'] > 0
+				AND TTUUID::isUUID( $data['filter_data']['company_id'] ) AND $data['filter_data']['company_id'] != TTUUID::getZeroID() AND $data['filter_data']['company_id'] != TTUUID::getNotExistID()
 				AND ( $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'edit') ) ) {
 			$company_id = $data['filter_data']['company_id'];
 		} else {
@@ -121,6 +125,12 @@ class APIUserSkill extends APIFactory {
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
 
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
 	function exportUserSkill( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
 		$result = $this->stripReturnHandler( $this->getUserSkill( $data, $disable_paging ) );
 		return $this->exportRecords( $format, 'export_skill', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
@@ -147,7 +157,9 @@ class APIUserSkill extends APIFactory {
 	/**
 	 * Set skill data for one or more skills.
 	 * @param array $data skill data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setUserSkill( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -170,12 +182,12 @@ class APIUserSkill extends APIFactory {
 			$permission_children_ids = $this->getPermissionChildren();
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' Skills', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -183,7 +195,7 @@ class APIUserSkill extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserSkillListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get qualification object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -198,7 +210,7 @@ class APIUserSkill extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('user_skill', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
 									OR ( $this->getPermissionObject()->Check('user_skill', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -231,6 +243,8 @@ class APIUserSkill extends APIFactory {
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
 					$lf->setObjectFromArray( $row );
+					$lf->Validator->setValidateOnly( $validate_only );
+
 					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
@@ -270,10 +284,10 @@ class APIUserSkill extends APIFactory {
 	/**
 	 * Delete one or more skills.
 	 * @param array $data skill data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteUserSkill( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -292,7 +306,7 @@ class APIUserSkill extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -301,7 +315,7 @@ class APIUserSkill extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserSkillListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get qualification object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -311,7 +325,7 @@ class APIUserSkill extends APIFactory {
 						if ( $this->getPermissionObject()->Check('user_skill', 'delete')
 								OR ( $this->getPermissionObject()->Check('user_skill', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
 								OR ( $this->getPermissionObject()->Check('user_skill', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -366,7 +380,7 @@ class APIUserSkill extends APIFactory {
 	 * @return array
 	 */
 	function copyUserSkill( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -392,6 +406,11 @@ class APIUserSkill extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @param int $first_used_date EPOCH
+	 * @param int $last_used_date EPOCH
+	 * @return array|bool
+	 */
 	function calcExperience( $first_used_date, $last_used_date = NULL ) {
 		if ( $first_used_date == '' ) {
 			return FALSE;

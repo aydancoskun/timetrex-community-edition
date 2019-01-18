@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,11 @@ class HierarchyControlFactory extends Factory {
 	protected $table = 'hierarchy_control';
 	protected $pk_sequence_name = 'hierarchy_control_id_seq'; //PK Sequence name
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -93,6 +98,10 @@ class HierarchyControlFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -109,38 +118,38 @@ class HierarchyControlFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Invalid Company')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -158,58 +167,42 @@ class HierarchyControlFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim($name);
-
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is invalid'),
-											2, 250)
-				AND	$this->Validator->isTrue(	'name',
-												$this->isUniqueName($name),
-												TTi18n::gettext('Name is already in use')
-												)
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
-	}
-	function setDescription($description) {
-		$description = trim($description);
-
-		if (	$description == ''
-				OR $this->Validator->isLength(	'description',
-											$description,
-											TTi18n::gettext('Description is invalid'),
-											1, 250) ) {
-
-			$this->data['description'] = $description;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'description' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @return null|string
+	 */
 	function getObjectTypeDisplay() {
 		$object_type_ids = $this->getObjectType();
 		$object_types = $this->getOptions('short_object_type');
@@ -227,6 +220,9 @@ class HierarchyControlFactory extends Factory {
 		return NULL;
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getObjectType() {
 		$valid_object_type_ids = $this->getOptions('object_type');
 
@@ -247,7 +243,11 @@ class HierarchyControlFactory extends Factory {
 		return FALSE;
 	}
 
-	function setObjectType($ids) {
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setObjectType( $ids) {
 		if ( is_array($ids) AND count($ids) > 0 ) {
 			$tmp_ids = array();
 			Debug::Arr($ids, 'IDs: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -278,14 +278,14 @@ class HierarchyControlFactory extends Factory {
 
 			foreach ($ids as $id) {
 				if ( isset($ids) AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'HierarchyObjectTypeFactory' );
-					$f->setHierarchyControl( $this->getId() );
-					$f->setObjectType( $id );
+					$hotf = TTnew( 'HierarchyObjectTypeFactory' );
+					$hotf->setHierarchyControl( $this->getId() );
+					$hotf->setObjectType( $id );
 
 					if ($this->Validator->isTrue(		'object_type',
-														$f->Validator->isValid(),
+														$hotf->isValid(),
 														TTi18n::gettext('Object type is already assigned to another hierarchy'))) {
-						$f->save();
+						$hotf->save();
 					}
 				}
 			}
@@ -300,6 +300,9 @@ class HierarchyControlFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getUser() {
 		$hulf = TTnew( 'HierarchyUserListFactory' );
 		$hulf->getByHierarchyControlID( $this->getId() );
@@ -313,7 +316,12 @@ class HierarchyControlFactory extends Factory {
 
 		return FALSE;
 	}
-	function setUser($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setUser( $ids) {
 		if ( !is_array($ids) ) {
 			$ids = array($ids);
 		}
@@ -358,7 +366,7 @@ class HierarchyControlFactory extends Factory {
 						$obj = $ulf->getCurrent();
 
 						if ($this->Validator->isTrue(		'user',
-															$huf->Validator->isValid(),
+															$huf->isValid(),
 															TTi18n::gettext('Selected subordinate is invalid or already assigned to another hierarchy with the same objects').' ('. $obj->getFullName() .')' )
 							) {
 							$huf->save();
@@ -373,18 +381,64 @@ class HierarchyControlFactory extends Factory {
 		Debug::text('No User IDs to set.', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
+
+	/**
+	 * @return mixed
+	 */
 	function getTotalSubordinates() {
 		$hulf = TTnew( 'HierarchyUserListFactory' );
 		$hulf->getByHierarchyControlID( $this->getId() );
 		return $hulf->getRecordCount();
 	}
+
+	/**
+	 * @return mixed
+	 */
 	function getTotalSuperiors() {
 		$hllf = TTnew('HierarchyLevelListFactory');
 		$hllf->getByHierarchyControlId( $this->getID() );
 		return $hllf->getRecordCount();
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Invalid Company')
+													);
+		// Name
+		$this->Validator->isLength(	'name',
+											$this->getName(),
+											TTi18n::gettext('Name is invalid'),
+											2, 250
+										);
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(	'name',
+												$this->isUniqueName($this->getName()),
+												TTi18n::gettext('Name is already in use')
+											);
+		}
+		// Description
+		if ( $this->getDescription() != '' ) {
+			$this->Validator->isLength(	'description',
+												$this->getDescription(),
+												TTi18n::gettext('Description is invalid'),
+												1, 250
+											);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( $this->getName() == FALSE AND $this->Validator->hasError('name') == FALSE ) {
 			$this->Validator->isTrue(		'name',
 											FALSE,
@@ -420,10 +474,17 @@ class HierarchyControlFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -449,6 +510,10 @@ class HierarchyControlFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return mixed
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
@@ -479,6 +544,10 @@ class HierarchyControlFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Hierarchy'), NULL, $this->getTable(), $this );
 	}

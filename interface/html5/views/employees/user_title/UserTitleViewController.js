@@ -1,7 +1,10 @@
 UserTitleViewController = BaseViewController.extend( {
 	el: '#user_title_view_container',
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+
+	_required_files: ['APIUserTitle'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserTitleEditView.html';
 		this.permission_id = 'user';
 		this.viewId = 'UserTitle';

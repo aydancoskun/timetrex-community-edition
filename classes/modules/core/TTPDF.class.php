@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,7 +45,11 @@ if ( !file_exists( K_PATH_CACHE ) ) {
  * @package Core
  */
 class TTPDF extends tcpdf {
-	protected function _freadint($f) {
+	/**
+	 * @param $f
+	 * @return number
+	 */
+	protected function _freadint( $f) {
 		//Read a 4-byte integer from file
 		$a = unpack('Ni', fread($f, 4));
 
@@ -61,7 +65,15 @@ class TTPDF extends tcpdf {
 		return $a['i'];
 	}
 
-	function __construct($orientation='P', $unit='mm', $format='LETTER', $encoding='UTF-8', $diskcache=FALSE) {
+	/**
+	 * TTPDF constructor.
+	 * @param string $orientation
+	 * @param string $unit
+	 * @param string $format
+	 * @param string $encoding
+	 * @param bool $diskcache
+	 */
+	function __construct( $orientation='P', $unit='mm', $format='LETTER', $encoding='UTF-8', $diskcache=FALSE) {
 		if ( TTi18n::getPDFDefaultFont() != 'freeserif' AND $encoding == 'ISO-8859-1' ) {
 			parent::__construct($orientation, $unit, $format, FALSE, 'ISO-8859-1', $diskcache); //Make sure TCPDF constructor is called with all the arguments
 		} else {
@@ -90,9 +102,16 @@ class TTPDF extends tcpdf {
 
 	//TCPDF oddly enough defines standard header/footers, instead of disabling them
 	//in every script, just override them as blank here.
+	/**
+	 * @return bool
+	 */
 	function header() {
 		return TRUE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function footer() {
 		return TRUE;
 	}

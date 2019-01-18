@@ -91,8 +91,8 @@ TTPromise = {
 					Debug.Text('Promise: success callback;', 'TTPromise.js', 'TTPromise.js', 'wait', 11);
 					success_callback( true );
 				} else {
-					Debug.Text('Promise: waiting again '+wait_category+'|'+wait_key, 'TTPromise.js', 'TTPromise.js', 'wait', 11);
-					TTPromise.wait(wait_category, wait_key, success_callback, error_callback);
+					Debug.Text('Promise: waiting again '+category+'|'+key, 'TTPromise.js', 'TTPromise.js', 'wait', 11);
+					TTPromise.wait(category, key, success_callback, error_callback);
 				}
 			};
 

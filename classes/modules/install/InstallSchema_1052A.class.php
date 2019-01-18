@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,9 @@
  */
 class InstallSchema_1052A extends InstallSchema_Base {
 
+	/**
+	 * @return bool
+	 */
 	function preInstall() {
 		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
@@ -47,10 +50,13 @@ class InstallSchema_1052A extends InstallSchema_Base {
 		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
 			$this->db->GenID( 'company_generic_map_id_seq' ); //Make sure the sequence exists so it can be updated.
 		}
-		
+
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postInstall() {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 

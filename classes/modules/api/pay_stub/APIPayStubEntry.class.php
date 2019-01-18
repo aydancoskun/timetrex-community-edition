@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIPayStubEntry extends APIFactory {
 	protected $main_class = 'PayStubEntryFactory';
 
+	/**
+	 * APIPayStubEntry constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APIPayStubEntry extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -68,52 +71,72 @@ class APIPayStubEntry extends APIFactory {
 	 * @return array
 	 */
 	function getPayStubEntryDefaultData() {
-
 		Debug::Text('Getting pay stub entry default data...', __FILE__, __LINE__, __METHOD__, 10);
 
-		$data = array(
-			10 => array(
-				array(  'tmp_type' => 10 ),
-				array(  'tmp_type' => 10,
-						'type_id' => 40,
-						'name' => TTi18n::getText('Total Gross')
-				)
-			),
-			20 => array(
-				array( 'tmp_type' => 20 ),
-				array( 'tmp_type' => 20,
-						'type_id' => 40,
-						'name' => TTi18n::getText('Total Deductions')
-				)
-			),
-			30 => array(
-				array( 'tmp_type' => 30 ),
-				array( 'tmp_type' => 30,
-						'type_id' => 40,
-						'name' => TTi18n::getText('Employer Total Contributions')
-				)
-			),
-			40 => array(
-				array( 'tmp_type' => 40,
-						'type_id' => 40,
-						'name' => TTi18n::getText('Net Pay')
-				),
-			),
-			50 => array(
-				array( 'tmp_type' => 50 )
-				),
-			80 => array(
-				array( 'tmp_type' => 80 )
-				),
-		);
+		return $this->returnHandler( FALSE );
 
-		return $this->returnHandler( $data );
+//		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+//		$pseallf->getByCompanyID( $this->getCurrentCompanyObject()->getId() );
+//		$pay_stub_entry_account_link_obj = FALSE;
+//		if ( $pseallf->getRecordCount() > 0 ) {
+//			$pay_stub_entry_account_link_obj = $pseallf->getCurrent();
+//		}
+//
+//		$data = FALSE;
+//		if( is_object( $pay_stub_entry_account_link_obj ) ) {
+//			$data = array(
+//					10 => array(
+//							array('tmp_type' => 10),
+//							array(
+//									'tmp_type' => 10,
+//									'type_id'  => 40,
+//									'name'     => TTi18n::getText( 'Total Gross' ),
+//									'pay_stub_entry_account_id' => $pay_stub_entry_account_link_obj->getTotalGross()
+//							),
+//					),
+//					20 => array(
+//							array('tmp_type' => 20),
+//							array(
+//									'tmp_type' => 20,
+//									'type_id'  => 40,
+//									'name'     => TTi18n::getText( 'Total Deductions' ),
+//									'pay_stub_entry_account_id' => $pay_stub_entry_account_link_obj->getTotalEmployeeDeduction()
+//							),
+//					),
+//					30 => array(
+//							array('tmp_type' => 30),
+//							array(
+//									'tmp_type' => 30,
+//									'type_id'  => 40,
+//									'name'     => TTi18n::getText( 'Employer Total Contributions' ),
+//									'pay_stub_entry_account_id' => $pay_stub_entry_account_link_obj->getTotalEmployerDeduction()
+//							),
+//					),
+//					40 => array(
+//							array(
+//									'tmp_type' => 40,
+//									'type_id'  => 40,
+//									'name'     => TTi18n::getText( 'Net Pay' ),
+//									'pay_stub_entry_account_id' => $pay_stub_entry_account_link_obj->getTotalNetPay()
+//							),
+//					),
+//					50 => array(
+//							array('tmp_type' => 50),
+//					),
+//					80 => array(
+//							array('tmp_type' => 80),
+//					),
+//			);
+//		}
+//
+//		return $this->returnHandler( $data );
 	}
 
 	/**
 	 * Get paystub_entry_account data for one or more paystub_entry_accountes.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getPayStubEntry( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
@@ -124,30 +147,21 @@ class APIPayStubEntry extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
 
-		$blf = TTnew( 'PayStubEntryListFactory' );
-		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
-		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-		if ( $blf->getRecordCount() > 0 ) {
-			$this->setPagerObject( $blf );
-
-			$prev_type = NULL;
+		/** @var PayStubEntryListFactory $pself */
+		$pself = TTnew( 'PayStubEntryListFactory' );
+		$pself->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+		Debug::Text('Record Count: '. $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $pself->getRecordCount() > 0 ) {
+			$this->setPagerObject( $pself );
 			$retarr = array();
+			/** @var PayStubEntryFactory $pse_obj */
+			foreach( $pself as $pse_obj ) {
 
-			foreach( $blf as $b_obj ) {
-				if ( $prev_type == 40 OR $b_obj->getPayStubEntryAccountObject()->getType() != 40 ) {
-					$type = $b_obj->getPayStubEntryAccountObject()->getType();
-				}
-
-				if ( isset( $type )  ) {
-					$retarr[$type][] = array_merge( $b_obj->getObjectAsArray( $data['filter_columns'] ), array( 'tmp_type' => $type ) );
-				}
-
-				$prev_type = $b_obj->getPayStubEntryAccountObject()->getType();
+				$retarr[] = $pse_obj->getObjectAsArray( $data['filter_columns'] );
 			}
 
 			return $this->returnHandler( $retarr );
 		}
-
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
 
@@ -170,198 +184,15 @@ class APIPayStubEntry extends APIFactory {
 	}
 
 	/**
-	 * Set paystub_entry_account data for one or more paystub_entry_accounts.
-	 * @param array $data paystub_entry_account data
-	 * @return array
-	 */
-	/*
-	function setPayStubEntry( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
-		$validate_only = (bool)$validate_only;
-
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
-		}
-
-		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
-			OR !( $this->getPermissionObject()->Check('pay_stub', 'edit') OR $this->getPermissionObject()->Check('pay_stub', 'edit_own') OR $this->getPermissionObject()->Check('pay_stub', 'edit_child') OR $this->getPermissionObject()->Check('pay_stub', 'add') ) ) {
-			return	$this->getPermissionObject()->PermissionDenied();
-		}
-
-		if ( $validate_only == TRUE ) {
-			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
-		}
-
-		extract( $this->convertToMultipleRecords($data) );
-		Debug::Text('Received data for: '. $total_records .' PayStubEntries', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) AND $total_records > 0 ) {
-			$lf = TTnew( 'PayStubEntryListFactory' );
-			$lf->StartTransaction(); //Need to wrap the entire batch in its own transaction.
-
-			$i = 0;
-			foreach( $data as $key => $row ) {
-				if ( ( isset($row['type']) AND $row['type'] == 40 ) OR ( isset($row['type_id']) AND $row['type_id'] == 40 ) ) {
-					$validator_stats['total_records']--;
-					continue;
-				}
-
-				$primary_validator = new Validator();
-				$lf = TTnew( 'PayStubEntryListFactory' );
-				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
-					if ( $i == 0 AND $row['pay_stub_id'] > 0 ) {
-						$pslf = TTnew('PayStubListFactory');
-						$pslf->getByCompanyIdAndId( $this->getCurrentCompanyObject()->getId(), (int)$row['pay_stub_id'] );
-						if ( $pslf->getRecordCount() == 1 ) {
-							$pay_stub_obj = $pslf->getCurrent();
-
-							if ( $pay_stub_obj->getStatus() == 25 ) {
-								$pay_stub_obj->setTainted(TRUE); //So we know it was modified.
-
-								//Load previous pay stub
-								$pay_stub_obj->loadPreviousPayStub();
-
-								//Delete all entries, so they can be re-added.
-								$pay_stub_obj->deleteEntries( TRUE );
-
-								//When editing pay stubs we can't re-process linked accruals.
-								$pay_stub_obj->setEnableLinkedAccruals( FALSE );
-								Debug::Text('Loaded pay stub: ', $row['pay_stub_id'], __FILE__, __LINE__, __METHOD__, 10);
-							} else {
-								$primary_validator->isTrue( 'status_id', FALSE, TTi18n::getText('Pay Stub must be marked as OPEN before any changes can be made') );
-							}
-						} else {
-							Debug::Text('ERROR: Unable to find pay stub: ', $row['pay_stub_id'], __FILE__, __LINE__, __METHOD__, 10);
-							break;
-						}
-						unset($pslf);
-					}
-
-					
-					//Modifying existing object.
-					//Get paystub_entry_account object, so we can only modify just changed data for specific records if needed.
-					$lf->getByIdAndPayStubIdAndCompanyId( $row['id'], $row['pay_stub_id'], $this->getCurrentCompanyObject()->getId() );
-					if ( $lf->getRecordCount() == 1 ) {
-						//Object exists, check edit permissions
-						if (
-							$validate_only == TRUE
-							OR
-							(
-								$this->getPermissionObject()->Check('pay_stub', 'edit')
-								OR ( $this->getPermissionObject()->Check('pay_stub', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-							) ) {
-
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
-							$lf = $lf->getCurrent();
-							$row = array_merge( $lf->getObjectAsArray(), $row );
-						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
-						}
-					} else {
-						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
-					}
-				} else {
-					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('pay_stub', 'add'), TTi18n::gettext('Add permission denied') );
-				}
-				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-				$is_valid = $primary_validator->isValid( $ignore_warning );
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					
-					if ( isset($row['pay_stub_entry_name_id']) AND $row['pay_stub_entry_name_id'] > 0 ) {
-						Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
-
-						if ( !isset($row['units']) OR $row['units'] == '' ) {
-							$row['units'] = 0;
-						}
-						if ( !isset($row['rate']) OR $row['rate'] == '' ) {
-							$row['rate'] = 0;
-						}
-						if ( !isset($row['description']) OR $row['description'] == '' ) {
-							$row['description'] = NULL;
-						}
-						if ( !isset($row['pay_stub_amendment_id']) OR $row['pay_stub_amendment_id'] == '' ) {
-							$row['pay_stub_amendment_id'] = NULL;
-						}
-						if ( !isset($row['user_expense_id']) OR $row['user_expense_id'] == '' ) {
-							$row['user_expense_id'] = NULL;
-						}
-
-						$ytd_adjustment = FALSE;
-						if ( $row['pay_stub_amendment_id'] > 0 ) {
-							$psamlf = TTNew('PayStubAmendmentListFactory');
-							$psamlf->getByIdAndCompanyId( (int)$row['pay_stub_amendment_id'], $this->getCurrentCompanyObject()->getId() );
-							if ( $psamlf->getRecordCount() > 0 ) {
-								$ytd_adjustment = $psamlf->getCurrent()->getYTDAdjustment();
-							}
-						}
-						Debug::Text(' Pay Stub Amendment Id: '. $row['pay_stub_amendment_id'] .' YTD Adjusment: '. (int)$ytd_adjustment, __FILE__, __LINE__, __METHOD__,10);
-
-						$is_valid = $pay_stub_obj->addEntry( $row['pay_stub_entry_name_id'], $row['amount'], $row['units'], $row['rate'], $row['description'], $row['pay_stub_amendment_id'], NULL, NULL, $ytd_adjustment, $row['user_expense_id'] );
-						if ( $is_valid == TRUE ) {
-							Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
-							$save_result[$key] = TRUE;
-							$validator_stats['valid_records']++;
-						}
-					} else {
-						$validator_stats['valid_records']++;
-					}
-				}
-
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
-
-					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
-
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
-				} elseif ( $validate_only == TRUE ) {
-					$lf->FailTransaction();
-				}
-
-				$lf->CommitTransaction();
-
-				$i++;
-			}
-
-			if ( isset($pay_stub_obj) ) {
-				Debug::Text('Final processing of pay stub...', __FILE__, __LINE__, __METHOD__, 10);
-				$pay_stub_obj->setEnableCalcYTD( TRUE );
-				$pay_stub_obj->setEnableProcessEntries( TRUE );
-				$pay_stub_obj->processEntries();
-
-				if ( $pay_stub_obj->isValid() ) {
-					$pay_stub_obj->Save();
-				} else {
-					$lf->FailTransaction();
-				}
-			} else {
-				$lf->FailTransaction();
-				Debug::Text('ERROR: Unable to perform final processing of pay stub...', __FILE__, __LINE__, __METHOD__, 10);
-			}
-
-			$lf->CommitTransaction();
-
-			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
-		}
-
-		return $this->returnHandler( FALSE );
-	}
-	*/
-
-	/**
 	 * Delete one or more paystub_entry_accounts.
 	 * @param array $data paystub_entry_account data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deletePayStubEntry( $data ) {
 		//
 		//This is required by Edit Pay Stub view to delete individual Pay Stub entries.
 		//
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -378,14 +209,14 @@ class APIPayStubEntry extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'PayStubEntryListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get paystub_entry_account object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -393,7 +224,7 @@ class APIPayStubEntry extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('pay_stub', 'delete')
 							OR ( $this->getPermissionObject()->Check('pay_stub', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );

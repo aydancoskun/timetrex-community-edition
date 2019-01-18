@@ -8,8 +8,11 @@ RibbonViewController = Backbone.View.extend( {
 	initialize: function( options ) {
 		// TopMenuManager should be initialized before render to avoid possible race condition.
 		// Error: TypeError: TopMenuManager.ribbon_view_controller is null in /interface/html5/framework/jquery.min.js?v=10.5.0-20170331-081453 line 2 > eval line 218
+
 		TopMenuManager.ribbon_view_controller = this;
-		this.render();
+		var $this = this;
+		require(['live-chat'],function(){
+			$this.render();});
 	},
 
 	onMenuSelect: function( e, ui ) {
@@ -75,17 +78,17 @@ RibbonViewController = Backbone.View.extend( {
 	//Does not trigger on Report menu items with dropdowns (see the right event)
 	onSubMenuClick: function( id ) {
 		var $this = this;
-		//#2342 This logic is also in onCancelClick in BaseViewController
+		//#2342 This logic is also in onCancelClick in BaseViewController and in Gloabl.closeEditViews.
 		if ( ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.edit_view && LocalCacheData.current_open_primary_controller.is_changed == true )
 			|| ( LocalCacheData.current_open_report_controller && LocalCacheData.current_open_report_controller.is_changed == true )
 			|| ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.is_changed == true )
 			|| ( LocalCacheData.current_open_sub_controller && LocalCacheData.current_open_sub_controller.edit_view && LocalCacheData.current_open_sub_controller.is_changed == true ) ) {
 
-			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
-				if ( flag === true ) {
+			Global.closeEditViews();
+			TTPromise.wait( 'base', 'onCancelClick', function( cancel_yes ) {
+				if ( cancel_yes == true ) {
 					doNext();
 				}
-
 			} );
 			return;
 		} else if ( LocalCacheData.current_open_primary_controller &&
@@ -317,6 +320,12 @@ RibbonViewController = Backbone.View.extend( {
 
 				window.open( url, '_blank' );
 				break;
+			case 'Sandbox':
+				if ( APIGlobal.pre_login_data['sandbox_url'] && APIGlobal.pre_login_data['sandbox_url'].length > 0 ) {
+					var user = LocalCacheData.getLoginUser();
+					Global.NewSession( user.user_name, 'SANDBOX', true );
+				}
+				break;
 			case 'ProcessPayrollWizard':
 				IndexViewController.openWizard( 'ProcessPayrollWizard', null, function() {
 					//Error: TypeError: LocalCacheData.current_open_primary_controller.search is not a function in interface/html5/framework/jquery.min.js?v=9.0.0-20151016-110437 line 2 > eval line 248
@@ -324,6 +333,21 @@ RibbonViewController = Backbone.View.extend( {
 						LocalCacheData.current_open_primary_controller.search();
 					}
 				} );
+				break;
+			case 'PayrollRemittanceAgencyEventWizard':
+				IndexViewController.openWizardController( 'PayrollRemittanceAgencyEventWizardController', null, function() {
+					//Error: TypeError: LocalCacheData.current_open_primary_controller.search is not a function in interface/html5/framework/jquery.min.js?v=9.0.0-20151016-110437 line 2 > eval line 248
+					if ( LocalCacheData.current_open_primary_controller && typeof LocalCacheData.current_open_primary_controller.search === 'function' ) {
+						LocalCacheData.current_open_primary_controller.search();
+					}
+				} );
+				break;
+			case 'LegalEntity':
+				if (LocalCacheData.getCurrentCompany().product_edition_id > 10) {
+					TopMenuManager.goToView( TopMenuManager.selected_sub_menu_id );
+				} else {
+					IndexViewController.openEditView( LocalCacheData.current_open_primary_controller, name, false );
+				}
 				break;
 			default:
 				TopMenuManager.goToView( TopMenuManager.selected_sub_menu_id );
@@ -355,6 +379,7 @@ RibbonViewController = Backbone.View.extend( {
 			case 'EmailHelp':
 				break;
 			case 'ProcessPayrollWizard':
+			case 'PayrollRemittanceAgencyWizard':
 				break;
 			default:
 				if ( TopMenuManager.selected_sub_menu_id ) {

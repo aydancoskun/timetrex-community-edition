@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ScheduleListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -75,7 +88,15 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyID($company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ScheduleListFactory
+	 */
+	function getByCompanyID( $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -90,7 +111,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		//Status sorting MUST be desc first, otherwise transfer punches are completely out of order.
@@ -110,10 +131,21 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @return bool|ScheduleListFactory
+	 */
 	function getByIdAndCompanyId( $id, $company_id ) {
 		return $this->getByCompanyIDAndId($company_id, $id);
 	}
-	function getByCompanyIDAndId($company_id, $id) {
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @return bool|ScheduleListFactory
+	 */
+	function getByCompanyIDAndId( $company_id, $id) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -125,8 +157,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'company_id2' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'company_id2' => TTUUID::castUUID($company_id),
 					);
 
 		//Status sorting MUST be desc first, otherwise transfer punches are completely out of order.
@@ -136,7 +168,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					from	'. $this->getTable() .' as a
 							LEFT JOIN '. $uf->getTable() .' as c ON ( a.user_id = c.id AND c.deleted = 0 )
 					where	( c.company_id = ? OR a.company_id = ? )
-						AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+						AND a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 						AND ( a.deleted = 0 )
 					ORDER BY a.start_time asc, a.status_id desc
 					';
@@ -146,7 +178,14 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndDateStamp($user_id, $date_stamp, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date_stamp EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ScheduleListFactory
+	 */
+	function getByUserIdAndDateStamp( $user_id, $date_stamp, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -163,7 +202,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
 					);
 
@@ -181,7 +220,15 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndDateStampAndStatus($user_id, $date_stamp, $status_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date_stamp EPOCH
+	 * @param int $status_id
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ScheduleListFactory
+	 */
+	function getByUserIdAndDateStampAndStatus( $user_id, $date_stamp, $status_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -202,7 +249,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
 					'status_id' => (int)$status_id,
 					);
@@ -222,7 +269,15 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ScheduleListFactory
+	 */
+	function getByUserIdAndStartDateAndEndDate( $user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -254,7 +309,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					from	'. $this->getTable() .' as a
 					where	a.date_stamp >= ?
 						AND a.date_stamp <= ?
-						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'uuid' ) .')
 						AND ( a.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -265,6 +320,12 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param int $epoch EPOCH
+	 * @param int $week_start_epoch EPOCH
+	 * @return bool|int
+	 */
 	function getWeekWorkTimeSumByUserIDAndEpochAndStartWeekEpoch( $user_id, $epoch, $week_start_epoch ) {
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -279,7 +340,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'week_start_epoch' => $this->db->BindDate( $week_start_epoch ),
 					'epoch' =>	$this->db->BindDate( $epoch ),
 					);
@@ -306,7 +367,18 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $total;
 	}
 
-	function getByUserIdAndTypeAndDirectionFromDate($user_id, $type_id, $direction, $date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $type_id
+	 * @param $direction
+	 * @param int $date EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ScheduleListFactory
+	 */
+	function getByUserIdAndTypeAndDirectionFromDate( $user_id, $type_id, $direction, $date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -349,7 +421,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					from	'. $this->getTable() .' as a
 					where	a.date_stamp '. $direction .' ?
 						AND a.status_id = ?
-						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'uuid' ) .')
 						AND ( a.deleted = 0 )
 					';
 
@@ -362,7 +434,16 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getConflictingByUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ScheduleListFactory
+	 */
+	function getConflictingByUserIdAndStartDateAndEndDate( $user_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
 		Debug::Text('User ID: '. $user_id .' Start Date: '. $start_date .' End Date: '. $end_date, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $user_id == '' ) {
@@ -377,6 +458,10 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
+		if ( $id == '' ) {
+			$id = TTUUID::getZeroId(); //Leaving this as NULL can cause the SQL query to not return rows when it should.
+		}
+
 		//MySQL is picky when it comes to timestamp filters on datestamp columns.
 		$start_datestamp = $this->db->BindDate( (int)$start_date );
 		$end_datestamp = $this->db->BindDate( (int)$end_date );
@@ -385,10 +470,10 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$end_timestamp = $this->db->BindTimeStamp( (int)$end_date );
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'start_date_a' => $start_datestamp,
 					'end_date_b' => $end_datestamp,
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					'start_date1' => $start_timestamp,
 					'end_date1' => $end_timestamp,
 					'start_date2' => $start_timestamp,
@@ -426,12 +511,17 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph );
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param int $epoch EPOCH
+	 * @return bool|mixed
+	 */
 	function getScheduleObjectByUserIdAndEpoch( $user_id, $epoch ) {
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -474,7 +564,14 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return FALSE;
 	}
 
-	function getMostCommonScheduleDataByCompanyIdAndUserAndStartDateAndEndDate($company_id, $user_id, $start_date, $end_date) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @return bool
+	 */
+	function getMostCommonScheduleDataByCompanyIdAndUserAndStartDateAndEndDate( $company_id, $user_id, $start_date, $end_date) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -496,28 +593,28 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query = 'SELECT
 							( 	SELECT	'. $this->getSQLToTimeFunction( 'a.start_time' ) .' as start_time
 								FROM	'. $this->getTable() .' as a
-								WHERE 	a.company_id = '. (int)$company_id .'
+								WHERE 	a.company_id = \''. TTUUID::castUUID($company_id) .'\'
 									AND a.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ).'
 									AND a.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .'
-									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'INT' ) .' )
+									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'uuid' ) .' )
 									AND ( a.deleted = 0 )
 								GROUP BY '. $this->getSQLToTimeFunction( 'a.start_time' ) .'
 								ORDER BY count(*) DESC LIMIT 1 ) as start_time,
 							( 	SELECT	'. $this->getSQLToTimeFunction( 'a.end_time' ) .' as end_time
 								FROM	'. $this->getTable() .' as a
-								WHERE 	a.company_id = '. (int)$company_id .'
+								WHERE 	a.company_id = \''. TTUUID::castUUID($company_id) .'\'
 									AND a.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ).'
 									AND a.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .'
-									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'INT' ) .' )
+									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'uuid' ) .' )
 									AND ( a.deleted = 0 )
 								GROUP BY '. $this->getSQLToTimeFunction( 'a.end_time' ) .'
 								ORDER BY count(*) DESC LIMIT 1 ) as end_time,
 							( 	SELECT	schedule_policy_id as schedule_policy_id
 								FROM	'. $this->getTable() .' as a
-								WHERE 	a.company_id = '. (int)$company_id .'
+								WHERE 	a.company_id = \''. TTUUID::castUUID($company_id) .'\'
 									AND a.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ).'
 									AND a.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .'
-									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'INT' ) .' )
+									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'uuid' ) .' )
 									AND ( a.deleted = 0 )
 								GROUP BY schedule_policy_id
 								ORDER BY count(*) DESC LIMIT 1 ) as schedule_policy_id';
@@ -530,6 +627,22 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 	}
 
 	//Find all *committed* open shifts that conflict, so they can be entered in the replaced_id field.
+
+	/**
+	 * @param string $company_id UUID
+	 * @param $start_time
+	 * @param $end_time
+	 * @param string $branch_id UUID
+	 * @param string $department_id UUID
+	 * @param string $job_id UUID
+	 * @param string $job_item_id UUID
+	 * @param int $replaced_id
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ScheduleListFactory
+	 */
 	function getConflictingOpenShiftSchedule( $company_id, $start_time, $end_time, $branch_id, $department_id, $job_id, $job_item_id, $replaced_id = 0, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '' OR $start_time == '' OR $end_time == '' ) {
 			return FALSE;
@@ -545,14 +658,14 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		Debug::Text('Getting conflicting Open Shifts...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$ph = array(
-				'company_id' => (int)$company_id,
-				'user_id' => (int)0, //Open Shift
+				'company_id' => TTUUID::castUUID($company_id),
+				'user_id' => TTUUID::getZeroID(), //Open Shift
 				'start_time' => $this->db->BindTimeStamp( (int)$start_time ),
 				'end_time' => $this->db->BindTimeStamp( (int)$end_time ),
-				'branch_id' => (int)$branch_id,
-				'department_id' => (int)$department_id,
-				'job_id' => (int)$job_id,
-				'job_item_id' => (int)$job_item_id,
+				'branch_id' => TTUUID::castUUID($branch_id),
+				'department_id' => TTUUID::castUUID($department_id),
+				'job_id' => TTUUID::castUUID($job_id),
+				'job_item_id' => TTUUID::castUUID($job_item_id),
 		);
 
 		$query = '
@@ -567,37 +680,45 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								AND a.department_id = ?
 								AND a.job_id = ?
 								AND a.job_item_id = ?
-								AND ( a.replaced_id = 0 AND b.replaced_id IS NULL )
+								AND ( a.replaced_id = \''. TTUUID::getZeroID() .'\' AND b.replaced_id IS NULL )
 								AND a.deleted = 0
 							)
 					';
 
-		if ( $replaced_id > 0 ) {
+		if ( TTUUID::isUUID($replaced_id) AND $replaced_id != TTUUID::getZeroID() AND $replaced_id != TTUUID::getNotExistID() ) {
 			//Make sure when passed a $replaced_id, we also make sure that record still matches all necessary items to fill the original open shift.
 			$ph += array(
-					'user_id2' => (int)0, //Open Shift
+					'user_id2' => TTUUID::getZeroID(), //Open Shift
 					'start_time2' => $this->db->BindTimeStamp( (int)$start_time ),
 					'end_time2' => $this->db->BindTimeStamp( (int)$end_time ),
-					'branch_id2' => (int)$branch_id,
-					'department_id2' => (int)$department_id,
-					'job_id2' => (int)$job_id,
-					'job_item_id2' => (int)$job_item_id );
+					'branch_id2' => TTUUID::castUUID($branch_id),
+					'department_id2' => TTUUID::castUUID($department_id),
+					'job_id2' => TTUUID::castUUID($job_id),
+					'job_item_id2' => TTUUID::castUUID($job_item_id) );
 
-			$query .= ' OR ( a.id = '. (int)$replaced_id .' AND a.user_id = ? AND a.start_time = ? AND a.end_time = ? AND a.branch_id = ? AND a.department_id = ? AND a.job_id = ? AND a.job_item_id = ? AND a.deleted = 0 ) ';
-			$order = ( array('a.id' => ' = '. (int)$replaced_id .' desc') + $order );
+			$query .= ' OR ( a.id = \''. TTUUID::castUUID($replaced_id) .'\' AND a.user_id = ? AND a.start_time = ? AND a.end_time = ? AND a.branch_id = ? AND a.department_id = ? AND a.job_id = ? AND a.job_item_id = ? AND a.deleted = 0 ) ';
+			$order = ( array('a.id' => ' = \''. TTUUID::castUUID($replaced_id) .'\' desc') + $order );
 		}
 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
 
-	//Returning RecurringScheduleIDs that have already been overridden by a committed shift, so we can exclude them from subsequent queries like getSearchByCompanyIdAndArrayCriteria()
+	/**
+	 * Returning RecurringScheduleIDs that have already been overridden by a committed shift, so we can exclude them from subsequent queries like getSearchByCompanyIdAndArrayCriteria()
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return array|bool
+	 */
 	function getOverriddenOpenShiftRecurringSchedules( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -705,26 +826,26 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								LEFT JOIN '. $rscf->getTable() .' as rscf_b ON rsf_b.recurring_schedule_control_id = rscf_b.id
 								LEFT JOIN schedule as sf_c ON 			(
 																			rsf_b.company_id = sf_c.company_id
-																			AND rsf_b.user_id = 0
+																			AND rsf_b.user_id = \''. TTUUID::getZeroID() .'\'
 																			AND rsf_b.date_stamp = sf_c.date_stamp 
-																			AND ( rsf_b.branch_id = sf_c.branch_id OR rsf_b.branch_id = -1 )
-																			AND ( rsf_b.department_id = sf_c.department_id OR rsf_b.department_id = -1 )
-																			AND ( rsf_b.job_id = sf_c.job_id OR rsf_b.job_id = -1 )
-																			AND ( rsf_b.job_item_id = sf_c.job_item_id OR rsf_b.job_item_id = -1 )
+																			AND ( rsf_b.branch_id = sf_c.branch_id OR rsf_b.branch_id = \''. TTUUID::getNotExistID() .'\' )
+																			AND ( rsf_b.department_id = sf_c.department_id OR rsf_b.department_id = \''. TTUUID::getNotExistID() .'\' )
+																			AND ( rsf_b.job_id = sf_c.job_id OR rsf_b.job_id = \''. TTUUID::getNotExistID() .'\' )
+																			AND ( rsf_b.job_item_id = sf_c.job_item_id OR rsf_b.job_item_id = \''. TTUUID::getNotExistID() .'\' )
 																			AND rsf_b.start_time = sf_c.start_time
 																			AND rsf_b.end_time = sf_c.end_time ';
 
 		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'sf_c.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : NULL;
 		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'sf_c.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : NULL;
-		$ph['company_id'] = (int)$company_id;
-		$ph['company_id4'] = (int)$company_id; //Needs to be twice.
+		$ph['company_id'] = TTUUID::castUUID($company_id);
+		$ph['company_id4'] = TTUUID::castUUID($company_id); //Needs to be twice.
 
 		//Check for NON-OPEN recurring schedules that override other open recurring schedules.
 		$query .= '
 																			AND sf_c.deleted = 0
 																		)
 								WHERE rsf_b.company_id = ?
-									AND rsf_b.user_id = 0
+									AND rsf_b.user_id = \''. TTUUID::getZeroID() .'\'
 									AND sf_c.id IS NOT NULL
 									AND ( rsf_b.deleted = 0 AND rscf_b.deleted = 0 )
 
@@ -737,7 +858,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 										rsf_b.status_id as status_id,
 										rsf_b.start_time as start_time,
 										rsf_b.end_time as end_time,
-
+			
 										rsf_b.branch_id as branch_id,
 										rsf_b.department_id as department_id,
 										rsf_b.job_id as job_id,
@@ -758,26 +879,26 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 												FROM '. $rsf->getTable() .' as rsf_d
 												LEFT JOIN users as uf_c ON ( rsf_d.user_id = uf_c.id )
 												WHERE 	rsf_d.company_id = ? 
-														AND rsf_d.user_id != 0 
+														AND rsf_d.user_id != \''. TTUUID::getZeroID() .'\' 
 											) as rsf_c ON 	(
 																			rsf_b.company_id = rsf_c.company_id
-																			AND ( rsf_b.user_id = 0 AND rsf_c.user_id != 0 )
-																			AND ( rsf_b.branch_id = rsf_c.branch_id OR ( rsf_c.branch_id = -1 AND rsf_b.branch_id = rsf_c.default_branch_id ) )
-																			AND ( rsf_b.department_id = rsf_c.department_id OR ( rsf_c.department_id = -1 AND rsf_b.department_id = rsf_c.default_department_id ) )
-																			AND ( rsf_b.job_id = rsf_c.job_id OR ( rsf_c.job_id = -1 AND rsf_b.job_id = rsf_c.default_job_id ) )
-																			AND ( rsf_b.job_item_id = rsf_c.job_item_id OR ( rsf_c.job_item_id = -1 AND rsf_b.job_item_id = rsf_c.default_job_item_id ) )
+																			AND ( rsf_b.user_id = \''. TTUUID::getZeroID() .'\' AND rsf_c.user_id != \''. TTUUID::getZeroID() .'\' )
+																			AND ( rsf_b.branch_id = rsf_c.branch_id OR ( rsf_c.branch_id = \''. TTUUID::getNotExistID() .'\' AND rsf_b.branch_id = rsf_c.default_branch_id ) )
+																			AND ( rsf_b.department_id = rsf_c.department_id OR ( rsf_c.department_id = \''. TTUUID::getNotExistID() .'\' AND rsf_b.department_id = rsf_c.default_department_id ) )
+																			AND ( rsf_b.job_id = rsf_c.job_id OR ( rsf_c.job_id = \''. TTUUID::getNotExistID() .'\' AND rsf_b.job_id = rsf_c.default_job_id ) )
+																			AND ( rsf_b.job_item_id = rsf_c.job_item_id OR ( rsf_c.job_item_id = \''. TTUUID::getNotExistID() .'\' AND rsf_b.job_item_id = rsf_c.default_job_item_id ) )
 																			AND rsf_b.start_time = rsf_c.start_time
 																			AND rsf_b.end_time = rsf_c.end_time ';
 
 		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'rsf_c.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : NULL;
 		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'rsf_c.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : NULL;
-		$ph['company_id2'] = (int)$company_id;
+		$ph['company_id2'] = TTUUID::castUUID($company_id);
 
 		$query .= '
 																			AND ( rsf_c.deleted = 0 AND rscf_b.deleted = 0 )
 																		)
 								WHERE rsf_b.company_id = ?
-									AND rsf_b.user_id = 0
+									AND rsf_b.user_id = \''. TTUUID::getZeroID() .'\'
 									AND rsf_c.id IS NOT NULL
 									AND ( rsf_b.deleted = 0 AND rscf_b.deleted = 0 )
 						) as a
@@ -789,29 +910,29 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			$query .= '	LEFT JOIN '. $jif->getTable() .' as y ON a.job_item_id = y.id';
 		}
 
-		$ph['company_id3'] = (int)$company_id;
+		$ph['company_id3'] = TTUUID::castUUID($company_id);
 		$query .= '	WHERE a.company_id = ? ';
 
-		$query .= ( isset($filter_data['schedule_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['schedule_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['schedule_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['schedule_department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['schedule_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['schedule_department_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['schedule_policy_id']) ) ? $this->getWhereClauseSQL( 'a.schedule_policy_id', $filter_data['schedule_policy_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_policy_id']) ) ? $this->getWhereClauseSQL( 'a.schedule_policy_id', $filter_data['schedule_policy_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy_id'], 'uuid_list', $ph ) : NULL;
 
-		//$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		//$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'x.group_id', $filter_data['job_group_id'], 'numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'x.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'uuid_list', $ph ) : NULL;
 		}
 
 		//These aren't needed here, asn they are filtered in the UNION SELECTs above. This seems to slow things down substantially in some cases.
@@ -824,7 +945,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$rows = $this->db->GetAll( $query, $ph );
 		if ( is_array($rows) ) {
 			//Debug::Arr($rows, 'Result: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -853,6 +974,15 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ScheduleListFactory
+	 */
 	function getSearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -881,7 +1011,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		if ( $order == NULL ) {
 			//$order = array( 'udf.pay_period_id' => 'asc', 'udf.user_id' => 'asc', 'a.start_time' => 'asc' );
 			//Sort by start_time first, then user, so when only showing 1st page, it has all employees working on the first day, not just some of the employees for multiple days.
-			$order = array( 'a.user_id' => '= 0 desc', 'a.start_time' => 'asc', 'uf.last_name' => 'asc' );
+			$order = array( 'a.user_id' => '= \''. TTUUID::getZeroID() .'\' desc', 'a.start_time' => 'asc', 'uf.last_name' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -1028,7 +1158,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							uwf.labor_burden_percent as user_labor_burden_percent,
 							uwf.effective_date as user_wage_effective_date, ';
 
-		$query .= Permission::getPermissionIsChildIsOwnerSQL( ( isset($filter_data['permission_current_user_id']) ) ? $filter_data['permission_current_user_id'] : 0, 'a.user_id', FALSE );
+		$query .= Permission::getPermissionIsChildIsOwnerSQL( ( isset($filter_data['permission_current_user_id']) ) ? $filter_data['permission_current_user_id'] : TTUUID::getZeroID(), 'a.user_id', FALSE, ( isset($filter_data['permission_is_id']) AND $filter_data['permission_is_id'] == TTUUID::getZeroID() ) ? $filter_data['permission_is_id'] : NULL );
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= ',
@@ -1100,7 +1230,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 									sf.updated_date as updated_date,
 									sf.deleted as deleted
 								FROM '. $sf->getTable() .' as sf
-								WHERE sf.company_id = '. (int)$company_id .'
+								WHERE sf.company_id = \''. TTUUID::castUUID($company_id) .'\'
 									AND sf.deleted = 0
 							)
 						UNION ALL
@@ -1121,10 +1251,10 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 									rsf.start_time as start_time,
 									rsf.end_time as end_time,
 
-									CASE WHEN rsf.branch_id = -1 THEN uf_b.default_branch_id ELSE rsf.branch_id END as branch_id,
-									CASE WHEN rsf.department_id = -1 THEN uf_b.default_department_id ELSE rsf.department_id END as department_id,
-									CASE WHEN rsf.job_id = -1 THEN uf_b.default_job_id ELSE rsf.job_id END as job_id,
-									CASE WHEN rsf.job_item_id = -1 THEN uf_b.default_job_item_id ELSE rsf.job_item_id END as job_item_id,
+									CASE WHEN rsf.branch_id = \''. TTUUID::getNotExistID() .'\' THEN uf_b.default_branch_id ELSE rsf.branch_id END as branch_id,
+									CASE WHEN rsf.department_id = \''. TTUUID::getNotExistID() .'\' THEN uf_b.default_department_id ELSE rsf.department_id END as department_id,
+									CASE WHEN rsf.job_id = \''. TTUUID::getNotExistID() .'\' THEN uf_b.default_job_id ELSE rsf.job_id END as job_id,
+									CASE WHEN rsf.job_item_id = \''. TTUUID::getNotExistID() .'\' THEN uf_b.default_job_item_id ELSE rsf.job_item_id END as job_item_id,
 
 									rsf.total_time as total_time,
 									rsf.schedule_policy_id as schedule_policy_id,
@@ -1142,7 +1272,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id )
 								LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.pay_period_schedule_id = ppsuf.pay_period_schedule_id AND rsf.date_stamp >= ppf.start_date AND rsf.date_stamp <= ppf.end_date )
 								LEFT JOIN schedule as sf_b ON (
-																( sf_b.user_id != 0 AND sf_b.user_id = rsf.user_id ) ';
+																( sf_b.user_id != \''. TTUUID::getZeroID() .'\' AND sf_b.user_id = rsf.user_id ) ';
 
 					if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 						$ph[] = $this->db->BindTimeStamp( ( (int)$filter_data['start_date'] - 86400 ) );
@@ -1168,7 +1298,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 																AND sf_b.deleted = 0
 															)
 								WHERE sf_b.id is NULL
-									AND rsf.company_id = '. (int)$company_id .'
+									AND rsf.company_id = \''. TTUUID::castUUID($company_id) .'\'
 									AND ( uf_b.hire_date IS NULL OR '. $this->getSQLToTimeStampFunction() .'(uf_b.hire_date) <= rsf.date_stamp )
 									AND ( uf_b.termination_date IS NULL OR '. $this->getSQLToTimeStampFunction() .'(uf_b.termination_date) >= rsf.date_stamp )';
 
@@ -1202,7 +1332,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			$query .= '
 						LEFT JOIN '. $jf->getTable() .' as jfb ON uf.default_job_id = jfb.id
 						LEFT JOIN '. $jif->getTable() .' as jifb ON uf.default_job_item_id = jifb.id
-
+			
 						LEFT JOIN '. $jf->getTable() .' as jf ON a.job_id = jf.id
 						LEFT JOIN '. $jif->getTable() .' as jif ON a.job_item_id = jif.id
 						LEFT JOIN '. $bf->getTable() .' as jbf ON jf.branch_id = jbf.id
@@ -1214,40 +1344,40 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		$query .= Permission::getPermissionHierarchySQL( $company_id, ( isset($filter_data['permission_current_user_id']) ) ? $filter_data['permission_current_user_id'] : 0, 'a.user_id' );
 
-		$query .= '	WHERE ( a.company_id = '. (int)$company_id .' AND sf.replaced_id IS NULL )';
+		$query .= '	WHERE ( a.company_id = \''. TTUUID::castUUID($company_id) .'\' AND sf.replaced_id IS NULL )';
 
 		$query .= Permission::getPermissionIsChildIsOwnerFilterSQL( $filter_data, 'a.user_id' );
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
 		//Make sure we filter on user_date.user_id column, to handle OPEN shifts.
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['recurring_schedule_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_id', $filter_data['recurring_schedule_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['schedule_id']) ) ? $this->getWhereClauseSQL( 'a.schedule_id', $filter_data['schedule_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['recurring_schedule_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_id', $filter_data['recurring_schedule_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_id']) ) ? $this->getWhereClauseSQL( 'a.schedule_id', $filter_data['schedule_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'uf.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'uf.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['recurring_schedule_template_control_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_template_control_id', $filter_data['recurring_schedule_template_control_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['schedule_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['schedule_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['schedule_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['schedule_department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['recurring_schedule_template_control_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_template_control_id', $filter_data['recurring_schedule_template_control_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['schedule_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['schedule_department_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['schedule_policy_id']) ) ? $this->getWhereClauseSQL( 'a.schedule_policy_id', $filter_data['schedule_policy_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_policy_id']) ) ? $this->getWhereClauseSQL( 'a.schedule_policy_id', $filter_data['schedule_policy_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'uuid_list', $ph ) : NULL;
 		}
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
@@ -1265,13 +1395,21 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ScheduleListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -1372,8 +1510,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'company_id2' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'company_id2' => TTUUID::castUUID($company_id),
 					);
 
 		//"group" is a reserved word in MySQL.
@@ -1487,32 +1625,34 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					WHERE ( d.company_id = ? OR a.company_id = ? ) AND sf.replaced_id IS NULL ';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'd.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'd.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'd.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'd.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'd.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'd.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'd.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'd.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'd.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'd.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['department_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['schedule_policy_id']) ) ? $this->getWhereClauseSQL( 'a.schedule_policy_id', $filter_data['schedule_policy_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_policy_id']) ) ? $this->getWhereClauseSQL( 'a.schedule_policy_id', $filter_data['schedule_policy_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'w.group_id', $filter_data['job_group_id'], 'numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'w.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'uuid_list', $ph ) : NULL;
 		}
 
 		$query .= ( isset($filter_data['date_stamp']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['date_stamp'], 'date_range_datestamp', $ph ) : NULL;

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIUserGenericStatus extends APIFactory {
 	protected $main_class = 'UserGenericStatusFactory';
 
+	/**
+	 * APIUserGenericStatus constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -51,6 +54,7 @@ class APIUserGenericStatus extends APIFactory {
 	/**
 	 * Get user generic status data for one or more .
 	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function getUserGenericStatus( $data = NULL, $disable_paging = FALSE ) {
@@ -61,6 +65,7 @@ class APIUserGenericStatus extends APIFactory {
 		if ( $data['filter_data']['batch_id'] != '' ) {
 
 			$batch_id = $data['filter_data']['batch_id'];
+
 			$ugslf = TTnew( 'UserGenericStatusListFactory' );
 			$ugslf->getByUserIdAndBatchId( $user_id, $batch_id, $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 
@@ -107,7 +112,7 @@ class APIUserGenericStatus extends APIFactory {
 	 * @return array
 	 */
 	function deleteUserGenericStatus( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -119,7 +124,7 @@ class APIUserGenericStatus extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -128,7 +133,7 @@ class APIUserGenericStatus extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserGenericStatusListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get branch object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -136,7 +141,7 @@ class APIUserGenericStatus extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('user', 'delete')
 								OR ( $this->getPermissionObject()->Check('user', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -185,7 +190,12 @@ class APIUserGenericStatus extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
-	function getUserGenericStatusCountArray($user_id, $batch_id) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $batch_id UUID
+	 * @return array|bool
+	 */
+	function getUserGenericStatusCountArray( $user_id, $batch_id) {
 		$user_id = $this->getCurrentUserObject()->getId();
 		if ( $batch_id != '' ) {
 			$ugslf = TTnew( 'UserGenericStatusListFactory' );

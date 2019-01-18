@@ -2,8 +2,8 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 
 	el: '.wizard',
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Generate Pay Stub Wizard' );
 		this.steps = 3;
@@ -198,7 +198,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 			if ( result.isValid() ) {
 				var user_generic_status_batch_id = result.getAttributeInAPIDetails( 'user_generic_status_batch_id' );
 
-				if ( user_generic_status_batch_id && user_generic_status_batch_id > 0 ) {
+				if ( user_generic_status_batch_id && TTUUID.isUUID( user_generic_status_batch_id ) && user_generic_status_batch_id != TTUUID.zero_id&& user_generic_status_batch_id != TTUUID.not_exist_id ) {
 					UserGenericStatusWindowController.open( user_generic_status_batch_id, user_ids, function() {
 						if ( cal_pay_stub_amendment ) {
 							var filter = {filter_data: {}};

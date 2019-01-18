@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,11 @@ class Permission {
 	private $cached_permissions = array();
 	private $cached_permission_children_ids = array();
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	function getPermissions( $user_id, $company_id ) {
 		//When Permission->Check() is used in a tight loop, even getCache() can be slow as it has to load a large array.
 		//So cache the permissions in even faster access memory when possible.
@@ -77,7 +82,14 @@ class Permission {
 		return $perm_arr;
 	}
 
-	function Check($section, $name, $user_id = NULL, $company_id = NULL) {
+	/**
+	 * @param $section
+	 * @param $name
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
+	function Check( $section, $name, $user_id = NULL, $company_id = NULL) {
 		//Use Cache_Lite class once we need performance.
 		if ( $user_id == NULL OR $user_id == '') {
 			global $current_user;
@@ -107,6 +119,11 @@ class Permission {
 		return $result;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool|int
+	 */
 	function getLevel( $user_id = NULL, $company_id = NULL ) {
 		//Use Cache_Lite class once we need performance.
 		if ( $user_id == NULL OR $user_id == '') {
@@ -132,7 +149,11 @@ class Permission {
 		return 1; //Lowest level.
 	}
 
-	function Redirect($result) {
+	/**
+	 * @param $result
+	 * @return bool
+	 */
+	function Redirect( $result) {
 		if ( $result !== TRUE ) {
 			Redirect::Page( URLBuilder::getURL( NULL, Environment::getBaseURL().'/permission/PermissionDenied.php') );
 		}
@@ -140,6 +161,11 @@ class Permission {
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $result
+	 * @param string $description
+	 * @return bool
+	 */
 	function PermissionDenied( $result = FALSE, $description = 'Permission Denied' ) {
 		if ( $result !== TRUE ) {
 			Debug::Text('Permission Denied! Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
@@ -150,7 +176,14 @@ class Permission {
 		return TRUE;
 	}
 
-	function Query($section, $name, $user_id = NULL, $company_id = NULL) {
+	/**
+	 * @param $section
+	 * @param $name
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
+	function Query( $section, $name, $user_id = NULL, $company_id = NULL) {
 		Debug::Text('Permission Query!', __FILE__, __LINE__, __METHOD__, 9);
 		if ( $user_id == NULL OR $user_id == '') {
 			global $current_user;
@@ -172,6 +205,13 @@ class Permission {
 	}
 
 	//Checks if the row_object_id is created by the current user
+
+	/**
+	 * @param $object_created_by
+	 * @param null $object_assigned_to
+	 * @param string $current_user_id UUID
+	 * @return bool
+	 */
 	function isOwner( $object_created_by, $object_assigned_to = NULL, $current_user_id = NULL ) {
 		if ( $current_user_id == NULL OR $current_user_id == '') {
 			global $current_user;
@@ -193,8 +233,15 @@ class Permission {
 	}
 
 	//Checks if the row_object_id is in the src_object_list array,
+
+	/**
+	 * @param string $row_object_id UUID
+	 * @param $src_object_list
+	 * @param string $current_user_id UUID
+	 * @return bool
+	 */
 	function isChild( $row_object_id, $src_object_list, $current_user_id = NULL ) {
-		if ( !is_numeric($row_object_id) AND !is_array($row_object_id) ) {
+		if ( !TTUUID::isUUID($row_object_id) AND !is_array($row_object_id) ) {
 			return FALSE;
 		}
 
@@ -232,17 +279,35 @@ class Permission {
 		return FALSE;
 	}
 
-	static function getPermissionIsChildIsOwnerSQL( $id, $inner_column, $append_comma = TRUE ) {
-		$query = '
-				CASE WHEN phc.is_child is NOT NULL THEN 1 ELSE 0 END as is_child,
-				CASE WHEN '. $inner_column .' = '. (int)$id .' THEN 1 ELSE 0 END as is_owner';
+	/**
+	 * @param string $id UUID
+	 * @param $inner_column
+	 * @return string
+	 */
+	static function getPermissionIsChildIsOwnerSQL( $id, $inner_column, $append_comma = TRUE, $special_child_id = NULL ) {
+		$query = "\n";
+
+		//Attendance -> Schedule needs to pass this special_child_id so all records assigned to the OPEN employee are considered "children".
+		if ( $special_child_id != '' ) {
+			$query .= ' CASE WHEN ( phc.is_child is NOT NULL OR ' . $inner_column . ' = \'' . TTUUID::getZeroID() . '\' ) THEN 1 ELSE 0 END as is_child,';
+		} else {
+			$query .= ' CASE WHEN phc.is_child is NOT NULL THEN 1 ELSE 0 END as is_child,';
+		}
+
+		$query .= ' CASE WHEN '. $inner_column .' = \''. TTUUID::castUUID($id) .'\' THEN 1 ELSE 0 END as is_owner';
 
 		if ( $append_comma == TRUE ) {
 			$query .= ', ';
 		}
-
 		return $query;
 	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param $outer_column
+	 * @return string
+	 */
 	static function getPermissionHierarchySQL( $company_id, $user_id, $outer_column ) {
 		$hlf = new HierarchyLevelFactory();
 		$huf = new HierarchyUserFactory();
@@ -257,8 +322,8 @@ class Permission {
 							LEFT JOIN '. $hotf->getTable() .' as phc_hotf ON phc_huf.hierarchy_control_id = phc_hotf.hierarchy_control_id
 							LEFT JOIN '. $hcf->getTable() .' as phc_hcf ON phc_huf.hierarchy_control_id = phc_hcf.id
 							WHERE
-								phc_hlf.user_id = '. (int)$user_id .'
-								AND phc_hcf.company_id = '. (int)$company_id .'
+								phc_hlf.user_id = \''. TTUUID::castUUID($user_id) .'\'
+								AND phc_hcf.company_id = \''. TTUUID::castUUID($company_id) .'\'
 								AND phc_hotf.object_type_id = 100
 								AND phc_huf.user_id != phc_hlf.user_id
 								AND ( phc_hlf.deleted = 0 AND phc_hcf.deleted = 0 )
@@ -267,23 +332,29 @@ class Permission {
 
 		return $query;
 	}
+
+	/**
+	 * @param $filter_data
+	 * @param $outer_column_name
+	 * @return array|bool|string
+	 */
 	static function getPermissionIsChildIsOwnerFilterSQL( $filter_data, $outer_column_name ) {
 		if ( isset($filter_data['permission_invalid']) ) {
 			Debug::Text('  Potential security bypass, permission invalid...', __FILE__, __LINE__, __METHOD__, 10);
-			$query = ' AND '. $outer_column_name . ' = -1'; //Bogus permissions, don't return any data.
+			$query = ' AND '. $outer_column_name . ' = \''. TTUUID::getNotExistID() .'\''; //Bogus permissions, don't return any data.
 			return $query;
 		} else {
 			$query = array();
 			if ( isset( $filter_data['permission_is_own'] ) AND $filter_data['permission_is_own'] == TRUE AND isset( $filter_data['permission_current_user_id'] ) ) {
-				$query[] = $outer_column_name . ' = ' . (int)$filter_data['permission_current_user_id'];
+				$query[] = $outer_column_name . ' = \'' . TTUUID::castUUID($filter_data['permission_current_user_id']).'\'';
 			}
 			if ( isset( $filter_data['permission_is_child'] ) AND $filter_data['permission_is_child'] == TRUE ) {
 				$query[] = 'phc.is_child = 1';
 			}
 
 			//Don't add this filter unless we have already added a is_own or is_child filter above because it will restrict to just the permission_is_id rather than it along with other children IDs.
-			if ( count($query) > 0 AND isset( $filter_data['permission_is_id'] ) AND $filter_data['permission_is_id'] !== '' ) {
-				$query[] = $outer_column_name . ' = ' . (int)$filter_data['permission_is_id'];
+			if ( count($query) > 0 AND isset( $filter_data['permission_is_id'] ) AND TTUUID::isUUID( $filter_data['permission_is_id'] ) ) {
+				$query[] = $outer_column_name . ' = \'' . TTUUID::castUUID($filter_data['permission_is_id']) .'\'';
 			}
 
 			if ( empty( $query ) == FALSE ) {
@@ -294,7 +365,13 @@ class Permission {
 		return FALSE;
 	}
 
-	function getPermissionFilterData($section, $name, $user_id = NULL, $company_id = NULL) {
+	/**
+	 * @param $section
+	 * @param $name
+	 * @param string $user_id UUID
+	 * @return array|bool
+	 */
+	function getPermissionFilterData( $section, $name, $user_id = NULL) {
 		//Use Cache_Lite class once we need performance.
 		if ( $user_id == NULL OR $user_id == '') {
 			global $current_user;
@@ -305,10 +382,10 @@ class Permission {
 			}
 		}
 
-		if ( $company_id == NULL OR $company_id == '') {
-			global $current_company;
-			$company_id = $current_company->getId();
-		}
+//		if ( $company_id == NULL OR $company_id == '') {
+//			global $current_company;
+//			$company_id = $current_company->getId();
+//		}
 
 		/*
 			permission_children_ids
@@ -342,6 +419,11 @@ class Permission {
 		return array();
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @return mixed
+	 */
 	function getPermissionHierarchyChildren( $company_id, $user_id ) {
 		if ( isset($this->cached_permission_children_ids[$company_id][$user_id]) ) {
 			return $this->cached_permission_children_ids[$company_id][$user_id];
@@ -355,7 +437,14 @@ class Permission {
 		}
 	}
 
-	function getPermissionChildren($section, $name, $user_id = NULL, $company_id = NULL) {
+	/**
+	 * @param $section
+	 * @param $name
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return array|bool|mixed|null
+	 */
+	function getPermissionChildren( $section, $name, $user_id = NULL, $company_id = NULL) {
 		//Use Cache_Lite class once we need performance.
 		if ( $user_id == NULL OR $user_id == '') {
 			global $current_user;
@@ -385,7 +474,7 @@ class Permission {
 			//	So we need to include the current user if they can only view their own, but exclude the current user when doing is_child checks above.
 			//Another way we could handle this is to return an array of children and owner separately, then in SQL queries combine them together.
 			if ( $this->Check( $section, $name.'_own', $user_id, $company_id) == TRUE ) {
-				$retarr[] = (int)$user_id;
+				$retarr[] = TTUUID::castUUID($user_id);
 			}
 
 			//If they don't have permissions to view anything, make sure we return a blank array, so all in_array() or isPermissionChild() returns FALSE.
@@ -402,14 +491,24 @@ class Permission {
 		return $retarr;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $permission_children_ids UUID
+	 * @return bool
+	 */
 	function isPermissionChild( $user_id, $permission_children_ids ) {
-		if ( $permission_children_ids === NULL OR in_array( (int)$user_id, (array)$permission_children_ids, TRUE ) ) { //Make sure we do a STRICT in_array() match, so $user_id=TRUE isn't matched.
+		if ( $permission_children_ids === NULL OR in_array( TTUUID::castUUID($user_id), (array)$permission_children_ids, TRUE ) ) { //Make sure we do a STRICT in_array() match, so $user_id=TRUE isn't matched.
 			return TRUE;
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	function getLastUpdatedDate( $user_id = NULL, $company_id = NULL ) {
 		//Use Cache_Lite class once we need performance.
 		if ( $user_id == NULL OR $user_id == '') {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,22 +41,39 @@
 class APICompanySetting extends APIFactory {
 	protected $main_class = 'CompanySettingFactory';
 
+	/**
+	 * APICompanySetting constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
 		return TRUE;
 	}
-	
+
+	/**
+	 * @param $name
+	 * @return array
+	 */
 	function getCompanySetting( $name ) {
 		$retarr = CompanySettingFactory::getCompanySettingArrayByName( $this->getCurrentCompanyObject()->getId(), $name );
 		return $this->returnHandler( $retarr );
 	}
-	
+
+	/**
+	 * @param $name
+	 * @param $value
+	 * @param int $type_id
+	 * @return array
+	 */
 	function setCompanySetting( $name, $value, $type_id = 10 ) {
 		$retval = CompanySettingFactory::setCompanySetting( $this->getCurrentCompanyObject()->getId(), $name, $value, $type_id );
 		return $this->returnHandler($retval);
 	}
-	
+
+	/**
+	 * @param $name
+	 * @return array
+	 */
 	function deleteCompanySetting( $name ) {
 		$retval = CompanySettingFactory::deleteCompanySetting( $this->getCurrentCompanyObject()->getId(), $name );
 		return $this->returnHandler($retval);

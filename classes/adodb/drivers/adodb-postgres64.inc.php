@@ -1077,6 +1077,8 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 				case 'PATH':
 				case 'POLYGON':
 				case 'CIRCLE':
+				case 'UUID':
+
 					if ($len <= $this->blobSize) return 'C';
 
 				case 'TEXT':

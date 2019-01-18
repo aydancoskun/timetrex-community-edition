@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -61,6 +61,9 @@ class TTMail {
 										'head_charset' => 'UTF-8',
 										);
 
+	/**
+	 * TTMail constructor.
+	 */
 	function __construct() {
 		//For some reason the EOL defaults to \r\n, which seems to screw with Amavis
 		//This also prevents wordwrapping at 70 chars.
@@ -71,6 +74,9 @@ class TTMail {
 		return TRUE;
 	}
 
+	/**
+	 * @return Mail_Mime|null
+	 */
 	function getMimeObject() {
 		if ( $this->mime_obj == NULL ) {
 			require_once('Mail/mime.php');
@@ -79,6 +85,10 @@ class TTMail {
 
 		return $this->mime_obj;
 	}
+
+	/**
+	 * @return null|object
+	 */
 	function getMailObject() {
 		if ( $this->mail_obj == NULL ) {
 			require_once('Mail.php');
@@ -117,6 +127,9 @@ class TTMail {
 		return $this->mail_obj;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getDeliveryMethod() {
 		global $config_vars;
 
@@ -132,6 +145,9 @@ class TTMail {
 		return 'soap'; //Default to SOAP as it has a better chance of working than mail/SMTP
 	}
 
+	/**
+	 * @return array
+	 */
 	function getSMTPConfig() {
 		global $config_vars;
 
@@ -160,11 +176,18 @@ class TTMail {
 		return $retarr;
 	}
 
+	/**
+	 * @return array
+	 */
 	function getMIMEHeaders() {
 		$mime_headers = @$this->getMIMEObject()->headers( $this->getHeaders(), TRUE );
 		//Debug::Arr($this->data['headers'], 'MIME Headers: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $mime_headers;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getHeaders() {
 		if ( isset( $this->data['headers'] ) ) {
 			return $this->data['headers'];
@@ -172,6 +195,12 @@ class TTMail {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param $headers
+	 * @param bool $include_default
+	 * @return bool
+	 */
 	function setHeaders( $headers, $include_default = FALSE ) {
 		$this->data['headers'] = $headers;
 
@@ -185,6 +214,9 @@ class TTMail {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getTo() {
 		if ( isset( $this->data['to'] ) ) {
 			return $this->data['to'];
@@ -192,12 +224,20 @@ class TTMail {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param $email
+	 * @return bool
+	 */
 	function setTo( $email ) {
 		$this->data['to'] = $email;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getBody() {
 		if ( isset( $this->data['body'] ) ) {
 			return $this->data['body'];
@@ -205,6 +245,11 @@ class TTMail {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param $body
+	 * @return bool
+	 */
 	function setBody( $body ) {
 		$this->data['body'] = $body;
 
@@ -212,6 +257,11 @@ class TTMail {
 	}
 
 	//Extracts just the email address part from a string that may contain the name part, etc...
+
+	/**
+	 * @param $address
+	 * @return mixed
+	 */
 	function parseEmailAddress( $address ) {
 		if ( preg_match('/(?<=[<\[]).*?(?=[>\]]$)/', $address, $match) ) {
 			$retval = $match[0];
@@ -222,6 +272,10 @@ class TTMail {
 		return filter_var($retval, FILTER_VALIDATE_EMAIL); //Make sure we filter the email address here, so if using -f params, we aren't exploitable, for example an email address like: "Attacker -Param2 -Param3"@test.com
 	}
 
+	/**
+	 * @param bool $force
+	 * @return bool
+	 */
 	function Send( $force = FALSE ) {
 		global $config_vars;
 		Debug::Arr($this->getTo(), 'Attempting to send email To: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -277,6 +331,13 @@ class TTMail {
 		$i = 0;
 		foreach( $to as $recipient ) {
 			Debug::Text($i .'. Recipient: '. $recipient, __FILE__, __LINE__, __METHOD__, 10);
+			//Make sure its at least a partially valid email address, otherwise just skip without returning FALSE.
+			//  Without this a CC recipient of '"John Doe" <>' will fail and return FALSE making other functions think email failed.
+			if ( strpos( $recipient, '@' ) === FALSE ) {
+				Debug::Text('  Recipient email address is invalid, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+				continue;
+			}
+
 			$this->data['headers']['To'] = $recipient; //Always set the TO header to the primary recipient. When using SMTP method it won't do that automatically. We shouldn't be setting this in the case of a Bcc, then its not blind anymore.
 
 			//Check to see if they want to force a return-path for better bounce handling.
@@ -310,6 +371,13 @@ class TTMail {
 					if ( $this->getDeliveryMethod() == 'smtp' AND isset($secondary_to) AND is_array($secondary_to) AND count($secondary_to) > 0 ) {
 						$x = 0;
 						foreach( $secondary_to as $cc_key => $cc_recipient ) {
+							//Make sure its at least a partially valid email address, otherwise just skip without returning FALSE.
+							//  Without this a CC recipient of '"John Doe" <>' will fail and return FALSE making other functions think email failed.
+							if ( strpos( $cc_recipient, '@' ) === FALSE ) {
+								Debug::Text('  CC Recipient email address is invalid, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+								continue;
+							}
+
 							Debug::Text('  '. $x .'. CC Recipient: '. $cc_recipient, __FILE__, __LINE__, __METHOD__, 10);
 							$send_retval = $this->getMailObject()->send( $cc_recipient, $this->getMIMEHeaders(), $this->getBody() );
 							if ( PEAR::isError( $send_retval ) ) {

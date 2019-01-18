@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class CompanyUserCountListFactory extends CompanyUserCountFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,7 +60,13 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyUserCountListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -61,7 +74,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => (int)$id,
+						'id' => TTUUID::castUUID($id),
 						);
 
 			$query = '
@@ -80,13 +93,21 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		return $this;
 	}
 
-	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyUserCountListFactory
+	 */
+	function getByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -103,7 +124,14 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		return $this;
 	}
 
-	function getActiveUsers($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getActiveUsers( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 
 		$uf = new UserFactory();
 
@@ -124,7 +152,14 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		return $this;
 	}
 
-	function getInActiveUsers($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getInActiveUsers( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 
 		$uf = new UserFactory();
 
@@ -145,7 +180,14 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		return $this;
 	}
 
-	function getDeletedUsers($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getDeletedUsers( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 
 		$uf = new UserFactory();
 
@@ -165,7 +207,17 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		return $this;
 	}
 
-	function getMinAvgMaxByCompanyIdAndStartDateAndEndDate($id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyUserCountListFactory
+	 */
+	function getMinAvgMaxByCompanyIdAndStartDateAndEndDate( $id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -179,7 +231,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		}
 
 		$ph = array(
-					'company_id' => (int)$id,
+					'company_id' => TTUUID::castUUID($id),
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
@@ -212,7 +264,18 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 	}
 
 	//This function returns data for multiple companies, used by the API.
-	function getMinAvgMaxByCompanyIDsAndStartDateAndEndDate($id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyUserCountListFactory
+	 */
+	function getMinAvgMaxByCompanyIDsAndStartDateAndEndDate( $id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -226,7 +289,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		}
 
 		$ph = array(
-					//'company_id' => (int)$id,
+					//'company_id' => TTUUID::castUUID($id),
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
@@ -251,9 +314,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 						date_stamp >= ?
 						AND date_stamp <= ? ';
 
-		if ( $id != '' AND ( isset($id[0]) AND !in_array(-1, (array)$id) ) ) {
-			$query	.=	' AND company_id in ('. $this->getListSQL( $id, $ph, 'int' ) .') ';
-		}
+		$query .= ( isset($filter_data['company_id']) ) ? $this->getWhereClauseSQL( 'company_id', $id, 'uuid_list', $ph ) : NULL;
 
 		$query .= ' group by company_id';
 
@@ -265,7 +326,17 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		return $this;
 	}
 
-	function getMonthlyMinAvgMaxByCompanyIdAndStartDateAndEndDate($id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyUserCountListFactory
+	 */
+	function getMonthlyMinAvgMaxByCompanyIdAndStartDateAndEndDate( $id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -279,7 +350,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		}
 
 		$ph = array(
-					'company_id' => (int)$id,
+					'company_id' => TTUUID::castUUID($id),
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
@@ -321,7 +392,16 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		return $this;
 	}
 
-	function getMonthlyMinAvgMaxByStartDateAndEndDate($start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyUserCountListFactory
+	 */
+	function getMonthlyMinAvgMaxByStartDateAndEndDate( $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $start_date == '' ) {
 			return FALSE;
 		}
@@ -375,7 +455,18 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 	}
 
 	//This gets the totals across all companies.
-	function getTotalMonthlyMinAvgMaxByCompanyStatusAndStartDateAndEndDate($status_id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+
+	/**
+	 * @param int $status_id
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyUserCountListFactory
+	 */
+	function getTotalMonthlyMinAvgMaxByCompanyStatusAndStartDateAndEndDate( $status_id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $start_date == '' ) {
 			return FALSE;
 		}
@@ -449,13 +540,18 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		return $this;
 	}
 
-	function getLastDateByCompanyId($company_id, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyUserCountListFactory
+	 */
+	function getLastDateByCompanyId( $company_id, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -472,7 +568,13 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyUserCountListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -482,8 +584,8 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '

@@ -1,9 +1,15 @@
 DepartmentViewController = BaseViewController.extend( {
 	el: '#department_view_container',
+
+	_required_files: {
+		10: ['APIDepartment', 'APICompanyGenericTag'],
+		20: ['APIGEOFence']
+	},
+
 	status_array: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'DepartmentEditView.html';
 		this.permission_id = 'department';
 		this.viewId = 'Department';
@@ -100,7 +106,7 @@ DepartmentViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
 		form_item_input.TTagInput( {field: 'tag', object_type_id: 120} );
-		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_department_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_department_column1, '', null, null, true );
 
 	},
 

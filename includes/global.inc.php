@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -58,8 +58,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '10.7.2' );
-define('APPLICATION_VERSION_DATE', 1506409200 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("26-Sep-2017")."\n\n";'
+define('APPLICATION_VERSION', '11.0.0' );
+define('APPLICATION_VERSION_DATE', 1508482800 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("20-Oct-2017")."\n\n";'
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
 	define('OPERATING_SYSTEM', 'WIN' );
@@ -114,8 +114,8 @@ if ( isset($config_vars['other']['deployment_on_demand']) AND $config_vars['othe
 	define('DEPLOYMENT_ON_DEMAND', FALSE);
 }
 
-if ( isset($config_vars['other']['primary_company_id']) AND $config_vars['other']['primary_company_id'] > 0 ) {
-	define('PRIMARY_COMPANY_ID', (int)$config_vars['other']['primary_company_id']);
+if ( isset($config_vars['other']['primary_company_id']) AND $config_vars['other']['primary_company_id'] != '') {
+	define('PRIMARY_COMPANY_ID', (string)$config_vars['other']['primary_company_id']);
 } else {
 	define('PRIMARY_COMPANY_ID', FALSE);
 }
@@ -378,7 +378,6 @@ require_once(Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'module
 																																																							//**REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
 																																																							if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" class="footerLink" target="_blank">AGPLv3.</a>' ); } else { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. All Rights Reserved.' ); }
 Debug::setEnable( (bool)$config_vars['debug']['enable'] );
-Debug::setEnableTidy( FALSE );
 Debug::setEnableDisplay( (bool)$config_vars['debug']['enable_display'] );
 Debug::setBufferOutput( (bool)$config_vars['debug']['buffer_output'] );
 Debug::setEnableLog( (bool)$config_vars['debug']['enable_log'] );

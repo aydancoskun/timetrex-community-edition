@@ -1,10 +1,13 @@
 PayCodeViewController = BaseViewController.extend( {
 	el: '#pay_code_view_container',
+
+	_required_files: ['APIPayCode', 'APIPayFormulaPolicy', 'APIPayStubEntryAccount'],
+
 	type_array: null,
 	//pay_type_array: null,
 	//wage_source_type_array: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayCodeEditView.html';
 		this.permission_id = 'pay_code';
 		this.viewId = 'PayCode';
@@ -336,7 +339,7 @@ PayCodeViewController = BaseViewController.extend( {
 			field: 'pay_formula_policy_id',
 			custom_first_label: $.i18n._( '-- Defined By Policy --' ),
 			added_items: [
-				{value: 0, label: $.i18n._( '-- Defined By Policy --' )}
+				{value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Policy --' )}
 			]
 			} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_pay_code_column1 );

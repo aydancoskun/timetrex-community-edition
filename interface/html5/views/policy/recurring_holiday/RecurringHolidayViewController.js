@@ -1,6 +1,8 @@
 RecurringHolidayViewController = BaseViewController.extend( {
 	el: '#recurring_holiday_view_container',
 
+	_required_files: ['APIRecurringHoliday'],
+
 	special_day_array: null,
 	type_array: null,
 	day_of_month_array: null,
@@ -11,8 +13,8 @@ RecurringHolidayViewController = BaseViewController.extend( {
 	week_interval_array: null,
 	pivot_day_direction_array: null,
 	date_api: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'RecurringHolidayEditView.html';
 		this.permission_id = 'holiday_policy';
 		this.viewId = 'RecurringHoliday';
@@ -212,20 +214,20 @@ RecurringHolidayViewController = BaseViewController.extend( {
 
 		if ( parseInt( this.current_edit_record['special_day'] ) === 0 ) {
 
-			if ( this.current_edit_record['type_id'] === 10 ) {
+			if ( this.current_edit_record['type_id'] == 10 ) {
 				this.detachElement( 'week_interval' );
 				this.detachElement( 'day_of_week' );
 				this.detachElement( 'pivot_day_direction_id' );
 				this.attachElement( 'day_of_month' );
 				this.attachElement( 'month_int' );
 
-			} else if ( this.current_edit_record['type_id'] === 20 ) {
+			} else if ( this.current_edit_record['type_id'] == 20 ) {
 				this.attachElement( 'week_interval' );
 				this.attachElement( 'day_of_week' );
 				this.detachElement( 'pivot_day_direction_id' );
 				this.detachElement( 'day_of_month' );
 				this.attachElement( 'month_int' );
-			} else if ( this.current_edit_record['type_id'] === 30 ) {
+			} else if ( this.current_edit_record['type_id'] == 30 ) {
 				this.detachElement( 'week_interval' );
 				this.attachElement( 'day_of_week' );
 				this.attachElement( 'pivot_day_direction_id' );

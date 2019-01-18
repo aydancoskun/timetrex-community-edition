@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,6 +46,10 @@ class Serializer {
 
 	protected $simple_xml_obj = NULL;
 
+	/**
+	 * Serializer constructor.
+	 * @param string $format
+	 */
 	function __construct( $format = 'XML' ) {
 		$format = strtoupper($format);
 
@@ -56,25 +60,47 @@ class Serializer {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return string
+	 */
 	function PHPSerialize( $data ) {
 		return serialize( $data );
 	}
+
+	/**
+	 * @param $data
+	 * @return mixed
+	 */
 	function PHPDeSerialize( $data ) {
 		return deserialize( $data );
 	}
 
+	/**
+	 * @param $data
+	 * @return string
+	 */
 	function JSONSerialize( $data ) {
 		return json_encode( $data );
 	}
+
+	/**
+	 * @param $data
+	 * @return mixed
+	 */
 	function JSONDeSerialize( $data ) {
 		return json_decode( $data );
 	}
 
-	function extractXML($xml) {
+	/**
+	 * @param $xml
+	 * @return array|string
+	 */
+	function extractXML( $xml) {
 		if (! ( $xml->children() ) ) {
 			return (string)$xml;
 		}
-		
+
 		$element = array();
 		foreach ( $xml->children() as $child ) {
 			$name = $child->getName();
@@ -87,9 +113,20 @@ class Serializer {
 
 		return $element;
 	}
+
+	/**
+	 * @param $value
+	 * @param $key
+	 * @param $tmp_xml
+	 */
 	function XMLArrayWalkCallBack( &$value, $key, $tmp_xml ) {
 		$tmp_xml->addChild( $key, $value );
 	}
+
+	/**
+	 * @param $data
+	 * @return mixed
+	 */
 	function XMLSerialize( $data ) {
 		if ( is_array( $data ) ) {
 
@@ -121,6 +158,10 @@ class Serializer {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array|string
+	 */
 	function XMLDeSerialize( $data ) {
 		$xml = simplexml_load_string( $data );
 		if ( $xml ) {
@@ -128,12 +169,20 @@ class Serializer {
 		}
 	}
 
+	/**
+	 * @param $data
+	 * @return mixed
+	 */
 	function serialize( $data ) {
 		$function = $this->format.'Serialize';
 
 		return $this->$function($data);
 	}
 
+	/**
+	 * @param $data
+	 * @return mixed
+	 */
 	function deserialize( $data ) {
 		$function = $this->format.'DeSerialize';
 

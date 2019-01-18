@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,9 @@
  */
 class TaxSummaryReport extends Report {
 
+	/**
+	 * TaxSummaryReport constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('Tax Summary Report');
 		$this->file_name = 'tax_summary_report';
@@ -49,6 +52,11 @@ class TaxSummaryReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
 				AND $this->getPermissionObject()->Check('report', 'view_generic_tax_summary', $user_id, $company_id ) ) {
@@ -58,6 +66,11 @@ class TaxSummaryReport extends Report {
 		return FALSE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|mixed|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -76,7 +89,10 @@ class TaxSummaryReport extends Report {
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
 										'-1010-time_period' => TTi18n::gettext('Time Period'),
+										'-1900-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2000-company_deduction_id' => TTi18n::gettext('Tax'),
+										'-2005-payroll_remittance_agency_id' => TTi18n::gettext('Remittance Agency'),
+
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -88,7 +104,7 @@ class TaxSummaryReport extends Report {
 										'-3000-custom_filter' => TTi18n::gettext('Custom Filter'),
 
 										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
-										
+
 										'-5000-columns' => TTi18n::gettext('Display Columns'),
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
@@ -161,7 +177,7 @@ class TaxSummaryReport extends Report {
 										'-1090-default_branch' => TTi18n::gettext('Default Branch'),
 										'-1100-default_department' => TTi18n::gettext('Default Department'),
 										'-1102-default_job' => TTi18n::gettext('Default Job'),
-										'-1104-default_job_item' => TTi18n::gettext('Default Task'), 
+										'-1104-default_job_item' => TTi18n::gettext('Default Task'),
 										'-1110-currency' => TTi18n::gettext('Currency'),
 										'-1200-permission_control' => TTi18n::gettext('Permission Group'),
 										'-1210-pay_period_schedule' => TTi18n::gettext('Pay Period Schedule'),
@@ -177,7 +193,9 @@ class TaxSummaryReport extends Report {
 										'-1298-hire_date_age' => TTi18n::gettext('Length of Service'),
 										'-1299-birth_date_age' => TTi18n::gettext('Age'),
 
-										'-1410-company_deduction_name' => TTi18n::gettext('Tax/Deduction Name'),
+										'-1400-payroll_remittance_agency_name' => TTi18n::gettext('Remittance Agency'),
+
+										'-1510-company_deduction_name' => TTi18n::gettext('Tax/Deduction Name'),
 
 								);
 
@@ -233,15 +251,15 @@ class TaxSummaryReport extends Report {
 							$prefix = $type_options[$psea_obj->getType()] .' - ';
 						}
 
-						$retval['-3'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PA'.$psea_obj->getID()] = $prefix.$psea_obj->getName();
+						$retval['-3'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PA:'.$psea_obj->getID()] = $prefix.$psea_obj->getName();
 
 						if ( $psea_obj->getType() == 10 ) { //Earnings only can see units.
-							$retval['-4'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PR'.$psea_obj->getID()] = $prefix.$psea_obj->getName() .' ['. TTi18n::getText('Rate') .']';
-							$retval['-5'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PU'.$psea_obj->getID()] = $prefix.$psea_obj->getName() .' ['. TTi18n::getText('Units') .']';
+							$retval['-4'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PR:'.$psea_obj->getID()] = $prefix.$psea_obj->getName() .' ['. TTi18n::getText('Rate') .']';
+							$retval['-5'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PU:'.$psea_obj->getID()] = $prefix.$psea_obj->getName() .' ['. TTi18n::getText('Units') .']';
 						}
 
 						if ( $psea_obj->getType() == 50 ) { //Accruals, display balance/YTD amount.
-							$retval['-6'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PY'.$psea_obj->getID()] = $prefix.$psea_obj->getName() .' ['. TTi18n::getText('Balance') .']';
+							$retval['-6'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PY:'.$psea_obj->getID()] = $prefix.$psea_obj->getName() .' ['. TTi18n::getText('Balance') .']';
 						}
 
 						$i++;
@@ -339,7 +357,11 @@ class TaxSummaryReport extends Report {
 			case 'templates':
 				$retval = array(
 									'-1010-by_employee+taxes' => TTi18n::gettext('Tax by Employee'),
-									'-1010-by_company_deduction_by_employee+taxes' => TTi18n::gettext('Tax by Tax/Employee'),
+									'-1020-by_company_deduction_by_employee+taxes' => TTi18n::gettext('Tax by Tax/Employee'),
+									'-1030-by_payroll_remittance_agency+taxes' => TTi18n::gettext('Tax by Remittance Agency'),
+									'-1040-by_payroll_remittance_agency_by_company_deduction+taxes' => TTi18n::gettext('Tax by Remittance Agency/Tax'),
+									'-1050-by_payroll_remittance_agency_by_employee+taxes' => TTi18n::gettext('Tax by Remittance Agency/Employee'),
+									'-1060-by_payroll_remittance_agency_by_company_deduction_by_employee+taxes' => TTi18n::gettext('Tax by Remittance Agency/Tax/Employee'),
 								);
 
 				break;
@@ -374,7 +396,7 @@ class TaxSummaryReport extends Report {
 											$retval['columns'][] = 'last_name';
 											$retval['columns'][] = 'sin';
 
-											$retval['-2000-company_deduction_id'][] = 0;
+											$retval['-2000-company_deduction_id'][] = TTUUID::getZeroID();
 
 											$retval['group'][] = 'first_name';
 											$retval['group'][] = 'last_name';
@@ -390,7 +412,7 @@ class TaxSummaryReport extends Report {
 											$retval['columns'][] = 'last_name';
 											$retval['columns'][] = 'sin';
 
-											$retval['-2000-company_deduction_id'][] = 0;
+											$retval['-2000-company_deduction_id'][] = TTUUID::getZeroID();
 
 											$retval['group'][] = 'company_deduction_name';
 											$retval['group'][] = 'first_name';
@@ -399,6 +421,76 @@ class TaxSummaryReport extends Report {
 
 											$retval['sub_total'][] = 'company_deduction_name';
 
+											$retval['sort'][] = array('company_deduction_name' => 'asc');
+											$retval['sort'][] = array('last_name' => 'asc');
+											$retval['sort'][] = array('first_name' => 'asc');
+											$retval['sort'][] = array('sin' => 'asc');
+											break;
+										case 'by_payroll_remittance_agency':
+											$retval['columns'][] = 'payroll_remittance_agency_name';
+
+											$retval['-2000-company_deduction_id'][] = TTUUID::getZeroID();
+
+											$retval['group'][] = 'payroll_remittance_agency_name';
+
+											$retval['sub_total'][] = 'payroll_remittance_agency_name';
+
+											$retval['sort'][] = array('payroll_remittance_agency_name' => 'asc');
+											break;
+										case 'by_payroll_remittance_agency_by_company_deduction':
+											$retval['columns'][] = 'payroll_remittance_agency_name';
+											$retval['columns'][] = 'company_deduction_name';
+
+											$retval['-2000-company_deduction_id'][] = TTUUID::getZeroID();
+
+											$retval['group'][] = 'payroll_remittance_agency_name';
+											$retval['group'][] = 'company_deduction_name';
+
+											$retval['sub_total'][] = 'payroll_remittance_agency_name';
+											$retval['sub_total'][] = 'company_deduction_name';
+
+											$retval['sort'][] = array('payroll_remittance_agency_name' => 'asc');
+											$retval['sort'][] = array('company_deduction_name' => 'asc');
+											break;
+										case 'by_payroll_remittance_agency_by_employee':
+											$retval['columns'][] = 'payroll_remittance_agency_name';
+											$retval['columns'][] = 'first_name';
+											$retval['columns'][] = 'last_name';
+											$retval['columns'][] = 'sin';
+
+											$retval['-2000-company_deduction_id'][] = TTUUID::getZeroID();
+
+											$retval['group'][] = 'payroll_remittance_agency_name';
+											$retval['group'][] = 'first_name';
+											$retval['group'][] = 'last_name';
+											$retval['group'][] = 'sin';
+
+											$retval['sub_total'][] = 'payroll_remittance_agency_name';
+
+											$retval['sort'][] = array('payroll_remittance_agency_name' => 'asc');
+											$retval['sort'][] = array('last_name' => 'asc');
+											$retval['sort'][] = array('first_name' => 'asc');
+											$retval['sort'][] = array('sin' => 'asc');
+											break;
+										case 'by_payroll_remittance_agency_by_company_deduction_by_employee':
+											$retval['columns'][] = 'payroll_remittance_agency_name';
+											$retval['columns'][] = 'company_deduction_name';
+											$retval['columns'][] = 'first_name';
+											$retval['columns'][] = 'last_name';
+											$retval['columns'][] = 'sin';
+
+											$retval['-2000-company_deduction_id'][] = TTUUID::getZeroID();
+
+											$retval['group'][] = 'payroll_remittance_agency_name';
+											$retval['group'][] = 'company_deduction_name';
+											$retval['group'][] = 'first_name';
+											$retval['group'][] = 'last_name';
+											$retval['group'][] = 'sin';
+
+											$retval['sub_total'][] = 'payroll_remittance_agency_name';
+											$retval['sub_total'][] = 'company_deduction_name';
+
+											$retval['sort'][] = array('payroll_remittance_agency_name' => 'asc');
 											$retval['sort'][] = array('company_deduction_name' => 'asc');
 											$retval['sort'][] = array('last_name' => 'asc');
 											$retval['sort'][] = array('first_name' => 'asc');
@@ -448,277 +540,274 @@ class TaxSummaryReport extends Report {
 	}
 
 	//Get raw data for report
+
+	function getCompanyDeductionData( $company_id, $filter_data, $columns ) {
+		$company_deduction_data = array();
+
+		$cdlf = TTnew( 'CompanyDeductionListFactory' );
+		//Order by calculation_id DESC so Federal Taxes are always the parent of Fixed Amount records for example.
+		$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, NULL, NULL, NULL, array('calculation_id' => 'desc') );
+		Debug::Text('Company Deductions: '. $cdlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $cdlf->getRecordCount() > 0 ) {
+			$duplicate_pay_stub_entry_account_map = array();
+
+			if ( isset($columns['payroll_remittance_agency_name']) ) {
+				$enable_split_by_payroll_remittance_agency = TRUE;
+			} else {
+				$enable_split_by_payroll_remittance_agency = FALSE;
+			}
+
+			if ( isset($columns['company_deduction_name']) ) {
+				$enable_split_by_company_deduction = TRUE;
+			} else {
+				$enable_split_by_company_deduction = FALSE;
+			}
+
+			$i = 0;
+			foreach( $cdlf as $cd_obj ) {
+				Debug::Text('  Company Deduction: '. $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
+
+				if ( $enable_split_by_payroll_remittance_agency == FALSE ) {
+					$tmp_payroll_remittance_agency_id = TTUUID::getZeroID();
+				} else {
+					$tmp_payroll_remittance_agency_id = $cd_obj->getPayrollRemittanceAgency();
+				}
+
+				if ( $enable_split_by_company_deduction == FALSE ) {
+					$tmp_company_deduction_id = TTUUID::getZeroID();
+				} else {
+					if ( isset( $duplicate_pay_stub_entry_account_map[$tmp_payroll_remittance_agency_id][$cd_obj->getPayStubEntryAccount()] ) ) {
+						$tmp_company_deduction_id = $duplicate_pay_stub_entry_account_map[$tmp_payroll_remittance_agency_id][$cd_obj->getPayStubEntryAccount()];
+						Debug::Text( 'Merging Company Deductions: Parent: ' . $company_deduction_data[$tmp_payroll_remittance_agency_id][ $tmp_company_deduction_id ]->getName() . ' (' . $tmp_company_deduction_id . ') Child: ' . $cd_obj->getName() . ' (' . $cd_obj->getId() . ')', __FILE__, __LINE__, __METHOD__, 10 );
+
+						$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->duplicate_of[] = $cd_obj;
+					} else {
+						$tmp_company_deduction_id = $cd_obj->getID();
+					}
+				}
+
+				if ( !isset($company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id] ) ) { //Make sure when $enable_split_by_company_deduction == FALSE we don't overwrite the COMPOSITE object.
+					$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id] = $cd_obj;
+				}
+
+				if ( !isset($company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->include_psea_ids) ) {
+					$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->include_psea_ids = array();
+				}
+				$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->include_psea_ids = array_merge( $company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->include_psea_ids, $cd_obj->getExpandedPayStubEntryAccountIDs( $cd_obj->getIncludePayStubEntryAccount() ) );
+
+				if ( !isset($company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->exclude_psea_ids) ) {
+					$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->exclude_psea_ids = array();
+				}
+				$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->exclude_psea_ids = array_merge( $company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->exclude_psea_ids, $cd_obj->getExpandedPayStubEntryAccountIDs( $cd_obj->getExcludePayStubEntryAccount() ) );
+
+				if ( !isset($company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->tax_withheld_psea_ids) ) {
+					$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->tax_withheld_psea_ids = array();
+				}
+				$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->tax_withheld_psea_ids = array_merge( $company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->tax_withheld_psea_ids, array( $cd_obj->getPayStubEntryAccount() ) );
+
+				$duplicate_pay_stub_entry_account_map[$tmp_payroll_remittance_agency_id][$cd_obj->getPayStubEntryAccount()] = $tmp_company_deduction_id;
+
+				//This needs to go last, otherwise changing the ID can cause failures getting child data like Include/Exclude PSEAs.
+//				if ( $i == 0 AND $enable_split_by_company_deduction == FALSE ) {
+//					$cd_obj->setName( 'COMPOSITE' );
+//					$cd_obj->setId( TTUUID::getZeroID() );
+//				}
+
+
+				$i++;
+			}
+		}
+
+		//Debug::Arr( $company_deduction_data, 'Company Deductions Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		return $company_deduction_data;
+	}
+
+	function getUserDeductionData( $company_id, $filter_data ) {
+		//To help determine MaximumTaxableWages, we need to get the UserDeduction records and call getMaximumPayStubEntryAccountAmount().
+		$user_deduction_data = array();
+		$udlf = TTnew( 'UserDeductionListFactory' );
+		$udlf->getByCompanyIdAndCompanyDeductionId( $company_id, $filter_data );
+		if ( $udlf->getRecordCount() > 0 ) {
+			foreach( $udlf as $ud_obj ) {
+				if ( $ud_obj->getMaximumPayStubEntryAccountAmount() != FALSE OR $ud_obj->getRate() != FALSE ) {
+					$user_deduction_data[$ud_obj->getCompanyDeduction()][$ud_obj->getUser()] = array( 'maximum_pay_stub_entry_amount' => $ud_obj->getMaximumPayStubEntryAccountAmount(), 'rate' => $ud_obj->getRate() );
+				}
+			}
+		}
+
+		return $user_deduction_data;
+	}
+
+	function addPayStubEntry( $cd_obj, $pse_obj ) {
+		$company_deduction_id = $cd_obj->getId();
+		$remittance_agency_id = $cd_obj->getPayrollRemittanceAgency();
+
+		$deduction_include_psea_ids = $cd_obj->include_psea_ids; //These should already be from getExpandedPayStubEntryAccountIDs()
+		$deduction_exclude_psea_ids = $cd_obj->exclude_psea_ids; //These should already be from getExpandedPayStubEntryAccountIDs()
+		$tax_withheld_psea_ids = $cd_obj->tax_withheld_psea_ids;
+
+		$user_id = $pse_obj->getColumn('user_id');
+		$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
+		$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
+
+		Debug::Text('    Processing PSE record: Agency ID: '. $remittance_agency_id .' Deduction ID: '. $company_deduction_id .' PSE Name ID: '. $pay_stub_entry_name_id .' Amount: '. $pse_obj->getColumn('amount'), __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]) ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id] = array(
+					'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
+					'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
+					'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+					'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+					'pay_period_id' => $pse_obj->getColumn('pay_period_id'),
+			);
+		}
+
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['PA:'.$pay_stub_entry_name_id]) ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['PA:'.$pay_stub_entry_name_id] = 0;
+		}
+		$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['PA:'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['PA:'.$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
+
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['PY:'.$pay_stub_entry_name_id]) ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['PY:'.$pay_stub_entry_name_id] = 0;
+		}
+		$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['PY:'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['PY:'.$pay_stub_entry_name_id], $pse_obj->getColumn('ytd_amount') );
+
+
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_wages']) ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_wages'] = 0;
+		}
+		$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_wages'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
+
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd']) ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd'] = 0;
+		}
+		$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd'] = bcadd( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('ytd_amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
+
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_units']) ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_units'] = 0;
+		}
+		$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_units'] = bcadd( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_units'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('units'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
+
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_rate']) ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_rate'] = 0;
+		}
+		$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_rate'] = ( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_units'] > 0 ) ? bcdiv($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_wages'], $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['subject_units']) : 0;
+
+
+
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages']) ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] = 0;
+		}
+		$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
+
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd']) ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = 0;
+		}
+		$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = bcadd( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('ytd_amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
+
+		if ( empty($tax_withheld_psea_ids) == FALSE AND in_array($pay_stub_entry_name_id, $tax_withheld_psea_ids ) ) {
+			if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['tax_withheld']) ) {
+				$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] = 0;
+			}
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] = bcadd( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'], $pse_obj->getColumn('amount') );
+		}
+
+		$pay_period_weeks = round( TTDate::getWeeks( ( TTDate::getEndDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') ) ) - TTDate::getBeginDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_start_date') ) ) ) ), 2 );
+
+		//For unemployment reports, we need to know the weeks where renumeration was received, so count weeks between start/end date of pay period
+		//Set pay period weeks once per transaction date (pay period)
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['pay_period_weeks']) ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['pay_period_weeks'] = $pay_period_weeks;
+		}
+
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['pay_period_taxable_wages_weeks'])
+				AND isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'])
+				AND $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] > 0 ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['pay_period_taxable_wages_weeks'] = $pay_period_weeks;
+		}
+		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['pay_period_tax_withheld_weeks'])
+				AND isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'])
+				AND $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] > 0 ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['pay_period_tax_withheld_weeks'] = $pay_period_weeks;
+		}
+
+		if ( isset($user_deduction_data[$company_deduction_id][$user_id]) AND $user_deduction_data[$company_deduction_id][$user_id]['rate'] != FALSE ) {
+			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['company_deduction_rate'] = $user_deduction_data[$company_deduction_id][$user_id]['rate'];
+		}
+
+		return TRUE;
+	}
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array('pay_stub_entry' => array(), 'user' => array() );
 
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
+		$company_deduction_filter_data = array();
+
+		if ( isset( $filter_data['company_deduction_id'] ) ) {
+			$company_deduction_filter_data['id'] = $filter_data['company_deduction_id'];
+		}
+
+		if ( isset( $filter_data['payroll_remittance_agency_id'] ) ) {
+			$company_deduction_filter_data['payroll_remittance_agency_id'] = $filter_data['payroll_remittance_agency_id'];
+		}
 
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		$ulf = TTnew( 'UserListFactory' );
-		$ulf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		if ( $ulf->getRecordCount() > 0 ) {
 			if ( isset( $filter_data['company_deduction_id'] ) == FALSE ) {
 				$filter_data['company_deduction_id'] = '';
 			}
 
-			if ( is_array($filter_data['company_deduction_id']) AND count($filter_data['company_deduction_id']) > 0 AND isset($columns['company_deduction_name']) ) {
+			if ( ( is_array($filter_data['company_deduction_id']) AND count($filter_data['company_deduction_id']) > 0 AND isset($columns['company_deduction_name']) ) ) {
 				Debug::Text('Multiple Tax/Deductions selected along with Tax/Deduction name', __FILE__, __LINE__, __METHOD__, 10);
 				$enable_split_tax_deduction_data = TRUE;
 			} else {
 				$enable_split_tax_deduction_data = FALSE;
-
-				$deduction_include_psea_ids = array();
-				$deduction_exclude_psea_ids = array();
-				$tax_withheld_psea_ids = array();
-				Debug::Text('Multiple Tax/Deductions selected WITHOUT Tax/Deduction name', __FILE__, __LINE__, __METHOD__, 10);
-				$cdlf = TTnew( 'CompanyDeductionListFactory' );
-				$cdlf->getByCompanyIdAndId( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'] );
-				if ( $cdlf->getRecordCount() > 0 ) {
-						Debug::Text('aFound Company Deductions...', __FILE__, __LINE__, __METHOD__, 10);
-						foreach( $cdlf as $cd_obj ) {
-							$deduction_include_psea_ids = array_merge($deduction_include_psea_ids, $cd_obj->getExpandedPayStubEntryAccountIDs( $cd_obj->getIncludePayStubEntryAccount() ) );
-							$deduction_exclude_psea_ids = array_merge($deduction_exclude_psea_ids, $cd_obj->getExpandedPayStubEntryAccountIDs( $cd_obj->getExcludePayStubEntryAccount() ) );
-							$tax_withheld_psea_ids[] = $cd_obj->getPayStubEntryAccount();
-						}
-						$deduction_include_psea_ids = array_unique( $deduction_include_psea_ids );
-						$deduction_exclude_psea_ids = array_unique( $deduction_exclude_psea_ids );
-						$tax_withheld_psea_ids = array_unique( $tax_withheld_psea_ids );
-				}
-				//Debug::Arr( array($deduction_include_psea_ids, $deduction_exclude_psea_ids), 'Include/Exclude PSEA IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 			}
 
-			//To help determine MaximumTaxableWages, we need to get the UserDeduction records and call getMaximumPayStubEntryAccountAmount().
-			$user_deduction_data = array();
-			$udlf = TTnew( 'UserDeductionListFactory' );
-			$udlf->getByCompanyIdAndCompanyDeductionId( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'] );
-			if ( $udlf->getRecordCount() > 0 ) {
-				foreach( $udlf as $ud_obj ) {
-					if ( $ud_obj->getMaximumPayStubEntryAccountAmount() != FALSE OR $ud_obj->getRate() != FALSE ) {
-						$user_deduction_data[$ud_obj->getCompanyDeduction()][$ud_obj->getUser()] = array( 'maximum_pay_stub_entry_amount' => $ud_obj->getMaximumPayStubEntryAccountAmount(), 'rate' => $ud_obj->getRate() );
-					}
-				}
-			}
+			$company_deduction_data = $this->getCompanyDeductionData( $this->getUserObject()->getCompany(), $company_deduction_filter_data, $columns );
+			$user_deduction_data = $this->getUserDeductionData( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'] );
+
 			//Debug::Arr($user_deduction_data, 'User Deduction Maximum Amount Data: ', __FILE__, __LINE__, __METHOD__, 10);
-			
+
 			if ( !isset($filter_data['exclude_ytd_adjustment']) ) {
 				$filter_data['exclude_ytd_adjustment'] = FALSE;
 			}
 
+			//Debug::Arr($filter_data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+			//We have to use the same PSE records and combine them in different ways for different Tax/Deduction or Remittance Agencies.
+			//  For example, the same earnings records are likely to count towards many different Tax/Deduction records.
 			$pself = TTnew( 'PayStubEntryListFactory' );
 			$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			if ( $enable_split_tax_deduction_data == FALSE ) {
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 			}
 			if ( $pself->getRecordCount() > 0 ) {
-				$x = 0;
+				if ( is_array( $company_deduction_data ) AND count( $company_deduction_data ) > 0 ) {
+					Debug::Text( 'Found Company Deductions...', __FILE__, __LINE__, __METHOD__, 10 );
+					foreach ( $company_deduction_data as $payroll_remittance_agency_id => $payroll_remittance_agency_data ) {
+						Debug::Text( '  Processing Remittance Agency: ' . $payroll_remittance_agency_id, __FILE__, __LINE__, __METHOD__, 10 );
+						foreach ( $payroll_remittance_agency_data as $cd_obj ) {
+							Debug::Text( '  Processing Company Deduction: ' . $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
+							//Debug::Arr( $cd_obj->include_psea_ids, '    Include PSEA IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
+							//Debug::Arr( $cd_obj->exclude_psea_ids, '    Exclude PSEA IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
+							//Debug::Arr( $cd_obj->getPayStubEntryAccount(), '   Withheld PSEA IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				if ( $enable_split_tax_deduction_data == TRUE ) {
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
-					$cdlf->getByCompanyIdAndId( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'] );
-					$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( $pself->getRecordCount() * $cdlf->getRecordCount() ), NULL, TTi18n::getText('Retrieving Data...') );
-					if ( $cdlf->getRecordCount() > 0 ) {
-						Debug::Text('bFound Company Deductions...', __FILE__, __LINE__, __METHOD__, 10);
-						foreach( $cdlf as $cd_obj ) {
-							$company_deduction_id = $cd_obj->getId();
-
-							$deduction_include_psea_ids = $cd_obj->getExpandedPayStubEntryAccountIDs( $cd_obj->getIncludePayStubEntryAccount() );
-							$deduction_exclude_psea_ids = $cd_obj->getExpandedPayStubEntryAccountIDs( $cd_obj->getExcludePayStubEntryAccount() );
-							$tax_withheld_psea_ids = array( $cd_obj->getPayStubEntryAccount() );
-
-							foreach( $pself as $key => $pse_obj ) {
-								$user_id = $pse_obj->getColumn('user_id');
-								$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
-								$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
-
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]) ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id] = array(
-																		'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
-																		'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
-																		'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
-																		'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
-																		'pay_period_id' => $pse_obj->getColumn('pay_period_id'),
-																		);
-								}
-
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id]) ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id] = 0;
-								}
-								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
-
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id]) ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id] = 0;
-								}
-								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id], $pse_obj->getColumn('ytd_amount') );
-
-
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages']) ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages'] = 0;
-								}
-								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd']) ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd'] = 0;
-								}
-								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('ytd_amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units']) ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'] = 0;
-								}
-								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('units'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-								
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_rate']) ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_rate'] = 0;
-								}
-								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_rate'] = ( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'] > 0 ) ? bcdiv($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages'], $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units']) : 0;
-
-
-
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages']) ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] = 0;
-								}
-								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd']) ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = 0;
-								}
-								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('ytd_amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-
-								if ( empty($tax_withheld_psea_ids) == FALSE AND in_array($pay_stub_entry_name_id, $tax_withheld_psea_ids ) ) {
-									if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld']) ) {
-										$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] = 0;
-									}
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'], $pse_obj->getColumn('amount') );
-								}
-
-								$pay_period_weeks = round( TTDate::getWeeks( ( TTDate::getEndDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') ) ) - TTDate::getBeginDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_start_date') ) ) ) ), 2 );
-
-								//For unemployment reports, we need to know the weeks where renumeration was received, so count weeks between start/end date of pay period
-								//Set pay period weeks once per transaction date (pay period)
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_weeks']) ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_weeks'] = $pay_period_weeks;
-								}
-
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_taxable_wages_weeks'])
-										AND isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'])
-										AND $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] > 0 ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_taxable_wages_weeks'] = $pay_period_weeks;
-								}
-								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_tax_withheld_weeks'])
-										AND isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'])
-										AND $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] > 0 ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_tax_withheld_weeks'] = $pay_period_weeks;
-								}
-
-								if ( isset($user_deduction_data[$company_deduction_id][$user_id]) AND $user_deduction_data[$company_deduction_id][$user_id]['rate'] != FALSE ) {
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['company_deduction_rate'] = $user_deduction_data[$company_deduction_id][$user_id]['rate'];
-								}
-
-								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
-
-								$x++;
+							foreach ( $pself as $key => $pse_obj ) {
+								$this->addPayStubEntry( $cd_obj, $pse_obj );
 							}
 						}
 					}
-				} else {
-					if ( is_array( $filter_data['company_deduction_id'] ) AND count($filter_data['company_deduction_id']) == 1 AND isset($filter_data['company_deduction_id'][0]) ) {
-						$company_deduction_id = $filter_data['company_deduction_id'][0];
-					} else {
-						$company_deduction_id = 0;
-					}
-					Debug::Text('Company Deduction ID: '. $company_deduction_id, __FILE__, __LINE__, __METHOD__, 10);
-					foreach( $pself as $key => $pse_obj ) {
-						$user_id = $pse_obj->getColumn('user_id');
-						$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
-						$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
-
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]) ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id] = array(
-																'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
-																'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
-																'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
-																'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
-																'pay_period_id' => $pse_obj->getColumn('pay_period_id'),
-																);
-						}
-
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id]) ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id] = 0;
-						}
-						$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
-
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id]) ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id] = 0;
-						}
-						$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id], $pse_obj->getColumn('ytd_amount') );
-
-
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages']) ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages'] = 0;
-						}
-						$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd']) ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd'] = 0;
-						}
-						$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages_ytd'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('ytd_amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units']) ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'] = 0;
-						}
-						$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('units'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_rate']) ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_rate'] = 0;
-						}
-						$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_rate'] = ( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'] > 0 ) ? bcdiv($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_wages'], $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units']) : 0;
-
-
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages']) ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] = 0;
-						}
-						$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd']) ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = 0;
-						}
-						$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('ytd_amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-						
-						if ( empty($tax_withheld_psea_ids) == FALSE AND in_array($pay_stub_entry_name_id, $tax_withheld_psea_ids ) ) {
-							if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld']) ) {
-								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] = 0;
-							}
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'], $pse_obj->getColumn('amount') );
-						}
-						$pay_period_weeks = round( TTDate::getWeeks( ( TTDate::getEndDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') ) ) - TTDate::getBeginDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_start_date') ) ) ) ), 2 );
-
-						//For unemployment reports, we need to know the weeks where renumeration was received, so count weeks between start/end date of pay period
-						//Set pay period weeks once per transaction date (pay period)
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_weeks']) ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_weeks'] = $pay_period_weeks;
-						}
-
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_taxable_wages_weeks'])
-								AND isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'])
-								AND $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] > 0 ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_taxable_wages_weeks'] = $pay_period_weeks;
-						}
-						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_tax_withheld_weeks'])
-								AND isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'])
-								AND $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] > 0 ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['pay_period_tax_withheld_weeks'] = $pay_period_weeks;
-						}
-
-						if ( isset($user_deduction_data[$company_deduction_id][$user_id]) AND $user_deduction_data[$company_deduction_id][$user_id]['rate'] != FALSE ) {
-							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['company_deduction_rate'] = $user_deduction_data[$company_deduction_id][$user_id]['rate'];
-						}
-
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
-
-						$x++;
-					}
-
 				}
 
 				//Loop through all records and handle maximum amounts.
@@ -726,32 +815,35 @@ class TaxSummaryReport extends Report {
 				//	then the next row has an excluded (negative) amount, so now we've capped the amount at a maximum, and its reduced by -XX.XX.
 				//  Instead just handle all the include/exclude amount above first, then once that is done go through and cap any necessary amounts.
 				if ( count($user_deduction_data) > 0 ) {
-					foreach( $this->tmp_data['pay_stub_entry'] as $company_deduction_id => $level1 ) {
-						foreach( $level1 as $date_stamp => $level2 ) {
-							foreach( $level2 as $user_id => $row ) {
-								//Debug::Text('Before Current Taxable Wages: '. $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] .' YTD: '. $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'], __FILE__, __LINE__, __METHOD__, 10);
-								if ( isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'])
-										AND isset($user_deduction_data[$company_deduction_id][$user_id])
-										AND $user_deduction_data[$company_deduction_id][$user_id]['maximum_pay_stub_entry_amount'] > 0
-										AND $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] > $user_deduction_data[$company_deduction_id][$user_id]['maximum_pay_stub_entry_amount'] ) {
-									//Make sure taxable wages abides by maximum amount properly.
-									$tmp_taxable_wages_ytd_diff = ( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] - $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] );
-									$tmp_taxable_wages_max_diff = ( $user_deduction_data[$company_deduction_id][$user_id]['maximum_pay_stub_entry_amount'] - $tmp_taxable_wages_ytd_diff );
-									//Debug::Text('  Taxable Wages YTD Diff: '. $tmp_taxable_wages_ytd_diff .' Max Diff: '. $tmp_taxable_wages_max_diff, __FILE__, __LINE__, __METHOD__, 10);
-									if ( $tmp_taxable_wages_ytd_diff < $user_deduction_data[$company_deduction_id][$user_id]['maximum_pay_stub_entry_amount'] ) {
-											$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] = $tmp_taxable_wages_max_diff;
-									} else {
-											$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] = 0;
+					foreach( $this->tmp_data['pay_stub_entry'] as $remittance_agency_id => $level1 ) {
+						foreach ( $level1 as $company_deduction_id => $level2 ) {
+							foreach ( $level2 as $date_stamp => $level3 ) {
+								foreach ( $level3 as $user_id => $row ) {
+									Debug::Text( 'Before Current Taxable Wages: ' . $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $user_id ]['taxable_wages'] . ' YTD: ' . $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $user_id ]['taxable_wages_ytd'], __FILE__, __LINE__, __METHOD__, 10 );
+									if ( isset( $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $user_id ]['taxable_wages'] )
+											AND isset( $user_deduction_data[ $company_deduction_id ][ $user_id ] )
+											AND $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount'] > 0
+											AND $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $user_id ]['taxable_wages_ytd'] > $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount']
+									) {
+										//Make sure taxable wages abides by maximum amount properly.
+										$tmp_taxable_wages_ytd_diff = ( $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $user_id ]['taxable_wages_ytd'] - $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $user_id ]['taxable_wages'] );
+										$tmp_taxable_wages_max_diff = ( $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount'] - $tmp_taxable_wages_ytd_diff );
+										//Debug::Text('  Taxable Wages YTD Diff: '. $tmp_taxable_wages_ytd_diff .' Max Diff: '. $tmp_taxable_wages_max_diff, __FILE__, __LINE__, __METHOD__, 10);
+										if ( $tmp_taxable_wages_ytd_diff < $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount'] ) {
+											$this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $user_id ]['taxable_wages'] = $tmp_taxable_wages_max_diff;
+										} else {
+											$this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $user_id ]['taxable_wages'] = 0;
+										}
+
+										$this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $user_id ]['taxable_wages_ytd'] = $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount'];
+										unset( $tmp_taxable_wages_ytd_diff, $tmp_taxable_wages_max_diff );
 									}
-	
-									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = $user_deduction_data[$company_deduction_id][$user_id]['maximum_pay_stub_entry_amount'];
-									unset( $tmp_taxable_wages_ytd_diff, $tmp_taxable_wages_max_diff );
+									//Debug::Text('After Current Taxable Wages: '. $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] .' YTD: '. $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'], __FILE__, __LINE__, __METHOD__, 10);
 								}
-								//Debug::Text('After Current Taxable Wages: '. $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] .' YTD: '. $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'], __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 					}
-					unset($level1, $level2, $company_deduction_id, $date_stamp, $user_id, $row);
+					unset($level1, $level2, $level3, $remittance_agency_id, $date_stamp, $user_id, $row);
 				}
 			}
 		}
@@ -767,50 +859,74 @@ class TaxSummaryReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
+		//Get remittance agency data for joining.
+		$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$pralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pralf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+		foreach ( $pralf as $key => $ra_obj ) {
+			$this->tmp_data['payroll_remittance_agency'][$ra_obj->getId()] = Misc::addKeyPrefix( 'payroll_remittance_agency_', (array)$ra_obj->getObjectAsArray( array( 'id' => TRUE, 'name' => TRUE ) ) );
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+		}
+
 		//Company Deduction data for joining...
 		$cdlf = TTnew( 'CompanyDeductionListFactory' );
-		$cdlf->getByCompanyIdAndId( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'] );
+		$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $company_deduction_filter_data );
+
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $cdlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach( $cdlf as $key => $cd_obj ) {
-				$this->tmp_data['company_deduction'][$cd_obj->getId()] = Misc::addKeyPrefix( 'company_deduction_', (array)$cd_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE ) ) );
+				$this->tmp_data['company_deduction'][$cd_obj->getId()] = Misc::addKeyPrefix( 'company_deduction_', (array)$cd_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'payroll_remittance_agency_id' => TRUE ) ) );
+
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
 		}
 
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
-	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
+	/**
+	 * @return bool
+	 */
+	function _preProcess() {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
+
 			//foreach( $this->tmp_data['pay_stub_entry'] as $date_stamp => $level_1 ) {
-			foreach( $this->tmp_data['pay_stub_entry'] as $company_deduction_id => $level_1 ) {
-				foreach( $level_1 as $date_stamp => $level_2 ) {
-					foreach( $level_2 as $user_id => $row ) {
-						if ( isset($this->tmp_data['user'][$user_id]) ) {
-							$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-							$processed_data	 = array(
-												//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
-												//'pay_stub' => array('sort' => $row['pay_stub_transaction_date'], 'display' => TTDate::getDate('DATE', $row['pay_stub_transaction_date'] ) ),
-												);
-							//Need to make sure PSEA IDs are strings not numeric otherwise array_merge will re-key them.
+			foreach( $this->tmp_data['pay_stub_entry'] as $remittance_agency_id => $level_0 ) {
+				foreach ( $this->tmp_data['pay_stub_entry'][$remittance_agency_id] as $company_deduction_id => $level_1 ) {
+					foreach ( $level_1 as $date_stamp => $level_2 ) {
+						foreach ( $level_2 as $user_id => $row ) {
+							if ( isset( $this->tmp_data['user'][ $user_id ] ) ) {
+								$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
+								$processed_data = array(
+									//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
+									//'pay_stub' => array('sort' => $row['pay_stub_transaction_date'], 'display' => TTDate::getDate('DATE', $row['pay_stub_transaction_date'] ) ),
+								);
+								//Need to make sure PSEA IDs are strings not numeric otherwise array_merge will re-key them.
 
-							if ( isset($this->tmp_data['company_deduction'][$company_deduction_id]) ) {
-								$tmp_company_deduction = $this->tmp_data['company_deduction'][$company_deduction_id];
-							} else {
-								$tmp_company_deduction = array();
+								if ( isset( $this->tmp_data['company_deduction'][ $company_deduction_id ] ) ) {
+									$tmp_company_deduction = $this->tmp_data['company_deduction'][ $company_deduction_id ];
+								} else {
+									$tmp_company_deduction = array();
+								}
+
+								if ( isset( $this->tmp_data['payroll_remittance_agency'][ $remittance_agency_id ] ) ) {
+									$tmp_payroll_remittance_agency = $this->tmp_data['payroll_remittance_agency'][ $remittance_agency_id ];
+								} else {
+									$tmp_payroll_remittance_agency = array();
+								}
+
+								$this->data[] = array_merge( $this->tmp_data['user'][ $user_id ], $tmp_company_deduction, $tmp_payroll_remittance_agency, $row, $date_columns, $processed_data );
+
+								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+								$key++;
 							}
-							$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_company_deduction, $row, $date_columns, $processed_data );
-
-							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-							$key++;
 						}
 					}
 				}
@@ -819,7 +935,7 @@ class TaxSummaryReport extends Report {
 			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1 );
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		return TRUE;
 	}
 }

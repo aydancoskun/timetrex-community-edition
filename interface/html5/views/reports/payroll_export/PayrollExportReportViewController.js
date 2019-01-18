@@ -1,5 +1,7 @@
 PayrollExportReportViewController = ReportBaseViewController.extend( {
 
+	_required_files: ['APIPayrollExportReport', 'APITimeSheetVerify', 'APICurrency'],
+
 	export_type_array: null,
 
 	export_policy_array: null,
@@ -14,8 +16,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 	save_export_setup_data: {},
 
-	initialize: function( options ) {
-		this.__super( 'initialize', options );
+	initReport: function( options ) {
 		this.script_name = 'PayrollExportReport';
 		this.viewId = 'PayrollExportReport';
 		this.context_menu_name = $.i18n._( 'Payroll Export' );
@@ -24,9 +25,6 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIPayrollExportReport' ))();
 		this.include_form_setup = true;
 		this.export_setup_data = {};
-
-		this.buildContextMenu();
-
 	},
 
 	initOptions: function( callBack ) {
@@ -187,22 +185,27 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			this.select_grid_last_row = null;
 		}
 
+		var message_override = $.i18n._( 'Setup data for this report has not been configured yet. Please click on the Export Setup tab to do so now.' )
+
 		switch ( id ) {
 			case ContextMenuIconName.view:
-				this.onViewClick();
+				ProgressBar.showOverlay();
+				this.onViewClick(null, false, message_override);
 				break;
 			case ContextMenuIconName.view_html:
-
-				this.onViewClick( 'html' );
+				ProgressBar.showOverlay();
+				this.onViewClick( 'html', false, message_override );
 				break;
+				ProgressBar.showOverlay();
 			case ContextMenuIconName.view_html_new_window:
-				this.onViewClick( 'html', true );
+				this.onViewClick( 'html', false, message_override );
 				break;
 			case ContextMenuIconName.export_excel:
-				this.onViewExcelClick();
+				this.onViewExcelClick(message_override);
 				break;
 			case ContextMenuIconName.export_export:
-				this.onViewClick( 'payroll_export' );
+				ProgressBar.showOverlay();
+				this.onViewClick( 'payroll_export', false, message_override );
 				break;
 			case ContextMenuIconName.cancel:
 				this.onCancelClick();
@@ -214,9 +217,11 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				this.onSaveNewReportClick();
 				break;
 			case ContextMenuIconName.timesheet_view: //All report view
+				ProgressBar.showOverlay();
 				this.onViewClick( 'pdf_timesheet' );
 				break;
 			case ContextMenuIconName.timesheet_view_detail: //All report view
+				ProgressBar.showOverlay();
 				this.onViewClick( 'pdf_timesheet_detail' );
 				break;
 			case ContextMenuIconName.save_setup: //All report view
@@ -641,7 +646,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				var column_id = row.label;
 				var export_column_value = export_columns[row.value];
 				// Error: Uncaught TypeError: Cannot read property 'hour_column' of undefined in /interface/html5/#!m=Exception&sm=PayrollExportReport&sid=1726 line 523
-				if ( !export_column_value ) {
+				if ( Global.isSet(export_column_value) == false ) {
 					if ( default_columns && row.value && default_columns[row.value] ) {
 						export_column_value = default_columns[row.value]
 					} else {

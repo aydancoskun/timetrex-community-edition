@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,9 +39,16 @@
  * @package Core
  */
 require_once( Environment::getBasePath() .'/classes/pear/System/SharedMemory.php');
+
+/**
+ * Class SharedMemory
+ */
 class SharedMemory {
 	protected $obj = NULL;
 
+	/**
+	 * SharedMemory constructor.
+	 */
 	function __construct() {
 		global $config_vars;
 
@@ -49,7 +56,7 @@ class SharedMemory {
 		if ( isset($config_vars['cache']['redis_host']) AND $config_vars['cache']['redis_host'] != '' ) {
 			$split_server = explode(',', $config_vars['cache']['redis_host'] );
 			$host = $split_server[0]; //Use just the master server.
-			
+
 			$this->obj = $shared_memory->Factory( 'Redis', array('host' => $host, 'db' => ( isset($config_vars['cache']['redis_db']) ) ? $config_vars['cache']['redis_db'] : '', 'timeout' => 1 ) );
 		} else {
 			if ( OPERATING_SYSTEM == 'WIN' ) {
@@ -63,6 +70,11 @@ class SharedMemory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $key
+	 * @param $value
+	 * @return bool
+	 */
 	function set( $key, $value ) {
 		if ( is_string( $key ) ) {
 			return $this->obj->set( $key, $value );
@@ -70,6 +82,10 @@ class SharedMemory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $key
+	 * @return bool
+	 */
 	function get( $key ) {
 		if ( is_string( $key ) ) {
 			return $this->obj->get( $key );
@@ -77,6 +93,10 @@ class SharedMemory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $key
+	 * @return bool
+	 */
 	function delete( $key ) {
 		if ( is_string( $key ) ) {
 			return $this->obj->rm( $key );

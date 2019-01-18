@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class UserReportDataFactory extends Factory {
 	protected $user_obj = NULL;
 	protected $obj_handler = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -89,6 +94,10 @@ class UserReportDataFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -106,10 +115,16 @@ class UserReportDataFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getObjectHandler() {
 		if ( is_object($this->obj_handler) ) {
 			return $this->obj_handler;
@@ -124,79 +139,68 @@ class UserReportDataFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(			'company',
-															$clf->getByID($id),
-															TTi18n::gettext('Invalid Company')
-															) ) {
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value ) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid Employee')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value ) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getScript() {
-		if ( isset($this->data['script']) ) {
-			return $this->data['script'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'script' );
 	}
-	function setScript($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScript( $value) {
 		//Strip out double slashes, as sometimes those occur and they cause the saved settings to not appear.
 		$value = self::handleScriptName( trim($value) );
-		if (	$this->Validator->isLength(	'script',
-											$value,
-											TTi18n::gettext('Invalid script'),
-											1, 250)
-						) {
-
-			$this->data['script'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'script', $value );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		if ( $this->getCompany() == FALSE ) {
 			return FALSE;
 		}
@@ -213,7 +217,7 @@ class UserReportDataFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'script' => $this->getScript(),
 					'name' => TTi18n::strtolower( $name ),
 					);
@@ -224,7 +228,7 @@ class UserReportDataFactory extends Factory {
 						AND script = ?
 						AND lower(name) = ? ';
 		if (  $this->getUser() != '' ) {
-			$query .= ' AND user_id = '. (int)$this->getUser();
+			$query .= ' AND user_id = \''. TTUUID::castUUID($this->getUser()).'\'';
 		} else {
 			$query .= ' AND user_id is NULL ';
 		}
@@ -244,104 +248,159 @@ class UserReportDataFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim($name);
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is too short or too long'),
-											1, 100)
-				AND
-				$this->Validator->isTrue(		'name',
-												$this->isUniqueName($name),
-												TTi18n::gettext('Name already exists'))
-				) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getDefault() {
-		if ( isset($this->data['is_default']) ) {
-			return $this->fromBool( $this->data['is_default'] );
-		}
-
-		return FALSE;
-	}
-	function setDefault($bool) {
-		$this->data['is_default'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'is_default' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDefault( $value ) {
+		return $this->setGenericDataValue( 'is_default', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
-	}
-	function setDescription($description) {
-		$description = trim($description);
-
-		if (	$this->Validator->isLength(	'description',
-											$description,
-											TTi18n::gettext('Description is invalid'),
-											0, 1024) ) {
-
-			$this->data['description'] = $description;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'description' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @return mixed
+	 */
 	function getData() {
-		return unserialize( $this->data['data'] );
+		return unserialize( $this->getGenericDataValue( 'data' ) );
 	}
-	function setData($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setData( $value) {
 		$value = serialize($value);
 
-		$this->data['data'] = $value;
+		$this->setGenericDataValue( 'data', $value );
 
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
-		if ( $this->Validator->hasError('name') == FALSE AND $this->getName() == '' ) {
-			$this->Validator->isTRUE(	'name',
-										FALSE,
-										TTi18n::gettext('Name must be specified'));
+		if ( $this->getDeleted() == FALSE ) {
+			//
+			// BELOW: Validation code moved from set*() functions.
+			//
+
+			// Company
+			$clf = TTnew( 'CompanyListFactory' );
+			$this->Validator->isResultSetWithRows(			'company',
+															  $clf->getByID($this->getCompany()),
+															  TTi18n::gettext('Invalid Company')
+			);
+
+			// User must always be specified, don't allow a zero UUID either.
+			if ( $this->getUser() !== FALSE ) {
+				$ulf = TTnew( 'UserListFactory' );
+				$this->Validator->isResultSetWithRows( 'user',
+													   $ulf->getByID( $this->getUser() ),
+													   TTi18n::gettext( 'Invalid Employee' )
+				);
+			}
+
+			// Script
+			$this->Validator->isLength( 'script',
+										$this->getScript(),
+										TTi18n::gettext( 'Invalid script' ),
+										1, 250
+			);
+
+			// Name
+			$this->Validator->isLength( 'name',
+										$this->getName(),
+										TTi18n::gettext( 'Name is too short or too long' ),
+										1, 100
+			);
+			if ( $this->Validator->isError( 'name' ) == FALSE ) {
+				$this->Validator->isTrue( 'name',
+										  $this->isUniqueName( $this->getName() ),
+										  TTi18n::gettext( 'Name already exists' )
+				);
+			}
+
+			// Description
+			$this->Validator->isLength( 'description',
+										$this->getDescription(),
+										TTi18n::gettext( 'Description is invalid' ),
+										0, 1024
+			);
+
+			//
+			// ABOVE: Validation code moved from set*() functions.
+			//
+
+			if ( $this->Validator->hasError( 'name' ) == FALSE AND $this->getName() == '' ) {
+				$this->Validator->isTRUE( 'name',
+										  FALSE,
+										  TTi18n::gettext( 'Name must be specified' ) );
+			}
 		}
 
 		return TRUE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getDefault() == TRUE ) {
 			//Remove default flag from all other entries.
 			$urdlf = TTnew( 'UserReportDataListFactory' );
-			if ( $this->getUser() == FALSE ) {
-				$urdlf->getByCompanyIdAndScriptAndDefault( $this->getUser(), $this->getScript(), TRUE );
+			if ( $this->getUser() == TTUUID::getZeroID() OR $this->getUser() == '' ) {
+				$urdlf->getByCompanyIdAndScriptAndDefault( $this->getCompany(), $this->getScript(), TRUE );
 			} else {
 				$urdlf->getByUserIdAndScriptAndDefault( $this->getUser(), $this->getScript(), TRUE );
 			}
 			if ( $urdlf->getRecordCount() > 0 ) {
 				foreach( $urdlf as $urd_obj ) {
-					Debug::Text('Removing Default Flag From: '. $urd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-					$urd_obj->setDefault(FALSE);
-					if ( $urd_obj->isValid() ) {
-						$urd_obj->Save();
+					if ( $urd_obj->getId() != $this->getId() ) { //Don't remove default flag from ourselves when editing an existing record.
+						Debug::Text( 'Removing Default Flag From: ' . $urd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+						$urd_obj->setDefault( FALSE );
+						if ( $urd_obj->isValid() ) {
+							$urd_obj->Save();
+						}
 					}
 				}
 			}
@@ -350,11 +409,20 @@ class UserReportDataFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $script_name
+	 * @return mixed
+	 */
 	static function handleScriptName( $script_name ) {
 		return str_replace('//', '/', $script_name);
 	}
 
 	//Support setting created_by, updated_by especially for importing data.
+
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -380,6 +448,10 @@ class UserReportDataFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -413,6 +485,10 @@ class UserReportDataFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		if ( $this->getUser() == FALSE AND $this->getDefault() == TRUE ) {
 			//Bypass logging on Company Default Save.

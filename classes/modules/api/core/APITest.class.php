@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,16 +41,27 @@
 class APITest extends APIFactory {
 	protected $main_class = '';
 
+	/**
+	 * APITest constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
 		return TRUE;
 	}
 
+	/**
+	 * @param $test
+	 * @return string
+	 */
 	function HelloWorld( $test ) {
 		return "You said: $test";
 	}
 
+	/**
+	 * @param int $seconds
+	 * @return bool
+	 */
 	function delay( $seconds = 10 ) {
 		Debug::text('delay: '. $seconds, __FILE__, __LINE__, __METHOD__, 9);
 
@@ -58,6 +69,9 @@ class APITest extends APIFactory {
 		return TRUE;
 	}
 
+	/**
+	 * @return array
+	 */
 	function getDataGridData() {
 		$retarr = array(
 						array(
@@ -80,6 +94,13 @@ class APITest extends APIFactory {
 	}
 
 	//Return large dataset to test performance.
+
+	/**
+	 * @param int $max_size
+	 * @param int $delay
+	 * @param string $progress_bar_id UUID
+	 * @return array
+	 */
 	function getLargeDataSet( $max_size = 100, $delay = 100000, $progress_bar_id = NULL) {
 		if ( $max_size > 9999 ) {
 			$max_size = 9999;
@@ -103,8 +124,14 @@ class APITest extends APIFactory {
 	}
 
 	//Date test, since Flex doesn't handle timezones very well, run tests to ensure things are working correctly.
+
+	/**
+	 * @param int $test
+	 * @return array
+	 */
 	function dateTest( $test = 1 ) {
 
+		$retarr = array();
 		switch ( $test ) {
 			case 1:
 				$retarr = array(

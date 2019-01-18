@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -106,8 +106,13 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 
 			if ( $install_obj->getIsUpgrade() == FALSE ) {
 				if ( $install_obj->checkDatabaseExists( $config_vars['database']['database_name'] ) == TRUE ) {
+					//Check to see if the DB schema is before the UUID upgrade (schema 1070 or older) and set the $PRIMARY_KEY_IS_UUID accordingly.
+					//  THIS IS in tools/unattended_install.php, tools/unattended_upgrade.php, includes/database.inc.php  as well.
+					$PRIMARY_KEY_IS_UUID = FALSE;
+
 					//Create SQL, always try to install every schema version, as
 					//installSchema() will check if its already been installed or not.
+					//  InstallSchema_1000A->postInstall() now sets the registration key and UUID seed.
 					$install_obj->setDatabaseDriver( $config_vars['database']['type'] );
 					$install_obj->createSchemaRange( NULL, NULL ); //All schema versions
 					$install_obj->setVersions();
@@ -126,7 +131,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 					$cf->setProductEdition( getTTProductEdition() );
 					$cf->setName( 'ABC Company', TRUE ); //Must force this change due to demo mode being enabled.
 					$cf->setShortName( 'ABC' );
-					$cf->setBusinessNumber( '123456789' );
+					//$cf->setBusinessNumber( '123456789' );
 					$cf->setAddress1( '123 Main St' );
 					$cf->setAddress2( 'Unit #123' );
 					$cf->setCity( 'New York' );
@@ -134,6 +139,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 					$cf->setProvince( 'NY' );
 					$cf->setPostalCode( '12345' );
 					$cf->setWorkPhone( '555-555-5555' );
+					$cf->setEnableAddLegalEntity( TRUE );
 					$cf->setEnableAddCurrency( TRUE );
 					$cf->setEnableAddPermissionGroupPreset( TRUE );
 					$cf->setEnableAddUserDefaultPreset( TRUE );
@@ -142,12 +148,13 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 					$cf->setEnableAddCompanyDeductionPreset( TRUE );
 					$cf->setEnableAddRecurringHolidayPreset( TRUE );
 					if ( $cf->isValid() ) {
-						$company_id = $cf->Save();
+						$company_id = $cf->Save( FALSE );
 						$install_obj->writeConfigFile( array('other' => array( 'primary_company_id' => $company_id ) ) );
 
 						//Setup admin user.
 						$uf = TTnew( 'UserFactory' );
 						$uf->setCompany( $company_id );
+						$uf->setLegalEntity( $cf->legal_entity_id ); //Legal entity was created as part of $cf->Save() (postSave)
 						$uf->setStatus( 10 );
 						$uf->setUserName( $user_name );
 						$uf->setPassword('demo', NULL, TRUE ); //Force password
@@ -206,7 +213,8 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 							//Debug::Display();
 							exit(0);
 						} else {
-							Debug::Text('ERROR: Unable to create User!', __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Arr( $uf->Validator->getTextErrors(), 'ERROR: Unable to create User!', __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Display();
 							echo "ERROR: Unable to create User!\n";
 						}
 					} else {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,7 +42,13 @@ class BreadCrumb {
 	static $home_name = 'Home';
 	static $seperator = ' > ';
 
-	static function setCrumb($name, $url = NULL) {
+	/**
+	 * @param $name
+	 * @param null $url
+	 * @return bool
+	 * @throws DBError
+	 */
+	static function setCrumb( $name, $url = NULL) {
 		global $db, $current_user;
 
 		//
@@ -115,6 +121,10 @@ class BreadCrumb {
 		return TRUE;
 	}
 
+	/**
+	 * @return array|bool
+	 * @throws DBError
+	 */
 	static function getCrumbs() {
 		global $db, $current_user;
 
@@ -152,10 +162,15 @@ class BreadCrumb {
 		return FALSE;
 	}
 
-	static function Delete($user_id = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @return bool
+	 * @throws DBError
+	 */
+	static function Delete( $user_id = NULL) {
 		global $db, $current_user;
 
-		if ( empty($user_id) ) {
+		if ( empty($user_id) OR $document_id == TTUUID::getZeroID() ) {
 			if ( is_object($current_user) ) {
 				$user_id = $current_user->getId();
 			} else {
@@ -164,7 +179,7 @@ class BreadCrumb {
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = 'DELETE FROM bread_crumb where user_id = ?';
@@ -180,12 +195,20 @@ class BreadCrumb {
 	}
 
 	//Used to return to the last URL the user visited.
-	static function getReturnCrumb($num = 1) {
+
+	/**
+	 * @param int $num
+	 * @return mixed
+	 */
+	static function getReturnCrumb( $num = 1) {
 		$crumbs = self::getCrumbs();
 
 		return $crumbs[$num]['url'];
 	}
 
+	/**
+	 * @return string
+	 */
 	static function Display() {
 		$crumbs = self::getCrumbs();
 

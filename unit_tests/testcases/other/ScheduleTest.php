@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -54,6 +54,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
+		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
@@ -72,8 +73,8 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createUserWageGroups( $this->company_id );
 
-		$this->user_id = $dd->createUser( $this->company_id, 100 );
-		$this->user_id2 = $dd->createUser( $this->company_id, 10 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
+		$this->user_id2 = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		$this->policy_ids['accrual_policy_account'][20] = $dd->createAccrualPolicyAccount( $this->company_id, 20 ); //Vacation
 		$this->policy_ids['accrual_policy_account'][30] = $dd->createAccrualPolicyAccount( $this->company_id, 30 ); //Sick
@@ -400,8 +401,6 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->company_id, $this->user_id, array(5, 20, 25, 30, 40, 50, 100, 110), $start_date, $end_date);
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach($udtlf as $udt_obj) {
-				$type_and_policy_id = $udt_obj->getObjectType().(int)$udt_obj->getPayCode();
-
 				$date_totals[$udt_obj->getDateStamp()][] = array(
 												'date_stamp' => $udt_obj->getDateStamp(),
 												'id' => $udt_obj->getId(),
@@ -414,7 +413,6 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 												'object_type_id' => $udt_obj->getObjectType(),
 												'pay_code_id' => $udt_obj->getPayCode(),
 
-												'type_and_policy_id' => $type_and_policy_id,
 												'branch_id' => (int)$udt_obj->getBranch(),
 												'department_id' => $udt_obj->getDepartment(),
 												'total_time' => $udt_obj->getTotalTime(),
@@ -748,7 +746,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
-		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
@@ -888,7 +886,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
-		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (7 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
@@ -965,7 +963,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
-		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
 		//Absence Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Absence
@@ -1252,7 +1250,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals( $schedule_id2, $schedule_arr[$iso_date_stamp][1]['id'] );
 			$this->assertEquals( $this->user_id2, $schedule_arr[$iso_date_stamp][1]['user_id'] );
 			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][1]['date_stamp'] );
-			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
+			$this->assertEquals( TTUUID::getZeroID(), $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
 		} else {
 			$this->assertEquals( TRUE, FALSE );
 		}
@@ -1269,9 +1267,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		if ( isset($schedule_arr[$iso_date_stamp][0]) ) {
 			$this->assertEquals( 1, count($schedule_arr[$iso_date_stamp]) );
 			$this->assertEquals( $open_schedule_id, $schedule_arr[$iso_date_stamp][0]['id'] );
-			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][0]['user_id'] );
+			$this->assertEquals( TTUUID::getZeroID(), $schedule_arr[$iso_date_stamp][0]['user_id'] );
 			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][0]['date_stamp'] );
-			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][0]['replaced_id'] );
+			$this->assertEquals( TTUUID::getZeroID(), $schedule_arr[$iso_date_stamp][0]['replaced_id'] );
 		} else {
 			$this->assertEquals( TRUE, FALSE );
 		}
@@ -1398,7 +1396,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals( 2, count($schedule_arr[$iso_date_stamp]) );
 			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][1]['id'] );
 			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][1]['date_stamp'] );
-			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
+			$this->assertEquals( TTUUID::getZeroID(), $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
 			$this->assertEquals( 'Test1', $schedule_arr[$iso_date_stamp][1]['note'] );
 		} else {
 			$this->assertEquals( TRUE, FALSE );
@@ -1434,7 +1432,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals( 2, count($schedule_arr[$iso_date_stamp]) );
 			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][1]['id'] );
 			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][1]['date_stamp'] );
-			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
+			$this->assertEquals( TTUUID::getZeroID(), $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
 			$this->assertEquals( 'Test1', $schedule_arr[$iso_date_stamp][1]['note'] );
 		} else {
 			$this->assertEquals( TRUE, FALSE );
@@ -1470,7 +1468,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals( 2, count($schedule_arr[$iso_date_stamp]) );
 			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][1]['id'] );
 			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][1]['date_stamp'] );
-			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
+			$this->assertEquals( TTUUID::getZeroID(), $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
 			$this->assertEquals( 'Test1', $schedule_arr[$iso_date_stamp][1]['note'] );
 		} else {
 			$this->assertEquals( TRUE, FALSE );

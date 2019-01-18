@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIUserDateTotal extends APIFactory {
 	protected $main_class = 'UserDateTotalFactory';
 
+	/**
+	 * APIUserDateTotal constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,6 +52,8 @@ class APIUserDateTotal extends APIFactory {
 
 	/**
 	 * Get default user_date_total data for creating new user_date_totales.
+	 * @param string $user_id UUID
+	 * @param int $date EPOCH
 	 * @return array
 	 */
 	function getUserDateTotalDefaultData( $user_id = NULL, $date = NULL ) {
@@ -79,7 +84,7 @@ class APIUserDateTotal extends APIFactory {
 			$data['job_item_id'] = $user_obj->getDefaultJobItem();
 
 			$uwlf = TTnew('UserWageListFactory');
-			$uwlf->getByUserIdAndGroupIDAndBeforeDate( $user_id, 0, TTDate::parseDateTime( $date ), 1 );
+			$uwlf->getByUserIdAndGroupIDAndBeforeDate( $user_id, TTUUID::getZeroID(), TTDate::parseDateTime( $date ), 1 );
 			if ( $uwlf->getRecordCount() > 0 ) {
 				foreach( $uwlf as $uw_obj ) {
 					$data['base_hourly_rate'] = $data['hourly_rate'] = $uw_obj->getHourlyRate();
@@ -96,7 +101,7 @@ class APIUserDateTotal extends APIFactory {
 	/**
 	 * Get combined recurring user_date_total and committed user_date_total data for one or more user_date_totales.
 	 * @param array $data filter data
-	 * @return array
+	 * @return array|bool
 	 */
 	function getCombinedUserDateTotal( $data = NULL ) {
 		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
@@ -118,7 +123,8 @@ class APIUserDateTotal extends APIFactory {
 	/**
 	 * Get user_date_total data for one or more user_date_totales.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getUserDateTotal( $data = NULL, $disable_paging = FALSE ) {
 		//if ( !$this->getPermissionObject()->Check('punch', 'enabled')
@@ -192,7 +198,9 @@ class APIUserDateTotal extends APIFactory {
 	/**
 	 * Set user_date_total data for one or more user_date_totales.
 	 * @param array $data user_date_total data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setUserDateTotal( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -217,12 +225,12 @@ class APIUserDateTotal extends APIFactory {
 			$permission_children_ids = $this->getPermissionChildren();
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' UserDateTotals', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -235,7 +243,7 @@ class APIUserDateTotal extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserDateTotalListFactory' );
 				//$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get user_date_total object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -257,7 +265,7 @@ class APIUserDateTotal extends APIFactory {
 								)
 							) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 
 							//When editing a record if the date changes, we need to recalculate the old date.
@@ -276,7 +284,7 @@ class APIUserDateTotal extends APIFactory {
 							//Since switching to batch calculation mode, need to store every possible date to recalculate.
 							if ( isset($row['user_id'])	AND $row['user_id'] != '' AND isset($row['date_stamp']) AND $row['date_stamp'] != '' ) {
 								//Since switching to batch calculation mode, need to store every possible date to recalculate.
-								$recalculate_user_date_stamp[(int)$row['user_id']][] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $row['date_stamp'] )); //Help avoid confusion with different timezones/DST.
+								$recalculate_user_date_stamp[TTUUID::castUUID($row['user_id'])][] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $row['date_stamp'] )); //Help avoid confusion with different timezones/DST.
 							}
 							$recalculate_user_date_stamp[$lf->getUser()][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
 
@@ -314,7 +322,7 @@ class APIUserDateTotal extends APIFactory {
 					} else {
 						if ( isset($row['user_id'])	AND $row['user_id'] != '' AND isset($row['date_stamp']) AND $row['date_stamp'] != '' ) {
 							//Since switching to batch calculation mode, need to store every possible date to recalculate.
-							$recalculate_user_date_stamp[(int)$row['user_id']][] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $row['date_stamp'] )); //Help avoid confusion with different timezones/DST.
+							$recalculate_user_date_stamp[TTUUID::castUUID($row['user_id'])][] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $row['date_stamp'] )); //Help avoid confusion with different timezones/DST.
 						}
 					}
 				}
@@ -399,10 +407,10 @@ class APIUserDateTotal extends APIFactory {
 	/**
 	 * Delete one or more user_date_totals.
 	 * @param array $data user_date_total data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteUserDateTotal( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -416,7 +424,7 @@ class APIUserDateTotal extends APIFactory {
 				) {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
-		
+
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$permission_children_ids = $this->getPermissionChildren();
 
@@ -424,20 +432,20 @@ class APIUserDateTotal extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			$lf = TTnew( 'UserDateTotalListFactory' );
 			$lf->StartTransaction();
-			
+
 			$recalculate_user_date_stamp = FALSE;
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserDateTotalListFactory' );
 				//$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get user_date_total object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -489,7 +497,7 @@ class APIUserDateTotal extends APIFactory {
 						$lf->setEnableCalcSystemTotalTime( FALSE );
 						$lf->setEnableCalcWeeklySystemTotalTime( FALSE );
 						$lf->setEnableCalcException( FALSE );
-						
+
 						$save_result[$key] = $lf->Save();
 						$validator_stats['valid_records']++;
 					}
@@ -528,9 +536,9 @@ class APIUserDateTotal extends APIFactory {
 			} else {
 				Debug::Text('bNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
 			}
-			
+
 			$lf->CommitTransaction();
-			
+
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
@@ -545,7 +553,7 @@ class APIUserDateTotal extends APIFactory {
 	 * @return array
 	 */
 	function copyUserDateTotal( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -571,10 +579,20 @@ class APIUserDateTotal extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @param $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
 	function getAccumulatedUserDateTotal( $data, $disable_paging = FALSE  ) {
 		return UserDateTotalFactory::calcAccumulatedTime( $this->getUserDateTotal( $data, TRUE ) );
 	}
 
+	/**
+	 * @param $data
+	 * @param bool $disable_paging
+	 * @return bool
+	 */
 	function getTotalAccumulatedUserDateTotal( $data, $disable_paging = FALSE ) {
 		$retarr = UserDateTotalFactory::calcAccumulatedTime( $this->getUserDateTotal( $data, TRUE ) );
 		if ( isset($retarr['total']) ) {

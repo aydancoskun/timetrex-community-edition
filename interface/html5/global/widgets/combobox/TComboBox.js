@@ -164,19 +164,31 @@
 			//if value is number convert to number type
 			var value = $( this ).children( 'option:selected' ).attr( 'value' );
 
-			var reg = new RegExp( '^[0-9]*$' );
-
-			if ( reg.test( value ) ) {
+			if ( $.isNumeric(value) ) {
 				value = parseFloat( value );
 			}
 
 			if ( value === -1 || value === '-1' ) {
 				value = -1;
 			}
-
 			return value;
 		};
 
+		this.getSelectedIndex = function() {
+			return this[0].selectedIndex;
+		};
+
+		this.setSelectedIndex = function ( set_index ) {
+			if ( set_index < 0 ) {
+				set_index = 0;
+			}
+			if( set_index >= this[0].length ) {
+				set_index = this[0].length - 1;
+			}
+			this[0].selectedIndex = set_index;
+			this.setValue( this[0].value );
+		}
+;
 		this.getLabel = function() {
 			//if value is number convert to number type
 			var value = $( this ).children( 'option:selected' ).text();
@@ -184,7 +196,6 @@
 		};
 
 		this.setValue = function( val ) {
-
 			select_value = val;
 
 			if ( !source_data || source_data.length < 1 || (set_empty && source_data.length === 1) || (set_any && source_data.length === 1) ) {
@@ -195,9 +206,9 @@
 			//When no value == undefined or null or default false
 			if ( !Global.isSet( val ) || val === false ) {
 				if ( set_empty ) {
-					val = '0';
+					val = TTUUID.zero_id;
 				} else if ( set_any ) {
-					val = '-1';
+					val = TTUUID.not_exist_id;
 				} else {
 					//If no empty value, default to select first item
 					if ( source_data && source_data.length > 0 ) {
@@ -217,7 +228,6 @@
 				}
 				return $( this ).attr( 'value' ) === val.toString();
 			} ).prop( 'selected', true ).attr( 'selected', true );
-
 		};
 
 		/* jshint ignore:start */
@@ -233,12 +243,12 @@
 				}
 			} else {
 				if ( set_empty ) {
-					if ( val && val.length > 0 && (val[0].value !== '0' && val[0].value !== 0) ) {
+					if ( val && val.length > 0 && (val[0].value != TTUUID.zero_id && val[0].value != 0) ) {
 						val = Global.addFirstItemToArray( val, 'empty', customFirstItemLabel );
 					}
 
 				} else if ( set_any ) {
-					if ( val && val.length > 0 && (val[0].value !== '-1' && val[0].value !== -1) ) {
+					if ( val && val.length > 0 && (val[0].value != TTUUID.not_exist_id && val[0].value != -1) ) {
 						val = Global.addFirstItemToArray( val, 'any', customFirstItemLabel );
 					}
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class ExceptionFactory extends Factory {
 	protected $user_obj = NULL;
 	protected $exception_policy_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -121,6 +126,10 @@ class ExceptionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 			$variable_function_map = array(
 											'id' => 'ID',
@@ -174,233 +183,187 @@ class ExceptionFactory extends Factory {
 			return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getExceptionPolicyObject() {
 		return $this->getGenericObject( 'ExceptionPolicyListFactory', $this->getExceptionPolicyID(), 'exception_policy_obj' );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
-		if ( $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
-	function getPayPeriod() {
-		if ( isset($this->data['pay_period_id']) ) {
-			return (int)$this->data['pay_period_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayPeriod($id = NULL) {
-		$id = trim($id);
-
-		if ( $id == NULL ) {
-			$id = (int)PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
-		}
-
-		$pplf = TTnew( 'PayPeriodListFactory' );
-
-		//Allow NULL pay period, incase its an absence or something in the future.
-		//Cron will fill in the pay period later.
-		if (
-				$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'pay_period',
-														$pplf->getByID($id),
-														TTi18n::gettext('Invalid Pay Period')
-														) ) {
-			$this->data['pay_period_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getDateStamp( $raw = FALSE ) {
-		if ( isset($this->data['date_stamp']) ) {
-			if ( $raw === TRUE ) {
-				return $this->data['date_stamp'];
-			} else {
-				return TTDate::strtotime( $this->data['date_stamp'] );
-			}
-		}
-
-		return FALSE;
-	}
-	function setDateStamp($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if	(	$this->Validator->isDate(		'date_stamp',
-												$epoch,
-												TTi18n::gettext('Incorrect date'))
-			) {
-
-			if	( $epoch > 0 ) {
-				$this->data['date_stamp'] = $epoch;
-
-				$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
-				return TRUE;
-			} else {
-				$this->Validator->isTRUE(		'date_stamp',
-												FALSE,
-												TTi18n::gettext('Incorrect date'));
-			}
-
-
-		}
-
-		return FALSE;
-	}
-
-	function getExceptionPolicyID() {
-		if ( isset($this->data['exception_policy_id']) ) {
-			return (int)$this->data['exception_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setExceptionPolicyID($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$eplf = TTnew( 'ExceptionPolicyListFactory' );
-
-		if (	$id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'exception_policy',
-														$eplf->getByID($id),
-														TTi18n::gettext('Invalid Exception Policy ID')
-														) ) {
-			$this->data['exception_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getPunchControlID() {
-		if ( isset($this->data['punch_control_id']) ) {
-			return (int)$this->data['punch_control_id'];
-		}
-
-		return FALSE;
-	}
-	function setPunchControlID($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$pclf = TTnew( 'PunchControlListFactory' );
-
-		if (
-				$id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'punch_control',
-														$pclf->getByID($id),
-														TTi18n::gettext('Invalid Punch Control ID')
-														) ) {
-			$this->data['punch_control_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getPunchID() {
-		if ( isset($this->data['punch_id']) ) {
-			return (int)$this->data['punch_id'];
-		}
-
-		return FALSE;
-	}
-	function setPunchID($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$plf = TTnew( 'PunchListFactory' );
-
-		if (	$id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'punch',
-														$plf->getByID($id),
-														TTi18n::gettext('Invalid Punch ID')
-														) ) {
-			$this->data['punch_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getType() {
-		if ( isset($this->data['type_id']) ) {
-			return (int)$this->data['type_id'];
-		}
-
-		return FALSE;
-	}
-	function setType($value) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
 		$value = trim($value);
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
 
-		if ( $this->Validator->inArrayKey(	'type',
-											$value,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
+	/**
+	 * @return bool|mixed
+	 */
+	function getPayPeriod() {
+		return $this->getGenericDataValue( 'pay_period_id' );
+	}
 
-			$this->data['type_id'] = $value;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayPeriod( $value = NULL) {
+		if ( $value == NULL ) {
+			$value = PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
+		}
 
-			return TRUE;
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		//Allow NULL pay period, incase its an absence or something in the future.
+		//Cron will fill in the pay period later
+		return $this->setGenericDataValue( 'pay_period_id', $value );
+	}
+
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
+	function getDateStamp( $raw = FALSE ) {
+		$value = $this->getGenericDataValue( 'date_stamp' );
+		if ( $value !== FALSE ) {
+			if ( $raw === TRUE ) {
+				return $value;
+			} else {
+				return TTDate::strtotime( $value );
+			}
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setDateStamp( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ( $value > 0 ) {
+			return $this->setGenericDataValue( 'date_stamp', $value );
+		}
+		return FALSE;
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getExceptionPolicyID() {
+		return $this->getGenericDataValue( 'exception_policy_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setExceptionPolicyID( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'exception_policy_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getPunchControlID() {
+		return $this->getGenericDataValue( 'punch_control_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPunchControlID( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'punch_control_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getPunchID() {
+		return $this->getGenericDataValue( 'punch_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPunchID( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'punch_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
+	function getType() {
+		return $this->getGenericDataValue( 'type_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'type_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getEnableDemerits() {
-		if ( isset($this->data['enable_demerit']) ) {
-			return $this->data['enable_demerit'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'enable_demerit' );
 	}
-	function setEnableDemerits($bool) {
-		$this->data['enable_demerit'] = $bool;
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableDemerits( $value) {
+		$this->setGenericDataValue( 'enable_demerit', $value );
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getBackgroundColor() {
 		//Use HTML color codes so they work in Flex too.
 		$retval = FALSE;
@@ -428,6 +391,9 @@ class ExceptionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getColor() {
 		$retval = FALSE;
 
@@ -456,6 +422,11 @@ class ExceptionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param object $u_obj
+	 * @param object $ep_obj
+	 * @return array|bool
+	 */
 	function getEmailExceptionAddresses( $u_obj = NULL, $ep_obj = NULL ) {
 		Debug::text(' Attempting to Email Notification...', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -543,6 +514,14 @@ class ExceptionFactory extends Factory {
 			To address, CC address (home email) and Bcc (supervisor) address?
 
 	*/
+	/**
+	 * @param object $u_obj
+	 * @param int $date_stamp EPOCH
+	 * @param object $punch_obj
+	 * @param object $schedule_obj
+	 * @param object $ep_obj
+	 * @return bool
+	 */
 	function emailException( $u_obj, $date_stamp, $punch_obj = NULL, $schedule_obj = NULL, $ep_obj = NULL ) {
 		if ( !is_object( $u_obj ) ) {
 			return FALSE;
@@ -568,10 +547,6 @@ class ExceptionFactory extends Factory {
 
 		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Exception') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>';
 		Debug::Text('To: '. implode(',', $email_to_arr), __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( is_array($email_to_arr) ) {
-			$reply_to = $email_to_arr[0];
-		}
 
 		//Define subject/body variables here.
 		$search_arr = array(
@@ -672,7 +647,78 @@ class ExceptionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+
+		// User
+		$ulf = TTnew( 'UserListFactory' );
+		$this->Validator->isResultSetWithRows(	'user',
+													$ulf->getByID($this->getUser()),
+													TTi18n::gettext('Invalid Employee')
+												);
+		// Pay Period
+		if ( $this->getPayPeriod() != FALSE AND $this->getPayPeriod() != TTUUID::getZeroID() ) {
+			$pplf = TTnew( 'PayPeriodListFactory' );
+			$this->Validator->isResultSetWithRows(	'pay_period',
+															$pplf->getByID($this->getPayPeriod()),
+															TTi18n::gettext('Invalid Pay Period')
+														);
+		}
+		// Date
+		if ( $this->getDateStamp() !== FALSE ) {
+			$this->Validator->isDate(		'date_stamp',
+													$this->getDateStamp(),
+													TTi18n::gettext('Incorrect date'));
+			if ( $this->Validator->isError('date_stamp') == FALSE ) {
+				$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
+			}
+		} else {
+			$this->Validator->isTRUE(		'date_stamp',
+												FALSE,
+												TTi18n::gettext('Incorrect date')
+											);
+		}
+		// Exception Policy ID
+		if ( $this->getExceptionPolicyID() !== FALSE AND $this->getExceptionPolicyID() != TTUUID::getZeroID() ) {
+			$eplf = TTnew( 'ExceptionPolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'exception_policy',
+															$eplf->getByID($this->getExceptionPolicyID()),
+															TTi18n::gettext('Invalid Exception Policy ID')
+														);
+		}
+		// Punch Control ID
+		if ( $this->getPunchControlID() !== FALSE AND $this->getPunchControlID() != TTUUID::getZeroID() ) {
+			$pclf = TTnew( 'PunchControlListFactory' );
+			$this->Validator->isResultSetWithRows(	'punch_control',
+															$pclf->getByID($this->getPunchControlID()),
+															TTi18n::gettext('Invalid Punch Control ID')
+														);
+		}
+		// Punch ID
+		if ( $this->getPunchID() !== FALSE AND $this->getPunchID() != TTUUID::getZeroID() ) {
+			$plf = TTnew( 'PunchListFactory' );
+			$this->Validator->isResultSetWithRows(	'punch',
+															$plf->getByID($this->getPunchID()),
+															TTi18n::gettext('Invalid Punch ID')
+														);
+		}
+		// Type
+		$this->Validator->inArrayKey(	'type',
+												$this->getType(),
+												TTi18n::gettext('Incorrect Type'),
+												$this->getOptions('type')
+											);
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
 		if ( $this->getUser() == FALSE ) {
 			$this->Validator->isTRUE(	'user_id',
 										FALSE,
@@ -688,6 +734,9 @@ class ExceptionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getPayPeriod() == FALSE ) {
 			$this->setPayPeriod();
@@ -696,10 +745,17 @@ class ExceptionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -725,6 +781,11 @@ class ExceptionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 
@@ -740,9 +801,9 @@ class ExceptionFactory extends Factory {
 					switch( $variable ) {
 						case 'pay_period_id':
 						case 'pay_period_schedule_id':
-						case 'pay_period_start_date':
-						case 'pay_period_end_date':
-						case 'pay_period_transaction_date':
+						//case 'pay_period_start_date':
+						//case 'pay_period_end_date':
+						//case 'pay_period_transaction_date':
 						case 'user_id':
 						case 'first_name':
 						case 'last_name':

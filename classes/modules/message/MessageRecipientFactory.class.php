@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,11 @@ class MessageRecipientFactory extends Factory {
 	protected $pk_sequence_name = 'message_recipient_id_seq'; //PK Sequence name
 	protected $obj_handler = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -58,127 +63,104 @@ class MessageRecipientFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getUser() {
-		return (int)$this->data['user_id'];
+		return $this->getGenericDataValue( 'user_id' );
 	}
-	function setUser($id) {
-		$id = trim($id);
 
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid Employee')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getMessageSender() {
-		if ( isset($this->data['message_sender_id']) ) {
-			return (int)$this->data['message_sender_id'];
-		}
-
-		return FALSE;
-	}
-	function setMessageSender($id) {
-		$id = trim($id);
-
-		$mslf = TTnew( 'MessageSenderListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'message_sender_id',
-													$mslf->getByID($id),
-													TTi18n::gettext('Message Sender is invalid')
-													) ) {
-			$this->data['message_sender_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'message_sender_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setMessageSender( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'message_sender_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getMessageControl() {
-		if ( isset($this->data['message_control_id']) ) {
-			return (int)$this->data['message_control_id'];
-		}
-
-		return FALSE;
-	}
-	function setMessageControl($id) {
-		$id = trim($id);
-
-		$mclf = TTnew( 'MessageControlListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'message_control_id',
-													$mclf->getByID($id),
-													TTi18n::gettext('Message Control is invalid')
-													) ) {
-			$this->data['message_control_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'message_control_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setMessageControl( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'message_control_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->setStatusDate();
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		$this->setStatusDate();
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getStatusDate() {
-		if ( isset($this->data['status_date']) ) {
-			return $this->data['status_date'];
-		}
-
-		return FALSE;
-	}
-	function setStatusDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
-		}
-
-		if	(	$this->Validator->isDate(		'status_date',
-												$epoch,
-												TTi18n::gettext('Incorrect Date')) ) {
-
-			$this->data['status_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
-
+		return $this->getGenericDataValue( 'status_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setStatusDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ($value == NULL) {
+			$value = TTDate::getTime();
+		}
+		return $this->setGenericDataValue( 'status_date', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function isAck() {
 		if ($this->getRequireAck() == TRUE AND $this->getAckDate() == '' ) {
 			return FALSE;
@@ -187,12 +169,19 @@ class MessageRecipientFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getAck() {
-		return $this->fromBool( $this->data['ack'] );
+		return $this->fromBool( $this->getGenericDataValue( 'ack' ) );
 	}
-	function setAck($bool) {
-		$this->data['ack'] = $this->toBool($bool);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAck( $value) {
+		$this->setGenericDataValue( 'ack', $this->toBool($value) );
 		if ( $this->getAck() == TRUE ) {
 			$this->setAckDate();
 			$this->setAckBy();
@@ -201,39 +190,94 @@ class MessageRecipientFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getAckDate() {
-		if ( isset($this->data['ack_date']) ) {
-			return $this->data['ack_date'];
-		}
-
-		return FALSE;
-	}
-	function setAckDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
-		}
-
-		if	(	$this->Validator->isDate(		'ack_date',
-												$epoch,
-												TTi18n::gettext('Invalid Acknowledge Date') ) ) {
-
-			$this->data['ack_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
-
+		return $this->getGenericDataValue( 'ack_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setAckDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ($value == NULL) {
+			$value = TTDate::getTime();
+		}
+		return $this->setGenericDataValue( 'ack_date', $value );
+
+	}
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Employee
+		if ( $this->getUser() != TTUUID::getZeroID() ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+															$ulf->getByID($this->getUser()),
+															TTi18n::gettext('Invalid Employee')
+														);
+		}
+		// Message Sender
+		$mslf = TTnew( 'MessageSenderListFactory' );
+		$this->Validator->isResultSetWithRows(	'message_sender_id',
+														$mslf->getByID($this->getMessageSender()),
+														TTi18n::gettext('Message Sender is invalid')
+													);
+		// Message Control
+		if ( $this->getMessageControl() !== FALSE ) {
+			$mclf = TTnew( 'MessageControlListFactory' );
+			$this->Validator->isResultSetWithRows(	'message_control_id',
+															$mclf->getByID($this->getMessageControl()),
+															TTi18n::gettext('Message Control is invalid')
+														);
+		}
+		// Status
+		if ( $this->getStatus() !== FALSE ) {
+			$this->Validator->inArrayKey(	'status',
+													$this->getStatus(),
+													TTi18n::gettext('Incorrect Status'),
+													$this->getOptions('status')
+												);
+		}
+		// Date
+		if ( $this->getStatusDate() !== FALSE ) {
+			$this->Validator->isDate(		'status_date',
+													$this->getStatusDate(),
+													TTi18n::gettext('Incorrect Date')
+												);
+		}
+		// Acknowledge Date
+		if ( $this->getAckDate() !== FALSE ) {
+			$this->Validator->isDate(		'ack_date',
+													$this->getAckDate(),
+													TTi18n::gettext('Invalid Acknowledge Date')
+												);
+		}
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getStatus() == FALSE ) {
 			$this->setStatus( 10 ); //UNREAD
 		}
 		return TRUE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		return TRUE;
 	}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class HierarchyControlListFactory extends HierarchyControlFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HierarchyControlListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,7 +89,14 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HierarchyControlListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -86,8 +106,8 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		}
 
 		$ph = array(
-					'id' => (int)$id,
-					'company_id' => (int)$company_id,
+					'id' => TTUUID::castUUID($id),
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -104,7 +124,15 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		return $this;
 	}
 
-	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HierarchyControlListFactory
+	 */
+	function getByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -116,7 +144,7 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -135,14 +163,21 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		return $this;
 	}
 
-	function getArrayByListFactory($lf, $include_blank = TRUE, $object_sorted_array = FALSE, $include_name = TRUE ) {
+	/**
+	 * @param $lf
+	 * @param bool $include_blank
+	 * @param bool $object_sorted_array
+	 * @param bool $include_name
+	 * @return array|bool
+	 */
+	function getArrayByListFactory( $lf, $include_blank = TRUE, $object_sorted_array = FALSE, $include_name = TRUE ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
-		
+
 		$list = array();
 		if ( $object_sorted_array == FALSE AND $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		//Make sure we always ensure that we return valid object_types for the product edition.
@@ -150,20 +185,20 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 
 		foreach ($lf as $obj) {
 			if ( isset($valid_object_type_ids[$obj->getColumn('object_type_id')])) {
-			if ( $object_sorted_array == TRUE ) {
-					if ( $include_blank == TRUE AND !isset( $list[$obj->getColumn( 'object_type_id' )][0] ) ) {
-						$list[$obj->getColumn( 'object_type_id' )][0] = '--';
-				}
+				if ( $object_sorted_array == TRUE ) {
+					if ( $include_blank == TRUE AND !isset( $list[$obj->getColumn( 'object_type_id' )][TTUUID::getZeroID()] ) ) {
+						$list[$obj->getColumn( 'object_type_id' )][TTUUID::getZeroID()] = '--';
+					}
 
-				if ( $include_name == TRUE ) {
+					if ( $include_name == TRUE ) {
 						$list[$obj->getColumn( 'object_type_id' )][$obj->getID()] = $obj->getName();
-				} else {
+					} else {
 						$list[$obj->getColumn( 'object_type_id' )] = $obj->getID();
+					}
+				} else {
+					$list[$obj->getID()] = $obj->getName();
 				}
-			} else {
-				$list[$obj->getID()] = $obj->getName();
 			}
-		}
 		}
 
 		if ( empty($list) == FALSE ) {
@@ -173,7 +208,13 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		return FALSE;
 	}
 
-	function getObjectTypeAppendedListByCompanyID($company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HierarchyControlListFactory
+	 */
+	function getObjectTypeAppendedListByCompanyID( $company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -192,7 +233,7 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		$hotf = new HierarchyObjectTypeFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -211,7 +252,14 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		return $this;
 	}
 
-	function getObjectTypeAppendedListByCompanyIDAndUserID($company_id, $user_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HierarchyControlListFactory
+	 */
+	function getObjectTypeAppendedListByCompanyIDAndUserID( $company_id, $user_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -224,8 +272,8 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		$huf = new HierarchyUserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'user_id' => (int)$user_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -246,6 +294,15 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HierarchyControlListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -283,7 +340,7 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		$hotf = new HierarchyObjectTypeFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		//Count total users in HierarchyControlFactory factory, so we can disable it when needed. That way it doesn't slow down Hierarchy dropdown boxes.
@@ -306,16 +363,16 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['object_type']) ) ? $this->getWhereClauseSQL( 'hotf.object_type_id', $filter_data['object_type'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['superior_user_id']) ) ? $this->getWhereClauseSQL( 'hlf.user_id', $filter_data['superior_user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'huf.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['superior_user_id']) ) ? $this->getWhereClauseSQL( 'hlf.user_id', $filter_data['superior_user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'huf.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

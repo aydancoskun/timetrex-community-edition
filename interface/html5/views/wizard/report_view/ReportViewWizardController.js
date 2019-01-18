@@ -2,8 +2,8 @@ ReportViewWizardController = BaseWizardController.extend( {
 
 	el: '.wizard-bg',
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.title = $.i18n._( 'Report View' );
 		this.steps = 1;
 		this.current_step = 1;

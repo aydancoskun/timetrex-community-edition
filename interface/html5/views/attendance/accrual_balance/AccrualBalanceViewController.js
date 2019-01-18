@@ -1,14 +1,14 @@
 AccrualBalanceViewController = BaseViewController.extend( {
 	el: '#accrual_balance_view_container',
-
+	_required_files: ['APIAccrualBalance', 'APIAccrual', 'APIUserGroup', 'APIUser', 'APIAccrualPolicyAccount', 'APIBranch', 'APIDepartment','views/attendance/accrual/AccrualViewController'],
 	user_group_api: null,
 	user_group_array: null,
 
 	sub_accrual_view_controller: null,
 
 	log_object_ids: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'AccrualBalanceEditView.html';
 		this.permission_id = 'accrual';
 		this.viewId = 'AccrualBalance';
@@ -461,12 +461,10 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		}
 
 		Global.loadScript( 'views/attendance/accrual/AccrualViewController.js', function() {
-
-			var tab_accrual = $this.edit_view_tab.find( '#tab_accrual' );
-			var firstColumn = tab_accrual.find( '.first-column-sub-view' );
-			Global.trackView( 'Sub' + 'Accrual' + 'View' );
-			AccrualViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-
+			var tab_accrual = $this.edit_view_tab.find('#tab_accrual');
+			var firstColumn = tab_accrual.find('.first-column-sub-view');
+			Global.trackView('Sub' + 'Accrual' + 'View');
+			AccrualViewController.loadSubView(firstColumn, beforeLoadView, afterLoadView);
 		} );
 
 		function beforeLoadView() {
@@ -494,16 +492,16 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			$this.sub_log_view_controller.table_name_key = $this.table_name_key;
 			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_log_view_controller.parent_view_controller = $this;
+
 			$this.sub_log_view_controller.initData();
 			return;
 		}
 
 		Global.loadScript( 'views/core/log/LogViewController.js', function() {
-
-			var tab = $this.edit_view_tab.find( '#' + tab_id );
-			var firstColumn = tab.find( '.first-column-sub-view' );
-			Global.trackView( 'Sub' + 'Log' + 'View' );
-			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
+			var tab = $this.edit_view_tab.find('#' + tab_id);
+			var firstColumn = tab.find('.first-column-sub-view');
+			Global.trackView('Sub' + 'Log' + 'View');
+			LogViewController.loadSubView(firstColumn, beforeLoadView, afterLoadView);
 		} );
 
 		function beforeLoadView() {
@@ -523,8 +521,10 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			$this.sub_log_view_controller.table_name_key = $this.table_name_key;
 			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_log_view_controller.parent_view_controller = $this;
-			$this.sub_log_view_controller.initData();
 
+			$this.sub_log_view_controller.postInit = function() {
+				this.initData();
+			};
 		}
 	},
 

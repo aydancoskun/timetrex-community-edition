@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class MessageSenderListFactory extends MessageSenderFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageSenderListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,7 +89,13 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageSenderListFactory
+	 */
+	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -84,7 +103,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -100,7 +119,14 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyIdAndId($company_id, $id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageSenderListFactory
+	 */
+	function getByCompanyIdAndId( $company_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -112,7 +138,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -121,7 +147,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 						LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
 					WHERE
 							b.company_id = ?
-							AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+							AND a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND a.deleted = 0
 					';
 		$this->ExecuteSQL( $query, $ph );
@@ -129,7 +155,14 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyIdAndRecipientId($company_id, $id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageSenderListFactory
+	 */
+	function getByCompanyIdAndRecipientId( $company_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -142,7 +175,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		//Ignore deleted message_sender rows, as the sender could have deleted the original message.
@@ -153,7 +186,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 						LEFT JOIN '. $uf->getTable() .' as c ON a.user_id = c.id
 					WHERE
 							c.company_id = ?
-							AND b.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+							AND b.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND ( b.deleted = 0 )
 					';
 		$this->ExecuteSQL( $query, $ph );
@@ -161,7 +194,16 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyIdAndObjectTypeAndObjectAndNotUser($company_id, $object_type_id, $object_id, $user_id = 0, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $object_type_id
+	 * @param string $object_id UUID
+	 * @param int $user_id
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageSenderListFactory
+	 */
+	function getByCompanyIdAndObjectTypeAndObjectAndNotUser( $company_id, $object_type_id, $object_id, $user_id = 0, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -174,15 +216,18 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 			return FALSE;
 		}
 
+		if ( $user_id === 0 ) {
+			$user_id = TTUUID::getZeroID();
+		}
 
 		$uf = new UserFactory();
 		$mcf = new MessageControlFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'object_type_id' => (int)$object_type_id,
-					'object_id' => (int)$object_id,
-					'user_id' => (int)$user_id,
+					'object_id' => TTUUID::castUUID($object_id),
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -201,7 +246,15 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyIdAndUserIdAndId($company_id, $user_id, $id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageSenderListFactory
+	 */
+	function getByCompanyIdAndUserIdAndId( $company_id, $user_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -217,8 +270,8 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'user_id' => (int)$user_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -228,7 +281,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 					WHERE
 							b.company_id = ?
 							AND a.user_id = ?
-							AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+							AND a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND a.deleted = 0
 					';
 		$this->ExecuteSQL( $query, $ph );

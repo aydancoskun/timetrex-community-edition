@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,11 @@ class BankAccountFactory extends Factory {
 
 	protected $user_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -96,6 +101,10 @@ class BankAccountFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -118,71 +127,70 @@ class BankAccountFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
-	
+
+	/**
+	 * @return mixed
+	 */
 	function getCompany() {
-		return (int)$this->data['company_id'];
+		return $this->getGenericDataValue( 'company_id' );
 	}
-	function setCompany($id) {
-		$id = trim($id);
 
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value ) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid Employee')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function isUnique() {
 		if ( $this->getCompany() == FALSE ) {
 			return FALSE;
 		}
 
-		if ( $this->getUser() > 0 ) {
+		if ( TTUUID::isUUID( $this->getUser() ) AND $this->getUser() != TTUUID::getZeroID() AND $this->getUser() != TTUUID::getNotExistID() ) {
 			$ph = array(
-						'company_id' => (int)$this->getCompany(),
-						'user_id' => (int)$this->getUser(),
+						'company_id' => TTUUID::castUUID($this->getCompany()),
+						'user_id' => TTUUID::castUUID($this->getUser()),
 						);
 
 			$query = 'select id from '. $this->getTable() .' where company_id = ? AND user_id = ? AND deleted = 0';
 		} else {
 			$ph = array(
-						'company_id' => (int)$this->getCompany(),
+						'company_id' => TTUUID::castUUID($this->getCompany()),
 						);
 
 			$query = 'select id from '. $this->getTable() .' where company_id = ? AND user_id is NULL AND deleted = 0';
@@ -201,70 +209,42 @@ class BankAccountFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getInstitution() {
-		if ( isset($this->data['institution']) ) {
-			return $this->data['institution'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'institution' );
 	}
-	function setInstitution($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setInstitution( $value) {
 		$value = trim($value);
-
-		if (
-				$value == ''
-				OR
-				(
-					$this->Validator->isNumeric(	'institution',
-													$value,
-													TTi18n::gettext('Invalid institution number, must be digits only'))
-					AND
-					$this->Validator->isLength(		'institution',
-													$value,
-													TTi18n::gettext('Invalid institution number length'),
-													2,
-													3)
-				)
-			) {
-
-			$this->data['institution'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'institution', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getTransit() {
-		if ( isset($this->data['transit']) ) {
-			return $this->data['transit'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'transit' );
 	}
-	function setTransit($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTransit( $value) {
 		$value = trim($value);
-
-		if (
-						$this->Validator->isNumeric(	'transit',
-														$value,
-														TTi18n::gettext('Invalid transit number, must be digits only'))
-				AND
-						$this->Validator->isLength(		'transit',
-														$value,
-														TTi18n::gettext('Invalid transit number length'),
-														2,
-														15)
-			) {
-
-			$this->data['transit'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'transit', $value );
 	}
 
+	/**
+	 * @param null $value
+	 * @return mixed
+	 */
 	function getSecureAccount( $value = NULL ) {
 		if ( $value == '' ) {
 			$value = $this->getAccount();
@@ -277,38 +257,90 @@ class BankAccountFactory extends Factory {
 		$account = str_replace( substr($value, $start_digit, $replace_length), str_repeat('X', $replace_length), $value );
 		return $account;
 	}
-	function getAccount() {
-		if ( isset($this->data['account']) ) {
-			return $this->data['account'];
-		}
 
-		return FALSE;
+	/**
+	 * @return bool|mixed
+	 */
+	function getAccount() {
+		return $this->getGenericDataValue( 'account' );
 	}
-	function setAccount($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAccount( $value) {
 		//If *'s are in the account number, skip setting it
 		//This allows them to change other data without seeing the account number.
 		if ( stripos( $value, 'X') !== FALSE  ) {
 			return FALSE;
 		}
-
 		$value = $this->Validator->stripNonNumeric( trim($value) );
-		if (
-						$this->Validator->isLength(		'account',
-														$value,
-														TTi18n::gettext('Invalid account number length'),
-														3,
-														20)
-			) {
-
-			$this->data['account'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'account', $value );
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		// Employee
+		if ( $this->getUser() != TTUUID::getZeroID() ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+														$ulf->getByID($this->getUser()),
+														TTi18n::gettext('Invalid Employee')
+													);
+		}
+		// Institution
+		if ( $this->getInstitution() != '' ) {
+			$this->Validator->isNumeric(	'institution',
+													$this->getInstitution(),
+													TTi18n::gettext('Invalid institution number, must be digits only')
+												);
+			if ( $this->Validator->isError('institution') == FALSE ) {
+				$this->Validator->isLength(		'institution',
+														$this->getInstitution(),
+														TTi18n::gettext('Invalid institution number length'),
+														2,
+														3
+													);
+			}
+		}
+		// Transit
+		$this->Validator->isNumeric(	'transit',
+												$this->getTransit(),
+												TTi18n::gettext('Invalid transit number, must be digits only')
+											);
+		if ( $this->Validator->isError('transit') == FALSE ) {
+			$this->Validator->isLength(		'transit',
+													$this->getTransit(),
+													TTi18n::gettext('Invalid transit number length'),
+													2,
+													15
+												);
+		}
+		// Account
+		$this->Validator->isLength(		'account',
+												$this->getAccount(),
+												TTi18n::gettext('Invalid account number length'),
+												3,
+												20
+											);
+
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( $this->getAccount() == FALSE ) {
 			$this->Validator->isTRUE(		'account',
 											FALSE,
@@ -327,10 +359,13 @@ class BankAccountFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getUser() == FALSE ) {
 			Debug::Text('Clearing User value, because this is strictly a company record', __FILE__, __LINE__, __METHOD__, 10);
-			//$this->setUser( 0 ); //COMPANY record.
+			//$this->setUser( TTUUID::getZeroID() ); //COMPANY record.
 		}
 
 		//PGSQL has a NOT NULL constraint on Instituion number prior to schema v1014A.
@@ -341,6 +376,10 @@ class BankAccountFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -366,6 +405,11 @@ class BankAccountFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -403,6 +447,10 @@ class BankAccountFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		if ( $this->getUser() == '' ) {
 			$log_description = TTi18n::getText('Company');

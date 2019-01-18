@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,19 +43,32 @@ class Environment {
 	static protected $template_dir = 'templates';
 	static protected $template_compile_dir = 'templates_c';
 
+	/**
+	 * @param $path
+	 * @return mixed
+	 */
 	static function stripDuplicateSlashes( $path ) {
 		return preg_replace('/([^:])(\/{2,})/', '$1/', $path);
 	}
 
+	/**
+	 * @return mixed
+	 */
 	static function getBasePath() {
 		//return dirname( __FILE__ ) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR;
 		return str_replace('classes'. DIRECTORY_SEPARATOR . 'modules'. DIRECTORY_SEPARATOR .'core', '', dirname( __FILE__ ) );
 	}
 
+	/**
+	 * @return string
+	 */
 	static function getHostName() {
 		return Misc::getHostName( TRUE );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	static function getBaseURL() {
 		global $config_vars;
 
@@ -74,10 +87,16 @@ class Environment {
 
 	//Due to how the legacy interface is handled, we need to use the this function to determine the URL to redirect too,
 	//as the base_url needs to be /interface most of the time, for images and such to load properly.
+	/**
+	 * @return mixed
+	 */
 	static function getDefaultInterfaceBaseURL() {
 		return self::getBaseURL();
 	}
 
+	/**
+	 * @return mixed|string
+	 */
 	static function getCookieBaseURL() {
 		//  "/timetrex/interface"
 		//  "/timetrex/api/json"
@@ -92,6 +111,11 @@ class Environment {
 	}
 
 	//Returns the BASE_URL for the API functions.
+
+	/**
+	 * @param null $api
+	 * @return mixed
+	 */
 	static function getAPIBaseURL( $api = NULL ) {
 		global $config_vars;
 
@@ -113,6 +137,10 @@ class Environment {
 		return $base_url;
 	}
 
+	/**
+	 * @param $api
+	 * @return string
+	 */
 	static function getAPIURL( $api ) {
 		return self::getAPIBaseURL( $api ).'api.php';
 	}
@@ -121,16 +149,25 @@ class Environment {
 		return self::getBasePath() . DIRECTORY_SEPARATOR .'interface'. DIRECTORY_SEPARATOR .'images'. DIRECTORY_SEPARATOR;
 	}
 
+	/**
+	 * @return string
+	 */
 	static function getImagesURL() {
 		return self::getBaseURL() .'images/';
 	}
 
+	/**
+	 * @return string
+	 */
 	static function getStorageBasePath() {
 		global $config_vars;
 
 		return $config_vars['path']['storage'] . DIRECTORY_SEPARATOR;
 	}
 
+	/**
+	 * @return string
+	 */
 	static function getLogBasePath() {
 		global $config_vars;
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,12 +39,21 @@
  * @package Core
  */
 class FactoryListIterator implements Iterator {
+	private $template_obj;
 	private $obj;
 	private $rs;
 	private $class_name;
 
-	function __construct($obj) {
+	/**
+	 * FactoryListIterator constructor.
+	 * @param object $obj
+	 */
+	function __construct( $obj) {
 		$this->class_name = get_class($obj);
+
+		//Save a cleanly instantiated object in memory so we can simply clone it rather than instantiate a new one every loop iteration in current()
+		//  It appears this doesn't work for the sub-objects like Validator. If one iteration in a loop has a validation error, all the rest will too.
+		//$this->template_obj = new $this->class_name();
 
 		if ( isset($obj->rs) ) {
 			$this->rs = $obj->rs;
@@ -53,6 +62,9 @@ class FactoryListIterator implements Iterator {
 		$this->obj = $obj;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function rewind() {
 		if ( isset($this->obj->rs) ) {
 			$this->obj->rs->MoveFirst();
@@ -61,6 +73,9 @@ class FactoryListIterator implements Iterator {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function valid() {
 		if ( isset($this->obj->rs) ) {
 			return !$this->obj->rs->EOF;
@@ -69,21 +84,29 @@ class FactoryListIterator implements Iterator {
 		return FALSE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function key() {
 		return $this->obj->rs->_currentRow;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function current() {
 		if ( isset($this->obj->rs) ) { //Stop some warnings from coming up?
-
 			//This automatically resets the object during each iteration in a foreach()
 			//Without this, data can persist and cause undesirable results.
 
+			//  It appears this doesn't work for the sub-objects like Validator. If one iteration in a loop has a validation error, all the rest will too.
+			//$this->obj = clone $this->template_obj; //Copy the template object to avoid having to instantiate it each loop iteration. This is about 30% faster.
 			$this->obj = new $this->class_name();
-
 			$this->obj->rs = $this->rs;
 
-			$this->obj->data = $this->obj->rs->fields; //Orignal
+			//Set old_data at the same time as data, so we can check to see what fields have changed by using getDataDifferences() in any other function (ie: Validate,preSave,postSave)
+			//This used to be done in getUpdateQuery(), but that was too late for Validate/preSave().
+			$this->obj->data = $this->obj->old_data = $this->obj->rs->fields; //Orignal
 		}
 
 		return $this->obj;

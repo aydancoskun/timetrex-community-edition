@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,9 @@
  */
 class AccrualBalanceSummaryReport extends Report {
 
+	/**
+	 * AccrualBalanceSummaryReport constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('Accrual Balance Summary Report');
 		$this->file_name = 'accrual_balance_summary_report';
@@ -49,6 +52,11 @@ class AccrualBalanceSummaryReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
 				AND $this->getPermissionObject()->Check('report', 'view_accrual_balance_summary', $user_id, $company_id ) ) {
@@ -58,6 +66,11 @@ class AccrualBalanceSummaryReport extends Report {
 		return FALSE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|mixed|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -76,6 +89,7 @@ class AccrualBalanceSummaryReport extends Report {
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
 										'-1010-time_period' => TTi18n::gettext('Time Period'),
+										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -182,7 +196,7 @@ class AccrualBalanceSummaryReport extends Report {
 										'-1112-current_currency' => TTi18n::gettext('Current Currency'),
 
 										'-1399-hire_date_age' => TTi18n::gettext('Length of Service'),
-										
+
 										'-1820-accrual_policy_account' => TTi18n::gettext('Accrual Account'),
 										'-1830-type' => TTi18n::gettext('Accrual Type'),
 										//'-1160-date_stamp' => TTi18n::gettext('Date'), //Date stamp is combination of time_stamp and user_date.date_stamp columns.
@@ -455,6 +469,11 @@ class AccrualBalanceSummaryReport extends Report {
 	}
 
 	//Get raw data for report
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array(
 							'user' => array(),
@@ -485,13 +504,13 @@ class AccrualBalanceSummaryReport extends Report {
 			$this->tmp_data['user'][$u_obj->getId()]['user_status'] = Option::getByKey( $u_obj->getStatus(), $u_obj->getOptions( 'status' ) );
 
 			$this->tmp_data['user_wage'][$u_obj->getId()] = array();
-			
+
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'TMP User Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user wage data for joining.
-		$filter_data['wage_group_id'] = array(0); //Use default wage groups only.
+		$filter_data['wage_group_id'] = array( TTUUID::getZeroID() ); //Use default wage groups only.
 		$uwlf = TTnew( 'UserWageListFactory' );
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -545,6 +564,10 @@ class AccrualBalanceSummaryReport extends Report {
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
+
+	/**
+	 * @return bool
+	 */
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['accrual']), NULL, TTi18n::getText('Pre-Processing Data...') );
 		if ( isset($this->tmp_data['user']) ) {
@@ -558,7 +581,7 @@ class AccrualBalanceSummaryReport extends Report {
 									$date_columns = TTDate::getReportDates( NULL, TTDate::parseDateTime($row['date_stamp']), FALSE, $this->getUserObject() );
 								} else {
 									$date_columns = array();
-								}								
+								}
 
 								if ( isset($this->tmp_data['user'][$user_id]['hire_date']) ) {
 									$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), FALSE, $this->getUserObject() );

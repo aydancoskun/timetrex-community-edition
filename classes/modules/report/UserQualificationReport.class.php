@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,9 @@
  */
 class UserQualificationReport extends Report {
 
+	/**
+	 * UserQualificationReport constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('Qualification Summary Report');
 		$this->file_name = 'qualification_summary_report';
@@ -49,6 +52,11 @@ class UserQualificationReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 		if ( $this->getPermissionObject()->Check('hr_report', 'enabled', $user_id, $company_id )
 				AND $this->getPermissionObject()->Check('hr_report', 'user_qualification', $user_id, $company_id ) ) {
@@ -58,6 +66,11 @@ class UserQualificationReport extends Report {
 		return FALSE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|mixed|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -77,6 +90,7 @@ class UserQualificationReport extends Report {
 										'-1000-template' => TTi18n::gettext('Template'),
 										//'-1010-time_period' => TTi18n::gettext('Time Period'),
 										//'-2000-user_id' => TTi18n::gettext('Employees'),
+										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -573,6 +587,11 @@ class UserQualificationReport extends Report {
 	}
 
 	//Get raw data for report
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array(
 							'user' => array(),
@@ -638,7 +657,7 @@ class UserQualificationReport extends Report {
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-		foreach ( $uwlf as $key => $uw_obj ) {			
+		foreach ( $uwlf as $key => $uw_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) {
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = Misc::addKeyPrefix('user_wage.', (array)$uw_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_wage.', $columns ) ));
 			}
@@ -716,6 +735,10 @@ class UserQualificationReport extends Report {
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
+
+	/**
+	 * @return bool
+	 */
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['qualification']), NULL, TTi18n::getText('Pre-Processing Data...') );
 		if ( isset($this->tmp_data['qualification']) ) {
@@ -817,6 +840,10 @@ class UserQualificationReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _setFilterConfig( $data ) {
 		if ( isset($data['skill_expiry_date']) ) {
 			$data = array_merge( $data, (array)$this->convertTimePeriodToStartEndDate( $data['skill_expiry_date'], 'skill_expiry_' ) );

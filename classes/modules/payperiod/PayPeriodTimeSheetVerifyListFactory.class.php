@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodTimeSheetVerifyListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,7 +89,14 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		return $this;
 	}
 
-	function getByPayPeriodIdAndUserId($pay_period_id, $user_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $pay_period_id UUID
+	 * @param string $user_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodTimeSheetVerifyListFactory
+	 */
+	function getByPayPeriodIdAndUserId( $pay_period_id, $user_id, $where = NULL, $order = NULL) {
 		if ( $pay_period_id == '') {
 			return FALSE;
 		}
@@ -86,8 +106,8 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		}
 
 		$ph = array(
-					'pay_period_id' => (int)$pay_period_id,
-					'user_id' => (int)$user_id,
+					'pay_period_id' => TTUUID::castUUID($pay_period_id),
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -106,7 +126,15 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		return $this;
 	}
 
-	function getByPayPeriodIdAndUserIdAndCompanyId($pay_period_id, $user_id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $pay_period_id UUID
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodTimeSheetVerifyListFactory
+	 */
+	function getByPayPeriodIdAndUserIdAndCompanyId( $pay_period_id, $user_id, $company_id, $where = NULL, $order = NULL) {
 		if ( $pay_period_id == '') {
 			return FALSE;
 		}
@@ -122,9 +150,9 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$uf = new UserFactory();
 
 		$ph = array(
-					'pay_period_id' => (int)$pay_period_id,
-					'user_id' => (int)$user_id,
-					'company_id' => (int)$company_id,
+					'pay_period_id' => TTUUID::castUUID($pay_period_id),
+					'user_id' => TTUUID::castUUID($user_id),
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -145,7 +173,14 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		return $this;
 	}
 
-	function getByPayPeriodIdAndCompanyId($pay_period_id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $pay_period_id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodTimeSheetVerifyListFactory
+	 */
+	function getByPayPeriodIdAndCompanyId( $pay_period_id, $company_id, $where = NULL, $order = NULL) {
 		if ( $pay_period_id == '') {
 			return FALSE;
 		}
@@ -157,8 +192,8 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$uf = new UserFactory();
 
 		$ph = array(
-					//'pay_period_id' => (int)$pay_period_id,
-					'company_id' => (int)$company_id,
+					//'pay_period_id' => TTUUID::castUUID($pay_period_id),
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -167,7 +202,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 							'. $uf->getTable() .' as b
 					where	a.user_id = b.id
 						AND b.company_id = ?
-						AND a.pay_period_id in ('. $this->getListSQL( $pay_period_id, $ph, 'int' ).')
+						AND a.pay_period_id in ('. $this->getListSQL( $pay_period_id, $ph, 'uuid' ).')
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 						';
 		$query .= $this->getWhereSQL( $where );
@@ -178,7 +213,14 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodTimeSheetVerifyListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -190,8 +232,8 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => (int)$id,
-					'company_id' => (int)$company_id
+					'id' => TTUUID::castUUID($id),
+					'company_id' => TTUUID::castUUID($company_id)
 					);
 
 		$query = '
@@ -211,7 +253,13 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		return $this;
 	}
 
-	function getByCompanyId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodTimeSheetVerifyListFactory
+	 */
+	function getByCompanyId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -219,7 +267,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$ppf = new PayPeriodFactory();
 
 		$ph = array(
-					'company_id' => (int)$id
+					'company_id' => TTUUID::castUUID($id)
 					);
 
 		$query = '
@@ -236,7 +284,18 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		return $this;
 	}
 
-	function getByUserIdListAndStatusAndLevelAndMaxLevelAndNotAuthorized($ids, $status, $level, $max_level, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $ids UUID
+	 * @param $status
+	 * @param $level
+	 * @param $max_level
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodTimeSheetVerifyListFactory
+	 */
+	function getByUserIdListAndStatusAndLevelAndMaxLevelAndNotAuthorized( $ids, $status, $level, $max_level, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $ids == '') {
 			return FALSE;
 		}
@@ -281,7 +340,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 						AND	a.status_id = ?
 						AND a.authorized = 0
 						AND ( a.authorization_level = ? OR a.authorization_level > ? )
-						AND a.user_id in ('. $this->getListSQL($ids, $ph).')
+						AND a.user_id in ('. $this->getListSQL($ids, $ph, 'uuid').')
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 				';
 		$query .= $this->getWhereSQL( $where );
@@ -292,7 +351,16 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		return $this;
 	}
 
-	function getByHierarchyLevelMapAndStatusAndNotAuthorized($hierarchy_level_map, $status, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param $hierarchy_level_map
+	 * @param $status
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodTimeSheetVerifyListFactory
+	 */
+	function getByHierarchyLevelMapAndStatusAndNotAuthorized( $hierarchy_level_map, $status, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $hierarchy_level_map == '') {
 			return FALSE;
 		}
@@ -337,6 +405,16 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 	}
 
 	//This is used just for MyAccount -> TimeSheet Authorization, as its more complicated than a normal query.
+
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodTimeSheetVerifyListFactory
+	 */
 	function getAPIAuthorizationSearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -385,7 +463,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$epoch = time();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		//Need to make this return DISTINCT records only, because if the same child is assigned to multiple hierarchies,
@@ -414,7 +492,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 							utf.name as title
 					FROM (
 							SELECT
-								CASE WHEN pptsvf.id IS NOT NULL THEN pptsvf.id ELSE -1 END as id,
+								CASE WHEN pptsvf.id IS NOT NULL THEN pptsvf.id ELSE \''. TTUUID::getNotExistID() .'\' END as id,
 								uf.id as user_id,
 								ppf.id as pay_period_id,
 								CASE WHEN pptsvf.id IS NOT NULL THEN pptsvf.status_id ELSE ( CASE WHEN ppsf.timesheet_verify_type_id IN (20,40) THEN 45 ELSE 30 END) END as status_id,
@@ -434,7 +512,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 								LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.pay_period_schedule_id = ppsuf.pay_period_schedule_id AND ppf.status_id != 20 )
 								LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppf.pay_period_schedule_id = ppsf.id AND ppsf.timesheet_verify_type_id != 10 AND ppsf.deleted = 0 )
 								LEFT JOIN '. $this->getTable() .' as pptsvf ON ( uf.id = pptsvf.user_id AND ppf.id = pptsvf.pay_period_id AND pptsvf.deleted = 0 )
-							WHERE uf.company_id = '. (int)$company_id .'
+							WHERE uf.company_id = \''. TTUUID::castUUID($company_id) .'\'
 								AND (
 										( ( uf.status_id = 10 AND uf.termination_date IS NULL ) OR ( uf.termination_date IS NOT NULL AND uf.termination_date >= '. $this->getSQLToEpochFunction( 'ppf.start_date' ) .' ) )
 										AND
@@ -458,20 +536,20 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 					WHERE uf.company_id = ? 
 							AND ppsf.timesheet_verify_type_id in ( 30, 40 )'; //Only show when pay period schedule timesheet verify settings actually allow authorization.
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'pptsvf.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'pptsvf.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'pptsvf.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'ppf.id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'ppf.id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'uf.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'uf.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
@@ -486,7 +564,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 			}
 		} elseif ( isset($filter_data['hierarchy_level_map']) AND $filter_data['hierarchy_level_map'] == FALSE ) {
 			//If hierarchy_level_map is not an array, don't return any requests.
-			$query	.= ' AND  huf.id = -1 '; //Make sure the user maps to a hierarchy.
+			$query	.= ' AND  huf.id = \''. TTUUID::getNotExistID() .'\''; //Make sure the user maps to a hierarchy.
 		}
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('pptsvf.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
@@ -503,6 +581,15 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodTimeSheetVerifyListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 				return FALSE;
@@ -553,7 +640,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$ppf = new PayPeriodFactory();
 
 		$ph = array(
-								'company_id' => (int)$company_id,
+								'company_id' => TTUUID::castUUID($company_id),
 								);
 
 		//Need to make this return DISTINCT records only, because if the same child is assigned to multiple hierarchies,
@@ -594,20 +681,21 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 								where   b.company_id = ?
 								';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'b.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
@@ -623,7 +711,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 				}
 		} elseif ( isset($filter_data['hierarchy_level_map']) AND $filter_data['hierarchy_level_map'] == FALSE ) {
 				//If hierarchy_level_map is not an array, don't return any requests.
-				$query  .= ' AND  huf.id = -1 '; //Make sure the user maps to a hierarchy.
+				$query  .= ' AND huf.id = \''. TTUUID::getNotExistID() .'\' '; //Make sure the user maps to a hierarchy.
 		}
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;

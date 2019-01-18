@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|WageGroupListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,7 +89,15 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|WageGroupListFactory
+	 */
+	function getByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -89,7 +110,7 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -106,7 +127,13 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|WageGroupListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -116,8 +143,8 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -138,7 +165,7 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 		$utlf = new UserTitleListFactory();
 		$utlf->getByCompanyId($company_id);
 
-		$title_list[0] = '--';
+		$title_list[TTUUID::getZeroID()] = '--';
 
 		foreach ($utlf as $title_obj) {
 			$title_list[$title_obj->getID()] = $title_obj->getName();
@@ -147,11 +174,16 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 		return $title_list;
 	}
 */
-	function getArrayByListFactory($lf, $include_blank = TRUE ) {
+	/**
+	 * @param $lf
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getArrayByListFactory( $lf, $include_blank = TRUE ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
-		
+
 		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = TTi18n::getText('-Default-');
@@ -168,6 +200,15 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|WageGroupListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -197,7 +238,7 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -214,9 +255,9 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 

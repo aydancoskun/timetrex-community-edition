@@ -15,10 +15,10 @@
 		var default_height = 42;
 		var enabled = true;
 
-		this.setEnable = function( val ) {
+		this.setEnabled = function( val ) {
 			enabled = val;
 
-			var btn = this.find( '.browser-form' );
+			var btn = this.find( '.browser-form input' );
 
 			if ( !val ) {
 				btn.attr( 'disabled', true );

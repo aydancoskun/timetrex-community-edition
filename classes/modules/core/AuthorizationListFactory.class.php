@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class AuthorizationListFactory extends AuthorizationFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AuthorizationListFactory|bool
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -75,7 +88,13 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $where = NULL, $order = NULL ) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AuthorizationListFactory|bool
+	 */
+	function getByCompanyId( $company_id, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -83,7 +102,7 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -100,7 +119,16 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AuthorizationListFactory|bool
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -119,7 +147,7 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -127,7 +155,7 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $uf->getTable() .' as uf ON (a.created_by = uf.id )
 					where	uf.company_id = ?
-						AND	a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+						AND	a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 						AND ( a.deleted = 0 AND uf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -137,7 +165,14 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		return $this;
 	}
 
-	function getByObjectTypeAndObjectId($object_type_id, $object_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $object_type_id
+	 * @param string $object_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AuthorizationListFactory|bool
+	 */
+	function getByObjectTypeAndObjectId( $object_type_id, $object_id, $where = NULL, $order = NULL) {
 		if ( $object_type_id == '') {
 			return FALSE;
 		}
@@ -148,7 +183,7 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 
 		$ph = array(
 					'object_type_id' => (int)$object_type_id,
-					'object_id' => (int)$object_id,
+					'object_id' => TTUUID::castUUID($object_id),
 					);
 
 		$query = '
@@ -165,7 +200,15 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		return $this;
 	}
 
-	function getByObjectTypeAndObjectIdAndCreatedBy($object_type_id, $object_id, $created_by, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $object_type_id
+	 * @param string $object_id UUID
+	 * @param $created_by
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AuthorizationListFactory|bool
+	 */
+	function getByObjectTypeAndObjectIdAndCreatedBy( $object_type_id, $object_id, $created_by, $where = NULL, $order = NULL) {
 		if ( $object_type_id == '') {
 			return FALSE;
 		}
@@ -180,8 +223,8 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 
 		$ph = array(
 					'object_type_id' => (int)$object_type_id,
-					'object_id' => (int)$object_id,
-					'created_by' => $created_by,
+					'object_id' => TTUUID::castUUID($object_id),
+					'created_by' =>  TTUUID::castUUID($created_by),
 					);
 
 		$query = '
@@ -199,6 +242,15 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AuthorizationListFactory|bool
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -238,7 +290,7 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -257,7 +309,7 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
 			$query .= ' LEFT JOIN '. $uef->getTable() .' as uef ON ( a.object_type_id = 200 AND a.object_id = uef.id ) ';
 		}
-		
+
 		$query .= '		LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	y.company_id = ?';
@@ -270,16 +322,16 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		} elseif ( isset($filter_data['object_type_id']) AND in_array( $filter_data['object_type_id'], array(200) ) ) { //Expense
 			$user_id_column = 'uef.user_id';
 		}
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( $user_id_column, $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( $user_id_column, $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['object_type_id']) ) ? $this->getWhereClauseSQL( 'a.object_type_id', $filter_data['object_type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['object_id']) ) ? $this->getWhereClauseSQL( 'a.object_id', $filter_data['object_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['object_id']) ) ? $this->getWhereClauseSQL( 'a.object_id', $filter_data['object_id'], 'uuid_list_with_all', $ph ) : NULL; //object_id can be -1, so we need to make sure we still filter on that if its passed, to avoid skipping this and returning all records.
 
 		if ( isset($filter_data['object_type_id']) AND in_array( $filter_data['object_type_id'], array(90) ) ) { //TimeSheet
-			$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'pptsvf.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'pptsvf.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
 		}
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;

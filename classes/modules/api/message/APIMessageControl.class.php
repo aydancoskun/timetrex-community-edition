@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIMessageControl extends APIFactory {
 	protected $main_class = 'MessageControlFactory';
 
+	/**
+	 * APIMessageControl constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APIMessageControl extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'user_columns' ) {
@@ -97,7 +100,8 @@ class APIMessageControl extends APIFactory {
 	/**
 	 * Get message_control data for one or more message_controles.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getMessageControl( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('message', 'enabled')
@@ -134,7 +138,7 @@ class APIMessageControl extends APIFactory {
 
 	/**
 	 * @param string $format
-	 * @param null $data
+	 * @param array $data
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
@@ -146,7 +150,8 @@ class APIMessageControl extends APIFactory {
 	/**
 	 * Get message data for one message or thread.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getMessage( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('message', 'enabled')
@@ -187,7 +192,8 @@ class APIMessageControl extends APIFactory {
 	/**
 	 * Get message data attached to a single object.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getEmbeddedMessage( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('message', 'enabled')
@@ -269,7 +275,9 @@ class APIMessageControl extends APIFactory {
 	/**
 	 * Set message_control data for one or more message_controls.
 	 * @param array $data message_control data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setMessageControl( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -288,12 +296,12 @@ class APIMessageControl extends APIFactory {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' MessageControls', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -301,12 +309,12 @@ class APIMessageControl extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'MessageControlListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
 				} else {
 					//Adding new object, check ADD permissions.
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('message', 'add'), TTi18n::gettext('Add permission denied') );
-					
+
 					//Security check, make sure any data passed as to_user_id is within the list of users available.
 					if ( !isset($row['to_user_id']) OR is_array($row['to_user_id']) AND count($row['to_user_id']) == 0 ) {
 						$row['to_user_id'] = FALSE;
@@ -320,7 +328,7 @@ class APIMessageControl extends APIFactory {
 						Debug::Text('Adding message to request, determining our own to_user_ids...', __FILE__, __LINE__, __METHOD__, 10);
 						//When replying to a request, find all users who have contributed messages to the request and make those the to_user_ids.
 						$mslf = TTNew('MessageSenderListFactory');
-						$mslf->getByCompanyIdAndObjectTypeAndObjectAndNotUser( $this->getCurrentCompanyObject()->getId(), (int)$row['object_type_id'], (int)$row['object_id'], $this->getCurrentUserObject()->getId() );
+						$mslf->getByCompanyIdAndObjectTypeAndObjectAndNotUser( $this->getCurrentCompanyObject()->getId(), (int)$row['object_type_id'], TTUUID::castUUID( $row['object_id'] ), $this->getCurrentUserObject()->getId() );
 						if ( $mslf->getRecordCount() > 0 ) {
 							$row['to_user_id'] = array();
 							foreach( $mslf as $ms_obj ) {
@@ -331,7 +339,7 @@ class APIMessageControl extends APIFactory {
 						} else {
 							$hlf = TTnew( 'HierarchyListFactory' );
 							$rlf = TTnew('RequestListFactory');
-							$rlf->getByIdAndCompanyId( (int)$row['object_id'], $this->getCurrentCompanyObject()->getId() );
+							$rlf->getByIdAndCompanyId( TTUUID::castUUID($row['object_id']), $this->getCurrentCompanyObject()->getId() );
 							if ( $rlf->getRecordCount() == 1 ) {
 								$object_type_id = $rlf->getHierarchyTypeId( (int)$rlf->getCurrent()->getType() );
 								$row['to_user_id'] = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId(), $object_type_id, TRUE, FALSE ); //Immediate parents only.
@@ -400,10 +408,11 @@ class APIMessageControl extends APIFactory {
 	/**
 	 * Delete one or more message_controls.
 	 * @param array $data message_control data
-	 * @return array
+	 * @param bool $folder_id
+	 * @return array|bool
 	 */
 	function deleteMessageControl( $data, $folder_id = FALSE) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -424,7 +433,7 @@ class APIMessageControl extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -438,7 +447,7 @@ class APIMessageControl extends APIFactory {
 					$lf = TTnew( 'MessageSenderListFactory' );
 				}
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get message_control object, so we can only modify just changed data for specific records if needed.
 					if ( $folder_id == 10 ) { //Inbox
@@ -452,7 +461,7 @@ class APIMessageControl extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('message', 'delete')
 								OR ( $this->getPermissionObject()->Check('message', 'delete_own') ) ) { //Remove is_owner() checks, as the list factory filter it for us.
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -507,7 +516,7 @@ class APIMessageControl extends APIFactory {
 	 * @return array
 	 */
 	function copyMessageControl( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -610,7 +619,7 @@ class APIMessageControl extends APIFactory {
 
 	/**
 	 * Check if there are unread messages for the current user.
-	 * @return number of unread messages.
+	 * @return array number of unread messages.
 	 */
 	function isNewMessage() {
 		$mclf = new MessageControlListFactory();
@@ -620,6 +629,10 @@ class APIMessageControl extends APIFactory {
 		return $this->returnHandler( $unread_messages );
 	}
 
+	/**
+	 * @param string $mark_read_message_ids UUID
+	 * @return array|bool
+	 */
 	function markRecipientMessageAsRead( $mark_read_message_ids ) {
 		return $this->returnHandler( MessageControlFactory::markRecipientMessageAsRead( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId(), $mark_read_message_ids ) );
 	}

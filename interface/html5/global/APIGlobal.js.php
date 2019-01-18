@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -49,18 +49,26 @@ var APIGlobal = function() {};
 APIGlobal.pre_login_data = <?php echo json_encode( $auth->getPreLoginData() );?>; //Convert getPreLoginData() array to JS.
 
 need_load_pre_login_data = false;
-var new_session = getCookie( 'NewSessionID' );
-if ( new_session ) {
-	setCookie( 'SessionID', new_session, 30, APIGlobal.pre_login_data.cookie_base_url );
 
-	//Allow NewSessionID cookie to be accessible from one level higher subdomain.
-	var host = window.location.hostname;
-	host = host.substring( (host.indexOf( '.' ) + 1) );
-	setCookie( 'NewSessionID', null, 0, APIGlobal.pre_login_data.cookie_base_url, host );
+var alternate_session_data = decodeURIComponent(getCookie( 'AlternateSessionData' ));
 
-	need_load_pre_login_data = true; // need load it again since APIGlobal.pre_login_data.is_logged_in will be false when first load
+if ( alternate_session_data ) {
+	alternate_session_data = JSON.parse(alternate_session_data);
+	if ( alternate_session_data.new_session_id ) {
+		setCookie('SessionID', alternate_session_data.new_session_id, 30, APIGlobal.pre_login_data.cookie_base_url);
+
+		alternate_session_data.new_session_id = null;
+
+		//Allow NewSessionID cookie to be accessible from one level higher subdomain.
+		var host = window.location.hostname;
+		host = host.substring((host.indexOf('.') + 1));
+
+		setCookie('AlternateSessionData', JSON.stringify(alternate_session_data), 1, APIGlobal.pre_login_data.cookie_base_url, host ); //was NewSessionID
+
+		need_load_pre_login_data = true; // need load it again since APIGlobal.pre_login_data.is_logged_in will be false when first load
+	}
 }
-delete new_session, host;
+delete alternate_session_data, host;
 <?php
 Debug::writeToLog();
 ?>

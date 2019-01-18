@@ -1,7 +1,10 @@
 EthnicGroupViewController = BaseViewController.extend( {
 	el: '#ethnic_group_view_container',
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+
+	_required_files: ['APIEthnicGroup'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'EthnicGroupEditView.html';
 		this.permission_id = 'user';
 		this.viewId = 'EthnicGroup';

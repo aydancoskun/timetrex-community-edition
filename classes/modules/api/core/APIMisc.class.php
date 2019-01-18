@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIMisc extends APIFactory {
 	protected $main_class = '';
 
+	/**
+	 * APIMisc constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,6 +52,9 @@ class APIMisc extends APIFactory {
 
 	//Ping function is also in APIMisc for when the session timesout is valid.
 	//Flex calls this after session is timedout so it can get the proper validation error and display the correct message to the user.
+	/**
+	 * @return bool
+	 */
 	function Ping() {
 		return TRUE;
 	}

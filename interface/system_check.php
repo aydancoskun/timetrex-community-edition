@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,13 @@ try {
 	exit;
 }
 //Debug::setVerbosity(11);
+
+//First check if we are installing or down for maintenance, so we don't try to initiate any DB connections.
+if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == TRUE )
+		OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == TRUE ) ) {
+	echo 'FAIL! (INSTALLER/DOWN FOR MAINTENANCE)';
+	exit;
+}
 
 //Confirm database connection is up and maintenance jobs have run recently...
 if ( PRODUCTION == TRUE ) {

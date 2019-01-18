@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,10 +46,18 @@ class CompanyFactory extends Factory {
 	protected $city_validator_regex = '/^[a-zA-Z0-9-,_\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $short_name_validator_regex = '/^[a-zA-Z0-9-]{1,15}$/iu'; //Short name must only allow characters available in domain names.
 
+	var $legal_entity_id = NULL; //Used in postSave() to allow other classes to access the newly created legal_entity.
+
 	var $user_default_obj = NULL;
 	var $user_obj = NULL;
 	var $base_currency_obj = NULL;
 
+
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -890,7 +898,7 @@ class CompanyFactory extends Factory {
 														'BS' => TTi18n::gettext('Baja California Sur'),
 														'CM' => TTi18n::gettext('Campeche'),
 														'CP' => TTi18n::gettext('Chiapas'),
-														'CP' => TTi18n::gettext('Chihuahua'),
+														'CH' => TTi18n::gettext('Chihuahua'),
 														'CA' => TTi18n::gettext('Coahuila'),
 														'CL' => TTi18n::gettext('Colima'),
 														'DF' => TTi18n::gettext('Distrito Federal'),
@@ -1385,7 +1393,7 @@ class CompanyFactory extends Factory {
 													'NJ' => array( '00' => TTi18n::gettext('--Other--') ),
 													'NY' => array(
 																'NYC' => TTi18n::gettext('New York City'),
-																'Yonkers' => TTi18n::gettext('Yonkers')
+																'YONKERS' => TTi18n::gettext('Yonkers')
 															),
 													'NC' => array( '00' => TTi18n::gettext('--Other--') ),
 													'ND' => array( '00' => TTi18n::gettext('--Other--') ),
@@ -1533,6 +1541,10 @@ class CompanyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 			$variable_function_map = array(
 											'id' => 'ID',
@@ -1611,6 +1623,9 @@ class CompanyFactory extends Factory {
 			return $variable_function_map;
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getUserDefaultObject() {
 		if ( is_object($this->user_default_obj) ) {
 			return $this->user_default_obj;
@@ -1626,6 +1641,10 @@ class CompanyFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function getUserObject( $user_id ) {
 		if ( $user_id == '' AND $user_id <= 0 ) {
 			return FALSE;
@@ -1647,10 +1666,18 @@ class CompanyFactory extends Factory {
 	}
 
 	//Returns total number of currencies, if its 1 then we know we don't need to do any currency conversions at all.
+
+	/**
+	 * @return mixed
+	 */
 	function getTotalCurrencies() {
 		$clf = TTNew('CurrencyListFactory');
 		return $clf->getByCompanyID( $this->getID() )->getRecordCount();
 	}
+
+	/**
+	 * @return bool|null
+	 */
 	function getBaseCurrencyObject() {
 		if ( is_object( $this->base_currency_obj ) ) {
 			return $this->base_currency_obj;
@@ -1666,890 +1693,714 @@ class CompanyFactory extends Factory {
 
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getParent() {
-		if ( isset($this->data['parent_id']) ) {
-			return (int)$this->data['parent_id'];
-		}
-
-		return FALSE;
-	}
-	function setParent($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $id == 0
-				OR (
-					$this->Validator->isTRUE(	'parent',
-															( $id != $this->getID() ) ? TRUE : FALSE,
-															TTi18n::gettext('Parent Company cannot be itself')
-															)
-					AND $this->Validator->isResultSetWithRows(	'parent',
-															$clf->getByID($id),
-															TTi18n::gettext('Parent Company is invalid')
-															)
-					)
-				) {
-			$this->data['parent_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'parent_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setParent( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'parent_id', $value );
+	}
+
+	/**
+	 * @return int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getProductEdition() {
-		if ( isset($this->data['product_edition_id']) ) {
-			if ( $this->data['product_edition_id'] > getTTProductEdition() ) {
+		$value = $this->getGenericDataValue( 'product_edition_id' );
+		if ( $value !== FALSE ) {
+			if ( $value > getTTProductEdition() ) {
 				return (int)getTTProductEdition();
 			} else {
-				return (int)$this->data['product_edition_id'];
+				return (int)$value;
 			}
 		}
-
-		return FALSE;
-	}
-	function setProductEdition($val) {
-		$val = trim($val);
-
-		if ( $this->Validator->inArrayKey(	'product_edition',
-											$val,
-											TTi18n::gettext('Incorrect Product Edition'),
-											$this->getOptions('product_edition')) ) {
-
-			$this->data['product_edition_id'] = $val;
-
-			return TRUE;
-		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setProductEdition( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'product_edition_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-		return $this->data['name'];
+		return $this->getGenericDataValue( 'name' );
 	}
 
-		return FALSE;
-	}
-	function setName($name, $force = FALSE) {
+	/**
+	 * @param $name
+	 * @param bool $force
+	 * @return bool
+	 */
+	function setName( $name, $force = FALSE) {
 		$name = ucwords( trim($name) );
-
-		if	(	( DEMO_MODE == FALSE OR $force == TRUE )
-				AND
-				$this->Validator->isLength(		'name',
-												$name,
-												TTi18n::gettext('Name is too short or too long'),
-												2,
-												100) ) {
-
+		if ( DEMO_MODE == FALSE OR $force == TRUE ) {
 			global $config_vars;
 			if ( $force == FALSE AND $this->isNew() == FALSE AND isset($config_vars['other']['primary_company_id']) AND $config_vars['other']['primary_company_id'] == $this->getId() AND getTTProductEdition() > 10 ) {
 				//Don't change company name
 				unset($name); //Satisfy coding standards.
 			} else {
-				$this->data['name'] = $name;
 				$this->setNameMetaphone( $name );
+				return $this->setGenericDataValue( 'name', $name );
 			}
-
-			return TRUE;
 		}
-
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getNameMetaphone() {
-		if ( isset($this->data['name_metaphone']) ) {
-			return $this->data['name_metaphone'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name_metaphone' );
 	}
-	function setNameMetaphone($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setNameMetaphone( $value) {
 		$value = metaphone( trim( Misc::stripThe( $value ) ) );
-
 		if	( $value != '' ) {
-			$this->data['name_metaphone'] = $value;
-
-			return TRUE;
+			return $this->setGenericDataValue( 'name_metaphone', $value );
 		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getIndustry() {
-		if ( isset($this->data['industry_id']) ) {
-			return (int)$this->data['industry_id'];
-		}
-
-		return FALSE;
-	}
-	function setIndustry($value) {
-		$value = trim($value);
-
-		if ( $value == 0
-				OR $this->Validator->inArrayKey(	'industry_id',
-													$value,
-													TTi18n::gettext('Incorrect Industry'),
-													$this->getOptions('industry')) ) {
-
-			$this->data['industry_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'industry_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setIndustry( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'industry_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getBusinessNumber() {
-		if ( isset($this->data['business_number']) ) {
-			return $this->data['business_number'];
-		}
-
-		return FALSE;
-	}
-	function setBusinessNumber($val) {
-		$val = trim($val);
-
-		if	(	$val == ''
-				OR $this->Validator->isLength(		'business_number',
-												$val,
-												TTi18n::gettext('Business Number is too short or too long'),
-												2,
-												200) ) {
-
-			$this->data['business_number'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'business_number' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setBusinessNumber( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'business_number', $value );
+	}
+
+	/**
+	 * @return string
+	 */
 	function getOriginatorID() {
-		if ( isset($this->data['originator_id']) ) {
-			return (string)$this->data['originator_id']; //Should not be cast to INT.
-		}
-
-		return FALSE;
-	}
-	function setOriginatorID($val) {
-		$val = trim($val);
-
-		if	(	$val == ''
-				OR $this->Validator->isLength(	'originator_id',
-												$val,
-												TTi18n::gettext('Originator ID is too short or too long'),
-												2,
-												200) ) {
-
-			//Typo in SQL file, go with it for now.
-			$this->data['originator_id'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (string)$this->getGenericDataValue( 'originator_id' ); //Should not be cast to INT.
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOriginatorID( $value) {
+		$value = trim($value);
+		//Typo in SQL file, go with it for now.
+		return $this->setGenericDataValue( 'originator_id', $value );
+	}
+
+	/**
+	 * @return string
+	 */
 	function getDataCenterID() {
-		if ( isset($this->data['data_center_id']) ) {
-			return (string)$this->data['data_center_id']; //Should not be cast to INT.
-		}
-
-		return FALSE;
-	}
-	function setDataCenterID($val) {
-		$val = trim($val);
-
-		if	(	$val == ''
-				OR $this->Validator->isLength(	'data_center_id',
-												$val,
-												TTi18n::gettext('Data Center ID is too short or too long'),
-												2,
-												200) ) {
-
-			$this->data['data_center_id'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (string)$this->getGenericDataValue( 'data_center_id' ); //Should not be cast to INT.
 	}
 
+	/**
+	 * @param $value
+	 * @return string
+	 */
+	function setDataCenterID( $value) {
+		$value = trim($value);
+		return (string)$this->setGenericDataValue( 'data_center_id', $value );//Should not be cast to INT.
+	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getShortName() {
-		if ( isset($this->data['short_name']) ) {
-			return $this->data['short_name'];
-		}
-
-		return FALSE;
-	}
-	function setShortName($name) {
-		$name = trim($name);
-
-		//Short name must only allow characters available in domain names.
-		if	(	$name == ''
-				OR (
-					$this->Validator->isLength(		'short_name',
-													$name,
-													TTi18n::gettext('Short name is too short or too long'),
-													2,
-													15)
-					AND
-					$this->Validator->isRegEx(		'short_name',
-													$name,
-													TTi18n::gettext('Short name must not contain any special characters'),
-													$this->short_name_validator_regex)
-				)
-			) {
-
-			$this->data['short_name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'short_name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setShortName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'short_name', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getAddress1() {
-		if ( isset($this->data['address1']) ) {
-			return $this->data['address1'];
-		}
-
-		return FALSE;
-	}
-	function setAddress1($address1) {
-		$address1 = trim($address1);
-
-		if	(
-				$address1 == ''
-				OR (
-				$this->Validator->isRegEx(		'address1',
-												$address1,
-												TTi18n::gettext('Address1 contains invalid characters'),
-												$this->address_validator_regex)
-				AND
-					$this->Validator->isLength(		'address1',
-													$address1,
-													TTi18n::gettext('Address1 is too short or too long'),
-													2,
-													250) ) ) {
-
-			$this->data['address1'] = $address1;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'address1' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAddress1( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'address1', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getAddress2() {
-		if ( isset($this->data['address2']) ) {
-			return $this->data['address2'];
-		}
-
-		return FALSE;
-	}
-	function setAddress2($address2) {
-		$address2 = trim($address2);
-
-		if	(	$address2 == ''
-				OR (
-					$this->Validator->isRegEx(		'address2',
-													$address2,
-													TTi18n::gettext('Address2 contains invalid characters'),
-													$this->address_validator_regex)
-				AND
-					$this->Validator->isLength(		'address2',
-													$address2,
-													TTi18n::gettext('Address2 is too short or too long'),
-													2,
-													250) ) ) {
-
-			$this->data['address2'] = $address2;
-
-			return TRUE;
-		}
-
-		return FALSE;
-
+		return $this->getGenericDataValue( 'address2' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAddress2( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'address2', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCity() {
-		if ( isset($this->data['city']) ) {
-			return $this->data['city'];
-		}
-
-		return FALSE;
-	}
-	function setCity($city) {
-		$city = trim($city);
-
-		if	(	$this->Validator->isRegEx(		'city',
-												$city,
-												TTi18n::gettext('City contains invalid characters'),
-												$this->city_validator_regex)
-				AND
-					$this->Validator->isLength(		'city',
-													$city,
-													TTi18n::gettext('City name is too short or too long'),
-													2,
-													250) ) {
-
-			$this->data['city'] = $city;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'city' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCity( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'city', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCountry() {
-		if ( isset($this->data['country']) ) {
-			return $this->data['country'];
-		}
-
-		return FALSE;
-	}
-	function setCountry($country) {
-		$country = trim($country);
-
-		if ( $this->Validator->inArrayKey(		'country',
-												$country,
-												TTi18n::gettext('Invalid Country'),
-												$this->getOptions('country') ) ) {
-
-			$this->data['country'] = $country;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'country' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCountry( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'country', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getProvince() {
-		if ( isset($this->data['province']) ) {
-			return $this->data['province'];
-		}
-
-		return FALSE;
-	}
-	function setProvince($province) {
-		$province = trim($province);
-
-		Debug::Text('Country: '. $this->getCountry() .' Province: '. $province, __FILE__, __LINE__, __METHOD__, 10);
-
-		$options_arr = $this->getOptions('province');
-		if ( isset($options_arr[$this->getCountry()]) ) {
-			$options = $options_arr[$this->getCountry()];
-		} else {
-			$options = array();
-		}
-
-		if ( $this->Validator->inArrayKey(		'province',
-												$province,
-												TTi18n::gettext('Invalid Province/State'),
-												$options ) ) {
-
-			$this->data['province'] = $province;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'province' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setProvince( $value) {
+		$value = trim($value);
+		Debug::Text('Country: '. $this->getCountry() .' Province: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'province', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPostalCode() {
-		if ( isset($this->data['postal_code']) ) {
-			return $this->data['postal_code'];
-		}
-
-		return FALSE;
-	}
-	function setPostalCode($postal_code) {
-		$postal_code = strtoupper( $this->Validator->stripSpaces($postal_code) );
-
-		if	(
-				$postal_code == ''
-				OR
-				(
-					$this->Validator->isPostalCode(	'postal_code',
-													$postal_code,
-													TTi18n::gettext('Postal/ZIP Code contains invalid characters, invalid format, or does not match Province/State'),
-													$this->getCountry(), $this->getProvince() )
-				AND
-					$this->Validator->isLength(		'postal_code',
-													$postal_code,
-													TTi18n::gettext('Postal/ZIP Code is too short or too long'),
-													1,
-													10)
-				)
-				) {
-
-			$this->data['postal_code'] = $postal_code;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'postal_code' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPostalCode( $value) {
+		$value = strtoupper( $this->Validator->stripSpaces($value) );
+		return $this->setGenericDataValue( 'postal_code', $value );
+	}
+
+	/**
+	 * @return bool|float
+	 */
 	function getLongitude() {
-		if ( isset($this->data['longitude']) ) {
-			return (float)$this->data['longitude'];
-		}
-
-		return FALSE;
-	}
-	function setLongitude($value) {
-		$value = TTi18n::parseFloat( $value );
-
-		if (	$value == 0
-				OR
-				$this->Validator->isFloat(	'longitude',
-											$value,
-											TTi18n::gettext('Longitude is invalid')
-											) ) {
-			$this->data['longitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'longitude' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLongitude( $value ) {
+		if ( is_numeric($value) ) {
+			$value = number_format( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+		} else {
+			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
+		}
+
+		return $this->setGenericDataValue( 'longitude', $value );
+	}
+
+	/**
+	 * @return bool|float
+	 */
 	function getLatitude() {
-		if ( isset($this->data['latitude']) ) {
-			return (float)$this->data['latitude'];
-		}
-
-		return FALSE;
-	}
-	function setLatitude($value) {
-		$value = TTi18n::parseFloat( $value );
-
-		if (	$value == 0
-				OR
-				$this->Validator->isFloat(	'latitude',
-											$value,
-											TTi18n::gettext('Latitude is invalid')
-											) ) {
-			$this->data['latitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'latitude' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLatitude( $value ) {
+		if ( is_numeric($value) ) {
+			$value = number_format( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+		} else {
+			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
+		}
+
+		return $this->setGenericDataValue( 'latitude', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getWorkPhone() {
-		if ( isset($this->data['work_phone']) ) {
-			return $this->data['work_phone'];
-		}
-
-		return FALSE;
-	}
-	function setWorkPhone($work_phone) {
-		$work_phone = trim($work_phone);
-
-		if	(	$this->Validator->isPhoneNumber(		'work_phone',
-														$work_phone,
-														TTi18n::gettext('Work phone number is invalid')) ) {
-
-			$this->data['work_phone'] = $work_phone;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'work_phone' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setWorkPhone( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'work_phone', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getFaxPhone() {
-		if ( isset($this->data['fax_phone']) ) {
-			return $this->data['fax_phone'];
-		}
-
-		return FALSE;
-	}
-	function setFaxPhone($fax_phone) {
-		$fax_phone = trim($fax_phone);
-
-		if	(	$fax_phone == ''
-				OR
-				$this->Validator->isPhoneNumber(		'fax_phone',
-														$fax_phone,
-														TTi18n::gettext('Fax phone number is invalid')) ) {
-
-			$this->data['fax_phone'] = $fax_phone;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'fax_phone' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setFaxPhone( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'fax_phone', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getAdminContact() {
-		if ( isset($this->data['admin_contact']) ) {
-			return $this->data['admin_contact'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'admin_contact' );
 	}
-	function setAdminContact($id) {
-		$id = trim($id);
 
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( !empty($id)
-				AND $this->Validator->isResultSetWithRows(	'admin_contact',
-																$ulf->getByID($id),
-																TTi18n::gettext('Contact User is invalid')
-																) ) {
-
-			$this->data['admin_contact'] = $id;
-
-			return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAdminContact( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'admin_contact', $value );
 
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getBillingContact() {
-		if ( isset($this->data['billing_contact']) ) {
-			return $this->data['billing_contact'];
-		}
-
-		return FALSE;
-	}
-	function setBillingContact($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( !empty($id)
-				AND $this->Validator->isResultSetWithRows(	'billing_contact',
-															$ulf->getByID($id),
-															TTi18n::gettext('Contact User is invalid')
-															) ) {
-
-			$this->data['billing_contact'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'billing_contact' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setBillingContact( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'billing_contact', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getSupportContact() {
-		if ( isset($this->data['support_contact']) ) {
-			return $this->data['support_contact'];
-		}
-
-		return FALSE;
-	}
-	function setSupportContact($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( !empty($id)
-				AND $this->Validator->isResultSetWithRows(	'support_contact',
-															$ulf->getByID($id),
-															TTi18n::gettext('Contact User is invalid')
-															) ) {
-
-			$this->data['support_contact'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'support_contact' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSupportContact( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'support_contact', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID1() {
-		if ( isset($this->data['other_id1']) ) {
-			return $this->data['other_id1'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id1' );
 	}
-	function setOtherID1($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID1( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id1',
-											$value,
-											TTi18n::gettext('Other ID 1 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id1'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id1', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID2() {
-		if ( isset($this->data['other_id2']) ) {
-			return $this->data['other_id2'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id2' );
 	}
-	function setOtherID2($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID2( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id2',
-											$value,
-											TTi18n::gettext('Other ID 2 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id2'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id2', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID3() {
-		if ( isset($this->data['other_id3']) ) {
-			return $this->data['other_id3'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id3' );
 	}
-	function setOtherID3($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID3( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id3',
-											$value,
-											TTi18n::gettext('Other ID 3 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id3'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id3', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID4() {
-		if ( isset($this->data['other_id4']) ) {
-			return $this->data['other_id4'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id4' );
 	}
-	function setOtherID4($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID4( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id4',
-											$value,
-											TTi18n::gettext('Other ID 4 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id4'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id4', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID5() {
-		if ( isset($this->data['other_id5']) ) {
-			return $this->data['other_id5'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id5' );
 	}
-	function setOtherID5($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID5( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id5',
-											$value,
-											TTi18n::gettext('Other ID 5 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id5'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id5', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getDefaultCurrency() {
 		$culf = TTnew( 'CurrencyListFactory' );
 		$culf->getByCompanyIdAndDefault( $this->getId(), TRUE );
-		if ($culf->getRecordCount() == 1 ) {
+		Debug::Text(' Finding Default Currency for Company ID: '. $this->getId() .' Records: '. $culf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9);
+		if ( $culf->getRecordCount() == 1 ) {
 			return $culf->getCurrent()->getId();
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getEnableAddLegalEntity() {
+		if ( isset($this->add_legal_entity) ) {
+			return $this->add_legal_entity;
+		}
+
+		return FALSE; //Default to FALSE otherwise updating company records (ie: when uploading license) will create new records.
+	}
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableAddLegalEntity( $bool) {
+		$this->add_legal_entity = $bool;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableAddCurrency() {
 		if ( isset($this->add_currency) ) {
 			return $this->add_currency;
 		}
 
-		return FALSE;
+		return FALSE; //Default to FALSE otherwise updating company records (ie: when uploading license) will create new records.
 	}
-	function setEnableAddCurrency($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableAddCurrency( $bool) {
 		$this->add_currency = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableAddPermissionGroupPreset() {
 		if ( isset($this->add_permission_group_preset) ) {
 			return $this->add_permission_group_preset;
 		}
 
-		return FALSE;
+		return FALSE; //Default to FALSE otherwise updating company records (ie: when uploading license) will create new records.
 	}
-	function setEnableAddPermissionGroupPreset($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableAddPermissionGroupPreset( $bool) {
 		$this->add_permission_group_preset = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableAddStation() {
 		if ( isset($this->add_station) ) {
 			return $this->add_station;
 		}
 
-		return FALSE;
+		return FALSE; //Default to FALSE otherwise updating company records (ie: when uploading license) will create new records.
 	}
-	function setEnableAddStation($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableAddStation( $bool) {
 		$this->add_station = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableAddPayStubEntryAccountPreset() {
 		if ( isset($this->add_pay_stub_entry_account_preset) ) {
 			return $this->add_pay_stub_entry_account_preset;
 		}
 
-		return FALSE;
+		return FALSE; //Default to FALSE otherwise updating company records (ie: when uploading license) will create new records.
 	}
-	function setEnableAddPayStubEntryAccountPreset($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableAddPayStubEntryAccountPreset( $bool) {
 		$this->add_pay_stub_entry_account_preset = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableAddCompanyDeductionPreset() {
 		if ( isset($this->add_company_deduction_preset) ) {
 			return $this->add_company_deduction_preset;
 		}
 
-		return FALSE;
+		return FALSE; //Default to FALSE otherwise updating company records (ie: when uploading license) will create new records.
 	}
-	function setEnableAddCompanyDeductionPreset($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableAddCompanyDeductionPreset( $bool) {
 		$this->add_company_deduction_preset = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableAddUserDefaultPreset() {
 		if ( isset($this->add_user_default_preset) ) {
 			return $this->add_user_default_preset;
 		}
 
-		return FALSE;
+		return FALSE; //Default to FALSE otherwise updating company records (ie: when uploading license) will create new records.
 	}
-	function setEnableAddUserDefaultPreset($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableAddUserDefaultPreset( $bool) {
 		$this->add_user_default_preset = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getEnableSecondLastName() {
-		if ( isset($this->data['enable_second_last_name']) ) {
-			return $this->data['enable_second_last_name'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'enable_second_last_name' );
 	}
 
-	function setEnableSecondLastName($bool) {
-		$this->data['enable_second_last_name'] = $this->toBool($bool);
-
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableSecondLastName( $value) {
+		return $this->setGenericDataValue( 'enable_second_last_name', $this->toBool($value) );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getMigrateURL() {
-		if ( isset($this->data['migrate_url']) ) {
-			return $this->data['migrate_url'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'migrate_url' );
 	}
-	function setMigrateURL($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMigrateURL( $value) {
 		$value = trim($value);
-
 		if	( $value != '' ) {
-			$this->data['migrate_url'] = $value;
-
-			return TRUE;
+			return $this->setGenericDataValue( 'migrate_url', $value );
 		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getSetupComplete() {
-		if ( isset($this->data['is_setup_complete']) ) {
-			return $this->data['is_setup_complete'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'is_setup_complete' );
 	}
 
-	function setSetupComplete($bool) {
-		$this->data['is_setup_complete'] = $this->toBool($bool);
-
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSetupComplete( $value) {
+		return $this->setGenericDataValue( 'is_setup_complete', $this->toBool($value) );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableAddRecurringHolidayPreset() {
 		if ( isset($this->add_recurring_holiday_preset) ) {
 			return $this->add_recurring_holiday_preset;
@@ -2557,16 +2408,31 @@ class CompanyFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableAddRecurringHolidayPreset($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableAddRecurringHolidayPreset( $bool) {
 		$this->add_recurring_holiday_preset = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isLogoExists() {
 		return file_exists( $this->getLogoFileName() );
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param bool $include_default_logo
+	 * @param bool $primary_company_logo
+	 * @param string $size
+	 * @return bool|string
+	 */
 	function getLogoFileName( $company_id = NULL, $include_default_logo = TRUE, $primary_company_logo = FALSE, $size = 'normal' ) {
 
 		//Test for both jpg and png
@@ -2599,10 +2465,14 @@ class CompanyFactory extends Factory {
 			}
 		}
 
-		Debug::Text('Logo File Name: '. $logo_file_name .' Include Default: '. (int)$include_default_logo .' Primary Company Logo: '. (int)$primary_company_logo .' Size: '. $size, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Text('Logo File Name: '. $logo_file_name .' Include Default: '. (int)$include_default_logo .' Primary Company Logo: '. (int)$primary_company_logo .' Size: '. $size, __FILE__, __LINE__, __METHOD__, 10);
 		return $logo_file_name;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	function cleanStoragePath( $company_id = NULL ) {
 		if ( $company_id == '' ) {
 			$company_id = $this->getCompany();
@@ -2625,6 +2495,10 @@ class CompanyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @return bool|string
+	 */
 	function getStoragePath( $company_id = NULL ) {
 		if ( $company_id == '' ) {
 			$company_id = $this->getID();
@@ -2641,6 +2515,9 @@ class CompanyFactory extends Factory {
 	//Send company data to TimeTrex server so auto update notifications are correct
 	//based on geographical region.
 	//This shouldn't be called unless the user requests auto update notification.
+	/**
+	 * @return bool
+	 */
 	function remoteSave() {
 		$ttsc = new TimeTrexSoapClient();
 		if ( PRODUCTION == TRUE AND DEMO_MODE == FALSE AND ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL OR $ttsc->isUpdateNotifyEnabled() == TRUE ) ) {
@@ -2656,107 +2533,82 @@ class CompanyFactory extends Factory {
 	/*
 		Pasword Policy functions
 	*/
+	/**
+	 * @return int
+	 */
 	function getPasswordPolicyType() {
-		if ( isset($this->data['password_policy_type_id']) ) {
-			return (int)$this->data['password_policy_type_id'];
-		}
-
-		return FALSE;
-	}
-	function setPasswordPolicyType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'password_policy_type_id',
-											$type,
-											TTi18n::gettext('Incorrect Password Policy type'),
-											$this->getOptions('password_policy_type')) ) {
-
-			$this->data['password_policy_type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'password_policy_type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPasswordPolicyType( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'password_policy_type_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPasswordMinimumPermissionLevel() {
-		if ( isset($this->data['password_minimum_permission_level']) ) {
-			return $this->data['password_minimum_permission_level'];
-		}
-
-		return FALSE;
-	}
-	function setPasswordMinimumPermissionLevel($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'password_minimum_permission_level',
-											$type,
-											TTi18n::gettext('Incorrect minimum permission level'),
-											$this->getOptions('password_minimum_permission_level')) ) {
-
-			$this->data['password_minimum_permission_level'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'password_minimum_permission_level' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPasswordMinimumPermissionLevel( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'password_minimum_permission_level', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPasswordMinimumStrength() {
-		if ( isset($this->data['password_minimum_strength']) ) {
-			return $this->data['password_minimum_strength'];
-		}
-
-		return FALSE;
-	}
-	function setPasswordMinimumStrength($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'password_minimum_strength',
-											$type,
-											TTi18n::gettext('Invalid password strength'),
-											$this->getOptions('password_minimum_strength')) ) {
-
-			$this->data['password_minimum_strength'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'password_minimum_strength' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPasswordMinimumStrength( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'password_minimum_strength', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPasswordMinimumLength() {
-		if ( isset($this->data['password_minimum_length']) ) {
-			return $this->data['password_minimum_length'];
-		}
-
-		return FALSE;
-	}
-	function setPasswordMinimumLength($type) {
-		$type = trim($type);
-
-		if (
-			$this->Validator->isNumeric(	'password_minimum_length',
-											$type,
-											TTi18n::gettext('Password minimum length must only be digits'))
-			) {
-
-			$this->data['password_minimum_length'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'password_minimum_length' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPasswordMinimumLength( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'password_minimum_length', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPasswordMinimumAge() {
-		if ( isset($this->data['password_minimum_age']) ) {
-			return $this->data['password_minimum_age'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'password_minimum_age' );
 	}
-	function setPasswordMinimumAge($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPasswordMinimumAge( $value) {
 		$value = $this->Validator->stripNonNumeric( trim($value) );
 
 		if ( $value <= 0 ) {
@@ -2765,29 +2617,21 @@ class CompanyFactory extends Factory {
 		if ( $value > 32766 ) {
 			$value = 32766;
 		}
-
-		if (
-					$this->Validator->isNumeric(	'password_minimum_age',
-													$value,
-													TTi18n::gettext('Minimum age must only be digits'))
-
-												) {
-			$this->data['password_minimum_age'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'password_minimum_age', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPasswordMaximumAge() {
-		if ( isset($this->data['password_maximum_age']) ) {
-			return $this->data['password_maximum_age'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'password_maximum_age' );
 	}
-	function setPasswordMaximumAge($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPasswordMaximumAge( $value) {
 		$value = $this->Validator->stripNonNumeric( trim($value) );
 
 		//Never let a value of 0 be set, use 999 instead.
@@ -2797,248 +2641,166 @@ class CompanyFactory extends Factory {
 		if ( $value > 32766 ) {
 			$value = 32766;
 		}
-
-		if (
-				$this->Validator->isNumeric(	'password_maximum_age',
-												$value,
-												TTi18n::gettext('Maximum age must only be digits'))
-												) {
-			$this->data['password_maximum_age'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'password_maximum_age', $value );
 	}
 
 
 	/*
 		LDAP Authentication functions
 	*/
+	/**
+	 * @return int
+	 */
 	function getLDAPAuthenticationType() {
-		if ( isset($this->data['ldap_authentication_type_id']) ) {
-			return (int)$this->data['ldap_authentication_type_id'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'ldap_authentication_type_id' );
 	}
-	function setLDAPAuthenticationType($type) {
-		$type = trim($type);
 
-		if ( DEMO_MODE == FALSE
-				AND
-				$this->Validator->inArrayKey(	'ldap_authentication_type_id',
-											$type,
-											TTi18n::gettext('Incorrect LDAP authentication type'),
-											$this->getOptions('ldap_authentication_type')) ) {
-
-			$this->data['ldap_authentication_type_id'] = $type;
-
-			return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLDAPAuthenticationType( $value) {
+		$value = trim($value);
+		if ( DEMO_MODE == FALSE ) {
+			return $this->setGenericDataValue( 'ldap_authentication_type_id', $value );
 		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLDAPHost() {
-		if ( isset($this->data['ldap_host']) ) {
-			return $this->data['ldap_host'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'ldap_host' );
 	}
-	function setLDAPHost($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLDAPHost( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'ldap_host',
-												$value,
-												TTi18n::gettext('LDAP server host name is too short or too long'),
-												2,
-												100) ) {
-
-			$this->data['ldap_host'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ldap_host', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLDAPPort() {
-		if ( isset($this->data['ldap_port']) ) {
-			return $this->data['ldap_port'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue('ldap_port' );
 	}
-	function setLDAPPort($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLDAPPort( $value) {
 		$value = $this->Validator->stripNonNumeric( trim($value) );
-
-		//Allow setting a blank employee number, so we can use Validate() to check employee number against the status_id
-		//To allow terminated employees to have a blank employee number, but active ones always have a number.
-		if (
-				$value == ''
-				OR (
-					$this->Validator->isNumeric(	'ldap_port',
-													$value,
-													TTi18n::gettext('LDAP port must only be digits'))
-					)
-												) {
-			$this->data['ldap_port'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ldap_port', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLDAPBindUserName() {
-		if ( isset($this->data['ldap_bind_user_name']) ) {
-			return $this->data['ldap_bind_user_name'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'ldap_bind_user_name' );
 	}
-	function setLDAPBindUserName($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLDAPBindUserName( $value) {
 		$value = trim($value);
-
-		if	(	$this->Validator->isLength(		'ldap_bind_user_name',
-												$value,
-												TTi18n::gettext('LDAP bind user name is too long'),
-												0,
-												100) ) {
-
-			$this->data['ldap_bind_user_name'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ldap_bind_user_name', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLDAPBindPassword() {
-		if ( isset($this->data['ldap_bind_password']) ) {
-			return $this->data['ldap_bind_password'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'ldap_bind_password' );
 	}
-	function setLDAPBindPassword($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLDAPBindPassword( $value) {
 		$value = trim($value);
-
-		if	(	$this->Validator->isLength(		'ldap_bind_password',
-												$value,
-												TTi18n::gettext('LDAP bind password is too long'),
-												0,
-												100) ) {
-
-			$this->data['ldap_bind_password'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ldap_bind_password', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLDAPBaseDN() {
-		if ( isset($this->data['ldap_base_dn']) ) {
-			return $this->data['ldap_base_dn'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'ldap_base_dn' );
 	}
-	function setLDAPBaseDN($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLDAPBaseDN( $value) {
 		$value = trim($value);
-
-		if	(	$this->Validator->isLength(		'ldap_base_dn',
-												$value,
-												TTi18n::gettext('LDAP base DN is too long'),
-												0,
-												250) ) {
-
-			$this->data['ldap_base_dn'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ldap_base_dn', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLDAPBindAttribute() {
-		if ( isset($this->data['ldap_bind_attribute']) ) {
-			return $this->data['ldap_bind_attribute'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'ldap_bind_attribute' );
 	}
-	function setLDAPBindAttribute($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLDAPBindAttribute( $value) {
 		$value = trim($value);
-
-		if	(	$this->Validator->isLength(		'ldap_bind_attribute',
-												$value,
-												TTi18n::gettext('LDAP bind attribute is too long'),
-												0,
-												100) ) {
-
-			$this->data['ldap_bind_attribute'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ldap_bind_attribute', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLDAPUserFilter() {
-		if ( isset($this->data['ldap_user_filter']) ) {
-			return $this->data['ldap_user_filter'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'ldap_user_filter' );
 	}
-	function setLDAPUserFilter($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLDAPUserFilter( $value) {
 		$value = trim($value);
-
-		if	(	$this->Validator->isLength(		'ldap_user_filter',
-												$value,
-												TTi18n::gettext('LDAP user filter is too long'),
-												0,
-												250) ) {
-
-			$this->data['ldap_user_filter'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ldap_user_filter', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLDAPLoginAttribute() {
-		if ( isset($this->data['ldap_login_attribute']) ) {
-			return $this->data['ldap_login_attribute'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'ldap_login_attribute' );
 	}
-	function setLDAPLoginAttribute($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLDAPLoginAttribute( $value) {
 		$value = trim($value);
-
-		if	(	$this->Validator->isLength(		'ldap_login_attribute',
-												$value,
-												TTi18n::gettext('LDAP login attribute is too long'),
-												0,
-												100) ) {
-
-			$this->data['ldap_login_attribute'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ldap_login_attribute', $value );
 	}
 
 	//Returns either UTF-8 or ISO-8859-1 encodings mainly as a report optimization.
+
+	/**
+	 * @param bool $company_id
+	 * @return bool|mixed|string
+	 */
 	function getEncoding( $company_id = FALSE ) {
 		if ( $company_id == '' ) {
 			$company_id = $this->getID();
@@ -3058,7 +2820,7 @@ class CompanyFactory extends Factory {
 						//$encoding = strtoupper( mb_detect_encoding(TTi18n::getCurrencySymbol( $iso_code ), 'auto') );
 						$encoding = TTI18n::detectUTF8( TTi18n::getCurrencySymbol( $iso_code ) );
 						if ( $encoding == TRUE ) {
-							Debug::Text($encoding, 'ISO Code: '. $iso_code .' Encoding: '. $encoding, __FILE__, __LINE__, __METHOD__, 9);
+							Debug::Text('ISO Code: '. $iso_code .' Encoding: '. $encoding, __FILE__, __LINE__, __METHOD__, 9);
 							$retval = 'UTF-8';
 						}
 					}
@@ -3089,8 +2851,11 @@ class CompanyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getDefaultContact() {
-		if ( $this->getID() > 0 ) {
+		if ( TTUUID::isUUID($this->getID()) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
 			//Loop through all employees with the highest permission level, and pick the account that is the oldest and logged in within the last 30 days.
 			$pclf = TTnew('PermissionControlListFactory');
 			$pclf->getByCompanyId( $this->getID(), 1, NULL, NULL, array( 'level' => 'desc' ) );
@@ -3131,8 +2896,402 @@ class CompanyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
 		global $config_vars;
+
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Parent
+		if ( $this->getParent() != '' AND $this->getParent() != TTUUID::getZeroID() ) {
+			$this->Validator->isTRUE(	'parent',
+											( $this->getParent() != $this->getID() ) ? TRUE : FALSE,
+											TTi18n::gettext('Parent Company cannot be itself')
+										);
+			if ( $this->Validator->isError('parent') == FALSE ) {
+				$clf = TTnew( 'CompanyListFactory' );
+				$this->Validator->isResultSetWithRows(	'parent',
+											$clf->getByID($this->getParent()),
+											TTi18n::gettext('Parent Company is invalid')
+										);
+			}
+		}
+		// Status
+		$this->Validator->inArrayKey(	'status',
+											$this->getStatus(),
+											TTi18n::gettext('Incorrect Status'),
+											$this->getOptions('status')
+										);
+
+		// Product Edition
+		$this->Validator->inArrayKey(	'product_edition',
+											$this->getProductEdition(),
+											TTi18n::gettext('Incorrect Product Edition'),
+											$this->getOptions('product_edition')
+										);
+		// Name
+		if ( DEMO_MODE == FALSE AND $this->getName() !== FALSE ) {
+			$this->Validator->isLength(		'name',
+											$this->getName(),
+											TTi18n::gettext('Name is too short or too long'),
+											2,
+											100
+										);
+		}
+		// Industry
+		if ( $this->getIndustry() !== FALSE ) {
+			$this->Validator->inArrayKey(	'industry_id',
+											$this->getIndustry(),
+											TTi18n::gettext('Incorrect Industry'),
+											$this->getOptions('industry')
+										);
+		}
+		// Business Number
+		if ( $this->getBusinessNumber() != '' ) {
+			$this->Validator->isLength(		'business_number',
+											$this->getBusinessNumber(),
+											TTi18n::gettext('Business Number is too short or too long'),
+											2,
+											200
+										);
+		}
+		// Originator ID
+		if ( $this->getOriginatorID() != '' ) {
+			$this->Validator->isLength(	'originator_id',
+											$this->getOriginatorID(),
+											TTi18n::gettext('Originator ID is too short or too long'),
+											2,
+											200
+										);
+		}
+		// Data Center ID
+		if ( $this->getDataCenterID() != '' ) {
+			$this->Validator->isLength(	'data_center_id',
+											$this->getDataCenterID(),
+											TTi18n::gettext('Data Center ID is too short or too long'),
+											2,
+											200
+										);
+		}
+		// Short name
+		if ( $this->getShortName() != '' ) {
+			//Short name must only allow characters available in domain names.
+			$this->Validator->isLength(		'short_name',
+											$this->getShortName(),
+											TTi18n::gettext('Short name is too short or too long'),
+											2,
+											15
+										);
+			if ( $this->Validator->isError('short_name') == FALSE ) {
+				$this->Validator->isRegEx(		'short_name',
+											$this->getShortName(),
+											TTi18n::gettext('Short name must not contain any special characters'),
+											$this->short_name_validator_regex
+										);
+			}
+		}
+		// Address1
+		if ( $this->getAddress1() != '' ) {
+			$this->Validator->isLength(		'address1',
+											   $this->getAddress1(),
+											   TTi18n::gettext('Address1 is too short or too long'),
+											   2,
+											   250
+			);
+
+			if ( $this->Validator->isError('address1') == FALSE ) {
+				$this->Validator->isRegEx(		'address1',
+												  $this->getAddress1(),
+												  TTi18n::gettext('Address1 contains invalid characters'),
+												  $this->address_validator_regex
+				);
+			}
+		}
+		// Address2
+		if ( $this->getAddress2() != '' ) {
+			$this->Validator->isLength(		'address2',
+											   $this->getAddress2(),
+											   TTi18n::gettext('Address2 is too short or too long'),
+											   2,
+											   250
+			);
+
+			if ( $this->Validator->isError('address2') == FALSE ) {
+				$this->Validator->isRegEx(		'address2',
+												  $this->getAddress2(),
+												  TTi18n::gettext('Address2 contains invalid characters'),
+												  $this->address_validator_regex
+				);
+			}
+		}
+		// City
+		$this->Validator->isRegEx(		'city',
+											$this->getCity(),
+											TTi18n::gettext('City contains invalid characters'),
+											$this->city_validator_regex
+										);
+
+		if ( $this->Validator->isError('city') == FALSE ) {
+			$this->Validator->isLength(		'city',
+											$this->getCity(),
+											TTi18n::gettext('City name is too short or too long'),
+											2,
+											250
+										);
+		}
+		// Country
+		$this->Validator->inArrayKey(		'country',
+											$this->getCountry(),
+											TTi18n::gettext('Invalid Country'),
+											$this->getOptions('country')
+										);
+		// Province
+		$options_arr = $this->getOptions('province');
+		if ( isset($options_arr[$this->getCountry()]) ) {
+			$options = $options_arr[$this->getCountry()];
+		} else {
+			$options = array();
+		}
+		$this->Validator->inArrayKey(		'province',
+											$this->getProvince(),
+											TTi18n::gettext('Invalid Province/State'),
+											$options
+										);
+		unset( $options, $options_arr );
+		// Postal/ZIP Code
+		if ( $this->getPostalCode() != '' ) {
+			$this->Validator->isPostalCode(	'postal_code',
+											$this->getPostalCode(),
+											TTi18n::gettext('Postal/ZIP Code contains invalid characters, invalid format, or does not match Province/State'),
+											$this->getCountry(), $this->getProvince()
+										);
+			if ( $this->Validator->isError('postal_code') == FALSE ) {
+				$this->Validator->isLength(		'postal_code',
+											$this->getPostalCode(),
+											TTi18n::gettext('Postal/ZIP Code is too short or too long'),
+											1,
+											10
+										);
+			}
+		}
+		// Longitude
+		if ( $this->getLongitude() != 0 ) {
+			$this->Validator->isFloat(	'longitude',
+											$this->getLongitude(),
+											TTi18n::gettext('Longitude is invalid')
+										);
+		}
+		// Latitude
+		if ( $this->getLatitude() != 0 ) {
+			$this->Validator->isFloat(	'latitude',
+											$this->getLatitude(),
+											TTi18n::gettext('Latitude is invalid')
+										);
+		}
+		// Work phone number
+		$this->Validator->isPhoneNumber(		'work_phone',
+											$this->getWorkPhone(),
+											TTi18n::gettext('Work phone number is invalid')
+										);
+		// Fax phone number
+		if ( $this->getFaxPhone() != '' ) {
+			$this->Validator->isPhoneNumber(		'fax_phone',
+											$this->getFaxPhone(),
+											TTi18n::gettext('Fax phone number is invalid')
+										);
+		}
+
+		// Admin Contact User
+		$ulf = TTnew( 'UserListFactory' );
+		if ( $this->getAdminContact() != '' AND $this->getAdminContact() != TTUUID::getZeroID() ) {
+			$this->Validator->isResultSetWithRows( 'admin_contact',
+												   $ulf->getByID( $this->getAdminContact() ),
+												   TTi18n::gettext( 'Contact is invalid' )
+			);
+		}
+
+		// Billing Contact User
+		if ( $this->getBillingContact() != '' AND $this->getBillingContact() != TTUUID::getZeroID() ) {
+			$this->Validator->isResultSetWithRows( 'billing_contact',
+												   $ulf->getByID( $this->getBillingContact() ),
+												   TTi18n::gettext( 'Contact is invalid' )
+			);
+		}
+
+		// Support Contact User
+		if ( $this->getSupportContact() != '' AND $this->getSupportContact() != TTUUID::getZeroID() ) {
+			$this->Validator->isResultSetWithRows( 'support_contact',
+												   $ulf->getByID( $this->getSupportContact() ),
+												   TTi18n::gettext( 'Contact is invalid' )
+			);
+		}
+
+		// Other ID 1
+		if ( $this->getOtherID1() != '' ) {
+			$this->Validator->isLength(	'other_id1',
+										$this->getOtherID1(),
+										TTi18n::gettext('Other ID 1 is invalid'),
+										1, 255
+									);
+		}
+		// Other ID 2
+		if ( $this->getOtherID2() != '' ) {
+			$this->Validator->isLength(	'other_id2',
+											$this->getOtherID2(),
+											TTi18n::gettext('Other ID 2 is invalid'),
+											1, 255
+										);
+		}
+		// Other ID 3
+		if ( $this->getOtherID3() != '' ) {
+			$this->Validator->isLength(	'other_id3',
+											$this->getOtherID3(),
+											TTi18n::gettext('Other ID 3 is invalid'),
+											1, 255
+										);
+		}
+		// Other ID 4
+		if ( $this->getOtherID4() != '' ) {
+			$this->Validator->isLength(	'other_id4',
+											$this->getOtherID4(),
+											TTi18n::gettext('Other ID 4 is invalid'),
+											1, 255
+										);
+		}
+		// Other ID 5
+		if ( $this->getOtherID5() != '' ) {
+			$this->Validator->isLength(	'other_id5',
+											$this->getOtherID5(),
+											TTi18n::gettext('Other ID 5 is invalid'),
+											1, 255
+										);
+		}
+
+		// Password Policy type
+		$this->Validator->inArrayKey(	'password_policy_type_id',
+											$this->getPasswordPolicyType(),
+											TTi18n::gettext('Incorrect Password Policy type'),
+											$this->getOptions('password_policy_type')
+										);
+
+		if ( $this->getPasswordPolicyType() == 1 ) { //Only validate below data when Password Policy is enabled and the data may actually be used.
+			// Minimum permission level
+			$this->Validator->inArrayKey( 'password_minimum_permission_level',
+										  $this->getPasswordMinimumPermissionLevel(),
+										  TTi18n::gettext( 'Incorrect minimum permission level' ),
+										  $this->getOptions( 'password_minimum_permission_level' )
+			);
+
+			// Password strength
+			$this->Validator->inArrayKey( 'password_minimum_strength',
+										  $this->getPasswordMinimumStrength(),
+										  TTi18n::gettext( 'Invalid password strength' ),
+										  $this->getOptions( 'password_minimum_strength' )
+			);
+
+			// Password minimum length
+			$this->Validator->isNumeric( 'password_minimum_length',
+										 $this->getPasswordMinimumLength(),
+										 TTi18n::gettext( 'Password minimum length must only be digits' )
+			);
+
+			// Minimum age
+			$this->Validator->isNumeric( 'password_minimum_age',
+										 $this->getPasswordMinimumAge(),
+										 TTi18n::gettext( 'Minimum age must only be digits' )
+			);
+
+			// Maximum age
+			$this->Validator->isNumeric( 'password_maximum_age',
+										 $this->getPasswordMaximumAge(),
+										 TTi18n::gettext( 'Maximum age must only be digits' )
+			);
+		}
+
+		// LDAP authentication type
+		if ( DEMO_MODE == FALSE ) {
+			$this->Validator->inArrayKey(	'ldap_authentication_type_id',
+											$this->getLDAPAuthenticationType(),
+											TTi18n::gettext('Incorrect LDAP authentication type'),
+											$this->getOptions('ldap_authentication_type')
+										);
+
+			if ( $this->getLDAPAuthenticationType() != 0 ) { //Only validate below data when LDAP authentication is enabled and the data may actually be used.
+				// LDAP server host name
+				if ( $this->getLDAPHost() != '' ) {
+					$this->Validator->isLength(		'ldap_host',
+													   $this->getLDAPHost(),
+													   TTi18n::gettext('LDAP server host name is too short or too long'),
+													   2,
+													   100
+					);
+				}
+
+				// LDAP port
+				if ( $this->getLDAPPort() != '' ) {
+					$this->Validator->isNumeric(	'ldap_port',
+													$this->getLDAPPort(),
+													TTi18n::gettext('LDAP port must only be digits')
+					);
+				}
+
+				// LDAP bind user name
+				$this->Validator->isLength(		'ldap_bind_user_name',
+												   $this->getLDAPBindUserName(),
+												   TTi18n::gettext('LDAP bind user name is too long'),
+												   0,
+												   100
+				);
+
+				// LDAP bind password
+				$this->Validator->isLength(		'ldap_bind_password',
+												   $this->getLDAPBindPassword(),
+												   TTi18n::gettext('LDAP bind password is too long'),
+												   0,
+												   100
+				);
+
+				// LDAP base DN
+				$this->Validator->isLength(		'ldap_base_dn',
+												   $this->getLDAPBaseDN(),
+												   TTi18n::gettext('LDAP base DN is too long'),
+												   0,
+												   250
+				);
+
+				// LDAP bind attribute
+				$this->Validator->isLength(		'ldap_bind_attribute',
+												   $this->getLDAPBindAttribute(),
+												   TTi18n::gettext('LDAP bind attribute is too long'),
+												   0,
+												   100
+				);
+
+				// LDAP user filter
+				$this->Validator->isLength(		'ldap_user_filter',
+												   $this->getLDAPUserFilter(),
+												   TTi18n::gettext('LDAP user filter is too long'),
+												   0,
+												   250
+				);
+
+				// LDAP login attribute
+				$this->Validator->isLength(		'ldap_login_attribute',
+												   $this->getLDAPLoginAttribute(),
+												   TTi18n::gettext('LDAP login attribute is too long'),
+												   0,
+												   100
+				);
+			}
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 
 		global $current_user;
 		if ( is_object($current_user) AND $current_user->getCompany() == $this->getID() ) { //Acting on currently logged in user.
@@ -3160,6 +3319,9 @@ class CompanyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->isNew() == TRUE ) {
 			$this->is_new = TRUE;
@@ -3189,7 +3351,11 @@ class CompanyFactory extends Factory {
 		return TRUE;
 	}
 
-	function postSave( $data_diff = NULL ) {
+	/**
+	 * @return bool
+	 */
+	function postSave() {
+		$data_diff = $this->getDataDifferences();
 		$this->removeCache( $this->getId() );
 
 		$this->remoteSave();
@@ -3202,7 +3368,7 @@ class CompanyFactory extends Factory {
 				$clf = TTnew( 'CurrencyListFactory' );
 				$clf->getByCompanyId( $this->getId() );
 				if ( $clf->getRecordCount() == 0 ) {
-					Debug::text('Adding Default Currency', __FILE__, __LINE__, __METHOD__, 9);
+					Debug::text('Adding Default Currency...', __FILE__, __LINE__, __METHOD__, 9);
 
 					$cf = TTnew( 'CurrencyFactory' );
 					$country_to_currency_map_arr = $cf->getOptions('country_currency');
@@ -3231,8 +3397,35 @@ class CompanyFactory extends Factory {
 				}
 			}
 
+			//Add legal entity, this must come *after* the currency is created though, as it in turn creates a default remittance source account.
+			if ( $this->getEnableAddLegalEntity() == TRUE ) {
+				$lef = TTnew( 'LegalEntityFactory' );
+				$lef->setCompany( $this->getId() );
+				$lef->setStatus( 10 ); //10=Active
+				$lef->setType( 10 ); //10=Corporation.
+				//$lef->setClassificationCode( 541214 );
+				$lef->setLegalName( $this->getname() );
+				$lef->setTradeName( $this->getname() );
+				$lef->setAddress1( $this->getAddress1() );
+				$lef->setAddress2( $this->getAddress2() );
+				$lef->setCountry( $this->getCountry() );
+				$lef->setCity( $this->getCity() );
+				$lef->setProvince( $this->getProvince() );
+				$lef->setPostalCode( $this->getPostalCode() );
+				$lef->setWorkPhone( $this->getWorkPhone() );
+				$lef->setFaxPhone( $this->getFaxPhone() );
+				$lef->setEnableAddRemittanceSource( TRUE );
+				$lef->setEnableAddPresets( FALSE );
+				if ( $lef->isValid() ) {
+					$this->legal_entity_id = $lef->save(); //This must be saved so it can be accessed outside this class too
+					Debug::Text( '  Legal Entity: ' . $this->legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
+				} else {
+					Debug::Text( '  ERROR: Invalid legal entity.', __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			}
+
 			if ( $this->getEnableAddPermissionGroupPreset() == TRUE ) {
-				Debug::text('Adding Preset Permission Groups', __FILE__, __LINE__, __METHOD__, 9);
+				Debug::text('Adding Preset Permission Groups...', __FILE__, __LINE__, __METHOD__, 9);
 
 				$pf = TTnew( 'PermissionFactory' );
 				$pf->StartTransaction();
@@ -3257,7 +3450,7 @@ class CompanyFactory extends Factory {
 			}
 
 			if ( $this->getEnableAddStation() == TRUE ) {
-				Debug::text('Adding Default Station', __FILE__, __LINE__, __METHOD__, 9);
+				Debug::text('Adding Default Station...', __FILE__, __LINE__, __METHOD__, 9);
 
 				//Enable punching in from all stations
 				$sf = TTnew( 'StationFactory' );
@@ -3324,6 +3517,7 @@ class CompanyFactory extends Factory {
 					OR $this->getEnableAddRecurringHolidayPreset() == TRUE
 					OR $this->getEnableAddUserDefaultPreset() == TRUE
 				) {
+				Debug::text('Adding Presets...', __FILE__, __LINE__, __METHOD__, 9);
 				$sp = TTNew('SetupPresets');
 				$sp->setCompany( $this->getID() );
 				//$sp->setUser( $this->getCurrentUserObject()->getId() );
@@ -3331,7 +3525,9 @@ class CompanyFactory extends Factory {
 				$sp->createPresets();
 				$sp->createPresets( $this->getCountry() );
 				$sp->createPresets( $this->getCountry(), $this->getProvince() );
-				$sp->UserDefaults();
+				if ( isset($this->legal_entity_id) AND $this->legal_entity_id != '' ) {
+					$sp->UserDefaults( $this->legal_entity_id );
+				}
 			}
 
 			//If status is set to anything other than ACTIVE, logout all users.
@@ -3344,6 +3540,10 @@ class CompanyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -3370,6 +3570,10 @@ class CompanyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -3435,6 +3639,10 @@ class CompanyFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Company Information'), NULL, $this->getTable(), $this );
 	}

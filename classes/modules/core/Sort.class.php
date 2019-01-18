@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,6 +39,14 @@
  * @package Core
  */
 class Sort {
+	/**
+	 * @param $data
+	 * @param $col1
+	 * @param null $col2
+	 * @param string $col1_order
+	 * @param string $col2_order
+	 * @return mixed
+	 */
 	static function multiSort( $data, $col1, $col2 = NULL, $col1_order = 'ASC', $col2_order = 'ASC' ) {
 		global $profiler;
 
@@ -87,6 +95,11 @@ class Sort {
 
 	//Usage: $arr2 = Sort::arrayMultiSort($arr1, array( 'name' => array(SORT_DESC, SORT_REGULAR), 'cat' => SORT_ASC ) );
 	//Case insensitive sorting.
+	/**
+	 * @param $array
+	 * @param $cols
+	 * @return array|bool
+	 */
 	static function arrayMultiSort( $array, $cols ) {
 		global $profiler;
 		$profiler->startTimer( 'Sort()' );

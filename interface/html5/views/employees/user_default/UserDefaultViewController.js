@@ -1,4 +1,6 @@
 UserDefaultViewController = BaseViewController.extend( {
+
+	_required_files: ['APIUserDefault', 'APIUserPreference', 'APILegalEntity', 'APIPayPeriodSchedule', 'APIPolicyGroup', 'APICurrency', 'APIUserTitle', 'APIBranch', 'APIDepartment', 'APICompanyDeduction', 'APILog'],
 	company_api: null,
 	user_preference_api: null,
 
@@ -14,9 +16,9 @@ UserDefaultViewController = BaseViewController.extend( {
 	time_zone_array: null,
 	start_week_day_array: null,
 
-	initialize: function( options ) {
+	init: function( options ) {
 
-		this._super( 'initialize', options );
+		//this._super('initialize', options );
 
 		this.permission_id = 'user';
 		this.viewId = 'UserDefault';
@@ -196,7 +198,7 @@ UserDefaultViewController = BaseViewController.extend( {
 				var result_data = result.getResult();
 				if ( result_data === true ) {
 					$this.refresh_id = $this.current_edit_record.id;
-				} else if ( result_data > 0 ) {
+				} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 					$this.refresh_id = result_data;
 				}
 
@@ -363,6 +365,8 @@ UserDefaultViewController = BaseViewController.extend( {
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
 
+
+
 		//Tab 0 start
 
 		var tab_employee_id = this.edit_view_tab.find( '#tab_employee_id' );
@@ -372,6 +376,18 @@ UserDefaultViewController = BaseViewController.extend( {
 		this.edit_view_tabs[0] = [];
 
 		this.edit_view_tabs[0].push( tab_employee_id_column1 );
+
+		//Legal Entity
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.LEGAL_ENTITY,
+			show_search_inputs: true,
+//			set_empty: true,
+			field: 'legal_entity_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Legal Entity' ), form_item_input, tab_employee_id_column1 );
 
 		//Permission Group
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );

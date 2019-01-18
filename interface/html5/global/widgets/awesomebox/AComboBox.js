@@ -434,26 +434,26 @@
 						} );
 						if ( select_items.length === 0 ) {
 							if ( set_any ) {
-								return_value.push( -1 ); // In fact, if the columns can be multiple selected. and no have any options selected, it's should be return an array.
+								return_value.push( TTUUID.not_exist_id ); // In fact, if the columns can be multiple selected. and no have any options selected, it's should be return an array.
 							}
 						}
 					} else {
 						if ( set_any ) {
-							return_value.push( -1 ); // In fact, if the columns can be multiple selected. and no have any options selected, it's should be return an array.
+							return_value.push( TTUUID.not_exist_id ); // In fact, if the columns can be multiple selected. and no have any options selected, it's should be return an array.
 						}
 					}
 					// Return false when no selected value
 					if ( return_value.length === 0 ) {
 						if ( set_any ) {
-							return_value = -1;
+							return_value = TTUUID.not_exist_id;
 						} else if ( set_empty ) {
-							return_value = 0;
+							return_value = TTUUID.zero_id;
 						} else if ( set_special_empty ) {
-							return_value = -1;
+							return_value = TTUUID.not_exist_id;
 						} else if ( set_open ) {
-							return_value = 0;
+							return_value = TTUUID.zero_id;
 						} else if ( set_default ) {
-							return_value = 0;
+							return_value = TTUUID.zero_id;
 						}
 					}
 				}
@@ -471,15 +471,15 @@
 
 					} else {
 						if ( set_any ) {
-							return -1;
+							return TTUUID.not_exist_id;
 						} else if ( set_empty ) {
-							return 0;
+							return TTUUID.zero_id;
 						} else if ( set_special_empty ) {
-							return -1;
+							return TTUUID.not_exist_id;
 						} else if ( set_open ) {
-							return 0;
+							return TTUUID.zero_id;
 						} else if ( set_default ) {
-							return 0;
+							return TTUUID.zero_id;
 						}
 					}
 
@@ -587,14 +587,17 @@
 				if ( $.type( val ) === 'array' && val.length > 0 ) {
 					val = val[0];
 				}
-				//If no default value set first item as default select item.
-				if ( !val ) {
+				//If no default value set first item as default select item
+				//#1187 - this fix might cause problems but is needed to allow proper selection of default value when zero_uuid is selected.
+				if ( !val || val == TTUUID.zero_id ) {
+				// if ( !val ) {
 					if ( !set_empty && !set_any && !set_default && !set_open && !set_all && !set_special_empty && source_data && source_data.length > 0 ) {
 						this.setValue( source_data[0] );
 					} else {
 						this.setSelectItem( null );
 					}
 				} else {
+
 					this.setSelectItem( val );
 				}
 			}
@@ -611,7 +614,7 @@
 			if ( Global.isSet( api_class ) ) {
 
 				//Try api awesomebox first
-				if ( parseInt( val ) <= 0 ) {
+				if ( ( !TTUUID.isUUID(val) && parseInt( val ) <= 0 ) || val == TTUUID.zero_id || val == TTUUID.not_exist_id ) {
 
 					if ( allow_multiple_selection ) {
 						$this.setValue( [this.getLocalSelectItem( val )] );
@@ -668,7 +671,7 @@
 						if ( content[key] == val ) {
 
 							$this.setValue( content );
-							return false;
+							return false; //This is a boolean false, not an integer or UUID.
 						}
 					} );
 
@@ -757,7 +760,7 @@
 				this.cleanDropDownValues();
 
 				return;
-			} else if ( val == -1 && set_any ) {
+			} else if ( val == TTUUID.not_exist_id && set_any ) {
 				select_items = val;
 				this.setEmptyLabel();
 				if ( setRealValueCallBack ) {
@@ -1825,18 +1828,19 @@
 		this.getFirstItem = function() {
 			var first_item = {};
 
-			first_item[key] = 0;
+			first_item[key] = TTUUID.zero_id;
 
 			if ( set_any || set_all ) {
-				first_item[key] = -1;
+				first_item[key] = TTUUID.not_exist_id;
 			} else {
-				first_item[key] = 0;
+				first_item[key] = TTUUID.zero_id;
 			}
 
 			$.each( display_columns, function( index, content ) {
 
 				if ( key !== 'id' ) {
-					first_item.id = 999; //records id start from 10000
+					//first_item.id = 999; //records id start from 10000
+					first_item.id = TTUUID.not_exist_id;
 				}
 				if ( set_all ) {
 					first_item[content.name] = Global.all_item;
@@ -1871,12 +1875,12 @@
 
 			if ( target_data.hasOwnProperty( 0 ) ) {
 				if ( set_any || set_all ) {
-					if ( target_data[0][key] === -1 ) {
+					if ( target_data[0][key] === TTUUID.not_exist_id ) {
 						return;
 					}
 
 				} else {
-					if ( target_data[0][key] === 0 ) {
+					if ( target_data[0][key] === TTUUID.zero_id) {
 						return;
 					}
 				}
@@ -1885,18 +1889,19 @@
 
 			var first_item = {};
 
-			first_item[key] = 0;
+			first_item[key] = TTUUID.zero_id;
 
 			if ( set_any || set_all || set_special_empty ) {
-				first_item[key] = -1;
+				first_item[key] = TTUUID.not_exist_id;
 			} else {
-				first_item[key] = 0;
+				first_item[key] = TTUUID.zero_id;
 			}
 
 			$.each( display_columns, function( index, content ) {
 
 				if ( key !== 'id' ) {
-					first_item.id = 999; //records id start from 10000
+					//first_item.id = 999; //records id start from 10000
+					first_item.id = TTUUID.not_exist_id; //records id start from 10000
 				}
 				if ( set_all ) {
 					first_item[content.name] = Global.all_item;
@@ -2329,7 +2334,7 @@
 
 			function setADropDownSelectValues( select_items ) {
 
-				if ( !(set_any && select_items == -1) ) {
+				if ( !(set_any && select_items == TTUUID.not_exist_id) ) {
 					a_dropdown.setSelectGridData( select_items );
 				}
 
@@ -2525,7 +2530,7 @@
 
 									//Error: TypeError: null is not an object (evaluating 'select_items.length') in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-113526 line 2441
 									//if select items contains data like 0, for example Employee in Recurring Schedule edit view
-									if ( select_items && select_items.length > 0 && select_items[0] == 0 ) {
+									if ( select_items && select_items.length > 0 && select_items[0] == TTUUID.zero_id) {
 										local_data = $this.getLocalSelectItem( select_items[0] );
 									}
 

@@ -2,8 +2,10 @@ ExceptionViewController = BaseViewController.extend( {
 	el: '#exception_view_container',
 	status_array: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	_required_files: ['APIException', 'APIPayPeriod', 'APIBranch', 'APIDepartment', 'APIUserTitle', 'APIExceptionPolicy', 'APIUserGroup'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'ExceptionEditView.html';
 		this.permission_id = 'punch';
 		this.viewId = 'Exception';
@@ -399,7 +401,7 @@ ExceptionViewController = BaseViewController.extend( {
 		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
 		filter.filter_sort = this.select_layout.data.filter_sort;
 
-		if ( this.refresh_id > 0 ) {
+		if ( TTUUID.isUUID(this.refresh_id) ) {
 			filter.filter_data = {};
 			filter.filter_data.id = [this.refresh_id];
 		} else {
@@ -426,7 +428,7 @@ ExceptionViewController = BaseViewController.extend( {
 				result_data = Global.formatGridData( result_data, $this.api.key_name );
 			}
 
-			if ( $this.refresh_id > 0 ) {
+			if ( TTUUID.isUUID($this.refresh_id) ) {
 				$this.refresh_id = null;
 				var grid_source_data = $this.grid.getGridParam( 'data' );
 				var len = grid_source_data.length;
@@ -441,9 +443,9 @@ ExceptionViewController = BaseViewController.extend( {
 					var record = grid_source_data[i];
 
 					//Fixed === issue. The id set by jQGrid is string type.
-					if ( !isNaN( parseInt( record.id ) ) ) {
-						record.id = parseInt( record.id );
-					}
+					// if ( !isNaN( parseInt( record.id ) ) ) {
+					// 	record.id = parseInt( record.id );
+					// }
 
 					if ( record.id == new_record.id ) {
 						$this.grid.setRowData( new_record.id, new_record );

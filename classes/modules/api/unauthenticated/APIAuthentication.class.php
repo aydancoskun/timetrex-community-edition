@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,12 +41,20 @@
 class APIAuthentication extends APIFactory {
 	protected $main_class = 'Authentication';
 
+	/**
+	 * APIAuthentication constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
 		return TRUE;
 	}
 
+	/**
+	 * @param null $user_name
+	 * @param null $password
+	 * @return array
+	 */
 	function PunchLogin( $user_name = NULL, $password = NULL ) {
 		global $config_vars;
 		Debug::Text('Quick Punch ID: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
@@ -151,11 +159,17 @@ class APIAuthentication extends APIFactory {
 			$validator[0] = $validator_obj->getErrorsArray();
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
 		}
-		return $this->returnHandler( FALSE );
 	}
 
 	//Default username=NULL to prevent argument warnings messages if its not passed from the API.
-	function Login($user_name = NULL, $password = NULL, $type = 'USER_NAME') {
+
+	/**
+	 * @param null $user_name
+	 * @param null $password
+	 * @param string $type
+	 * @return array|null
+	 */
+	function Login( $user_name = NULL, $password = NULL, $type = 'USER_NAME') {
 		global $config_vars;
 		$authentication = new Authentication();
 
@@ -239,10 +253,14 @@ class APIAuthentication extends APIFactory {
 
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
 		}
-
-		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $client_id UUID
+	 * @param null $ip_address
+	 * @return array|bool
+	 */
 	function newSession( $user_id, $client_id = NULL, $ip_address = NULL ) {
 		global $authentication;
 
@@ -250,7 +268,7 @@ class APIAuthentication extends APIFactory {
 			Debug::text('Session ID: '. $authentication->getSessionID(), __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( $this->getPermissionObject()->Check('company', 'view') AND $this->getPermissionObject()->Check('company', 'login_other_user') ) {
-				if ( !is_numeric( $user_id ) ) { //If username is used, lookup user_id
+				if ( TTUUID::isUUID( $user_id ) == FALSE ) { //If username is used, lookup user_id
 					Debug::Text('Lookup User ID by UserName: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 					$ulf = TTnew( 'UserListFactory' );
 					$ulf->getByUserName( trim($user_id) );
@@ -260,7 +278,7 @@ class APIAuthentication extends APIFactory {
 				}
 
 				$ulf = TTnew( 'UserListFactory' );
-				$ulf->getByIdAndStatus( (int)$user_id, 10 );  //Can only switch to Active employees
+				$ulf->getByIdAndStatus( TTUUID::castUUID($user_id), 10 );  //Can only switch to Active employees
 				if ( $ulf->getRecordCount() == 1 ) {
 					$new_session_user_obj = $ulf->getCurrent();
 
@@ -270,6 +288,7 @@ class APIAuthentication extends APIFactory {
 					$retarr = array(
 									'session_id' => $new_session_id,
 									'url' => Misc::getHostName(FALSE).Environment::getBaseURL(), //Don't include the port in the hostname, otherwise it can cause problems when forcing port 443 but not using 'https'.
+									'cookie_base_url' => Environment::getCookieBaseURL(),
 									);
 
 					//Add entry in source *AND* destination user log describing who logged in.
@@ -281,6 +300,8 @@ class APIAuthentication extends APIFactory {
 
 					return $this->returnHandler( $retarr );
 				}
+			} else {
+				Debug::text('  ERROR: Permission check failed for logging in as another user...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 
@@ -288,6 +309,11 @@ class APIAuthentication extends APIFactory {
 	}
 
 	//Accepts user_id or user_name.
+
+	/**
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function switchUser( $user_id ) {
 		global $authentication;
 
@@ -295,7 +321,7 @@ class APIAuthentication extends APIFactory {
 			Debug::text('Session ID: '. $authentication->getSessionID(), __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( $this->getPermissionObject()->Check('company', 'view') AND $this->getPermissionObject()->Check('company', 'login_other_user') ) {
-				if ( !is_numeric( $user_id ) ) { //If username is used, lookup user_id
+				if ( TTUUID::isUUID( $user_id ) == FALSE ) { //If username is used, lookup user_id
 					Debug::Text('Lookup User ID by UserName: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 					$ulf = TTnew( 'UserListFactory' );
 					$ulf->getByUserName( trim($user_id) );
@@ -305,7 +331,7 @@ class APIAuthentication extends APIFactory {
 				}
 
 				$ulf = TTnew( 'UserListFactory' );
-				$ulf->getByIdAndStatus( (int)$user_id, 10 );  //Can only switch to Active employees
+				$ulf->getByIdAndStatus( TTUUID::castUUID($user_id), 10 );  //Can only switch to Active employees
 				if ( $ulf->getRecordCount() == 1 ) {
 					Debug::Text('Login as different user: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 					$authentication->changeObject( $user_id );
@@ -321,12 +347,17 @@ class APIAuthentication extends APIFactory {
 				} else {
 					Debug::Text('User is likely not active: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 				}
+			}  else {
+				Debug::text('  ERROR: Permission check failed for switching users...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function Logout() {
 		global $authentication;
 
@@ -339,6 +370,9 @@ class APIAuthentication extends APIFactory {
 		return FALSE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getSessionIdle() {
 		global $config_vars;
 
@@ -350,6 +384,11 @@ class APIAuthentication extends APIFactory {
 		}
 	}
 
+	/**
+	 * @param bool $touch_updated_date
+	 * @param string $type
+	 * @return bool
+	 */
 	function isLoggedIn( $touch_updated_date = TRUE, $type = 'USER_NAME' ) {
 		global $authentication, $config_vars;
 
@@ -370,6 +409,9 @@ class APIAuthentication extends APIFactory {
 		return FALSE;
 	}
 
+	/**
+	 * @return array
+	 */
 	function getCurrentUserName() {
 		if ( is_object( $this->getCurrentUserObject() ) ) {
 			return $this->returnHandler( $this->getCurrentUserObject()->getUserName() );
@@ -377,6 +419,10 @@ class APIAuthentication extends APIFactory {
 
 		return $this->returnHandler( FALSE );
 	}
+
+	/**
+	 * @return array
+	 */
 	function getCurrentUser() {
 		if ( is_object( $this->getCurrentUserObject() ) ) {
 			return $this->returnHandler( $this->getCurrentUserObject()->getObjectAsArray( array( 'id' => TRUE, 'company_id' => TRUE, 'currency_id' => TRUE, 'permission_control_id' => TRUE, 'pay_period_schedule_id' => TRUE, 'policy_group_id' => TRUE, 'employee_number' => TRUE, 'user_name' => TRUE, 'phone_id' => TRUE, 'first_name' => TRUE, 'middle_name' => TRUE, 'last_name' => TRUE, 'full_name' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'longitude' => TRUE, 'latitude' => TRUE, 'work_phone' => TRUE, 'home_phone' => TRUE, 'work_email' => TRUE, 'home_email' => TRUE, 'feedback_rating' => TRUE, 'last_login_date' => TRUE, 'created_date' => TRUE, 'is_owner' => TRUE, 'is_child' => TRUE ) ) );
@@ -385,6 +431,9 @@ class APIAuthentication extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @return array
+	 */
 	function getCurrentCompany() {
 		if ( is_object( $this->getCurrentCompanyObject() ) ) {
 			return $this->returnHandler( $this->getCurrentCompanyObject()->getObjectAsArray( array('id' => TRUE, 'product_edition_id' => TRUE, 'name' => TRUE, 'short_name' => TRUE, 'industry' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'work_phone' => TRUE, 'application_build' => TRUE, 'is_setup_complete' => TRUE, 'total_active_days' => TRUE, 'created_date' => TRUE, 'latitude' => TRUE, 'longitude' => TRUE ) ) );
@@ -393,6 +442,9 @@ class APIAuthentication extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @return array
+	 */
 	function getCurrentUserPreference() {
 		if ( is_object( $this->getCurrentUserObject() ) AND is_object( $this->getCurrentUserObject()->getUserPreferenceObject() ) ) {
 			return $this->returnHandler( $this->getCurrentUserObject()->getUserPreferenceObject()->getObjectAsArray() );
@@ -403,28 +455,84 @@ class APIAuthentication extends APIFactory {
 
 	//Functions that can be called before the API client is logged in.
 	//Mainly so the proper loading/login page can be displayed.
+	/**
+	 * @return bool
+	 */
 	function getProduction() {
 		return PRODUCTION;
 	}
+
+	/**
+	 * @return string
+	 */
 	function getApplicationName() {
 		return APPLICATION_NAME;
 	}
+
+	/**
+	 * @return string
+	 */
 	function getApplicationVersion() {
 		return APPLICATION_VERSION;
 	}
+
+	/**
+	 * @return int
+	 */
 	function getApplicationVersionDate() {
 		return APPLICATION_VERSION_DATE;
 	}
+
+	/**
+	 * @return string
+	 */
 	function getApplicationBuild() {
 		return APPLICATION_BUILD;
 	}
+
+	/**
+	 * @return string
+	 */
 	function getOrganizationName() {
 		return ORGANIZATION_NAME;
 	}
+
+	/**
+	 * @return string
+	 */
 	function getOrganizationURL() {
 		return ORGANIZATION_URL;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function isApplicationBranded() {
+		global $config_vars;
+
+		if ( isset($config_vars['branding']['application_name']) ) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @return bool
+	 */
+	function isPoweredByLogoEnabled() {
+		global $config_vars;
+
+		if ( isset($config_vars['branding']['disable_powered_by_logo']) AND $config_vars['branding']['disable_powered_by_logo'] == TRUE ) {
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function isAnalyticsEnabled() {
 		global $config_vars;
 
@@ -435,6 +543,9 @@ class APIAuthentication extends APIFactory {
 		return TRUE;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getAnalyticsTrackingCode() {
 		global $config_vars;
 
@@ -445,6 +556,10 @@ class APIAuthentication extends APIFactory {
 		return 'UA-333702-3';
 	}
 
+	/**
+	 * @param bool $name
+	 * @return int|string
+	 */
 	function getTTProductEdition( $name = FALSE ) {
 		if ( $name == TRUE ) {
 			$edition = getTTProductEditionName();
@@ -456,14 +571,25 @@ class APIAuthentication extends APIFactory {
 		return $edition;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getDeploymentOnDemand() {
 		return DEPLOYMENT_ON_DEMAND;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getRegistrationKey() {
 		return SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
 	}
 
+	/**
+	 * @param null $language
+	 * @param null $country
+	 * @return null
+	 */
 	function getLocale( $language = NULL, $country = NULL ) {
 		$language = Misc::trimSortPrefix( $language );
 		if ( $language == '' AND is_object( $this->getCurrentUserObject() ) AND is_object($this->getCurrentUserObject()->getUserPreferenceObject()) ) {
@@ -488,14 +614,23 @@ class APIAuthentication extends APIFactory {
 		return $retval;
 	}
 
+	/**
+	 * @return int|mixed
+	 */
 	function getSystemLoad() {
 		return Misc::getSystemLoad();
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getHTTPHost() {
 		return $_SERVER['HTTP_HOST'];
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyName() {
 		//Get primary company data needs to be used when user isn't logged in as well.
 		$clf = TTnew( 'CompanyListFactory' );
@@ -510,15 +645,21 @@ class APIAuthentication extends APIFactory {
 	}
 
 	//Returns all login data required in a single call for optimization purposes.
+
+	/**
+	 * @param null $api
+	 * @return array
+	 */
 	function getPreLoginData( $api = NULL ) {
 		global $config_vars;
 
-		if ( isset($_GET['disable_db']) OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) ) {
-			Debug::text('WARNING: Installer is enabled... Normal logins are disabled!', __FILE__, __LINE__, __METHOD__, 10);
+		if ( (isset($_GET['disable_db']) AND $_GET['disable_db'] == 1 )
+				OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 )
+				OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == TRUE ) ) {
+			Debug::text('WARNING: Installer/Down For Maintenance is enabled... Normal logins are disabled!', __FILE__, __LINE__, __METHOD__, 10);
 			return array(
 				'primary_company_id' => PRIMARY_COMPANY_ID, //Needed for some branded checks.
 				'primary_company_name' => 'N/A',
-				'analytics_enabled' => $this->isAnalyticsEnabled(),
 				'application_version' => $this->getApplicationVersion(),
 				'application_version_date' => $this->getApplicationVersionDate(),
 				'application_build' => $this->getApplicationBuild(),
@@ -592,11 +733,21 @@ class APIAuthentication extends APIFactory {
 				'map_tile_url' => isset( $config_vars['map']['tile_url'] ) ? rtrim($config_vars['map']['tile_url'], '/') : '//map-tiles.timetrex.com',
 				'map_routing_url' => isset( $config_vars['map']['routing_url'] ) ? rtrim($config_vars['map']['routing_url'], '/') : '//map-routing.timetrex.com',
 				'map_geocode_url' => isset( $config_vars['map']['geocode_url'] ) ? rtrim($config_vars['map']['geocode_url'], '/') : '//map-geocode.timetrex.com',
+
+				'sandbox_url' => isset($config_vars['other']['sandbox_url']) ? $config_vars['other']['sandbox_url'] : FALSE,
+				'sandbox' => isset($config_vars['other']['sandbox']) ? $config_vars['other']['sandbox'] : FALSE,
+				'uuid_seed' => TTUUID::getSeed(TRUE),
 		);
 	}
 
 
 	//Function that HTML5 interface can call when an irrecoverable error or uncaught exception is triggered.
+
+	/**
+	 * @param null $data
+	 * @param null $screenshot
+	 * @return string
+	 */
 	function sendErrorReport( $data = NULL, $screenshot = NULL ) {
 		$rl = TTNew('RateLimit');
 		$rl->setID( 'error_report_'. Misc::getRemoteIPAddress() );
@@ -612,11 +763,7 @@ class APIAuthentication extends APIFactory {
 			$attachments[] = array( 'file_name' => 'screenshot.png', 'mime_type' => 'image/png', 'data' => base64_decode( $screenshot ) );
 		}
 
-		if ( defined( 'TIMETREX_JSON_API' ) == TRUE ) {
-			$subject = TTi18n::gettext('HTML5 Error Report');
-		} else {
-			$subject = TTi18n::gettext('Flex Error Report');
-		}
+		$subject = 'HTML5 Error Report'; //Don't translate this, as it breaks filters.
 
 		$data = 'IP Address: '. Misc::getRemoteIPAddress() ."\nServer Version: ". APPLICATION_BUILD ."\n\n". $data;
 
@@ -632,8 +779,8 @@ class APIAuthentication extends APIFactory {
 	 * @param string $current_password
 	 * @param string $new_password
 	 * @param string $new_password2
-	 * @param string $type
-	 * @return bool
+	 * @return array|bool
+	 * @internal param string $type
 	 */
 	function changePassword( $user_name, $current_password = NULL, $new_password = NULL, $new_password2 = NULL ) {
 		$rl = TTNew( 'RateLimit' );
@@ -725,6 +872,10 @@ class APIAuthentication extends APIFactory {
 		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), $u_obj->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
 	}
 
+	/**
+	 * @param $email
+	 * @return array
+	 */
 	function resetPassword( $email ) {
 		//Debug::setVerbosity( 11 );
 		$rl = TTNew('RateLimit');
@@ -747,13 +898,18 @@ class APIAuthentication extends APIFactory {
 				if ( $user_obj->getStatus() == 10 ) { //Only allow password resets on active employees.
 					//Check if company is using LDAP authentication, if so deny password reset.
 					if ( $user_obj->getCompanyObject()->getLDAPAuthenticationType() == 0 ) {
-						$user_obj->sendPasswordResetEmail();
-						Debug::Text('Found USER! ', __FILE__, __LINE__, __METHOD__, 10);
-						$rl->delete(); //Clear password reset rate limit upon successful login.
-						return $this->returnHandler( array('email_sent' => 1, 'email' => $email ) );
+						if ( $user_obj->sendPasswordResetEmail() == TRUE ) {
+							Debug::Text( 'Found USER! ', __FILE__, __LINE__, __METHOD__, 10 );
+							$rl->delete(); //Clear password reset rate limit upon successful login.
+
+							return $this->returnHandler( array('email_sent' => 1, 'email' => $email) );
+						} else {
+							Debug::Text('ERROR: Unable to send password reset email, perhaps user record is invalid?', __FILE__, __LINE__, __METHOD__, 10);
+							$validator->isTrue('email', FALSE, TTi18n::getText('Unable to reset password, please contact your administrator for more information') );
+						}
 					} else {
 						Debug::Text('LDAP Authentication is enabled, password reset is disabled! ', __FILE__, __LINE__, __METHOD__, 10);
-						$validator->isTrue('email', FALSE, TTi18n::getText('Please contact your administrator for instructions on changing your password.'). ' (LDAP)' );
+						$validator->isTrue('email', FALSE, TTi18n::getText('Please contact your administrator for instructions on changing your password'). ' (LDAP)' );
 					}
 				} else {
 					$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (b)') );
@@ -777,6 +933,12 @@ class APIAuthentication extends APIFactory {
 	 * @param string $password
 	 * @param string $password2
 	 * */
+	/**
+	 * @param $key
+	 * @param $password
+	 * @param $password2
+	 * @return array
+	 */
 	function passwordReset( $key, $password, $password2 ) {
 		$rl = TTNew('RateLimit');
 		$rl->setID( 'password_reset_'. Misc::getRemoteIPAddress() );
@@ -836,6 +998,9 @@ class APIAuthentication extends APIFactory {
 
 	//Ping function is also in APIMisc for when the session timesout is valid.
 	//Ping no longer can tell if the session is timed-out, must use "isLoggedIn(FALSE)" instead.
+	/**
+	 * @return bool
+	 */
 	function Ping() {
 		return TRUE;
 	}

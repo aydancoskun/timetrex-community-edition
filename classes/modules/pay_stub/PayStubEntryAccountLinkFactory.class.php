@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,10 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	protected $pk_sequence_name = 'pay_stub_entry_account_link_id_seq'; //PK Sequence name
 
 	var $company_obj = NULL;
+
+	/**
+	 * @return null
+	 */
 	function getCompanyObject() {
 		if ( is_object($this->company_obj) ) {
 			return $this->company_obj;
@@ -54,10 +58,15 @@ class PayStubEntryAccountLinkFactory extends Factory {
 		}
 	}
 
-	function isUnique($company_id, $id) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function isUnique( $company_id, $id) {
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND id != ? AND deleted=0';
@@ -75,298 +84,218 @@ class PayStubEntryAccountLinkFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$clf = TTnew( 'CompanyListFactory' );
-		if (		$this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													)
-					AND
-					$this->Validator->isTrue(			'company',
-														$this->isUnique( $id, $this->getID() ),
-														TTi18n::gettext('Pay Stub Account Links for this company already exist')
-														)
-			) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTotalGross() {
-		if ( isset($this->data['total_gross']) ) {
-			return $this->data['total_gross'];
-		}
-
-		return FALSE;
-	}
-	function setTotalGross($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (
-				( $id == '' OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'total_gross',
-														$psealf->getByID($id),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													) ) {
-
-			$this->data['total_gross'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'total_gross' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setTotalGross( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'total_gross', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTotalEmployeeDeduction() {
-		if ( isset($this->data['total_employee_deduction']) ) {
-			return $this->data['total_employee_deduction'];
-		}
-
-		return FALSE;
-	}
-	function setTotalEmployeeDeduction($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (
-				( $id == '' OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'total_employee_deduction',
-														$psealf->getByID($id),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													) ) {
-
-			$this->data['total_employee_deduction'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'total_employee_deduction' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setTotalEmployeeDeduction( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'total_employee_deduction', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTotalEmployerDeduction() {
-		if ( isset($this->data['total_employer_deduction']) ) {
-			return $this->data['total_employer_deduction'];
-		}
-
-		return FALSE;
-	}
-	function setTotalEmployerDeduction($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (
-				( $id == '' OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'total_employer_deduction',
-														$psealf->getByID($id),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													) ) {
-
-			$this->data['total_employer_deduction'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'total_employer_deduction' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setTotalEmployerDeduction( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'total_employer_deduction', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTotalNetPay() {
-		if ( isset($this->data['total_net_pay']) ) {
-			return $this->data['total_net_pay'];
-		}
-
-		return FALSE;
-	}
-	function setTotalNetPay($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (
-				( $id == '' OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'total_net_pay',
-														$psealf->getByID($id),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													) ) {
-
-			$this->data['total_net_pay'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'total_net_pay' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setTotalNetPay( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'total_net_pay', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getRegularTime() {
-		if ( isset($this->data['regular_time']) ) {
-			return $this->data['regular_time'];
-		}
-
-		return FALSE;
-	}
-	function setRegularTime($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (
-				( $id == '' OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'regular_time',
-														$psealf->getByID($id),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													) ) {
-
-			$this->data['regular_time'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'regular_time' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setRegularTime( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'regular_time', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getEmployeeCPP() {
-		if ( isset($this->data['employee_cpp']) ) {
-			return $this->data['employee_cpp'];
-		}
-
-		return FALSE;
-	}
-	function setEmployeeCPP($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (
-				( $id == '' OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'employee_cpp',
-														$psealf->getByID($id),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													) ) {
-
-			$this->data['employee_cpp'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'employee_cpp' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setEmployeeCPP( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'employee_cpp', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getEmployeeEI() {
-		if ( isset($this->data['employee_ei']) ) {
-			return $this->data['employee_ei'];
-		}
-
-		return FALSE;
-	}
-	function setEmployeeEI($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (
-				( $id == '' OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'employee_ei',
-														$psealf->getByID($id),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													) ) {
-
-			$this->data['employee_ei'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'employee_ei' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setEmployeeEI( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'employee_ei', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getMonthlyAdvance() {
-		if ( isset($this->data['monthly_advance']) ) {
-			return $this->data['monthly_advance'];
-		}
-
-		return FALSE;
-	}
-	function setMonthlyAdvance($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (
-				( $id == '' OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'monthly_advance',
-														$psealf->getByID($id),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													) ) {
-
-			$this->data['monthly_advance'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'monthly_advance' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setMonthlyAdvance( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'monthly_advance', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getMonthlyAdvanceDeduction() {
-		if ( isset($this->data['monthly_advance_deduction']) ) {
-			return $this->data['monthly_advance_deduction'];
+		return $this->getGenericDataValue( 'monthly_advance_deduction' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setMonthlyAdvanceDeduction( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
 
-		return FALSE;
-	}
-	function setMonthlyAdvanceDeduction($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (
-				( $id == '' OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'monthly_advance_deduction',
-														$psealf->getByID($id),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													) ) {
-
-			$this->data['monthly_advance_deduction'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'monthly_advance_deduction', $value );
 	}
 
+	/**
+	 * @return array
+	 */
 	function getPayStubEntryAccountIDToTypeIDMap() {
 		$retarr = array(
 						$this->getTotalGross() => 10,
@@ -376,13 +305,110 @@ class PayStubEntryAccountLinkFactory extends Factory {
 
 		return $retarr;
 	}
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		if ( $this->Validator->isError('company') == FALSE ) {
+			$this->Validator->isTrue(			'company',
+														$this->isUnique( $this->getCompany(), $this->getID() ),
+														TTi18n::gettext('Pay Stub Account Links for this company already exist')
+													);
+		}
+		// Pay Stub Account
+		if ( $this->getTotalGross() != TTUUID::getZeroID() ) {
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'total_gross',
+															$psealf->getByID($this->getTotalGross()),
+															TTi18n::gettext('Pay Stub Account is invalid')
+														);
+		}
+		if ( $this->getTotalEmployeeDeduction() != TTUUID::getZeroID() ) {
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'total_employee_deduction',
+															$psealf->getByID($this->getTotalEmployeeDeduction()),
+															TTi18n::gettext('Pay Stub Account is invalid')
+														);
+		}
+		if ( $this->getTotalEmployerDeduction() != TTUUID::getZeroID() ) {
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'total_employer_deduction',
+															$psealf->getByID($this->getTotalEmployerDeduction()),
+															TTi18n::gettext('Pay Stub Account is invalid')
+														);
+		}
+		if ( $this->getTotalNetPay() != TTUUID::getZeroID() ) {
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'total_net_pay',
+															$psealf->getByID($this->getTotalNetPay()),
+															TTi18n::gettext('Pay Stub Account is invalid')
+														);
+		}
+		if ( $this->getRegularTime() != TTUUID::getZeroID() ) {
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'regular_time',
+															$psealf->getByID($this->getRegularTime()),
+															TTi18n::gettext('Pay Stub Account is invalid')
+														);
+		}
+		if ( $this->getEmployeeCPP() !== FALSE AND $this->getEmployeeCPP() != TTUUID::getZeroID() ) {
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'employee_cpp',
+															$psealf->getByID($this->getEmployeeCPP()),
+															TTi18n::gettext('Pay Stub Account is invalid')
+														);
+		}
+		if ( $this->getEmployeeEI() !== FALSE AND $this->getEmployeeEI() != TTUUID::getZeroID() ) {
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'employee_ei',
+															$psealf->getByID($this->getEmployeeEI()),
+															TTi18n::gettext('Pay Stub Account is invalid')
+														);
+		}
 
+		//These are deprecated fields and no longer used.
+//		if ( $this->getMonthlyAdvance() != TTUUID::getZeroID() ) {
+//			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+//			$this->Validator->isResultSetWithRows(	'monthly_advance',
+//															$psealf->getByID($this->getMonthlyAdvance()),
+//															TTi18n::gettext('Pay Stub Account is invalid')
+//														);
+//		}
+//		if ( $this->getMonthlyAdvanceDeduction() != TTUUID::getZeroID() ) {
+//			$this->Validator->isResultSetWithRows(	'monthly_advance_deduction',
+//															$psealf->getByID($this->getMonthlyAdvanceDeduction()),
+//															TTi18n::gettext('Pay Stub Account is invalid')
+//														);
+//		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getCompanyObject()->getId() );
 
 		return TRUE;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub Account Links'), NULL, $this->getTable() );
 	}

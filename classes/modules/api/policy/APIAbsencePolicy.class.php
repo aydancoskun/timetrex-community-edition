@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIAbsencePolicy extends APIFactory {
 	protected $main_class = 'AbsencePolicyFactory';
 
+	/**
+	 * APIAbsencePolicy constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APIAbsencePolicy extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -84,6 +87,7 @@ class APIAbsencePolicy extends APIFactory {
 	/**
 	 * Get absence policy data for one or more absence policyes.
 	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function getAbsencePolicy( $data = NULL, $disable_paging = FALSE ) {
@@ -114,7 +118,7 @@ class APIAbsencePolicy extends APIFactory {
 					}
 				}
 			}
-			
+
 			if ( isset( $absence_policy_ids ) ) {
 				$data['filter_data']['id'] = $absence_policy_ids;
 			} else {
@@ -130,14 +134,14 @@ class APIAbsencePolicy extends APIFactory {
 		}
 
 		//Remove any user_id=0 as its for an OPEN shift and no absence policy is ever assigned to this user in the policy groups.
-		if ( isset($data['filter_data']['user_id']) AND in_array( 0, $data['filter_data']['user_id'] ) ) {
-			$open_user_id_key = array_search( 0, $data['filter_data']['user_id']);
+		if ( isset($data['filter_data']['user_id']) AND in_array( TTUUID::getZeroId(), $data['filter_data']['user_id'] ) ) {
+			$open_user_id_key = array_search( TTUUID::getZeroID(), $data['filter_data']['user_id']);
 			if ( $open_user_id_key !== FALSE ) {
 				Debug::Text('Removing user_id=0 from filter...', __FILE__, __LINE__, __METHOD__, 10);
 				unset($data['filter_data']['user_id'][$open_user_id_key]);
 			}
 		}
-		
+
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'absence_policy', 'view' );
 
 		$blf = TTnew( 'AbsencePolicyListFactory' );
@@ -159,7 +163,7 @@ class APIAbsencePolicy extends APIFactory {
 
 	/**
 	 * @param string $format
-	 * @param null $data
+	 * @param array $data
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
@@ -189,7 +193,9 @@ class APIAbsencePolicy extends APIFactory {
 	/**
 	 * Set absence policy data for one or more absence policyes.
 	 * @param array $data absence policy data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setAbsencePolicy( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -208,18 +214,18 @@ class APIAbsencePolicy extends APIFactory {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' AbsencePolicys', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'AbsencePolicyListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get absence policy object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -233,7 +239,7 @@ class APIAbsencePolicy extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('absence_policy', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -294,10 +300,10 @@ class APIAbsencePolicy extends APIFactory {
 	/**
 	 * Delete one or more absence policys.
 	 * @param array $data absence policy data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteAbsencePolicy( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -314,14 +320,14 @@ class APIAbsencePolicy extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'AbsencePolicyListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get absence policy object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -329,7 +335,7 @@ class APIAbsencePolicy extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('absence_policy', 'delete')
 								OR ( $this->getPermissionObject()->Check('absence_policy', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -380,7 +386,7 @@ class APIAbsencePolicy extends APIFactory {
 	 * @return array
 	 */
 	function copyAbsencePolicy( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -406,6 +412,11 @@ class APIAbsencePolicy extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @param string $accrual_policy_id UUID
+	 * @param string $user_id UUID
+	 * @return array|bool
+	 */
 	function getAccrualBalance( $accrual_policy_id, $user_id ) {
 		if ( $accrual_policy_id == '' ) {
 			return FALSE;
@@ -415,7 +426,7 @@ class APIAbsencePolicy extends APIFactory {
 		}
 
 		$ablf = TTnew( 'AccrualBalanceListFactory' );
-		$ablf->getByUserIdAndAccrualPolicyId( (int)$user_id, (int)$accrual_policy_id );
+		$ablf->getByUserIdAndAccrualPolicyId( TTUUID::castUUID($user_id), TTUUID::castUUID($accrual_policy_id) );
 		if ( $ablf->getRecordCount() > 0 ) {
 			$accrual_balance = $ablf->getCurrent()->getBalance();
 		} else {
@@ -425,6 +436,11 @@ class APIAbsencePolicy extends APIFactory {
 		return $this->returnHandler(  TTDate::getTimeUnit($accrual_balance) );
 	}
 
+	/**
+	 * @param string $absence_policy_id UUID
+	 * @param string $user_id UUID
+	 * @return array
+	 */
 	function getAbsencePolicyBalance( $absence_policy_id, $user_id ) {
 		if ( $absence_policy_id == '' ) {
 			return $this->returnHandler( FALSE );
@@ -446,6 +462,15 @@ class APIAbsencePolicy extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @param string $absence_policy_id UUID
+	 * @param string $user_id UUID
+	 * @param int $epoch EPOCH
+	 * @param $amount
+	 * @param int $previous_amount
+	 * @param bool $previous_absence_policy_id
+	 * @return array
+	 */
 	function getProjectedAbsencePolicyBalance( $absence_policy_id, $user_id, $epoch, $amount, $previous_amount = 0, $previous_absence_policy_id = FALSE ) {
 		if ( $absence_policy_id == '' ) {
 			return $this->returnHandler( FALSE );
@@ -454,9 +479,9 @@ class APIAbsencePolicy extends APIFactory {
 		if ( $user_id == '' ) {
 			return $this->returnHandler( FALSE );
 		}
-		
-		$user_id = (int)$user_id;
-		
+
+		$user_id = TTUUID::castUUID($user_id);
+
 		$epoch = TTDate::parseDateTime( $epoch );
 
 		$aplf = TTnew( 'AbsencePolicyListFactory' );
@@ -560,7 +585,7 @@ class APIAbsencePolicy extends APIFactory {
 					if ( $ulf->getRecordCount() == 1 ) {
 						$u_obj = $ulf->getCurrent();
 
-						$retarr = FALSE;
+						$retarr = array();
 						foreach( $aplf as $acp_obj ) {
 							Debug::Text('  Accrual Policy ID: '. $acp_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 							//Pass $retval back into itself so additional balance can be calculated when accrual policy accounts are used in multiple policies.
@@ -591,7 +616,7 @@ class APIAbsencePolicy extends APIFactory {
 					if ( isset($dollar_retarr) ) {
 						$retarr = array_merge( $retarr, $dollar_retarr);
 					}
-									
+
 					Debug::Arr($retarr, '  Current Accrual Arr: ', __FILE__, __LINE__, __METHOD__, 10);
 					return $this->returnHandler( $retarr );
 				} else {

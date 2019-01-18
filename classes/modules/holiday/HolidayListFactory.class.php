@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,14 +89,20 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
 		$hpf = new HolidayPolicyFactory();
 
-		$ph = array(	'company_id' => (int)$company_id,
+		$ph = array(	'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -100,7 +119,14 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByIDAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getByIDAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -118,8 +144,8 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
 		$hpf = new HolidayPolicyFactory();
 
-		$ph = array(	'company_id' => (int)$company_id,
-						'id' => (int)$id
+		$ph = array(	'company_id' => TTUUID::castUUID($company_id),
+						'id' => TTUUID::castUUID($id)
 					);
 
 		$query = '
@@ -137,14 +163,21 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByIdAndHolidayPolicyID($id, $holiday_policy_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $holiday_policy_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getByIdAndHolidayPolicyID( $id, $holiday_policy_id, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
-					'holiday_policy_id' => (int)$holiday_policy_id,
+					'id' => TTUUID::castUUID($id),
+					'holiday_policy_id' => TTUUID::castUUID($holiday_policy_id),
 					);
 
 		$query = '
@@ -161,7 +194,13 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByHolidayPolicyId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getByHolidayPolicyId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -178,7 +217,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$query = '
 					select	*
 					from	'. $this->getTable() .' as a
-					where	holiday_policy_id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+					where	holiday_policy_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -188,7 +227,15 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByHolidayPolicyIdAndStartDateAndEndDate($holiday_policy_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $holiday_policy_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getByHolidayPolicyIdAndStartDateAndEndDate( $holiday_policy_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $holiday_policy_id == '' ) {
 			return FALSE;
 		}
@@ -222,7 +269,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 					where
 						a.date_stamp >= ?
 						AND a.date_stamp <= ?
-						AND b.id in ('. $this->getListSQL( $holiday_policy_id, $ph, 'int' ) .')
+						AND b.id in ('. $this->getListSQL( $holiday_policy_id, $ph, 'uuid' ) .')
 						AND ( a.deleted = 0 AND b.deleted=0 )
 						';
 		$query .= $this->getWhereSQL( $where );
@@ -235,7 +282,14 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyIdAndHolidayPolicyId($company_id, $id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getByCompanyIdAndHolidayPolicyId( $company_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -253,14 +307,14 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
 		$hpf = new HolidayPolicyFactory();
 
-		$ph = array( 'company_id' => (int)$company_id, );
+		$ph = array( 'company_id' => TTUUID::castUUID($company_id), );
 
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $hpf->getTable() .' as b ON a.holiday_policy_id = b.id
 					where	b.company_id = ?
-						AND a.holiday_policy_id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+						AND a.holiday_policy_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0) ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -270,7 +324,13 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getByPolicyGroupUserId( $user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -289,7 +349,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -315,7 +375,14 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByPolicyGroupUserIdAndDate($user_id, $date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getByPolicyGroupUserIdAndDate( $user_id, $date, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -338,7 +405,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'date' => $this->db->BindDate( $date ),
 					);
 
@@ -365,7 +432,15 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByPolicyGroupUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getByPolicyGroupUserIdAndStartDateAndEndDate( $user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -410,7 +485,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 						AND d.holiday_policy_id = c.id
 						AND d.date_stamp >= ?
 						AND d.date_stamp <= ?
-						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'uuid' ) .')
 						AND ( c.deleted = 0 AND d.deleted=0 )
 						';
 		$query .= $this->getWhereSQL( $where );
@@ -421,7 +496,15 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyIdAndStartDateAndEndDate($company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
+	function getByCompanyIdAndStartDateAndEndDate( $company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -448,7 +531,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
@@ -478,7 +561,13 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getArrayByPolicyGroupUserId($user_id, $start_date, $end_date) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @return array|bool
+	 */
+	function getArrayByPolicyGroupUserId( $user_id, $start_date, $end_date) {
 		$hlf = new HolidayListFactory();
 		$hlf->getByPolicyGroupUserIdAndStartDateAndEndDate( $user_id, $start_date, $end_date);
 
@@ -494,6 +583,15 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '' ) {
 			return FALSE;
@@ -531,9 +629,9 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
-		
+
 		$query = '
 					select	distinct a.*,
 							y.first_name as created_by_first_name,
@@ -552,14 +650,14 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 					where	hpf.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['holiday_policy_id']) ) ? $this->getWhereClauseSQL( 'a.holiday_policy_id', $filter_data['holiday_policy_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'pguf.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['holiday_policy_id']) ) ? $this->getWhereClauseSQL( 'a.holiday_policy_id', $filter_data['holiday_policy_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'pguf.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
-		
+
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 			$ph[] = $this->db->BindDate( (int)$filter_data['start_date'] );
 			$query	.=	' AND a.date_stamp >= ?';

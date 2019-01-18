@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class MessageControlFactory extends Factory {
 	protected $obj_handler = NULL;
 	protected $tmp_data = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -159,6 +164,10 @@ class MessageControlFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -187,32 +196,42 @@ class MessageControlFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getFromUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getFromUserID(), 'from_user_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getFromUserId() {
-		if ( isset($this->tmp_data['from_user_id']) ) {
-			return $this->tmp_data['from_user_id'];
-		}
-
-		return FALSE;
-	}
-	function setFromUserId( $id ) {
-		if ( $id != '' ) {
-			$this->tmp_data['from_user_id'] = $id;
-			return TRUE;
-		}
-		return FALSE;
+		return $this->getGenericTempDataValue( 'from_user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setFromUserId( $value ) {
+		if ( $value != '' ) {
+			return $this->setGenericTempDataValue( 'from_user_id', $value );
+		}
+		return FALSE;
+	}
+
+	/**
+	 * @return bool|array|string
+	 */
 	function getToUserId() {
-		if ( isset($this->tmp_data['to_user_id']) ) {
-			return $this->tmp_data['to_user_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericTempDataValue( 'to_user_id' );
 	}
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
 	function setToUserId( $ids ) {
 		if ( !is_array($ids) ) {
 			$ids = array($ids);
@@ -222,7 +241,7 @@ class MessageControlFactory extends Factory {
 		if ( count($ids) > 0 ) {
 			$this->tmp_data['to_user_id'] = array(); //Reset the TO array, so if this is called multiple times, we don't keep adding more and more users to it.
 			foreach($ids as $id ) {
-				if ( $id > 0 ) {
+				if ( TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() ) {
 					$this->tmp_data['to_user_id'][] = $id;
 				}
 			}
@@ -233,22 +252,29 @@ class MessageControlFactory extends Factory {
 	}
 
 	//Expose message_sender_id for migration purposes.
+
+	/**
+	 * @return bool
+	 */
 	function getMessageSenderId() {
-		if ( isset($this->tmp_data['message_sender_id']) ) {
-			return $this->tmp_data['message_sender_id'];
-		}
-
-		return FALSE;
-	}
-	function setMessageSenderId( $id ) {
-		if ( $id != '' ) {
-			$this->tmp_data['message_sender_id'] = $id;
-			return TRUE;
-		}
-		return FALSE;
-
+		return $this->getGenericTempDataValue( 'message_sender_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setMessageSenderId( $value ) {
+		if ( $value != '' ) {
+			return $this->setGenericTempDataValue( 'message_sender_id', $value );
+		}
+		return FALSE;
+
+	}
+
+	/**
+	 * @return bool
+	 */
 	function isAck() {
 		if ( $this->getRequireAck() == TRUE AND $this->getColumn('ack_date') == '' ) {
 			return FALSE;
@@ -258,42 +284,38 @@ class MessageControlFactory extends Factory {
 	}
 
 	//Parent ID is the parent message_sender_id.
+
+	/**
+	 * @return bool
+	 */
 	function getParent() {
-		if ( isset($this->tmp_data['parent_id']) ) {
-			return $this->tmp_data['parent_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericTempDataValue( 'parent_id' );
 	}
-	function setParent($id) {
-		$id = trim($id);
 
-		if ( empty($id) ) {
-			$id = 0;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setParent( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' OR empty($value) ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		if ( $id == 0
-				OR $this->Validator->isNumeric(				'parent',
-															$id,
-															TTi18n::gettext('Parent is invalid')
-															) ) {
-			$this->tmp_data['parent_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericTempDataValue( 'parent_id', $value );
 	}
 
 	//These functions are out of the ordinary, as the getStatus gets the status of a message based on a SQL join to the recipient table.
-	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
 
-		return FALSE;
+	/**
+	 * @return bool|int
+	 */
+	function getStatus() {
+		return (int)$this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @return null|object
+	 */
 	function getObjectHandler() {
 		if ( is_object($this->obj_handler) ) {
 			return $this->obj_handler;
@@ -318,150 +340,108 @@ class MessageControlFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getObjectType() {
-		if ( isset($this->data['object_type_id']) ) {
-			return (int)$this->data['object_type_id'];
-		}
-
-		return FALSE;
-	}
-	function setObjectType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'object_type',
-											$type,
-											TTi18n::gettext('Object Type is invalid'),
-											$this->getOptions('type')) ) {
-
-			$this->data['object_type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'object_type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setObjectType( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'object_type_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getObject() {
-		if ( isset($this->data['object_id']) ) {
-			return (int)$this->data['object_id'];
-		}
-
-		return FALSE;
-	}
-	function setObject($id) {
-		$id = trim($id);
-
-		if ( $this->Validator->isResultSetWithRows(	'object',
-													( is_object( $this->getObjectHandler() ) ) ? $this->getObjectHandler()->getByID($id) : FALSE,
-													TTi18n::gettext('Object is invalid')
-													) ) {
-			$this->data['object_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'object_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setObject( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'object_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getPriority() {
-		if ( isset($this->data['priority_id']) ) {
-			return (int)$this->data['priority_id'];
-		}
-
-		return FALSE;
-	}
-	function setPriority($priority = NULL) {
-		$priority = trim($priority);
-
-		if ( empty($priority) ) {
-			$priority = 50;
-		}
-
-		if ( $this->Validator->inArrayKey(	'priority',
-											$priority,
-											TTi18n::gettext('Invalid Priority'),
-											$this->getOptions('priority')) ) {
-
-			$this->data['priority_id'] = $priority;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'priority_id' );
 	}
 
+	/**
+	 * @param null $value
+	 * @return bool
+	 */
+	function setPriority( $value = NULL) {
+		$value = (int)trim($value);
+
+		if ( empty($value) ) {
+			$value = 50;
+		}
+		return $this->setGenericDataValue( 'priority_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getSubject() {
-		if ( isset($this->data['subject']) ) {
-			return $this->data['subject'];
-		}
-
-		return FALSE;
-	}
-	function setSubject($text) {
-		$text = trim($text);
-
-		if	(	strlen($text) == 0
-				OR
-				$this->Validator->isLength(		'subject',
-												$text,
-												TTi18n::gettext('Invalid Subject length'),
-												2,
-												100) ) {
-
-			$this->data['subject'] = $text;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'subject' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSubject( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'subject', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getBody() {
-		if ( isset($this->data['body']) ) {
-			return $this->data['body'];
-		}
-
-		return FALSE;
-	}
-	function setBody($text) {
-		$text = trim($text);
-
-		//Flex interface validates the message too soon, make it skip a 0 length message when only validating.
-		if ( $this->Validator->getValidateOnly() == TRUE AND $text == '' ) {
-			$minimum_length = 0;
-		} else {
-			$minimum_length = 2;
-		}
-
-		if ( $this->Validator->isLength( 'body',
-										 $text,
-										 TTi18n::gettext( 'Message body is too short.' ),
-										 $minimum_length,
-										 ( 1024 * 9999999 ) )
-				AND
-				$this->Validator->isLength( 'body',
-											$text,
-											TTi18n::gettext( 'Message body is too long.' ),
-											0,
-											( 1024 * 10 ) )
-		) {
-			$this->data['body'] = $text;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'body' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setBody( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'body', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getRequireAck() {
-		return $this->fromBool( $this->data['require_ack'] );
-	}
-	function setRequireAck($bool) {
-		$this->data['require_ack'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'require_ack' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setRequireAck( $value) {
+		return $this->setGenericDataValue( 'require_ack', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableEmailMessage() {
 		if ( isset($this->email_message) ) {
 			return $this->email_message;
@@ -469,13 +449,95 @@ class MessageControlFactory extends Factory {
 
 		return TRUE;
 	}
-	function setEnableEmailMessage($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableEmailMessage( $bool) {
 		$this->email_message = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Parent
+		if ( $this->getParent() !== FALSE AND $this->getParent() != TTUUID::getZeroID() ) {
+			$this->Validator->isUUID(				'parent',
+															$this->getParent(),
+															TTi18n::gettext('Parent is invalid')
+														);
+		}
+		// Object Type
+		$this->Validator->inArrayKey(	'object_type',
+												$this->getObjectType(),
+												TTi18n::gettext('Object Type is invalid'),
+												$this->getOptions('type')
+											);
+		// Object
+		$this->Validator->isResultSetWithRows(	'object',
+												( is_object( $this->getObjectHandler() ) ) ? $this->getObjectHandler()->getByID($this->getObject()) : FALSE,
+												TTi18n::gettext('Object is invalid')
+											);
+		// Priority
+		if ( $this->getPriority() !== FALSE ) {
+			$this->Validator->inArrayKey(	'priority',
+												$this->getPriority(),
+												TTi18n::gettext('Invalid Priority'),
+												$this->getOptions('priority')
+											);
+		}
+		// Subject
+		if ( $this->getSubject() !== FALSE ) {
+			$this->Validator->isLength(		'subject',
+													$this->getSubject(),
+													TTi18n::gettext('Subject is too short'),
+													2,
+													99999
+												);
+			$this->Validator->isLength(		'subject',
+											   $this->getSubject(),
+											   TTi18n::gettext('Subject is too long'),
+											   0,
+											   100
+			);
+
+		}
+
+		// Message body
+		//Flex interface validates the message too soon, make it skip a 0 length message when only validating.
+		if ( $this->Validator->getValidateOnly() == TRUE AND $this->getBody() == '' ) {
+			$minimum_length = 0;
+		} else {
+			$minimum_length = 2;
+		}
+		$this->Validator->isLength( 'body',
+											$this->getBody(),
+											TTi18n::gettext( 'Message body is too short.' ),
+											$minimum_length,
+											( 1024 * 9999999 )
+										);
+		if ( $this->Validator->isError('body') == FALSE ) {
+			$this->Validator->isLength( 'body',
+												$this->getBody(),
+												TTi18n::gettext( 'Message body is too long.' ),
+												0,
+												( 1024 * 10 )
+											);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
+
 		//Only validate from/to user if there is a subject and body set, otherwise validation will fail on a new object with no data all the time.
 		if ( $this->getSubject() != '' AND $this->getBody() != '' ) {
 			if ( $this->Validator->hasError( 'from' ) == FALSE AND $this->getFromUserId() == '' ) {
@@ -486,10 +548,10 @@ class MessageControlFactory extends Factory {
 			}
 
 			//Messages attached to objects do not require a recipient.
-			if ( $this->Validator->hasError( 'to' ) == FALSE AND $this->getObjectType() == 5 AND ( (int)$this->getToUserId() == 0 OR ( is_array( $this->getToUserId() ) AND count( $this->getToUserId() ) == 0 ) ) ) {
-				$this->Validator->isTrue(	'to',
+			if ( $this->Validator->hasError( 'to' ) == FALSE AND $this->getObjectType() == 5 AND ( $this->getToUserId() == '' OR ( is_array( $this->getToUserId() ) AND count( $this->getToUserId() ) == 0 ) ) ) {
+				$this->Validator->isTrue(	'to_user_id',
 											FALSE,
-											TTi18n::gettext('Message recipient is invalid') );
+											TTi18n::gettext('Please specify at least one employee') );
 			}
 		}
 
@@ -511,6 +573,12 @@ class MessageControlFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param string|array $ids UUID
+	 * @return bool
+	 */
 	static function markRecipientMessageAsRead( $company_id, $user_id, $ids ) {
 		if ( $company_id == '' OR $user_id == '' OR $ids == '' OR count($ids) == 0 ) {
 			return FALSE;
@@ -530,6 +598,9 @@ class MessageControlFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getEmailMessageAddresses() {
 		//Remove the From User from any recipicient list so we don't send emails back to ourselves.
 		$user_ids = array_diff( $this->getToUserId(), array( $this->getFromUserId() ) );
@@ -566,6 +637,9 @@ class MessageControlFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function emailMessage() {
 		Debug::Text('emailMessage: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -660,6 +734,9 @@ class MessageControlFactory extends Factory {
 		return TRUE; //Always return true
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		//Check to make sure the 'From' user_id doesn't appear in the 'To' user list as well.
 		$from_user_id_key = array_search( $this->getFromUserId(), (array)$this->getToUserId() );
@@ -668,7 +745,7 @@ class MessageControlFactory extends Factory {
 			unset($to_user_ids[$from_user_id_key]);
 			$this->setToUserId( $to_user_ids );
 
-			Debug::text('From user is assigned as a To user as well, removing...'. (int)$from_user_id_key, __FILE__, __LINE__, __METHOD__, 9);
+			Debug::text('From user is assigned as a To user as well, removing...'. $from_user_id_key, __FILE__, __LINE__, __METHOD__, 9);
 		}
 
 		Debug::Arr($this->getFromUserId(), 'From: ', __FILE__, __LINE__, __METHOD__, 9);
@@ -677,6 +754,9 @@ class MessageControlFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		//Save Sender/Recipient records for this message.
 		if ( $this->getDeleted() == FALSE ) {
@@ -698,7 +778,7 @@ class MessageControlFactory extends Factory {
 					if ( $this->getObjectType() == 5 ) {
 						$msf->setParent( $this->getParent() );
 					} else {
-						$msf->setParent( 0 );
+						$msf->setParent( TTUUID::getZeroID() );
 					}
 					$msf->setMessageControl( $this->getId() );
 					$msf->setCreatedBy( $this->getCreatedBy() );
@@ -742,6 +822,10 @@ class MessageControlFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -767,6 +851,10 @@ class MessageControlFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		$data = array();

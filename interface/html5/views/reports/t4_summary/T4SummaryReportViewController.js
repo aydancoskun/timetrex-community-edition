@@ -1,10 +1,10 @@
 T4SummaryReportViewController = ReportBaseViewController.extend( {
 
+	_required_files: ['APIT4SummaryReport', 'APIPayStubEntryAccount'],
 
 	type_array: null,
 
-	initialize: function( options ) {
-		this.__super( 'initialize', options );
+	initReport: function( options ) {
 		this.script_name = 'T4SummaryReport';
 		this.viewId = 'T4SummaryReport';
 		this.context_menu_name = $.i18n._( 'T4 Summary' );
@@ -12,9 +12,6 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		this.view_file = 'T4SummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIT4SummaryReport' ))();
 		this.include_form_setup = true;
-
-		this.buildContextMenu();
-
 	},
 
 	buildContextMenuModels: function() {
@@ -130,25 +127,25 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 				nav: view_print
 			});
 		}
-
-		var print_print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
-			id: ContextMenuIconName.print,
-			group: form_setup_group,
-			icon: 'print-35x35.png',
-			type: RibbonSubMenuType.NAVIGATION,
-			items: [],
-			permission_result: true,
-			permission: true} );
-
-		var pdf_form_print_government = new RibbonSubMenuNavItem( {label: $.i18n._( 'Government (Multiple Employees/Page)' ),
-			id: 'pdf_form_print_government',
-			nav: print_print
-		} );
-
-		var pdf_form_print = new RibbonSubMenuNavItem( {label: $.i18n._( 'Employee (One Employee/Page)' ),
-			id: 'pdf_form_print',
-			nav: print_print
-		} );
+		//
+		// var print_print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
+		// 	id: ContextMenuIconName.print,
+		// 	group: form_setup_group,
+		// 	icon: 'print-35x35.png',
+		// 	type: RibbonSubMenuType.NAVIGATION,
+		// 	items: [],
+		// 	permission_result: true,
+		// 	permission: true} );
+		//
+		// var pdf_form_print_government = new RibbonSubMenuNavItem( {label: $.i18n._( 'Government (Multiple Employees/Page)' ),
+		// 	id: 'pdf_form_print_government',
+		// 	nav: print_print
+		// } );
+		//
+		// var pdf_form_print = new RibbonSubMenuNavItem( {label: $.i18n._( 'Employee (One Employee/Page)' ),
+		// 	id: 'pdf_form_print',
+		// 	nav: print_print
+		// } );
 
 		var eFile = new RibbonSubMenu( {
 			label: $.i18n._( 'eFile' ),
@@ -214,13 +211,15 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 
 		switch ( id ) {
 			case ContextMenuIconName.view:
+				ProgressBar.showOverlay();
 				this.onViewClick();
 				break;
 			case ContextMenuIconName.view_html:
-
+				ProgressBar.showOverlay();
 				this.onViewClick('html');
 				break;
 			case ContextMenuIconName.view_html_new_window:
+				ProgressBar.showOverlay();
 				this.onViewClick('html', true);
 				break;
 			case ContextMenuIconName.export_excel:
@@ -1046,59 +1045,6 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 
 		form_item_input.TTextInput( {field: 'remittances_paid', width: 120} );
 		this.addEditFieldToColumn( $.i18n._( 'Remittances Paid in Year' ), form_item_input, tab3_column1 );
-
-		//Company Name
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'company_name', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Company Name' ), form_item_input, tab3_column1 );
-
-		form_item_input.parent().width( '45%' );
-
-		//Address 1
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Address 1' ), form_item_input, tab3_column1 );
-		form_item_input.parent().width( '45%' );
-
-		//Address 2
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'address2', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Address 2' ), form_item_input, tab3_column1 );
-		form_item_input.parent().width( '45%' );
-
-		//City
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'city'} );
-		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab3_column1 );
-
-		//Province
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'province', set_empty: true} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.province_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Province' ), form_item_input, tab3_column1 );
-
-		//Postal Code
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'postal_code'} );
-		this.addEditFieldToColumn( $.i18n._( 'Postal Code' ), form_item_input, tab3_column1 );
-
-		//Payroll Account Number
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'payroll_account_number'} );
-		this.addEditFieldToColumn( $.i18n._( 'Payroll Account Number' ), form_item_input, tab3_column1 );
-
-		//Transmitter
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'transmitter_number'} );
-		this.addEditFieldToColumn( $.i18n._( 'Transmitter' ), form_item_input, tab3_column1 );
-
 	},
 
 	getFormSetupData: function() {
@@ -1332,18 +1278,6 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 				this.edit_view_ui_dic.postal_code.setValue( res_Data.postal_code );
 
 				this.current_edit_record.postal_code = res_Data.postal_code;
-			}
-
-			if ( res_Data.payroll_account_number ) {
-				this.edit_view_ui_dic.payroll_account_number.setValue( res_Data.payroll_account_number );
-
-				this.current_edit_record.payroll_account_number = res_Data.payroll_account_number;
-			}
-
-			if ( res_Data.transmitter_number ) {
-				this.edit_view_ui_dic.transmitter_number.setValue( res_Data.transmitter_number );
-
-				this.current_edit_record.transmitter_number = res_Data.transmitter_number;
 			}
 
 			if ( res_Data.other_box ) {

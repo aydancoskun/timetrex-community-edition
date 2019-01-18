@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,7 +60,13 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayCodeListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -61,7 +74,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => (int)$id,
+						'id' => TTUUID::castUUID($id),
 						);
 
 			$query = '
@@ -80,7 +93,14 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayCodeListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -97,7 +117,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -105,7 +125,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 					from	'. $this->getTable() .'
 					where
 						company_id = ?
-						AND id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+						AND id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -115,7 +135,13 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayCodeListFactory
+	 */
+	function getByCompanyId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -132,7 +158,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$spf = new SchedulePolicyFactory();
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -153,7 +179,14 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyIdAndPayFormulaPolicyId($id, $pay_formula_policy_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $pay_formula_policy_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayCodeListFactory
+	 */
+	function getByCompanyIdAndPayFormulaPolicyId( $id, $pay_formula_policy_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -170,7 +203,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -178,7 +211,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 					select	*
 					from	'. $this->getTable() .' as a
 					where	company_id = ?
-						AND pay_formula_policy_id in ('. $this->getListSQL( $pay_formula_policy_id, $ph, 'int' ) .')
+						AND pay_formula_policy_id in ('. $this->getListSQL( $pay_formula_policy_id, $ph, 'uuid' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -188,7 +221,14 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyIdAndAccrualPayStubEntryAccountID($company_id, $pay_stub_entry_account_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $pay_stub_entry_account_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayCodeListFactory
+	 */
+	function getByCompanyIdAndAccrualPayStubEntryAccountID( $company_id, $pay_stub_entry_account_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -205,8 +245,8 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-				'company_id' => (int)$company_id,
-				'pay_stub_entry_account_id' => (int)$pay_stub_entry_account_id
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'pay_stub_entry_account_id' => TTUUID::castUUID( $pay_stub_entry_account_id )
 		);
 
 		$psef = new PayStubEntryAccountFactory();
@@ -226,6 +266,10 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @return array|bool
+	 */
 	static function getPayCodeTypeMap( $company_id ) {
 		$pclf = TTnew( 'PayCodeListFactory' );
 		$pclf->getByCompanyId( $company_id );
@@ -247,7 +291,15 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 	}
 
 
-
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayCodeListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -291,7 +343,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$cppf = new ContributingPayCodePolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -347,16 +399,16 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['pay_formula_policy_id']) ) ? $this->getWhereClauseSQL( 'a.pay_formula_policy_id', $filter_data['pay_formula_policy_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_stub_entry_account_id']) ) ? $this->getWhereClauseSQL( 'a.pay_stub_entry_account_id', $filter_data['pay_stub_entry_account_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_formula_policy_id']) ) ? $this->getWhereClauseSQL( 'a.pay_formula_policy_id', $filter_data['pay_formula_policy_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_stub_entry_account_id']) ) ? $this->getWhereClauseSQL( 'a.pay_stub_entry_account_id', $filter_data['pay_stub_entry_account_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

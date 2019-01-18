@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,42 +45,49 @@ class PermissionUserFactory extends Factory {
 	var $user_obj = NULL;
 	var $permission_control_obj = NULL;
 
+	/**
+	 * @return bool
+	 */
 	function getPermissionControlObject() {
-		return $this->getGenericObject( 'PermissionControlListFactory',
-		$this->getPermissionControl(), 'permission_control_obj' );
+		return $this->getGenericObject( 'PermissionControlListFactory', $this->getPermissionControl(), 'permission_control_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getPermissionControl() {
-		return (int)$this->data['permission_control_id'];
+		return TTUUID::castUUID($this->getGenericDataValue( 'permission_control_id' ));
 	}
 
-	function setPermissionControl($id) {
-		$id = trim($id);
-
-		$pclf = TTnew( 'PermissionControlListFactory' );
-
-		if ( $id != 0
-				OR $this->Validator->isResultSetWithRows( 'permission_control',
-															$pclf->getByID($id),
-															TTi18n::gettext('Permission Group is
-															invalid') ) ) {
-			$this->data['permission_control_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPermissionControl( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'permission_control_id', $value );
 	}
 
-	function isUniqueUser($id) {
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function isUniqueUser( $id) {
 		$pclf = TTnew( 'PermissionControlListFactory' );
 
 		$ph = array(
-					'id' => $id
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = 'select a.id from '. $this->getTable() .' as a, '. $pclf->getTable() .' as b where a.permission_control_id = b.id AND a.user_id = ? AND b.deleted = 0';
@@ -94,81 +101,178 @@ class PermissionUserFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getUser() {
-		return (int)$this->data['user_id'];
+		return TTUUID::castUUID($this->getGenericDataValue( 'user_id' ));
 	}
-	function setUser($id) {
-		$id = trim($id);
 
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $id != 0
-				AND $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Selected Employee is invalid')
-															)
-				AND	$this->Validator->isTrue(		'user',
-													$this->isUniqueUser($id),
-													TTi18n::gettext('Selected Employee is already assigned to another Permission Group')
-													)
-			) {
-
-			$this->data['user_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
+		/** @var UserListFactory $ulf */
+		if ( $value != TTUUID::getZeroID() ) {
+			return $this->setGenericDataValue( 'user_id', $value );
+		}
 		return FALSE;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
+
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+
+		// Permission Group
+		if ( $this->getPermissionControl() == TTUUID::getZeroID() ) {
+			$pclf = TTnew( 'PermissionControlListFactory' );
+			$this->Validator->isResultSetWithRows( 'permission_control',
+															$pclf->getByID($this->getPermissionControl()),
+															TTi18n::gettext('Permission Group is invalid')
+														);
+		}
+		// Employee
+		if ( $this->getUser() !== FALSE AND $this->getUser() != TTUUID::getZeroID() ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+															$ulf->getByID($this->getUser()),
+															TTi18n::gettext('Selected Employee is invalid')
+														);
+			if ( $this->Validator->isError('user') == FALSE ) {
+				$this->Validator->isTrue(		'user',
+														$this->isUniqueUser($this->getUser()),
+														TTi18n::gettext('Selected Employee is already assigned to another Permission Group')
+													);
+			}
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
 		return FALSE;
 	}
-	function setDeleted($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCreatedDate() {
 		return FALSE;
 	}
-	function setCreatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getUpdatedBy() {
 		return FALSE;
 	}
-	function setUpdatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
 		return FALSE;
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {
-		return FALSE;
-	}
-	function getDeletedBy() {
-		return FALSE;
-	}
-	function setDeletedBy($id = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getDeletedBy() {
+		return FALSE;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
+		return FALSE;
+	}
+
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {

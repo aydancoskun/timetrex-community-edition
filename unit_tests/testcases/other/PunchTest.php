@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -51,6 +51,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
+		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertGreaterThan( 0, $this->company_id );
 
@@ -71,7 +72,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->policy_ids['pay_formula_policy'][100] = $dd->createPayFormulaPolicy( $this->company_id, 100 ); //Reg 1.0x
 		$this->policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $this->policy_ids['pay_formula_policy'][100] ); //Regular
 
-		$this->user_id = $dd->createUser( $this->company_id, 100 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
@@ -537,8 +538,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->company_id, $this->user_id, array(5, 20, 30, 40, 100, 110), $start_date, $end_date);
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach($udtlf as $udt_obj) {
-				$type_and_policy_id = $udt_obj->getObjectType().(int)$udt_obj->getPayCode();
-
 				$date_totals[$udt_obj->getDateStamp()][] = array(
 												'date_stamp' => $udt_obj->getDateStamp(),
 												'id' => $udt_obj->getId(),
@@ -551,7 +550,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 												'object_type_id' => $udt_obj->getObjectType(),
 												'pay_code_id' => $udt_obj->getPayCode(),
 
-												'type_and_policy_id' => $type_and_policy_id,
 												'branch_id' => (int)$udt_obj->getBranch(),
 												'department_id' => $udt_obj->getDepartment(),
 												'total_time' => $udt_obj->getTotalTime(),
@@ -5426,10 +5424,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
 
-		$this->assertEquals( 0, $data['branch_id'] );
-		$this->assertEquals( 0, $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['branch_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['department_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -5445,7 +5443,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -5467,10 +5465,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
 
-		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
-		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'], 'Branch' );
+		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'], 'department' );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'], 'job' );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'],'task');
 
 		return TRUE;
 	}
@@ -5490,7 +5488,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -5530,8 +5528,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -5547,7 +5545,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -5587,8 +5585,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -5604,7 +5602,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -5644,8 +5642,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -5661,7 +5659,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -5701,8 +5699,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -5718,7 +5716,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -5756,10 +5754,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
 
-		$this->assertEquals( 0, $data['branch_id'] );
-		$this->assertEquals( 0, $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['branch_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['department_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -5775,7 +5773,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10, 57600, 0 ); //Set $new_shift_trigger_time = 0
 		$this->createPayPeriods();
@@ -5829,8 +5827,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -5846,7 +5844,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10, 57600, (3600 * 4) ); //Set $new_shift_trigger_time = 4hrs
 		$this->createPayPeriods();
@@ -5900,8 +5898,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -5917,7 +5915,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -5955,10 +5953,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
 
-		$this->assertEquals( 0, $data['branch_id'] );
-		$this->assertEquals( 0, $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['branch_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['department_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -5974,7 +5972,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6012,10 +6010,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
 
-		$this->assertEquals( 0, $data['branch_id'] );
-		$this->assertEquals( 0, $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['branch_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['department_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -6030,7 +6028,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6100,7 +6098,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6137,8 +6135,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -6154,7 +6152,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6191,8 +6189,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[1], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[1], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -6208,7 +6206,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6258,8 +6256,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -6275,7 +6273,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6325,8 +6323,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -6342,7 +6340,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6392,8 +6390,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -6409,7 +6407,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6459,8 +6457,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[1], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[1], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -6476,7 +6474,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6526,8 +6524,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[1], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[1], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -6543,7 +6541,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6601,8 +6599,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -6618,7 +6616,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6676,8 +6674,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}
@@ -6693,7 +6691,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
-		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -6751,8 +6749,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
-		$this->assertEquals( 0, $data['job_id'] );
-		$this->assertEquals( 0, $data['job_item_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
 		return TRUE;
 	}

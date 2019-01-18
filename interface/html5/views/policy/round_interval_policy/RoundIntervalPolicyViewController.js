@@ -1,11 +1,14 @@
 RoundIntervalPolicyViewController = BaseViewController.extend( {
 	el: '#round_interval_policy_view_container',
+
+	_required_files: ['APIRoundIntervalPolicy'],
+
 	punch_type_array: null,
 	round_type_array: null,
 	condition_type_array: null,
 	date_api: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'RoundIntervalPolicyEditView.html';
 		this.permission_id = 'round_policy';
 		this.viewId = 'RoundIntervalPolicy';
@@ -254,16 +257,16 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		this.detachElement('condition_stop_window');
 		this.detachElement('condition_static_time');
 
-		if ( condition_type_id === 10 || condition_type_id === 20 ) {
+		if ( condition_type_id == 10 || condition_type_id == 20 ) {
 			this.attachElement('condition_start_window');
 			this.attachElement('condition_stop_window');
 
-		} else if ( condition_type_id === 30 ) {
+		} else if ( condition_type_id == 30 ) {
 			this.attachElement('condition_static_time');
 			this.attachElement('condition_stop_window');
 			this.attachElement('condition_start_window');
 
-		} else if ( condition_type_id === 40 ) {
+		} else if ( condition_type_id == 40 ) {
 
 			this.attachElement('condition_static_total_time');
 			this.attachElement('condition_stop_window');

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,7 +46,13 @@ class TimeTrexClientAPI {
 	protected $namespace = 'urn:api';
 	protected $protocol_version = 1;
 
-	function __construct($class = NULL, $url = NULL, $session_id = NULL) {
+	/**
+	 * TimeTrexClientAPI constructor.
+	 * @param null $class
+	 * @param null $url
+	 * @param string $session_id UUID
+	 */
+	function __construct( $class = NULL, $url = NULL, $session_id = NULL) {
 		global $TIMETREX_URL, $TIMETREX_SESSION_ID;
 
 		ini_set('default_socket_timeout', 3600);
@@ -66,6 +72,9 @@ class TimeTrexClientAPI {
 		return TRUE;
 	}
 
+	/**
+	 * @return SoapClient
+	 */
 	function getSoapClientObject() {
 		global $TIMETREX_BASIC_AUTH_USER, $TIMETREX_BASIC_AUTH_PASSWORD;
 
@@ -102,6 +111,10 @@ class TimeTrexClientAPI {
 		return $retval;
 	}
 
+	/**
+	 * @param $url
+	 * @return bool
+	 */
 	function setURL( $url ) {
 		if ( $url != '' ) {
 			$this->url = $url;
@@ -111,6 +124,10 @@ class TimeTrexClientAPI {
 		return FALSE;
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setSessionID( $value ) {
 		if ( $value != '' ) {
 			global $TIMETREX_SESSION_ID;
@@ -121,6 +138,10 @@ class TimeTrexClientAPI {
 		return FALSE;
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setClass( $value ) {
 		$this->class_factory = trim($value);
 
@@ -128,22 +149,46 @@ class TimeTrexClientAPI {
 	}
 
 	//Use the SessionHash to ensure the URL for the session doesn't get changed out from under us without re-logging in.
+
+	/**
+	 * @param $url
+	 * @param string $session_id UUID
+	 * @return string
+	 */
 	function calcSessionHash( $url, $session_id ) {
 		return md5( trim($url) . trim($session_id) );
 	}
+
+	/**
+	 * @return null
+	 */
 	function getSessionHash() {
 		return $this->session_hash;
 	}
+
+	/**
+	 * @return bool
+	 */
 	private function setSessionHash() {
 		global $TIMETREX_SESSION_HASH;
 		$this->session_hash = $TIMETREX_SESSION_HASH = $this->calcSessionHash( $this->url, $this->session_id );
 		return TRUE;
 	}
 
+	/**
+	 * @param $result
+	 * @return mixed
+	 */
 	function isFault( $result ) {
 		return $this->getSoapClientObject()->is_soap_fault( $result );
 	}
 
+	/**
+	 * @param $user_name
+	 * @param null $password
+	 * @param string $type
+	 * @return bool
+	 */
 	function Login( $user_name, $password = NULL, $type = 'USER_NAME' ) {
 		//Check to see if we are currently logged in as the same user already?
 		global $TIMETREX_SESSION_ID, $TIMETREX_SESSION_HASH;
@@ -168,6 +213,9 @@ class TimeTrexClientAPI {
 		return FALSE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function isLoggedIn() {
 		$old_class = $this->class_factory;
 		$this->setClass('Authentication');
@@ -178,6 +226,9 @@ class TimeTrexClientAPI {
 		return $retval;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function Logout() {
 		$this->setClass('Authentication');
 		$retval = $this->getSoapClientObject()->Logout();
@@ -190,7 +241,12 @@ class TimeTrexClientAPI {
 		return $retval;
 	}
 
-	function __call($function_name, $args = array() ) {
+	/**
+	 * @param $function_name
+	 * @param array $args
+	 * @return bool|TimeTrexClientAPIReturnHandler
+	 */
+	function __call( $function_name, $args = array() ) {
 		if ( is_object( $this->getSoapClientObject() ) ) {
 			$retval = call_user_func_array(array($this->getSoapClientObject(), $function_name), $args);
 
@@ -228,6 +284,12 @@ class TimeTrexClientAPIReturnHandler {
 	protected $args = NULL;
 	protected $result_data = FALSE;
 
+	/**
+	 * TimeTrexClientAPIReturnHandler constructor.
+	 * @param $function_name
+	 * @param $args
+	 * @param $result_data
+	 */
 	function __construct( $function_name, $args, $result_data ) {
 		$this->function_name = $function_name;
 		$this->args = $args;
@@ -236,17 +298,30 @@ class TimeTrexClientAPIReturnHandler {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getResultData() {
 		return $this->result_data;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getFunction() {
 		return $this->function_name;
 	}
+
+	/**
+	 * @return null
+	 */
 	function getArgs() {
 		return $this->args;
 	}
 
+	/**
+	 * @return string
+	 */
 	function __toString() {
 		$eol = "<br>\n";
 
@@ -287,6 +362,9 @@ class TimeTrexClientAPIReturnHandler {
 		return implode( $eol, $output );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isValid() {
 		if ( isset($this->result_data['api_retval']) ) {
 			return (bool)$this->result_data['api_retval'];
@@ -294,6 +372,10 @@ class TimeTrexClientAPIReturnHandler {
 
 		return TRUE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function isError() { //Opposite of isValid()
 		if ( isset($this->result_data['api_retval']) ) {
 			if ( $this->result_data['api_retval'] === FALSE ) {
@@ -306,6 +388,9 @@ class TimeTrexClientAPIReturnHandler {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCode() {
 		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['code']) ) {
 			return $this->result_data['api_details']['code'];
@@ -313,6 +398,10 @@ class TimeTrexClientAPIReturnHandler {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getDescription() {
 		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['description']) ) {
 			return $this->result_data['api_details']['description'];
@@ -320,6 +409,10 @@ class TimeTrexClientAPIReturnHandler {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getDetails() {
 		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['details']) ) {
 			return $this->result_data['api_details']['details'];
@@ -328,6 +421,9 @@ class TimeTrexClientAPIReturnHandler {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getRecordDetails() {
 		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['record_details']) ) {
 			return $this->result_data['api_details']['record_details'];
@@ -335,6 +431,10 @@ class TimeTrexClientAPIReturnHandler {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getTotalRecords() {
 		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['record_details']) AND isset($this->result_data['api_details']['record_details']['total_records']) ) {
 			return $this->result_data['api_details']['record_details']['total_records'];
@@ -342,6 +442,10 @@ class TimeTrexClientAPIReturnHandler {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getValidRecords() {
 		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['record_details']) AND isset($this->result_data['api_details']['record_details']['valid_records']) ) {
 			return $this->result_data['api_details']['record_details']['valid_records'];
@@ -349,6 +453,10 @@ class TimeTrexClientAPIReturnHandler {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getInValidRecords() {
 		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['record_details']) AND isset($this->result_data['api_details']['record_details']['invalid_records']) ) {
 			return $this->result_data['api_details']['record_details']['invalid_records'];
@@ -357,6 +465,9 @@ class TimeTrexClientAPIReturnHandler {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getResult() {
 		if ( isset($this->result_data['api_retval']) ) {
 			return $this->result_data['api_retval'];

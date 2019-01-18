@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,12 +40,18 @@
  */
 class InstallSchema_1054A extends InstallSchema_Base {
 
+	/**
+	 * @return bool
+	 */
 	function preInstall() {
 		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postInstall() {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
@@ -62,7 +68,7 @@ class InstallSchema_1054A extends InstallSchema_Base {
 					if	( $pseallf->getRecordCount() > 0 ) {
 						$psea_obj = $pseallf->getCurrent();
 					} else {
-						
+
 						// @codingStandardsIgnoreStart
 						Debug::text('Failed getting PayStubEntryLink for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 						//leaving debugs alone.
@@ -91,7 +97,7 @@ class InstallSchema_1054A extends InstallSchema_Base {
 									$tmp_cd_obj = $cdlf->getCurrent();
 								}
 							}
-							
+
 							$filing_status = array();
 							if ( is_object($tmp_cd_obj) ) {
 								$udlf = TTnew( 'UserDeductionListFactory' );
@@ -154,7 +160,7 @@ class InstallSchema_1054A extends InstallSchema_Base {
 							Debug::text('Medicare Employer Tax / Deduction Matches... Adjusting specific formula Percent...', __FILE__, __LINE__, __METHOD__, 9);
 							$include_pay_stub_accounts = $cd_obj->getIncludePayStubEntryAccount();
 							$exclude_pay_stub_accounts = $cd_obj->getExcludePayStubEntryAccount();
-							
+
 							$cd_obj->ignore_column_list = TRUE; //Prevents SQL errors due to new columns being added later on.
 							if ( $cd_obj->isValid() ) {
 								$cd_obj->Save();

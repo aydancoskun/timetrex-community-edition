@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,11 @@ class CompanyGenericMapFactory extends Factory {
 	protected $table = 'company_generic_map';
 	protected $pk_sequence_name = 'company_generic_map_id_seq'; //PK Sequence name
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -139,11 +144,15 @@ class CompanyGenericMapFactory extends Factory {
 										3010 => 'payment_gateway_credit_card_type',
 										3020 => 'payment_gateway_bank_account_type',
 
-										//GEOFence										
+										//GEOFence
 										4000 => 'geo_fence_branch',
 										4010 => 'geo_fence_department',
 										4020 => 'geo_fence_job',
-										4030 => 'geo_fence_job_item',										
+										4030 => 'geo_fence_job_item',
+
+										//RemittanceAgencyEvent Recurring Holidays
+										5000 => 'remittance_agency_recurring_holiday',
+										5010 => 'remittance_agency_pay_period_schedule',
 									);
 				break;
 		}
@@ -151,98 +160,85 @@ class CompanyGenericMapFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'company',
-															$clf->getByID($id),
-															TTi18n::gettext('Company is invalid')
-															) ) {
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue('company_id');
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return int
+	 */
 	function getObjectType() {
-		if ( isset($this->data['object_type_id']) ) {
-			return (int)$this->data['object_type_id'];
-		}
-
-		return FALSE;
-	}
-	function setObjectType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'object_type',
-											$type,
-											TTi18n::gettext('Object Type is invalid'),
-											$this->getOptions('object_type')) ) {
-
-			$this->data['object_type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'object_type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setObjectType( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'object_type_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getObjectID() {
-		if ( isset($this->data['object_id']) ) {
-			return (int)$this->data['object_id'];
-		}
-
-		return FALSE;
-	}
-	function setObjectID($id) {
-		$id = trim($id);
-
-		if ( $this->Validator->isNumeric(	'object_id',
-										$id,
-										TTi18n::gettext('Object ID is invalid')
-										) ) {
-			$this->data['object_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'object_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setObjectID( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'object_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getMapID() {
-		if ( isset($this->data['map_id']) ) {
-			return (int)$this->data['map_id'];
-		}
-
-		return FALSE;
-	}
-	function setMapID($id) {
-		$id = trim($id);
-
-		if ( $this->Validator->isNumeric(	'map_id',
-										$id,
-										TTi18n::gettext('Map ID is invalid')
-										) ) {
-			$this->data['map_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'map_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMapID( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'map_id', $value );
+	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param int $object_type_id
+	 * @param string $object_id UUID
+	 * @param string|array $ids UUID
+	 * @param bool $is_new
+	 * @param bool $relaxed_range
+	 * @return bool
+	 */
 	static function setMapIDs( $company_id, $object_type_id, $object_id, $ids, $is_new = FALSE, $relaxed_range = FALSE ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -262,7 +258,7 @@ class CompanyGenericMapFactory extends Factory {
 			//return FALSE;
 		}
 
-		if ( !is_array($ids) AND is_numeric( $ids ) ) {
+		if ( !is_array($ids) AND TTUUID::isUUID( $ids ) ) {
 			$ids = array($ids);
 		}
 		//Debug::Arr($ids, 'Object Type ID: '. $object_type_id .' Object ID: '. $object_id .' IDs: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -292,7 +288,9 @@ class CompanyGenericMapFactory extends Factory {
 				unset($id, $obj);
 			}
 			foreach ($ids as $id) {
-				if ( $id !== FALSE AND ( $relaxed_range == TRUE OR ( $relaxed_range == FALSE AND ( $id == -1 OR $id > 0 ) ) ) AND !in_array($id, $tmp_ids) ) {
+				//if ( $id !== FALSE AND ( $relaxed_range == TRUE OR ( $relaxed_range == FALSE AND ( $id == -1 OR $id > 0 ) ) ) AND !in_array($id, $tmp_ids) ) {
+				if ( $id !== FALSE AND ( $relaxed_range == TRUE OR ( $relaxed_range == FALSE AND ( TTUUID::isUUID( $id ) AND ( $id == TTUUID::getNotExistID() OR $id != TTUUID::getZeroID() ) ) ) ) AND !in_array($id, $tmp_ids) ) {
+					/** @var CompanyGenericMapFactory $cgmf */
 					$cgmf = TTnew( 'CompanyGenericMapFactory' );
 					$cgmf->setCompany( $company_id );
 					$cgmf->setObjectType( $object_type_id );
@@ -311,6 +309,46 @@ class CompanyGenericMapFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		if ( $this->getCompany() != TTUUID::getZeroID() ) {
+			$clf = TTnew( 'CompanyListFactory' );
+			$this->Validator->isResultSetWithRows(	'company',
+															$clf->getByID($this->getCompany()),
+															TTi18n::gettext('Company is invalid')
+														);
+		}
+		// Object Type
+		$this->Validator->inArrayKey(	'object_type',
+												$this->getObjectType(),
+												TTi18n::gettext('Object Type is invalid'),
+												$this->getOptions('object_type')
+											);
+		// Object ID
+		$this->Validator->isUUID(	'object_id',
+											$this->getObjectID(),
+											TTi18n::gettext('Object ID is invalid')
+										);
+		// Map ID
+		$this->Validator->isUUID(	'map_id',
+											$this->getMapID(),
+											TTi18n::gettext('Map ID is invalid')
+										);
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( md5( $this->getCompany() . serialize( $this->getObjectType() ) . serialize( $this->getId() ) ) );
 
@@ -318,52 +356,116 @@ class CompanyGenericMapFactory extends Factory {
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
+
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
 		return FALSE;
 	}
-	function setDeleted($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCreatedDate() {
 		return FALSE;
 	}
-	function setCreatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getUpdatedBy() {
 		return FALSE;
 	}
-	function setUpdatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {
-		return FALSE;
-	}
-	function getDeletedBy() {
-		return FALSE;
-	}
-	function setDeletedBy($id = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getDeletedBy() {
+		return FALSE;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
+		return FALSE;
+	}
+
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		$retval = FALSE;
 		if ( $this->getObjectType() > 0 ) {
@@ -531,10 +633,10 @@ class CompanyGenericMapFactory extends Factory {
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = TTi18n::getText('KPI Group').': '. $lf->getCurrent()->getName();
 					}
-					if ( $this->getMapID() == -1 ) {
+					if ( $this->getMapID() == TTUUID::getNotExistID() ) {
 						$description = TTi18n::getText('KPI Group').': All';
 					}
-					if ( $this->getMapID() == 0 ) {
+					if ( $this->getMapID() == TTUUID::getZeroID() ) {
 						$description = TTi18n::getText('KPI Group').': Root';
 					}
 					Debug::text('Action: '. $log_action .' MapID: '. $this->getMapID() .' ObjectID: '. $this->getObjectID() .' Description: '. $description .' Record Count: '. $lf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -624,7 +726,7 @@ class CompanyGenericMapFactory extends Factory {
 					}
 					Debug::text('Action: '. $log_action .' MapID: '. $this->getMapID() .' ObjectID: '. $this->getObjectID() .' Description: '. $description .' Record Count: '. $lf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, 'GEO Fence' );
-					break;				
+					break;
 			}
 		}
 

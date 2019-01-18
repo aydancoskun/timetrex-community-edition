@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIKPI extends APIFactory {
 	protected $main_class = 'KPIFactory';
 
+	/**
+	 * APIKPI constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,13 +52,13 @@ class APIKPI extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('kpi', 'enabled') 
+				AND ( !$this->getPermissionObject()->Check('kpi', 'enabled')
 					OR !( $this->getPermissionObject()->Check('kpi', 'view') OR $this->getPermissionObject()->Check('kpi', 'view_own') OR $this->getPermissionObject()->Check('kpi', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
@@ -73,9 +76,9 @@ class APIKPI extends APIFactory {
 		Debug::Text('Getting KPI default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
-						'company_id' => $company_obj->getId(), 
-						'minimum_rate' => 1, 
-						'maximum_rate' => 10, 
+						'company_id' => $company_obj->getId(),
+						'minimum_rate' => 1,
+						'maximum_rate' => 10,
 					);
 
 		return $this->returnHandler( $data );
@@ -84,7 +87,8 @@ class APIKPI extends APIFactory {
 	/**
 	 * Get KPI data for one or more KPIs.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getKPI( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('kpi', 'enabled')
@@ -93,7 +97,7 @@ class APIKPI extends APIFactory {
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'kpi', 'view' );
-		
+
 		$klf = TTnew( 'KPIListFactory' );
 		$klf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $klf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -102,7 +106,7 @@ class APIKPI extends APIFactory {
 			Debug::Arr($data, 'Searching Data: ', __FILE__, __LINE__, __METHOD__, 10);
 			$retarr = array();
 			foreach( $klf as $kpi_obj ) {
-				$retarr[] = $kpi_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids']  ); 
+				$retarr[] = $kpi_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids']  );
 			}
 			Debug::Arr($retarr, 'Getting Data: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->returnHandler( $retarr );
@@ -113,7 +117,7 @@ class APIKPI extends APIFactory {
 
 	/**
 	 * @param string $format
-	 * @param null $data
+	 * @param array $data
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
@@ -143,7 +147,9 @@ class APIKPI extends APIFactory {
 	/**
 	 * Set KPI data for one or more KPIs.
 	 * @param array $data KPI data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setKPI( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -166,18 +172,18 @@ class APIKPI extends APIFactory {
 			$permission_children_ids = $this->getPermissionChildren();
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' KPIs', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'KPIListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get KPI object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -190,8 +196,8 @@ class APIKPI extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('kpi', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy() ) === TRUE )
 									OR ( $this->getPermissionObject()->Check('kpi', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getCreatedBy(), $permission_children_ids ) === TRUE )
 								) ) {
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
-							$lf = $lf->getCurrent(); 
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
 							$primary_validator->isTrue( 'kpi', FALSE, TTi18n::gettext('Edit permission denied') );
@@ -204,7 +210,7 @@ class APIKPI extends APIFactory {
 					//Adding new object, check ADD permissions.
 					$primary_validator->isTrue( 'kpi', $this->getPermissionObject()->Check('kpi', 'add'), TTi18n::gettext('Add permission denied') );
 
-					//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first, 
+					//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first,
 					//so the sub-classes can depend on it. We also need to call Save( TRUE, TRUE ) to force a lookup on isNew()
 					$row['id'] = $lf->getNextInsertId();
 				}
@@ -252,10 +258,10 @@ class APIKPI extends APIFactory {
 	/**
 	 * Delete one or more KPIs.
 	 * @param array $data KPI data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteKPI( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -267,21 +273,21 @@ class APIKPI extends APIFactory {
 				OR !( $this->getPermissionObject()->Check('kpi', 'delete') OR $this->getPermissionObject()->Check('kpi', 'delete_own') OR $this->getPermissionObject()->Check('kpi', 'delete_child') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
-		
+
 		$permission_children_ids = $this->getPermissionChildren();
 
 		Debug::Text('Received data for: '. count($data) .' KPIs', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'KPIListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get KPI object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -291,8 +297,8 @@ class APIKPI extends APIFactory {
 								OR ( $this->getPermissionObject()->Check('kpi', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy() ) === TRUE )
 								OR ( $this->getPermissionObject()->Check('kpi', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getCreatedBy(), $permission_children_ids ) === TRUE )
 							) {
-								
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'kpi', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -314,7 +320,7 @@ class APIKPI extends APIFactory {
 
 					$is_valid = $lf->isValid();
 					if ( $is_valid == TRUE ) {
-						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);						 
+						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
 						$save_result[$key] = $lf->Save();
 						$validator_stats['valid_records']++;
 					}
@@ -342,7 +348,7 @@ class APIKPI extends APIFactory {
 	 * @return array
 	 */
 	function copyKPI( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -357,7 +363,7 @@ class APIKPI extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'], $src_rows[$key]['user']); //Clear fields that can't be copied				 
+				unset($src_rows[$key]['id'], $src_rows[$key]['user']); //Clear fields that can't be copied
 				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);

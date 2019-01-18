@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class PermissionFactory extends Factory {
 	protected $permission_control_obj = NULL;
 	protected $company_id = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|bool|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -159,6 +164,7 @@ class PermissionFactory extends Factory {
 										'company' => array(
 															'system',
 															'company',
+															'legal_entity',
 															'currency',
 															'branch',
 															'department',
@@ -177,7 +183,8 @@ class PermissionFactory extends Factory {
 															'user',
 															'user_preference',
 															'user_tax_deduction',
-															'user_contact'
+															'user_contact',
+															'remittance_destination_account'
 														),
 										'schedule'	=> array(
 															'schedule',
@@ -233,6 +240,8 @@ class PermissionFactory extends Factory {
 															'pay_stub',
 															'government_document',
 															'pay_stub_amendment',
+															'payroll_remittance_agency',
+															'remittance_source_account',
 															'wage',
 															'roe',
 															'company_tax_deduction',
@@ -281,6 +290,7 @@ class PermissionFactory extends Factory {
 				$retval = array(
 										'system' => TTi18n::gettext('System'),
 										'company' => TTi18n::gettext('Company'),
+										'legal_entity' => TTi18n::gettext('Legal Entity'),
 										'currency' => TTi18n::gettext('Currency'),
 										'branch' => TTi18n::gettext('Branch'),
 										'department' => TTi18n::gettext('Department'),
@@ -298,6 +308,7 @@ class PermissionFactory extends Factory {
 										'user_preference' => TTi18n::gettext('Employee Preferences'),
 										'user_tax_deduction' => TTi18n::gettext('Employee Tax / Deductions'),
 										'user_contact' => TTi18n::gettext('Employee Contact'),
+										'remittance_destination_account' => TTi18n::gettext('Remittance Destination Account'),
 
 										'schedule' => TTi18n::gettext('Schedule'),
 										'recurring_schedule' => TTi18n::gettext('Recurring Schedule'),
@@ -344,6 +355,8 @@ class PermissionFactory extends Factory {
 										'expense_policy' => TTi18n::gettext('Expense Policies'),
 
 										'pay_stub_account' => TTi18n::gettext('Pay Stub Accounts'),
+										'payroll_remittance_agency' => TTi18n::gettext('Payroll Remittance Agency'),
+										'remittance_source_account' => TTi18n::gettext('Remittance Source Account'),
 										'pay_stub' => TTi18n::gettext('Employee Pay Stubs'),
 										'government_document' => TTi18n::gettext('Government Documents'),
 										'pay_stub_amendment' => TTi18n::gettext('Employee Pay Stub Amendments'),
@@ -389,7 +402,7 @@ class PermissionFactory extends Factory {
 																'delete_own' => TTi18n::gettext('Delete Own'),
 																'delete' => TTi18n::gettext('Delete'),
 																//'undelete' => TTi18n::gettext('Un-Delete'),
-																'edit_own_bank' => TTi18n::gettext('Edit Own Banking Information'),
+																//'edit_own_bank' => TTi18n::gettext('Edit Own Banking Information'),
 																'login_other_user' => TTi18n::gettext('Login as Other Employee')
 															),
 											'user' =>	array(
@@ -402,9 +415,9 @@ class PermissionFactory extends Factory {
 																'edit_child' => TTi18n::gettext('Edit Subordinate'),
 																'edit' => TTi18n::gettext('Edit'),
 																'edit_advanced' => TTi18n::gettext('Edit Advanced'),
-																'edit_own_bank' => TTi18n::gettext('Edit Own Bank Info'),
-																'edit_child_bank' => TTi18n::gettext('Edit Subordinate Bank Info'),
-																'edit_bank' => TTi18n::gettext('Edit Bank Info'),
+																//'edit_own_bank' => TTi18n::gettext('Edit Own Bank Info'),
+																//'edit_child_bank' => TTi18n::gettext('Edit Subordinate Bank Info'),
+																//'edit_bank' => TTi18n::gettext('Edit Bank Info'),
 																'edit_permission_group' => TTi18n::gettext('Edit Permission Group'),
 																'edit_pay_period_schedule' => TTi18n::gettext('Edit Pay Period Schedule'),
 																'edit_policy_group' => TTi18n::gettext('Edit Policy Group'),
@@ -514,6 +527,26 @@ class PermissionFactory extends Factory {
 																'delete' => TTi18n::gettext('Delete'),
 																//'undelete' => TTi18n::gettext('Un-Delete')
 															),
+											'payroll_remittance_agency' =>	array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete' => TTi18n::gettext('Delete'),
+															),
+											'remittance_source_account' => array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete' => TTi18n::gettext('Delete'),
+															),
 											'pay_stub' =>	array(
 																'enabled' => TTi18n::gettext('Enabled'),
 																'view_own' => TTi18n::gettext('View Own'),
@@ -588,6 +621,29 @@ class PermissionFactory extends Factory {
 																'delete' => TTi18n::gettext('Delete'),
 																//'undelete' => TTi18n::gettext('Un-Delete')
 															),
+											'legal_entity' =>	array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete' => TTi18n::gettext('Delete'),
+											),
+											'remittance_destination_account' => array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view_child' => TTi18n::gettext('View Subordinate'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit_child' => TTi18n::gettext('Edit Subordinate'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete_child' => TTi18n::gettext('Delete Subordinate'),
+																'delete' => TTi18n::gettext('Delete'),
+																),
 											'department' =>	array(
 																'enabled' => TTi18n::gettext('Enabled'),
 																'view_own' => TTi18n::gettext('View Own'),
@@ -1057,7 +1113,6 @@ class PermissionFactory extends Factory {
 																'view_affordable_care' => TTi18n::gettext('Affordable Care'),
 																'view_user_barcode' => TTi18n::gettext('Employee Barcodes'),
 																'view_general_ledger_summary' => TTi18n::gettext('General Ledger Summary'),
-																'view_exception_summary' => TTi18n::gettext('Exception Summary'),
 																//'view_roe' => TTi18n::gettext('Record of employment'), //Disable for now as its not needed, use 'roe', 'view' instead.
 																'view_expense' => TTi18n::gettext('Expense Summary'),
 															),
@@ -1404,10 +1459,18 @@ class PermissionFactory extends Factory {
 		return $retval;
 	}
 
-	function setCompany( $id ) {
-		$this->company_id = $id;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value ) {
+		$this->company_id = $value;
 		return TRUE;
 	}
+
+	/**
+	 * @return null
+	 */
 	function getCompany() {
 		if ( $this->company_id != '' ) {
 			return $this->company_id;
@@ -1418,6 +1481,9 @@ class PermissionFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getPermissionControlObject() {
 		if ( is_object($this->permission_control_obj) ) {
 			return $this->permission_control_obj;
@@ -1436,110 +1502,89 @@ class PermissionFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|int|string
+	 */
 	function getPermissionControl() {
-		if ( isset($this->data['permission_control_id']) ) {
-			return (int)$this->data['permission_control_id'];
-		}
-
-		return FALSE;
-	}
-	function setPermissionControl($id) {
-		$id = trim($id);
-
-		$pclf = TTnew( 'PermissionControlListFactory' );
-
-		if ( $id != 0
-				OR
-				$this->Validator->isResultSetWithRows(	'permission_control',
-													$pclf->getByID($id),
-													TTi18n::gettext('Permission Group is invalid')
-													) ) {
-
-			$this->data['permission_control_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return TTUUID::castUUID($this->getGenericDataValue( 'permission_control_id' ));
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPermissionControl( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'permission_control_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getSection() {
-		if ( isset($this->data['section']) ) {
-			return $this->data['section'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'section' );
 	}
-	function setSection($section, $disable_error_check = FALSE ) {
+
+	/**
+	 * @param $section
+	 * @param bool $disable_error_check
+	 * @return bool
+	 */
+	function setSection( $section, $disable_error_check = FALSE ) {
 		$section = trim($section);
-
-		if ( $disable_error_check === TRUE
-				OR
-				$this->Validator->inArrayKey(	'section',
-											$section,
-											TTi18n::gettext('Incorrect section'),
-											$this->getOptions('section')) ) {
-
-			$this->data['section'] = $section;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'section', $section );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
-	function setName($name, $disable_error_check = FALSE ) {
+
+	/**
+	 * @param $name
+	 * @param bool $disable_error_check
+	 * @return bool
+	 */
+	function setName( $name, $disable_error_check = FALSE ) {
 		$name = trim($name);
-
-		//Debug::Arr($this->getOptions('name', $this->getSection() ), 'Options: ', __FILE__, __LINE__, __METHOD__, 10);
-		if ( $disable_error_check === TRUE
-				OR
-				$this->Validator->inArrayKey(	'name',
-											$name,
-											TTi18n::gettext('Incorrect permission name'),
-											$this->getOptions('name', $this->getSection() ) ) ) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'name', $name );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getValue() {
-		if ( isset($this->data['value']) AND $this->data['value'] == 1 ) {
+		$value = $this->getGenericDataValue('value');
+		if ( $value !== FALSE AND $value == 1 ) {
 			return TRUE;
 		} else {
 			return FALSE;
 		}
 	}
-	function setValue($value) {
-		$value = trim($value);
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setValue( $value ) {
+		$value = (int)$value;
 
 		//Debug::Arr($value, 'Value: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		if	(	$this->Validator->isLength(		'value',
-												$value,
-												TTi18n::gettext('Value is invalid'),
-												1,
-												255) ) {
-
-			$this->data['value'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'value', $value );
 	}
 
+	/**
+	 * @param $preset
+	 * @param bool $filter_sections
+	 * @param bool $filter_permissions
+	 * @return bool
+	 */
 	function filterPresetPermissions( $preset, $filter_sections = FALSE, $filter_permissions = FALSE ) {
 		//Debug::Arr( array($filter_sections, $filter_permissions), 'Preset: '. $preset, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $preset == 0 ) {
@@ -1585,6 +1630,12 @@ class PermissionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $preset
+	 * @param array $preset_flags
+	 * @param bool $force_system_presets
+	 * @return array|bool
+	 */
 	function getPresetPermissions( $preset, $preset_flags = array(), $force_system_presets = TRUE ) {
 		$key = Option::getByValue($preset, $this->getOptions('preset') );
 		if ($key !== FALSE) {
@@ -1697,7 +1748,7 @@ class PermissionFactory extends Factory {
 														array(
 															'user' =>	array(
 																				'enabled' => TRUE,
-																				'edit_own_bank' => TRUE,
+																				//'edit_own_bank' => TRUE,
 																			),
 															'pay_stub' =>	array(
 																				'enabled' => TRUE,
@@ -1707,6 +1758,13 @@ class PermissionFactory extends Factory {
 																				'enabled' => TRUE,
 																				'view_own' => TRUE,
 																			),
+															'remittance_destination_account' => array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+																	'add' => TRUE,
+																	'edit_own' => TRUE,
+																	'delete_own' => TRUE,
+															),
 														),
 													40 => //Module: Job Costing
 														array(
@@ -2337,11 +2395,18 @@ class PermissionFactory extends Factory {
 																				'enabled' => TRUE,
 																				'view_own' => TRUE,
 																				'edit_own' => TRUE,
-																				'edit_own_bank' => TRUE
+																				//'edit_own_bank' => TRUE
 																			),
+															'legal_entity' =>	array(
+																				'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE,
+															),
 															'user' =>	array(
 																				'add' => TRUE,
-																				'edit_bank' => TRUE,
+																				//'edit_bank' => TRUE,
 																				'view_sin' => TRUE,
 																			),
 															'wage' =>	array(
@@ -2413,6 +2478,27 @@ class PermissionFactory extends Factory {
 																				'edit' => TRUE,
 																				'delete' => TRUE
 																			),
+															'payroll_remittance_agency' =>	array(
+																				'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE
+																			),
+															'remittance_source_account' =>	array(
+																				'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE
+																			),
+															'remittance_destination_account' => array(
+																				//'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE,
+															),
 															'pay_stub' =>	array(
 																				'view' => TRUE,
 																				'add' => TRUE,
@@ -2623,13 +2709,6 @@ class PermissionFactory extends Factory {
 																				'edit' => TRUE,
 																				'delete' => TRUE,
 																			),
-															'round_policy' =>	array(
-																				'enabled' => TRUE,
-																				'view' => TRUE,
-																				'add' => TRUE,
-																				'edit' => TRUE,
-																				'delete' => TRUE,
-																			),
 															'currency' =>	array(
 																				'enabled' => TRUE,
 																				'view' => TRUE,
@@ -2652,12 +2731,6 @@ class PermissionFactory extends Factory {
 																				'delete' => TRUE,
 																				'assign' => TRUE
 																			),
-															'gep_fence' =>	array(
-																				'enabled' => TRUE,
-																				'view' => TRUE,
-																				'add' => TRUE,
-																				'edit' => TRUE,
-																				'delete' => TRUE																			),
 															'station' =>	array(
 																				'enabled' => TRUE,
 																				'view' => TRUE,
@@ -2762,7 +2835,13 @@ class PermissionFactory extends Factory {
 
 	//This is used by CompanyFactory to create the initial permissions when creating a new company.
 	//Also by the Quick Start wizard.
-	function applyPreset($permission_control_id, $preset, $preset_flags) {
+	/**
+	 * @param string $permission_control_id UUID
+	 * @param $preset
+	 * @param $preset_flags
+	 * @return bool
+	 */
+	function applyPreset( $permission_control_id, $preset, $preset_flags) {
 		$preset_permissions = $this->getPresetPermissions( $preset, $preset_flags );
 
 		if ( !is_array($preset_permissions) ) {
@@ -2786,12 +2865,13 @@ class PermissionFactory extends Factory {
 				if ( $pf->isIgnore( $section, $name, $product_edition ) == FALSE ) {
 					//Put all inserts into a single query, this speeds things up greatly (9s to less than .5s),
 					//but we are by-passing the audit log so make sure we add a new entry describing what took place.
+					$ph[] = $pf->getNextInsertId(); //This needs work before UUID and after.
 					$ph[] = $permission_control_id;
 					$ph[] = $section;
 					$ph[] = $name;
 					$ph[] = (int)$value;
 					$ph[] = $created_date;
-					$data[] = '(?, ?, ?, ?, ?)';
+					$data[] = '(?, ?, ?, ?, ?, ?)';
 
 					/*
 					//Debug::Text('Setting Permission - Section: '. $section .' Name: '. $name .' Value: '. (int)$value, __FILE__, __LINE__, __METHOD__, 10);
@@ -2812,7 +2892,7 @@ class PermissionFactory extends Factory {
 		$pclf = TTnew( 'PermissionControlListFactory' );
 		if ( isset($data) ) {
 			//Save data in a single SQL query.
-			$query = 'INSERT INTO '. $this->getTable() .'(PERMISSION_CONTROL_ID, SECTION, NAME, VALUE, CREATED_DATE) VALUES'. implode(',', $data );
+			$query = 'INSERT INTO '. $this->getTable() .'(ID, PERMISSION_CONTROL_ID, SECTION, NAME, VALUE, CREATED_DATE) VALUES'. implode(',', $data );
 			//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 			$this->db->Execute($query, $ph);
 
@@ -2848,6 +2928,11 @@ class PermissionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $permission_control_id UUID
+	 * @return bool
+	 */
 	function deletePermissions( $company_id, $permission_control_id ) {
 		if ( $company_id == '' ) {
 			return FALSE;
@@ -2867,6 +2952,12 @@ class PermissionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $section
+	 * @param null $name
+	 * @param int $product_edition
+	 * @return bool
+	 */
 	static function isIgnore( $section, $name = NULL, $product_edition = 10 ) {
 		global $current_company;
 
@@ -2891,9 +2982,6 @@ class PermissionFactory extends Factory {
 										'user_expense' => 'ALL',
 										'expense_policy' => 'ALL',
 										'report' => array('view_expense'),
-										'job_vacancy' => 'ALL',
-										'job_applicant' => 'ALL',
-										'job_application' => 'ALL',
 										'recruitment_report' => 'ALL',
 										);
 		} elseif ( $product_edition == TT_PRODUCT_PROFESSIONAL ) { //Professional
@@ -2924,9 +3012,6 @@ class PermissionFactory extends Factory {
 										'user_expense' => 'ALL',
 										'expense_policy' => 'ALL',
 										'report' => array('view_expense'),
-										'job_vacancy' => 'ALL',
-										'job_applicant' => 'ALL',
-										'job_application' => 'ALL',
 										'recruitment_report' => 'ALL',
 										);
 		} elseif ( $product_edition == TT_PRODUCT_COMMUNITY ) { //Community
@@ -2960,11 +3045,8 @@ class PermissionFactory extends Factory {
 										'user_expense' => 'ALL',
 										'expense_policy' => 'ALL',
 										'report' => array('view_expense'),
-										'job_vacancy' => 'ALL',
-										'job_applicant' => 'ALL',
-										'job_application' => 'ALL',
 										'recruitment_report' => 'ALL',
-			);
+										);
 		}
 
 		//If they are currently logged in as the primary company ID, allow multiple company permissions.
@@ -2998,6 +3080,9 @@ class PermissionFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		//Just update any existing permissions. It would probably be faster to delete them all and re-insert though.
 		$plf = TTnew( 'PermissionListFactory' );
@@ -3007,12 +3092,20 @@ class PermissionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getCacheID() {
 		$cache_id = 'permission_query_'.$this->getSection().$this->getName().$this->getPermissionControl().$this->getCompany();
 
 		return $cache_id;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	function clearCache( $user_id, $company_id ) {
 		Debug::Text(' Clearing Cache for User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -3020,6 +3113,73 @@ class PermissionFactory extends Factory {
 		return $this->removeCache( $cache_id );
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getEnableSectionAndNameValidation() {
+		if ( isset($this->enable_section_and_name_validation) ) {
+			return $this->enable_section_and_name_validation;
+		}
+
+		return TRUE; //Default to TRUE
+	}
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableSectionAndNameValidation( $bool) {
+		$this->enable_section_and_name_validation = $bool;
+
+		return TRUE;
+	}
+
+
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Permission Group
+		if ( $this->getPermissionControl() == TTUUID::getZeroID() ) {
+			$pclf = TTnew( 'PermissionControlListFactory' );
+			$this->Validator->isResultSetWithRows(	'permission_control',
+															$pclf->getByID($this->getPermissionControl()),
+															TTi18n::gettext('Permission Group is invalid')
+														);
+		}
+
+		if ( $this->getEnableSectionAndNameValidation() == TRUE ) {
+			// Section
+			if ( $this->getGenericTempDataValue( 'section' ) !== FALSE ) {
+				$this->Validator->inArrayKey( 'section',
+											  $this->getGenericTempDataValue( 'section' ),
+											  TTi18n::gettext( 'Incorrect section' ),
+											  $this->getOptions( 'section' )
+				);
+			}
+			// Permission Name
+			if ( $this->getGenericTempDataValue( 'name' ) !== FALSE ) {
+				$this->Validator->inArrayKey( 'name',
+											  $this->getGenericTempDataValue( 'name' ),
+											  TTi18n::gettext( 'Incorrect permission name' ),
+											  $this->getOptions( 'name', $this->getSection() )
+				);
+			}
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		//$cache_id = 'permission_query_'.$this->getSection().$this->getName().$this->getUser().$this->getCompany();
 		//$this->removeCache( $this->getCacheID() );
@@ -3027,6 +3187,10 @@ class PermissionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		if ( $this->getValue() == TRUE ) {
 			$value_display = TTi18n::getText( 'ALLOW' );

@@ -36,6 +36,7 @@ LHCChatOptions.opt = {
 	var refferer = (document.referrer) ? encodeURIComponent( document.referrer.substr( document.referrer.indexOf( '://' ) + 1 ) ) : '';
 	var location = (document.location) ? encodeURIComponent( window.location.href.substring( window.location.protocol.length ) ) : '';
 	po.src = 'https://chat.timetrex.com/index.php/chat/getstatus/(click)/internal/(position)/api/(ma)/br/(dot)/true/(top)/350/(units)/pixels/(leaveamessage)/true/(department)/2/(disable_pro_active)/true?r=' + refferer + '&l=' + location +'&ttr='+ new Date().getTime();
+	po.crossOrigin = 'anonymous';
 	var s = document.getElementsByTagName( 'script' )[0];
 	s.parentNode.insertBefore( po, s );
 })();

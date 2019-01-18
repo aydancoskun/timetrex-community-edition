@@ -29,9 +29,9 @@ $ADODB_INCLUDED_CSV = 1;
 	/**
  	 * convert a recordset into special format
 	 *
-	 * @param rs	the recordset
+	 * @param object	the recordset
 	 *
-	 * @return	the CSV formated data
+	 * @return string	the CSV formated data
 	 */
 	function _rs2serialize(&$rs,$conn=false,$sql='')
 	{

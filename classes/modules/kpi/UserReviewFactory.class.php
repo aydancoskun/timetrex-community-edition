@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,12 @@ class UserReviewFactory extends Factory {
 	protected $table = 'user_review';
 	protected $pk_sequence_name = 'user_review_id_seq'; //PK Sequence name
 	protected $kpi_obj = NULL;
+
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -72,6 +78,10 @@ class UserReviewFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -90,149 +100,183 @@ class UserReviewFactory extends Factory {
 										);
 		return $variable_function_map;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getKPIObject() {
 		return $this->getGenericObject( 'KPIListFactory', $this->getKPI(), 'kpi_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getKPI() {
-		if ( isset($this->data['kpi_id']) ) {
-			return (int)$this->data['kpi_id'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'kpi_id' );
 	}
 
-	function setKPI($id) {
-		$id = trim($id);
-		$klf = TTnew( 'KPIListFactory' );
-		if ( $this->Validator->isResultSetWithRows( 'kpi_id',
-													$klf->getById($id),
-													TTi18n::gettext('Invalid KPI')
-														) ) {
-						$this->data['kpi_id'] = $id;
-						return TRUE;
-		}
-		return FALSE;
-	}
-
-	function getUserReviewControl() {
-		if ( isset($this->data['user_review_control_id']) ) {
-			return (int)$this->data['user_review_control_id'];
-		}
-		return FALSE;
-	}
-
-	function setUserReviewControl( $id ) {
-		$id = trim($id);
-
-		$urclf = TTnew('UserReviewControlListFactory');
-
-		if ( $this->Validator->isResultSetWithRows( 'user_review_control_id',
-													$urclf->getById($id),
-													TTi18n::gettext('Invalid review control')
-													) ) {
-						$this->data['user_review_control_id'] = $id;
-						return TRUE;
-		}
-		return FALSE;
-	}
-
-	function getRating() {
-		if ( isset($this->data['rating']) ) {
-			return $this->data['rating'];
-		}
-		return FALSE;
-	}
-
-	function setRating($value) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setKPI( $value) {
 		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'kpi_id', $value );
+	}
 
+	/**
+	 * @return bool|mixed
+	 */
+	function getUserReviewControl() {
+		return $this->getGenericDataValue( 'user_review_control_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUserReviewControl( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'user_review_control_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getRating() {
+		return $this->getGenericDataValue( 'rating' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setRating( $value) {
+		$value = trim($value);
 		if ( $value == '' ) {
 			$value = NULL;
 		}
-		if ( 	$value == NULL
-				OR
-				(
-				$this->Validator->isNumeric(	'rating',
-													$value,
-													TTi18n::gettext('Rating must only be digits')
-										)
-				AND
-				$this->Validator->isLengthBeforeDecimal( 'rating',
-														$value,
-														TTi18n::gettext('Invalid Rating'),
-														0,
-														7
-										)
-				AND
-				$this->Validator->isLengthAfterDecimal( 'rating',
-														$value,
-														TTi18n::gettext('Invalid Rating'),
-														0,
-														2
-										)
-				)
-			) {
-
-			$this->data['rating'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'rating', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getNote() {
-		if ( isset($this->data['note']) ) {
-			return $this->data['note'];
-		}
-		return FALSE;
-	}
-	function setNote($note) {
-		$note = trim($note);
-
-		if (	$note == ''
-				OR
-				$this->Validator->isLength( 'note',
-											$note,
-											TTi18n::gettext('Note is too long'),
-											0, 4096 )  ) {
-				$this->data['note'] = $note;
-				return	TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'note' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setNote( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'note', $value );
+	}
+
+	/**
+	 * @return bool|string
+	 */
 	function getTag() {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
-		if ( isset($this->tmp_data['tags']) ) {
-			return $this->tmp_data['tags'];
-		} elseif ( is_object( $this->getKPIObject() ) AND $this->getKPIObject()->getCompany() > 0 AND $this->getID() > 0 ) {
+		$value = $this->getGenericTempDataValue( 'tags' );
+		if ( $value !== FALSE ) {
+			return $value;
+		} elseif ( is_object( $this->getKPIObject() )
+				AND TTUUID::isUUID( $this->getKPIObject()->getCompany() ) AND $this->getKPIObject()->getCompany() != TTUUID::getZeroID() AND $this->getKPIObject()->getCompany() != TTUUID::getNotExistID()
+				AND TTUUID::isUUID( $this->getID() ) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID()
+			) {
 			return CompanyGenericTagMapListFactory::getStringByCompanyIDAndObjectTypeIDAndObjectID( $this->getKPIObject()->getCompany(), 330, $this->getID() );
 		}
 
 		return FALSE;
 	}
-	function setTag( $tags ) {
-		$tags = trim($tags);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTag( $value ) {
+		$value = trim($value);
 		//Save the tags in temporary memory to be committed in postSave()
-		$this->tmp_data['tags'] = $tags;
-
-		return TRUE;
+		return $this->setGenericTempDataValue( 'tags', $value );
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
 		//$this->setProvince( $this->getProvince() ); //Not sure why this was there, but it causes duplicate errors if the province is incorrect.
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// KPI
+		$klf = TTnew( 'KPIListFactory' );
+		$this->Validator->isResultSetWithRows( 'kpi_id',
+														$klf->getById($this->getKPI()),
+														TTi18n::gettext('Invalid KPI')
+													);
+		// review control
+		$urclf = TTnew('UserReviewControlListFactory');
+		$this->Validator->isResultSetWithRows( 'user_review_control_id',
+														$urclf->getById($this->getUserReviewControl()),
+														TTi18n::gettext('Invalid review control')
+													);
+		// Rating
+		if ( $this->getRating() != NULL ) {
+			$this->Validator->isNumeric(	'rating',
+													$this->getRating(),
+													TTi18n::gettext('Rating must only be digits')
+												);
+			if ( $this->Validator->isError('rating') == FALSE ) {
+				$this->Validator->isLengthBeforeDecimal( 'rating',
+																	$this->getRating(),
+																	TTi18n::gettext('Invalid Rating'),
+																	0,
+																	7
+																);
+			}
+			if ( $this->Validator->isError('rating') == FALSE ) {
+				$this->Validator->isLengthAfterDecimal( 'rating',
+																$this->getRating(),
+																TTi18n::gettext('Invalid Rating'),
+																0,
+																2
+															);
+			}
+		}
+		// Note
+		if ( $this->getNote() != '' ) {
+			$this->Validator->isLength( 'note',
+												$this->getNote(),
+												TTi18n::gettext('Note is too long'),
+												0, 4096
+											);
+		}
 
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
@@ -244,6 +288,10 @@ class UserReviewFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 
 		if ( is_array( $data ) ) {
@@ -270,6 +318,11 @@ class UserReviewFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -305,6 +358,10 @@ class UserReviewFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		$kpi_obj = $this->getKPIObject();
 		if ( is_object($kpi_obj) ) {

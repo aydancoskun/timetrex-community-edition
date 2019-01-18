@@ -1,11 +1,14 @@
 PayPeriodsViewController = BaseViewController.extend( {
 	el: '#pay_periods_view_container',
+
+	_required_files: ['APIPayPeriod','APIPayPeriodSchedule'],
+
 	status_array: null,
 	type_array: null,
 	pay_period_schedule_api: null,
-	initialize: function( options ) {
+	init: function( options ) {
 
-		this._super( 'initialize', options );
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayPeriodsEditView.html';
 		this.permission_id = 'pay_period_schedule';
 		this.script_name = 'PayPeriodsView';
@@ -747,7 +750,8 @@ PayPeriodsViewController = BaseViewController.extend( {
 	},
 
 	onStatusChange: function() {
-		if ( this.current_edit_record['status_id'] === 20 ) {
+		//TypeError: Cannot read property 'status_id' of undefined
+		if ( this.current_edit_record && this.current_edit_record['status_id'] == 20 ) {
 			this.setDateColumnStatus( 'start_date', true );
 			this.setDateColumnStatus( 'end_date', true );
 			this.setDateColumnStatus( 'transaction_date', true );
@@ -795,8 +799,11 @@ PayPeriodsViewController.loadSubView = function( container, beforeViewLoadedFun,
 
 		if ( Global.isSet( container ) ) {
 			container.html( template( args ) );
+
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				afterViewLoadedFun( sub_pay_periods_view_controller );
+				TTPromise.wait('BaseViewController', 'initialize',function(){
+					afterViewLoadedFun( sub_pay_periods_view_controller );
+				});
 			}
 
 		}

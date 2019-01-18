@@ -1,7 +1,10 @@
 AccrualPolicyAccountViewController = BaseViewController.extend( {
 	el: '#wage_group_view_container',
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+
+	_required_files: ['APIAccrualPolicyAccount'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'AccrualPolicyAccountEditView.html';
 		this.permission_id = 'accrual_policy';
 		this.viewId = 'AccrualPolicyAccount';

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,7 +60,13 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RoundIntervalPolicyListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -61,7 +74,7 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => (int)$id,
+						'id' => TTUUID::castUUID($id),
 						);
 
 			$query = '
@@ -80,7 +93,14 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RoundIntervalPolicyListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -90,8 +110,8 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		}
 
 		$ph = array(
-					'id' => (int)$id,
-					'company_id' => (int)$company_id
+					'id' => TTUUID::castUUID($id),
+					'company_id' => TTUUID::castUUID($company_id)
 					);
 
 		$query = '
@@ -108,7 +128,13 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		return $this;
 	}
 
-	function getByCompanyId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RoundIntervalPolicyListFactory
+	 */
+	function getByCompanyId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -125,7 +151,7 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		$hpf = new HolidayPolicyFactory();
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -146,14 +172,19 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		return $this;
 	}
 
-	function getByCompanyIdArray($company_id, $include_blank = TRUE) {
+	/**
+	 * @param string $company_id UUID
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getByCompanyIdArray( $company_id, $include_blank = TRUE) {
 
 		$riplf = new RoundIntervalPolicyListFactory();
 		$riplf->getByCompanyId($company_id);
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($riplf as $rip_obj) {
@@ -167,7 +198,14 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		return FALSE;
 	}
 
-	function getByPolicyGroupUserIdAndTypeId($user_id, $type_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $type_id
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RoundIntervalPolicyListFactory
+	 */
+	function getByPolicyGroupUserIdAndTypeId( $user_id, $type_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -199,7 +237,7 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -224,6 +262,15 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RoundIntervalPolicyListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -268,7 +315,7 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		$hpf = new HolidayPolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -299,9 +346,9 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 

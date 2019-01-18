@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,7 +60,13 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserWageListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -61,7 +74,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => (int)$id,
+						'id' => TTUUID::castUUID($id),
 						);
 
 			$query = '
@@ -80,7 +93,12 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserWageListFactory
+	 */
+	function getByCompanyId( $company_id, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -88,7 +106,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -105,7 +123,13 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserWageListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -117,8 +141,8 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -136,7 +160,14 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByIdAndUserId($id, $user_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $user_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserWageListFactory
+	 */
+	function getByIdAndUserId( $id, $user_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -144,8 +175,8 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$this->rs = $this->getCache($id.$user_id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => (int)$id,
-						'user_id' => (int)$user_id,
+						'id' => TTUUID::castUUID($id),
+						'user_id' => TTUUID::castUUID($user_id),
 						);
 
 			$query = '
@@ -165,13 +196,18 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserId($user_id, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserWageListFactory
+	 */
+	function getByUserId( $user_id, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -186,13 +222,23 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndGroupIDAndBeforeDate($user_id, $wage_group_id, $epoch, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $wage_group_id UUID
+	 * @param int $epoch EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserWageListFactory
+	 */
+	function getByUserIdAndGroupIDAndBeforeDate( $user_id, $wage_group_id, $epoch, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
 
 		if ( $wage_group_id == '') {
-			$wage_group_id = 0;
+			$wage_group_id = TTUUID::getZeroID();
 		}
 
 		if ( $epoch == '') {
@@ -207,8 +253,8 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'wage_group_id' => (int)$wage_group_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'wage_group_id' => TTUUID::castUUID($wage_group_id),
 					'date' => $this->db->BindTimeStamp( $epoch ),
 					);
 
@@ -228,7 +274,14 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getIsModifiedByUserIdAndDate($user_id, $date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool
+	 */
+	function getIsModifiedByUserIdAndDate( $user_id, $date, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -238,7 +291,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'created_date' => $date,
 					'updated_date' => $date,
 					);
@@ -264,7 +317,12 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 
 
 	//Grabs JUST the latest wage entry.
-	function getLastWageByUserId($user_id) {
+
+	/**
+	 * @param string $user_id UUID
+	 * @return bool|UserWageListFactory
+	 */
+	function getLastWageByUserId( $user_id) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -272,7 +330,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -281,7 +339,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 							'. $this->getTable() .' as b
 					where	a.id = b.user_id
 						AND	b.user_id = ?
-						AND b.wage_group_id = 0
+						AND b.wage_group_id = \''. TTUUID::getZeroID() .'\'
 						AND a.deleted = 0
 						AND b.deleted = 0
 					ORDER BY b.effective_date desc
@@ -293,7 +351,13 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 	}
 
 	//Grabs JUST the latest wage entry.
-	function getLastWageByUserIdAndDate($user_id, $epoch) {
+
+	/**
+	 * @param string $user_id UUID
+	 * @param int $epoch EPOCH
+	 * @return bool|UserWageListFactory
+	 */
+	function getLastWageByUserIdAndDate( $user_id, $epoch) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -316,8 +380,8 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 						from	'. $this->getTable() .' as z
 						where
 							z.effective_date <= ?
-							AND z.wage_group_id = 0
-							AND z.user_id in ('. $this->getListSQL( $user_id, $ph ) .')
+							AND z.wage_group_id = \''. TTUUID::getZeroID() .'\'
+							AND z.user_id in ('. $this->getListSQL( $user_id, $ph, 'uuid'  ) .')
 							AND ( z.deleted = 0 )
 						GROUP BY z.user_id
 						) as b,
@@ -333,7 +397,12 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getWageByUserIdAndPayPeriodEndDate($user_id, $pay_period_end_date) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $pay_period_end_date EPOCH
+	 * @return bool|UserWageListFactory
+	 */
+	function getWageByUserIdAndPayPeriodEndDate( $user_id, $pay_period_end_date) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -345,7 +414,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'epoch' => $this->db->BindTimeStamp( $pay_period_end_date ),
 					);
 
@@ -356,7 +425,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 					where	a.id = b.user_id
 						AND	b.user_id = ?
 						AND b.effective_date <= ?
-						AND b.wage_group_id = 0
+						AND b.wage_group_id = \''. TTUUID::getZeroID() .'\'
 						AND (a.deleted = 0 AND b.deleted=0)
 					ORDER BY b.effective_date desc
 					LIMIT 1';
@@ -366,7 +435,12 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndDate($user_id, $date) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date EPOCH
+	 * @return bool|UserWageListFactory
+	 */
+	function getByUserIdAndDate( $user_id, $date) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -378,7 +452,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'date' => $this->db->BindTimeStamp(	 $date ),
 					);
 
@@ -389,7 +463,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 					where	a.id = b.user_id
 						AND	b.user_id = ?
 						AND b.effective_date <= ?
-						AND b.wage_group_id = 0
+						AND b.wage_group_id = \''. TTUUID::getZeroID() .'\'
 						AND (a.deleted = 0 AND b.deleted=0)
 					ORDER BY b.effective_date desc
 					LIMIT 1';
@@ -399,7 +473,13 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getDefaultWageGroupByUserIdAndStartDateAndEndDate($user_id, $start_date = FALSE, $end_date = FALSE) {
+	/**
+	 * @param string $user_id UUID
+	 * @param bool $start_date
+	 * @param bool $end_date
+	 * @return bool|UserWageListFactory
+	 */
+	function getDefaultWageGroupByUserIdAndStartDateAndEndDate( $user_id, $start_date = FALSE, $end_date = FALSE) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -431,7 +511,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 						AND	b.user_id = ?
 						AND b.effective_date >= ?
 						AND b.effective_date <= ?
-						AND b.wage_group_id = 0
+						AND b.wage_group_id = \''. TTUUID::getZeroID() .'\'
 						AND (a.deleted = 0 AND b.deleted=0)
 					)
 					UNION
@@ -442,7 +522,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 						where	c.id = d.user_id
 							AND	d.user_id = ?
 							AND d.effective_date <= ?
-							AND d.wage_group_id = 0
+							AND d.wage_group_id = \''. TTUUID::getZeroID() .'\'
 							AND (c.deleted = 0 AND d.deleted=0)
 						ORDER BY d.effective_date desc
 						LIMIT 1
@@ -455,7 +535,13 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndStartDateAndEndDate($user_id, $start_date = FALSE, $end_date = FALSE) {
+	/**
+	 * @param string $user_id UUID
+	 * @param bool $start_date
+	 * @param bool $end_date
+	 * @return bool|UserWageListFactory
+	 */
+	function getByUserIdAndStartDateAndEndDate( $user_id, $start_date = FALSE, $end_date = FALSE) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -471,10 +557,10 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'user_id1' => (int)$user_id,
+					'user_id1' => TTUUID::castUUID($user_id),
 					'start_date1' => $this->db->BindTimeStamp( $start_date ),
 					'end_date1' => $this->db->BindTimeStamp( $end_date ),
-					'user_id2' => (int)$user_id,
+					'user_id2' => TTUUID::castUUID($user_id),
 					'start_date2' => $this->db->BindTimeStamp( $start_date ),
 					);
 
@@ -507,75 +593,81 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 
 		return $this;
 	}
-	function getByUserIdAndCompanyIdAndStartDateAndEndDate($user_id, $company_id, $start_date = FALSE, $end_date = FALSE) {
-		if ( $user_id == '' ) {
-			return FALSE;
-		}
+//	function getByUserIdAndCompanyIdAndStartDateAndEndDate($user_id, $company_id, $start_date = FALSE, $end_date = FALSE) {
+//		if ( $user_id == '' ) {
+//			return FALSE;
+//		}
+//
+//		if ( $company_id == '' ) {
+//			return FALSE;
+//		}
+//
+//		if ( $start_date == '' ) {
+//			$start_date = 0;
+//		}
+//
+//		if ( $end_date == '' ) {
+//			$end_date = TTDate::getTime();
+//		}
+//
+//		$uf = new UserFactory();
+//
+//		$ph = array(
+//					'company_id' => TTUUID::castUUID($company_id),
+//					'start_date' => $this->db->BindTimeStamp( $start_date ),
+//					'end_date' => $this->db->BindTimeStamp( $end_date ),
+//					);
+//
+//		$b_user_id_sql = $this->getListSQL( $user_id, $ph, 'uuid' );
+//
+//		$ph['company_id2'] = TTUUID::castUUID($company_id);
+//		$ph['start_date2'] = $this->db->BindTimeStamp( $start_date );
+//
+//		$query = '
+//					(
+//					select b.*
+//					from	'. $uf->getTable() .' as a,
+//							'. $this->getTable() .' as b
+//					where	a.id = b.user_id
+//						AND a.company_id = ?
+//						AND b.effective_date >= ?
+//						AND b.effective_date <= ?
+//						AND	b.user_id in ('. $b_user_id_sql .')
+//						AND (a.deleted = 0 AND b.deleted=0)
+//
+//					)
+//					UNION
+//					(
+//						select	m.*
+//						from	'. $this->getTable() .' as m
+//						where
+//							cast(m.id as VARCHAR(36)) in (
+//									select max( CAST ( d.id AS VARCHAR(36) ) ) as id
+//									from	'. $uf->getTable() .' as c,
+//											'. $this->getTable() .' as d
+//									where CAST( c.id AS UUID ) = d.user_id
+//										AND c.company_id = ?
+//										AND d.effective_date <= ?
+//										AND	d.user_id in ('. $this->getListSQL( $user_id, $ph, 'uuid' ) .')
+//										AND (c.deleted = 0 AND d.deleted=0)
+//									group by d.user_id
+//									)
+//					)
+//					ORDER BY effective_date desc
+//					';
+//
+//		$this->ExecuteSQL( $query, $ph );
+//
+//		return $this;
+//	}
 
-		if ( $company_id == '' ) {
-			return FALSE;
-		}
-
-		if ( $start_date == '' ) {
-			$start_date = 0;
-		}
-
-		if ( $end_date == '' ) {
-			$end_date = TTDate::getTime();
-		}
-
-		$uf = new UserFactory();
-
-		$ph = array(
-					'company_id' => (int)$company_id,
-					'start_date' => $this->db->BindTimeStamp( $start_date ),
-					'end_date' => $this->db->BindTimeStamp( $end_date ),
-					);
-
-		$b_user_id_sql = $this->getListSQL( $user_id, $ph, 'int' );
-
-		$ph['company_id2'] = (int)$company_id;
-		$ph['start_date2'] = $this->db->BindTimeStamp( $start_date );
-
-		$query = '
-					(
-					select b.*
-					from	'. $uf->getTable() .' as a,
-							'. $this->getTable() .' as b
-					where	a.id = b.user_id
-						AND a.company_id = ?
-						AND b.effective_date >= ?
-						AND b.effective_date <= ?
-						AND	b.user_id in ('. $b_user_id_sql .')
-						AND (a.deleted = 0 AND b.deleted=0)
-
-					)
-					UNION
-					(
-						select	m.*
-						from	'. $this->getTable() .' as m
-						where
-							m.id in (
-									select max(d.id) as id
-									from	'. $uf->getTable() .' as c,
-											'. $this->getTable() .' as d
-									where c.id = d.user_id
-										AND c.company_id = ?
-										AND d.effective_date <= ?
-										AND	d.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
-										AND (c.deleted = 0 AND d.deleted=0)
-									group by d.user_id
-									)
-					)
-					ORDER BY effective_date desc
-					';
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
-	function getArrayByUserIdAndStartDateAndEndDate($user_id, $start_date = FALSE, $end_date = FALSE) {
+	/**
+	 * @param string $user_id UUID
+	 * @param bool $start_date
+	 * @param bool $end_date
+	 * @return array|bool
+	 */
+	function getArrayByUserIdAndStartDateAndEndDate( $user_id, $start_date = FALSE, $end_date = FALSE) {
 		$uwlf = new UserWageListFactory();
 		$uwlf->getDefaultWageGroupByUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date);
 
@@ -597,12 +689,21 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 
 	}
 
-	function getByUserIdAndCompanyId($user_id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( empty($user_id) ) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserWageListFactory
+	 */
+	function getByUserIdAndCompanyId( $user_id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( empty($user_id) OR $user_id == TTUUID::getZeroID() ) {
 			return FALSE;
 		}
 
-		if ( empty($company_id) ) {
+		if ( empty($company_id) OR $company_id == TTUUID::getZeroID() ) {
 			return FALSE;
 		}
 
@@ -616,8 +717,8 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'user_id' => (int)$user_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -635,12 +736,21 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByWageGroupIDAndCompanyId($wage_group_id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( empty($wage_group_id) ) {
+	/**
+	 * @param string $wage_group_id UUID
+	 * @param string $company_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserWageListFactory
+	 */
+	function getByWageGroupIDAndCompanyId( $wage_group_id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( empty($wage_group_id) OR $wage_group_id == TTUUID::getZeroID()  ) {
 			return FALSE;
 		}
 
-		if ( empty($company_id) ) {
+		if ( empty($company_id) OR $company_id == TTUUID::getZeroID()  ) {
 			return FALSE;
 		}
 
@@ -654,8 +764,8 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'wage_group_id' => (int)$wage_group_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'wage_group_id' => TTUUID::castUUID($wage_group_id),
 					);
 
 		$query = '
@@ -673,6 +783,15 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserWageListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -714,12 +833,12 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$wgf = new WageGroupFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
 					select	a.*,
-							CASE WHEN a.wage_group_id = 0 THEN \''. TTi18n::getText('-Default-') .'\' ELSE ab.name END as wage_group,
+							CASE WHEN a.wage_group_id = \''. TTUUID::getZeroID() .'\' THEN \''. TTi18n::getText('-Default-') .'\' ELSE ab.name END as wage_group,
 							b.first_name as first_name,
 							b.last_name as last_name,
 							b.country as country,
@@ -758,19 +877,22 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 					where	b.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['wage_group_id']) ) ? $this->getWhereClauseSQL( 'a.wage_group_id', $filter_data['wage_group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['wage_group_id']) ) ? $this->getWhereClauseSQL( 'a.wage_group_id', $filter_data['wage_group_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'b.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'b.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 
@@ -786,6 +908,15 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserWageListFactory
+	 */
 	function getAPILastWageSearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -833,12 +964,12 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 
 		$ph = array(
 					'effective_date' => $this->db->BindTimeStamp($filter_data['effective_date']),
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
 					select	a.*,
-							CASE WHEN a.wage_group_id = 0 THEN \''. TTi18n::getText('-Default-') .'\' ELSE ab.name END as wage_group,
+							CASE WHEN a.wage_group_id = \''. TTUUID::getZeroID() .'\' THEN \''. TTi18n::getText('-Default-') .'\' ELSE ab.name END as wage_group,
 							b.first_name as first_name,
 							b.last_name as last_name,
 							b.country as country,
@@ -885,19 +1016,19 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 					where	b.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['wage_group_id']) ) ? $this->getWhereClauseSQL( 'a.wage_group_id', $filter_data['wage_group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['wage_group_id']) ) ? $this->getWhereClauseSQL( 'a.wage_group_id', $filter_data['wage_group_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'b.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 

@@ -1,18 +1,22 @@
 SavedReportViewController = BaseViewController.extend( {
 	el: '#saved_report_view_container',
 
-	sub_report_schedule_view_controller: null,
+	//Issue #1187 - Many of these variables are needed when this view is rendered as a sub view
+	//in that case, init() will not be run so those variables need to be defined at load time instead.
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
-		this.edit_view_tpl = 'SavedReportEditView.html';
-		this.permission_id = 'report';
-		this.viewId = 'SavedReport';
-		this.script_name = 'UserReportDataView';
-		this.table_name_key = 'user_report_data';
-		this.context_menu_name = $.i18n._( 'Reports' );
-		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUserReportData' ))();
+	_required_files: ['APIUserReportData', 'APIUser'],
+	sub_report_schedule_view_controller: null,
+	edit_view_tpl: 'SavedReportEditView.html',
+	permission_id: 'report',
+	viewId: 'SavedReport',
+	script_name: 'UserReportDataView',
+	table_name_key: 'user_report_data',
+	context_menu_name: $.i18n._( 'Reports' ),
+	navigation_label: $.i18n._( 'Saved Report' ) + ':',
+
+	api: new (APIFactory.getAPIClass( 'APIUserReportData' ))(),
+
+	init: function( options ) {
 
 		this.render();
 		if ( this.sub_view_mode ) {
@@ -202,65 +206,70 @@ SavedReportViewController = BaseViewController.extend( {
 	onViewClick: function( editId, noRefreshUI ) {
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var id = grid_selected_id_array[0];
-		var report_name = this.getRecordFromGridById( id ).script; //Must use 'script' instead of 'script_name' so it doesn't change with different languages.
 
-		LocalCacheData.current_doing_context_action = 'view';
-		LocalCacheData.default_edit_id_for_next_open_edit_view = id;
+		var record = this.getRecordFromGridById( id );
+		if ( record && record.script ) {
+			var report_name = record.script; //Must use 'script' instead of 'script_name' so it doesn't change with different languages.
 
-		switch ( report_name ) {
-			case 'AccrualBalanceSummaryReport':
-			case 'ActiveShiftReport':
-			case 'AuditTrailReport':
-			case 'Form1099MiscReport':
-			case 'Form940Report':
-			case 'Form941Report':
-			case 'FormW2Report':
-			case 'GeneralLedgerSummaryReport':
-			case 'InvoiceTransactionSummaryReport':
-			case 'JobInformationReport':
-			case 'JobItemInformationReport':
-			case 'JobSummaryReport':
-			case 'KPIReport':
-			case 'PayrollExportReport':
-			case 'PayStubSummaryReport':
-			case 'PunchSummaryReport':
-			case 'RemittanceSummaryReport':
-			case 'ScheduleSummaryReport':
-			case 'T4ASummaryReport':
-			case 'T4SummaryReport':
-			case 'TaxSummaryReport':
-			case 'TimesheetDetailReport':
-			case 'TimesheetSummaryReport':
-			case 'UserQualificationReport':
-			case 'UserRecruitmentDetailReport':
-			case 'UserRecruitmentSummaryReport':
-			case 'UserSummaryReport':
-				//Leave report_name alone, as it should match exactly.
-				break;
-			case 'UserExpenseReport':
-				report_name = 'ExpenseSummaryReport';
-				break;
-			case 'ExceptionReport':
-				report_name = 'ExceptionSummaryReport';
-				break;
-			case 'JobDetailReport':
-				report_name = 'JobAnalysisReport';
-				break;
-			case 'AffordableCareReport':
-				if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
-					TAlertManager.showAlert( Global.getUpgradeMessage() );
+			LocalCacheData.current_doing_context_action = 'view';
+			LocalCacheData.default_edit_id_for_next_open_edit_view = id;
+
+			switch (report_name) {
+				case 'AccrualBalanceSummaryReport':
+				case 'ActiveShiftReport':
+				case 'AuditTrailReport':
+				case 'Form1099MiscReport':
+				case 'Form940Report':
+				case 'Form941Report':
+				case 'FormW2Report':
+				case 'GeneralLedgerSummaryReport':
+				case 'InvoiceTransactionSummaryReport':
+				case 'JobInformationReport':
+				case 'JobItemInformationReport':
+				case 'JobSummaryReport':
+				case 'KPIReport':
+				case 'PayrollExportReport':
+				case 'PayStubTransactionSummaryReport':
+				case 'PayStubSummaryReport':
+				case 'PunchSummaryReport':
+				case 'RemittanceSummaryReport':
+				case 'ScheduleSummaryReport':
+				case 'T4ASummaryReport':
+				case 'T4SummaryReport':
+				case 'TaxSummaryReport':
+				case 'TimesheetDetailReport':
+				case 'TimesheetSummaryReport':
+				case 'UserQualificationReport':
+				case 'UserRecruitmentDetailReport':
+				case 'UserRecruitmentSummaryReport':
+				case 'UserSummaryReport':
+					//Leave report_name alone, as it should match exactly.
+					break;
+				case 'UserExpenseReport':
+					report_name = 'ExpenseSummaryReport';
+					break;
+				case 'ExceptionReport':
+					report_name = 'ExceptionSummaryReport';
+					break;
+				case 'JobDetailReport':
+					report_name = 'JobAnalysisReport';
+					break;
+				case 'AffordableCareReport':
+					if (LocalCacheData.getCurrentCompany().product_edition_id == 10) {
+						TAlertManager.showAlert(Global.getUpgradeMessage());
+						report_name = null;
+					}
+					break;
+				default:
+					ProgressBar.closeOverlay();
+					Debug.Text('ERROR: Saved Report name not defined: ' + report_name, 'SavedReportViewController.js', '', 'onViewClick', 10);
 					report_name = null;
-				}
-				break;
-			default:
-				ProgressBar.closeOverlay();
-				Debug.Text('ERROR: Saved Report name not defined: ' + report_name , 'SavedReportViewController.js', '', 'onViewClick', 10 );
-				report_name = null;
-				break;
-		}
+					break;
+			}
 
-		if ( Global.isSet( report_name ) && report_name ) {
-			IndexViewController.openReport(this, report_name);
+			if (Global.isSet(report_name) && report_name) {
+				IndexViewController.openReport(this, report_name);
+			}
 		}
 	},
 
@@ -379,16 +388,16 @@ SavedReportViewController = BaseViewController.extend( {
 
 
 		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-			var $this = this;
+		var $this = this;
 
 			if (this.sub_report_schedule_view_controller) {
 				this.sub_report_schedule_view_controller.buildContextMenu(true);
-				this.sub_report_schedule_view_controller.setDefaultMenu();
-				$this.sub_report_schedule_view_controller.parent_value = $this.current_edit_record.id;
-				$this.sub_report_schedule_view_controller.parent_edit_record = $this.current_edit_record;
-				$this.sub_report_schedule_view_controller.initData(); //Init data in this parent view
-				return;
-			}
+			this.sub_report_schedule_view_controller.setDefaultMenu();
+			$this.sub_report_schedule_view_controller.parent_value = $this.current_edit_record.id;
+			$this.sub_report_schedule_view_controller.parent_edit_record = $this.current_edit_record;
+			$this.sub_report_schedule_view_controller.initData(); //Init data in this parent view
+			return;
+		}
 
 			Global.loadViewSource('ReportSchedule', 'ReportScheduleViewController.js', function () {
 
@@ -454,8 +463,8 @@ SavedReportViewController = BaseViewController.extend( {
 				if (this.current_edit_record.id) {
 					this.edit_view.find('.save-and-continue-div').css('display', 'none');
 					this.edit_view_tab.find('#tab_schedule').find('.first-column-sub-view').css('display', 'block');
-					this.initSubReportScheduleView();
-				} else {
+				this.initSubReportScheduleView();
+			} else {
 					this.edit_view_tab.find('#tab_schedule').find('.first-column-sub-view').css('display', 'none');
 					this.edit_view.find('.permission-defined-div').css('display', 'none');
 				}
@@ -583,7 +592,9 @@ SavedReportViewController.loadSubView = function( container, beforeViewLoadedFun
 		if ( Global.isSet( container ) ) {
 			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				afterViewLoadedFun( sub_saved_report_controller );
+				TTPromise.wait('BaseViewController', 'initialize', function(){
+					afterViewLoadedFun( sub_saved_report_controller );
+				});
 			}
 
 		}

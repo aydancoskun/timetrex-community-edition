@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -52,6 +52,11 @@ class ExceptionPolicyFactory extends Factory {
 
 	protected $exception_policy_control_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -123,7 +128,7 @@ class ExceptionPolicyFactory extends Factory {
 										'J3' => TTi18n::gettext('Job Completed'),
 										'J4' => TTi18n::gettext('No Job or Task'),
 										//'J5' => TTi18n::gettext('No Task'), //Make J4 No Job only?
-										
+
 										//Add location based exceptions, ie: Restricted Location.
 										'G1' => TTi18n::gettext('GEO Fence Violation'),
 
@@ -168,6 +173,10 @@ class ExceptionPolicyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -187,35 +196,38 @@ class ExceptionPolicyFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getExceptionPolicyControlObject() {
 		return $this->getGenericObject( 'ExceptionPolicyControlListFactory', $this->getExceptionPolicyControl(), 'exception_policy_control_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getExceptionPolicyControl() {
-		if ( isset($this->data['exception_policy_control_id']) ) {
-			return (int)$this->data['exception_policy_control_id'];
-		}
-
-		return FALSE;
-	}
-	function setExceptionPolicyControl($id) {
-		$id = trim($id);
-
-		$epclf = TTnew( 'ExceptionPolicyControlListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'exception_policy_control',
-													$epclf->getByID($id),
-													TTi18n::gettext('Exception Policy Control is invalid')
-													) ) {
-
-			$this->data['exception_policy_control_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'exception_policy_control_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setExceptionPolicyControl( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'exception_policy_control_id', $value );
+	}
+
+	/**
+	 * @param $exclude_exceptions
+	 * @param int $product_edition
+	 * @return array
+	 */
 	function getExceptionTypeDefaultValues( $exclude_exceptions, $product_edition = 10 ) {
 		if ( !is_array($exclude_exceptions) ) {
 			$exclude_exceptions = array();
@@ -747,10 +759,17 @@ class ExceptionPolicyFactory extends Factory {
 		return $retarr;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getName() {
 		return Option::getByKey( $this->getType(), $this->getTypeOptions( getTTProductEdition() ) );
 	}
 
+	/**
+	 * @param int $product_edition
+	 * @return bool
+	 */
 	function getTypeOptions( $product_edition = 10 ) {
 		$options = $this->getOptions('type');
 
@@ -764,153 +783,121 @@ class ExceptionPolicyFactory extends Factory {
 		return $options;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getType() {
-		if ( isset($this->data['type_id']) ) {
-			return (string)$this->data['type_id']; //Should not be cast to int.
-		}
-
-		return FALSE;
+		return (string)$this->getGenericDataValue( 'type_id' );//Should not be cast to int.
 	}
-	function setType($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'type',
-											$value,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
-
-			$this->data['type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'type_id', $value );
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getSeverity() {
-		if ( isset($this->data['severity_id']) ) {
-			return (int)$this->data['severity_id'];
-		}
-
-		return FALSE;
-	}
-	function setSeverity($value) {
-		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'severity',
-											$value,
-											TTi18n::gettext('Incorrect Severity'),
-											$this->getOptions('severity')) ) {
-
-			$this->data['severity_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'severity_id' );
 	}
 
-	function getWatchWindow() {
-		if ( isset($this->data['watch_window']) ) {
-			return $this->data['watch_window'];
-		}
-
-		return FALSE;
-	}
-	function setWatchWindow($value) {
-		$value = trim($value);
-
-		if	(	$value == 0
-				OR $this->Validator->isNumeric(		'watch_window',
-													$value,
-													TTi18n::gettext('Incorrect Watch Window')) ) {
-
-			$this->data['watch_window'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getGrace() {
-		if ( isset($this->data['grace']) ) {
-			return $this->data['grace'];
-		}
-
-		return FALSE;
-	}
-	function setGrace($value) {
-		$value = trim($value);
-
-		if	(	$value == 0
-				OR $this->Validator->isNumeric(		'grace',
-													$value,
-													TTi18n::gettext('Incorrect grace value')) ) {
-
-			$this->data['grace'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getDemerit() {
-		if ( isset($this->data['demerit']) ) {
-			return $this->data['demerit'];
-		}
-
-		return FALSE;
-	}
-	function setDemerit($value) {
-		$value = trim($value);
-
-		if	(	$value == 0
-				OR $this->Validator->isNumeric(		'demerit',
-													$value,
-													TTi18n::gettext('Incorrect demerit value')) ) {
-
-			$this->data['demerit'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getEmailNotification() {
-		if ( isset($this->data['email_notification_id']) ) {
-			return (int)$this->data['email_notification_id'];
-		}
-
-		return FALSE;
-	}
-	function setEmailNotification($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSeverity( $value) {
 		$value = (int)trim($value);
-
-		if ( $this->Validator->inArrayKey(	'email_notification',
-											$value,
-											TTi18n::gettext('Incorrect Email Notification'),
-											$this->getOptions('email_notification')) ) {
-
-			$this->data['email_notification_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'severity_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
+	function getWatchWindow() {
+		return $this->getGenericDataValue( 'watch_window' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setWatchWindow( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'watch_window', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getGrace() {
+		return $this->getGenericDataValue( 'grace' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setGrace( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'grace', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getDemerit() {
+		return $this->getGenericDataValue( 'demerit' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDemerit( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'demerit', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
+	function getEmailNotification() {
+		return $this->getGenericDataValue( 'email_notification_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEmailNotification( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'email_notification_id', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getActive() {
-		return $this->fromBool( $this->data['active'] );
-	}
-	function setActive($bool) {
-		$this->data['active'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'active' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setActive( $value) {
+		return $this->setGenericDataValue( 'active', $this->toBool($value) );
+	}
+
+	/**
+	 * @param null $code
+	 * @return bool
+	 */
 	function isEnabledGrace( $code = NULL ) {
 		if ( $code == NULL ) {
 			$code = $this->getType();
@@ -923,6 +910,10 @@ class ExceptionPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $code
+	 * @return bool
+	 */
 	function isEnabledWatchWindow( $code = NULL ) {
 		if ( $code == NULL ) {
 			$code = $this->getType();
@@ -935,6 +926,10 @@ class ExceptionPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $code
+	 * @return bool
+	 */
 	static function isPreMature( $code ) {
 		if ( in_array( $code, self::$premature_exceptions ) ) {
 			return TRUE;
@@ -942,8 +937,14 @@ class ExceptionPolicyFactory extends Factory {
 
 		return FALSE;
 	}
-							
+
 	//This function needs to determine which new exceptions to create, and which old exceptions are no longer valid and to delete.
+
+	/**
+	 * @param $existing_exceptions
+	 * @param $current_exceptions
+	 * @return array
+	 */
 	static function diffExistingAndCurrentExceptions( $existing_exceptions, $current_exceptions ) {
 		//Debug::Arr($existing_exceptions, 'Existing Exceptions: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($current_exceptions, 'Current Exceptions: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -968,17 +969,17 @@ class ExceptionPolicyFactory extends Factory {
 		foreach( $current_exceptions as $current_key => $current_exception ) {
 			foreach( $existing_exceptions as $existing_exception ) {
 				//Need to match all elements except 'id'.
-				if (	(int)$current_exception['exception_policy_id'] == (int)$existing_exception['exception_policy_id']
+				if (	TTUUID::castUUID($current_exception['exception_policy_id']) == TTUUID::castUUID($existing_exception['exception_policy_id'])
 						AND
 						(int)$current_exception['type_id'] == (int)$existing_exception['type_id']
 						AND
-						(int)$current_exception['user_id'] == (int)$existing_exception['user_id']
+						TTUUID::castUUID($current_exception['user_id']) == TTUUID::castUUID($existing_exception['user_id'])
 						AND
 						(int)$current_exception['date_stamp'] == (int)$existing_exception['date_stamp']
 						AND
-						(int)$current_exception['punch_control_id'] == (int)$existing_exception['punch_control_id']
+						TTUUID::castUUID($current_exception['punch_control_id']) == TTUUID::castUUID($existing_exception['punch_control_id'])
 						AND
-						(int)$current_exception['punch_id'] == (int)$existing_exception['punch_id']
+						TTUUID::castUUID($current_exception['punch_id']) == TTUUID::castUUID($existing_exception['punch_id'])
 					) {
 					//Debug::text('Removing current exception that matches existing exception: '. $current_key, __FILE__, __LINE__, __METHOD__, 10);
 					unset($new_exceptions[$current_key]);
@@ -1009,7 +1010,7 @@ class ExceptionPolicyFactory extends Factory {
 					$match_count--;
 				}
 				*/
-				
+
 				//Debug::text('aDetermining if we should delete this exception... Match Count: '. $match_count .' Total: '. $total_current_exceptions .' Existing Key: '. $existing_key, __FILE__, __LINE__, __METHOD__, 10);
 			}
 
@@ -1024,11 +1025,17 @@ class ExceptionPolicyFactory extends Factory {
 		return $retarr;
 	}
 
-	function isUnique($exception_policy_control_id, $type_id, $id ) {
+	/**
+	 * @param string $exception_policy_control_id UUID
+	 * @param int $type_id
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function isUnique( $exception_policy_control_id, $type_id, $id ) {
 		$ph = array(
 					'exception_policy_control_id' => $exception_policy_control_id,
 					'type_id' => trim(strtoupper($type_id)),
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where exception_policy_control_id = ? AND type_id = ? AND id != ? AND deleted = 0';
@@ -1046,7 +1053,64 @@ class ExceptionPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Exception Policy Control
+		$epclf = TTnew( 'ExceptionPolicyControlListFactory' );
+		$this->Validator->isResultSetWithRows(	'exception_policy_control',
+														$epclf->getByID($this->getExceptionPolicyControl()),
+														TTi18n::gettext('Exception Policy Control is invalid')
+													);
+		// Type
+		$this->Validator->inArrayKey(	'type',
+												$this->getType(),
+												TTi18n::gettext('Incorrect Type'),
+												$this->getOptions('type')
+											);
+		// Severity
+		$this->Validator->inArrayKey(	'severity',
+												$this->getSeverity(),
+												TTi18n::gettext('Incorrect Severity'),
+												$this->getOptions('severity')
+											);
+		// Watch Window
+		if ( $this->getWatchWindow() != '' ) {
+			$this->Validator->isNumeric(		'watch_window',
+														$this->getWatchWindow(),
+														TTi18n::gettext('Incorrect Watch Window')
+													);
+		}
+		// Grace value
+		if ( $this->getGrace() != '' ) {
+			$this->Validator->isNumeric(		'grace',
+														$this->getGrace(),
+														TTi18n::gettext('Incorrect grace value')
+													);
+		}
+		// Demerit value
+		if ( $this->getDemerit() != '' ) {
+			$this->Validator->isNumeric(		'demerit',
+														$this->getDemerit(),
+														TTi18n::gettext('Incorrect demerit value')
+													);
+		}
+		// Email Notification
+		$this->Validator->inArrayKey(	'email_notification',
+												$this->getEmailNotification(),
+												TTi18n::gettext('Incorrect Email Notification'),
+												$this->getOptions('email_notification')
+											);
+
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( $this->isUnique( $this->getExceptionPolicyControl(), $this->getType(), $this->getID() ) == FALSE ) {
 			$this->Validator->isTrue(		'type_id',
 											FALSE,
@@ -1056,14 +1120,24 @@ class ExceptionPolicyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -1089,6 +1163,10 @@ class ExceptionPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -1101,6 +1179,7 @@ class ExceptionPolicyFactory extends Factory {
 						case 'is_enabled_watch_window':
 						case 'is_enabled_grace':
 							$function = str_replace('_', '', $variable);
+							//Must not place a break here, as we just change the funtion name for the below default case.
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();
@@ -1118,6 +1197,10 @@ class ExceptionPolicyFactory extends Factory {
 
 	//This is called for every record everytime, and doesn't help much because of that.
 	//This has to be enabled to properly log modifications though.
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getExceptionPolicyControl(), $log_action, TTi18n::getText('Exception Policy') .' - '. TTi18n::getText('Type') .': '. Option::getByKey( $this->getType(), $this->getOptions('type') ), NULL, $this->getTable(), $this );
 	}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,7 +60,13 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodScheduleListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -61,7 +74,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => (int)$id,
+						'id' => TTUUID::castUUID($id),
 						);
 
 			$query = '
@@ -80,7 +93,13 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		return $this;
 	}
 
-	function getByUserId($user_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodScheduleListFactory
+	 */
+	function getByUserId( $user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -88,7 +107,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		$ppsulf = new PayPeriodScheduleUserListFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -106,13 +125,21 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		return $this;
 	}
 
-	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodScheduleListFactory
+	 */
+	function getByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -129,7 +156,14 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		return $this;
 	}
 
-	function getByCompanyIdAndUserId($company_id, $user_ids, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_ids UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodScheduleListFactory
+	 */
+	function getByCompanyIdAndUserId( $company_id, $user_ids, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -147,7 +181,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 */
 		$ppsuf = new PayPeriodScheduleUserFactory();
 
-		$ph = array( 'company_id' => (int)$company_id, );
+		$ph = array( 'company_id' => TTUUID::castUUID($company_id), );
 
 		$query = '
 					select	a.*,
@@ -158,7 +192,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 						AND a.company_id = ? ';
 
 		if ( isset($user_ids) AND ( $user_ids != '' OR ( is_array($user_ids) AND isset($user_ids[0]) ) ) ) {
-			$query	.=	' AND b.user_id in ('. $this->getListSQL( $user_ids, $ph, 'int' ) .') ';
+			$query	.=	' AND b.user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid' ) .') ';
 		}
 
 		$query .= '	AND a.deleted = 0';
@@ -170,7 +204,13 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodScheduleListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -180,8 +220,8 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -197,7 +237,16 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		return $this;
 	}
 
-	function getByPayPeriodIdAndCompanyId($id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodScheduleListFactory
+	 */
+	function getByPayPeriodIdAndCompanyId( $id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -207,7 +256,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$ppf = new PayPeriodFactory();
@@ -218,7 +267,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 						_ADODB_COUNT
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND	id in ( select ppf.pay_period_schedule_id from '. $ppf->getTable() .' as ppf where ppf.id in ('. $this->getListSQL( $id, $ph, 'int' ) .') )
+						AND	id in ( select ppf.pay_period_schedule_id from '. $ppf->getTable() .' as ppf where ppf.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .') )
 						AND deleted=0';
 		$query .= $this->getSortSQL( $order );
 
@@ -227,14 +276,19 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		return $this;
 	}
 
-	function getByCompanyIdArray($company_id, $include_blank = TRUE ) {
+	/**
+	 * @param string $company_id UUID
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getByCompanyIdArray( $company_id, $include_blank = TRUE ) {
 
 		$ppslf = new PayPeriodScheduleListFactory();
 		$ppslf->getByCompanyId($company_id);
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($ppslf as $pps_obj) {
@@ -248,14 +302,19 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		return FALSE;
 	}
 
-	function getArrayByListFactory($lf, $include_blank = TRUE) {
+	/**
+	 * @param $lf
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getArrayByListFactory( $lf, $include_blank = TRUE) {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($lf as $obj) {
@@ -269,6 +328,10 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		return FALSE;
 	}
 
+	/**
+	 * @param $lf
+	 * @return array|bool
+	 */
 	function getUserToPayPeriodScheduleMapArrayByListFactory( $lf ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
@@ -286,6 +349,15 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodScheduleListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -317,7 +389,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		$ppsuf = new PayPeriodScheduleUserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -338,9 +410,9 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['type']) AND !is_array($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
 			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APISchedule extends APIFactory {
 	protected $main_class = 'ScheduleFactory';
 
+	/**
+	 * APISchedule constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,6 +52,7 @@ class APISchedule extends APIFactory {
 
 	/**
 	 * Get default schedule data for creating new schedulees.
+	 * @param array $data
 	 * @return array
 	 */
 	function getScheduleDefaultData( $data = NULL ) {
@@ -58,16 +62,16 @@ class APISchedule extends APIFactory {
 
 		$retarr = array(
 						'status_id' => 10,
-						//'user_id' => ($user_id != '' ) ? $user_id : $this->getCurrentUserObject()->getID(),
+						'user_id' => $this->getCurrentUserObject()->getID(), //prevent '...' in combobox
 						'start_time' => TTDate::getAPIDate( 'TIME', strtotime( '8:00 AM' ) ),
 						'end_time' => TTDate::getAPIDate( 'TIME', strtotime( '5:00 PM' ) ),
-						'schedule_policy_id' => 0,
+						'schedule_policy_id' => TTUUID::getZeroID(),
 
 						//JS will figure out these values based on selected cells.
-						'branch_id' => -1,
-						'department_id' => -1,
-						'job_id' => -1,
-						'job_item_id' => -1,
+						'branch_id' => TTUUID::getNotExistID(),
+						'department_id' => TTUUID::getNotExistID(),
+						'job_id' => TTUUID::getNotExistID(),
+						'job_item_id' => TTUUID::getNotExistID(),
 					);
 
 		//Get all user_ids.
@@ -125,8 +129,11 @@ class APISchedule extends APIFactory {
 
 	/**
 	 * Get all necessary dates for building the schedule in a single call, this is mainly as a performance optimization.
-	 * @param array $data filter data
+	 * @param int $base_date EPOCH
+	 * @param $type
+	 * @param bool $strict
 	 * @return array
+	 * @internal param array $data filter data
 	 */
 	function getScheduleDates( $base_date, $type, $strict = TRUE ) {
 		$epoch = TTDate::parseDateTime( $base_date );
@@ -200,7 +207,10 @@ class APISchedule extends APIFactory {
 	/**
 	 * Get combined recurring schedule and committed schedule data for one or more schedulees.
 	 * @param array $data filter data
-	 * @return array
+	 * @param int $base_date EPOCH
+	 * @param null $type
+	 * @param null $strict
+	 * @return array|bool
 	 */
 	function getCombinedSchedule( $data = NULL, $base_date = NULL, $type = NULL, $strict = NULL ) {
 
@@ -226,9 +236,9 @@ class APISchedule extends APIFactory {
 		//If we don't have permissions to view open shifts, exclude user_id = 0;
 		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == TRUE
 				AND ( $this->getPermissionObject()->Check('schedule', 'view_own') == TRUE OR $this->getPermissionObject()->Check('schedule', 'view_child') == TRUE ) ) {
-			$data['filter_data']['permission_is_id'] = 0; //Always allow this user_id to be returned.
+			$data['filter_data']['permission_is_id'] = TTUUID::getZeroID(); //Always allow this user_id to be returned.
 		} elseif ( $this->getPermissionObject()->Check('schedule', 'view_open') == FALSE ) {
-			$data['filter_data']['exclude_id'] = array(0);
+			$data['filter_data']['exclude_id'] = array( TTUUID::getZeroID() );
 		}
 
 		//Pass items per page through to getScheduleArray()
@@ -292,7 +302,8 @@ class APISchedule extends APIFactory {
 	/**
 	 * Get schedule data for one or more schedulees.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getSchedule( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('schedule', 'enabled')
@@ -321,10 +332,10 @@ class APISchedule extends APIFactory {
 
 		//If we don't have permissions to view open shifts, exclude user_id = 0;
 		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == FALSE ) {
-			$data['filter_data']['exclude_id'] = array(0);
+			$data['filter_data']['exclude_id'] = array( TTUUID::getZeroID() );
 		} elseif ( count($data['filter_data']['permission_children_ids']) > 0 ) {
 			//If schedule, view_open is allowed but they are also only allowed to see their subordinates (which they have some of), add "open" employee as if they are a subordinate.
-			$data['filter_data']['permission_children_ids'][] = 0;
+			$data['filter_data']['permission_children_ids'][] = TTUUID::getZeroID();
 		}
 
 		$blf = TTnew( 'ScheduleListFactory' );
@@ -355,8 +366,9 @@ class APISchedule extends APIFactory {
 
 	/**
 	 * Export wage data to csv
-	 * @param array $data filter data
 	 * @param string $format file format (csv)
+	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function exportSchedule( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
@@ -391,6 +403,9 @@ class APISchedule extends APIFactory {
 	/**
 	 * Set schedule data for one or more schedulees.
 	 * @param array $data schedule data
+	 * @param bool $validate_only
+	 * @param bool $overwrite
+	 * @param bool $ignore_warning
 	 * @return array
 	 */
 	function setSchedule( $data, $validate_only = FALSE, $overwrite = FALSE, $ignore_warning = TRUE ) {
@@ -412,15 +427,15 @@ class APISchedule extends APIFactory {
 
 		//If they have permissions to view open shifts, assume "0" is one of their subordinates.
 		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == TRUE ) {
-			$permission_children_ids[] = 0;
+			$permission_children_ids[] = TTUUID::getZeroID();
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' Schedules', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -428,7 +443,7 @@ class APISchedule extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'ScheduleListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' AND $row['id'] != TTUUID::getZeroID() AND $row['id'] != TTUUID::getNotExistID() ) {
 					//Modifying existing object.
 					//Get schedule object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -443,7 +458,7 @@ class APISchedule extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('schedule', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -463,12 +478,13 @@ class APISchedule extends APIFactory {
 										$this->getPermissionObject()->Check('schedule', 'edit')
 										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('schedule', 'edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
 										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('schedule', 'edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('schedule', 'view_open') AND (int)$row['user_id'] == 0 )
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('schedule', 'view_open') AND TTUUID::castUUID($row['user_id']) == TTUUID::getZeroID() )
 									)
 								)
 							) ) {
 						$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Add permission denied') );
 					}
+					$row['id'] = $this->getNextInsertID();
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -485,7 +501,7 @@ class APISchedule extends APIFactory {
 								Debug::Text('Deleting Schedule Shift ID: '. $s_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 								$s_obj->setDeleted(TRUE);
 								if ( $s_obj->isValid() ) {
-									$s_obj->Save();
+									$s_obj->Save( TRUE, TRUE );
 								}
 							}
 						} else {
@@ -495,14 +511,6 @@ class APISchedule extends APIFactory {
 					}
 
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
-
-					//This is important when adding/editing a scheduled shift, without it there can be issues calculating exceptions
-					//because if a specific schedule was modified that caused the day to change, smartReCalculate
-					//may only be able to recalculate a single day, instead of both.
-					$old_date_stamp = $lf->getDateStamp();
-					if ( $old_date_stamp != 0 ) {
-						$lf->setOldDateStamp( $old_date_stamp );
-					}
 
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();	 //This prevents a validation error if company_id is FALSE.
 					$lf->setObjectFromArray( $row );
@@ -518,7 +526,7 @@ class APISchedule extends APIFactory {
 						if ( $validate_only == TRUE ) {
 							$save_result[$key] = TRUE;
 						} else {
-							$save_result[$key] = $lf->Save();
+							$save_result[$key] = $lf->Save( TRUE, TRUE );
 						}
 						$validator_stats['valid_records']++;
 					}
@@ -551,10 +559,10 @@ class APISchedule extends APIFactory {
 	/**
 	 * Delete one or more schedules.
 	 * @param array $data schedule data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteSchedule( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -571,14 +579,14 @@ class APISchedule extends APIFactory {
 		$permission_children_ids = $this->getPermissionChildren();
 		//If they have permissions to view open shifts, assume "0" is one of their subordinates.
 		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == TRUE ) {
-			$permission_children_ids[] = 0;
+			$permission_children_ids[] = TTUUID::getZeroID();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' Schedules', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -587,7 +595,7 @@ class APISchedule extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'ScheduleListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get schedule object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -596,7 +604,7 @@ class APISchedule extends APIFactory {
 						if ( $this->getPermissionObject()->Check('schedule', 'delete')
 								OR ( $this->getPermissionObject()->Check('schedule', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
 								OR ( $this->getPermissionObject()->Check('schedule', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -653,7 +661,8 @@ class APISchedule extends APIFactory {
 	 * @param integer $start Start date epoch
 	 * @param integer $end End date epoch
 	 * @param integer $schedule_policy_id Schedule policy ID
-	 * @return array
+	 * @param string $user_id UUID
+	 * @return array|bool
 	 */
 	function getScheduleTotalTime( $start, $end, $schedule_policy_id = NULL, $user_id = NULL ) {
 		Debug::text('Calculating total time for scheduled shift... Start: '. $start .' End: '. $end, __FILE__, __LINE__, __METHOD__, 10);
@@ -670,7 +679,7 @@ class APISchedule extends APIFactory {
 
 		//This helps calculate the schedule total time based on schedule policy or policy groups.
 		$sf->setCompany( $this->getCurrentCompanyObject()->getId() );
-		if ( !is_array($user_id) AND $user_id > 0 ) {
+		if ( !is_array($user_id) AND $user_id != '' ) {
 			$sf->setUser( $user_id );
 		}
 
@@ -758,7 +767,7 @@ class APISchedule extends APIFactory {
 	 * Creates punches from an array of scheduled shift ids.
 	 *
 	 * @param array $schedule_arr should have 2 sub arrays of integer ids, one labeled 'schedule', one labeled 'recurring'
-	 * @return bool
+	 * @return array|bool
 	 */
 	function addPunchesFromScheduledShifts( $schedule_arr ) {
 		if ( $this->getCurrentCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {

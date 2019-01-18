@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,11 @@ class HolidayFactory extends Factory {
 
 	protected $holiday_policy_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -81,6 +86,10 @@ class HolidayFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -92,37 +101,38 @@ class HolidayFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getHolidayPolicyObject() {
 		return $this->getGenericObject( 'HolidayPolicyListFactory', $this->getHolidayPolicyID(), 'holiday_policy_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getHolidayPolicyID() {
-		if ( isset($this->data['holiday_policy_id']) ) {
-			return (int)$this->data['holiday_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setHolidayPolicyID($id) {
-		$id = trim($id);
-
-		$hplf = TTnew( 'HolidayPolicyListFactory' );
-
-		if (
-				$this->Validator->isResultSetWithRows(	'holiday_policy',
-													$hplf->getByID($id),
-													TTi18n::gettext('Holiday Policy is invalid')
-													) ) {
-
-			$this->data['holiday_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'holiday_policy_id' );
 	}
 
-	function isUniqueDateStamp($date_stamp) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setHolidayPolicyID( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'holiday_policy_id', $value );
+	}
+
+	/**
+	 * @param int $date_stamp EPOCH
+	 * @return bool
+	 */
+	function isUniqueDateStamp( $date_stamp) {
 		$ph = array(
 					'policy_id' => $this->getHolidayPolicyID(),
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
@@ -145,64 +155,54 @@ class HolidayFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getDateStamp( $raw = FALSE ) {
-		if ( isset($this->data['date_stamp']) ) {
+		$value = $this->getGenericDataValue( 'date_stamp' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['date_stamp'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['date_stamp'] );
-			}
-		}
-
-		return FALSE;
-	}
-	function setDateStamp($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if	(	$this->Validator->isDate(		'date_stamp',
-												$epoch,
-												TTi18n::gettext('Incorrect date'))
-					AND
-						$this->Validator->isTrue(		'date_stamp',
-														$this->isUniqueDateStamp($epoch),
-														TTi18n::gettext('Date is already in use by another Holiday'))
-
-			) {
-
-			if	( $epoch > 0 ) {
-				if ( $this->getDateStamp() !== $epoch AND $this->getOldDateStamp() != $this->getDateStamp() ) {
-					Debug::Text(' Setting Old DateStamp... Current Old DateStamp: '. (int)$this->getOldDateStamp() .' Current DateStamp: '. (int)$this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
-					$this->setOldDateStamp( $this->getDateStamp() );
-				}
-
-				$this->data['date_stamp'] = $epoch;
-
-				return TRUE;
-			} else {
-				$this->Validator->isTRUE(		'date_stamp',
-												FALSE,
-												TTi18n::gettext('Incorrect date'));
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setDateStamp( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'date_stamp', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getOldDateStamp() {
-		if ( isset($this->tmp_data['old_date_stamp']) ) {
-			return $this->tmp_data['old_date_stamp'];
-		}
-
-		return FALSE;
-	}
-	function setOldDateStamp($date_stamp) {
-		Debug::Text(' Setting Old DateStamp: '. TTDate::getDate('DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
-		$this->tmp_data['old_date_stamp'] = TTDate::getMiddleDayEpoch( $date_stamp );
-
-		return TRUE;
+		return $this->getGenericTempDataValue( 'old_date_stamp' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setOldDateStamp( $value) {
+		Debug::Text(' Setting Old DateStamp: '. TTDate::getDate('DATE', $value ), __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericTempDataValue( 'old_date_stamp', TTDate::getMiddleDayEpoch( $value ) );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		//BindDate() causes a deprecated error if date_stamp is not set, so just return TRUE so we can throw a invalid date error elsewhere instead.
 		//This also causes it so we can never have a invalid date and invalid name validation errors at the same time.
 		if ( $this->getDateStamp() == '' ) {
@@ -259,37 +259,29 @@ class HolidayFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
-	function setName($name) {
-		$name = trim($name);
 
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is invalid'),
-											2, 50)
-					AND
-						$this->Validator->isTrue(		'name',
-														$this->isUniqueName($name),
-														TTi18n::gettext('Name is already in use in this year, or within 30 days'))
-
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'name', $value );
 	}
 
 	//ignore_after_eligibility is used when scheduling employees as absent on a holiday, since they haven't worked after the holiday
 	// when the schedule is created, it will always fail.
+	/**
+	 * @param string $user_id UUID
+	 * @param bool $ignore_after_eligibility
+	 * @return bool
+	 */
 	function isEligible( $user_id, $ignore_after_eligibility = FALSE ) {
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -341,20 +333,84 @@ class HolidayFactory extends Factory {
 
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Holiday Policy
+		$hplf = TTnew( 'HolidayPolicyListFactory' );
+		$this->Validator->isResultSetWithRows(	'holiday_policy',
+														$hplf->getByID($this->getHolidayPolicyID()),
+														TTi18n::gettext('Holiday Policy is invalid')
+													);
+		// Date stamp
+		$this->Validator->isDate(		'date_stamp',
+												$this->getDateStamp(),
+												TTi18n::gettext('Incorrect date')
+											);
+		if ( $this->Validator->isError('date_stamp') == FALSE ) {
+			$this->Validator->isTrue(		'date_stamp',
+													$this->isUniqueDateStamp( $this->getDateStamp() ),
+													TTi18n::gettext('Date is already in use by another Holiday')
+												);
+		}
+		if ( $this->Validator->isError('date_stamp') == FALSE ) {
+			$value = $this->getDateStamp();
+			if	( $value > 0 ) {
+				if ( $this->getDateStamp() !== $value AND $this->getOldDateStamp() != $this->getDateStamp() ) {
+					Debug::Text(' Setting Old DateStamp... Current Old DateStamp: '. (int)$this->getOldDateStamp() .' Current DateStamp: '. (int)$this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
+					$this->setOldDateStamp( $this->getDateStamp() );
+				}
+			} else {
+				$this->Validator->isTRUE(		'date_stamp',
+												FALSE,
+												TTi18n::gettext('Incorrect date'));
+			}
+		}
+		// Name
+		$this->Validator->isLength(	'name',
+											$this->getName(),
+											TTi18n::gettext('Name is invalid'),
+											2, 50
+										);
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(		'name',
+											$this->isUniqueName($this->getName()),
+											TTi18n::gettext('Name is already in use in this year, or within 30 days')
+										);
+		}
+
+
+
+
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( $this->Validator->hasError('date_stamp') == FALSE AND $this->getDateStamp() == '' ) {
 			$this->Validator->isTrue(		'date_stamp',
 											FALSE,
 											TTi18n::gettext('Date is invalid'));
 		}
 
+
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		//ReCalculate Recurring Schedule records based on this holiday, assuming its in the future.
 		if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) >= TTDate::getMiddleDayEpoch( time() ) ) {
@@ -378,7 +434,7 @@ class HolidayFactory extends Factory {
 				Debug::text('Recurring Schedule Record Count: '. $rslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $rslf->getRecordCount() > 0 ) {
 					foreach( $rslf as $rs_obj ) {
-						if ( $rs_obj->getRecurringScheduleControl() > 0 ) {
+						if ( TTUUID::isUUID( $rs_obj->getRecurringScheduleControl() ) AND $rs_obj->getRecurringScheduleControl() != TTUUID::getZeroID() AND $rs_obj->getRecurringScheduleControl() != TTUUID::getNotExistID() ) {
 							$recurring_schedule_control_ids[] = $rs_obj->getRecurringScheduleControl();
 						}
 					}
@@ -404,6 +460,10 @@ class HolidayFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -434,6 +494,10 @@ class HolidayFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -464,6 +528,10 @@ class HolidayFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Holiday'), NULL, $this->getTable(), $this );
 	}

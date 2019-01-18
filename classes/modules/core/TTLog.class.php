@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,6 +39,15 @@
  * @package Core
  */
 class TTLog {
+	/**
+	 * @param string $object_id UUID
+	 * @param int $action_id
+	 * @param $description
+	 * @param string $user_id UUID
+	 * @param $table
+	 * @param null $object
+	 * @return bool
+	 */
 	static function addEntry( $object_id, $action_id, $description, $user_id, $table, $object = NULL ) {
 		global $config_vars;
 
@@ -46,7 +55,7 @@ class TTLog {
 			return TRUE;
 		}
 
-		if ( !is_numeric($object_id) ) {
+		if ( $object_id == ''  ) {
 			return FALSE;
 		}
 
@@ -60,7 +69,7 @@ class TTLog {
 				Debug::text('User Class: '. get_class( $current_user ) .' Full Name: '. $current_user->getFullName(), __FILE__, __LINE__, __METHOD__, 10);
 				$user_id = $current_user->getId();
 			} else {
-				$user_id = 0;
+				$user_id = TTUUID::getZeroID();
 			}
 		}
 
@@ -73,7 +82,7 @@ class TTLog {
 		$lf->setObject( $object_id );
 		$lf->setAction( $action_id );
 		$lf->setTableName( $table );
-		$lf->setUser( (int)$user_id );
+		$lf->setUser( TTUUID::castUUID($user_id) );
 		$lf->setDescription( $description );
 		$lf->setDate( time() );
 

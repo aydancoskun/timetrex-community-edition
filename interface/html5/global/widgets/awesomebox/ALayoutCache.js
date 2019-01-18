@@ -35,6 +35,10 @@ ALayoutCache.buildDefaultColumns = function() {
 		{label: $.i18n._( 'Status' ), value: 'status'}
 	];
 
+	default_columns[ALayoutIDs.LEGAL_ENTITY] = [
+		{label: $.i18n._( 'Name' ), value: 'legal_name'}
+	];
+
 	default_columns[ALayoutIDs.JOB] = [
 		{label: $.i18n._( 'Name' ), value: 'name'},
 		{label: $.i18n._( 'Code' ), value: 'manual_id'}
@@ -157,6 +161,11 @@ ALayoutCache.buildDefaultColumns = function() {
 		{label: $.i18n._( 'Type' ), value: 'type'},
 		{label: $.i18n._( 'Status' ), value: 'status'}
 
+	];
+
+	default_columns[ALayoutIDs.PAYROLL_REMITTANCE_AGENCY] = [
+		{label: $.i18n._( 'Name' ), value: 'name'},
+		{label: $.i18n._( 'Legal Entity Name' ), value: 'legal_entity_legal_name'}
 	];
 
 	default_columns[ALayoutIDs.KPI_REVIEW_CONTROL] = [

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,9 @@
  */
 class TimesheetSummaryReport extends Report {
 
+	/**
+	 * TimesheetSummaryReport constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('TimeSheet Summary Report');
 		$this->file_name = 'timesheet_summary_report';
@@ -49,6 +52,11 @@ class TimesheetSummaryReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
 				AND $this->getPermissionObject()->Check('report', 'view_timesheet_summary', $user_id, $company_id ) ) {
@@ -58,6 +66,9 @@ class TimesheetSummaryReport extends Report {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	protected function _validateConfig() {
 		$config = $this->getConfig();
 
@@ -69,6 +80,11 @@ class TimesheetSummaryReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|mixed|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -87,7 +103,7 @@ class TimesheetSummaryReport extends Report {
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
 										'-1010-time_period' => TTi18n::gettext('Time Period'),
-
+										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -619,6 +635,11 @@ class TimesheetSummaryReport extends Report {
 	}
 
 	//Get raw data for report
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array('user_date_total' => array(), 'schedule' => array(), 'worked_days' => array(), 'user' => array(), 'default_branch' => array(), 'default_department' => array(), 'branch' => array(), 'department' => array(), 'verified_timesheet' => array() );
 
@@ -678,8 +699,8 @@ class TimesheetSummaryReport extends Report {
 
 						if ( !isset($include_no_data_rows_arr[$udt_obj->getColumn('pay_period_id')][$date_stamp]) ) {
 							$include_no_data_rows_arr[$udt_obj->getColumn('pay_period_id')][$date_stamp] = array(
-																			'branch_id' => 0,
-																			'department_id' => 0,
+																			'branch_id' => TTUUID::getZeroID(),
+																			'department_id' => TTUUID::getZeroID(),
 																			'pay_period_start_date' => strtotime( $udt_obj->getColumn('pay_period_start_date') ),
 																			'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
 																			'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
@@ -689,12 +710,12 @@ class TimesheetSummaryReport extends Report {
 						}
 					}
 
-					if ( $udt_obj->getPayCode() > 0 ) { //Make sure we don't set the currency based on worked_time that will always be currency_id=0 and have no pay_code_id associated.
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency_rate'] = $currency_rate;
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency'] = $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $currency_id, $currency_options );
-						if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
-							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
-						}
+					if ( TTUUID::isUUID( $udt_obj->getPayCode() ) AND $udt_obj->getPayCode() != TTUUID::getZeroID() AND $udt_obj->getPayCode() != TTUUID::getNotExistID() ) { //Make sure we don't set the currency based on worked_time that will always be currency_id=0 and have no pay_code_id associated.
+					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency_rate'] = $currency_rate;
+					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency'] = $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $currency_id, $currency_options );
+					if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
+						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
+					}
 					}
 
 					foreach( $time_columns as $column ) {
@@ -753,8 +774,8 @@ class TimesheetSummaryReport extends Report {
 					$status = strtolower( Option::getByKey($s_obj->getColumn('status_id'), $s_obj->getOptions('status') ) );
 
 					//Check if the user worked on any of the scheduled days, if not insert a dummy day so the scheduled time at least appears still.
-					if ( !isset($this->tmp_data['user_date_total'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]) ) {
-						$this->tmp_data['user_date_total'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')] = array(
+					if ( !isset($this->tmp_data['user_date_total'][TTUUID::castUUID($s_obj->getUser())][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]) ) {
+						$this->tmp_data['user_date_total'][TTUUID::castUUID($s_obj->getUser())][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')] = array(
 							'branch_id' => $s_obj->getColumn('branch_id'),
 							'department_id' => $s_obj->getColumn('department_id'),
 							'pay_period_start_date' => strtotime( $s_obj->getColumn('pay_period_start_date') ),
@@ -766,10 +787,10 @@ class TimesheetSummaryReport extends Report {
 					}
 
 					//Make sure we handle multiple schedules on the same day.
-					if ( isset($this->tmp_data['schedule'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status]) ) {
-						$this->tmp_data['schedule'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status] = bcadd( $this->tmp_data['schedule'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status], $s_obj->getColumn('total_time') );
+					if ( isset($this->tmp_data['schedule'][TTUUID::castUUID($s_obj->getUser())][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status]) ) {
+						$this->tmp_data['schedule'][TTUUID::castUUID($s_obj->getUser())][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status] = bcadd( $this->tmp_data['schedule'][TTUUID::castUUID($s_obj->getUser())][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status], $s_obj->getColumn('total_time') );
 					} else {
-						$this->tmp_data['schedule'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status] = $s_obj->getColumn('total_time');
+						$this->tmp_data['schedule'][TTUUID::castUUID($s_obj->getUser())][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status] = $s_obj->getColumn('total_time');
 					}
 				}
 			}
@@ -851,6 +872,10 @@ class TimesheetSummaryReport extends Report {
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
+
+	/**
+	 * @return bool
+	 */
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['user_date_total']), NULL, TTi18n::getText('Pre-Processing Data...') );
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class AccrualBalanceListFactory extends AccrualBalanceFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualBalanceListFactory|bool
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -75,7 +88,13 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualBalanceListFactory|bool
+	 */
+	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -83,7 +102,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -101,7 +120,14 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualBalanceListFactory|bool
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -113,8 +139,8 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => (int)$id,
-					'company_id' => (int)$company_id,
+					'id' => TTUUID::castUUID($id),
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -132,7 +158,16 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		return $this;
 	}
 
-	function getByUserIdAndCompanyId($user_id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualBalanceListFactory|bool
+	 */
+	function getByUserIdAndCompanyId( $user_id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -154,7 +189,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$af = new AccrualFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -168,7 +203,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 					where	a.user_id = b.id
 						AND a.accrual_policy_account_id = c.id
 						AND b.company_id = ?
-						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'uuid' ) .')
 						AND EXISTS ( select 1 from '. $af->getTable() .' as af WHERE af.accrual_policy_account_id = a.accrual_policy_account_id AND a.user_id = af.user_id AND af.deleted = 0 )
 						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
@@ -179,7 +214,17 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		return $this;
 	}
 
-	function getByUserIdAndCompanyIdAndEnablePayStubBalanceDisplay($user_id, $company_id, $enable_pay_stub_balance_display, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @param $enable_pay_stub_balance_display
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualBalanceListFactory|bool
+	 */
+	function getByUserIdAndCompanyIdAndEnablePayStubBalanceDisplay( $user_id, $company_id, $enable_pay_stub_balance_display, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -200,7 +245,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$apaf = new AccrualPolicyAccountFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'enable_pay_stub_balance_display' => (int)$enable_pay_stub_balance_display,
 					);
 
@@ -214,7 +259,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 						AND a.accrual_policy_account_id = c.id
 						AND b.company_id = ?
 						AND c.enable_pay_stub_balance_display = ?
-						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'uuid' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
@@ -224,7 +269,14 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		return $this;
 	}
 
-	function getByUserIdAndAccrualPolicyAccount($user_id, $accrual_policy_account_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualBalanceListFactory|bool
+	 */
+	function getByUserIdAndAccrualPolicyAccount( $user_id, $accrual_policy_account_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -234,8 +286,8 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'accrual_policy_account_id' => TTUUID::castUUID($accrual_policy_account_id),
 					);
 
 		$query = '
@@ -252,6 +304,15 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualBalanceListFactory|bool
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -295,7 +356,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$af = new AccrualFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -327,28 +388,28 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 						AND EXISTS ( select 1 from '. $af->getTable() .' as af WHERE af.accrual_policy_account_id = a.accrual_policy_account_id AND a.user_id = af.user_id AND af.deleted = 0 )
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['accrual_policy_account_id']) ) ? $this->getWhereClauseSQL( 'a.accrual_policy_account_id', $filter_data['accrual_policy_account_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['accrual_policy_account_id']) ) ? $this->getWhereClauseSQL( 'a.accrual_policy_account_id', $filter_data['accrual_policy_account_id'], 'uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['status']) AND !is_array( $filter_data['status'] ) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
 		}
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'b.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['group']) ) ? $this->getWhereClauseSQL( 'e.name', $filter_data['group'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_branch']) ) ? $this->getWhereClauseSQL( 'c.name', $filter_data['default_branch'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department']) ) ? $this->getWhereClauseSQL( 'd.name', $filter_data['default_department'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title']) ) ? $this->getWhereClauseSQL( 'f.name', $filter_data['title'], 'text', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'b.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;

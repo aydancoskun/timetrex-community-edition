@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,10 +46,15 @@ class PayStubEntryFactory extends Factory {
 	protected $pay_stub_obj = NULL;
 	protected $ps_amendment_obj = NULL;
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 									'id' => 'ID',
 									'type_id' => FALSE,
+									'pay_stub_entry_account_id' => FALSE,
 									'name' => FALSE,
 									'pay_stub_id' => 'PayStub',
 									'rate' => 'Rate',
@@ -67,78 +72,86 @@ class PayStubEntryFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPayStubEntryAccountObject() {
 		return $this->getGenericObject( 'PayStubEntryAccountListFactory', $this->getPayStubEntryNameID(), 'pay_stub_entry_account_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPayStubObject() {
 		return $this->getGenericObject( 'PayStubListFactory', $this->getPayStub(), 'pay_stub_obj' );
 	}
-	
+
+	/**
+	 * @return bool
+	 */
 	function getPayStubAmendmentObject() {
 		return $this->getGenericObject( 'PayStubAmendmentListFactory', $this->getPayStubAmendment(), 'ps_amendment_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayStub() {
-		if ( isset($this->data['pay_stub_id']) ) {
-			return (int)$this->data['pay_stub_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayStub($id) {
-		$id = trim($id);
-
-		$pslf = TTnew( 'PayStubListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'pay_stub',
-													$pslf->getByID($id),
-													TTi18n::gettext('Invalid Pay Stub')
-													) ) {
-			$this->data['pay_stub_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_stub_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayStub( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'pay_stub_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayStubEntryNameId() {
-		if ( isset($this->data['pay_stub_entry_name_id']) ) {
-			return (int)$this->data['pay_stub_entry_name_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayStubEntryNameId($id) {
-		$id = trim($id);
-
-		Debug::text('Entry Account ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-		if (  $this->Validator->isResultSetWithRows(	'pay_stub_entry_name_id',
-														$psealf->getById($id),
-														TTi18n::gettext('Invalid Entry Account Id')
-														) ) {
-			$this->data['pay_stub_entry_name_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_stub_entry_name_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayStubEntryNameId( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::text('Entry Account ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'pay_stub_entry_name_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayStubAmendment() {
-		if ( isset($this->data['pay_stub_amendment_id']) ) {
-			return (int)$this->data['pay_stub_amendment_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_stub_amendment_id' );
 	}
-	function setPayStubAmendment($id, $start_date = FALSE, $end_date = FALSE ) {
-		$id = (int)$id;
 
-		if ( $id != 0 ) {
+	/**
+	 * @param string $id UUID
+	 * @param bool $start_date
+	 * @param bool $end_date
+	 * @return bool
+	 */
+	function setPayStubAmendment( $id, $start_date = FALSE, $end_date = FALSE ) {
+		$id = TTUUID::castUUID($id);
+
+		if ( $id != TTUUID::getZeroID() ) {
 			if ( $start_date == '' AND $end_date == '' ) {
 				$pay_stub_obj = $this->getPayStubObject();
 				if ( is_object( $pay_stub_obj ) ) {
@@ -154,12 +167,12 @@ class PayStubEntryFactory extends Factory {
 		Debug::text('PS Amendment ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$psalf = TTnew( 'PayStubAmendmentListFactory' );
-		if (  $id == 0
+		if (  $id == TTUUID::getZeroID()
 				OR $this->Validator->isResultSetWithRows(	'pay_stub_amendment_id',
 														$psalf->getByIdAndStartDateAndEndDate($id, $start_date, $end_date ),
 														TTi18n::gettext('Pay Stub Amendment effective date is after employees pay stub end date or termination date')
 														) ) {
-			$this->data['pay_stub_amendment_id'] = $id;
+			$this->setGenericDataValue( 'pay_stub_amendment_id', $id );
 
 			return TRUE;
 		}
@@ -167,90 +180,63 @@ class PayStubEntryFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserExpense() {
-		if ( isset($this->data['user_expense_id']) ) {
-			return (int)$this->data['user_expense_id'];
-		}
-
-		return FALSE;
-	}
-	function setUserExpense($id) {
-		$id = (int)$id;
-
-		Debug::text('User Expense ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
-			$uelf = TTnew( 'UserExpenseListFactory' );
-			$result = $uelf->getById($id);
-		} else {
-			$id = 0;
-		}
-
-		if (	$id == 0
-				OR $this->Validator->isResultSetWithRows(	'user_expense_id',
-															$result,
-															TTi18n::gettext('Invalid Expense')
-														) ) {
-
-			$this->data['user_expense_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_expense_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUserExpense( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::text('User Expense ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		if ( getTTProductEdition() < TT_PRODUCT_ENTERPRISE ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_expense_id', $value );
+	}
+
+	/**
+	 * @return null
+	 */
 	function getRate() {
-		if ( isset($this->data['rate']) ) {
-			return $this->data['rate'];
-		}
-
-		return NULL;
+		return $this->getGenericDataValue( 'rate' );
 	}
-	function setRate($value) {
-		$value = trim($value);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setRate( $value) {
+		$value = trim($value);
 		if ($value == NULL OR $value == '') {
 			return FALSE;
 		}
-
-		if (	empty($value) OR
-				(
-				$this->Validator->isFloat(				'rate',
-														$value,
-														TTi18n::gettext('Invalid Rate') )
-				AND
-				$this->Validator->isLength(				'rate',
-											$value,
-											TTi18n::gettext('Rate has too many digits'),
-											0,
-											21) //Need to include decimal.
-				AND
-				$this->Validator->isLengthBeforeDecimal('rate',
-											$value,
-											TTi18n::gettext('Rate has too many digits before the decimal'),
-											0,
-											16)
-				)
-			) {
-			//Must round to 2 decimals otherwise discreptancy can occur when generating pay stubs.
-			//$this->data['rate'] = Misc::MoneyFormat( $value, FALSE );
-			$this->data['rate'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		//Must round to 2 decimals otherwise discreptancy can occur when generating pay stubs.
+		//$this->data['rate'] = Misc::MoneyFormat( $value, FALSE );
+		return $this->setGenericDataValue( 'rate', $value );
 	}
 
+	/**
+	 * @return null
+	 */
 	function getUnits() {
-		if ( isset($this->data['units']) ) {
-			return $this->data['units'];
-		}
-
-		return NULL;
+		return $this->getGenericDataValue( 'units' );
 	}
-	function setUnits($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUnits( $value) {
 		$value = trim($value);
 
 		if ($value == NULL OR $value == '') {
@@ -258,43 +244,23 @@ class PayStubEntryFactory extends Factory {
 		}
 
 		Debug::text('Rate: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-
-		if (	empty($value) OR
-				(
-				$this->Validator->isFloat(				'units',
-														$value,
-														TTi18n::gettext('Invalid Units') )
-				AND
-				$this->Validator->isLength(				'units',
-											$value,
-											TTi18n::gettext('Units has too many digits'),
-											0,
-											21) //Need to include decimal
-				AND
-				$this->Validator->isLengthBeforeDecimal('units',
-											$value,
-											TTi18n::gettext('Units has too many digits before the decimal'),
-											0,
-											16)
-				)
-			) {
-			//Must round to 2 decimals otherwise discreptancy can occur when generating pay stubs.
-			//$this->data['units'] = Misc::MoneyFormat( $value, FALSE );
-			$this->data['units'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		//Must round to 2 decimals otherwise discreptancy can occur when generating pay stubs.
+		//$this->data['units'] = Misc::MoneyFormat( $value, FALSE );
+		return $this->setGenericDataValue( 'units', $value );
 	}
+
+	/**
+	 * @return null
+	 */
 	function getYTDUnits() {
-		if ( isset($this->data['ytd_units']) ) {
-			return $this->data['ytd_units'];
-		}
-
-		return NULL;
+		return $this->getGenericDataValue( 'ytd_units' );
 	}
-	function setYTDUnits($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setYTDUnits( $value) {
 		$value = trim($value);
 
 		if ($value == NULL OR $value == '') {
@@ -302,19 +268,12 @@ class PayStubEntryFactory extends Factory {
 		}
 
 		Debug::text('YTD Units: '. $value .' Name: '. $this->getPayStubEntryNameId(), __FILE__, __LINE__, __METHOD__, 10);
-
-		if (  $this->Validator->isFloat(				'ytd_units',
-														$value,
-														TTi18n::gettext('Invalid YTD Units')
-														) ) {
-			$this->data['ytd_units'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ytd_units', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableCalculateYTD() {
 		if ( isset($this->enable_calc_ytd) ) {
 			return $this->enable_calc_ytd;
@@ -322,12 +281,20 @@ class PayStubEntryFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableCalculateYTD($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableCalculateYTD( $bool) {
 		$this->enable_calc_ytd = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableCalculateAccrualBalance() {
 		if ( isset($this->enable_calc_accrual_balance) ) {
 			return $this->enable_calc_accrual_balance;
@@ -335,20 +302,29 @@ class PayStubEntryFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableCalculateAccrualBalance($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableCalculateAccrualBalance( $bool) {
 		$this->enable_calc_accrual_balance = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getAmount() {
-		if ( isset($this->data['amount']) ) {
-			return $this->data['amount'];
-		}
-
-		return NULL;
+		return $this->getGenericDataValue( 'amount' );
 	}
-	function setAmount($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAmount( $value) {
 		$value = trim($value);
 
 		//PHP v5.3.5 has a bug that it converts large values with 0's on the end into scientific notation.
@@ -359,82 +335,48 @@ class PayStubEntryFactory extends Factory {
 		if ($value == NULL OR $value == '' ) {
 			return FALSE;
 		}
-
-		if (  $this->Validator->isFloat(				'amount',
-														$value,
-														TTi18n::gettext('Invalid Amount') )
-				AND
-				$this->Validator->isLength(				'amount',
-											$value,
-											TTi18n::gettext('Amount has too many digits'),
-											0,
-											21) //Need to include decimal
-				AND
-				$this->Validator->isLengthBeforeDecimal('amount',
-											$value,
-											TTi18n::gettext('Amount has too many digits before the decimal'),
-											0,
-											16)
-			) {
-			//$this->data['amount'] = Misc::MoneyFormat( $value, FALSE );
-			$this->data['amount'] = ( is_object( $this->getPayStubObject() ) AND is_object( $this->getPayStubObject()->getCurrencyObject() ) ) ? $this->getPayStubObject()->getCurrencyObject()->round( $value ) : Misc::MoneyFormat( $value, FALSE );
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'amount', ( is_object( $this->getPayStubObject() ) AND is_object( $this->getPayStubObject()->getCurrencyObject() ) ) ? $this->getPayStubObject()->getCurrencyObject()->round( $value ) : Misc::MoneyFormat( $value, FALSE ) );
 	}
+
+	/**
+	 * @return null
+	 */
 	function getYTDAmount() {
-		if ( isset($this->data['ytd_amount']) ) {
-			return $this->data['ytd_amount'];
-		}
-
-		return NULL;
+		return $this->getGenericDataValue( 'ytd_amount' );
 	}
-	function setYTDAmount($value) {
-		$value = trim($value);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setYTDAmount( $value) {
+		$value = trim($value);
 		if ($value == NULL OR $value == '') {
 			return FALSE;
 		}
-
 		Debug::text('YTD Amount: '. $value .' Name: '. $this->getPayStubEntryNameId(), __FILE__, __LINE__, __METHOD__, 10);
-
-		if (  $this->Validator->isFloat(				'ytd_amount',
-														$value,
-														TTi18n::gettext('Invalid YTD Amount')
-														) ) {
-			//$this->data['ytd_amount'] = Misc::MoneyFormat( $value, FALSE );
-			$this->data['ytd_amount'] = ( is_object( $this->getPayStubObject() ) AND is_object( $this->getPayStubObject()->getCurrencyObject() ) ) ? $this->getPayStubObject()->getCurrencyObject()->round( $value ) : Misc::MoneyFormat( $value, FALSE );
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'ytd_amount', ( is_object( $this->getPayStubObject() ) AND is_object( $this->getPayStubObject()->getCurrencyObject() ) ) ? $this->getPayStubObject()->getCurrencyObject()->round( $value ) : Misc::MoneyFormat( $value, FALSE ) );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getDescription() {
-		return $this->data['description'];
-	}
-	function setDescription($text) {
-		$text = trim($text);
-
-		if	(	strlen($text) == 0
-				OR
-				$this->Validator->isLength(		'description',
-												$text,
-												TTi18n::gettext('Invalid Description Length'),
-												2,
-												100) ) {
-
-			$this->data['description'] = htmlspecialchars( $text );
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'description' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', htmlspecialchars( $value ) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		Debug::text('Pay Stub ID: '. $this->getPayStub() .' Calc YTD: '. (int)$this->getEnableCalculateYTD(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -446,54 +388,138 @@ class PayStubEntryFactory extends Factory {
 			$this->setYTDUnits( 0 );
 		}
 
-		/*
-		if (	$this->getPayStub()
-				AND
-				(
-					( $this->getYTDAmount() == FALSE AND $this->getYTDUnits() == FALSE )
-					OR
-					$this->getEnableCalculateYTD() == TRUE
-				) ) {
-			Debug::text('Calculating YTD values...', __FILE__, __LINE__, __METHOD__, 10);
-
-			//Calculate things like YTD values
-			$pslf = TTnew( 'PayStubListFactory' );
-			$ps = $pslf->getById( $this->getPayStub() )->getCurrent();
-
-			$pself = TTnew( 'PayStubEntryListFactory' );
-
-			//if ( $this->getPayStubEntryNameId() == 24 ) { //Vacation accural
-			//Debug::text('aaCalculating YTD values...:	 for Vacation Accrual....', __FILE__, __LINE__, __METHOD__, 10);
-			if ( $this->getPayStubEntryAccountObject() != FALSE
-					AND $this->getPayStubEntryAccountObject()->getType() == 50 ) {
-				//Accurals don't re-start after year boundary.
-				Debug::text('aaCalculating Balance (NOT YTD) values for Accrual....', __FILE__, __LINE__, __METHOD__, 10);
-				$ytd_values = $pself->getAmountSumByUserIdAndEntryNameIdAndDate( $ps->getUser(), $this->getPayStubEntryNameId(), $ps->getPayPeriodObject()->getEndDate(), $this->getId() );
-				//BUG: When re-calculating old pay stubs the balances don't
-				//take in to account other entries of the same PSE account on the same pay stub.
-				// 5.00	  5.00
-				//-5.00	 -5.00
-				//$ytd_values = $pself->getAmountSumByUserIdAndEntryNameIdAndDate( $ps->getUser(), $this->getPayStubEntryNameId(), $ps->getPayPeriodObject()->getEndDate(), 0 );
-			} else {
-				//$ytd_values = $pself->getYTDAmountSumByUserIdAndEntryNameIdAndYear( $ps->getUser(), $this->getPayStubEntryNameId(), $ps->getPayPeriodStartDate() );
-				$ytd_values = $pself->getYTDAmountSumByUserIdAndEntryNameIdAndDate( $ps->getUser(), $this->getPayStubEntryNameId(), $ps->getPayPeriodObject()->getTransactionDate(), $this->getId() );
-			}
-
-			Debug::text('aCalculating YTD values...: Amount: '. $ytd_values['amount'] .' PS Entry Name ID: '. $this->getPayStubEntryNameId(), __FILE__, __LINE__, __METHOD__, 10);
-
-			$this->setYTDAmount( $ytd_values['amount'] + $this->getAmount() );
-			$this->setYTDUnits( $ytd_values['units'] + $this->getUnits() );
-
-			Debug::text('bCalculating YTD values...: Amount: '. $this->getYTDAmount(), __FILE__, __LINE__, __METHOD__, 10);
-		} else {
-			Debug::text('NOT Calculating YTD values... YTD Amount: '. $this->getYTDAmount() .' YTD Units: '. $this->getYTDUnits(), __FILE__, __LINE__, __METHOD__, 10);
-		}
-		*/
-
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Pay Stub
+		if ( $this->getPayStub() !== FALSE ) {
+			$pslf = TTnew( 'PayStubListFactory' );
+			$this->Validator->isResultSetWithRows(	'pay_stub',
+															$pslf->getByID($this->getPayStub()),
+															TTi18n::gettext('Invalid Pay Stub')
+														);
+		}
+		// Entry Account Id
+		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+		$this->Validator->isResultSetWithRows(	'pay_stub_entry_name_id',
+														$psealf->getById($this->getPayStubEntryNameId()),
+														TTi18n::gettext('Invalid Entry Account Id')
+													);
+		// Expense
+		if ( $this->getUserExpense() !== FALSE AND $this->getUserExpense() != TTUUID::getZeroID() ) {
+			$uelf = TTnew( 'UserExpenseListFactory' );
+			$result = $uelf->getById($this->getUserExpense());
+			$this->Validator->isResultSetWithRows(	'user_expense_id',
+															$result,
+															TTi18n::gettext('Invalid Expense')
+														);
+		}
+		// Rate
+		if ( $this->getRate() != '' ) {
+			$this->Validator->isFloat(				'rate',
+															$this->getRate(),
+															TTi18n::gettext('Invalid Rate')
+														);
+			if ( $this->Validator->isError('rate') == FALSE ) {
+				$this->Validator->isLength(				'rate',
+																$this->getRate(),
+																TTi18n::gettext('Rate has too many digits'),
+																0,
+																21)
+															; //Need to include decimal.
+			}
+			if ( $this->Validator->isError('rate') == FALSE ) {
+				$this->Validator->isLengthBeforeDecimal('rate',
+																$this->getRate(),
+																TTi18n::gettext('Rate has too many digits before the decimal'),
+																0,
+																16
+															);
+			}
+		}
+		// Units
+		if ( $this->getUnits() != '' ) {
+			$this->Validator->isFloat(				'units',
+															$this->getUnits(),
+															TTi18n::gettext('Invalid Units')
+														);
+			if ( $this->Validator->isError('units') == FALSE ) {
+				$this->Validator->isLength(				'units',
+																$this->getUnits(),
+																TTi18n::gettext('Units has too many digits'),
+																0,
+																21
+															); //Need to include decimal
+			}
+			if ( $this->Validator->isError('units') == FALSE ) {
+				$this->Validator->isLengthBeforeDecimal('units',
+																$this->getUnits(),
+																TTi18n::gettext('Units has too many digits before the decimal'),
+																0,
+																16
+															);
+			}
+		}
+		// YTD Units
+		if ( $this->getYTDUnits() !== FALSE ) {
+			$this->Validator->isFloat(				'ytd_units',
+															$this->getYTDUnits(),
+															TTi18n::gettext('Invalid YTD Units')
+														);
+		}
+		// Amount
+		if ( $this->getAmount() !== FALSE ) {
+			$this->Validator->isFloat(				'amount',
+															$this->getAmount(),
+															TTi18n::gettext('Invalid Amount')
+														);
+			if ( $this->Validator->isError('amount') == FALSE ) {
+				$this->Validator->isLength(				'amount',
+																$this->getAmount(),
+																TTi18n::gettext('Amount has too many digits'),
+																0,
+																21
+															); //Need to include decimal
+			}
+			if ( $this->Validator->isError('amount') == FALSE ) {
+				$this->Validator->isLengthBeforeDecimal('amount',
+																$this->getAmount(),
+																TTi18n::gettext('Amount has too many digits before the decimal'),
+																0,
+																16
+															);
+			}
+		}
+		// YTD Amount
+		if ( $this->getYTDAmount() !== FALSE ) {
+			$this->Validator->isFloat(				'ytd_amount',
+															$this->getYTDAmount(),
+															TTi18n::gettext('Invalid YTD Amount')
+														);
+		}
+		// Description
+		if ( $this->getDescription() != '' ) {
+			$this->Validator->isLength(		'description',
+													$this->getDescription(),
+													TTi18n::gettext('Invalid Description Length'),
+													2,
+													100
+												);
+		}
+
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
 		//Calc YTD values if they aren't already done.
 		if ( $this->getYTDAmount() == NULL OR $this->getYTDUnits() == NULL ) {
 			$this->preSave();
@@ -564,6 +590,9 @@ class PayStubEntryFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		//If this entry is based off pay stub amendment, mark
 		//PS amendment as "ACTIVE" status.
@@ -608,6 +637,10 @@ class PayStubEntryFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -633,6 +666,10 @@ class PayStubEntryFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		$data = array();
@@ -642,6 +679,7 @@ class PayStubEntryFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'pay_stub_entry_account_id':
 						case 'type_id':
 						case 'name':
 							$data[$variable] = $this->getColumn( $variable );
@@ -661,6 +699,10 @@ class PayStubEntryFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getPayStub(), $log_action, TTi18n::getText('Pay Stub Entry') .': '. $this->getPayStubEntryAccountObject()->getName() .': '. TTi18n::getText('Amount') .': '. $this->getAmount(), NULL, $this->getTable(), $this );
 	}

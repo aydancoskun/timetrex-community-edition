@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,9 @@ class ROEReport extends Report {
 
 	protected $user_ids = array();
 
+	/**
+	 * ROEReport constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('ROE Report');
 		$this->file_name = 'roe';
@@ -51,6 +54,11 @@ class ROEReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 
 		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
@@ -64,6 +72,11 @@ class ROEReport extends Report {
 	}
 
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -88,7 +101,7 @@ class ROEReport extends Report {
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
 										'-1010-time_period' => TTi18n::gettext('Time Period'),
-
+										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -112,12 +125,12 @@ class ROEReport extends Report {
 				$retval = TTDate::getTimePeriodOptions();
 				break;
 			case 'date_columns':
-				$retval = array_merge(
-										TTDate::getReportDateOptions( 'first', TTi18n::gettext('First Day Worked(Or first day since last ROE)'), 16, FALSE ),
-										TTDate::getReportDateOptions( 'last', TTi18n::gettext('Last Day For Which Paid'), 16, FALSE ),
-										TTDate::getReportDateOptions( 'pay_period_end', TTi18n::gettext('Final Pay Period Ending Date'), 17, FALSE ),
-										TTDate::getReportDateOptions( 'recall', TTi18n::gettext('Expected Date of Recall'), 17, FALSE )
-				);
+//				$retval = array_merge(
+//										TTDate::getReportDateOptions( 'first', TTi18n::gettext('First Day Worked(Or first day since last ROE)'), 16, FALSE ),
+//										TTDate::getReportDateOptions( 'last', TTi18n::gettext('Last Day For Which Paid'), 16, FALSE ),
+//										TTDate::getReportDateOptions( 'pay_period_end', TTi18n::gettext('Final Pay Period Ending Date'), 17, FALSE ),
+//										TTDate::getReportDateOptions( 'recall', TTi18n::gettext('Expected Date of Recall'), 17, FALSE )
+//				);
 				$retval = array();
 				break;
 			case 'report_custom_column':
@@ -364,6 +377,9 @@ class ROEReport extends Report {
 		return $retval;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getFormObject() {
 		if ( !isset($this->form_obj['gf']) OR !is_object($this->form_obj['gf']) ) {
 			//
@@ -380,6 +396,18 @@ class ROEReport extends Report {
 		return $this->form_obj['gf'];
 	}
 
+	/**
+	 * @return bool
+	 */
+	function clearFormObject() {
+		$this->form_obj['gf'] = FALSE;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return mixed
+	 */
 	function getROEObject() {
 		if ( !isset($this->form_obj['roe']) OR !is_object($this->form_obj['roe']) ) {
 			$this->form_obj['roe'] = $this->getFormObject()->getFormObject( 'ROE', 'CA' );
@@ -389,20 +417,25 @@ class ROEReport extends Report {
 		return $this->form_obj['roe'];
 	}
 
+	/**
+	 * @return array
+	 */
 	function formatFormConfig() {
 		$retarr = (array)$this->getFormConfig();
 		return $retarr;
 	}
 
 	//Get raw data for report
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array( 'user' => array(), 'roe' => array() );
 
 		$filter_data = $this->getFilterConfig();
 
-		$this->user_ids = array_unique( $this->user_ids ); //Used to get the total number of employees.
-
-		//Debug::Arr($this->user_ids, 'User IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->form_data, 'Form Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -436,14 +469,56 @@ class ROEReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray(); //Don't pass $this->getColumnDataConfig() here as no columns are sent from Flex so it breaks the report.
+			$this->tmp_data['user'][$u_obj->getId()]['user_id'] = $u_obj->getId();
+			$this->tmp_data['user'][$u_obj->getId()]['legal_entity_id'] = $u_obj->getLegalEntity();
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+
+		unset($filter_data['id'], $filter_data['roe_id']); //Remove this filter so we don't cause problems with below queries.
+
+		//Get legal entity data for joining.
+		/** @var LegalEntityListFactory $lelf */
+		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		//Debug::Text( ' User Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
+		if ( $lelf->getRecordCount() > 0 ) {
+			foreach ( $lelf as $key => $le_obj ) {
+				if ( $format == 'html' OR $format == 'pdf' ) {
+					$this->tmp_data['legal_entity'][$le_obj->getId()] = Misc::addKeyPrefix( 'legal_entity_', (array)$le_obj->getObjectAsArray( Misc::removeKeyPrefix( 'legal_entity_', $this->getColumnDataConfig() ) ) );
+					$this->tmp_data['legal_entity'][$le_obj->getId()]['legal_entity_id'] = $le_obj->getId();
+				} else {
+					$this->form_data['legal_entity'][$le_obj->getId()] = $le_obj;
+				}
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			}
+		}
+
+		$this->tmp_data['remittance_agency'] = array();
+
+		$filter_data['agency_id'] = array('10:CA:00:00:0010',  '10:CA:00:00:0020'); //CA Service Canada (ROE)
+		/** @var PayrollRemittanceAgencyListFactory $ralf */
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		//Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
+		if ( $ralf->getRecordCount() > 0 ) {
+			foreach ( $ralf as $key => $ra_obj ) {
+				$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$ra_obj->parseAgencyID( NULL, 'id')] = $ra_obj;
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			}
+		}
 
 		return TRUE;
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
+
+	/**
+	 * @return bool
+	 */
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['roe']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
@@ -477,30 +552,39 @@ class ROEReport extends Report {
 					$recall_date_columns = array();
 				}
 
-
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
+					$tmp_legal_array = array();
+					if ( isset($this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']]) ) {
+						$tmp_legal_array = $this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']];
+					}
 
-					if ( is_array( $this->tmp_data['user'][$user_id] ) ) {
-						$process_data = array_merge( $process_data, $this->tmp_data['user'][$user_id] );
-					}
-					if ( is_array( $row ) ) {
-						$process_data = array_merge( $process_data, $row );
-					}
-					$this->data[] = array_merge( $process_data, $first_date_columns, $last_date_columns, $pay_period_end_date_columns, $recall_date_columns );
+					$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $first_date_columns, $last_date_columns, $pay_period_end_date_columns, $recall_date_columns, $tmp_legal_array );
 
 					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 					$key++;
 				}
 			}
-			unset($this->tmp_data, $row, $first_date_columns, $last_date_columns, $pay_period_end_date_columns, $recall_date_columns, $process_data);
+			unset($this->tmp_data, $row, $first_date_columns, $last_date_columns, $pay_period_end_date_columns, $recall_date_columns, $process_data, $tmp_legal_array);
+
+			//Calculate Form Data
+			if ( is_array($this->data) ) {
+				foreach( $this->data as $row ) {
+					if ( !isset($this->form_data['user'][$row['legal_entity_id']][$row['user_id']]) ) {
+						$this->form_data['roe'][$row['legal_entity_id']][$row['user_id']] = $row;
+					}
+
+				}
+			}
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		$this->form_data = $this->data; //Copy data to Form Data so group/sort doesn't affect it.
 
 		return TRUE;
 	}
 
+	/**
+	 * @param null $format
+	 * @return array|bool
+	 */
 	function _outputPDFForm( $format = NULL ) {
 		// Always display the background.
 		$show_background = TRUE;
@@ -521,113 +605,151 @@ class ROEReport extends Report {
 
 		$roef = TTnew('ROEFactory');
 
-		$roe = $this->getROEObject();
-		$roe->setShowBackground( $show_background );
-		//$roe->setDebug( TRUE );
-		//$roe->setType( $form_type );
-		$roe->business_number = $current_company->getBusinessNumber();
-		$roe->company_name = $current_company->getName();
-		$roe->company_address1 = $current_company->getAddress1();
-		$roe->company_address2 = $current_company->getAddress2();
-		$roe->company_city = $current_company->getCity();
-		$roe->company_province = $current_company->getProvince();
-		$roe->company_postal_code = $current_company->getPostalCode();
-		$roe->company_work_phone = $current_company->getWorkPhone();
-		$roe->english = TRUE;
-
 		$i = 0;
-		foreach($this->form_data as $row) {
-			if ( !isset($row['user_id']) ) {
-				Debug::Text('User ID not set!', __FILE__, __LINE__, __METHOD__, 10);
-				continue;
-			}
-
-			$ulf = TTnew( 'UserListFactory' );
-			$ulf->getById( (int)$row['user_id'] );
-			if ( $ulf->getRecordCount() == 1 ) {
-				$user_obj = $ulf->getCurrent();
-
-				$title_obj = $user_obj->getTitleObject();
-
-				$roef->setPayPeriodType( $row['pay_period_type_id'] );
-				
-				$ee_data = array(
-							'first_name' => $user_obj->getFirstName(),
-							'middle_name' => $user_obj->getMiddleName(),
-							'last_name' => $user_obj->getLastName(),
-							'employee_full_name' => $user_obj->getFullName(FALSE),
-							'employee_address1' => $user_obj->getAddress1(),
-							'employee_address2' => $user_obj->getAddress2(),
-							'employee_city' => $user_obj->getCity(),
-							'employee_province' => $user_obj->getProvince(),
-							'employee_postal_code' => $user_obj->getPostalCode(),
-							'title' => ( is_object( $title_obj ) ) ? $title_obj->getName() : NULL,
-							'sin' => $user_obj->getSIN(),
-
-							'pay_period_type' => $row['pay_period_type'],
-							'pay_period_type_id' => $row['pay_period_type_id'],
-							'insurable_earnings_pay_periods' => $roef->getInsurableEarningsReportPayPeriods( '15b' ),
-							
-							'code_id' => $row['code_id'],
-							'first_date' => TTDate::parseDateTime( $row['first_date'] ),
-							'last_date' => TTDate::parseDateTime( $row['last_date'] ),
-							'pay_period_end_date' => TTDate::parseDateTime( $row['pay_period_end_date'] ),
-							'recall_date' => TTDate::parseDateTime( $row['recall_date'] ),
-							'insurable_hours' => $row['insurable_hours'],
-							'insurable_earnings' => $row['insurable_earnings'],
-							'vacation_pay' => $row['vacation_pay'],
-							'serial' => $row['serial'],
-							'comments' => $row['comments'],
-							'created_date' => TTDate::parseDateTime( $row['created_date'] ),
-							);
-
-			}
-
-			$ulf->getById( (int)$row['created_by_id'] );
-			if ( $ulf->getRecordCount() == 1 ) {
-				$user_obj = $ulf->getCurrent();
-
-				$ee_data['created_user_first_name'] = $user_obj->getFirstName();
-				$ee_data['created_user_middle_name'] = $user_obj->getMiddleName();
-				$ee_data['created_user_last_name'] = $user_obj->getLastName();
-				$ee_data['created_user_full_name'] = $user_obj->getFullName(FALSE);
-				$ee_data['created_user_work_phone'] = $user_obj->getWorkPhone();
-			}
-
-			if ( isset( $row['pay_period_earnings'] ) AND is_array( $row['pay_period_earnings'] ) ) {
-				foreach( $row['pay_period_earnings'] as $pay_period_earning ) {
-					$ee_data['pay_period_earnings'][] = Misc::MoneyFormat( $pay_period_earning['amount'], FALSE );
+		if ( isset( $this->form_data['roe'] ) AND is_array( $this->form_data['roe'] ) ) {
+			$file_name = 'roe.ext';
+			foreach ( $this->form_data['roe'] as $legal_entity_id => $user_rows ) {
+				if ( isset( $this->form_data['legal_entity'][ $legal_entity_id ] ) == FALSE ) {
+					Debug::Text( 'Missing Legal Entity: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
+					continue;
 				}
+
+				if ( isset( $this->form_data['remittance_agency'][ $legal_entity_id ][10] ) == FALSE ) {
+					Debug::Text( 'Missing Remittance Agency: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
+					continue;
+				}
+
+				/** @var LegalEntityFactory $le_obj */
+				$le_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
+
+				$cra_pra_obj = $this->form_data['remittance_agency'][ $legal_entity_id ][10];
+				$pra_obj = $this->form_data['remittance_agency'][ $legal_entity_id ][20];
+
+				$roe = $this->getROEObject();
+				$roe->setShowBackground( $show_background );
+				//$roe->setDebug( TRUE );
+				//$roe->setType( $form_type );
+				$roe->business_number = $cra_pra_obj->getPrimaryIdentification();
+				$roe->company_name = $le_obj->getTradeName();
+				$roe->company_address1 = $le_obj->getAddress1();
+				$roe->company_address2 = $le_obj->getAddress2();
+				$roe->company_city = $le_obj->getCity();
+				$roe->company_province = $le_obj->getProvince();
+				$roe->company_postal_code = $le_obj->getPostalCode();
+				$roe->company_work_phone = $le_obj->getWorkPhone();
+				$roe->english = TRUE;
+
+				foreach ( $user_rows as $row ) {
+					$ulf = TTnew( 'UserListFactory' );
+					$ulf->getById( TTUUID::castUUID( $row['user_id'] ) );
+					if ( $ulf->getRecordCount() == 1 ) {
+						$user_obj = $ulf->getCurrent();
+
+						$title_obj = $user_obj->getTitleObject();
+
+						$roef->setPayPeriodType( $row['pay_period_type_id'] );
+
+						$ee_data = array(
+								'first_name'           => $user_obj->getFirstName(),
+								'middle_name'          => $user_obj->getMiddleName(),
+								'last_name'            => $user_obj->getLastName(),
+								'employee_full_name'   => $user_obj->getFullName( FALSE ),
+								'employee_address1'    => $user_obj->getAddress1(),
+								'employee_address2'    => $user_obj->getAddress2(),
+								'employee_city'        => $user_obj->getCity(),
+								'employee_province'    => $user_obj->getProvince(),
+								'employee_postal_code' => $user_obj->getPostalCode(),
+								'title'                => ( is_object( $title_obj ) ) ? $title_obj->getName() : NULL,
+								'sin'                  => $user_obj->getSIN(),
+
+								'pay_period_type'                => $row['pay_period_type'],
+								'pay_period_type_id'             => $row['pay_period_type_id'],
+								'insurable_earnings_pay_periods' => $roef->getInsurableEarningsReportPayPeriods( '15b' ),
+
+								'code_id'             => $row['code_id'],
+								'first_date'          => TTDate::parseDateTime( $row['first_date'] ),
+								'last_date'           => TTDate::parseDateTime( $row['last_date'] ),
+								'pay_period_end_date' => TTDate::parseDateTime( $row['pay_period_end_date'] ),
+								'recall_date'         => TTDate::parseDateTime( $row['recall_date'] ),
+								'insurable_hours'     => $row['insurable_hours'],
+								'insurable_earnings'  => $row['insurable_earnings'],
+								'vacation_pay'        => $row['vacation_pay'],
+								'serial'              => $row['serial'],
+								'comments'            => $row['comments'],
+								'created_date'        => TTDate::parseDateTime( $row['created_date'] ),
+						);
+
+					}
+
+					if ( is_object( $pra_obj ) AND is_object( $pra_obj->getContactUserObject() ) ) {
+						$contact_user_obj = $pra_obj->getContactUserObject();
+					} else {
+						$ulf->getById( TTUUID::castUUID( $row['created_by_id'] ) );
+						if ( $ulf->getRecordCount() == 1 ) {
+							$contact_user_obj = $ulf->getCurrent();
+						}
+					}
+
+					if ( is_object( $contact_user_obj ) ) {
+						$ee_data['created_user_first_name'] = $contact_user_obj->getFirstName();
+						$ee_data['created_user_middle_name'] = $contact_user_obj->getMiddleName();
+						$ee_data['created_user_last_name'] = $contact_user_obj->getLastName();
+						$ee_data['created_user_full_name'] = $contact_user_obj->getFullName( FALSE );
+						$ee_data['created_user_work_phone'] = $contact_user_obj->getWorkPhone();
+					}
+
+					if ( isset( $row['pay_period_earnings'] ) AND is_array( $row['pay_period_earnings'] ) ) {
+						foreach ( $row['pay_period_earnings'] as $pay_period_earning ) {
+							$ee_data['pay_period_earnings'][] = Misc::MoneyFormat( $pay_period_earning['amount'], FALSE );
+						}
+					}
+
+					$roe->addRecord( $ee_data );
+					unset( $ee_data );
+
+					$i++;
+				}
+
+				$this->getFormObject()->addForm( $roe );
+
+				if ( $format == 'efile_xml' ) {
+					$output_format = 'XML';
+					$file_name = 'roe_efile_' . date( 'Y_m_d' ) . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.xml';
+					$mime_type = 'applications/octet-stream'; //Force file to download.
+				} else {
+					$output_format = 'PDF';
+					$file_name = 'roe_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.pdf';
+					$mime_type = $this->file_mime_type;
+				}
+				$file_output = $this->getFormObject()->output( $output_format );
+				if ( !is_array( $file_output ) ) {
+					$file_arr[] = array('file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $file_output);
+				} else {
+					return $file_output;
+				}
+
+				//Reset the file objects.
+				$this->clearFormObject();
+				unset( $file_output );
 			}
-
-			$roe->addRecord( $ee_data );
-			unset($ee_data);
-
-			$i++;
-
 		}
 
-		$this->getFormObject()->addForm( $roe );
-
-		if ( $format == 'efile_xml' ) {
-			$output_format = 'XML';
-			$file_name = 'roe_efile_'.date('Y_m_d').'.blk'; //The filename should actually end in ".blk" instead of ".xml"
-			$mime_type = 'applications/octet-stream'; //Force file to download.
+		$zip_filename = explode( '.', $file_name );
+		if ( isset( $zip_filename[ ( count( $zip_filename ) - 1 ) ] ) ) {
+			$zip_filename = str_replace( '.', '', str_replace( $zip_filename[ ( count( $zip_filename ) - 1 ) ], '', $file_name ) ) . '.zip';
 		} else {
-			$output_format = 'PDF';
-			$file_name = $this->file_name.'.pdf';
-			$mime_type = $this->file_mime_type;
+			$zip_filename = str_replace( '.', '', $file_name ) . '.zip';
 		}
 
-		$output = $this->getFormObject()->output( $output_format );
-		if ( !is_array($output) ) {
-			return array( 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output );
-		}
-
-		return $output;
+		return Misc::zip( $file_arr, $zip_filename, TRUE );
 	}
 
 	//Short circuit this function, as no postprocessing is required for exporting the data.
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _postProcess( $format = NULL ) {
 		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' ) {
 			Debug::Text('Skipping postProcess! Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
@@ -637,6 +759,10 @@ class ROEReport extends Report {
 		}
 	}
 
+	/**
+	 * @param null $format
+	 * @return array|bool
+	 */
 	function _output( $format = NULL ) {
 		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' ) {
 			return $this->_outputPDFForm( $format );

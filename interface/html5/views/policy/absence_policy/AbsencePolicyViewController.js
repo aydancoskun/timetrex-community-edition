@@ -1,7 +1,10 @@
 AbsencePolicyViewController = BaseViewController.extend( {
 	el: '#absence_policy_view_container',
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+
+	_required_files: ['APIAbsencePolicy', 'APIPayCode', 'APIPayFormulaPolicy'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'AbsencePolicyEditView.html';
 		this.permission_id = 'absence_policy';
 		this.viewId = 'AbsencePolicy';
@@ -93,7 +96,7 @@ AbsencePolicyViewController = BaseViewController.extend( {
 			field: 'pay_formula_policy_id',
 			custom_first_label: $.i18n._( '-- Defined By Pay Code --' ),
 			added_items: [
-				{value: 0, label: $.i18n._( '-- Defined By Pay Code --' )}
+				{value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Pay Code --' )}
 			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_absence_policy_column1 );
@@ -131,7 +134,7 @@ AbsencePolicyViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 		/*
-		 if ( this.current_edit_record['type_id'] === 20 ) {
+		 if ( this.current_edit_record['type_id'] == 20 ) {
 
 		 this.edit_view_form_item_dic['rate'].css( 'display', 'none' );
 		 this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'none' );

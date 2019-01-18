@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class PayFormulaPolicyFactory extends Factory {
 	protected $company_obj = NULL;
 	protected $accrual_policy_account_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
 		$product_edition_id = Misc::getCurrentCompanyProductEdition();
@@ -141,6 +146,10 @@ class PayFormulaPolicyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -169,48 +178,54 @@ class PayFormulaPolicyFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getAccrualPolicyAccountObject() {
 		return $this->getGenericObject( 'AccrualPolicyAccountListFactory', $this->getAccrualPolicyAccount(), 'accrual_policy_account_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -228,180 +243,129 @@ class PayFormulaPolicyFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim($name);
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is too short or too long'),
-											2, 100) //Needs to be long enough for upgrade procedure when converting from other policies.
-				AND
-				$this->Validator->isTrue(	'name',
-											$this->isUniqueName($name),
-											TTi18n::gettext('Name is already in use') )
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
-	}
-	function setDescription($description) {
-		$description = trim($description);
-
-		if (	$description == ''
-				OR $this->Validator->isLength(	'description',
-												$description,
-												TTi18n::gettext('Description is invalid'),
-												1, 250) ) {
-
-			$this->data['description'] = $description;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'description' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCode() {
-		if ( isset($this->data['code']) ) {
-			return $this->data['code'];
-		}
-
-		return FALSE;
-	}
-	function setCode($code) {
-		$code = trim($code);
-		if (	$this->Validator->isLength(	'code',
-											$code,
-											TTi18n::gettext('Code is too short or too long'),
-											2, 50)
-						) {
-
-			$this->data['code'] = $code;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'code' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCode( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'code', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getPayType() {
-		if ( isset($this->data['pay_type_id']) ) {
-			return (int)$this->data['pay_type_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayType($value) {
-		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'pay_type_id',
-											$value,
-											TTi18n::gettext('Incorrect Pay Type'),
-											$this->getOptions('pay_type')) ) {
-
-			$this->data['pay_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPayType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'pay_type_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getWageSourceType() {
-		if ( isset($this->data['wage_source_type_id']) ) {
-			return (int)$this->data['wage_source_type_id'];
-		}
-
-		return FALSE;
-	}
-	function setWageSourceType($value) {
-		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'wage_source_type_id',
-											$value,
-											TTi18n::gettext('Incorrect Wage Source Type'),
-											$this->getOptions('wage_source_type')) ) {
-
-			$this->data['wage_source_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'wage_source_type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setWageSourceType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'wage_source_type_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getWageSourceContributingShiftPolicy() {
-		if ( isset($this->data['wage_source_contributing_shift_policy_id']) ) {
-			return (int)$this->data['wage_source_contributing_shift_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setWageSourceContributingShiftPolicy($id) {
-		$id = trim($id);
-
-		$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
-
-		if (	$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'wage_source_contributing_shift_policy_id',
-													$csplf->getByID($id),
-													TTi18n::gettext('Wage Source Contributing Shift Policy is invalid')
-													) ) {
-
-			$this->data['wage_source_contributing_shift_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'wage_source_contributing_shift_policy_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setWageSourceContributingShiftPolicy( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'wage_source_contributing_shift_policy_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTimeSourceContributingShiftPolicy() {
-		if ( isset($this->data['time_source_contributing_shift_policy_id']) ) {
-			return (int)$this->data['time_source_contributing_shift_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setTimeSourceContributingShiftPolicy($id) {
-		$id = trim($id);
-
-		$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
-
-		if (	$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'time_source_contributing_shift_policy_id',
-													$csplf->getByID($id),
-													TTi18n::gettext('Time Source Contributing Shift Policy is invalid')
-													) ) {
-
-			$this->data['time_source_contributing_shift_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'time_source_contributing_shift_policy_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setTimeSourceContributingShiftPolicy( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'time_source_contributing_shift_policy_id', $value );
+	}
+
+	/**
+	 * @param $original_hourly_rate
+	 * @return bool|int|mixed
+	 */
 	function getHourlyRate( $original_hourly_rate ) {
 		//Debug::text(' Getting Rate based off Hourly Rate: '. $original_hourly_rate .' Pay Type: '. $this->getPayType(), __FILE__, __LINE__, __METHOD__, 10);
 		$rate = 0;
@@ -457,123 +421,192 @@ class PayFormulaPolicyFactory extends Factory {
 		return $rate;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getRate() {
-		if ( isset($this->data['rate']) ) {
-			return $this->data['rate'];
-		}
-
-		return FALSE;
-	}
-	function setRate($int) {
-		$int = trim($int);
-
-		if	( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isFloat(		'rate',
-												$int,
-												TTi18n::gettext('Incorrect Rate')) ) {
-			$this->data['rate'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'rate' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setRate( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'rate', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getWageGroup() {
-		if ( isset($this->data['wage_group_id']) ) {
-			return (int)$this->data['wage_group_id'];
-		}
-
-		return FALSE;
-	}
-	function setWageGroup($id) {
-		$id = trim($id);
-
-		$wglf = TTnew( 'WageGroupListFactory' );
-
-		if ( $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'wage_group_id',
-													$wglf->getByID($id),
-													TTi18n::gettext('Wage Group is invalid')
-													) ) {
-
-			$this->data['wage_group_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'wage_group_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setWageGroup( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'wage_group_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getAccrualRate() {
-		if ( isset($this->data['accrual_rate']) ) {
-			return $this->data['accrual_rate'];
-		}
-
-		return FALSE;
-	}
-	function setAccrualRate($int) {
-		$int = trim($int);
-
-		if	( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isFloat(		'accrual_rate',
-												$int,
-												TTi18n::gettext('Incorrect Accrual Rate')) ) {
-			$this->data['accrual_rate'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'accrual_rate' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAccrualRate( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'accrual_rate', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getAccrualPolicyAccount() {
-		if ( isset($this->data['accrual_policy_account_id']) ) {
-			return (int)$this->data['accrual_policy_account_id'];
-		}
-
-		return FALSE;
-	}
-	function setAccrualPolicyAccount($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = 0;
-		}
-
-		$apalf = TTnew( 'AccrualPolicyAccountListFactory' );
-
-		if ( $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'accrual_policy_account_id',
-													$apalf->getByID($id),
-													TTi18n::gettext('Accrual Account is invalid')
-													) ) {
-
-			$this->data['accrual_policy_account_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'accrual_policy_account_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setAccrualPolicyAccount( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' OR empty($value) ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'accrual_policy_account_id', $value );
+	}
+
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
-		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		// Name
+		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
 			if ( $this->getName() == '' ) {
 				$this->Validator->isTRUE(	'name',
 											FALSE,
 											TTi18n::gettext('Please specify a name') );
 			}
 		}
+		if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isLength(	'name',
+												$this->getName(),
+												TTi18n::gettext('Name is too short or too long'),
+												2, 100); //Needs to be long enough for upgrade procedure when converting from other policies.
+		}
+		if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(	'name',
+												$this->isUniqueName($this->getName()),
+												TTi18n::gettext('Name is already in use')
+											);
+		}
+		// Description
+		if ( $this->getDescription() != '' ) {
+			$this->Validator->isLength(	'description',
+												$this->getDescription(),
+												TTi18n::gettext('Description is invalid'),
+												1, 250
+											);
+		}
+		// Code
+		if ( $this->getCode() !== FALSE ) {
+			$this->Validator->isLength(	'code',
+												$this->getCode(),
+												TTi18n::gettext('Code is too short or too long'),
+												2, 50
+											);
+		}
+		// Pay Type
+		if ( $this->getPayType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'pay_type_id',
+												$this->getPayType(),
+												TTi18n::gettext('Incorrect Pay Type'),
+												$this->getOptions('pay_type')
+											);
+		}
+		// Wage Source Type
+		if ( $this->getWageSourceType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'wage_source_type_id',
+												$this->getWageSourceType(),
+												TTi18n::gettext('Incorrect Wage Source Type'),
+												$this->getOptions('wage_source_type')
+											);
+		}
+		// Wage Source Contributing Shift Policy
+		if ( $this->getWageSourceContributingShiftPolicy() !== FALSE AND $this->getWageSourceContributingShiftPolicy() != TTUUID::getZeroID() ) {
+			$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'wage_source_contributing_shift_policy_id',
+															$csplf->getByID($this->getWageSourceContributingShiftPolicy()),
+															TTi18n::gettext('Wage Source Contributing Shift Policy is invalid')
+														);
+		}
+		// Time Source Contributing Shift Policy
+		if ( $this->getTimeSourceContributingShiftPolicy() !== FALSE AND $this->getTimeSourceContributingShiftPolicy() != TTUUID::getZeroID() ) {
+			$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'time_source_contributing_shift_policy_id',
+															$csplf->getByID($this->getTimeSourceContributingShiftPolicy()),
+															TTi18n::gettext('Time Source Contributing Shift Policy is invalid')
+														);
+		}
+		// Rate
+		if ( $this->getRate() !== FALSE ) {
+			$this->Validator->isFloat(		'rate',
+													$this->getRate(),
+													TTi18n::gettext('Incorrect Rate')
+												);
+		}
+		// Wage Group
+		if ( $this->getWageGroup() !== FALSE AND $this->getWageGroup() != TTUUID::getZeroID() ) {
+			$wglf = TTnew( 'WageGroupListFactory' );
+			$this->Validator->isResultSetWithRows(	'wage_group_id',
+															$wglf->getByID($this->getWageGroup()),
+															TTi18n::gettext('Wage Group is invalid')
+														);
+		}
+		// Accrual Rate
+		if ( $this->getAccrualRate() !== FALSE ) {
+			$this->Validator->isFloat(		'accrual_rate',
+													$this->getAccrualRate(),
+													TTi18n::gettext('Incorrect Accrual Rate')
+												);
+		}
+		// Accrual Account
+		if ( $this->getAccrualPolicyAccount() !== FALSE AND $this->getAccrualPolicyAccount() != TTUUID::getZeroID() ) {
+			$apalf = TTnew( 'AccrualPolicyAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'accrual_policy_account_id',
+															$apalf->getByID($this->getAccrualPolicyAccount()),
+															TTi18n::gettext('Accrual Account is invalid')
+														);
+		}
 
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( $this->getDeleted() == TRUE ) {
 			$pclf = TTNew('PayCodeListFactory');
 			$pclf->getByCompanyIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId() );
@@ -635,19 +668,29 @@ class PayFormulaPolicyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getWageGroup() === FALSE ) {
-			$this->setWageGroup( 0 );
+			$this->setWageGroup( TTUUID::getZeroID() );
 		}
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -673,6 +716,10 @@ class PayFormulaPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -706,6 +753,10 @@ class PayFormulaPolicyFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Formula Policy'), NULL, $this->getTable(), $this );
 	}

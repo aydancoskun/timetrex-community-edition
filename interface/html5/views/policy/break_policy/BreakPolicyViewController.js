@@ -1,11 +1,14 @@
 BreakPolicyViewController = BaseViewController.extend( {
 	el: '#break_policy_view_container',
+
+	_required_files: ['APIBreakPolicy', 'APIPayCode', 'APIPayFormulaPolicy'],
+
 	type_array: null,
 	auto_detect_type_array: null,
 
 	date_api: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'BreakPolicyEditView.html';
 		this.permission_id = 'break_policy';
 		this.viewId = 'BreakPolicy';
@@ -166,7 +169,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 			field: 'pay_formula_policy_id',
 			custom_first_label: $.i18n._( '-- Defined By Pay Code --' ),
 			added_items: [
-				{value: 0, label: $.i18n._( '-- Defined By Pay Code --' )}
+				{value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Pay Code --' )}
 			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_break_policy_column1 );
@@ -290,13 +293,13 @@ BreakPolicyViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 
-		if ( this.current_edit_record['type_id'] === 10 || this.current_edit_record['type_id'] === 15 ) {
+		if ( this.current_edit_record['type_id'] == 10 || this.current_edit_record['type_id'] == 15 ) {
 
 			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Deduction/Addition Time' ) + ": " );
 			this.attachElement( 'include_break_punch_time' );
 			this.attachElement( 'include_multiple_breaks' );
 
-		} else if ( this.current_edit_record['type_id'] === 20 ) {
+		} else if ( this.current_edit_record['type_id'] == 20 ) {
 			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Break Time' ) + ": " );
 			this.detachElement( 'include_break_punch_time' );
 			this.detachElement( 'include_multiple_breaks' );
@@ -308,13 +311,13 @@ BreakPolicyViewController = BaseViewController.extend( {
 
 	onAutoDetectTypeChange: function() {
 
-		if ( this.current_edit_record['auto_detect_type_id'] === 10 ) {
+		if ( this.current_edit_record['auto_detect_type_id'] == 10 ) {
 			this.attachElement( 'start_window' );
 			this.attachElement( 'window_length' );
 			this.detachElement( 'minimum_punch_time' );
 			this.detachElement( 'maximum_punch_time' );
 
-		} else if ( this.current_edit_record['auto_detect_type_id'] === 20 ) {
+		} else if ( this.current_edit_record['auto_detect_type_id'] == 20 ) {
 			this.detachElement( 'start_window' );
 			this.detachElement( 'window_length' );
 			this.attachElement( 'minimum_punch_time' );

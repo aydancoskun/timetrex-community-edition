@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -47,6 +47,8 @@ class DemoData {
 	protected $password = 'demo';
 	protected $enable_quick_punch = TRUE;
 	protected $max_random_users = 0;
+
+	public $create_data = array( 'schedule' => TRUE, 'punch' => TRUE, 'invoice' => TRUE, 'expense' => TRUE, 'document' => TRUE, 'hr' => TRUE, ); //Set an array of what data to create.
 
 
 	protected $first_names = array(
@@ -339,10 +341,16 @@ class DemoData {
 								array(33.910314751383,-103.76518249512)
 							);
 
+	/**
+	 * DemoData constructor.
+	 */
 	function __construct() {
 		$this->Validator = new Validator();
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableQuickPunch() {
 		if ( isset($this->enable_quick_punch) ) {
 			return $this->enable_quick_punch;
@@ -350,12 +358,20 @@ class DemoData {
 
 		return FALSE;
 	}
-	function setEnableQuickPunch($val) {
+
+	/**
+	 * @param $val
+	 * @return bool
+	 */
+	function setEnableQuickPunch( $val) {
 		$this->enable_quick_punch = (bool)$val;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getMaxRandomUsers() {
 		if ( isset($this->max_random_users) ) {
 			return $this->max_random_users;
@@ -363,7 +379,12 @@ class DemoData {
 
 		return FALSE;
 	}
-	function setMaxRandomUsers($val) {
+
+	/**
+	 * @param $val
+	 * @return bool
+	 */
+	function setMaxRandomUsers( $val) {
 		if ( $val != '' ) {
 			$this->max_random_users = $val;
 
@@ -373,6 +394,9 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getUserNamePostfix() {
 		if ( isset($this->user_name_postfix) ) {
 			return $this->user_name_postfix;
@@ -380,7 +404,12 @@ class DemoData {
 
 		return FALSE;
 	}
-	function setUserNamePostfix($val) {
+
+	/**
+	 * @param $val
+	 * @return bool
+	 */
+	function setUserNamePostfix( $val) {
 		if ( $val != '' ) {
 			$this->user_name_postfix = $this->Validator->stripNonNumeric( trim($val) ); //Should be numeric only.
 			Debug::Text('UserName Postfix: '. $this->user_name_postfix, __FILE__, __LINE__, __METHOD__, 10);
@@ -391,6 +420,9 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getUserNamePrefix() {
 		if ( isset($this->user_name_prefix) ) {
 			return $this->user_name_prefix;
@@ -398,7 +430,12 @@ class DemoData {
 
 		return FALSE;
 	}
-	function setUserNamePrefix($val) {
+
+	/**
+	 * @param $val
+	 * @return bool
+	 */
+	function setUserNamePrefix( $val) {
 		if ( $val != '' ) {
 			$this->user_name_prefix = $val;
 
@@ -408,6 +445,9 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getAdminUserNamePrefix() {
 		if ( isset($this->admin_user_name_prefix) ) {
 			return $this->admin_user_name_prefix;
@@ -415,7 +455,12 @@ class DemoData {
 
 		return FALSE;
 	}
-	function setAdminUserNamePrefix($val) {
+
+	/**
+	 * @param $val
+	 * @return bool
+	 */
+	function setAdminUserNamePrefix( $val) {
 		if ( $val != '' ) {
 			$this->admin_user_name_prefix = $val;
 
@@ -425,6 +470,9 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getPassword() {
 		if ( isset($this->password) ) {
 			return $this->password;
@@ -432,7 +480,12 @@ class DemoData {
 
 		return FALSE;
 	}
-	function setPassword($val) {
+
+	/**
+	 * @param $val
+	 * @return bool
+	 */
+	function setPassword( $val) {
 		if ( $val != '' ) {
 			$this->password = $val;
 
@@ -442,10 +495,18 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param $arr
+	 * @return mixed
+	 */
 	function getRandomArrayValue( $arr ) {
 		$rand = array_rand( $arr );
 		return $arr[$rand];
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getRandomFirstName() {
 		$rand = array_rand( $this->first_names );
 		if ( isset($this->first_names[$rand]) ) {
@@ -453,6 +514,10 @@ class DemoData {
 		}
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getRandomLastName() {
 		$rand = array_rand( $this->last_names );
 		if ( isset($this->last_names[$rand]) ) {
@@ -461,6 +526,25 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param $legal_entity_id
+	 * @return bool
+	 */
+	function getLegalEntityObject( $legal_entity_id ) {
+		$lelf = TTnew('LegalEntityListFactory');
+		$lelf->getByID( $legal_entity_id );
+		if ( $lelf->getRecordCount() > 0 ) {
+			$le_obj = $lelf->getCurrent();
+
+			return $le_obj;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function createCompany() {
 		$cf = TTnew( 'CompanyFactory' );
 
@@ -468,7 +552,7 @@ class DemoData {
 		$cf->setProductEdition( getTTProductEdition() );
 		$cf->setName( 'ABC Company ('. $this->getUserNamePostfix() .')', TRUE ); //Must force this change due to demo mode being enabled.
 		$cf->setShortName( substr( 'ABC'. $this->getUserNamePostfix(), 0, 15 ) ); //This must be unique to allow the recruitment portal to work properly.
-		$cf->setBusinessNumber( '123456789' );
+		//$cf->setBusinessNumber( '123456789' );
 		//$cf->setOriginatorID( $company_data['originator_id'] );
 		//$cf->setDataCenterID($company_data['data_center_id']);
 		$cf->setAddress1( '123 Main St' );
@@ -479,7 +563,18 @@ class DemoData {
 		$cf->setPostalCode( '12345' );
 		$cf->setWorkPhone( '555-555-5555' );
 
-		$cf->setEnableAddCurrency(FALSE);
+		//$cf->setEnableAddLegalEntity(FALSE);
+		//$cf->setEnableAddCurrency(FALSE);
+
+		$cf->setEnableAddLegalEntity( FALSE );
+		$cf->setEnableAddCurrency( FALSE );
+		$cf->setEnableAddPermissionGroupPreset( FALSE );
+		$cf->setEnableAddUserDefaultPreset( FALSE );
+		$cf->setEnableAddStation( FALSE );
+		$cf->setEnableAddPayStubEntryAccountPreset( FALSE );
+		$cf->setEnableAddCompanyDeductionPreset( FALSE );
+		$cf->setEnableAddRecurringHolidayPreset( FALSE );
+
 		$cf->setSetupComplete(TRUE);
 		if ( $cf->isValid() ) {
 			$insert_id = $cf->Save();
@@ -493,6 +588,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @return bool
+	 */
 	function createCurrency( $company_id, $type ) {
 		$cf = TTnew( 'CurrencyFactory' );
 		$cf->setCompany( $company_id );
@@ -542,6 +642,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param int $object_type_id
+	 * @param $type
+	 * @return bool
+	 */
 	function createDocument( $company_id, $object_type_id, $type ) {
 		$df = TTnew( 'DocumentFactory' );
 		$df->setCompany( $company_id );
@@ -564,6 +670,13 @@ class DemoData {
 				case 40:
 					$name = 'Non-Disclosure';
 					break;
+				case 50:
+					$name = 'Tax-Certificate';
+					break;
+				case 60:
+					$name = 'Benefit-Plan-Application';
+					break;
+
 			}
 		} elseif ( $object_type_id == 60 ) { // Job
 			switch( $type ) {
@@ -616,69 +729,71 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createDocumentRevision( $document_id, $type ) {
+	/**
+	 * @param string $document_id UUID
+	 * @param $type
+	 * @return bool
+	 */
+	function createDocumentRevision( $company_id, $document_id, $object_type_id, $type, $revision ) {
 		$drf = TTnew( 'DocumentRevisionFactory' );
 		$drf->setDocument( $document_id );
-		switch( $type ) {
-			case 10:
+		switch( $revision ) {
+			case 1:
 				$drf->setRevision('1.0');
 				$drf->setChangeLog('Revision 1.0');
 				break;
-			case 20:
+			case 2:
 				$drf->setRevision('2.0');
 				$drf->setChangeLog('Revision 2.0');
 				break;
-			case 30:
+			case 3:
 				$drf->setRevision('3.0');
 				$drf->setChangeLog('Revision 3.0');
 				break;
-			case 40:
+			case 4:
 				$drf->setRevision('4.0');
 				$drf->setChangeLog('Revision 4.0');
 				break;
-			case 50:
+			case 5:
 				$drf->setRevision('5.0');
 				$drf->setChangeLog('Revision 5.0');
 				break;
-			case 60:
+			case 6:
 				$drf->setRevision('6.0');
 				$drf->setChangeLog('Revision 6.0');
 				break;
 
 		}
-		$drf->setLocalFileName('');
-		$drf->setRemoteFileName('');
-		$drf->setMimeType('');
-		if ( $drf->isValid() ) {
-			$insert_id = $drf->Save();
-			Debug::Text('Document Revision ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
-			return $insert_id;
+		$drf->setLocalFileName(); //Permanent file on server.
+		$dir = $drf->getStoragePath( $company_id );
+
+		$remote_file_name = $this->createDocumentFilesByObjectType(	$company_id, $object_type_id, $type, $dir );
+		if ( $remote_file_name != '' ) {
+			$drf->setRemoteFileName( $remote_file_name ); //Temporary file
+
+			$drf->setMimeType( 'text/plain' );
+			if ( $drf->isValid() ) {
+				$insert_id = $drf->Save( FALSE );
+				Debug::Text( 'Document Revision ID: ' . $insert_id, __FILE__, __LINE__, __METHOD__, 10 );
+
+				return $insert_id;
+			}
 		}
 
 		Debug::Text('Failed Creating Document Revision!', __FILE__, __LINE__, __METHOD__, 10);
-
 		return FALSE;
-
 	}
 
-
-	function createDocumentFilesByObjectType( $company_id, $object_type_id, $type, $document_revision_id, $document_id	) {
-		if ( $document_revision_id == FALSE ) {
-			return FALSE;
-		}
-		if ( $document_id == FALSE ) {
-			return FALSE;
-		}
-		$drf = TTnew( 'DocumentRevisionFactory' );
-		$drf->setId( $document_revision_id );
-		$drf->setDocument( $document_id );
-
-		$dir = $drf->getStoragePath( $company_id );
-		if ( isset($dir) ) {
-			@mkdir($dir, 0700, TRUE);
-		}
-
+	/**
+	 * @param string $company_id UUID
+	 * @param int $object_type_id
+	 * @param $type
+	 * @param string $document_revision_id UUID
+	 * @param string $document_id UUID
+	 * @return bool
+	 */
+	function createDocumentFilesByObjectType( $company_id, $object_type_id, $type, $dir ) {
 		if ( $object_type_id == 100 ) { // Employee
 			switch( $type ) {
 				case 10:
@@ -692,6 +807,12 @@ class DemoData {
 					break;
 				case 40:
 					$file_name = 'non_disclosure.txt';
+					break;
+				case 50:
+					$file_name = 'tax_certificate.txt';
+					break;
+				case 60:
+					$file_name = 'benefit_plan_application.txt';
 					break;
 			}
 		} elseif ( $object_type_id == 60 ) { // Job
@@ -732,25 +853,25 @@ class DemoData {
 			}
 		}
 
-		if ( @file_put_contents( $dir.$file_name, 'Sample' ) ) {
-			$drf->setRemoteFileName( $file_name );
-			$drf->setMimeType('text/plain');
-			//$drf->setLocalFileName( md5( uniqid().$drf->getRemoteFileName() ) ); This should be created automatically.
-			if ( $drf->isValid() ) {
-				$drf->Save( FALSE );
-				$drf->renameLocalFile();
-				Debug::Text('Attached file to Document ID: '. $document_id .' Revision ID: '. $document_revision_id .' File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-
-				return TRUE;
+		if ( isset( $file_name ) ) {
+			@mkdir( $dir, 0700, TRUE );
+			$local_full_path_file_name = $dir . DIRECTORY_SEPARATOR . $file_name;
+			Debug::Text( 'Writing sample document file to: ' . $local_full_path_file_name, __FILE__, __LINE__, __METHOD__, 10 );
+			if ( @file_put_contents( $local_full_path_file_name, 'Sample file created for DEMO purposes.' ) ) {
+				return $file_name; //Return just base file name, as the path is prepended in DocumentRevisionFactory.
 			}
 		}
 
-		Debug::Text('ERROR: Unable to attached file to Document ID: '. $document_id .' Revision ID: '. $document_revision_id, __FILE__, __LINE__, __METHOD__, 10);
-
+		Debug::Text('ERROR: Unable to write sample file...', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
-
 	}
 
+	/**
+	 * @param string $document_id UUID
+	 * @param int $object_type_id
+	 * @param string $object_id UUID
+	 * @return bool
+	 */
 	function createDocumentAttachment( $document_id, $object_type_id, $object_id ) {
 		$daf = TTnew( 'DocumentAttachmentFactory' );
 		$daf->setDocument( $document_id );
@@ -769,6 +890,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param string $geo_fence_ids UUID
+	 * @return bool
+	 */
 	function createBranch( $company_id, $type, $geo_fence_ids = NULL) {
 		$bf = TTnew( 'BranchFactory' );
 		$bf->setCompany( $company_id );
@@ -787,12 +914,11 @@ class DemoData {
 				$bf->setWorkPhone( '555-555-5555' );
 
 				$bf->setManualId( 1 );
-
 				break;
 			case 20: //Branch 2
 				$bf->setName( 'Seattle' );
-				$bf->setAddress1( '789 Main St' );
-				$bf->setAddress2( 'Unit #789' );
+				$bf->setAddress1( '321 Main St' );
+				$bf->setAddress2( 'Unit #321' );
 				$bf->setCity( 'Seattle' );
 				$bf->setCountry( 'US' );
 				$bf->setProvince( 'WA' );
@@ -801,6 +927,33 @@ class DemoData {
 				$bf->setWorkPhone( '555-555-5555' );
 
 				$bf->setManualId( 2 );
+				break;
+
+			case 30: //Branch 3
+				$bf->setName( 'Toronto' );
+				$bf->setAddress1( '456 Main St' );
+				$bf->setAddress2( 'Unit #456' );
+				$bf->setCity( 'Toronto' );
+				$bf->setCountry( 'CA' );
+				$bf->setProvince( 'ON' );
+
+				$bf->setPostalCode( 'M5E 1A1' );
+				$bf->setWorkPhone( '555-555-5555' );
+
+				$bf->setManualId( 3 );
+				break;
+			case 40: //Branch 4
+				$bf->setName( 'Vancouver' );
+				$bf->setAddress1( '654 Main St' );
+				$bf->setAddress2( 'Unit #654' );
+				$bf->setCity( 'Vancouver' );
+				$bf->setCountry( 'CA' );
+				$bf->setProvince( 'BC' );
+
+				$bf->setPostalCode( 'V6G 1A1' );
+				$bf->setWorkPhone( '555-555-5555' );
+
+				$bf->setManualId( 4 );
 				break;
 		}
 
@@ -819,6 +972,13 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param string $branch_ids UUID
+	 * @param string $geo_fence_ids UUID
+	 * @return bool
+	 */
 	function createDepartment( $company_id, $type, $branch_ids = NULL, $geo_fence_ids = NULL ) {
 		$df = TTnew( 'DepartmentFactory' );
 		$df->setCompany( $company_id );
@@ -860,6 +1020,12 @@ class DemoData {
 
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $source
+	 * @param string $station
+	 * @return bool
+	 */
 	function createStation( $company_id, $source = 'ANY', $station = 'ANY' ) {
 		$sf = TTnew( 'StationFactory' );
 		$sf->setCompany( $company_id );
@@ -886,14 +1052,21 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	function createPayStubAccount( $company_id ) {
 		//$retval = PayStubEntryAccountFactory::addPresets( $company_id );
 		$sp = TTNew('SetupPresets');
 		$sp->setCompany( $company_id );
 
-		$retval = $sp->PayStubAccounts();
-		$retval = $sp->PayStubAccounts( 'us' );
-		$retval = $sp->PayStubAccounts( 'us', 'ny' );
+		$sp->PayStubAccounts();
+		$sp->PayStubAccounts( 'us' );
+		$sp->PayStubAccounts( 'us', 'ny' );
+
+		$sp->PayStubAccounts( 'ca' );
+		$retval = $sp->PayStubAccounts( 'ca', 'on' );
 		if ( $retval == TRUE ) {
 			Debug::Text('Created Pay Stub Accounts!', __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
@@ -904,14 +1077,22 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function createTaxForms( $company_id, $user_id ) {
 		$sp = TTNew('SetupPresets');
 		$sp->setCompany( $company_id );
 		$sp->setUser( $user_id );
 
-		$retval = $sp->TaxForms();
-		$retval = $sp->TaxForms( 'us' );
-		$retval = $sp->TaxForms( 'us', 'ny' );
+		$sp->TaxForms();
+		$sp->TaxForms( 'us' );
+		$sp->TaxForms( 'us', 'ny' );
+
+		$sp->TaxForms( 'ca' );
+		$retval = $sp->TaxForms( 'ca', 'on' );
 		if ( $retval == TRUE ) {
 			Debug::Text('Created TaxForm data!', __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
@@ -922,6 +1103,10 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	function createPayStubAccountLink( $company_id ) {
 		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
 		$pseallf->getByCompanyId( $company_id );
@@ -955,14 +1140,75 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createCompanyDeduction( $company_id ) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $current_user_id UUID
+	 * @return bool
+	 */
+	function createRecurringHolidays( $company_id, $current_user_id ) {
 		//$retval = CompanyDeductionFactory::addPresets( $company_id );
 		$sp = TTNew('SetupPresets');
 		$sp->setCompany( $company_id );
+		$sp->setUser( $current_user_id );
 
-		$retval = $sp->CompanyDeductions();
-		$retval = $sp->CompanyDeductions( 'us' );
-		$retval = $sp->CompanyDeductions( 'us', 'ny' );
+		//$sp->PayrollRemittanceAgencys();
+		$sp->RecurringHolidays( 'us' );
+		$sp->RecurringHolidays( 'us', 'ny' );
+
+		$sp->RecurringHolidays( 'ca' );
+		$retval = $sp->RecurringHolidays( 'ca', 'on' );
+		if ( $retval == TRUE ) {
+			Debug::Text('Created Recurring Holidays!', __FILE__, __LINE__, __METHOD__, 10);
+			return TRUE;
+		}
+
+		Debug::Text('Failed Creating RecurringHolidays for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $current_user_id UUID
+	 * @return bool
+	 */
+	function createPayrollRemittanceAgency( $company_id, $current_user_id, $legal_entity_id, $country = 'US' ) {
+		//$retval = CompanyDeductionFactory::addPresets( $company_id );
+		$sp = TTNew('SetupPresets');
+		$sp->setCompany( $company_id );
+		$sp->setUser( $current_user_id );
+
+		$le_obj = $this->getLegalEntityObject( $legal_entity_id );
+		$sp->PayrollRemittanceAgencys( $le_obj->getCountry(), NULL, NULL, NULL, $legal_entity_id );
+		$retval = $sp->PayrollRemittanceAgencys( $le_obj->getCountry(), $le_obj->getProvince(), NULL, NULL, $legal_entity_id );
+
+		if ( $retval == TRUE ) {
+			Debug::Text('Created Payroll Remittance Agencys!', __FILE__, __LINE__, __METHOD__, 10);
+			return TRUE;
+		}
+
+		Debug::Text('Failed Creating Payroll Remittance Agencys for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $current_user_id UUID
+	 * @return bool
+	 */
+	function createCompanyDeduction( $company_id, $current_user_id, $legal_entity_id ) {
+		//$retval = CompanyDeductionFactory::addPresets( $company_id );
+		/** @var SetupPresets $sp */
+		$sp = TTNew('SetupPresets');
+		$sp->setCompany( $company_id );
+		$sp->setUser( $current_user_id );
+
+		$le_obj = $this->getLegalEntityObject( $legal_entity_id );
+
+		$sp->CompanyDeductions( $le_obj->getCountry(), NULL, NULL, NULL, $legal_entity_id );
+		$retval = $sp->CompanyDeductions( $le_obj->getCountry(), $le_obj->getProvince(), NULL, NULL, $legal_entity_id );
+
 		if ( $retval == TRUE ) {
 			Debug::Text('Created Company Deductions!', __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
@@ -973,6 +1219,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @return bool
+	 */
 	function createRoundingPolicy( $company_id, $type ) {
 		$ripf = TTnew( 'RoundIntervalPolicyFactory' );
 		$ripf->setCompany( $company_id );
@@ -1009,6 +1260,13 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $product_id UUID
+	 * @param bool $include_area_policy_ids
+	 * @param bool $exclude_area_policy_ids
+	 * @return bool
+	 */
 	function createTaxPolicy( $company_id, $product_id, $include_area_policy_ids = FALSE, $exclude_area_policy_ids = FALSE ) {
 		$tpf = TTnew( 'TaxPolicyFactory' );
 		$tpf->setCompany( $company_id );
@@ -1035,6 +1293,11 @@ class DemoData {
 
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @return bool
+	 */
 	function createAccrualPolicyAccount( $company_id, $type ) {
 		$apaf = TTnew( 'AccrualPolicyAccountFactory' );
 
@@ -1064,6 +1327,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param string $accrual_policy_account_id UUID
+	 * @return bool
+	 */
 	function createAccrualPolicy( $company_id, $type, $accrual_policy_account_id ) {
 		$apf = TTnew( 'AccrualPolicyFactory' );
 
@@ -1169,6 +1438,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param string $taxes_policy_ids UUID
+	 * @return bool
+	 */
 	function createExpensePolicy( $company_id, $type, $taxes_policy_ids = NULL) {
 		$epf = TTnew( 'ExpensePolicyFactory' );
 		$epf->StartTransaction();
@@ -1271,10 +1546,14 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param bool $invoice_district_ids
+	 * @return bool
+	 */
 	function createAreaPolicy( $company_id, $type, $invoice_district_ids = FALSE  ) {
 		$apf = TTnew( 'AreaPolicyFactory' );
-		$cf = TTnew( 'CompanyFactory' );
-
 		$apf->setCompany( $company_id );
 
 		switch( $type ) {
@@ -1312,7 +1591,17 @@ class DemoData {
 
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $pay_formula_policy_id
+	 * @return bool
+	 */
 	function createPayCode( $company_id, $type, $pay_formula_policy_id = 0 ) {
+		if ( $pay_formula_policy_id === 0 ) {
+			$pay_formula_policy_id = TTUUID::getZeroID();
+		}
+
 		$pcf = TTnew( 'PayCodeFactory' );
 		$pcf->setCompany( $company_id );
 
@@ -1413,7 +1702,7 @@ class DemoData {
 				$pcf->setType( 10 ); //Paid
 				//$pcf->setRate( 1.0 );
 				//$pcf->setAccrualPolicyID( $accrual_policy_id );
-				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Vacation Accrual Release') );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Vacation - Accrual Release') );
 				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
@@ -1423,7 +1712,7 @@ class DemoData {
 				$pcf->setType( 20 ); //Not Paid
 				//$pcf->setRate( 1.0 );
 				//$pcf->setAccrualPolicyID( $accrual_policy_id );
-				$pcf->setPayStubEntryAccountID( 0 );
+				$pcf->setPayStubEntryAccountID( TTUUID::getZeroID() );
 				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
@@ -1433,7 +1722,7 @@ class DemoData {
 				$pcf->setType( 20 ); //Not Paid
 				//$pcf->setRate( 1.0 );
 				//$pcf->setAccrualPolicyID( $accrual_policy_id );
-				$pcf->setPayStubEntryAccountID( 0 );
+				$pcf->setPayStubEntryAccountID( TTUUID::getZeroID() );
 				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
@@ -1451,7 +1740,16 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $accrual_policy_account_id
+	 * @return bool
+	 */
 	function createPayFormulaPolicy( $company_id, $type, $accrual_policy_account_id = 0 ) {
+		if ( $accrual_policy_account_id === 0 ) {
+			$accrual_policy_account_id = TTUUID::getZeroID();
+		}
 		$pfpf = TTnew( 'PayFormulaPolicyFactory' );
 		$pfpf->setCompany( $company_id );
 
@@ -1534,7 +1832,17 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $pay_code_ids
+	 * @return bool
+	 */
 	function createContributingPayCodePolicy( $company_id, $type, $pay_code_ids = 0 ) {
+		if ( $pay_code_ids === 0 ) {
+			$pay_code_ids = TTUUID::getZeroID();
+		}
+
 		$ctpf = TTnew( 'ContributingPayCodePolicyFactory' );
 		$ctpf->setId( $ctpf->getNextInsertId() ); //Make sure we can define the pay codes before calling isValid()
 		$ctpf->setCompany( $company_id );
@@ -1574,6 +1882,13 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param string $contributing_pay_code_policy_id UUID
+	 * @param string $holiday_policy_id UUID
+	 * @return bool
+	 */
 	function createContributingShiftPolicy( $company_id, $type, $contributing_pay_code_policy_id, $holiday_policy_id = NULL ) {
 		$cspf = TTnew( 'ContributingShiftPolicyFactory' );
 		$cspf->setCompany( $company_id );
@@ -1672,7 +1987,22 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $contributing_shift_policy_id
+	 * @param int $pay_code_id
+	 * @return bool
+	 */
 	function createRegularTimePolicy( $company_id, $type, $contributing_shift_policy_id = 0, $pay_code_id = 0 ) {
+		if ( $contributing_shift_policy_id === 0 ) {
+			$contributing_shift_policy_id = TTUUID::getZeroID();
+		}
+
+		if ( $pay_code_id === 0 ) {
+			$pay_code_id = TTUUID::getZeroID();
+		}
+
 		$rtpf = TTnew( 'RegularTimePolicyFactory' );
 		$rtpf->setCompany( $company_id );
 
@@ -1703,22 +2033,32 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $contributing_shift_policy_id
+	 * @param int $pay_code_id
+	 * @return bool
+	 */
 	function createOverTimePolicy( $company_id, $type, $contributing_shift_policy_id = 0, $pay_code_id = 0 ) {
+		if ( $contributing_shift_policy_id === 0 ) {
+			$contributing_shift_policy_id = TTUUID::getZeroID();
+		}
+
+		if ( $pay_code_id === 0 ) {
+			$pay_code_id = TTUUID::getZeroID();
+		}
+
 		$otpf = TTnew( 'OverTimePolicyFactory' );
 		$otpf->setCompany( $company_id );
 
 		switch ( $type ) {
 			case 10:
-				$otpf->setName( 'OverTime (>8hrs)' );
+				$otpf->setName( 'Daily (>8hrs)' );
 				$otpf->setType( 10 );
 				$otpf->setTriggerTime( (3600 * 8) );
 				$otpf->setContributingShiftPolicy( $contributing_shift_policy_id );
 				$otpf->setPayCode( $pay_code_id );
-				//$otpf->setRate( '1.5' );
-				//$otpf->setPayStubEntryAccountId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Over Time 1') );
-
-				//$otpf->setAccrualPolicyId( 0 );
-				//$otpf->setAccrualRate( 0 );
 				break;
 			case 20:
 				$otpf->setName( 'Daily (>10hrs)' );
@@ -1758,7 +2098,22 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $contributing_shift_policy_id
+	 * @param int $pay_code_id
+	 * @return bool
+	 */
 	function createPremiumPolicy( $company_id, $type, $contributing_shift_policy_id = 0, $pay_code_id = 0 ) {
+		if ( $contributing_shift_policy_id === 0 ) {
+			$contributing_shift_policy_id = TTUUID::getZeroID();
+		}
+
+		if ( $pay_code_id === 0 ) {
+			$pay_code_id = TTUUID::getZeroID();
+		}
+
 		$ppf = TTnew( 'PremiumPolicyFactory' );
 		$ppf->setCompany( $company_id );
 
@@ -1828,7 +2183,17 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $pay_code_id
+	 * @return bool
+	 */
 	function createAbsencePolicy( $company_id, $type, $pay_code_id = 0) {
+		if ( $pay_code_id === 0 ) {
+			$pay_code_id = TTUUID::getZeroID();
+		}
+
 		$apf = TTnew( 'AbsencePolicyFactory' );
 		$apf->setCompany( $company_id );
 
@@ -1846,22 +2211,10 @@ class DemoData {
 			case 20: //Bank Time
 				$apf->setName( 'Bank Time' );
 				$apf->setPayCode( $pay_code_id );
-				//$apf->setType( 20 ); //Not Paid
-				//$apf->setRate( 1.0 );
-				//$apf->setAccrualPolicyID( $accrual_policy_id );
-				//$apf->setPayStubEntryAccountID( 0 );
-				//$apf->setAccrualRate( 1.0 );
-
 				break;
 			case 30: //Sick Time
 				$apf->setName( 'Sick Time' );
 				$apf->setPayCode( $pay_code_id );
-				//$apf->setType( 20 ); //Not Paid
-				//$apf->setRate( 1.0 );
-				//$apf->setAccrualPolicyID( $accrual_policy_id );
-				//$apf->setPayStubEntryAccountID( 0 );
-				//$apf->setAccrualRate( 1.0 );
-
 				break;
 		}
 
@@ -1877,7 +2230,16 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param int $pay_code_id
+	 * @return bool
+	 */
 	function createMealPolicy( $company_id, $pay_code_id = 0 ) {
+		if ( $pay_code_id === 0 ) {
+			$pay_code_id = TTUUID::getZeroID();
+		}
+
 		$mpf = TTnew( 'MealPolicyFactory' );
 
 		$mpf->setCompany( $company_id );
@@ -1900,12 +2262,16 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $meal_policy_id UUID
+	 * @return bool
+	 */
 	function createSchedulePolicy( $company_id, $meal_policy_id ) {
 		$spf = TTnew( 'SchedulePolicyFactory' );
 
 		$spf->setCompany( $company_id );
 		$spf->setName( 'One Hour Lunch' );
-		//$spf->setAbsencePolicyID( 0 );
 		$spf->setStartStopWindow( 1800 );
 
 		if ( $spf->isValid() ) {
@@ -1923,6 +2289,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_review_control_id UUID
+	 * @param $type
+	 * @param string $kpi_id UUID
+	 * @return bool
+	 */
 	function createUserReview( $user_review_control_id, $type, $kpi_id ) {
 		$urf = TTnew( 'UserReviewFactory' );
 		$urf->setUserReviewControl( $user_review_control_id );
@@ -1947,6 +2319,10 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	function createExceptionPolicy( $company_id ) {
 		$epcf = TTnew( 'ExceptionPolicyControlFactory' );
 
@@ -1955,14 +2331,7 @@ class DemoData {
 
 		if ( $epcf->isValid() ) {
 			$epc_id = $epcf->Save();
-
 			Debug::Text('aException Policy Control ID: '. $epc_id, __FILE__, __LINE__, __METHOD__, 10);
-
-			if ( $epc_id === TRUE ) {
-				$epc_id = $data['id'];
-			}
-
-			Debug::Text('bException Policy Control ID: '. $epc_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$data['exceptions'] = array(
 									'S1' => array(
@@ -2070,6 +2439,14 @@ class DemoData {
 		Debug::Text('Failed Creating Exception Policy!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param $rate_type
+	 * @param string $kpi_group_ids UUID
+	 * @return bool
+	 */
 	function createKPI( $company_id, $type, $rate_type, $kpi_group_ids = NULL ) {
 		$kf = TTnew( 'KPIFactory' );
 		$kf->StartTransaction();
@@ -2150,6 +2527,22 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $meal_policy_ids UUID
+	 * @param string $exception_policy_id UUID
+	 * @param string $holiday_policy_ids UUID
+	 * @param string $over_time_policy_ids UUID
+	 * @param string $premium_policy_ids UUID
+	 * @param string $rounding_policy_ids UUID
+	 * @param string $user_ids UUID
+	 * @param string $break_policy_ids UUID
+	 * @param string $accrual_policy_ids UUID
+	 * @param string $expense_policy_ids UUID
+	 * @param string $absence_policy_ids UUID
+	 * @param string $regular_policy_ids UUID
+	 * @return bool
+	 */
 	function createPolicyGroup( $company_id, $meal_policy_ids = NULL, $exception_policy_id = NULL, $holiday_policy_ids = NULL, $over_time_policy_ids = NULL, $premium_policy_ids = NULL, $rounding_policy_ids = NULL, $user_ids = NULL, $break_policy_ids = NULL, $accrual_policy_ids = NULL, $expense_policy_ids = NULL, $absence_policy_ids = NULL, $regular_policy_ids = NULL ) {
 		$pgf = TTnew( 'PolicyGroupFactory' );
 		$pgf->StartTransaction();
@@ -2246,6 +2639,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_ids UUID
+	 * @return bool
+	 */
 	function createPayPeriodSchedule( $company_id, $user_ids ) {
 		$ppsf = TTnew( 'PayPeriodScheduleFactory' );
 		$ppsf->setCompany( $company_id );
@@ -2290,7 +2688,17 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $parent_id
+	 * @return bool
+	 */
 	function createUserGroup( $company_id, $type, $parent_id = 0) {
+		if ( $parent_id === 0 ) {
+			$parent_id = TTUUID::getZeroID();
+		}
+
 		$ugf = TTnew( 'UserGroupFactory' );
 		$ugf->setCompany( $company_id );
 
@@ -2334,7 +2742,17 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $parent_id
+	 * @return bool
+	 */
 	function createKPIGroup( $company_id, $type, $parent_id = 0 ) {
+		if ( $parent_id === 0 ) {
+			$parent_id = TTUUID::getZeroID();
+		}
+
 		$kgf = TTnew( 'KPIGroupFactory' );
 		$kgf->setCompany( $company_id );
 		switch( $type ) {
@@ -2372,7 +2790,17 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $parent_id
+	 * @return bool
+	 */
 	function createQualificationGroup( $company_id, $type, $parent_id = 0 ) {
+		if ( $parent_id === 0 ) {
+			$parent_id = TTUUID::getZeroID();
+		}
+
 		$qgf = TTnew( 'QualificationGroupFactory' );
 		$qgf->setCompany( $company_id );
 		switch( $type ) {
@@ -2410,6 +2838,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param string $qualification_group_id UUID
+	 * @return bool
+	 */
 	function createQualification( $company_id, $type, $qualification_group_id ) {
 		$qf = TTnew( 'QualificationFactory' );
 
@@ -2618,6 +3052,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @return bool
+	 */
 	function createUserTitle( $company_id, $type) {
 		$utf = TTnew( 'UserTitleFactory' );
 		$utf->setCompany( $company_id );
@@ -2664,6 +3103,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @return bool
+	 */
 	function createEthnicGroup( $company_id, $type) {
 		$egf = TTnew( 'EthnicGroupFactory' );
 		$egf->setCompany( $company_id );
@@ -2699,11 +3143,16 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function createUserContact( $user_id ) {
 		$ucf = TTnew( 'UserContactFactory' );
 		$ucf->setUser($user_id);
 		$ucf->setStatus(10);
 		$ucf->setType( ( rand(1, 7) * 10 ));
+
 		$first_name = $this->getRandomFirstName();
 		$last_name = $this->getRandomLastName();
 		if ( $first_name != '' AND $last_name != '' ) {
@@ -2724,9 +3173,9 @@ class DemoData {
 			$ucf->setWorkEmail( $first_name.'.'.$last_name.'@abc-company.com' );
 			$ucf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
 			$ucf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-
 		}
 		unset($first_name, $last_name);
+
 		if ( $ucf->isValid() ) {
 			$insert_id = $ucf->Save();
 			Debug::Text('User Contact ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -2741,7 +3190,38 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $expense_policy_id UUID
+	 * @param int $default_branch_id
+	 * @param int $default_department_id
+	 * @param int $default_currency_id
+	 * @param int $job_id
+	 * @param int $job_item_id
+	 * @param bool $reimburse
+	 * @return bool
+	 */
 	function createUserExpense( $user_id, $expense_policy_id, $default_branch_id = 0, $default_department_id = 0, $default_currency_id = 0, $job_id = 0, $job_item_id = 0, $reimburse = TRUE ) {
+		if ( $default_branch_id === 0 ) {
+			$default_branch_id = TTUUID::getZeroID();
+		}
+
+		if ( $default_department_id === 0 ) {
+			$default_department_id = TTUUID::getZeroID();
+		}
+
+		if ( $default_currency_id === 0 ) {
+			$default_currency_id = TTUUID::getZeroID();
+		}
+
+		if ( $job_id === 0 ) {
+			$job_id = TTUUID::getZeroID();
+		}
+
+		if ( $job_item_id === 0 ) {
+			$job_item_id = TTUUID::getZeroID();
+		}
+
 		$uef = TTnew( 'UserExpenseFactory' );
 		$uef->setStatus( 20 ); //Pending authorization.
 		$uef->setUser( $user_id );
@@ -2767,6 +3247,13 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param string $user_ids UUID
+	 * @param string $client_group_ids UUID
+	 * @return bool
+	 */
 	function createClient( $company_id, $type, $user_ids = NULL, $client_group_ids = NULL ) {
 		$cf = TTnew( 'ClientFactory' );
 		$cf->setCompany( $company_id );
@@ -2798,11 +3285,6 @@ class DemoData {
 				$cf->setGroup( $client_group_ids[2] );
 				break;
 			case 50:
-				$cf->setCompanyName('WLK Landscaping');
-				$cf->setWebsite('www.wlklandscape.com');
-				$cf->setGroup( $client_group_ids[3] );
-				break;
-			case 50:
 				$cf->setCompanyName('BLVD Engineering');
 				$cf->setWebsite('www.blvd.com.cn');
 				$cf->setGroup( $client_group_ids[4] );
@@ -2827,6 +3309,11 @@ class DemoData {
 				$cf->setWebsite('www.aeon.com');
 				$cf->setGroup( $client_group_ids[1] );
 				break;
+			case 100:
+				$cf->setCompanyName('WLK Landscaping');
+				$cf->setWebsite('www.wlklandscape.com');
+				$cf->setGroup( $client_group_ids[3] );
+				break;
 		}
 
 		if ( $cf->isValid() ) {
@@ -2843,6 +3330,11 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @return bool
+	 */
 	function createInvoiceDistrict( $company_id, $type ) {
 		$cidf = TTnew( 'InvoiceDistrictFactory' );
 		$cidf->setCompany( $company_id );
@@ -2880,6 +3372,13 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $client_id UUID
+	 * @param $type
+	 * @param string $invoice_district_ids UUID
+	 * @param string $default_currency_id UUID
+	 * @return bool
+	 */
 	function createClientContact( $client_id, $type, $invoice_district_ids, $default_currency_id ) {
 		$ccf = TTnew( 'ClientContactFactory' );
 
@@ -2924,10 +3423,20 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $client_id UUID
+	 * @param string $currency_id UUID
+	 * @param $products
+	 * @param int $status_id
+	 * @param null $payments
+	 * @param string $user_ids UUID
+	 * @param string $shipping_policy_ids UUID
+	 * @return bool
+	 */
 	function createInvoice( $company_id, $client_id, $currency_id, $products, $status_id = 10, $payments = NULL, $user_ids = NULL, $shipping_policy_ids = NULL ) {
 
 		$if = TTnew( 'InvoiceFactory' );
-		$ilf = TTnew( 'InvoiceListFactory' );
 		$tf = TTnew( 'TransactionFactory' );
 		$clf = TTnew( 'ClientListFactory' );
 		$plf = TTnew( 'ProductListFactory' );
@@ -2937,7 +3446,6 @@ class DemoData {
 			if ( $clf->getRecordCount() > 0 ) {
 				$c_obj = $clf->getCurrent();
 			}
-
 		}
 
 		$client_billing_contact_obj = $c_obj->getClientContactObject( $c_obj->getDefaultBillingContact() );
@@ -2964,7 +3472,7 @@ class DemoData {
 		if ( $shipping_policy_ids != NULL ) {
 			$shipping_policy_id = $this->getRandomArrayValue( (array)$shipping_policy_ids );
 		} else {
-			$shipping_policy_id = 0;
+			$shipping_policy_id = TTUUID::getZeroID();
 		}
 
 		$combined_shipping_policy_arr = ShippingPolicyFactory::parseCombinedShippingPolicyServiceId( $shipping_policy_id );
@@ -2987,7 +3495,7 @@ class DemoData {
 			$invoice_id = $if->Save(FALSE);
 		}
 
-		if ( is_numeric( $products ) ) {
+		if ( !is_array( $products ) ) {
 			$products = (array)$products;
 		}
 
@@ -3075,9 +3583,9 @@ class DemoData {
 				$tf->setAmount($payment_data['amount']);
 				if ( $is_credit_transaction_valid == TRUE AND $tf->isValid() == TRUE ) {
 					$save_result = $tf->Save();
-					if ( is_numeric($save_result) ) {
-						$payment_transaction_ids[$save_result] = $payment_counter;
-					}
+//					if ( is_numeric($save_result) ) {
+//						$payment_transaction_ids[$save_result] = $payment_counter;
+//					}
 				} else {
 					$is_credit_transaction_valid = FALSE;
 				}
@@ -3109,14 +3617,51 @@ class DemoData {
 	}
 
 
-	function createUser( $company_id, $type, $policy_group_id = 0, $default_branch_id = 0, $default_department_id = 0, $default_currency_id = 0, $user_group_id = 0, $user_title_id = 0, $ethnic_group_ids = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $legal_entity_id UUID
+	 * @param $type
+	 * @param int $policy_group_id
+	 * @param int $default_branch_id
+	 * @param int $default_department_id
+	 * @param int $default_currency_id
+	 * @param int $user_group_id
+	 * @param int $user_title_id
+	 * @param string $ethnic_group_ids UUID
+	 * @return bool
+	 */
+	function createUser( $company_id, $legal_entity_id, $type, $policy_group_id = NULL, $default_branch_id = NULL, $default_department_id = NULL, $default_currency_id = NULL, $user_group_id = NULL, $user_title_id = NULL, $ethnic_group_ids = NULL, $remittance_source_account_ids = NULL ) {
+		if ( $policy_group_id === NULL ) {
+			$policy_group_id = TTUUID::getZeroID();
+		}
+
+		if ( $default_branch_id === NULL ) {
+			$default_branch_id = TTUUID::getZeroID();
+		}
+
+		if ( $default_department_id === NULL ) {
+			$default_department_id = TTUUID::getZeroID();
+		}
+
+		if ( $default_currency_id === NULL ) {
+			$default_currency_id = TTUUID::getZeroID();
+		}
+
+		if ( $user_group_id === NULL ) {
+			$user_group_id = TTUUID::getZeroID();
+		}
+
+		if ( $user_title_id === NULL ) {
+			$user_title_id = TTUUID::getZeroID();
+		}
+
 		$uf = TTnew( 'UserFactory' );
 		$uf->setId( $uf->getNextInsertId() ); //Because password encryption requires the user_id, we need to get it first when creating a new employee.
 		$uf->setCompany( $company_id );
+		$uf->setLegalEntity( $legal_entity_id );
 		$uf->setStatus( 10 );
-		//$uf->setPolicyGroup( 0 );
 
-		if ( $default_currency_id == 0 ) {
+		if ( $default_currency_id == TTUUID::getZeroID() ) {
 			Debug::Text('Get Default Currency...', __FILE__, __LINE__, __METHOD__, 10);
 
 			//Get Default.
@@ -3135,8 +3680,44 @@ class DemoData {
 			$uf->setEthnicGroup( $this->getRandomArrayValue( (array)$ethnic_group_ids ) );
 		}
 
+		if ( is_object( $uf->getLegalEntityObject() ) ) {
+			Debug::Text('  Legal Entity: '. $uf->getLegalEntityObject()->getTradeName() .' Country: '. $uf->getLegalEntityObject()->getCountry(), __FILE__, __LINE__, __METHOD__, 10);
+			if ( strtoupper( $uf->getLegalEntityObject()->getCountry() ) == 'CA' ) {
+				if ( ( $type >= 24 AND $type <= 27 ) ) {
+					$country = 'CA';
+					$province = 'ON';
+					$city = 'Toronto';
+					$postal_code = 'M5E ' . rand( 1, 9 ) . 'A' . rand( 1, 9 );
+				} else {
+					$country = 'CA';
+					$province = 'BC';
+					$city = 'Vancouver';
+					$postal_code = 'V5A ' . rand( 1, 9 ) . 'A' . rand( 1, 9 );
+				}
+
+				$sin = array_rand( array('786 958 926' => TRUE, '764 746 855' => TRUE, '789 010 949' => TRUE, '111 667 374' => TRUE, '178 776 621' => TRUE, '178 776 621' => TRUE, '200 823 029' => TRUE, '754 585 453' => TRUE, '140 572 983' => TRUE, '667 044 044' => TRUE, '471 694 695' => TRUE ) );
+			} else {
+				if ( $type == 100 OR ( $type >= 10 AND $type <= 19 ) ) {
+					$country = 'US';
+					$province = 'NY';
+					$city = 'New York';
+					$postal_code = str_pad( rand( 400, 599 ), 5, 0, STR_PAD_LEFT );
+				} else {
+					$country = 'US';
+					$province = 'WA';
+					$city = 'Seattle';
+					$postal_code = rand(98000, 99499);
+				}
+
+				$sin = rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999);
+			}
+		} else {
+			Debug::Text('  ERROR: Legal entity is not defined or incorrect!', __FILE__, __LINE__, __METHOD__, 10);
+		}
+
 		switch ( $type ) {
 			case 10: //John Doe
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'john.doe'. $this->getUserNamePostfix() );
 
 				//Set Phone ID/Password to test web quickpunch
@@ -3150,307 +3731,149 @@ class DemoData {
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Springfield St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 11: //Theodora	 Simmons
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'theodora.simmons'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Theodora' );
 				$uf->setLastName( 'Simmons' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Springfield St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 12: //Kitty  Nicholas
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'kitty.nicholas'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Kitty' );
 				$uf->setLastName( 'Nicholas' );
 				$uf->setSex( 20 );
 				$uf->setAddress1( rand(100, 9999). ' Ethel St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 13: //Tristen	Braun
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'tristen.braun'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Tristen' );
 				$uf->setLastName( 'Braun' );
 				$uf->setSex( 20 );
 				$uf->setAddress1( rand(100, 9999). ' Ethel St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 14: //Gale	 Mench
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'gale.mench'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Gale' );
 				$uf->setLastName( 'Mench' );
 				$uf->setSex( 20 );
 				$uf->setAddress1( rand(100, 9999). ' Gordon St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 15: //Beau	 Mayers
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'beau.mayers'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Beau' );
 				$uf->setLastName( 'Mayers' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Gordon St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 16: //Ian	Schofield
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'ian.schofield'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Ian' );
 				$uf->setLastName( 'Schofield' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Sussex St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 17: //Gabe	 Hoffhants
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'gabe.hoffhants'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Gabe' );
 				$uf->setLastName( 'Hoffhants' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Sussex St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 18: //Franklin	 Mcmichaels
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'franklin.mcmichaels'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Franklin' );
 				$uf->setLastName( 'McMichaels' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Georgia St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 19: //Donald  Whitling
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'donald.whitling'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Donald' );
 				$uf->setLastName( 'Whitling' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Georgia St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 20: //Jane Doe
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'jane.doe'. $this->getUserNamePostfix() );
 
 				//Set Phone ID/Password to test web quickpunch
@@ -3464,339 +3887,164 @@ class DemoData {
 				$uf->setSex( 20 );
 				$uf->setAddress1( rand(100, 9999). ' Ontario St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 21: //Tamera  Erschoff
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'tamera.erschoff'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Tamera' );
 				$uf->setLastName( 'Erschoff' );
 				$uf->setSex( 20 );
 				$uf->setAddress1( rand(100, 9999). ' Ontario St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 22: //Redd	 Rifler
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'redd.rifler'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Redd' );
 				$uf->setLastName( 'Rifler' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Main St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 23: //Brent  Pawle
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'brent.pawle'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Brent' );
 				$uf->setLastName( 'Pawle' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Pandosy St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 24: //Heather	Grant
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'heather.grant'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Heather' );
 				$uf->setLastName( 'Grant' );
 				$uf->setSex( 20 );
 				$uf->setAddress1( rand(100, 9999). ' Lakeshore St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 25: //Steph  Mench
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'steph.mench'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Steph' );
 				$uf->setLastName( 'Mench' );
 				$uf->setSex( 20 );
 				$uf->setAddress1( rand(100, 9999). ' Dobbin St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 26: //Kailey  Klockman
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'kailey.klockman'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Kailey' );
 				$uf->setLastName( 'Klockman' );
 				$uf->setSex( 20 );
 				$uf->setAddress1( rand(100, 9999). ' Spall St' );
 				//$uf->setAddress2( 'Unit #123' );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 27: //Matt	 Marcotte
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'matt.marcotte'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Matt' );
 				$uf->setLastName( 'Marcotte' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Spall St' );
 				//$uf->setAddress2( 'Unit #123' );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 28: //Nick	 Hanseu
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'nick.hanseu'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Nick' );
 				$uf->setLastName( 'Hanseu' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Gates St' );
 				//$uf->setAddress2( 'Unit #123' );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 29: //Rich	 Wiggins
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'rich.wiggins'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
 
 				$uf->setFirstName( 'Rich' );
 				$uf->setLastName( 'Wiggins' );
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Gates St' );
 				//$uf->setAddress2( 'Unit #123' );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 30: //Mike Smith
-
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'mike.smith'. $this->getUserNamePostfix() );
-				//$uf->setPhoneId( '2222' );
-				//$uf->setPhonePassword( '2222' );
 
 				$uf->setFirstName( 'Mike' );
 				$uf->setLastName( 'Smith' );
 				$uf->setSex( 20 );
 				$uf->setAddress1( rand(100, 9999). ' Main St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 40: //John Hancock
+				$next_available_employee_number = $type;
 				$uf->setUserName( 'john.hancock'. $this->getUserNamePostfix() );
 
 				$uf->setFirstName( 'John' );
@@ -3804,28 +4052,14 @@ class DemoData {
 				$uf->setSex( 20 );
 				$uf->setAddress1( rand(100, 9999). ' Main St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'Seattle' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'WA' );
-
-				$uf->setPostalCode( rand(98000, 99499) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 100: //Administrator
+				$next_available_employee_number = $type;
 				$hire_date = strtotime('01-Jan-2001'); //Force consistent hire date for the administrator, so other unit tests can rely on it.
 
 				$uf->setUserName( 'demoadmin'. $this->getUserNamePostfix() );
@@ -3841,29 +4075,14 @@ class DemoData {
 				$uf->setSex( 10 );
 				$uf->setAddress1( rand(100, 9999). ' Main St' );
 				$uf->setAddress2( 'Unit #'. rand(10, 999) );
-				$uf->setCity( 'New York' );
+				$uf->setCity( $city );
 
-				$uf->setCountry( 'US' );
-				$uf->setProvince( 'NY' );
-
-				$uf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
-				$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkPhoneExt( rand(100, 1000) );
-				$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-				$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-				$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-				$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-				$uf->setHireDate( $hire_date );
-				$uf->setEmployeeNumber( $type );
-
-				$uf->setDefaultBranch( $default_branch_id );
-				$uf->setDefaultDepartment( $default_department_id );
-				$uf->setCurrency( $default_currency_id );
-				$uf->setGroup( $user_group_id );
-				$uf->setTitle( $user_title_id );
+				$uf->setCountry( $country );
+				$uf->setProvince( $province );
+				$uf->setPostalCode( $postal_code );
 				break;
 			case 999: //Random user
-				$next_available_employee_number = UserFactory::getNextAvailableEmployeeNumber( $company_id );
+				$next_available_employee_number = $uf->getNextAvailableEmployeeNumber( $company_id );
 				srand( $type.$next_available_employee_number ); //Re-seed random number otherwise all random users will be exactly the same.
 
 				$first_name = $this->getRandomFirstName();
@@ -3882,25 +4101,27 @@ class DemoData {
 					$uf->setProvince( 'WA' );
 
 					$uf->setPostalCode( rand(98000, 99499) );
-					$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-					$uf->setWorkPhoneExt( rand(100, 1000) );
-					$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
-					$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
-					$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-					$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-					$uf->setHireDate( $hire_date );
-					$uf->setEmployeeNumber( $next_available_employee_number );
-
-					$uf->setDefaultBranch( $default_branch_id );
-					$uf->setDefaultDepartment( $default_department_id );
-					$uf->setCurrency( $default_currency_id );
-					$uf->setGroup( $user_group_id );
-					$uf->setTitle( $user_title_id );
 				}
 				unset($first_name, $last_name);
 
 				break;
 		}
+
+		$uf->setDefaultBranch( $default_branch_id );
+		$uf->setDefaultDepartment( $default_department_id );
+		$uf->setCurrency( $default_currency_id );
+		$uf->setGroup( $user_group_id );
+		$uf->setTitle( $user_title_id );
+		$uf->setHireDate( $hire_date );
+		$uf->setEmployeeNumber( $next_available_employee_number );
+
+		$uf->setWorkPhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
+		$uf->setWorkPhoneExt( rand(100, 1000) );
+		$uf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
+		$uf->setWorkEmail( $uf->getUserName().'@abc-company.com' );
+		$uf->setSIN( $sin );
+		$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
+
 		$uf->setPassword( 'demo', NULL, TRUE );
 
 		if ( $uf->isValid() ) {
@@ -3908,35 +4129,50 @@ class DemoData {
 			Debug::Text('User ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$this->createUserPreference( $insert_id );
-/*
-			$preset_flags = array(
-								'invoice' => 0,
-								'job' => 1,
-								'document' => 0,
-								);
-*/
+
 			if ( $type == 100 ) {
-				//$this->createUserPermission( array( $insert_id ), 40, $preset_flags );
 				$this->createUserPermission( $insert_id, 40 );
 			} elseif ( $type == 10 OR $type == 11 OR $type == 999 ) {
 				$this->createUserPermission( $insert_id, 18 );
 			} else {
-				//$this->createUserPermission( array( $insert_id ), 10, $preset_flags );
 				$this->createUserPermission( $insert_id, 10 );
 			}
-			//$this->createUserPermission( array( -1 ), 10, $preset_flags );
 
-			//Default wage group
-			$this->createUserWage( $insert_id, '19.50', $hire_date );
-			$this->createUserWage( $insert_id, '19.75', ( $hire_date + (86400 * 30 * 6) ) );
-			$this->createUserWage( $insert_id, '20.15', ( $hire_date + (86400 * 30 * 12) ) );
-			$this->createUserWage( $insert_id, '21.50', ( $hire_date + (86400 * 30 * 18) ) );
 
-			$this->createUserWage( $insert_id, '10.00', $hire_date, $this->user_wage_groups[0] );
-			$this->createUserWage( $insert_id, '20.00', $hire_date, $this->user_wage_groups[1] );
+			if ( $type == 100 ) {
+				//Admin user needs satic (non-random) wages as they are used in the unit tests.
+				$this->createUserWage( $insert_id, '19.50', $hire_date );
+				$this->createUserWage( $insert_id, '19.75', ( $hire_date + (86400 * 30 * 6) ) );
+				$this->createUserWage( $insert_id, '20.15', ( $hire_date + (86400 * 30 * 12) ) );
+				$this->createUserWage( $insert_id, '21.50', ( $hire_date + (86400 * 30 * 18) ) );
+
+
+				$this->createUserWage( $insert_id, '10.00', $hire_date, $this->user_wage_groups[0] );
+				$this->createUserWage( $insert_id, '20.00', $hire_date, $this->user_wage_groups[1] );
+			} else {
+				//Default wage group
+				$this->createUserWage( $insert_id, '18.' . rand( 0, 99 ), $hire_date );
+				$this->createUserWage( $insert_id, '19.' . rand( 0, 99 ), ( $hire_date + ( 86400 * 30 * 6 ) ) );
+				$this->createUserWage( $insert_id, '20.' . rand( 0, 99 ), ( $hire_date + ( 86400 * 30 * 12 ) ) );
+				$this->createUserWage( $insert_id, '21.' . rand( 0, 99 ), ( $hire_date + ( 86400 * 30 * 18 ) ) );
+
+				$this->createUserWage( $insert_id, '10.' . rand( 0, 99 ), $hire_date, $this->user_wage_groups[0] );
+				$this->createUserWage( $insert_id, '20.' . rand( 0, 99 ), $hire_date, $this->user_wage_groups[1] );
+			}
 
 			//Assign Taxes to user
-			$this->createUserDeduction( $company_id, $insert_id );
+			$this->createUserDeduction( $company_id, $legal_entity_id, $insert_id );
+
+			$this->createRemittanceDestinationAccount( $insert_id, $default_currency_id, $legal_entity_id, $remittance_source_account_ids[$legal_entity_id][0], 10 );
+			$this->createRemittanceDestinationAccount( $insert_id, $default_currency_id, $legal_entity_id, $remittance_source_account_ids[$legal_entity_id][1], 20 );
+			$this->createRemittanceDestinationAccount( $insert_id, $default_currency_id, $legal_entity_id, $remittance_source_account_ids[$legal_entity_id][2], 30 );
+
+			//5 contacts per user.
+			$x = 1;
+			while ( $x <= 5 ) {
+				$this->createUserContact($insert_id);
+				$x++;
+			}
 
 			return $insert_id;
 		}
@@ -3946,7 +4182,27 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param int $user_title_id
+	 * @param int $default_branch_id
+	 * @param int $default_department_id
+	 * @return bool
+	 */
 	function createJobVacancy( $company_id, $user_id, $user_title_id = 0, $default_branch_id = 0, $default_department_id = 0 ) {
+		if ( $user_title_id === 0 ) {
+			$user_title_id = TTUUID::getZeroID();
+		}
+
+		if ( $default_branch_id === 0 ) {
+			$default_branch_id = TTUUID::getZeroID();
+		}
+
+		if ( $default_department_id === 0 ) {
+			$default_department_id = TTUUID::getZeroID();
+		}
+
 		$jvf = TTnew( 'JobVacancyFactory' );
 		$jvf->setCompany( $company_id );
 		$jvf->setUser( $user_id );
@@ -3981,6 +4237,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $job_applicant_id UUID
+	 * @param string $job_vacancy_id UUID
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function createJobApplication( $job_applicant_id, $job_vacancy_id, $user_id ) {
 		$jaf = TTnew( 'JobApplicationFactory' );
 		$jaf->setJobApplicant( $job_applicant_id );
@@ -4007,6 +4269,10 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $job_applicant_id UUID
+	 * @return bool
+	 */
 	function createJobApplicantLocation( $job_applicant_id ) {
 		$jal = TTnew( 'JobApplicantLocationFactory' );
 		$jal->setJobApplicant( $job_applicant_id );
@@ -4030,6 +4296,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $job_applicant_id UUID
+	 * @param $type
+	 * @return bool
+	 */
 	function createJobApplicantEmployment( $job_applicant_id, $type ) {
 		$jae = TTnew( 'JobApplicantEmploymentFactory' );
 		$jae->setJobApplicant( $job_applicant_id );
@@ -4093,6 +4364,10 @@ class DemoData {
 
 	}
 
+	/**
+	 * @param string $job_applicant_id UUID
+	 * @return bool
+	 */
 	function createJobApplicantReference( $job_applicant_id ) {
 		$jar = TTnew( 'JobApplicantReferenceFactory' );
 		$jar->setJobApplicant($job_applicant_id);
@@ -4127,6 +4402,10 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	function createJobApplicant( $company_id ) {
 		$jaf = TTnew( 'JobApplicantFactory' );
 		$jaf->setCompany( $company_id );
@@ -4184,6 +4463,10 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function createUserPreference( $user_id ) {
 		$uplf = TTnew( 'UserPreferenceListFactory' );
 		$uplf->getByUserId( $user_id );
@@ -4200,7 +4483,12 @@ class DemoData {
 		$upf->setTimeUnitFormat( 10 );
 		$upf->setTimeZone( 'PST8PDT' );
 		$upf->setStartWeekDay( 0 );
-		$upf->setItemsPerPage( 25 );
+		$upf->setItemsPerPage( 50 );
+
+		$upf->setEnableEmailNotificationException( FALSE );
+		$upf->setEnableEmailNotificationMessage( FALSE );
+		$upf->setEnableEmailNotificationPayStub( FALSE );
+		$upf->setEnableEmailNotificationHome( FALSE );
 
 		if ( $upf->isValid() ) {
 			$insert_id = $upf->Save();
@@ -4214,7 +4502,12 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createUserDefaults( $company_id ) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $legal_entity_id UUID
+	 * @return bool
+	 */
+	function createUserDefaults( $company_id, $legal_entity_id ) {
 		//User Default settings, always do this last.
 		$udf = TTnew( 'UserDefaultFactory' );
 
@@ -4222,6 +4515,7 @@ class DemoData {
 		$clf->getById( $company_id );
 		if ( $clf->getRecordCount() > 0 ) {
 			$udf->setCompany( $company_id );
+			$udf->setLegalEntity( $legal_entity_id );
 			$udf->setCity( $clf->getCurrent()->getCity() );
 			$udf->setCountry( $clf->getCurrent()->getCountry() );
 			$udf->setProvince( $clf->getCurrent()->getProvince() );
@@ -4236,6 +4530,7 @@ class DemoData {
 		$udf->setTimeUnitFormat( 10 );
 		$udf->setStartWeekDay( 0 );
 		$udf->setTimeZone( 'PST8PDT' );
+		$udf->setDistanceFormat( 10 );
 
 		//Get Pay Period Schedule
 		$ppslf = TTNew('PayPeriodScheduleListFactory');
@@ -4275,14 +4570,20 @@ class DemoData {
 
 			return $udf->Save();
 		}
+
+		return FALSE;
 	}
 
-	function createUserDeduction( $company_id, $user_id ) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
+	function createUserDeduction( $company_id, $legal_entity_id, $user_id ) {
 		$fail_transaction = FALSE;
 
 		$cdlf = TTnew( 'CompanyDeductionListFactory' );
-		$cdlf->getByCompanyId( $company_id	);
-
+		$cdlf->getByCompanyIdAndLegalEntityId( $company_id, $legal_entity_id );
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach( $cdlf as $cd_obj ) {
 				Debug::Text('Creating User Deduction: User Id:'. $user_id .' Company Deduction: '. $cd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
@@ -4308,12 +4609,14 @@ class DemoData {
 			Debug::Text('No Company Deductions Found!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-
 		Debug::Text('Failed Creating User Deductions!', __FILE__, __LINE__, __METHOD__, 10);
-
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	function createUserWageGroups( $company_id ) {
 		$wgf = TTnew( 'WageGroupFactory' );
 		$wgf->setCompany( $company_id );
@@ -4336,7 +4639,19 @@ class DemoData {
 
 		return TRUE;
 	}
+
+	/**
+	 * @param string $user_id UUID
+	 * @param $rate
+	 * @param int $effective_date EPOCH
+	 * @param int $wage_group_id
+	 * @return bool
+	 */
 	function createUserWage( $user_id, $rate, $effective_date, $wage_group_id = 0 ) {
+		if ( $wage_group_id === 0 ) {
+			$wage_group_id = TTUUID::getZeroID();
+		}
+
 		$uwf = TTnew( 'UserWageFactory' );
 
 		$uwf->setUser($user_id);
@@ -4359,6 +4674,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param null $filter_preset_options
+	 * @return bool
+	 */
 	function createPermissionGroups( $company_id, $filter_preset_options = NULL ) {
 		Debug::text('Adding Preset Permission Groups: '. $company_id, __FILE__, __LINE__, __METHOD__, 9);
 
@@ -4401,6 +4721,11 @@ class DemoData {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $preset_id UUID
+	 * @return bool
+	 */
 	function createUserPermission( $user_id, $preset_id ) {
 		if ( isset($this->permission_presets[$preset_id] ) ) {
 			$pclf = TTnew( 'PermissionControlListFactory' );
@@ -4426,6 +4751,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $child_user_ids UUID
+	 * @return bool
+	 */
 	function createAuthorizationHierarchyControl( $company_id, $child_user_ids ) {
 		$hcf = TTnew( 'HierarchyControlFactory' );
 		$hcf->setCompany( $company_id );
@@ -4446,6 +4776,13 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $hierarchy_id UUID
+	 * @param string $root_user_id UUID
+	 * @param $level
+	 * @return bool
+	 */
 	function createAuthorizationHierarchyLevel( $company_id, $hierarchy_id, $root_user_id, $level ) {
 		if ( $hierarchy_id != '' ) {
 			//Add level
@@ -4465,13 +4802,26 @@ class DemoData {
 		return TRUE;
 	}
 
+	/**
+	 * @param $type
+	 * @param string $user_id UUID
+	 * @param int $date_stamp EPOCH
+	 * @param int $absence_policy_id
+	 * @return bool
+	 */
 	function createRequest( $type, $user_id, $date_stamp, $absence_policy_id = 0 ) {
+		if ( $absence_policy_id === 0 ) {
+			$absence_policy_id = TTUUID::getZeroID();
+		}
+
 		$date_stamp = TTDate::parseDateTime($date_stamp); //Make sure date_stamp is always an integer.
 
 		$rf = TTnew( 'RequestFactory' );
 		$rf->setId( $rf->getNextInsertId() );
 		$rf->setUser( $user_id );
 		$rf->setDateStamp( $date_stamp );
+
+		$u_obj = $rf->getUserObject();
 
 		switch( $type ) {
 			case 10: //Try to match setType()
@@ -4503,6 +4853,10 @@ class DemoData {
 					$rsf->setThu( TRUE );
 					$rsf->setFri( TRUE );
 					$rsf->setSat( FALSE );
+					$rsf->setBranch( $u_obj->getDefaultBranch() );
+					$rsf->setDepartment( $u_obj->getDefaultDepartment() );
+					$rsf->setJob( $u_obj->getDefaultJob() );
+					$rsf->setJobItem( $u_obj->getDefaultJobItem() );
 					$rsf->setAbsencePolicy( $absence_policy_id );
 					if ( $rsf->isValid() ) {
 						$rsf_insert_id = $rsf->Save();
@@ -4536,6 +4890,11 @@ class DemoData {
 					$rsf->setThu( TRUE );
 					$rsf->setFri( TRUE );
 					$rsf->setSat( TRUE );
+					$rsf->setBranch( $u_obj->getDefaultBranch() );
+					$rsf->setDepartment( $u_obj->getDefaultDepartment() );
+					$rsf->setJob( $u_obj->getDefaultJob() );
+					$rsf->setJobItem( $u_obj->getDefaultJobItem() );
+
 					if ( $rsf->isValid() ) {
 						$rsf_insert_id = $rsf->Save();
 						Debug::Text( 'RequestSchedule ID: ' . $rsf_insert_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -4547,7 +4906,6 @@ class DemoData {
 
 				break;
 		}
-
 
 		if ( $rf->isValid() ) {
 			$insert_id = $rf->Save( TRUE, TRUE );
@@ -4561,6 +4919,13 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $object_type_id
+	 * @param string $object_id UUID
+	 * @param string $user_id UUID
+	 * @param bool $authorize
+	 * @return bool
+	 */
 	function createAuthorization( $object_type_id, $object_id, $user_id, $authorize = TRUE ) {
 		$af = TTnew( 'AuthorizationFactory' );
 		$af->setObjectType( $object_type_id );
@@ -4582,6 +4947,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $pay_period_id UUID
+	 * @param string $current_user_id UUID
+	 * @return bool
+	 */
 	function createTimeSheetVerification( $user_id, $pay_period_id, $current_user_id ) {
 		$pptsvf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
 		$pptsvf->setCurrentUser( $current_user_id );
@@ -4603,7 +4974,17 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $parent_id
+	 * @return bool
+	 */
 	function createTaskGroup( $company_id, $type, $parent_id = 0 ) {
+		if ( $parent_id === 0 ) {
+			$parent_id = TTUUID::getZeroID();
+		}
+
 		$jigf = TTnew( 'JobItemGroupFactory' );
 		$jigf->setCompany( $company_id );
 
@@ -4648,6 +5029,13 @@ class DemoData {
 
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param string $group_id UUID
+	 * @param string $product_id UUID
+	 * @return bool
+	 */
 	function createTask( $company_id, $type, $group_id, $product_id = NULL ) {
 		$jif = TTnew( 'JobItemFactory' );
 		$jif->setCompany( $company_id );
@@ -4776,7 +5164,17 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $parent_id
+	 * @return bool
+	 */
 	function createJobGroup( $company_id, $type, $parent_id = 0 ) {
+		if ( $parent_id === 0 ) {
+			$parent_id = TTUUID::getZeroID();
+		}
+
 		$jgf = TTnew( 'JobGroupFactory' );
 		$jgf->setCompany( $company_id );
 
@@ -4820,7 +5218,17 @@ class DemoData {
 		return FALSE;
 
 	}
+
+	/**
+	 * @param string $user_id UUID
+	 * @param int $qualification_id
+	 * @return bool
+	 */
 	function createUserEducation( $user_id, $qualification_id = 0 ) {
+		if ( $qualification_id === 0 ) {
+			$qualification_id = TTUUID::getZeroID();
+		}
+
 		$uef = TTnew( 'UserEducationFactory' );
 		$uef->setUser( $user_id );
 		$uef->setQualification( $qualification_id );
@@ -4844,6 +5252,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $job_applicant_id UUID
+	 * @param string $qualification_id UUID
+	 * @return bool
+	 */
 	function createJobApplicantEducation( $job_applicant_id, $qualification_id ) {
 		$jaef = TTnew( 'JobApplicantEducationFactory' );
 		$jaef->setJobApplicant( $job_applicant_id );
@@ -4868,7 +5281,16 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param int $qualification_id
+	 * @return bool
+	 */
 	function createUserLicense( $user_id, $qualification_id = 0 ) {
+		if ( $qualification_id === 0 ) {
+			$qualification_id = TTUUID::getZeroID();
+		}
+
 		$lf = TTnew( 'UserLicenseFactory' );
 		$lf->setUser( $user_id );
 		$lf->setQualification( $qualification_id );
@@ -4888,6 +5310,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $job_applicant_id UUID
+	 * @param string $qualification_id UUID
+	 * @return bool
+	 */
 	function createJobApplicantLicense( $job_applicant_id, $qualification_id ) {
 		$jalf = TTnew( 'JobApplicantLicenseFactory' );
 		$jalf->setJobApplicant( $job_applicant_id );
@@ -4908,7 +5335,17 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param $type
+	 * @param int $qualification_id
+	 * @return bool
+	 */
 	function createUserLanguage( $user_id, $type, $qualification_id = 0 ) {
+		if ( $qualification_id === 0 ) {
+			$qualification_id = TTUUID::getZeroID();
+		}
+
 		$ulf = TTnew( 'UserLanguageFactory' );
 		$ulf->setUser( $user_id );
 		$ulf->setQualification( $qualification_id );
@@ -4943,6 +5380,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $job_applicant_id UUID
+	 * @param string $qualification_id UUID
+	 * @return bool
+	 */
 	function createJobApplicantLanguage( $job_applicant_id, $qualification_id ) {
 		$jalf = TTnew( 'JobApplicantLanguageFactory' );
 		$jalf->setJobApplicant( $job_applicant_id );
@@ -4963,6 +5405,13 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param $type
+	 * @param string $qualification_id UUID
+	 * @param string $default_currency_id UUID
+	 * @return bool
+	 */
 	function createUserMembership( $user_id, $type, $qualification_id, $default_currency_id ) {
 		$umf = TTnew( 'UserMembershipFactory' );
 		$umf->setUser( $user_id );
@@ -4993,6 +5442,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $job_applicant_id UUID
+	 * @param string $qualification_id UUID
+	 * @param string $default_currency_id UUID
+	 * @return bool
+	 */
 	function createJobApplicantMembership( $job_applicant_id, $qualification_id, $default_currency_id ) {
 		$jamf = TTnew( 'JobApplicantMembershipFactory' );
 		$jamf->setJobApplicant( $job_applicant_id );
@@ -5015,6 +5470,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $reviewer_user_id UUID
+	 * @return bool
+	 */
 	function createUserReviewControl( $user_id, $reviewer_user_id) {
 		$urcf = TTnew('UserReviewControlFactory');
 		$urcf->setUser( $user_id );
@@ -5039,8 +5499,17 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $user_id UUID
+	 * @param $type
+	 * @param int $qualification_id
+	 * @return bool
+	 */
+	function createUserSkill( $user_id, $type, $qualification_id = 0  ) {
+		if ( $qualification_id === 0 ) {
+			$qualification_id = TTUUID::getZeroID();
+		}
 
-	function createUserSkill(  $user_id, $type, $qualification_id = 0  ) {
 		$usf = TTnew( 'UserSkillFactory' );
 		$usf->setUser( $user_id );
 		$usf->setQualification( $qualification_id );
@@ -5078,7 +5547,12 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createJobApplicantSkill(  $job_applicant_id, $qualification_id ) {
+	/**
+	 * @param string $job_applicant_id UUID
+	 * @param string $qualification_id UUID
+	 * @return bool
+	 */
+	function createJobApplicantSkill( $job_applicant_id, $qualification_id ) {
 		$jasf = TTnew( 'JobApplicantSkillFactory' );
 		$jasf->setJobApplicant( $job_applicant_id );
 		$jasf->setQualification( $qualification_id );
@@ -5102,7 +5576,17 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $parent_id
+	 * @return bool
+	 */
 	function createClientGroup( $company_id, $type, $parent_id = 0 ) {
+		if ( $parent_id === 0 ) {
+			$parent_id = TTUUID::getZeroID();
+		}
+
 		$cgf = TTnew( 'ClientGroupFactory' );
 		$cgf->setCompany( $company_id );
 
@@ -5141,7 +5625,17 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $parent_id
+	 * @return bool
+	 */
 	function createProductGroup( $company_id, $type, $parent_id = 0 ) {
+		if ( $parent_id === 0 ) {
+			$parent_id = TTUUID::getZeroID();
+		}
+
 		$pgf = TTnew( 'ProductGroupFactory' );
 		$pgf->setCompany( $company_id );
 
@@ -5180,6 +5674,13 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $group_ids UUID
+	 * @param $type
+	 * @param string $currency_id UUID
+	 * @return bool
+	 */
 	function createProduct( $company_id, $group_ids, $type, $currency_id ) {
 		$pf = TTnew( 'ProductFactory' );
 		$pf->setCompany($company_id);
@@ -5458,6 +5959,15 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $product_id UUID
+	 * @param $type
+	 * @param string $currency_id UUID
+	 * @param bool $include_area_policy_ids
+	 * @param bool $exclude_area_policy_ids
+	 * @return bool
+	 */
 	function createShippingPolicy( $company_id, $product_id, $type, $currency_id, $include_area_policy_ids = FALSE, $exclude_area_policy_ids = FALSE  ) {
 		$spf = TTnew('ShippingPolicyFactory');
 		$spf->setCompany( $company_id );
@@ -5506,6 +6016,11 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @return bool
+	 */
 	public function createGEOFence( $company_id, $type ) {
 		$gf = TTnew( 'GEOFenceFactory' );
 		$gf->setCompany( $company_id );
@@ -5632,7 +6147,30 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param string $item_id UUID
+	 * @param int $job_group_id
+	 * @param int $branch_id
+	 * @param int $department_id
+	 * @param string $client_id UUID
+	 * @param string $geo_fence_ids UUID
+	 * @return bool
+	 */
 	function createJob( $company_id, $type, $item_id, $job_group_id = 0, $branch_id = 0, $department_id = 0, $client_id = NULL, $geo_fence_ids = NULL ) {
+		if ( $job_group_id === 0 ) {
+			$job_group_id = TTUUID::getZeroID();
+		}
+
+		if ( $branch_id === 0 ) {
+			$branch_id = TTUUID::getZeroID();
+		}
+
+		if ( $department_id === 0 ) {
+			$department_id = TTUUID::getZeroID();
+		}
+
 		$jf = TTnew( 'JobFactory' );
 
 		$jf->setCompany( $company_id );
@@ -6051,10 +6589,10 @@ class DemoData {
 			if ( $jf->isValid() ) {
 				$jf->Save();
 
-				Debug::Text('Job ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text('Job ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
-				return $insert_id;
-			}
+			return $insert_id;
+		}
 		}
 
 		Debug::Text('Failed Creating Job!', __FILE__, __LINE__, __METHOD__, 10);
@@ -6064,6 +6602,14 @@ class DemoData {
 	}
 
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $template_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param string $user_ids UUID
+	 * @return bool
+	 */
 	function createRecurringSchedule( $company_id, $template_id, $start_date, $end_date, $user_ids ) {
 		$rscf = TTnew( 'RecurringScheduleControlFactory' );
 		$rscf->setCompany( $company_id );
@@ -6091,6 +6637,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param string $schedule_policy_id UUID
+	 * @return bool
+	 */
 	function createRecurringScheduleTemplate( $company_id, $type, $schedule_policy_id = NULL ) {
 		$rstcf = TTnew( 'RecurringScheduleTemplateControlFactory' );
 		$rstcf->setCompany( $company_id );
@@ -6119,13 +6671,13 @@ class DemoData {
 					$rstf->setStartTime( strtotime('06:00 AM') );
 					$rstf->setEndTime( strtotime('03:00 PM') );
 
-					if ( $schedule_policy_id > 0 ) {
+					if ( TTUUID::isUUID($schedule_policy_id) AND $schedule_policy_id != TTUUID::getZeroID() AND $schedule_policy_id != TTUUID::getNotExistID() ) {
 						$rstf->setSchedulePolicyID( $schedule_policy_id );
 					}
-					$rstf->setBranch( '-1' ); //Default
-					$rstf->setDepartment( '-1' ); //Default
-					$rstf->setJob( '-1' ); //Default
-					$rstf->setJobItem( '-1' ); //Default
+					$rstf->setBranch( TTUUID::getNotExistID() ); //Default
+					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
+					$rstf->setJob( TTUUID::getNotExistID() ); //Default
+					$rstf->setJobItem( TTUUID::getNotExistID() ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6159,13 +6711,13 @@ class DemoData {
 					$rstf->setStartTime( strtotime('10:00 AM') );
 					$rstf->setEndTime( strtotime('07:00 PM') );
 
-					if ( $schedule_policy_id > 0 ) {
+					if ( TTUUID::isUUID($schedule_policy_id) AND $schedule_policy_id != TTUUID::getZeroID() AND $schedule_policy_id != TTUUID::getNotExistID() ) {
 						$rstf->setSchedulePolicyID( $schedule_policy_id );
 					}
-					$rstf->setBranch( '-1' ); //Default
-					$rstf->setDepartment( '-1' ); //Default
-					$rstf->setJob( '-1' ); //Default
-					$rstf->setJobItem( '-1' ); //Default
+					$rstf->setBranch( TTUUID::getNotExistID() ); //Default
+					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
+					$rstf->setJob( TTUUID::getNotExistID() ); //Default
+					$rstf->setJobItem( TTUUID::getNotExistID() ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6199,13 +6751,13 @@ class DemoData {
 					$rstf->setStartTime( strtotime('02:00 PM') );
 					$rstf->setEndTime( strtotime('11:00 PM') );
 
-					if ( $schedule_policy_id > 0 ) {
+					if ( TTUUID::isUUID($schedule_policy_id) AND $schedule_policy_id != TTUUID::getZeroID() AND $schedule_policy_id != TTUUID::getNotExistID() ) {
 						$rstf->setSchedulePolicyID( $schedule_policy_id );
 					}
-					$rstf->setBranch( '-1' ); //Default
-					$rstf->setDepartment( '-1' ); //Default
-					$rstf->setJob( '-1' ); //Default
-					$rstf->setJobItem( '-1' ); //Default
+					$rstf->setBranch( TTUUID::getNotExistID() ); //Default
+					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
+					$rstf->setJob( TTUUID::getNotExistID() ); //Default
+					$rstf->setJobItem( TTUUID::getNotExistID() ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6239,13 +6791,13 @@ class DemoData {
 					$rstf->setStartTime( strtotime('08:00 AM') );
 					$rstf->setEndTime( strtotime('12:00 PM') );
 
-					if ( $schedule_policy_id > 0 ) {
+					if ( TTUUID::isUUID($schedule_policy_id) AND $schedule_policy_id != TTUUID::getZeroID() AND $schedule_policy_id != TTUUID::getNotExistID() ) {
 						$rstf->setSchedulePolicyID( $schedule_policy_id );
 					}
-					$rstf->setBranch( '-1' ); //Default
-					$rstf->setDepartment( '-1' ); //Default
-					$rstf->setJob( '-1' ); //Default
-					$rstf->setJobItem( '-1' ); //Default
+					$rstf->setBranch( TTUUID::getNotExistID() ); //Default
+					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
+					$rstf->setJob( TTUUID::getNotExistID() ); //Default
+					$rstf->setJobItem( TTUUID::getNotExistID() ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6266,11 +6818,11 @@ class DemoData {
 					$rstf->setStartTime( strtotime('05:00 PM') );
 					$rstf->setEndTime( strtotime('9:00 PM') );
 
-					if ( $schedule_policy_id > 0 ) {
+					if ( TTUUID::isUUID($schedule_policy_id) AND $schedule_policy_id != TTUUID::getZeroID() AND $schedule_policy_id != TTUUID::getNotExistID() ) {
 						$rstf->setSchedulePolicyID( $schedule_policy_id );
 					}
-					$rstf->setBranch( '-1' ); //Default
-					$rstf->setDepartment( '-1' ); //Default
+					$rstf->setBranch( TTUUID::getNotExistID() ); //Default
+					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6303,14 +6855,14 @@ class DemoData {
 
 					$rstf->setStartTime( strtotime('06:00 AM') );
 					$rstf->setEndTime( strtotime('03:00 PM') );
-					$rstf->setJob( '-1' ); //Default
-					$rstf->setJobItem( '-1' ); //Default
+					$rstf->setJob( TTUUID::getNotExistID() ); //Default
+					$rstf->setJobItem( TTUUID::getNotExistID() ); //Default
 
-					if ( $schedule_policy_id > 0 ) {
+					if ( TTUUID::isUUID($schedule_policy_id) AND $schedule_policy_id != TTUUID::getZeroID() AND $schedule_policy_id != TTUUID::getNotExistID() ) {
 						$rstf->setSchedulePolicyID( $schedule_policy_id );
 					}
-					$rstf->setBranch( '-1' ); //Default
-					$rstf->setDepartment( '-1' ); //Default
+					$rstf->setBranch( TTUUID::getNotExistID() ); //Default
+					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6332,11 +6884,11 @@ class DemoData {
 					$rstf->setStartTime( strtotime('10:00 AM') );
 					$rstf->setEndTime( strtotime('07:00 PM') );
 
-					if ( $schedule_policy_id > 0 ) {
+					if ( TTUUID::isUUID($schedule_policy_id) AND $schedule_policy_id != TTUUID::getZeroID() AND $schedule_policy_id != TTUUID::getNotExistID() ) {
 						$rstf->setSchedulePolicyID( $schedule_policy_id );
 					}
-					$rstf->setBranch( '-1' ); //Default
-					$rstf->setDepartment( '-1' ); //Default
+					$rstf->setBranch( TTUUID::getNotExistID() ); //Default
+					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6357,13 +6909,13 @@ class DemoData {
 					$rstf->setStartTime( strtotime('02:00 PM') );
 					$rstf->setEndTime( strtotime('11:00 PM') );
 
-					if ( $schedule_policy_id > 0 ) {
+					if ( TTUUID::isUUID($schedule_policy_id) AND $schedule_policy_id != TTUUID::getZeroID() AND $schedule_policy_id != TTUUID::getNotExistID() ) {
 						$rstf->setSchedulePolicyID( $schedule_policy_id );
 					}
-					$rstf->setBranch( '-1' ); //Default
-					$rstf->setDepartment( '-1' ); //Default
-					$rstf->setJob( '-1' ); //Default
-					$rstf->setJobItem( '-1' ); //Default
+					$rstf->setBranch( TTUUID::getNotExistID() ); //Default
+					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
+					$rstf->setJob( TTUUID::getNotExistID() ); //Default
+					$rstf->setJobItem( TTUUID::getNotExistID() ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6382,6 +6934,13 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param int $date_stamp EPOCH
+	 * @param null $data
+	 * @return bool
+	 */
 	function createSchedule( $company_id, $user_id, $date_stamp, $data = NULL ) {
 		$sf = TTnew( 'ScheduleFactory' );
 		$sf->setCompany( $company_id );
@@ -6441,6 +7000,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @param null $data
+	 * @return bool
+	 */
 	function editSchedule( $id, $data = NULL ) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -6504,6 +7068,10 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
 	function deleteSchedule( $id ) {
 		$slf = TTnew( 'ScheduleListFactory' );
 		$slf->getById( $id );
@@ -6525,6 +7093,10 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
 	function deletePunch( $id ) {
 		$plf = TTnew( 'PunchListFactory' );
 		$plf->getById( $id );
@@ -6548,6 +7120,11 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @param null $data
+	 * @return bool
+	 */
 	function editPunch( $id, $data = NULL ) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -6601,6 +7178,16 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param int $type_id
+	 * @param int $status_id
+	 * @param $time_stamp
+	 * @param $data
+	 * @param null $coordinate
+	 * @param bool $calc_total_time
+	 * @return bool
+	 */
 	function createPunch( $user_id, $type_id, $status_id, $time_stamp, $data, $coordinate = NULL, $calc_total_time = TRUE ) {
 		$fail_transaction = FALSE;
 
@@ -6677,6 +7264,10 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $type
+	 * @return float
+	 */
 	function getRandomCoordinates( $type = 'longitude' ) {
 		if ( $type == 'longitude' ) {
 			$retval = ( round( ( mt_rand( 80, 110 ) + mt_rand(0, 32767) / 32767 ), 5 ) * -1 );
@@ -6687,7 +7278,23 @@ class DemoData {
 		return $retval;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date_stamp EPOCH
+	 * @param $total_time
+	 * @param int $branch_id
+	 * @param int $department_id
+	 * @return bool
+	 */
 	function createUserDateTotal( $user_id, $date_stamp, $total_time, $branch_id = 0, $department_id = 0 ) {
+		if ( $branch_id === 0 ) {
+			$branch_id = TTUUID::getZeroID();
+		}
+
+		if ( $department_id === 0 ) {
+			$department_id = TTUUID::getZeroID();
+		}
+
 		$udtf = TTnew( 'UserDateTotalFactory' );
 
 		$udtf->StartTransaction();
@@ -6695,11 +7302,11 @@ class DemoData {
 		$udtf->setUser( $user_id );
 		$udtf->setDateStamp( $date_stamp );
 		$udtf->setObjectType( 10 ); //Regular time
-		//$udtf->setSourceObject( (int)$policy_id );
+		//$udtf->setSourceObject( TTUUID::castUUID($policy_id) );
 		//$udtf->setPayCode( $pay_code_id );
 
-		$udtf->setBranch( (int)$branch_id );
-		$udtf->setDepartment( (int)$department_id );
+		$udtf->setBranch( TTUUID::castUUID($branch_id) );
+		$udtf->setDepartment( TTUUID::castUUID($department_id) );
 		$udtf->setJob( (int)0 );
 		$udtf->setJobItem( (int)0 );
 
@@ -6734,6 +7341,14 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date_stamp EPOCH
+	 * @param $total_time
+	 * @param string $absence_policy_id UUID
+	 * @param bool $override
+	 * @return bool
+	 */
 	function createAbsence( $user_id, $date_stamp, $total_time, $absence_policy_id, $override = FALSE ) {
 		$udtf = TTnew( 'UserDateTotalFactory' );
 
@@ -6745,7 +7360,7 @@ class DemoData {
 			$pay_code_id = $aplf->getCurrent()->getPayCode();
 
 			if ( $override == TRUE ) {
-				$filter_data = array( 	'user_id' => (int)$user_id,
+				$filter_data = array( 	'user_id' => TTUUID::castUUID($user_id),
 										'date_stamp' => $date_stamp,
 										'object_type_id' => (int)50,
 
@@ -6754,8 +7369,8 @@ class DemoData {
 										//and still have multiple entries on the same day with the same branch/department/job/task.
 										//Some customers have 5-10 UNPAID absence policies all going to the same UNPAID pay code.
 										//This is required to allow more than one to be used on the same day.
-										'src_object_id' => (int)$absence_policy_id,
-										'pay_code_id' => (int)$pay_code_id,
+										'src_object_id' => TTUUID::castUUID($absence_policy_id),
+										'pay_code_id' => TTUUID::castUUID($pay_code_id),
 									);
 
 				$udtlf = TTnew( 'UserDateTotalListFactory' );
@@ -6771,7 +7386,7 @@ class DemoData {
 			$udtf->setUser( $user_id );
 			$udtf->setDateStamp( $date_stamp );
 			$udtf->setObjectType( 50 ); //Absence Time (Taken)
-			$udtf->setSourceObject( (int)$absence_policy_id );
+			$udtf->setSourceObject( TTUUID::castUUID($absence_policy_id) );
 			$udtf->setPayCode( $pay_code_id );
 
 			$udtf->setBranch( (int)0 );
@@ -6814,6 +7429,10 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
 	function deleteAbsence( $id ) {
 		$udtlf = TTnew( 'UserDateTotalListFactory' );
 		$udtlf->getById( $id );
@@ -6839,6 +7458,15 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param $in_time_stamp
+	 * @param $out_time_stamp
+	 * @param null $data
+	 * @param bool $calc_total_time
+	 * @param null $coordinate
+	 * @return bool
+	 */
 	function createPunchPair( $user_id, $in_time_stamp, $out_time_stamp, $data = NULL, $calc_total_time = TRUE, $coordinate = NULL ) {
 		$fail_transaction = FALSE;
 
@@ -6861,8 +7489,8 @@ class DemoData {
 				$pf_in->setLatitude( $coordinate[0] );
 				$pf_in->setLongitude( $coordinate[1] );
 			} else {
-				$pf_in->setLongitude( $this->getRandomCoordinates('longitude' ) );
-				$pf_in->setLatitude( $this->getRandomCoordinates('latitude' ) );
+			$pf_in->setLongitude( $this->getRandomCoordinates('longitude' ) );
+			$pf_in->setLatitude( $this->getRandomCoordinates('latitude' ) );
 			}
 			if ( $pf_in->isNew() ) {
 				$pf_in->setActualTimeStamp( $out_time_stamp );
@@ -6894,8 +7522,8 @@ class DemoData {
 				$pf_out->setLatitude( $coordinate[0] );
 				$pf_out->setLongitude( $coordinate[1] );
 			} else {
-				$pf_out->setLongitude( $this->getRandomCoordinates('longitude' ) );
-				$pf_out->setLatitude( $this->getRandomCoordinates('latitude' ) );
+			$pf_out->setLongitude( $this->getRandomCoordinates('longitude' ) );
+			$pf_out->setLatitude( $this->getRandomCoordinates('latitude' ) );
 			}
 			if ( $pf_out->isNew() ) {
 				$pf_out->setActualTimeStamp( $in_time_stamp );
@@ -6979,6 +7607,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param int $type
+	 * @return bool
+	 */
 	function createAccrualBalance( $user_id, $accrual_policy_account_id, $type = 30) {
 		$af = TTnew( 'AccrualFactory' );
 
@@ -7001,6 +7635,12 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $report
+	 * @param $type
+	 * @return bool
+	 */
 	function createReportCustomColumn( $company_id, $report, $type ) {
 		$rcf = TTnew( 'ReportCustomColumnFactory' );
 		$rcf->setCompany( $company_id );
@@ -7101,6 +7741,280 @@ class DemoData {
 		return FALSE;
 	}
 
+
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param int $status_id
+	 * @return bool
+	 */
+	function createLegalEntity( $company_id, $type, $status_id = 10  ) {
+		$lef = TTnew( 'LegalEntityFactory' );
+		$lef->setCompany( $company_id );
+		$lef->setStatus( $status_id );
+		switch( $type ) {
+			case 10: //US
+				$lef->setType( 10 );
+				$lef->setLegalName( 'ACME USA East Inc.' );
+				$lef->setTradeName( 'ACME USA East' );
+				$lef->setAddress1( '123 Main St' );
+				$lef->setAddress2( 'Unit #123' );
+				$lef->setCity( 'New York' );
+				$lef->setCountry( 'US' );
+				$lef->setProvince( 'NY' );
+
+				$lef->setPostalCode( '12345' );
+				$lef->setWorkPhone( '555-555-5555' );
+				$lef->setFaxPhone('');
+				$lef->setStartDate( time() - (86400 * 365) );
+				//$lef->setEndDate( time() + (86400 * 7) );
+				break;
+			case 15: //US
+				$lef->setType( 10 );
+				$lef->setLegalName( 'ACME USA West Inc.' );
+				$lef->setTradeName( 'ACME USA West' );
+				$lef->setAddress1( '321 Main St' );
+				$lef->setAddress2( 'Unit #321' );
+				$lef->setCity( 'Seattle' );
+				$lef->setCountry( 'US' );
+				$lef->setProvince( 'WA' );
+
+				$lef->setPostalCode( '98101' );
+				$lef->setWorkPhone( '555-555-5555' );
+				$lef->setFaxPhone('');
+				$lef->setStartDate( time() - (86400 * 365) );
+				//$lef->setEndDate( time() + (86400 * 7) );
+				break;
+
+			case 20: //Canada
+				$lef->setType( 10 );
+				$lef->setLegalName( 'ACME Canada East Inc.' );
+				$lef->setTradeName( 'ACME Canada East' );
+				$lef->setAddress1( '456 Main St' );
+				$lef->setAddress2( 'Unit #456' );
+				$lef->setCity( 'Toronto' );
+				$lef->setCountry( 'CA' );
+				$lef->setProvince( 'ON' );
+
+				$lef->setPostalCode( 'M5E 1A1' );
+				$lef->setWorkPhone( '555-555-5555' );
+				$lef->setFaxPhone('');
+				$lef->setStartDate( time() - (86400 * 365) );
+				//$lef->setEndDate( time() - (86400 * 7) );
+				break;
+			case 25: //Canada
+				$lef->setType( 10 );
+				$lef->setLegalName( 'ACME Canada West Inc.' );
+				$lef->setTradeName( 'ACME Canada West' );
+				$lef->setAddress1( '654 Main St' );
+				$lef->setAddress2( 'Unit #654' );
+				$lef->setCity( 'Vancouver' );
+				$lef->setCountry( 'CA' );
+				$lef->setProvince( 'BC' );
+
+				$lef->setPostalCode( 'V6G 1A1' );
+				$lef->setWorkPhone( '555-555-5555' );
+				$lef->setFaxPhone('');
+				$lef->setStartDate( time() - (86400 * 365) );
+				//$lef->setEndDate( time() - (86400 * 7) );
+				break;
+
+		}
+
+		if ( $lef->isValid() ) {
+			$insert_id = $lef->Save();
+			Debug::Text('Legal ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating Legal Entity!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	/**
+	 * @param string $legal_entity_id UUID
+	 * @param string $currency_id UUID
+	 * @param $type
+	 * @return bool
+	 */
+	function createRemittanceSourceAccount( $legal_entity_id, $currency_id, $type ) {
+		$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+		$rsaf->setLegalEntity( $legal_entity_id );
+		$rsaf->setStatus( 10 ); //Enabled
+		$rsaf->setCurrency( $currency_id );
+		$rsaf->setLastTransactionNumber( rand(100, 999) );
+		switch( $type ) {
+			// the first one legal entity record
+			case 10:
+				$rsaf->setType( 2000 ); //Check
+				$rsaf->setCountry('US');
+				$rsaf->setName( 'Corporate Checking (USD)' );
+				$rsaf->setDescription( '' );
+				$rsaf->setDataFormat( 10 );
+				$rsaf->setValue1( rand(100, 999) );
+				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue4( '' );
+				$rsaf->setValue5( '' );
+				break;
+			case 20:
+				$rsaf->setType( 3000 ); //US EFT
+				$rsaf->setCountry('US');
+				$rsaf->setName( 'Corporate ACH (USD)' );
+				$rsaf->setDescription( '' );
+				$rsaf->setDataFormat( 10 );
+				$rsaf->setValue1( rand(100, 999) );
+				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue4( rand(100, 999) );
+				$rsaf->setValue5( rand(100, 999) );
+				$rsaf->setValue7( rand(100, 999) );
+				break;
+			case 30:
+				$rsaf->setType( 3000 );
+				$rsaf->setCountry('CA');
+				$rsaf->setName( 'Corporate ACH (CAD)' );
+				$rsaf->setDescription( '' );
+				$rsaf->setDataFormat( 20 );
+				$rsaf->setValue1( rand(100, 999) );
+				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue4( rand(100, 999) );
+				$rsaf->setValue5( rand(100, 999) );
+				$rsaf->setValue7( rand(100, 999) );
+				break;
+			// the second one legal entity record
+			case 80:
+				$rsaf->setType( 2000 );
+				$rsaf->setCountry('CA');
+				$rsaf->setName( 'Corporate Checking (CAD)' );
+				$rsaf->setDescription( '' );
+				$rsaf->setDataFormat( 10 );
+				$rsaf->setValue1( rand(100, 999) );
+				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue4( '' );
+				$rsaf->setValue5( '' );
+				break;
+			case 90:
+				$rsaf->setType( 3000 );
+				$rsaf->setCountry('CA');
+				$rsaf->setName( 'Corporate EFT (CAD)' );
+				$rsaf->setDescription( '' );
+				$rsaf->setDataFormat( 20 );
+				$rsaf->setValue1( rand(100, 999) );
+				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue4( rand(100, 999) );
+				$rsaf->setValue5( rand(100, 999) );
+				$rsaf->setValue7( rand(100, 999) );
+				break;
+			case 100:
+				$rsaf->setType( 3000 );
+				$rsaf->setCountry('US'); //Country has to be US when using USD currency.
+				$rsaf->setName( 'Corporate EFT (USD)' );
+				$rsaf->setDescription( '' );
+				$rsaf->setDataFormat( 10 );
+				$rsaf->setValue1( rand(100, 999) );
+				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue4( rand(100, 999) );
+				$rsaf->setValue5( rand(100, 999) );
+				$rsaf->setValue7( rand(100, 999) );
+				break;
+		}
+
+		if ( $rsaf->isValid() ) {
+			$insert_id = $rsaf->Save();
+			Debug::Text('Remittance Source Account ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating Remittance Source Account!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	/**
+	 * @param string $user_id UUID
+	 * @param string $currency_id UUID
+	 * @param string $legal_entity_id UUID
+	 * @param string $remittance_source_account_id UUID
+	 * @param int $type_id
+	 * @return bool|int|string
+	 */
+	function createRemittanceDestinationAccount( $user_id, $currency_id, $legal_entity_id, $remittance_source_account_id, $type_id ) {
+		/** @var RemittanceDestinationAccountFactory $rdaf */
+		$rdaf = TTnew( 'RemittanceDestinationAccountFactory' );
+		/** @var RemittanceSourceAccountFactory $rsaf */
+		$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+
+		Debug::Text('Creating remittance destination account.', __FILE__, __LINE__, __METHOD__, 10);
+		$rdaf->setUser( $user_id );
+		$rdaf->setCurrency( $currency_id );
+		$rdaf->setStatus( 10 ); //Enabled
+		$rdaf->setRemittanceSourceAccount( $remittance_source_account_id );
+
+		$amount_type_id = array_rand( $rdaf->getOptions('amount_type') ); //10 or 20
+		if ( $amount_type_id == 10 ) {
+			$amount_type_id = 20;
+			$rdaf->setAmountType( $amount_type_id );
+			$rdaf->setAmount( rand( 1, 100 )  );
+			$rdaf->setPercentAmount(0);
+			$rdaf->setPriority( rand(1, 5) );
+		} else if ( $amount_type_id == 20 ) {
+			$amount_type_id = 10;
+			$rdaf->setAmountType( $amount_type_id );
+			if ( isset( $percent_amount ) ) {
+				$rdaf->setPercentAmount( 100 - $percent_amount  );
+			} else {
+				$percent_amount = rand( 10, 89 );
+				$rdaf->setPercentAmount( $percent_amount  );
+			}
+			$rdaf->setAmount( 0 );
+			$rdaf->setPriority( rand(6, 10) );
+		}
+
+		Debug::Text('Type ID: '. $type_id, __FILE__, __LINE__, __METHOD__, 10);
+		switch( $type_id ) {
+			case 10:
+				$rdaf->setType( 2000 );
+				$rdaf->setName( 'Checking Account' );
+				break;
+			case 20:
+				$rdaf->setType( 3000 );
+				$rdaf->setName( 'Saving Account' );
+				$rdaf->setValue1( rand( 10, 999) );
+				$rdaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rdaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				break;
+			case 30:
+				$rdaf->setType( 3000 );
+				$rdaf->setName( 'Retirement Savings' );
+				$rdaf->setValue1( rand( 10, 999) );
+				$rdaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rdaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				break;
+		}
+
+		if ( $rdaf->isValid() ) {
+			$insert_id = $rdaf->Save();
+			Debug::Text('Remittance Source Account ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating Remittance Destination Account!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function generateData() {
 		global $current_company, $current_user;
 
@@ -7116,7 +8030,7 @@ class DemoData {
 
 		$clf = TTnew( 'CompanyListFactory' );
 		$clf->getById( $company_id );
-		$current_company = $clf->getCurrent();
+		$this->current_company = $current_company = $clf->getCurrent();
 
 		if ( $company_id !== FALSE ) {
 			Debug::Text('Company Created Successfully!', __FILE__, __LINE__, __METHOD__, 10);
@@ -7126,11 +8040,19 @@ class DemoData {
 			//Create currency
 			$currency_ids[] = $this->createCurrency( $company_id, 10 ); //USD
 			$currency_ids[] = $this->createCurrency( $company_id, 20 ); //CAD
-			$currency_ids[] = $this->createCurrency( $company_id, 30 ); //EUR
+			//$currency_ids[] = $this->createCurrency( $company_id, 30 ); //EUR
+
+			//Legal Entity
+			$legal_entity_ids[] = $this->createLegalEntity( $company_id, 10 );
+			$legal_entity_ids[] = $this->createLegalEntity( $company_id, 15 );
+			$legal_entity_ids[] = $this->createLegalEntity( $company_id, 20 );
+			$legal_entity_ids[] = $this->createLegalEntity( $company_id, 25 );
 
 			//Create branch
 			$branch_ids[] = $this->createBranch( $company_id, 10 ); //NY
 			$branch_ids[] = $this->createBranch( $company_id, 20 ); //WA
+			$branch_ids[] = $this->createBranch( $company_id, 30 ); //ON
+			$branch_ids[] = $this->createBranch( $company_id, 40 ); //BC
 
 			//Create departments
 			$department_ids[] = $this->createDepartment( $company_id, 10 );
@@ -7139,16 +8061,13 @@ class DemoData {
 			$department_ids[] = $this->createDepartment( $company_id, 40 );
 
 			//Create stations
-			$station_id = $this->createStation( $company_id );
+			$this->createStation( $company_id );
 
 			//Create pay stub accounts.
 			$this->createPayStubAccount( $company_id );
 
 			//Link pay stub accounts.
 			$this->createPayStubAccountLink( $company_id );
-
-			//Company Deductions
-			$this->createCompanyDeduction( $company_id );
 
 			//Wage Groups
 			$wage_group_ids[] = $this->createUserWageGroups( $company_id );
@@ -7179,46 +8098,26 @@ class DemoData {
 			$ethnic_group_ids[] = $this->createEthnicGroup( $company_id, 40 );
 			$ethnic_group_ids[] = $this->createEthnicGroup( $company_id, 50 );
 
-			$this->createUserDefaults( $company_id );
+			$this->createUserDefaults( $company_id, $legal_entity_ids[0] );
 
-			//Users
-			$user_ids[] = $this->createUser( $company_id, 10, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 11, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 12, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 13, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 14, 0, $branch_ids[0], $department_ids[1], $currency_ids[1], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 15, 0, $branch_ids[0], $department_ids[0], $currency_ids[1], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 16, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 17, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 18, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 19, 0, $branch_ids[0], $department_ids[1], $currency_ids[2], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 20, 0, $branch_ids[0], $department_ids[1], $currency_ids[2], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 21, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 22, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 23, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 24, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 25, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 26, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 27, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 28, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 29, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 30, 0, $branch_ids[1], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 40, 0, $branch_ids[1], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
+			//Remittance Source Account - US
+			$remittance_source_account_ids[$legal_entity_ids[0]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[0], $currency_ids[0], 10  ); // Type=10 (Checking)
+			$remittance_source_account_ids[$legal_entity_ids[0]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[0], $currency_ids[0], 20  ); // type 20
+			$remittance_source_account_ids[$legal_entity_ids[0]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[0], $currency_ids[1], 30  ); // type 30
+			$remittance_source_account_ids[$legal_entity_ids[1]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[1], $currency_ids[0], 10  ); // Type=10 (Checking)
+			$remittance_source_account_ids[$legal_entity_ids[1]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[1], $currency_ids[0], 20  ); // type 20
+			$remittance_source_account_ids[$legal_entity_ids[1]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[1], $currency_ids[1], 30  ); // type 30
 
-			//Create random users.
-			Debug::Text('Creating random users: '. $this->getMaxRandomUsers(), __FILE__, __LINE__, __METHOD__, 10);
-			for( $i = 0; $i <= $this->getMaxRandomUsers(); $i++ ) {
-				$tmp_user_id = $this->createUser( $company_id, 999, 0, $branch_ids[($i % 2)], $department_ids[($i % 4)], $currency_ids[0], $user_group_ids[($i % 5)], $user_title_ids[($i % 9)], $ethnic_group_ids );
-				if ( $tmp_user_id != FALSE ) {
-					$user_ids[] = $tmp_user_id;
-				}
-			}
-			//Debug::Arr($user_ids, 'All User IDs:', __FILE__, __LINE__, __METHOD__, 10);
+			//Remittance Source Account - CA
+			$remittance_source_account_ids[$legal_entity_ids[2]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[2], $currency_ids[1], 80  ); // Type=10 (Checking)
+			$remittance_source_account_ids[$legal_entity_ids[2]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[2], $currency_ids[1], 90  ); // type 20
+			$remittance_source_account_ids[$legal_entity_ids[2]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[2], $currency_ids[0], 100  ); // type 30
+			$remittance_source_account_ids[$legal_entity_ids[3]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[3], $currency_ids[1], 80  ); // Type=10 (Checking)
+			$remittance_source_account_ids[$legal_entity_ids[3]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[3], $currency_ids[1], 90  ); // type 20
+			$remittance_source_account_ids[$legal_entity_ids[3]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[3], $currency_ids[0], 100  ); // type 30
 
-			//Put this at the very end so its always created last after any random users. That way is can be easily popped off the end if needed.
-			$current_user_id = $user_ids[] = $this->createUser( $company_id, 100, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[0], $ethnic_group_ids );
-			ksort($user_ids);
-
+			//Administrator User - Do this first so they can be used in SetupPresets
+			$current_user_id = $user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 100, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids );
 			$ulf = TTnew( 'UserListFactory' );
 			$ulf->getById( $current_user_id );
 			$current_user = $ulf->getCurrent();
@@ -7227,6 +8126,57 @@ class DemoData {
 				return FALSE;
 			}
 			unset($current_user_id);
+
+			//Create Recurring Holidays, MUST GO BEFORE createPayrollRemittanceAgency()
+			$this->createRecurringHolidays( $company_id, $current_user->getId() );
+
+			//Create payroll remittance agency. MUST GO BEFORE createCompanyDeduction()
+			$this->createPayrollRemittanceAgency( $company_id, $current_user->getId(), $legal_entity_ids[0] );
+			$this->createPayrollRemittanceAgency( $company_id, $current_user->getId(), $legal_entity_ids[1] );
+			$this->createPayrollRemittanceAgency( $company_id, $current_user->getId(), $legal_entity_ids[2], 'CA' );
+			$this->createPayrollRemittanceAgency( $company_id, $current_user->getId(), $legal_entity_ids[3], 'CA' );
+
+			//Company Deductions. MUST GO AFTER createPayrollRemittanceAgency() and createUser()
+			$this->createCompanyDeduction( $company_id, $current_user->getId(), $legal_entity_ids[0] );
+			$this->createCompanyDeduction( $company_id, $current_user->getId(), $legal_entity_ids[1] );
+			$this->createCompanyDeduction( $company_id, $current_user->getId(), $legal_entity_ids[2] );
+			$this->createCompanyDeduction( $company_id, $current_user->getId(), $legal_entity_ids[3] );
+
+			//Users
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 10, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 11, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 12, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 13, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 14, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 15, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 16, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 17, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 18, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 19, 0, $branch_ids[0], $department_ids[1], $currency_ids[1], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 20, 0, $branch_ids[1], $department_ids[1], $currency_ids[1], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 21, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 22, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 23, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 24, 0, $branch_ids[2], $department_ids[2], $currency_ids[1], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 25, 0, $branch_ids[2], $department_ids[2], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 26, 0, $branch_ids[2], $department_ids[1], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 27, 0, $branch_ids[2], $department_ids[3], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 28, 0, $branch_ids[3], $department_ids[3], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 29, 0, $branch_ids[3], $department_ids[3], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 30, 0, $branch_ids[3], $department_ids[0], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 40, 0, $branch_ids[3], $department_ids[0], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
+
+			//Create random users.
+			Debug::Text('Creating random users: '. $this->getMaxRandomUsers(), __FILE__, __LINE__, __METHOD__, 10);
+			for( $i = 0; $i <= $this->getMaxRandomUsers(); $i++ ) {
+				$tmp_user_id = $this->createUser( $company_id, $legal_entity_ids[0] , 999, 0, $branch_ids[($i % 2)], $department_ids[($i % 4)], $currency_ids[0], $user_group_ids[($i % 5)], $user_title_ids[($i % 9)], $ethnic_group_ids, $remittance_source_account_ids );
+				if ( $tmp_user_id != FALSE ) {
+					$user_ids[] = $tmp_user_id;
+					$tmp_user_ids[] = $tmp_user_id;
+				}
+			}
+			unset($i, $tmp_user_id);
+
 
 			//Create policies
 			$policy_ids['round'][] = $this->createRoundingPolicy( $company_id, 10 ); //In
@@ -7327,23 +8277,50 @@ class DemoData {
 			$this->createPayPeriodSchedule( $company_id, $user_ids );
 
 			//Create Policy Group
-			$this->createPolicyGroup(	$company_id,
-										$policy_ids['meal_1'],
-										$policy_ids['exception_1'],
-										NULL,
-										$policy_ids['overtime'],
-										$policy_ids['premium'],
-										$policy_ids['round'],
-										$user_ids,
-										NULL,
-										NULL,
-										$policy_ids['expense'],
-										$policy_ids['absence'],
-										$policy_ids['regular']
-										);
+			$this->createPolicyGroup(	 $company_id,
+										 $policy_ids['meal_1'],
+										 $policy_ids['exception_1'],
+										 NULL,
+										 $policy_ids['overtime'],
+										 $policy_ids['premium'],
+										 $policy_ids['round'],
+										 $user_ids,
+										 NULL,
+										 NULL,
+										 $policy_ids['expense'],
+										 $policy_ids['absence'],
+										 $policy_ids['regular']
+			);
 			Debug::Text(' a.Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			//Create Accrual balances
+			foreach( $user_ids as $user_id ) {
+				foreach( $policy_ids['accrual_account'] as $accrual_policy_account_id ) {
+					$this->createAccrualBalance( $user_id, $accrual_policy_account_id );
+				}
+				unset($accrual_policy_account_id);
+			}
+
+			if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 10 );
+				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 20 );
+				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 100 );
+				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 200 );
+				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 270 );
+				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 400 );
+				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 405 );
+
+				$this->createReportCustomColumn( $company_id, 'TimesheetSummaryReport', 10 );
+				$this->createReportCustomColumn( $company_id, 'TimesheetSummaryReport', 20 );
+				$this->createReportCustomColumn( $company_id, 'TimesheetSummaryReport', 200 );
+
+				$this->createReportCustomColumn( $company_id, 'TimesheetDetailReport', 10 );
+				$this->createReportCustomColumn( $company_id, 'TimesheetDetailReport', 20 );
+				$this->createReportCustomColumn( $company_id, 'TimesheetDetailReport', 200 );
+			}
+
+
+			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND isset($this->create_data['invoice']) AND $this->create_data['invoice'] == TRUE ) {
 				//Client Groups
 				$client_group_ids[] = $this->createClientGroup( $company_id, 10, 0 );
 				$client_group_ids[] = $this->createClientGroup( $company_id, 20, $client_group_ids[0] );
@@ -7370,7 +8347,6 @@ class DemoData {
 				$client_ids[] = $this->createClient( $company_id, 80, $user_ids, $client_group_ids );
 
 
-
 				//Create Invoice District
 				$invoice_district_ids[] = $this->createInvoiceDistrict( $company_id, 10 );//US
 				$invoice_district_ids[] = $this->createInvoiceDistrict( $company_id, 20 );//US
@@ -7378,9 +8354,8 @@ class DemoData {
 				$invoice_district_ids[] = $this->createInvoiceDistrict( $company_id, 40 );//CA
 
 
-
 				//Create Client Contact, Each client should have at least two client contacts.
-				foreach( $client_ids as $client_id ) {
+				foreach ( $client_ids as $client_id ) {
 					$client_contact_ids[] = $this->createClientContact( $client_id, 10, $invoice_district_ids, $currency_ids[0] );
 					$client_contact_ids[] = $this->createClientContact( $client_id, 20, $invoice_district_ids, $currency_ids[0] );
 				}
@@ -7399,8 +8374,8 @@ class DemoData {
 				$product_ids[40][] = $this->createProduct( $company_id, $product_group_ids, 80, $currency_ids[0] );
 				$product_ids[50][] = $this->createProduct( $company_id, $product_group_ids, 90, $currency_ids[0] );
 
-				$area_policy_ids[] = $this->createAreaPolicy( $company_id, 20, array( $invoice_district_ids[0], $invoice_district_ids[1] ) );
-				$area_policy_ids[] = $this->createAreaPolicy( $company_id, 10, array( $invoice_district_ids[2], $invoice_district_ids[3] ) );
+				$area_policy_ids[] = $this->createAreaPolicy( $company_id, 20, array($invoice_district_ids[0], $invoice_district_ids[1]) );
+				$area_policy_ids[] = $this->createAreaPolicy( $company_id, 10, array($invoice_district_ids[2], $invoice_district_ids[3]) );
 
 				$tax_policy_ids[] = $this->createTaxPolicy( $company_id, $product_ids[30][0], $area_policy_ids );
 
@@ -7410,17 +8385,18 @@ class DemoData {
 
 
 				//Create Invoice
-				foreach( $client_ids as $client_id ) {
+				foreach ( $client_ids as $client_id ) {
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], $product_ids[20][0], 100, array(), $user_ids, $shipping_policy_ids );
-					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], array( $product_ids[10][0], $product_ids[10][1], $product_ids[10][2], $product_ids[10][3], $product_ids[10][4], $product_ids[20][0]  ), 40, NULL, $user_ids, $shipping_policy_ids );
-					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], array( $product_ids[10][1], $product_ids[10][2], $product_ids[10][3] ), 40, NULL, $user_ids, $shipping_policy_ids );
-					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], array( $product_ids[10][0], $product_ids[10][4], $product_ids[20][0] ), 100, array(), $user_ids, $shipping_policy_ids );
-					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], array( $product_ids[10][3], $product_ids[10][4] ), 100, array(), $user_ids, $shipping_policy_ids );
+					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], array($product_ids[10][0], $product_ids[10][1], $product_ids[10][2], $product_ids[10][3], $product_ids[10][4], $product_ids[20][0]), 40, NULL, $user_ids, $shipping_policy_ids );
+					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], array($product_ids[10][1], $product_ids[10][2], $product_ids[10][3]), 40, NULL, $user_ids, $shipping_policy_ids );
+					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], array($product_ids[10][0], $product_ids[10][4], $product_ids[20][0]), 100, array(), $user_ids, $shipping_policy_ids );
+					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], array($product_ids[10][3], $product_ids[10][4]), 100, array(), $user_ids, $shipping_policy_ids );
 				}
 			} else {
+				Debug::Text('NOTICE: Skipping invoices...', __FILE__, __LINE__, __METHOD__, 10);
 				$client_group_ids[] = 0;
 				$product_group_ids[] = 0;
-				$client_ids[] = 0;
+				$client_ids = range(0, 10);
 				$invoice_district_ids[] = 0;
 				$client_contact_ids[] = 0;
 				$product_ids[10] = 0;
@@ -7495,558 +8471,568 @@ class DemoData {
 			}
 
 			if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[2], $policy_ids['expense'][0], $branch_ids[0], $department_ids[1], $currency_ids[0], $job_ids[1], $task_ids[1] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[3], $policy_ids['expense'][0], $branch_ids[0], $department_ids[2], $currency_ids[1], $job_ids[1], $task_ids[0] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[4], $policy_ids['expense'][0], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[1], $task_ids[2] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[5], $policy_ids['expense'][0], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[6], $policy_ids['expense'][1], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[7], $policy_ids['expense'][1], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[8], $policy_ids['expense'][1], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[3], $task_ids[1] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[9], $policy_ids['expense'][1], $branch_ids[1], $department_ids[0], $currency_ids[0], $job_ids[4], $task_ids[1] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[10], $policy_ids['expense'][2], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[4], $task_ids[1] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[11], $policy_ids['expense'][2], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[5], $task_ids[0] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[12], $policy_ids['expense'][2], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[6], $task_ids[0] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[13], $policy_ids['expense'][2], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[7], $task_ids[0] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[14], $policy_ids['expense'][2], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[7], $task_ids[4] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[15], $policy_ids['expense'][3], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[8], $task_ids[4] );
+				if ( isset($this->create_data['expense']) AND $this->create_data['expense'] == TRUE ) {
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[2], $policy_ids['expense'][0], $branch_ids[0], $department_ids[1], $currency_ids[0], $job_ids[1], $task_ids[1] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[3], $policy_ids['expense'][0], $branch_ids[0], $department_ids[2], $currency_ids[1], $job_ids[1], $task_ids[0] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[4], $policy_ids['expense'][0], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[1], $task_ids[2] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[5], $policy_ids['expense'][0], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[6], $policy_ids['expense'][1], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[7], $policy_ids['expense'][1], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[8], $policy_ids['expense'][1], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[3], $task_ids[1] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[9], $policy_ids['expense'][1], $branch_ids[1], $department_ids[0], $currency_ids[0], $job_ids[4], $task_ids[1] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[10], $policy_ids['expense'][2], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[4], $task_ids[1] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[11], $policy_ids['expense'][2], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[5], $task_ids[0] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[12], $policy_ids['expense'][2], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[6], $task_ids[0] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[13], $policy_ids['expense'][2], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[7], $task_ids[0] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[14], $policy_ids['expense'][2], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[7], $task_ids[4] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[15], $policy_ids['expense'][3], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[8], $task_ids[4] );
 
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[16], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[8], $task_ids[4]);
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[17], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[9], $task_ids[1]);
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[18], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[10], $task_ids[3]);
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[19], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[0], $task_ids[3]);
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[20], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[0], $task_ids[3]);
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[16], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[8], $task_ids[4] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[17], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[9], $task_ids[1] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[18], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[10], $task_ids[3] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[19], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[0], $task_ids[3] );
+					$user_expense_ids[] = $this->createUserExpense( $user_ids[20], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[0], $task_ids[3] );
 
-				//Authorize random expenses.
-				foreach( $user_expense_ids as $user_expense_id ) {
-					if ( rand( 0, 99 ) < 85 ) { //85% chance
-						$this->createAuthorization( 200, $user_expense_id, $superior_user_ids[2], TRUE );
+					//Authorize random expenses.
+					foreach ( $user_expense_ids as $user_expense_id ) {
 						if ( rand( 0, 99 ) < 85 ) { //85% chance
-							$this->createAuthorization( 200, $user_expense_id, $superior_user_ids[1], TRUE );
-							if ( rand( 0, 99 ) < 50 ) { //50% chance
-								$this->createAuthorization( 200, $user_expense_id, $superior_user_ids[0], TRUE );
+							$this->createAuthorization( 200, $user_expense_id, $superior_user_ids[2], TRUE );
+							if ( rand( 0, 99 ) < 85 ) { //85% chance
+								$this->createAuthorization( 200, $user_expense_id, $superior_user_ids[1], TRUE );
+								if ( rand( 0, 99 ) < 50 ) { //50% chance
+									$this->createAuthorization( 200, $user_expense_id, $superior_user_ids[0], TRUE );
+								}
 							}
 						}
 					}
+				} else {
+					Debug::Text('NOTICE: Skipping expense...', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			} else {
 				$user_expense_ids[] = 0;
 			}
 
-			//Create Qualification
-			$qualification_group_ids[] = $this->createQualificationGroup( $company_id, 10, 0 );
-			$qualification_group_ids[] = $this->createQualificationGroup( $company_id, 20, 0 );
-			$qualification_group_ids[] = $this->createQualificationGroup( $company_id, 30, 0 );
-			$qualification_group_ids[] = $this->createQualificationGroup( $company_id, 40, 0 );
-			$qualification_group_ids[] = $this->createQualificationGroup( $company_id, 50, 0 );
 
+			if ( isset($this->create_data['hr']) AND $this->create_data['hr'] == TRUE ) {
+				//Create Qualification
+				$qualification_group_ids[] = $this->createQualificationGroup( $company_id, 10, 0 );
+				$qualification_group_ids[] = $this->createQualificationGroup( $company_id, 20, 0 );
+				$qualification_group_ids[] = $this->createQualificationGroup( $company_id, 30, 0 );
+				$qualification_group_ids[] = $this->createQualificationGroup( $company_id, 40, 0 );
+				$qualification_group_ids[] = $this->createQualificationGroup( $company_id, 50, 0 );
 
-			//Create Accrual balances
-			foreach( $user_ids as $user_id ) {
-				foreach( $policy_ids['accrual_account'] as $accrual_policy_account_id ) {
-					$this->createAccrualBalance( $user_id, $accrual_policy_account_id );
-				}
-				unset($accrual_policy_account_id);
-			}
+				// Create Qualification
+				$qualification_ids['skill'][] = $this->createQualification( $company_id, 10, $qualification_group_ids[0] );
+				$qualification_ids['skill'][] = $this->createQualification( $company_id, 20, $qualification_group_ids[1] );
+				$qualification_ids['skill'][] = $this->createQualification( $company_id, 40, $qualification_group_ids[2] );
+				$qualification_ids['skill'][] = $this->createQualification( $company_id, 50, $qualification_group_ids[3] );
+				$qualification_ids['skill'][] = $this->createQualification( $company_id, 60, $qualification_group_ids[0] );
+				$qualification_ids['license'][] = $this->createQualification( $company_id, 200, $qualification_group_ids[0] );
+				$qualification_ids['license'][] = $this->createQualification( $company_id, 210, $qualification_group_ids[1] );
+				$qualification_ids['license'][] = $this->createQualification( $company_id, 220, $qualification_group_ids[1] );
+				$qualification_ids['license'][] = $this->createQualification( $company_id, 230, $qualification_group_ids[2] );
+				$qualification_ids['license'][] = $this->createQualification( $company_id, 240, $qualification_group_ids[4] );
+				$qualification_ids['education'][] = $this->createQualification( $company_id, 310, $qualification_group_ids[4] );
+				$qualification_ids['education'][] = $this->createQualification( $company_id, 320, $qualification_group_ids[2] );
+				$qualification_ids['education'][] = $this->createQualification( $company_id, 330, $qualification_group_ids[3] );
+				$qualification_ids['education'][] = $this->createQualification( $company_id, 340, $qualification_group_ids[2] );
+				$qualification_ids['education'][] = $this->createQualification( $company_id, 350, $qualification_group_ids[1] );
+				$qualification_ids['language'][] = $this->createQualification( $company_id, 400, $qualification_group_ids[0] );
+				$qualification_ids['language'][] = $this->createQualification( $company_id, 410, $qualification_group_ids[1] );
+				$qualification_ids['language'][] = $this->createQualification( $company_id, 420, $qualification_group_ids[3] );
+				$qualification_ids['membership'][] = $this->createQualification( $company_id, 500, $qualification_group_ids[0] );
+				$qualification_ids['membership'][] = $this->createQualification( $company_id, 510, $qualification_group_ids[1] );
+				$qualification_ids['membership'][] = $this->createQualification( $company_id, 520, $qualification_group_ids[2] );
+				$qualification_ids['membership'][] = $this->createQualification( $company_id, 530, $qualification_group_ids[3] );
 
+				$kpi_group_ids[] = $this->createKPIGroup( $company_id, 10, 0 );
+				$kpi_group_ids[] = $this->createKPIGroup( $company_id, 20, 0 );
+				$kpi_group_ids[] = $this->createKPIGroup( $company_id, 30, 0 );
+				$kpi_group_ids[] = $this->createKPIGroup( $company_id, 40, 0 );
+				$kpi_group_ids[] = $this->createKPIGroup( $company_id, 50, 0 );
 
-			// Create Qualification
-			$qualification_ids['skill'][] = $this->createQualification( $company_id, 10, $qualification_group_ids[0] );
-			$qualification_ids['skill'][] = $this->createQualification( $company_id, 20, $qualification_group_ids[1] );
-			$qualification_ids['skill'][] = $this->createQualification( $company_id, 40, $qualification_group_ids[2] );
-			$qualification_ids['skill'][] = $this->createQualification( $company_id, 50, $qualification_group_ids[3] );
-			$qualification_ids['skill'][] = $this->createQualification( $company_id, 60, $qualification_group_ids[0] );
-			$qualification_ids['license'][] = $this->createQualification( $company_id, 200, $qualification_group_ids[0] );
-			$qualification_ids['license'][] = $this->createQualification( $company_id, 210, $qualification_group_ids[1] );
-			$qualification_ids['license'][] = $this->createQualification( $company_id, 220, $qualification_group_ids[1] );
-			$qualification_ids['license'][] = $this->createQualification( $company_id, 230, $qualification_group_ids[2] );
-			$qualification_ids['license'][] = $this->createQualification( $company_id, 240, $qualification_group_ids[4] );
-			$qualification_ids['education'][] = $this->createQualification( $company_id, 310, $qualification_group_ids[4] );
-			$qualification_ids['education'][] = $this->createQualification( $company_id, 320, $qualification_group_ids[2] );
-			$qualification_ids['education'][] = $this->createQualification( $company_id, 330, $qualification_group_ids[3] );
-			$qualification_ids['education'][] = $this->createQualification( $company_id, 340, $qualification_group_ids[2] );
-			$qualification_ids['education'][] = $this->createQualification( $company_id, 350, $qualification_group_ids[1] );
-			$qualification_ids['language'][] = $this->createQualification( $company_id, 400, $qualification_group_ids[0] );
-			$qualification_ids['language'][] = $this->createQualification( $company_id, 410, $qualification_group_ids[1] );
-			$qualification_ids['language'][] = $this->createQualification( $company_id, 420, $qualification_group_ids[3] );
-			$qualification_ids['membership'][] = $this->createQualification( $company_id, 500, $qualification_group_ids[0] );
-			$qualification_ids['membership'][] = $this->createQualification( $company_id, 510, $qualification_group_ids[1] );
-			$qualification_ids['membership'][] = $this->createQualification( $company_id, 520, $qualification_group_ids[2] );
-			$qualification_ids['membership'][] = $this->createQualification( $company_id, 530, $qualification_group_ids[3] );
+				$kpi_all_ids[]['10'] = $this->createKPI( $company_id, 10, 10, array(-1) );
+				$kpi_all_ids[]['10'] = $this->createKPI( $company_id, 20, 10, array(-1) );
+				$kpi_all_ids[]['20'] = $this->createKPI( $company_id, 30, 20, array(-1) );
+				$kpi_group1_ids[]['20'] = $this->createKPI( $company_id, 40, 20, array($kpi_group_ids[0]) );
+				$kpi_group1_ids[]['10'] = $this->createKPI( $company_id, 50, 10, array($kpi_group_ids[0]) );
+				$kpi_group2_ids[]['30'] = $this->createKPI( $company_id, 60, 30, array($kpi_group_ids[1]) );
+				$kpi_group2_ids[]['30'] = $this->createKPI( $company_id, 70, 30, array($kpi_group_ids[1]) );
 
-
-			$kpi_group_ids[] = $this->createKPIGroup( $company_id, 10, 0 );
-			$kpi_group_ids[] = $this->createKPIGroup( $company_id, 20, 0 );
-			$kpi_group_ids[] = $this->createKPIGroup( $company_id, 30, 0 );
-			$kpi_group_ids[] = $this->createKPIGroup( $company_id, 40, 0 );
-			$kpi_group_ids[] = $this->createKPIGroup( $company_id, 50, 0 );
-
-
-			$kpi_all_ids[]['10'] = $this->createKPI( $company_id, 10, 10, array(-1) );
-			$kpi_all_ids[]['10'] = $this->createKPI( $company_id, 20, 10, array(-1) );
-			$kpi_all_ids[]['20'] = $this->createKPI( $company_id, 30, 20, array(-1) );
-			$kpi_group1_ids[]['20'] = $this->createKPI( $company_id, 40, 20, array($kpi_group_ids[0]) );
-			$kpi_group1_ids[]['10'] = $this->createKPI( $company_id, 50, 10, array($kpi_group_ids[0]) );
-			$kpi_group2_ids[]['30'] = $this->createKPI( $company_id, 60, 30, array($kpi_group_ids[1]) );
-			$kpi_group2_ids[]['30'] = $this->createKPI( $company_id, 70, 30, array($kpi_group_ids[1]) );
-
-			foreach( $user_ids as $code => $user_id ) {
-				$reviewer_user_ids = $user_ids;
-				unset($reviewer_user_ids[$code]);
-				$reviewer_user_ids = array_values($reviewer_user_ids);
-				$reviewer_user_random_ids = array_rand($reviewer_user_ids, 3);
-				$user_review_control_id = $this->createUserReviewControl( $user_id, $reviewer_user_ids[array_rand($reviewer_user_random_ids)] );
-				if ( $user_review_control_id != '' ) {
-					foreach( $kpi_all_ids as $kpi_all_id ) {
-						foreach( $kpi_all_id as $code => $kpi_id ) {
-							$this->createUserReview( $user_review_control_id, $code, $kpi_id );
+				foreach ( $user_ids as $code => $user_id ) {
+					$reviewer_user_ids = $user_ids;
+					unset( $reviewer_user_ids[$code] );
+					$reviewer_user_ids = array_values( $reviewer_user_ids );
+					$reviewer_user_random_ids = array_rand( $reviewer_user_ids, 3 );
+					$user_review_control_id = $this->createUserReviewControl( $user_id, $reviewer_user_ids[array_rand( $reviewer_user_random_ids )] );
+					if ( $user_review_control_id != '' ) {
+						foreach ( $kpi_all_ids as $kpi_all_id ) {
+							foreach ( $kpi_all_id as $code => $kpi_id ) {
+								$this->createUserReview( $user_review_control_id, $code, $kpi_id );
+							}
+						}
+						$group_id = rand( 1, 2 );
+						switch ( $group_id ) {
+							case 1:
+								foreach ( $kpi_group1_ids as $kpi_group1_id ) {
+									foreach ( $kpi_group1_id as $code => $kpi_id ) {
+										$this->createUserReview( $user_review_control_id, $code, $kpi_id );
+									}
+								}
+								break;
+							case 2:
+								foreach ( $kpi_group2_ids as $kpi_group2_id ) {
+									foreach ( $kpi_group2_id as $code => $kpi_id ) {
+										$this->createUserReview( $user_review_control_id, $code, $kpi_id );
+									}
+								}
+								break;
 						}
 					}
-					$group_id = rand(1, 2);
-					switch($group_id) {
-						case 1:
-							foreach( $kpi_group1_ids as $kpi_group1_id ) {
-								foreach( $kpi_group1_id as $code => $kpi_id ) {
-									$this->createUserReview( $user_review_control_id, $code, $kpi_id);
-								}
-							}
-							break;
-						case 2:
-							foreach( $kpi_group2_ids as $kpi_group2_id ) {
-								foreach( $kpi_group2_id as $code => $kpi_id ) {
-									$this->createUserReview( $user_review_control_id, $code, $kpi_id);
-								}
-							}
-							break;
-					}
 				}
-			}
 
-			//Create Qualification, Skills, Education, Language, Lencense, Membership
+				//Create Qualification, Skills, Education, Language, Lencense, Membership
 
-			$x = 1;
-			foreach($user_ids as $user_id) {
-				$type = ($x * 10);
-				$rand_arr_ids = array(1, 2, 3, 4, 5);
-				$rand_ids = array_rand($rand_arr_ids, rand(3, 5));
-				foreach( $rand_ids as $rand_id ) {
-					switch( $rand_arr_ids[$rand_id] ) {
-						case 1:
-							$this->createUserSkill( $user_id, $type, $qualification_ids['skill'][array_rand($qualification_ids['skill'])] );
-							break;
-						case 2:
-							$this->createUserEducation( $user_id, $qualification_ids['education'][array_rand($qualification_ids['education'])] );
-							break;
-						case 3:
-							$this->createUserLicense( $user_id, $qualification_ids['license'][array_rand($qualification_ids['license'])] );
-							break;
-						case 4:
-							$this->createUserLanguage( $user_id, $type, $qualification_ids['language'][array_rand($qualification_ids['language'])] );
-							break;
-						case 5:
-							$this->createUserMembership( $user_id, $type, $qualification_ids['membership'][array_rand($qualification_ids['membership'])], $currency_ids[0] );
-							break;
-					}
-				}
-				$x++;
-			}
-
-			foreach($user_ids as $user_id) {
 				$x = 1;
-				while ( $x <= 5 ) {
-					$this->createUserContact($user_id);
-					$x++;
-				}
-			}
-
-
-			if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
-				$x = 1;
-				while( $x <= 9 ) {
-					$interviewer_random_user_ids = array_rand( $user_ids, 3 );
-					$user_id = $user_ids[array_rand($interviewer_random_user_ids)];
-					$job_vacancy_id = $this->createJobVacancy( $company_id, $user_id, $user_title_ids[array_rand($user_title_ids)], $branch_ids[array_rand($branch_ids)], $department_ids[array_rand($department_ids)] );
-					if ( $job_vacancy_id != '' ) {
-
-						$job_applicant_id = $this->createJobApplicant( $company_id );
-
-						$y = 1;
-						while( $y <= rand( 75, 150 ) ) {
-							$this->createJobApplication( $job_applicant_id, $job_vacancy_id, $user_id );
-							$y++;
-						}
-						$n = 1;
-						while( $n <= rand(2, 5) ) {
-							$this->createJobApplicantLocation( $job_applicant_id );
-							$this->createJobApplicantEmployment( $job_applicant_id, ( $n * 10 ) );
-							$this->createJobApplicantReference( $job_applicant_id );
-							$this->createJobApplicantSkill( $job_applicant_id, $qualification_ids['skill'][array_rand($qualification_ids['skill'])] );
-							$this->createJobApplicantEducation( $job_applicant_id, $qualification_ids['education'][array_rand($qualification_ids['education'])] );
-							$this->createJobApplicantLicense( $job_applicant_id, $qualification_ids['license'][array_rand($qualification_ids['license'])] );
-							$this->createJobApplicantLanguage( $job_applicant_id, $qualification_ids['language'][array_rand($qualification_ids['language'])] );
-							$this->createJobApplicantMembership( $job_applicant_id, $qualification_ids['membership'][array_rand($qualification_ids['membership'])], $currency_ids[0] );
-							$n++;
+				foreach ( $user_ids as $user_id ) {
+					$type = ( $x * 10 );
+					$rand_arr_ids = array(1, 2, 3, 4, 5);
+					$rand_ids = array_rand( $rand_arr_ids, rand( 3, 5 ) );
+					foreach ( $rand_ids as $rand_id ) {
+						switch ( $rand_arr_ids[$rand_id] ) {
+							case 1:
+								$this->createUserSkill( $user_id, $type, $qualification_ids['skill'][array_rand( $qualification_ids['skill'] )] );
+								break;
+							case 2:
+								$this->createUserEducation( $user_id, $qualification_ids['education'][array_rand( $qualification_ids['education'] )] );
+								break;
+							case 3:
+								$this->createUserLicense( $user_id, $qualification_ids['license'][array_rand( $qualification_ids['license'] )] );
+								break;
+							case 4:
+								$this->createUserLanguage( $user_id, $type, $qualification_ids['language'][array_rand( $qualification_ids['language'] )] );
+								break;
+							case 5:
+								$this->createUserMembership( $user_id, $type, $qualification_ids['membership'][array_rand( $qualification_ids['membership'] )], $currency_ids[0] );
+								break;
 						}
 					}
 					$x++;
 				}
+
+				if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
+					$x = 1;
+					while( $x <= 9 ) {
+						$interviewer_random_user_ids = array_rand( $user_ids, 3 );
+						$user_id = $user_ids[array_rand($interviewer_random_user_ids)];
+						$job_vacancy_id = $this->createJobVacancy( $company_id, $user_id, $user_title_ids[array_rand($user_title_ids)], $branch_ids[array_rand($branch_ids)], $department_ids[array_rand($department_ids)] );
+						if ( $job_vacancy_id != '' ) {
+
+							$job_applicant_id = $this->createJobApplicant( $company_id );
+
+							$y = 1;
+							while( $y <= rand( 75, 150 ) ) {
+								$this->createJobApplication( $job_applicant_id, $job_vacancy_id, $user_id );
+								$y++;
+							}
+							$n = 1;
+							while( $n <= rand(2, 5) ) {
+								$this->createJobApplicantLocation( $job_applicant_id );
+								$this->createJobApplicantEmployment( $job_applicant_id, ( $n * 10 ) );
+								$this->createJobApplicantReference( $job_applicant_id );
+								$this->createJobApplicantSkill( $job_applicant_id, $qualification_ids['skill'][array_rand($qualification_ids['skill'])] );
+								$this->createJobApplicantEducation( $job_applicant_id, $qualification_ids['education'][array_rand($qualification_ids['education'])] );
+								$this->createJobApplicantLicense( $job_applicant_id, $qualification_ids['license'][array_rand($qualification_ids['license'])] );
+								$this->createJobApplicantLanguage( $job_applicant_id, $qualification_ids['language'][array_rand($qualification_ids['language'])] );
+								$this->createJobApplicantMembership( $job_applicant_id, $qualification_ids['membership'][array_rand($qualification_ids['membership'])], $currency_ids[0] );
+								$n++;
+							}
+						}
+						$x++;
+					}
+				}
+			} else {
+				Debug::Text('NOTICE: Skipping HR (Qualifications/Recruitment)...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 
-			if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 10 );
-				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 20 );
-				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 100 );
-				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 200 );
-				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 270 );
-				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 400 );
-				$this->createReportCustomColumn( $company_id, 'UserSummaryReport', 405 );
+			if ( isset($this->create_data['document']) AND $this->create_data['document'] == TRUE ) {
+				if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					// Attach  document to employee
+					foreach ( $user_ids as $user_id ) {
+						$x = 1;
+						while ( $x <= rand( 2, 4 ) ) {
+							$type = ( $x * 10 );
+							$document_id = $this->createDocument( $company_id, 100, $type );
 
-				$this->createReportCustomColumn( $company_id, 'TimesheetSummaryReport', 10 );
-				$this->createReportCustomColumn( $company_id, 'TimesheetSummaryReport', 20 );
-				$this->createReportCustomColumn( $company_id, 'TimesheetSummaryReport', 200 );
+							for( $n = 1; $n <= rand(1, 6); $n++ ) {
+								$this->createDocumentRevision( $company_id, $document_id, 100, $type, $n );
+							}
 
-				$this->createReportCustomColumn( $company_id, 'TimesheetDetailReport', 10 );
-				$this->createReportCustomColumn( $company_id, 'TimesheetDetailReport', 20 );
-				$this->createReportCustomColumn( $company_id, 'TimesheetDetailReport', 200 );
-			}
+							$this->createDocumentAttachment( $document_id, 100, $user_id );
 
-
-			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-				// Attach  document to employee
-				foreach( $user_ids as $user_id ) {
-					$x = 1;
-					while( $x <= rand(2, 4) ) {
-						$type = ($x * 10);
-						$document_id = $this->createDocument( $company_id, 100, $type );
-
-						$rand_arr = array(1, 2, 3, 4, 5, 6);
-						$rand_ids = array_rand( $rand_arr, rand(2, 5) );
-						foreach( $rand_ids as $rand_id ) {
-							$document_revision_id = $this->createDocumentRevision( $document_id, ($rand_arr[$rand_id] * 10 ) );
-							$this->createDocumentFilesByObjectType( $company_id, 100, $type, $document_revision_id, $document_id );
+							$x++;
 						}
+					}
 
-						$this->createDocumentAttachment( $document_id, 100, $user_id );
+					// Attach document to Jobs
+					foreach ( $job_ids as $job_id ) {
+						$x = 1;
+						while ( $x <= rand( 2, 3 ) ) {
+							$type = ( $x * 10 );
+							$document_id = $this->createDocument( $company_id, 60, $type );
 
-						$x++;
+							for( $n = 1; $n <= rand(1, 6); $n++ ) {
+								$this->createDocumentRevision( $company_id, $document_id, 60, $type, $n );
+							}
+
+							$this->createDocumentAttachment( $document_id, 60, $job_id );
+
+							$x++;
+						}
+					}
+
+					// Attach document to clients
+					foreach ( $client_ids as $client_id ) {
+						$x = 1;
+						while ( $x <= rand( 2, 4 ) ) {
+							$type = ( $x * 10 );
+							$document_id = $this->createDocument( $company_id, 80, $type );
+
+							for( $n = 1; $n <= rand(1, 6); $n++ ) {
+								$this->createDocumentRevision( $company_id, $document_id, 80, $type, $n );
+							}
+
+							$this->createDocumentAttachment( $document_id, 80, $client_id );
+
+							$x++;
+						}
+					}
+
+					// Attach document to client contacts
+					foreach ( $client_contact_ids as $client_contact_id ) {
+						$x = 1;
+						while ( $x <= 2 ) {
+							$type = ( $x * 10 );
+							$document_id = $this->createDocument( $company_id, 85, $type );
+
+							for( $n = 1; $n <= rand(1, 6); $n++ ) {
+								$this->createDocumentRevision( $company_id, $document_id, 85, $type, $n );
+							}
+
+							$this->createDocumentAttachment( $document_id, 85, $client_contact_id );
+
+							$x++;
+						}
 					}
 				}
-
-				// Attach document to Jobs
-				foreach( $job_ids as $job_id ) {
-					$x = 1;
-					while( $x <= rand(2, 3) ) {
-						$type = ($x * 10);
-						$document_id = $this->createDocument( $company_id, 60, $type );
-
-						$rand_arr = array(1, 2, 3, 4, 5, 6);
-						$rand_ids = array_rand( $rand_arr, rand(2, 5) );
-						foreach( $rand_ids as $rand_id ) {
-							$document_revision_id = $this->createDocumentRevision( $document_id, ($rand_arr[$rand_id] * 10) );
-							$this->createDocumentFilesByObjectType( $company_id, 60, $type, $document_revision_id, $document_id );
-						}
-
-						$this->createDocumentAttachment( $document_id, 60, $job_id );
-
-						$x++;
-					}
-				}
-
-				// Attach document to clients
-				foreach( $client_ids as $client_id ) {
-					$x = 1;
-					while( $x <= rand(2, 4) ) {
-						$type = ($x * 10);
-						$document_id = $this->createDocument( $company_id, 80, $type );
-
-						$rand_arr = array(1, 2, 3, 4, 5, 6);
-						$rand_ids = array_rand( $rand_arr, rand(2, 5) );
-						foreach( $rand_ids as $rand_id ) {
-							$document_revision_id = $this->createDocumentRevision( $document_id, ($rand_arr[$rand_id] * 10) );
-							$this->createDocumentFilesByObjectType( $company_id, 80, $type, $document_revision_id, $document_id );
-						}
-
-						$this->createDocumentAttachment( $document_id, 80, $client_id );
-
-						$x++;
-					}
-				}
-
-				// Attach document to client contacts
-				foreach( $client_contact_ids as $client_contact_id ) {
-					$x = 1;
-					while( $x <= 2 ) {
-						$type = ($x * 10);
-						$document_id = $this->createDocument( $company_id, 85, $type );
-						$rand_arr = array(1, 2, 3, 4, 5, 6);
-						$rand_ids = array_rand( $rand_arr, rand(2, 5) );
-						foreach( $rand_ids as $rand_id ) {
-							$document_revision_id = $this->createDocumentRevision( $document_id, ($rand_arr[$rand_id] * 10) );
-							$this->createDocumentFilesByObjectType( $company_id, 85, $type, $document_revision_id, $document_id );
-						}
-
-						$this->createDocumentAttachment( $document_id, 85, $client_contact_id );
-
-						$x++;
-					}
-				}
+			} else {
+				Debug::Text('NOTICE: Skipping documents...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 			Debug::Text(' b.Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 
+			if ( isset($this->create_data['schedule']) AND $this->create_data['schedule'] == TRUE ) {
+				//Create recurring schedule templates
+				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 10, $policy_ids['schedule_1'] ); //Morning shift
+				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 20, $policy_ids['schedule_1'] ); //Afternoon shift
+				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 30, $policy_ids['schedule_1'] ); //Evening shift
+				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 40 ); //Split Shift
+				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 50, $policy_ids['schedule_1'] ); //Full rotation
 
-			//Create recurring schedule templates
-			$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 10, $policy_ids['schedule_1'] ); //Morning shift
-			$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 20, $policy_ids['schedule_1'] ); //Afternoon shift
-			$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 30, $policy_ids['schedule_1'] ); //Evening shift
-			$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 40 ); //Split Shift
-			$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 50, $policy_ids['schedule_1'] ); //Full rotation
-
-			$recurring_schedule_start_date = TTDate::getBeginWeekEpoch( ( $current_epoch + (86400 * 7.5) ) );
-			$this->createRecurringSchedule( $company_id, $recurring_schedule_ids[0], $recurring_schedule_start_date, '', array( $user_ids[0], $user_ids[1], $user_ids[2], $user_ids[3], $user_ids[4] ) );
-			$this->createRecurringSchedule( $company_id, $recurring_schedule_ids[1], $recurring_schedule_start_date, '', array( $user_ids[5], $user_ids[6], $user_ids[7], $user_ids[8], $user_ids[9] ) );
-			$this->createRecurringSchedule( $company_id, $recurring_schedule_ids[2], $recurring_schedule_start_date, '', array( $user_ids[10], $user_ids[11], $user_ids[12], $user_ids[13], $user_ids[14] ) );
-
-
-			//Create different schedule shifts.
-			$schedule_options_arr = array(
-										array( //Morning Shift
-											'status_id' => 10,
-											'start_time' => '06:00AM',
-											'end_time' => '03:00PM',
-											'schedule_policy_id' => $policy_ids['schedule_1'],
-										),
-										array( //Afternoon Shift
-											'status_id' => 10,
-											'start_time' => '10:00AM',
-											'end_time' => '07:00PM',
-											'schedule_policy_id' => $policy_ids['schedule_1'],
-										),
-										array( //Evening Shift
-											'status_id' => 10,
-											'start_time' => '2:00PM',
-											'end_time' => '11:00PM',
-											'schedule_policy_id' => $policy_ids['schedule_1'],
-										),
-										array( //Common shift.
-											'status_id' => 10,
-											'start_time' => '08:00AM',
-											'end_time' => '05:00PM',
-											'schedule_policy_id' => $policy_ids['schedule_1'],
-										),
-									);
-
-			//Create schedule for each employee.
-			$x = 0;
-			foreach( $user_ids as $user_id ) {
-				//Create schedule starting 6 weeks ago, up to the end of the week.
-				Debug::Text('Creating schedule for User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-
-				$schedule_date = ($current_epoch - (86400 * 14));
-				$schedule_end_date = TTDate::getEndWeekEpoch( $current_epoch );
-				while ( $schedule_date <= $schedule_end_date ) {
-					if ( ($x % 5) == 0 ) {
-						$schedule_options_key = 3; //Common shift
-					} else {
-						$schedule_options_key = array_rand($schedule_options_arr);
-					}
-
-					Debug::Text('  Schedule Date: '. $schedule_date .' Schedule Options Key: '. $schedule_options_key, __FILE__, __LINE__, __METHOD__, 10);
-
-					//Random departments/branches
-					$schedule_options_arr[$schedule_options_key]['branch_id'] = $branch_ids[array_rand($branch_ids)];
-					$schedule_options_arr[$schedule_options_key]['department_id'] = $department_ids[array_rand($department_ids)];
-
-					//Schedule just weekdays for users 1-4, then weekends and not mon/tue for user 5.
-					if ( ( ($x % 5) != 0 AND date('w', $schedule_date) != 0 AND date('w', $schedule_date) != 6 )
-							OR ( ($x % 5) == 0 AND date('w', $schedule_date) != 1 AND date('w', $schedule_date) != 2 ) ) {
-						$this->createSchedule( $company_id, $user_id, $schedule_date, $schedule_options_arr[$schedule_options_key]);
-					}
-					$schedule_date += 86400;
-				}
-				//break;
-
-				unset($schedule_date, $schedule_end_date, $user_id);
-				$x++;
-			}
-			unset($schedule_options_arr, $schedule_options_key);
+				$recurring_schedule_start_date = TTDate::getBeginWeekEpoch( ( $current_epoch + ( 86400 * 7.5 ) ) );
+				$this->createRecurringSchedule( $company_id, $recurring_schedule_ids[0], $recurring_schedule_start_date, '', array($user_ids[0], $user_ids[1], $user_ids[2], $user_ids[3], $user_ids[4]) );
+				$this->createRecurringSchedule( $company_id, $recurring_schedule_ids[1], $recurring_schedule_start_date, '', array($user_ids[5], $user_ids[6], $user_ids[7], $user_ids[8], $user_ids[9]) );
+				$this->createRecurringSchedule( $company_id, $recurring_schedule_ids[2], $recurring_schedule_start_date, '', array($user_ids[10], $user_ids[11], $user_ids[12], $user_ids[13], $user_ids[14]) );
 
 
-			//Punch users in/out randomly.
-			foreach( $user_ids as $user_id ) {
-				//Pick random jobs/tasks that are used for the entire date range.
-				//So one employee isn't punching into 15 jobs.
-				srand( ( (float)microtime() * 10000000 ) );
-				$user_random_task_ids = (array)array_flip( (array)array_rand($task_ids, 3 ) );
-				$user_random_job_ids = (array)array_flip( (array)array_rand($job_ids, 2 ) );
-				//Create punches starting 6 weeks ago, up to the end of the week.
-				$start_date = $punch_date = ($current_epoch - (86400 * 14));
-				$end_date = TTDate::getEndWeekEpoch( $current_epoch );
-				$i = 0;
-				while ( $punch_date <= $end_date ) {
-					$date_stamp = TTDate::getDate('DATE', $punch_date );
-					//$punch_full_time_stamp = strtotime($pc_data['date_stamp'].' '.$pc_data['time_stamp']);
-					$exception_cutoff_date = ( $current_epoch - (86400 * 14) );
-					if ( ($i % 25) == 0 ) {
-						$user_random_coordinates = (array)array_slice( $this->coordinates, 22 );// outside new york, seattle
-						$user_random_job_ids = $job_ids;
-					} else {
-						if ( ($i % 2) == 0 ) {
-							$user_random_job_ids = (array)array_slice($job_ids, 0, 7); // new york
-							$user_random_coordinates = (array)array_slice( $this->coordinates, 0, 10 ); // inside new york
+				//Create different schedule shifts.
+				$schedule_options_arr = array(
+						array( //Morning Shift
+							   'status_id'          => 10,
+							   'start_time'         => '06:00AM',
+							   'end_time'           => '03:00PM',
+							   'schedule_policy_id' => $policy_ids['schedule_1'],
+						),
+						array( //Afternoon Shift
+							   'status_id'          => 10,
+							   'start_time'         => '10:00AM',
+							   'end_time'           => '07:00PM',
+							   'schedule_policy_id' => $policy_ids['schedule_1'],
+						),
+						array( //Evening Shift
+							   'status_id'          => 10,
+							   'start_time'         => '2:00PM',
+							   'end_time'           => '11:00PM',
+							   'schedule_policy_id' => $policy_ids['schedule_1'],
+						),
+						array( //Common shift.
+							   'status_id'          => 10,
+							   'start_time'         => '08:00AM',
+							   'end_time'           => '05:00PM',
+							   'schedule_policy_id' => $policy_ids['schedule_1'],
+						),
+				);
+
+				//Create schedule for each employee.
+				$x = 0;
+				foreach ( $user_ids as $user_id ) {
+					//Create schedule starting 6 weeks ago, up to the end of the week.
+					Debug::Text( 'Creating schedule for User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
+
+					$schedule_date = ( $current_epoch - ( 86400 * 14 ) );
+					$schedule_end_date = TTDate::getEndWeekEpoch( $current_epoch );
+					while ( $schedule_date <= $schedule_end_date ) {
+						if ( ( $x % 5 ) == 0 ) {
+							$schedule_options_key = 3; //Common shift
 						} else {
-							$user_random_job_ids = (array)array_slice($job_ids, 8); // seattle
-							$user_random_coordinates = (array)array_slice( $this->coordinates, 10, 12 ); // inside seattle
+							$schedule_options_key = array_rand( $schedule_options_arr );
 						}
+
+						Debug::Text( '  Schedule Date: ' . $schedule_date . ' Schedule Options Key: ' . $schedule_options_key, __FILE__, __LINE__, __METHOD__, 10 );
+
+						//Random departments/branches
+						$schedule_options_arr[$schedule_options_key]['branch_id'] = $branch_ids[array_rand( $branch_ids )];
+						$schedule_options_arr[$schedule_options_key]['department_id'] = $department_ids[array_rand( $department_ids )];
+
+						//Schedule just weekdays for users 1-4, then weekends and not mon/tue for user 5.
+						if ( ( ( $x % 5 ) != 0 AND date( 'w', $schedule_date ) != 0 AND date( 'w', $schedule_date ) != 6 )
+								OR ( ( $x % 5 ) == 0 AND date( 'w', $schedule_date ) != 1 AND date( 'w', $schedule_date ) != 2 )
+						) {
+							$this->createSchedule( $company_id, $user_id, $schedule_date, $schedule_options_arr[$schedule_options_key] );
+						}
+						$schedule_date += 86400;
 					}
-					if ( date('w', $punch_date) != 0 AND date('w', $punch_date) != 6 ) {
-						if ( $punch_date >= $exception_cutoff_date
-								AND ($i % 4) == 0 ) {
-							$first_punch_in = rand(7, 8).':'.str_pad( rand(0, 30), 2, '0', STR_PAD_LEFT) .'AM';
-							$last_punch_out = strtotime($date_stamp.' '. rand(4, 5).':'.str_pad( rand(0, 30), 2, '0', STR_PAD_LEFT) .'PM' );
+					//break;
 
-							if ( $punch_date >= $exception_cutoff_date
-									AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-									AND ( $i % 20 ) == 0 ) {
-								//Create request
-								$request_id = $this->createRequest( 40, $user_id, $date_stamp );
-								if ( rand( 0, 99 ) < 50 ) { //50% chance
-									$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
-									$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
-									$this->createAuthorization( 1020, $request_id, $superior_user_ids[0], TRUE );
-								}
-							}
-							if ( $punch_date >= $exception_cutoff_date
-									AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-									AND ( $i % 16 ) == 0 ) {
-								//Create request
-								$request_id = $this->createRequest( 30, $user_id, $date_stamp, $policy_ids['absence'][0]  );
-								if ( rand( 0, 99 ) < 50 ) { //50% chance
-									$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
-									$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
-								}
-							}
+					unset( $schedule_date, $schedule_end_date, $user_id );
+					$x++;
+				}
+				unset( $schedule_options_arr, $schedule_options_key );
+			} else {
+				Debug::Text('NOTICE: Skipping schedules...', __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			if ( isset($this->create_data['punch']) AND $this->create_data['punch'] == TRUE ) {
+				//Punch users in/out randomly.
+				$ulf = TTnew( 'UserListFactory' );
+
+				foreach ( $user_ids as $user_id ) {
+					//Pick random jobs/tasks that are used for the entire date range.
+					//So one employee isn't punching into 15 jobs.
+					srand( ( (float)microtime() * 10000000 ) );
+					$user_random_job_ids = (array)array_flip( (array)array_rand( $job_ids, 2 ) );
+					$user_random_task_ids = (array)array_flip( (array)array_rand( $task_ids, 3 ) );
+					//Create punches starting 6 weeks ago, up to the end of the week.
+					$start_date = $punch_date = ( $current_epoch - ( 86400 * 14 ) );
+					$end_date = TTDate::getEndWeekEpoch( $current_epoch );
+					$i = 0;
+					while ( $punch_date <= $end_date ) {
+						$date_stamp = TTDate::getDate( 'DATE', $punch_date );
+						//$punch_full_time_stamp = strtotime($pc_data['date_stamp'].' '.$pc_data['time_stamp']);
+						$exception_cutoff_date = ( $current_epoch - (86400 * 14) );
+						if ( ($i % 25) == 0 ) {
+							$user_random_coordinates = (array)array_slice( $this->coordinates, 22 );// outside new york, seattle
+							$user_random_job_ids = $job_ids;
 						} else {
-							$first_punch_in = '08:00AM';
-							if ( $punch_date >= $exception_cutoff_date
-									AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-									AND ( $i % 10 ) == 0 ) {
-								//Don't punch out to generate exception.
-								$last_punch_out = NULL;
+							if ( ($i % 2) == 0 ) {
+								$user_random_job_ids = (array)array_slice($job_ids, 0, 7); // new york
+								$user_random_coordinates = (array)array_slice( $this->coordinates, 0, 10 ); // inside new york
+							} else {
+								$user_random_job_ids = (array)array_slice($job_ids, 8); // seattle
+								$user_random_coordinates = (array)array_slice( $this->coordinates, 10, 12 ); // inside seattle
+							}
+						}
+						if ( date('w', $punch_date) != 0 AND date('w', $punch_date) != 6 ) {
+							if ( $punch_date >= $exception_cutoff_date AND ( $i % 4 ) == 0 ) {
+								$first_punch_in = rand( 7, 8 ) . ':' . str_pad( rand( 0, 30 ), 2, '0', STR_PAD_LEFT ) . 'AM';
+								$last_punch_out = strtotime( $date_stamp . ' ' . rand( 4, 5 ) . ':' . str_pad( rand( 0, 30 ), 2, '0', STR_PAD_LEFT ) . 'PM' );
 
-								//Forgot to punch out request
-								$request_id = $this->createRequest( 10, $user_id, $date_stamp );
-								if ( rand( 0, 99 ) < 50 ) { //50% chance
-									$this->createAuthorization( 1010, $request_id, $superior_user_ids[2], TRUE );
+								if ( $punch_date >= $exception_cutoff_date
+										AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
+										AND ( $i % 20 ) == 0
+								) {
+									//Create request
+									$request_id = $this->createRequest( 40, $user_id, $date_stamp );
+									if ( rand( 0, 99 ) < 50 ) { //50% chance
+										$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
+										$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
+										$this->createAuthorization( 1020, $request_id, $superior_user_ids[0], TRUE );
+									}
+								}
+								if ( $punch_date >= $exception_cutoff_date
+										AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
+										AND ( $i % 16 ) == 0
+								) {
+									//Create request
+									$request_id = $this->createRequest( 30, $user_id, $date_stamp, $policy_ids['absence'][0] );
+									if ( rand( 0, 99 ) < 50 ) { //50% chance
+										$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
+										$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
+									}
 								}
 							} else {
-								$last_punch_out = strtotime($date_stamp.' 5:00PM');
-							}
-						}
+								$first_punch_in = '08:00AM';
+								if ( $punch_date >= $exception_cutoff_date
+										AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
+										AND ( $i % 10 ) == 0
+								) {
+									//Don't punch out to generate exception.
+									$last_punch_out = NULL;
 
-						//Weekdays
-						$this->createPunchPair(		$user_id,
-													strtotime($date_stamp.' '. $first_punch_in),
-													strtotime($date_stamp.' 11:00AM'),
+									//Forgot to punch out request
+									$request_id = $this->createRequest( 10, $user_id, $date_stamp );
+									if ( rand( 0, 99 ) < 50 ) { //50% chance
+										$this->createAuthorization( 1010, $request_id, $superior_user_ids[2], TRUE );
+									}
+								} else {
+									$last_punch_out = strtotime( $date_stamp . ' 5:00PM' );
+								}
+							}
+
+							//Weekdays
+							$this->createPunchPair( $user_id,
+													strtotime( $date_stamp . ' ' . $first_punch_in ),
+													strtotime( $date_stamp . ' 11:00AM' ),
 													array(
-															'in_type_id' => 10,
-															'out_type_id' => 10,
+															'in_type_id'    => 10,
+															'out_type_id'   => 10,
 															'branch_id' => $branch_ids[array_rand($branch_ids)],
 															'department_id' => $department_ids[array_rand($department_ids)],
 															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
 															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
 															//'job_item_id' => $task_ids[array_rand($task_ids)],
-														),
-													TRUE,
+													),
+													FALSE, //Calculate at end of loop.
 													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
-												);
-						$this->createPunchPair(		$user_id,
-													strtotime($date_stamp.' 11:00AM'),
-													strtotime($date_stamp.' 1:00PM'),
+							);
+							$this->createPunchPair( $user_id,
+													strtotime( $date_stamp . ' 11:00AM' ),
+													strtotime( $date_stamp . ' 1:00PM' ),
 													array(
-															'in_type_id' => 10,
-															'out_type_id' => 20,
+															'in_type_id'    => 10,
+															'out_type_id'   => 20,
 															'branch_id' => $branch_ids[array_rand($branch_ids)],
 															'department_id' => $department_ids[array_rand($department_ids)],
 															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
 															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
-														),
-													TRUE,
+													),
+													FALSE, //Calculate at end of loop.
 													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
-												);
-						//Calc total time on last punch pair only.
-						$this->createPunchPair(		$user_id,
-													strtotime($date_stamp.' 2:00PM'),
+							);
+							//Calc total time on last punch pair only.
+							$this->createPunchPair( $user_id,
+													strtotime( $date_stamp . ' 2:00PM' ),
 													$last_punch_out,
 													array(
-															'in_type_id' => 20,
-															'out_type_id' => 10,
+															'in_type_id'    => 20,
+															'out_type_id'   => 10,
 															'branch_id' => $branch_ids[array_rand($branch_ids)],
 															'department_id' => $department_ids[array_rand($department_ids)],
 															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
 															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
-														),
-													TRUE,
+													),
+													FALSE, //Calculate at end of loop.
 													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
-												);
-					} elseif ( $punch_date > $exception_cutoff_date
-								AND date('w', $punch_date) == 6 AND ($i % 10) == 0) {
-						//Sat.
-						$this->createPunchPair(		$user_id,
-													strtotime($date_stamp.' 10:00AM'),
-													strtotime($date_stamp.' 2:30PM'),
+							);
+						} elseif ( $punch_date > $exception_cutoff_date AND date( 'w', $punch_date ) == 6 AND ( $i % 10 ) == 0 ) {
+							//Sat.
+							$this->createPunchPair( $user_id,
+													strtotime( $date_stamp . ' 10:00AM' ),
+													strtotime( $date_stamp . ' 2:30PM' ),
 													array(
-															'in_type_id' => 10,
-															'out_type_id' => 10,
+															'in_type_id'    => 10,
+															'out_type_id'   => 10,
 															'branch_id' => $branch_ids[array_rand($branch_ids)],
 															'department_id' => $department_ids[array_rand($department_ids)],
 															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
 															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
-														),
-													TRUE,
+													),
+													FALSE,
 													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
-												);
+							);
+						}
+
+						//Recalculate entire day. Performance optimization.
+						//UserDateTotalFactory::reCalculateRange( $user_id, $start_date, $end_date );
+
+						$punch_date += 86400;
+						$i++;
 					}
 
-					//Recalculate entire day. Performance optimization.
-					//UserDateTotalFactory::reCalculateRange( $user_id, $start_date, $end_date );
+					//Calculate entire user timesheet here, as an optimization. Reduced time in half.
+					$ulf->getById( $user_id );
+					$user_obj = $ulf->getCurrent();
 
-					$punch_date += 86400;
-					$i++;
+					$cp = TTNew( 'CalculatePolicy' );
+					$cp->setUserObject( $user_obj );
+					$cp->addPendingCalculationDate( $start_date, $end_date );
+					$cp->calculate(); //This sets timezone itself.
+					$cp->Save();
+
+					unset($punch_options_arr, $punch_date, $user_id, $user_obj, $cp);
+
 				}
-				unset($punch_options_arr, $punch_date, $user_id);
-			}
-			Debug::Text(' c.Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text(' c.Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 
-			//Generate pay stubs for each pay period
-			$pplf = TTnew( 'PayPeriodListFactory' );
-			$pplf->getByCompanyId( $company_id );
-			if ( $pplf->getRecordCount() > 0 ) {
-				foreach( $pplf as $pp_obj ) {
-					foreach( $user_ids as $user_id ) {
-						if ( !in_array( $user_id, $superior_user_ids ) ) {
-							//Verify timesheets at random for each regular user/pay period.
-							if ( rand( 0, 99 ) < 85 ) { //85% chance
-								$timesheet_verification_id = $this->createTimeSheetVerification( $user_id, $pp_obj->getId(), $user_id );
+				//Generate pay stubs for each pay period
+				//Can't do this unless punches are created too.
+				$pplf = TTnew( 'PayPeriodListFactory' );
+				$pplf->getByCompanyId( $company_id, NULL, NULL, NULL, array('start_date' => 'asc') );
+				if ( $pplf->getRecordCount() > 0 ) {
+					$n = 0;
+					foreach( $pplf as $pp_obj ) {
+						foreach( $user_ids as $user_id ) {
+							if ( !in_array( $user_id, $superior_user_ids ) ) {
+								//Verify timesheets at random for each regular user/pay period.
 								if ( rand( 0, 99 ) < 85 ) { //85% chance
-									$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[2], TRUE );
+									$timesheet_verification_id = $this->createTimeSheetVerification( $user_id, $pp_obj->getId(), $user_id );
 									if ( rand( 0, 99 ) < 85 ) { //85% chance
-										$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[1], TRUE );
-										if ( rand( 0, 99 ) < 25 ) { //25% chance
-											$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[0], TRUE );
+										$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[2], TRUE );
+										if ( rand( 0, 99 ) < 85 ) { //85% chance
+											$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[1], TRUE );
+											if ( rand( 0, 99 ) < 25 ) { //25% chance
+												$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[0], TRUE );
+											}
 										}
 									}
 								}
 							}
+
+							$cps = new CalculatePayStub();
+							$cps->setUser( $user_id );
+							$cps->setPayPeriod( $pp_obj->getId() );
+							$cps->calculate();
 						}
 
-						$cps = new CalculatePayStub();
-						$cps->setUser( $user_id );
-						$cps->setPayPeriod( $pp_obj->getId() );
-						$cps->calculate();
+						if ( $n == 0 ) { //Pay and close only the first pay period
+							Debug::Text('  Processing PayStub Transactions and closing the pay period... Pay Period: '. $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+							//Process Payments for all transactions.
+							$data['filter_data']['transaction_status_id'] = array(10, 200); //10=Pending, 200=ReIssue
+							$data['filter_data']['transaction_type_id'] = 10; //10=Valid (Enabled)
+							$data['filter_data']['pay_period_id'] = $pp_obj->getId();
+
+							$pslf = TTnew( 'PayStubTransactionListFactory' );
+							$pslf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'] );
+							$pslf->exportPayStubTransaction( $pslf, 10 ); //10=Both EFT/CHeck
+							unset($pslf, $data);
+
+							$pp_obj->setStatus( 20 );
+							if ( $pp_obj->isValid() ) {
+								$pp_obj->Save();
+							} else {
+								Debug::Text('  ERROR: Unable to close pay period: '. $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+							}
+						} else {
+							Debug::Text('  NOT Processing PayStub Transactions and closing the pay period... Pay Period: '. $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+						}
+
+						$n++;
 					}
 				}
+				unset($pplf, $pp_obj, $user_id);
+			} else {
+				Debug::Text('NOTICE: Skipping punches and pay stubs...', __FILE__, __LINE__, __METHOD__, 10);
 			}
-			unset($pplf, $pp_obj, $user_id);
 		}
 
 		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {

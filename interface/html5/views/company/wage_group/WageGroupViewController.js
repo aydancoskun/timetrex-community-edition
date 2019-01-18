@@ -1,7 +1,10 @@
 WageGroupViewController = BaseViewController.extend( {
 	el: '#wage_group_view_container',
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+
+	_required_files: ['APIWageGroup'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'WageGroupEditView.html';
 		this.permission_id = 'wage';
 		this.viewId = 'WageGroup';

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -73,6 +73,13 @@ class UnitConvert {
 									'mm' => array('mm', 'in', 'cm', 'ft', 'm', 'km', 'mi')
 									);
 
+	/**
+	 * @param $src_unit
+	 * @param $dst_unit
+	 * @param $measurement
+	 * @param int $exponent
+	 * @return bool|float|int
+	 */
 	static function convert( $src_unit, $dst_unit, $measurement, $exponent = 1 ) {
 		$src_unit = strtolower($src_unit);
 		$dst_unit = strtolower($dst_unit);

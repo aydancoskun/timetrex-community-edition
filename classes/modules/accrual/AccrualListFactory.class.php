@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -76,13 +89,21 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 	}
 
 
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
 	function getByAccrualPolicyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-			'accrual_policy_id' => (int)$id,
+			'accrual_policy_id' => TTUUID::castUUID($id),
 		);
 
 		$query = '
@@ -99,7 +120,14 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -111,8 +139,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => (int)$id,
-					'company_id' => (int)$company_id
+					'id' => TTUUID::castUUID($id),
+					'company_id' => TTUUID::castUUID($company_id)
 					);
 
 		$query = '
@@ -130,7 +158,13 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -138,7 +172,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id
+					'company_id' => TTUUID::castUUID($company_id)
 					);
 
 		$query = '
@@ -155,7 +189,14 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndCompanyId($user_id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getByUserIdAndCompanyId( $user_id, $company_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -165,8 +206,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'company_id' => (int)$company_id
+					'user_id' => TTUUID::castUUID($user_id),
+					'company_id' => TTUUID::castUUID($company_id)
 					);
 
 		$uf = new UserFactory();
@@ -187,7 +228,17 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyIdAndUserIdAndAccrualPolicyAccount($company_id, $user_id, $accrual_policy_account_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getByCompanyIdAndUserIdAndAccrualPolicyAccount( $company_id, $user_id, $accrual_policy_account_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -210,9 +261,9 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'company_id' => (int)$company_id,
-					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'company_id' => TTUUID::castUUID($company_id),
+					'accrual_policy_account_id' => TTUUID::castUUID($accrual_policy_account_id),
 					);
 
 		$query = '
@@ -235,7 +286,19 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyIdAndUserIdAndAccrualPolicyAccountAndTimeStampAndAmount($company_id, $user_id, $accrual_policy_account_id, $time_stamp, $amount, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param $time_stamp
+	 * @param $amount
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getByCompanyIdAndUserIdAndAccrualPolicyAccountAndTimeStampAndAmount( $company_id, $user_id, $accrual_policy_account_id, $time_stamp, $amount, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -266,9 +329,9 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'company_id' => (int)$company_id,
-					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'company_id' => TTUUID::castUUID($company_id),
+					'accrual_policy_account_id' => TTUUID::castUUID($accrual_policy_account_id),
 					'time_stamp' => $this->db->BindTimeStamp( $time_stamp ),
 					'amount' => $amount,
 					);
@@ -294,7 +357,19 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyIdAndUserIdAndAccrualPolicyAccountAndTypeIDAndTimeStamp($company_id, $user_id, $accrual_policy_account_id, $type_id, $time_stamp, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param int $type_id
+	 * @param $time_stamp
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getByCompanyIdAndUserIdAndAccrualPolicyAccountAndTypeIDAndTimeStamp( $company_id, $user_id, $accrual_policy_account_id, $type_id, $time_stamp, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -325,9 +400,9 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'company_id' => (int)$company_id,
-					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'company_id' => TTUUID::castUUID($company_id),
+					'accrual_policy_account_id' => TTUUID::castUUID($accrual_policy_account_id),
 					'type_id' => (int)$type_id,
 					'time_stamp' => $this->db->BindTimeStamp( $time_stamp ),
 					);
@@ -353,7 +428,15 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndAccrualPolicyAccountAndUserDateTotalID($user_id, $accrual_policy_account_id, $user_date_total_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param string $user_date_total_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getByUserIdAndAccrualPolicyAccountAndUserDateTotalID( $user_id, $accrual_policy_account_id, $user_date_total_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -367,9 +450,9 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
-					'user_date_total_id' => (int)$user_date_total_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'accrual_policy_account_id' => TTUUID::castUUID($accrual_policy_account_id),
+					'user_date_total_id' => TTUUID::castUUID($user_date_total_id),
 					);
 
 		$query = '
@@ -387,7 +470,16 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndAccrualPolicyAccountAndAccrualPolicyAndUserDateTotalID($user_id, $accrual_policy_account_id, $accrual_policy_id, $user_date_total_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param string $accrual_policy_id UUID
+	 * @param string $user_date_total_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getByUserIdAndAccrualPolicyAccountAndAccrualPolicyAndUserDateTotalID( $user_id, $accrual_policy_account_id, $accrual_policy_id, $user_date_total_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -407,10 +499,10 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		//}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
-					'accrual_policy_id' => (int)$accrual_policy_id,
-					'user_date_total_id' => (int)$user_date_total_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'accrual_policy_account_id' => TTUUID::castUUID($accrual_policy_account_id),
+					'accrual_policy_id' => TTUUID::castUUID($accrual_policy_id),
+					'user_date_total_id' => TTUUID::castUUID($user_date_total_id),
 					);
 
 		$query = '
@@ -431,7 +523,14 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndUserDateTotalID($user_id, $user_date_total_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $user_date_total_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getByUserIdAndUserDateTotalID( $user_id, $user_date_total_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -441,8 +540,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'user_date_total_id' => (int)$user_date_total_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'user_date_total_id' => TTUUID::castUUID($user_date_total_id),
 					);
 
 		$query = '
@@ -459,7 +558,13 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getOrphansByUserId($user_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getOrphansByUserId( $user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -498,7 +603,14 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getOrphansByUserIdAndDate($user_id, $date_stamp, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date_stamp EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getOrphansByUserIdAndDate( $user_id, $date_stamp, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -516,7 +628,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		//
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					//Filter the accrual rows to one day before and one day after as an optimization.
 					//This causes problems when only calculating one day, or the last day of the week though, it will delete
 					//accruals for the previous day and not put them back if needed.
@@ -550,7 +662,12 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getSumByUserIdAndAccrualPolicyAccount($user_id, $accrual_policy_account_id) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @return bool|int
+	 */
+	function getSumByUserIdAndAccrualPolicyAccount( $user_id, $accrual_policy_account_id) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -562,8 +679,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'accrual_policy_account_id' => TTUUID::castUUID($accrual_policy_account_id),
 					);
 
 		//Make sure orphaned records that slip through are not counted in the balance.
@@ -587,7 +704,13 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $total;
 	}
 
-	function getSumByUserIdAndAccrualPolicyAccountAndAfterDate($user_id, $accrual_policy_account_id, $epoch ) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param int $epoch EPOCH
+	 * @return bool|int
+	 */
+	function getSumByUserIdAndAccrualPolicyAccountAndAfterDate( $user_id, $accrual_policy_account_id, $epoch ) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -603,8 +726,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'accrual_policy_account_id' => TTUUID::castUUID($accrual_policy_account_id),
 					'time_stamp' => $this->db->BindTimeStamp( $epoch ),
 					);
 
@@ -630,7 +753,15 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $total;
 	}
 
-	function getSumByUserIdAndAccrualPolicyAccountAndTypeAndStartDateAndEndDate($user_id, $accrual_policy_account_id, $type_id, $start_date, $end_date ) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param int $type_id
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @return bool|int
+	 */
+	function getSumByUserIdAndAccrualPolicyAccountAndTypeAndStartDateAndEndDate( $user_id, $accrual_policy_account_id, $type_id, $start_date, $end_date ) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -649,8 +780,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'accrual_policy_account_id' => TTUUID::castUUID($accrual_policy_account_id),
 					'start_date' => $this->db->BindTimeStamp( $start_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_date ),
 					);
@@ -679,13 +810,19 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $total;
 	}
 
-	function getByAccrualPolicyAccount($accrual_policy_account_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $accrual_policy_account_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
+	function getByAccrualPolicyAccount( $accrual_policy_account_id, $where = NULL, $order = NULL) {
 		if ( $accrual_policy_account_id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'accrual_policy_account_id' => TTUUID::castUUID($accrual_policy_account_id),
 					);
 
 		$uf = new UserFactory();
@@ -712,6 +849,15 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualListFactory|bool
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -754,10 +900,21 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 									);
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == NULL ) {
-			$order = array( 'accrual_policy_account_id' => 'asc', 'date_stamp' => 'desc');
+			$order = array( 'accrual_policy_account_id' => 'asc', 'date_stamp' => 'desc', 'a.created_date' => 'desc', 'type_id' => 'desc' ); //Sort by type_id last to try and put rollover adjustments lower in the list than Accrual Policy time, so it better reflects the real order.
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
+			//Always sort by last name, first name after other columns
+			if ( !isset($order['date_stamp']) ) {
+				$order['date_stamp'] = 'desc';
+			}
+			if ( !isset($order['a.created_date']) ) {
+				$order['a.created_date'] = 'desc';
+			}
+			if ( !isset($order['type_id']) ) {
+				$order['type_id'] = 'desc';
+			}
+
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -772,7 +929,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$apf = new AccrualPolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		//If changes are made to UDTF joining, also update getByAccrualPolicyAccount().
@@ -818,10 +975,10 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 					where	b.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['type']) AND !is_array($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
 			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );
@@ -833,17 +990,18 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		}
 
 		//$query .= ( isset($filter_data['accrual_policy_type_id']) ) ? $this->getWhereClauseSQL( 'ab.type_id', $filter_data['accrual_policy_type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['accrual_policy_account_id']) ) ? $this->getWhereClauseSQL( 'a.accrual_policy_account_id', $filter_data['accrual_policy_account_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['accrual_policy_account_id']) ) ? $this->getWhereClauseSQL( 'a.accrual_policy_account_id', $filter_data['accrual_policy_account_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'b.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'b.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'udtf.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'udtf.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 			$ph[] = $this->db->BindTimeStamp( (int)$filter_data['start_date'] );
@@ -865,8 +1023,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;

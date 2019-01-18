@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,8 +48,13 @@ abstract class Factory {
 	protected $progress_bar_obj = NULL;
 	protected $AMF_message_id = NULL;
 
+	protected $is_valid = FALSE; //Flag that determines if the data is valid since it was last changed or not.
+
 	public $validate_only = FALSE; //Used by the API to ignore certain validation checks if we are doing validation only.
 
+	/**
+	 * Factory constructor.
+	 */
 	function __construct() {
 		global $db, $cache;
 
@@ -68,12 +73,20 @@ abstract class Factory {
 	/*
 	 * Used for updating progress bar for API calls.
 	 */
+	/**
+	 * @return bool|null
+	 */
 	function getAMFMessageID() {
 		if ( $this->AMF_message_id != NULL ) {
 			return $this->AMF_message_id;
 		}
 		return FALSE;
 	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
 	function setAMFMessageID( $id ) {
 		if ( $id != '' ) {
 			$this->AMF_message_id = $id;
@@ -83,6 +96,10 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param object $obj
+	 * @return bool
+	 */
 	function setProgressBarObject( $obj ) {
 		if	( is_object( $obj ) ) {
 			$this->progress_bar_obj = $obj;
@@ -91,6 +108,10 @@ abstract class Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return null|ProgressBar
+	 */
 	function getProgressBarObject() {
 		if	( !is_object( $this->progress_bar_obj ) ) {
 			$this->progress_bar_obj = new ProgressBar();
@@ -100,6 +121,12 @@ abstract class Factory {
 	}
 
 	//Allow method to pre-populate/overwrite the cache if needed.
+
+	/**
+	 * @param object $obj
+	 * @param string $variable
+	 * @return bool
+	 */
 	function setGenericObject( $obj, $variable ) {
 		$this->$variable = $obj;
 
@@ -108,6 +135,14 @@ abstract class Factory {
 
 	//Generic function to return and cache class objects
 	//ListFactory, ListFactoryMethod, Variable, ID, IDMethod
+	/**
+	 * @param string $list_factory
+	 * @param string|int $id UUID
+	 * @param string $variable
+	 * @param string $list_factory_method
+	 * @param string $id_method
+	 * @return bool
+	 */
 	function getGenericObject( $list_factory, $id, $variable, $list_factory_method = 'getById', $id_method = 'getID' ) {
 		if ( isset($this->$variable) AND is_object( $this->$variable ) AND $id == $this->$variable->$id_method() ) { //Make sure we always compare that the object IDs match.
 			return $this->$variable;
@@ -124,9 +159,18 @@ abstract class Factory {
 	}
 
 	//Generic function to return and cache CompanyGenericMap data, this greatly improves performance of CalculatePolicy when many policies exist.
+
+	/**
+	 * @param string $company_id UUID
+	 * @param int $object_type_id
+	 * @param string $id UUID
+	 * @param string $variable
+	 * @return mixed
+	 */
 	function getCompanyGenericMapData( $company_id, $object_type_id, $id, $variable ) {
 		$tmp = &$this->$variable; //Works around a PHP issues where $this->$variable[$id] cause a fatal error on unknown string offset
-		if ( $id > 0 AND isset($tmp[$id]) ) {
+		if ( TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID()
+				AND isset($tmp[$id]) ) {
 			return $tmp[$id];
 		} else {
 			$tmp[$id] = CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $company_id, $object_type_id, $id );
@@ -134,10 +178,120 @@ abstract class Factory {
 		}
 	}
 
+	//Generic getter/setter functions that should be used when Validation code is moved from get/set functions to Validate() function.
+
+	/**
+	 * @param string $name
+	 * @return bool|mixed
+	 */
+	function getGenericDataValue( $name, $cast = NULL ) {
+		if ( isset($this->data[$name]) ) {
+//			if ( $cast != '' ) {
+//				$this->castGenericDataValue( $this->data[$name], $cast );
+//			}
+
+			return $this->data[$name];
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param string $name
+	 * @param mixed $data
+	 * @return bool
+	 */
+	function setGenericDataValue( $name, $data, $cast = NULL ) {
+		$this->is_valid = FALSE; //Force revalidation when data is changed.
+
+//		if ( $cast != '' ) {
+//			$this->castGenericDataValue( $data, $cast );
+//		}
+
+		$this->data[$name] = $data;
+		return TRUE;
+	}
+
+	/**
+	 * Generic casting function that all set/get*() functions should pass through.
+	 * However for now lets wait until we have meta data from SQL schema so we can pass those datatypes directly into this.
+	 * @param $value mixed
+	 * @param $cast string
+	 * @return mixed
+	 */
+	function castGenericDataValue( &$value, $cast ) {
+		if ( $cast != '' ) {
+			$cast = strtolower( $cast );
+
+			switch ( $cast ) {
+				case 'uuid':
+					$value = TTUUID::castUUID( $value );
+					break;
+				case 'uuid+zero':
+					$value = TTUUID::castUUID( $value );
+					if ( $value == '' ) {
+						$value = TTUUID::getZeroID();
+					}
+					break;
+				default:
+					if ( settype( $value, $cast ) == FALSE ) {
+						Debug::Arr( $value, 'ERROR: Unable to cast variable to: ' . $cast, __FILE__, __LINE__, __METHOD__, 10 );
+					}
+					break;
+			}
+
+		}
+
+		return $value;
+	}
+
+	//Generic getter/setter functions that should be used when Validation code is moved from get/set functions to Validate() function.
+
+	/**
+	 * @param string $name
+	 * @return bool
+	 */
+	function getGenericTempDataValue( $name ) {
+		if ( isset($this->tmp_data[$name]) ) {
+			return $this->tmp_data[$name];
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param string $name
+	 * @param mixed $data
+	 * @return bool
+	 */
+	function setGenericTempDataValue( $name, $data ) {
+		$this->is_valid = FALSE; //Force revalidation when data is changed.
+		$this->tmp_data[$name] = $data;
+		return TRUE;
+	}
+
+
+	/**
+	 * @param string $name Gets data value from old_data array, or the original value in the database, prior to any changes currently in memory.
+	 * @return bool|mixed
+	 */
+	function getGenericOldDataValue( $name ) {
+		if ( isset($this->old_data[$name]) ) {
+			return $this->old_data[$name];
+		}
+
+		return FALSE;
+	}
+
 	/*
 	 * Cache functions
 	 */
-	function getCache($cache_id, $group_id = NULL ) {
+	/**
+	 * @param string $cache_id
+	 * @param string $group_id
+	 * @return bool|mixed
+	 */
+	function getCache( $cache_id, $group_id = NULL ) {
 		if ( is_object($this->cache) ) {
 			if ( $group_id == NULL ) {
 				$group_id = $this->getTable(TRUE);
@@ -155,7 +309,14 @@ abstract class Factory {
 
 		return FALSE;
 	}
-	function saveCache($data, $cache_id, $group_id = NULL ) {
+
+	/**
+	 * @param mixed $data
+	 * @param string $cache_id
+	 * @param string $group_id
+	 * @return bool
+	 */
+	function saveCache( $data, $cache_id, $group_id = NULL ) {
 		//Cache_ID can't have ':' in it, otherwise it fails on Windows.
 		if ( is_object($this->cache) ) {
 			if ( $group_id == NULL ) {
@@ -176,7 +337,13 @@ abstract class Factory {
 		}
 		return FALSE;
 	}
-	function removeCache($cache_id = NULL, $group_id = NULL ) {
+
+	/**
+	 * @param string $cache_id
+	 * @param string $group_id
+	 * @return bool
+	 */
+	function removeCache( $cache_id = NULL, $group_id = NULL ) {
 		//See ContributingPayCodePolicyFactory() ->getPayCode() for comments on a bug with caching...
 		Debug::text('Attempting to remove cache: '. $cache_id, __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_object($this->cache) ) {
@@ -194,6 +361,11 @@ abstract class Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param int $secs
+	 * @return bool
+	 */
 	function setCacheLifeTime( $secs ) {
 		if ( is_object($this->cache) ) {
 			return $this->cache->setLifeTime( $secs );
@@ -203,6 +375,11 @@ abstract class Factory {
 	}
 
 	//Serialize ADODB recordset.
+
+	/**
+	 * @param object $rs
+	 * @return string
+	 */
 	function serializeRS( $rs ) {
 		global $ADODB_INCLUDED_CSV;
 		if ( empty($ADODB_INCLUDED_CSV) ) {
@@ -213,6 +390,11 @@ abstract class Factory {
 	}
 
 	//UnSerialize ADODB recordset.
+
+	/**
+	 * @param string $rs
+	 * @return mixed
+	 */
 	function unserializeRS( $rs ) {
 		$rs = explode("\n", $rs);
 		unset($rs[0]);
@@ -220,7 +402,11 @@ abstract class Factory {
 		return unserialize( $rs );
 	}
 
-	function getTable($strip_quotes = FALSE) {
+	/**
+	 * @param bool $strip_quotes
+	 * @return bool|string
+	 */
+	function getTable( $strip_quotes = FALSE) {
 		if ( isset($this->table) ) {
 			if ( $strip_quotes == TRUE ) {
 				return str_replace('"', '', $this->table );
@@ -234,8 +420,11 @@ abstract class Factory {
 
 	//Generic function get any data from the data array.
 	//Used mainly for the reports that return grouped queries and such.
+	/**
+	 * @param string $column
+	 * @return bool|mixed
+	 */
 	function getColumn( $column ) {
-
 		if ( isset($this->data[$column]) ) {
 			return $this->data[$column];
 		}
@@ -244,6 +433,10 @@ abstract class Factory {
 	}
 
 	//Print primary columns from object.
+
+	/**
+	 * @return bool|string
+	 */
 	function __toString() {
 		if ( method_exists( $this, 'getObjectAsArray' ) ) {
 			$columns = Misc::trimSortPrefix( $this->getOptions('columns') );
@@ -266,7 +459,11 @@ abstract class Factory {
 		return FALSE;
 	}
 
-	function toBool($value) {
+	/**
+	 * @param string|int|bool $value
+	 * @return int
+	 */
+	function toBool( $value) {
 		$value = strtolower(trim($value));
 
 		if ($value === TRUE OR $value == 1 OR $value == 't') {
@@ -278,7 +475,11 @@ abstract class Factory {
 		}
 	}
 
-	function fromBool($value) {
+	/**
+	 * @param string|int|bool $value
+	 * @return bool
+	 */
+	function fromBool( $value) {
 		if ( $value == 1 ) {
 			return TRUE;
 		} elseif ( $value == 0 ) {
@@ -290,16 +491,25 @@ abstract class Factory {
 		}
 	}
 
-	//Determines if the data is new data, or updated data.
-	function isNew( $force_lookup = FALSE ) {
+	/**
+	 * Determines if the data is new data, or updated data. Basically determines if a database INSERT or UPDATE SQL statement is generated.
+	 * @param bool $force_lookup
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function isNew( $force_lookup = FALSE, $id = NULL ) {
+		if ( $id === NULL ) {
+			$id = $this->getId();
+		}
 		//Debug::Arr( $this->getId(), 'getId: ', __FILE__, __LINE__, __METHOD__, 10);
-		if ( $this->getId() === FALSE ) {
+
+		if ( $id === FALSE ) {
 			//New Data
 			return TRUE;
 		} elseif ( $force_lookup == TRUE ) {
 			//See if we can find the ID to determine if the record needs to be inserted or update.
-			$ph = array( 'id' => $this->getID() );
-			$query = 'select id from '. $this->getTable() .' where id = ?';
+			$ph = array( 'id' => $id ); // Do not cast to UUID as it needs to support both integer and UUID across v11 upgrade.
+			$query = 'SELECT id FROM '. $this->getTable() .' WHERE id = ?';
 			$retval = $this->db->GetOne($query, $ph);
 			if ( $retval === FALSE ) {
 				return TRUE;
@@ -310,34 +520,9 @@ abstract class Factory {
 		return FALSE;
 	}
 
-	//Determines if we were called by a save function or not.
-	//This is useful for determining if we are just validating or actually saving data. Problem is its too late to throw any new validation errors.
-	function isSave() {
-		$stack = debug_backtrace();
-
-		if ( is_array($stack) ) {
-			//Loop through and if we find a Save function call return TRUE.
-			//Not sure if this will work in some more complex cases though.
-			foreach( $stack as $data ) {
-				if ( $data['function'] == 'Save' ) {
-					return TRUE;
-				}
-			}
-		}
-
-		return FALSE;
-	}
-
-	//Returns the calling function name
-	function getCallerFunction() {
-		$stack = debug_backtrace();
-		if ( isset($stack[1]) ) {
-			return $statc[1]['function'];
-		}
-
-		return FALSE;
-	}
-
+	/**
+	 * @return bool|mixed|string
+	 */
 	function getLabelId() {
 		//Gets the ID used in validator labels. If no ID, uses "-1";
 		if ( $this->getId() == FALSE ) {
@@ -347,28 +532,48 @@ abstract class Factory {
 		return $this->getId();
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getId() {
-		if ( isset($this->data['id']) AND $this->data['id'] != NULL) {
-			return (int)$this->data['id'];
-		}
+//		if ( isset($this->data['id']) AND $this->data['id'] != NULL) {
+////			return (int)$this->data['id'];
+//			return $this->data['id'];
+//		}
 
-		return FALSE;
-	}
-	function setId($id) {
-		/*
-		if ($id != NULL) {
-			//$this->data['id'] = (int)$id;
-			$this->data['id'] = $id; //Allow ID to be set as FALSE. Essentially making a new entry.
-		}
-		*/
-		if ( is_numeric( $id ) OR is_bool( $id ) ) {
-			$this->data['id'] = $id; //Allow ID to be set as FALSE. Essentially making a new entry.
-			return TRUE;
+		$id = $this->getGenericDataValue( 'id' );
+		if ( $id != NULL ) {
+			return $id;
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setId( $id) {
+		global $PRIMARY_KEY_IS_UUID;
+
+		if ( $PRIMARY_KEY_IS_UUID == FALSE ) {
+			if ( is_numeric( $id ) OR is_bool( $id ) ) {
+				$this->setGenericDataValue( 'id', $id ); //Allow ID to be set as FALSE. Essentially making a new entry.
+				return TRUE;
+			}
+		} else {
+			if ( is_bool( $id ) OR TTUUID::isUUID($id) ) {
+				$this->setGenericDataValue( 'id', $id ); //Allow ID to be set as FALSE. Essentially making a new entry.
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableSystemLogDetail() {
 		if ( isset($this->enable_system_log_detail) ) {
 			return $this->enable_system_log_detail;
@@ -376,41 +581,54 @@ abstract class Factory {
 
 		return FALSE;
 	}
-	function setEnableSystemLogDetail($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableSystemLogDetail( $bool) {
 		$this->enable_system_log_detail = (bool)$bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
-		if ( isset($this->data['deleted']) ) {
-			return $this->fromBool( $this->data['deleted'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'deleted' ) );
 	}
-	function setDeleted($bool) {
+
+	/**
+	 * @param bool $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		$value = (bool)$bool;
 
 		//Handle Postgres's boolean values.
-		if ($value === TRUE) {
+		if ( $value === TRUE ) {
 			//Only set this one we're deleting
 			$this->setDeletedDate();
 			$this->setDeletedBy();
 		}
 
-		$this->data['deleted'] = $this->toBool($value);
+		$this->setGenericDataValue( 'deleted', $this->toBool($value) );
 		return TRUE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getCreatedDate() {
-		if ( isset($this->data['created_date']) ) {
-			return (int)$this->data['created_date'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'created_date' );
 	}
-	function setCreatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
 		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == NULL OR $epoch == '' OR $epoch == 0 ) {
@@ -421,7 +639,7 @@ abstract class Factory {
 												$epoch,
 												TTi18n::gettext('Incorrect Date')) ) {
 
-			$this->data['created_date'] = $epoch;
+			$this->setGenericDataValue( 'created_date', $epoch );
 
 			return TRUE;
 		}
@@ -429,15 +647,20 @@ abstract class Factory {
 		return FALSE;
 
 	}
-	function getCreatedBy() {
-		if ( isset($this->data['created_by']) ) {
-			return (int)$this->data['created_by'];
-		}
 
-		return FALSE;
+	/**
+	 * @return bool|mixed
+	 */
+	function getCreatedBy() {
+		return $this->getGenericDataValue( 'created_by' );
 	}
-	function setCreatedBy($id = NULL) {
-		$id = (int)trim($id);
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
+		//$id = (int)trim($id);
 
 		if ( empty($id) ) {
 			global $current_user;
@@ -458,7 +681,7 @@ abstract class Factory {
 													TTi18n::gettext('Incorrect User')
 													) ) {
 
-			$this->data['created_by'] = $id;
+			$this->setGenericDataValue( 'created_by', $id );
 
 			return TRUE;
 		}
@@ -466,19 +689,23 @@ abstract class Factory {
 		return FALSE;
 		*/
 
-		$this->data['created_by'] = (int)$id;
+		$this->setGenericDataValue( 'created_by', $id );
 
 		return TRUE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getUpdatedDate() {
-		if ( isset($this->data['updated_date']) ) {
-			return (int)$this->data['updated_date'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'updated_date' );
 	}
-	function setUpdatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool|int|null|string
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == NULL OR $epoch == '' OR $epoch == 0 ) {
@@ -489,7 +716,7 @@ abstract class Factory {
 												$epoch,
 												TTi18n::gettext('Incorrect Date')) ) {
 
-			$this->data['updated_date'] = $epoch;
+			$this->setGenericDataValue( 'updated_date', $epoch );
 
 			//return TRUE;
 			//Return the value so we can use it in getUpdateSQL
@@ -499,15 +726,20 @@ abstract class Factory {
 		return FALSE;
 
 	}
-	function getUpdatedBy() {
-		if ( isset($this->data['updated_by']) ) {
-			return (int)$this->data['updated_by'];
-		}
 
-		return FALSE;
+	/**
+	 * @return bool|mixed
+	 */
+	function getUpdatedBy() {
+		return $this->getGenericDataValue( 'updated_by' );
 	}
-	function setUpdatedBy($id = NULL) {
-		$id = (int)trim($id);
+
+	/**
+	 * @param string $id UUID
+	 * @return bool|null
+	 */
+	function setUpdatedBy( $id = NULL) {
+		//$id = (int)trim($id);
 
 		if ( empty($id) ) {
 			global $current_user;
@@ -527,7 +759,7 @@ abstract class Factory {
 													$ulf->getByID($id),
 													TTi18n::gettext('Incorrect User')
 													) ) {
-			$this->data['updated_by'] = $id;
+			$this->setGenericDataValue( 'updated_by', $id );
 
 			//return TRUE;
 			return $id;
@@ -536,20 +768,24 @@ abstract class Factory {
 		return FALSE;
 		*/
 
-		$this->data['updated_by'] = $id;
+		$this->setGenericDataValue( 'updated_by', $id );
 
 		return $id;
 	}
 
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getDeletedDate() {
-		if ( isset($this->data['deleted_date']) ) {
-			return $this->data['deleted_date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'deleted_date' );
 	}
-	function setDeletedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == NULL OR $epoch == '' OR $epoch == 0 ) {
@@ -560,7 +796,7 @@ abstract class Factory {
 												$epoch,
 												TTi18n::gettext('Incorrect Date')) ) {
 
-			$this->data['deleted_date'] = $epoch;
+			$this->setGenericDataValue( 'deleted_date', $epoch );
 
 			return TRUE;
 		}
@@ -568,15 +804,20 @@ abstract class Factory {
 		return FALSE;
 
 	}
-	function getDeletedBy() {
-		if ( isset($this->data['deleted_by']) ) {
-			return $this->data['deleted_by'];
-		}
 
-		return FALSE;
+	/**
+	 * @return bool|mixed
+	 */
+	function getDeletedBy() {
+		return $this->getGenericDataValue( 'deleted_by' );
 	}
-	function setDeletedBy($id = NULL) {
-		$id = trim($id);
+
+	/**
+	 * @param string $id UUID
+	 * @return bool|null
+	 */
+	function setDeletedBy( $id = NULL) {
+		//$id = trim($id);
 
 		if ( empty($id) ) {
 			global $current_user;
@@ -598,7 +839,7 @@ abstract class Factory {
 													TTi18n::gettext('Incorrect User')
 													) ) {
 
-			$this->data['deleted_by'] = $id;
+			$this->setGenericDataValue( 'deleted_by', $id );
 
 			return TRUE;
 		}
@@ -606,11 +847,16 @@ abstract class Factory {
 		return FALSE;
 		*/
 
-		$this->data['deleted_by'] = $id;
+		$this->setGenericDataValue( 'deleted_by', $id );
 
 		return $id;
 	}
 
+	/**
+	 * @param array $data
+	 * @param array $variable_to_function_map
+	 * @return bool
+	 */
 	function setCreatedAndUpdatedColumns( $data, $variable_to_function_map = array() ) {
 		//Debug::text(' Set created/updated columns...', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -619,20 +865,26 @@ abstract class Factory {
 		//For now, only allow these fields to be changed from user input if its set in the variable_to_function_map.
 
 		//Update array in-place.
-		if ( isset($data['created_by']) AND is_numeric($data['created_by']) AND $data['created_by'] > 0 AND isset($variable_to_function_map['created_by']) ) {
+		if ( isset($data['created_by'])
+				AND TTUUID::isUUID( $data['created_by'] ) AND $data['created_by'] != TTUUID::getZeroID() AND $data['created_by'] != TTUUID::getNotExistID()
+				AND isset($variable_to_function_map['created_by']) ) {
 			$this->setCreatedBy( $data['created_by'] );
 		}
-		if ( isset($data['created_by_id']) AND is_numeric($data['created_by_id']) AND $data['created_by_id'] > 0 AND isset($variable_to_function_map['created_by']) ) {
+		if ( isset($data['created_by_id'])
+				AND TTUUID::isUUID( $data['created_by_id'] ) AND $data['created_by_id'] != TTUUID::getZeroID() AND $data['created_by_id'] != TTUUID::getNotExistID()
+				AND isset($variable_to_function_map['created_by']) ) {
 			$this->setCreatedBy( $data['created_by_id'] );
 		}
 		if ( isset($data['created_date']) AND $data['created_date'] != FALSE AND $data['created_date'] != '' AND isset($variable_to_function_map['created_date']) ) {
 			$this->setCreatedDate( TTDate::parseDateTime( $data['created_date'] ) );
 		}
 
-		if ( isset($data['updated_by']) AND is_numeric($data['updated_by']) AND $data['updated_by'] > 0 AND isset($variable_to_function_map['updated_by']) ) {
+		if ( isset($data['updated_by'])
+				AND TTUUID::isUUID( $data['updated_by'] ) AND $data['updated_by'] != TTUUID::getZeroID() AND $data['updated_by'] != TTUUID::getNotExistID()
+				AND isset($variable_to_function_map['updated_by']) ) {
 			$this->setUpdatedBy( $data['updated_by'] );
 		}
-		if ( isset($data['updated_by_id']) AND is_numeric($data['updated_by_id']) AND $data['updated_by_id'] > 0 AND isset($variable_to_function_map['updated_by']) ) {
+		if ( isset($data['updated_by_id']) AND TTUUID::isUUID($data['updated_by_id']) AND $data['updated_by_id'] > 0 AND isset($variable_to_function_map['updated_by']) ) {
 			$this->setUpdatedBy( $data['updated_by_id'] );
 		}
 		if ( isset($data['updated_date']) AND $data['updated_date'] != FALSE AND $data['updated_date'] != '' AND isset($variable_to_function_map['updated_date']) ) {
@@ -641,6 +893,12 @@ abstract class Factory {
 
 		return TRUE;
 	}
+
+	/**
+	 * @param array $data
+	 * @param null $include_columns
+	 * @return bool
+	 */
 	function getCreatedAndUpdatedColumns( &$data, $include_columns = NULL ) {
 		//Update array in-place.
 		if ( $include_columns == NULL OR ( isset($include_columns['created_by_id']) AND $include_columns['created_by_id'] == TRUE) ) {
@@ -665,6 +923,14 @@ abstract class Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param array $data
+	 * @param string $object_user_id UUID
+	 * @param string $created_by_id UUID
+	 * @param string $permission_children_ids UUID
+	 * @param array $include_columns
+	 * @return bool
+	 */
 	function getPermissionColumns( &$data, $object_user_id, $created_by_id, $permission_children_ids = NULL, $include_columns = NULL ) {
 		$permission = new Permission();
 
@@ -694,7 +960,12 @@ abstract class Factory {
 		return TRUE;
 	}
 
-	function getOptions($name, $parent = NULL) {
+	/**
+	 * @param string $name
+	 * @param string|int $parent
+	 * @return array|bool
+	 */
+	function getOptions( $name, $parent = NULL) {
 		if ( $parent == NULL OR $parent == '') {
 			return $this->_getFactoryOptions( $name );
 		} elseif ( is_array( $parent ) ) {
@@ -708,17 +979,35 @@ abstract class Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param string $name
+	 * @param string|int $parent
+	 * @return bool
+	 */
 	protected function _getFactoryOptions( $name, $parent = NULL ) {
 		return FALSE;
 	}
 
+	/**
+	 * @param array $data
+	 * @return array|bool
+	 */
 	function getVariableToFunctionMap( $data = NULL ) {
 		return $this->_getVariableToFunctionMap( $data );
 	}
+
+	/**
+	 * @param array $data
+	 * @return bool
+	 */
 	protected function _getVariableToFunctionMap( $data ) {
 		return FALSE;
 	}
 
+	/**
+	 * @return int|bool
+	 */
 	function getRecordCount() {
 		if ( isset($this->rs->_numOfRows) ) { //Check a deep variable to make sure it is in fact a valid ADODB record set, just in case some other object is passed in.
 			return $this->rs->RecordCount();
@@ -727,6 +1016,10 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $offset
+	 * @return int|bool
+	 */
 	function getCurrentRow( $offset = 1 ) {
 		if ( isset($this->rs) AND isset($this->rs->_currentRow) ) {
 			return ( $this->rs->_currentRow + (int)$offset );
@@ -735,11 +1028,12 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $milliseconds
+	 * @return bool
+	 */
 	function setQueryStatementTimeout( $milliseconds = NULL ) {
-		global $db;
-
 		if ( $milliseconds == '' ) {
-			global $config_vars;
 			$milliseconds = 0;
 			if ( isset($this->config['other']['query_statement_timeout']) ) {
 				$milliseconds = (int)$this->config['other']['query_statement_timeout'];
@@ -754,7 +1048,11 @@ abstract class Factory {
 		return TRUE;
 	}
 
-	private function getRecordSetColumnList($rs) {
+	/**
+	 * @param object $rs
+	 * @return array|bool
+	 */
+	private function getRecordSetColumnList( $rs) {
 		if (is_object($rs)) {
 			for ($i = 0, $max = $rs->FieldCount(); $i < $max; $i++) {
 				$field = $rs->FetchField($i);
@@ -767,6 +1065,11 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param int|string $int
+	 * @param string $type
+	 * @return bool|int|string
+	 */
 	protected function castInteger( $int, $type = 'int' ) {
 		//smallint	2 bytes	small-range integer	-32768 to +32767
 		//integer	4 bytes	typical choice for integer	-2147483648 to +2147483647
@@ -799,6 +1102,9 @@ abstract class Factory {
 					$retval = (int)$int;
 				}
 				break;
+			case 'uuid':
+				$retval = TTUUID::castUUID($int);
+				break;
 			default:
 				return $int; //Make sure if the $type is not recognized we just return the raw value again.
 				break;
@@ -809,8 +1115,13 @@ abstract class Factory {
 		}
 		return $retval;
 	}
-
-	protected function getListSQL($array, &$ph = NULL, $cast = FALSE ) {
+	/**
+	 * @param array|string|int $array
+	 * @param array $ph
+	 * @param string|bool $cast
+	 * @return bool|int|string|array
+	 */
+	protected function getListSQL( $array, &$ph = NULL, $cast = FALSE ) {
 		//Debug::Arr($array, 'List Values:', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ph === NULL ) {
 			if ( is_array( $array ) AND count($array) > 0 ) {
@@ -847,7 +1158,7 @@ abstract class Factory {
 							$ph[] = $val;
 						}
 					} else {
-						$ph[] = '-1';
+						$ph[] = ( ( $cast == 'uuid' ) ? TTUUID::getNotExistID() : -1 );
 					}
 				}
 
@@ -858,16 +1169,17 @@ abstract class Factory {
 				//Return NULL, because this is an empty array.
 				//This may have to return -1 instead of NULL
 				//$ph[] = 'NULL';
-				$ph[] = -1;
+				$ph[] = ( ( $cast == 'uuid' ) ? TTUUID::getNotExistID() : -1 );
 				$retval = '?';
 			} elseif ( $array === FALSE OR $array === '' ) { //Make sure we don't catch int(0) here.
 				//$ph[] = 'NULL';
-				$ph[] = -1;
+				//$ph[] = -1;
+				$ph[] = ( ( $cast == 'uuid' ) ? TTUUID::getNotExistID() : -1 );
 				$retval = '?';
 			} else {
 				$array = $this->castInteger( $array, $cast );
 				if ( $array === FALSE ) {
-					$ph[] = -1;
+					$ph[] = ( ( $cast == 'uuid' ) ? TTUUID::getNotExistID() : -1 );
 				} else {
 					$ph[] = $array;
 				}
@@ -890,6 +1202,13 @@ abstract class Factory {
 	//					>01-Jan-09
 	//					>01-Jan-09 & <10-Jan-09
 	//
+	/**
+	 * @param string $str
+	 * @param string $column
+	 * @param string $format
+	 * @param bool $include_blank_dates
+	 * @return bool|string
+	 */
 	function getDateRangeSQL( $str, $column, $format = 'epoch', $include_blank_dates = FALSE ) {
 		if ( $str == '' ) {
 			return FALSE;
@@ -985,6 +1304,10 @@ abstract class Factory {
 
 	//Handles '*' and '%' as wildcards, defaults to wildcard on the end always.
 	//If no wildcard is to be added, the last character should be |
+	/**
+	 * @param string $arg
+	 * @return string
+	 */
 	protected function handleSQLSyntax( $arg ) {
 		$arg = str_replace('*', '%', trim($arg) );
 
@@ -996,10 +1319,17 @@ abstract class Factory {
 		return addslashes( $this->stripSQLSyntax( $arg ) ); //Addaslashes to prevent SQL syntax error if %\ is at the end of the where clause.
 	}
 
+	/**
+	 * @param string $arg
+	 * @return mixed
+	 */
 	protected function stripSQLSyntax( $arg ) {
 		return str_replace( array('"'), '', $arg); //Strip syntax characters out.
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function getSQLToTimeStampFunction() {
 		if ( $this->getDatabaseType() == 'mysql' ) {
 			$to_timestamp_sql = 'FROM_UNIXTIME';
@@ -1010,6 +1340,9 @@ abstract class Factory {
 		return $to_timestamp_sql;
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function getDatabaseType() {
 		global $config_vars;
 		if ( strncmp($config_vars['database']['type'], 'mysql', 5) == 0 ) {
@@ -1021,6 +1354,10 @@ abstract class Factory {
 		return $database_driver;
 	}
 
+	/**
+	 * @param string $sql
+	 * @return string
+	 */
 	protected function getGEOMAsTextFunction( $sql ) {
 		if ( $this->getDatabaseType() == 'mysql' ) {
 			$to_text_sql = 'AsText('. $sql .')';
@@ -1031,6 +1368,10 @@ abstract class Factory {
 		return $to_text_sql;
 	}
 
+	/**
+	 * @param string $sql
+	 * @return string
+	 */
 	protected function getSQLToEpochFunction( $sql ) {
 		if ( $this->getDatabaseType() == 'mysql' ) {
 			$to_timestamp_sql = 'UNIX_TIMESTAMP('. $sql .')';
@@ -1043,6 +1384,10 @@ abstract class Factory {
 		return $to_timestamp_sql;
 	}
 
+	/**
+	 * @param string $sql
+	 * @return string
+	 */
 	protected function getSQLToTimeFunction( $sql ) {
 		if ( $this->getDatabaseType() == 'mysql' ) {
 			$to_time_sql = 'TIME('. $sql .')';
@@ -1053,6 +1398,11 @@ abstract class Factory {
 		return $to_time_sql;
 	}
 
+	/**
+	 * @param string $sql
+	 * @param string $glue
+	 * @return string
+	 */
 	protected function getSQLStringAggregate( $sql, $glue ) {
 		//See Group.class.php aggegate() function with 'concat' argument, that is used in most reports instead.
 		if ( $this->getDatabaseType() == 'mysql' ) {
@@ -1065,6 +1415,15 @@ abstract class Factory {
 		return $agg_sql;
 	}
 
+	/**
+	 * @param array|string $columns
+	 * @param array|string $args
+	 * @param string $type
+	 * @param array $ph
+	 * @param string $query_stub
+	 * @param bool $and
+	 * @return null|string
+	 */
 	protected function getWhereClauseSQL( $columns, $args, $type, &$ph, $query_stub = NULL, $and = TRUE ) {
 		//Debug::Text('Type: '. $type .' Query Stub: '. $query_stub .' AND: '. (int)$and, __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($columns, 'Columns: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1115,7 +1474,7 @@ abstract class Factory {
 									} else {
 										$query_stub .= 'lower('. $columns .') LIKE ?';
 									}
-									if ( isset( $split_args[$key+1] ) ) {
+									if ( isset( $split_args[( $key + 1 )] ) ) {
 										$query_stub .= ' OR ';
 									} else {
 										$query_stub .= ' )';
@@ -1130,6 +1489,15 @@ abstract class Factory {
 							}
 						}
 					}
+					$retval = $query_stub;
+				}
+				break;
+			case 'string':
+				if ( isset($args) AND !is_array($args) AND trim($args) != '' ) {
+					if ( $query_stub == '' AND !is_array($columns) ) {
+						$query_stub = $columns .' = ?';
+					}
+					$ph[] = $this->handleSQLSyntax( $args );
 					$retval = $query_stub;
 				}
 				break;
@@ -1157,6 +1525,42 @@ abstract class Factory {
 					$retval = $query_stub;
 				}
 				break;
+			case 'uuid':
+				if ( isset($args) AND !is_array($args) AND trim($args) != '' AND TTUUID::isUUID( $args ) ) {
+					if ( $query_stub == '' AND !is_array($columns) ) {
+						$query_stub = $columns .' = ?';
+					}
+					$ph[] = TTUUID::castUUID( $args );
+					$retval = $query_stub;
+				}
+				break;
+			case 'uuid_list':
+			case 'not_uuid_list':
+				if ( !is_array($args) ) {
+					$args = (array)$args;
+				}
+				if ( isset($args) AND isset($args[0]) AND !in_array( TTUUID::getNotExistID(), $args) AND !in_array( -1, $args ) ) { //Check for -1 as well for backwards compatibily with INT ID lists.
+					if ( $query_stub == '' AND !is_array($columns) ) {
+						if ( strtolower($type) == 'not_uuid_list' ) {
+							$query_stub = $columns . ' NOT IN (?)';
+						} else{
+							$query_stub = $columns .' IN (?)';
+						}
+					}
+					$retval = str_replace('?', $this->getListSQL($args, $ph, 'uuid' ), $query_stub );
+				}
+				break;
+			case 'uuid_list_with_all': //Doesn't check for -1 and ignore the filter completely. Used in KPIListFactory.
+				if ( !is_array($args) ) {
+					$args = (array)$args;
+				}
+				if ( isset($args) AND isset($args[0]) ) {
+					if ( $query_stub == '' AND !is_array($columns) ) {
+						$query_stub = $columns .' IN (?)';
+					}
+					$retval = str_replace('?', $this->getListSQL($args, $ph, str_replace( '_list', '', 'uuid_list' ) ), $query_stub );
+				}
+				break;
 			case 'text_list':
 			case 'lower_text_list':
 			case 'upper_text_list':
@@ -1176,7 +1580,7 @@ abstract class Factory {
 					$args = array_flip( array_change_key_case( array_flip( $args ), $text_case ) );
 				}
 
-				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args) AND !in_array( '00', $args) ) {
+				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args) AND !in_array( strtoupper( TTUUID::getNotExistID() ), $args) AND !in_array( TTUUID::getNotExistID(), $args) AND !in_array( '00', $args) ) {
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$query_stub = $sql_text_case_function.'('. $columns .') IN (?)';
 					}
@@ -1279,7 +1683,7 @@ abstract class Factory {
 														select 1
 														from company_generic_tag_map as cgtm
 														INNER JOIN company_generic_tag as cgt ON (cgtm.tag_id = cgt.id)
-														WHERE cgt.company_id = '. (int)$args['company_id'] .'
+														WHERE cgt.company_id = \''. TTUUID::castUUID($args['company_id']) .'\'
 															AND cgtm.object_type_id = '. (int)$args['object_type_id'] .'
 															AND '. $columns .' = cgtm.object_id
 															AND ( lower(cgt.name) in (?) )
@@ -1297,7 +1701,7 @@ abstract class Factory {
 														select 1
 														from company_generic_tag_map as cgtm
 														INNER JOIN company_generic_tag as cgt ON (cgtm.tag_id = cgt.id)
-														WHERE cgt.company_id = '. (int)$args['company_id'] .'
+														WHERE cgt.company_id = \''. TTUUID::castUUID($args['company_id']) .'\'
 															AND cgtm.object_type_id = '. (int)$args['object_type_id'] .'
 															AND '. $columns .' = cgtm.object_id
 															AND ( lower(cgt.name) in (?) )
@@ -1331,7 +1735,7 @@ abstract class Factory {
 			case 'end_datestamp': //Uses EPOCH values only, used for date/timestamp datatype columns
 				if ( !is_array($args) ) { //Can't check isset() on a NULL value.
 					if ( $query_stub == '' AND !is_array($columns) ) {
-						$args = $this->castInteger( $this->Validator->stripNonNumeric( $args ), 'int' );
+						$args = $this->castInteger( $this->Validator->stripNonFloat( $args ), 'int' ); //Make sure we allow decimals
 						if ( is_numeric( $args ) ) {
 							$ph[] = $this->db->bindDate( $args );
 							if ( strtolower($type) == 'start_datestamp' ) {
@@ -1349,7 +1753,7 @@ abstract class Factory {
 			case 'end_timestamp': //Uses EPOCH values only, used for date/timestamp datatype columns
 				if ( !is_array($args) ) { //Can't check isset() on a NULL value.
 					if ( $query_stub == '' AND !is_array($columns) ) {
-						$args = $this->castInteger( $this->Validator->stripNonNumeric( $args ), 'int' );
+						$args = $this->castInteger( $this->Validator->stripNonFloat( $args ), 'int' ); //Make sure we allow decimals
 						if ( is_numeric( $args ) ) {
 							$ph[] = $this->db->bindTimeStamp( $args );
 							if ( strtolower($type) == 'start_timestamp' ) {
@@ -1367,7 +1771,7 @@ abstract class Factory {
 			case 'end_date':
 				if ( !is_array($args) ) { //Can't check isset() on a NULL value.
 					if ( $query_stub == '' AND !is_array($columns) ) {
-						$args = $this->castInteger( $this->Validator->stripNonNumeric( $args ), 'int' );
+						$args = $this->castInteger( $this->Validator->stripNonFloat( $args ), 'int' ); //Make sure we allow decimals
 						if ( is_numeric( $args ) ) {
 							$ph[] = $args;
 							if ( strtolower($type) == 'start_date' ) {
@@ -1410,7 +1814,7 @@ abstract class Factory {
 				break;
 			case 'user_id_or_name':
 				if ( isset( $args ) AND is_array( $args ) ) {
-					$retval = $this->getWhereClauseSQL( $columns[0], $args, 'numeric_list', $ph, '', FALSE );
+					$retval = $this->getWhereClauseSQL( $columns[0], $args, 'uuid_list', $ph, '', FALSE );
 				}
 				if ( isset( $args ) AND !is_array( $args ) AND trim( $args ) != '' ) {
 					$ph[] = $ph[] = $this->handleSQLSyntax(TTi18n::strtolower( trim( $args ) ));
@@ -1418,10 +1822,24 @@ abstract class Factory {
 				}
 				break;
 			case 'boolean':
-				if ( isset($args) AND !is_array($args) AND trim($args) != '' ) {
+				if ( is_bool( $args ) ) { //Handle strict boolean types here, convert to strings to be matched later on.
+					if ( $args === TRUE ) {
+						$args = 'true';
+					} else {
+						$args = 'false';
+					}
+				} elseif ( is_int( $args ) ) { //Handle strict integer types here, convert to strings to be matched later on.
+					if ( $args === 1 ) {
+						$args = 'true';
+					} else {
+						$args = 'false';
+					}
+				}
+
+				if ( isset($args) AND !is_array($args) AND trim($args) != '' ) { // trim($args) != '' won't match (bool)FALSE. So it must be changed to a string above.
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						switch( strtolower( trim( (string)$args) ) ) { //Cast to string here is critical for the below CASE's to work properly.
-							//Can't check for (int)1 or (bool)TRUE here as it matches even with (bool)FALSE.
+							//Can't check for (int)1 or (bool)TRUE here as it matches even with (bool)FALSE. DocumentList passes (bool)FALSE for handling private documents.
 							case '1':
 							case 'yes':
 							case 'y':
@@ -1467,7 +1885,12 @@ abstract class Factory {
 	}
 
 	//Parses out the exact column name, without any aliases, or = signs in it.
-	private function parseColumnName($column) {
+
+	/**
+	 * @param string $column
+	 * @return bool|string
+	 */
+	private function parseColumnName( $column) {
 		$column = trim($column);
 
 		//Make sure there isn't a SQL injection attack here, but still allow things like: "order by a.column = 1 asc"
@@ -1502,7 +1925,12 @@ abstract class Factory {
 		return $retval;
 	}
 
-	protected function getWhereSQL($array, $append_where = FALSE) {
+	/**
+	 * @param array $array
+	 * @param bool $append_where
+	 * @return bool|string
+	 */
+	protected function getWhereSQL( $array, $append_where = FALSE) {
 		//Make this a multi-dimensional array, the first entry
 		//is the WHERE clauses with '?' for placeholders, the second is
 		//the array to replace the placeholders with.
@@ -1513,13 +1941,13 @@ abstract class Factory {
 			if ( is_array( $fields ) ) {
 				foreach ( $array as $orig_column => $expression ) {
 					if ( is_array( $expression ) ) { //Handle nested arrays, so we the same column can be specified multiple times.
-						foreach ( $expression as $orig_column => $expression ) {
-							$orig_column = trim( $orig_column );
-							$column = $this->parseColumnName( $orig_column );
-							$expression = trim( $expression );
+						foreach ( $expression as $tmp_orig_column => $tmp_expression ) {
+							$tmp_orig_column = trim( $tmp_orig_column );
+							$column = $this->parseColumnName( $tmp_orig_column );
+							$tmp_expression = trim( $tmp_expression );
 
 							if ( in_array( $column, $fields ) ) {
-								$sql_chunks[] = $orig_column . ' ' . $expression;
+								$sql_chunks[] = $tmp_orig_column . ' ' . $tmp_expression;
 							}
 						}
 					} else {
@@ -1550,6 +1978,11 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param array $columns
+	 * @param array $aliases
+	 * @return array
+	 */
 	protected function getColumnsFromAliases( $columns, $aliases ) {
 		// Columns is the original column array.
 		//
@@ -1579,6 +2012,10 @@ abstract class Factory {
 		return $columns;
 	}
 
+	/**
+	 * @param array $array
+	 * @return array
+	 */
 	function convertFlexArray( $array ) {
 		//NOTE: This needs to stick around to handle saved search & layouts created in Flex and still in use.
 		//Flex doesn't appear to be consistent on the order the fields are placed into an assoc array, so
@@ -1609,13 +2046,20 @@ abstract class Factory {
 		return $array;
 	}
 
+	/**
+	 * @param array $array
+	 * @param bool $strict
+	 * @param array $additional_fields
+	 * @return array
+	 * @throws Exception
+	 */
 	public function getValidSQLColumns( $array, $strict = TRUE, $additional_fields = NULL ) {
 		$retarr = array();
 
 		$fields = $this->getRecordSetColumnList( $this->getEmptyRecordSet() );
 
 		//Merge additional fields
-		if ( is_array($additional_fields) ) {
+		if ( is_array( $fields ) AND is_array( $additional_fields ) ) {
 			$fields = array_merge( $fields, $additional_fields);
 		}
 		//Debug::Arr($fields, 'Column List:', __FILE__, __LINE__, __METHOD__, 10);
@@ -1646,7 +2090,13 @@ abstract class Factory {
 		return $retarr;
 	}
 
-	protected function getSortSQL($array, $strict = TRUE, $additional_fields = NULL) {
+	/**
+	 * @param array $array
+	 * @param bool $strict
+	 * @param array $additional_fields
+	 * @return bool|string
+	 */
+	protected function getSortSQL( $array, $strict = TRUE, $additional_fields = NULL) {
 		if ( is_array($array) ) {
 			//Disabled in v10 to start migrating away from FlexArray formats.
 			//  This is still needed, as clicking on a column header to sort by that seems to use the wrong format.
@@ -1676,14 +2126,22 @@ abstract class Factory {
 
 			if ( isset($sql_chunks) ) {
 				$sql = implode(',', $sql_chunks);
-
-				return ' ORDER BY ' . $this->db->escape( $sql );
+				//We can't escape the quotes needed to order by specific UUID's such as UUID_ZERO...
+				//For example: ScheduleListFactory::getSearchByCompanyIdAndArrayCriteria()
+				if ( $strict === FALSE ) {
+					return ' ORDER BY '. $sql;
+				} else {
+					return ' ORDER BY '. $this->db->escape( $sql );
+				}
 			}
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	public function getColumnList() {
 		if ( is_array($this->data) AND count($this->data) > 0) {
 			//Possible errors can happen if $this->data[<invalid_column>] is passed to save/update the database,
@@ -1727,15 +2185,21 @@ abstract class Factory {
 		return FALSE;
 	}
 
-	public function getEmptyRecordSet($id = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @return mixed
+	 * @throws DBError
+	 */
+	public function getEmptyRecordSet( $id = NULL) {
 		global $profiler, $config_vars;
 		$profiler->startTimer( 'getEmptyRecordSet()' );
 
 		if ($id == NULL) {
-			$id = -1;
+//			$id = -1;
+			$id = TTUUID::getNotExistID();
 		}
 
-		$id = (int)$id;
+		$id = TTUUID::castUUID($id);
 
 		//Possible errors can happen if $this->data[<invalid_column>] is passed, like what happens with APIPunch when attempting to delete a punch.
 		//Why are we not using '*' for all empty record set queries? Will using * cause more fields to be updated then necessary?
@@ -1753,8 +2217,8 @@ abstract class Factory {
 			$column_str = '*'; //Get empty RS with all columns.
 		}
 		try {
-			$query = 'select '. $column_str .' from '. $this->table .' where id = '. $id;
-			if ( $id == -1 AND isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] == TRUE ) {
+			$query = 'SELECT '. $column_str .' FROM '. $this->table .' WHERE id = \''. $id .'\'';
+			if ( $id == TTUUID::getNotExistID() AND isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] == TRUE ) {
 
 				/*
 				//Try to use Cache Lite instead of ADODB, to avoid cache write errors from causing a transaction rollback. It should be faster too.
@@ -1794,6 +2258,10 @@ abstract class Factory {
 		return $rs;
 	}
 
+	/**
+	 * @return bool
+	 * @throws DBError
+	 */
 	private function getUpdateQuery() {
 		//Debug::text('Update', __FILE__, __LINE__, __METHOD__, 9);
 
@@ -1810,12 +2278,13 @@ abstract class Factory {
 		//Classes like station don't have updated_date, so we need to take that in to account.
 		try {
 			$rs = $this->getEmptyRecordSet( $this->getId() );
-			$this->old_data = $rs->fields; //Store old data in memory for detailed audit log.
+			//Set old_data in FactoryListIterator->getCurrent() instead, that way getDataDfifferences() can be used in Validate/preSave functions as well.
+			//$this->old_data = $rs->fields; //Store old data in memory for detailed audit log.
 		} catch (Exception $e) {
 			throw new DBError($e);
 		}
 		if (!$rs) {
-			Debug::text('No Record Found! (ID: '. $this->getID() .' Insert instead?', __FILE__, __LINE__, __METHOD__, 9);
+			Debug::text('No Record Found! (ID: '. $this->getID() .') Insert instead?', __FILE__, __LINE__, __METHOD__, 9);
 			//Throw exception?
 		}
 
@@ -1838,16 +2307,20 @@ abstract class Factory {
 		return $query;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	private function getInsertQuery() {
 		Debug::text('Insert', __FILE__, __LINE__, __METHOD__, 9);
 
 		//Debug::arr($this->data, 'Data Arr', __FILE__, __LINE__, __METHOD__, 10);
 
-		try {
-			$rs = $this->getEmptyRecordSet();
-		} catch (Exception $e) {
-			throw new DBError($e);
-		}
+//		$rs is a unused variable when we use $table instead of $rs in GetInsertSQL() below.
+//		try {
+//			$rs = $this->getEmptyRecordSet();
+//		} catch (Exception $e) {
+//			throw new DBError($e);
+//		}
 
 		$table = $this->getTable(); //STRICT warning from v5.4
 
@@ -1860,19 +2333,30 @@ abstract class Factory {
 		return $query;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function StartTransaction() {
 		Debug::text('StartTransaction(): Transaction: Count: '. $this->db->transCnt .' Off: '. $this->db->transOff .' OK: '. (int)$this->db->_transOK, __FILE__, __LINE__, __METHOD__, 9);
 		return $this->db->StartTrans();
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function FailTransaction() {
 		Debug::text('FailTransaction(): Transaction: Count: '. $this->db->transCnt .' Off: '. $this->db->transOff .' OK: '. (int)$this->db->_transOK, __FILE__, __LINE__, __METHOD__, 9);
 		return $this->db->FailTrans();
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function CommitTransaction() {
 		if ( $this->db->transOff == 1 ) {
-			Debug::text('CommitTransaction(): Final Commit... Transaction: Count: '. $this->db->transCnt .' Off: '. $this->db->transOff .' OK: '. (int)$this->db->_transOK, __FILE__, __LINE__, __METHOD__, 9);
+			Debug::text( 'CommitTransaction(): Final Commit... Transaction: Count: ' . $this->db->transCnt . ' Off: ' . $this->db->transOff . ' OK: ' . (int)$this->db->_transOK, __FILE__, __LINE__, __METHOD__, 9 );
+		} else if ( $this->db->transCnt == 0 ) {
+			Debug::text( 'CommitTransaction(): ERROR: Double Commit... Transaction: Count: ' . $this->db->transCnt . ' Off: ' . $this->db->transOff . ' OK: ' . (int)$this->db->_transOK, __FILE__, __LINE__, __METHOD__, 9 );
 		} else {
 			Debug::text('CommitTransaction(): Transaction: Count: '. $this->db->transCnt .' Off: '. $this->db->transOff, __FILE__, __LINE__, __METHOD__, 9);
 		}
@@ -1885,10 +2369,19 @@ abstract class Factory {
 
 		return $retval;
 	}
+
+	/**
+	 * @param string $mode
+	 * @return mixed
+	 */
 	function setTransactionMode( $mode = '' ) {
 		Debug::text('setTransactionMode(): Mode: '. $mode, __FILE__, __LINE__, __METHOD__, 9);
 		return $this->db->setTransactionMode( $mode );
 	}
+
+	/**
+	 * @return string
+	 */
 	function getTransactionMode() {
 		if ( $this->getDatabaseType() == 'mysql' ) {
 			$mode = $this->db->GetOne( 'select @@session.tx_isolation' );
@@ -1901,16 +2394,31 @@ abstract class Factory {
 	}
 
 	//Call class specific validation function just before saving.
+
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function isValid( $ignore_warning = TRUE ) {
-		if ( method_exists($this, 'Validate') ) {
-			Debug::text('Calling Validate()', __FILE__, __LINE__, __METHOD__, 10);
-			$this->Validate( $ignore_warning );
+		if ( $this->is_valid == FALSE ) {
+			if ( method_exists($this, 'Validate') ) {
+				Debug::text( 'Calling Validate()', __FILE__, __LINE__, __METHOD__, 10 );
+				if ( $this->Validate( $ignore_warning ) == TRUE ) {
+					$this->is_valid = TRUE; //Set flag so we don't revalidate all data unless it has changed.
+				}
+			}
+		} else {
+			Debug::text('Data has already been validated...', __FILE__, __LINE__, __METHOD__, 9);
 		}
 
 		return $this->Validator->isValid();
 	}
 
 	//Call class specific validation function just before saving.
+
+	/**
+	 * @return bool
+	 */
 	function isWarning() {
 		if ( method_exists($this, 'validateWarning') ) {
 			Debug::text('Calling validateWarning()', __FILE__, __LINE__, __METHOD__, 10);
@@ -1920,6 +2428,9 @@ abstract class Factory {
 		return $this->Validator->isWarning();
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getSequenceName() {
 		if ( isset($this->pk_sequence_name) ) {
 			return $this->pk_sequence_name;
@@ -1927,15 +2438,34 @@ abstract class Factory {
 
 		return FALSE;
 	}
-	function getNextInsertId() {
-		if ( isset($this->pk_sequence_name) ) {
-			return $this->db->GenID( $this->pk_sequence_name );
-		}
 
-		return FALSE;
+	/**
+	 * @return bool|string
+	 */
+	function getNextInsertId() {
+		global $PRIMARY_KEY_IS_UUID;
+
+		if ( $PRIMARY_KEY_IS_UUID == FALSE ) {
+			if ( isset($this->pk_sequence_name) ) {
+				return $this->db->GenID( $this->pk_sequence_name );
+			}
+			return FALSE;
+		} else {
+			return TTUUID::generateUUID();
+		}
 	}
 
 	//Execute SQL queries and handle paging properly for select statements.
+
+	/**
+	 * @param string $query
+	 * @param array $ph
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @return bool
+	 * @throws DBError
+	 * @throws Exception
+	 */
 	function ExecuteSQL( $query, $ph = NULL, $limit = NULL, $page = NULL ) {
 		try {
 			if ( $ph === NULL ) { //Work around ADODB change that requires $ph === FALSE, otherwise it changes it to a array( 0 => NULL ) and causes SQL errors.
@@ -1967,6 +2497,14 @@ abstract class Factory {
 
 	//Retry the SQL query for $retry_max_attempts, especially useful when using REPEATABLE READ/SERIALIZABLE transactions.
 	// See APITimeSheet->reCalculateTimeSheet() for an example of how to retry an entire transaction.
+	/**
+	 * @param string $query
+	 * @param array $ph
+	 * @param int $retry_max_attempts
+	 * @param int $sleep
+	 * @return bool
+	 * @throws DBError
+	 */
 	function RetryExecuteSQL( $query, $ph = NULL, $retry_max_attempts = 2, $sleep = 5 ) {
 		$retry_attempts = 0;
 		do {
@@ -1990,9 +2528,26 @@ abstract class Factory {
 		return TRUE;
 	}
 
+	/**
+	 * Returns the differences in data from the DB vs the in-memory object, so the data will be the OLD data. Used in Validation/postSave() functions to determine if a field has changed or not.
+	 * @return array
+	 */
+	function getDataDifferences() {
+		$retarr = array_diff_assoc( (array)$this->old_data, (array)$this->data );
+		Debug::Arr( $retarr, 'Calling getDataDifferences()', __FILE__, __LINE__, __METHOD__, 10);
+		return $retarr;
+	}
+
 	//Determines to insert or update, and does it.
 	//Have this handle created, createdby, updated, updatedby.
-	function Save($reset_data = TRUE, $force_lookup = FALSE) {
+	/**
+	 * @param bool $reset_data
+	 * @param bool $force_lookup
+	 * @return bool|int|string
+	 * @throws DBError
+	 * @throws GeneralError
+	 */
+	function Save( $reset_data = TRUE, $force_lookup = FALSE ) {
 		$this->StartTransaction();
 
 		//Run Pre-Save function
@@ -2020,7 +2575,7 @@ abstract class Factory {
 			//However from the API, Created By only needs to be set for a small subset of classes like RecurringScheduleTemplateControl.
 			//We handle this in setCreatedAndUpdatedColumns().
 			if ( $this->getCreatedDate() == '' ) {
-				$this->setCreatedDate($time);
+				$this->setCreatedDate( $time );
 			}
 			if ( $this->getCreatedBy() == '' ) {
 				$this->setCreatedBy();
@@ -2041,12 +2596,13 @@ abstract class Factory {
 			if ( $insert_id == FALSE ) {
 				//Append insert ID to data array.
 				$insert_id = $this->getNextInsertId();
-				if ( $insert_id === 0 ) { //Sometimes with MYSQL the _seq tables might not be initialized properly and cause insert_id=0.
-					throw new DBError('ERROR: Insert ID returned as 0, sequence likely not setup correctly for table: '. $this->getTable() );
-				} else {
+				//FIXME: not a likely scenario for UUID-friendly code.
+//				if ( $insert_id === 0 ) { //Sometimes with MYSQL the _seq tables might not be initialized properly and cause insert_id=0.
+//					throw new DBError('ERROR: Insert ID returned as 0, sequence likely not setup correctly for table: '. $this->getTable() );
+//				} else {
 					Debug::text('Insert ID: '. $insert_id .' Table: '. $this->getTable(), __FILE__, __LINE__, __METHOD__, 9);
 					$this->setId($insert_id);
-				}
+//				}
 			}
 
 			try {
@@ -2054,7 +2610,7 @@ abstract class Factory {
 			} catch (Exception $e) {
 				throw new DBError($e);
 			}
-			$retval = (int)$insert_id;
+			$retval = TTUUID::castUUID($insert_id);
 			$log_action = 10; //'Add';
 		} else {
 			Debug::text(' Updating...', __FILE__, __LINE__, __METHOD__, 10);
@@ -2105,7 +2661,7 @@ abstract class Factory {
 			//Run postSave function.
 			if ( method_exists($this, 'postSave') ) {
 				Debug::text('Calling postSave()', __FILE__, __LINE__, __METHOD__, 10);
-				if ( $this->postSave( array_diff_assoc( (array)$this->old_data, (array)$this->data ) ) === FALSE ) {
+				if ( $this->postSave() === FALSE ) {
 					throw new GeneralError('postSave() failed.');
 				}
 			}
@@ -2131,6 +2687,10 @@ abstract class Factory {
 		return FALSE; //This should return false here?
 	}
 
+	/**
+	 * @return bool
+	 * @throws DBError
+	 */
 	function Delete() {
 		Debug::text('Delete: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 9);
 
@@ -2160,6 +2720,10 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param object $lf
+	 * @return array|bool
+	 */
 	function getIDSByListFactory( $lf ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
@@ -2176,6 +2740,11 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param string|array $ids UUID
+	 * @return bool
+	 * @throws DBError
+	 */
 	function bulkDelete( $ids ) {
 		//Debug::text('Delete: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 9);
 
@@ -2183,7 +2752,7 @@ abstract class Factory {
 		if ( is_array($ids) AND count($ids) > 0 ) {
 			$ph = array();
 
-			$query = 'DELETE FROM '. $this->getTable() .' WHERE id in ('. $this->getListSQL( $ids, $ph, 'int' ) .')';
+			$query = 'DELETE FROM '. $this->getTable() .' WHERE id in ('. $this->getListSQL( $ids, $ph, 'uuid' ) .')';
 
 			try {
 				$this->db->Execute($query, $ph);
@@ -2198,6 +2767,10 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param array $data_diff
+	 * @return bool
+	 */
 	function clearGeoCode( $data_diff = NULL ) {
 		if ( is_array($data_diff) AND ( isset($data_diff['address1']) OR isset($data_diff['address2']) OR isset($data_diff['city']) OR isset($data_diff['province']) OR isset($data_diff['country']) OR isset($data_diff['postal_code']) ) ) {
 			//Run a separate custom query to clear the geocordinates. Do we really want to do this for so many objects though...
@@ -2211,18 +2784,39 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function clearData() {
-		$this->data = $this->tmp_data = $this->old_data = array();
+		$this->data = $this->tmp_data = array();
 		$this->next_insert_id = NULL;
+
+		$this->clearOldData();
+
+		return TRUE;
+	}
+	/**
+	 * @return bool
+	 */
+	function clearOldData() {
+		$this->old_data = array();
 
 		return TRUE;
 	}
 
+
+	/**
+	 * @return FactoryListIterator
+	 */
 	final function getIterator() {
 		return new FactoryListIterator($this);
 	}
 
 	//Grabs the current object
+
+	/**
+	 * @return mixed
+	 */
 	final function getCurrent() {
 		return $this->getIterator()->current();
 	}

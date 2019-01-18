@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,11 @@ class DepartmentFactory extends Factory {
 	protected $pk_sequence_name = 'department_id_seq'; //PK Sequence name
 
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -86,6 +91,10 @@ class DepartmentFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -107,49 +116,48 @@ class DepartmentFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getCompany() {
-		return (int)$this->data['company_id'];
+		return $this->getGenericDataValue( 'company_id' );
 	}
-	function setCompany($id) {
-		$id = trim($id);
 
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'company',
-															$clf->getByID($id),
-															TTi18n::gettext('Company is invalid')
-															) ) {
-			$this->data['company_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
+	/**
+	 * @return int
+	 */
 	function getStatus() {
 		//Have to return the KEY because it should always be a drop down box.
 		//return Option::getByKey($this->data['status_id'], $this->getOptions('status') );
-		return (int)$this->data['status_id'];
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
-	function isUniqueManualID($id) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function isUniqueManualID( $id) {
 		if ( $this->getCompany() == FALSE ) {
 			return FALSE;
 		}
@@ -173,10 +181,15 @@ class DepartmentFactory extends Factory {
 
 		return FALSE;
 	}
-	static function getNextAvailableManualId( $company_id = NULL ) {
+
+	/**
+	 * @param string $company_id UUID
+	 * @return int
+	 */
+	function getNextAvailableManualId( $company_id = NULL ) {
 		global $current_company;
 
-		if ( $company_id == '' ANd is_object($current_company) ) {
+		if ( $company_id == '' AND is_object($current_company) ) {
 			$company_id = $current_company->getId();
 		} elseif ( $company_id == '' AND isset($this) AND is_object($this) ) {
 			$company_id = $this->getCompany();
@@ -193,44 +206,27 @@ class DepartmentFactory extends Factory {
 		return $next_available_manual_id;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getManualID() {
-		if ( isset($this->data['manual_id']) ) {
-			return (int)$this->data['manual_id'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'manual_id' );
 	}
-	function setManualID($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setManualID( $value) {
 		$value = $this->Validator->stripNonNumeric( trim($value) );
-
-		if (	$this->Validator->isNumeric(	'manual_id',
-												$value,
-												TTi18n::gettext('Code is invalid'))
-				AND
-				$this->Validator->isLength(	'manual_id',
-											$value,
-											TTi18n::gettext('Code has too many digits'),
-											0,
-											10)
-				AND
-				$this->Validator->isTrue(	'manual_id',
-											( $this->Validator->stripNon32bitInteger( $value ) === 0 ) ? FALSE : TRUE,
-											TTi18n::gettext('Code is invalid, maximum value exceeded') )
-				AND
-				$this->Validator->isTrue(		'manual_id',
-												$this->isUniqueManualID($value),
-												TTi18n::gettext('Code is already in use, please enter a different one'))
-												) {
-
-			$this->data['manual_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'manual_id', $value );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		if ( $this->getCompany() == FALSE ) {
 			return FALSE;
 		}
@@ -241,7 +237,7 @@ class DepartmentFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -263,47 +259,39 @@ class DepartmentFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
-	function setName($name) {
-		$name = trim($name);
 
-		if	(	$this->Validator->isLength(		'name',
-												$name,
-												TTi18n::gettext('Department name is too short or too long'),
-												2,
-												100)
-					AND
-						$this->Validator->isTrue(		'name',
-														$this->isUniqueName($name),
-														TTi18n::gettext('Department already exists'))
-
-												) {
-
-			$this->data['name'] = $name;
-			$this->setNameMetaphone( $name );
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim($value);
+		$this->setNameMetaphone( $value );
+		return $this->setGenericDataValue( 'name', $value );
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getNameMetaphone() {
-		if ( isset($this->data['name_metaphone']) ) {
-			return $this->data['name_metaphone'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name_metaphone' );
 	}
-	function setNameMetaphone($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setNameMetaphone( $value) {
 		$value = metaphone( trim($value) );
 
 		if	( $value != '' ) {
-			$this->data['name_metaphone'] = $value;
+			$this->setGenericDataValue( 'name_metaphone', $value );
 
 			return TRUE;
 		}
@@ -311,6 +299,9 @@ class DepartmentFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getBranch() {
 		$branch_list = array();
 		$dblf = TTnew( 'DepartmentBranchListFactory' );
@@ -325,7 +316,12 @@ class DepartmentFactory extends Factory {
 
 		return FALSE;
 	}
-	function setBranch($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setBranch( $ids) {
 		if (is_array($ids) AND count($ids) > 0) {
 			//If needed, delete mappings first.
 			$dblf = TTnew( 'DepartmentBranchListFactory' );
@@ -368,173 +364,258 @@ class DepartmentFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getOtherID1() {
-		if ( isset($this->data['other_id1']) ) {
-			return $this->data['other_id1'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id1' );
 	}
-	function setOtherID1($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID1( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id1',
-											$value,
-											TTi18n::gettext('Other ID 1 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id1'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id1', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getOtherID2() {
-		if ( isset($this->data['other_id2']) ) {
-			return $this->data['other_id2'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id2' );
 	}
-	function setOtherID2($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID2( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id2',
-											$value,
-											TTi18n::gettext('Other ID 2 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id2'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id2', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getOtherID3() {
-		if ( isset($this->data['other_id3']) ) {
-			return $this->data['other_id3'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id3' );
 	}
-	function setOtherID3($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID3( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id3',
-											$value,
-											TTi18n::gettext('Other ID 3 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id3'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id3', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getOtherID4() {
-		if ( isset($this->data['other_id4']) ) {
-			return $this->data['other_id4'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id4' );
 	}
-	function setOtherID4($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID4( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id4',
-											$value,
-											TTi18n::gettext('Other ID 4 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id4'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id4', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getOtherID5() {
-		if ( isset($this->data['other_id5']) ) {
-			return $this->data['other_id5'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id5' );
 	}
-	function setOtherID5($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID5( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id5',
-											$value,
-											TTi18n::gettext('Other ID 5 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id5'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id5', $value );
 	}
 
 
+	/**
+	 * @return array|bool
+	 */
 	function getGEOFenceIds() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 4010, $this->getID() );
 	}
 
-	function setGEOFenceIds($ids) {
-		Debug::text('Setting GEO Fence IDs : ', __FILE__, __LINE__, __METHOD__, 10);
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setGEOFenceIds( $ids) {
+		Debug::text('Setting GEO Fence IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 4010, $this->getID(), (array)$ids );
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getTag() {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
-		if ( isset($this->tmp_data['tags']) ) {
-			return $this->tmp_data['tags'];
-		} elseif ( $this->getCompany() > 0 AND $this->getID() > 0 ) {
+		$value = $this->getGenericTempDataValue( 'tags' );
+		if ( $value !== FALSE ) {
+			return $value;
+		} elseif ( TTUUID::isUUID( $this->getCompany() ) AND $this->getCompany() != TTUUID::getZeroID() AND $this->getCompany() != TTUUID::getNotExistID()
+				AND TTUUID::isUUID( $this->getID() ) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
 			return CompanyGenericTagMapListFactory::getStringByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 120, $this->getID() );
 		}
 
 		return FALSE;
 	}
-	function setTag( $tags ) {
-		$tags = trim($tags);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTag( $value ) {
+		$value = trim($value);
 		//Save the tags in temporary memory to be committed in postSave()
-		$this->tmp_data['tags'] = $tags;
-
+		return $this->setGenericTempDataValue( 'tags', $value );
+	}
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		if ( $this->getCompany() != TTUUID::getZeroID() ) {
+			$clf = TTnew( 'CompanyListFactory' );
+			$this->Validator->isResultSetWithRows(	'company',
+															$clf->getByID($this->getCompany()),
+															TTi18n::gettext('Company is invalid')
+														);
+		}
+		// Status
+		if ( $this->getStatus() !== FALSE ) {
+			$this->Validator->inArrayKey(	'status',
+													$this->getStatus(),
+													TTi18n::gettext('Incorrect Status'),
+													$this->getOptions('status')
+												);
+		}
+		// Code
+		if ( $this->getManualID() != '' ) {
+			$this->Validator->isNumeric(	'manual_id',
+													$this->getManualID(),
+													TTi18n::gettext('Code is invalid')
+												);
+			if ( $this->Validator->isError('manual_id') == FALSE ) {
+				$this->Validator->isLength(	'manual_id',
+													$this->getManualID(),
+													TTi18n::gettext('Code has too many digits'),
+													0,
+													10
+												);
+			}
+			if ( $this->Validator->isError('manual_id') == FALSE ) {
+				$this->Validator->isTrue(	'manual_id',
+											( $this->Validator->stripNon32bitInteger( $this->getManualID() ) === 0 ) ? FALSE : TRUE,
+											TTi18n::gettext('Code is invalid, maximum value exceeded')
+										);
+			}
+			if ( $this->Validator->isError('manual_id') == FALSE ) {
+				$this->Validator->isTrue(		'manual_id',
+														$this->isUniqueManualID($this->getManualID()),
+														TTi18n::gettext('Code is already in use, please enter a different one')
+													);
+			}
+		}
+		// Department name
+		if ( $this->getName() !== FALSE ) {
+			$this->Validator->isLength(		'name',
+													$this->getName(),
+													TTi18n::gettext('Department name is too short or too long'),
+													2,
+													100
+												);
+			if ( $this->Validator->isError('name') == FALSE ) {
+				$this->Validator->isTrue(		'name',
+														$this->isUniqueName($this->getName()),
+														TTi18n::gettext('Department already exists')
+													);
+			}
+		}
+		// Other ID 1
+		if ( $this->getOtherID1() != '' ) {
+			$this->Validator->isLength(	'other_id1',
+												$this->getOtherID1(),
+												TTi18n::gettext('Other ID 1 is invalid'),
+												1, 255
+											);
+		}
+		// Other ID 2
+		if ( $this->getOtherID2() != '' ) {
+			$this->Validator->isLength(	'other_id2',
+												$this->getOtherID2(),
+												TTi18n::gettext('Other ID 2 is invalid'),
+												1, 255
+											);
+		}
+		// Other ID 3
+		if ( $this->getOtherID3() != '' ) {
+			$this->Validator->isLength(	'other_id3',
+												$this->getOtherID3(),
+												TTi18n::gettext('Other ID 3 is invalid'),
+												1, 255
+											);
+		}
+		// Other ID 4
+		if ( $this->getOtherID4() != '' ) {
+			$this->Validator->isLength(	'other_id4',
+												$this->getOtherID4(),
+												TTi18n::gettext('Other ID 4 is invalid'),
+												1, 255
+											);
+		}
+		// Other ID 5
+		if ( $this->getOtherID5() != '' ) {
+			$this->Validator->isLength(	'other_id5',
+												$this->getOtherID5(),
+												TTi18n::gettext('Other ID 5 is invalid'),
+												1, 255
+											);
+		}
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getStatus() == FALSE ) {
 			$this->setStatus(10);
 		}
 
 		if ( $this->getManualID() == FALSE ) {
-			$this->setManualID( DepartmentListFactory::getNextAvailableManualId( $this->getCompany() ) );
+			$this->setManualID( $this->getNextAvailableManualId( $this->getCompany() ) );
 		}
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
@@ -553,34 +634,38 @@ class DepartmentFactory extends Factory {
 			$sf_b = TTnew( 'ScheduleFactory' );
 			$udf = TTnew( 'UserDefaultFactory' );
 			$rstf = TTnew( 'RecurringScheduleTemplateFactory' );
+			$rsf = TTnew( 'RecurringScheduleFactory' );
 
-			$query = 'update '. $pcf->getTable() .' set department_id = 0 where department_id = '. (int)$this->getId();
+			$query = 'update '. $pcf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $udtf->getTable() .' set department_id = 0 where department_id = '. (int)$this->getId();
+			$query = 'update '. $udtf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $sf_b->getTable() .' set department_id = 0 where department_id = '. (int)$this->getId();
+			$query = 'update '. $sf_b->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $uf->getTable() .' set default_department_id = 0 where company_id = '. (int)$this->getCompany() .' AND default_department_id = '. (int)$this->getId();
+			$query = 'update '. $uf->getTable() .' set default_department_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND default_department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $udf->getTable() .' set default_department_id = 0 where company_id = '. (int)$this->getCompany() .' AND default_department_id = '. (int)$this->getId();
+			$query = 'update '. $udf->getTable() .' set default_department_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND default_department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $sf->getTable() .' set department_id = 0 where company_id = '. (int)$this->getCompany() .' AND department_id = '. (int)$this->getId();
+			$query = 'update '. $sf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'delete from '. $sdf->getTable() .' where department_id = '. (int)$this->getId();
+			$query = 'delete from '. $sdf->getTable() .' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $rstf->getTable() .' set department_id = 0 where department_id = '. (int)$this->getId();
+			$query = 'update '. $rstf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
+			$this->db->Execute($query);
+
+			$query = 'update '. $rsf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 				$jf = TTNew('JobFactory');
-				$query = 'update '. $jf->getTable() .' set department_id = 0 where department_id = '. (int)$this->getId();
+				$query = 'update '. $jf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 				$this->db->Execute($query);
 
 				//Job employee criteria
@@ -603,6 +688,10 @@ class DepartmentFactory extends Factory {
 
 	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -629,6 +718,10 @@ class DepartmentFactory extends Factory {
 	}
 
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -660,6 +753,10 @@ class DepartmentFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Department') .': '. $this->getName(), NULL, $this->getTable(), $this );
 	}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIAccrualBalance extends APIFactory {
 	protected $main_class = 'AccrualBalanceFactory';
 
+	/**
+	 * APIAccrualBalance constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APIAccrualBalance extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -66,7 +69,8 @@ class APIAccrualBalance extends APIFactory {
 	/**
 	 * Get accrual balance data for one or more accrual balancees.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getAccrualBalance( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('accrual', 'enabled')
@@ -103,8 +107,9 @@ class APIAccrualBalance extends APIFactory {
 
 	/**
 	 * Export data to csv
-	 * @param array $data filter data
 	 * @param string $format file format (csv)
+	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function exportAccrualBalance( $format = 'csv', $data = NULL, $disable_paging = TRUE) {

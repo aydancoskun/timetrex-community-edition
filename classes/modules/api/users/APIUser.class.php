@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIUser extends APIFactory {
 	protected $main_class = 'UserFactory';
 
+	/**
+	 * APIUser constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,18 +52,20 @@ class APIUser extends APIFactory {
 
 	/**
 	 * Get default user data for creating new users.
+	 * @param string $tmp_company_id UUID
 	 * @return array
 	 */
 	function getUserDefaultData( $tmp_company_id = NULL ) {
 
 		//Allow getting default data from other companies, so it makes it easier to create the first employee of a company.
-		if ( $tmp_company_id != '' AND $tmp_company_id > 0 AND $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'view') ) {
+		if ( $tmp_company_id != '' AND TTUUID::isUUID($tmp_company_id) AND $tmp_company_id != TTUUID::getZeroID() AND $tmp_company_id != TTUUID::getNotExistID() AND $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'view') ) {
 			$company_id = $tmp_company_id;
 		} else {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 		Debug::Text('Getting user default data for Company ID: '. $company_id .' TMP Company ID: '. $tmp_company_id, __FILE__, __LINE__, __METHOD__, 10);
 
+		$uf = TTnew('UserFactory');
 		//Get New Hire Defaults.
 		$udlf = TTnew( 'UserDefaultListFactory' );
 		$udlf->getByCompanyId( $company_id );
@@ -70,9 +75,10 @@ class APIUser extends APIFactory {
 
 			$data = array(
 							'company_id' => $company_id,
+							'legal_entity_id' => $udf_obj->getLegalEntity(),
 							'status_id' => 10, //Active.
 							'title_id' => $udf_obj->getTitle(),
-							'employee_number' => UserFactory::getNextAvailableEmployeeNumber( $company_id ),
+							'employee_number' => $uf->getNextAvailableEmployeeNumber( $company_id ),
 							'city' => $udf_obj->getCity(),
 							'country' => $udf_obj->getCountry(),
 							'province' => $udf_obj->getProvince(),
@@ -88,6 +94,8 @@ class APIUser extends APIFactory {
 							'policy_group_id' => $udf_obj->getPolicyGroup(),
 							'currency_id' => $udf_obj->getCurrency(),
 						);
+		} else {
+			Debug::Text(' User Default data does not exists for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		if ( !isset( $data['company_id'] ) ) {
@@ -99,7 +107,7 @@ class APIUser extends APIFactory {
 		}
 
 		if ( !isset( $data['currency_id'] ) ) {
-			$data['currency_id'] = 0;
+			$data['currency_id'] = TTUUID::getZeroID();
 		}
 
 		if ( !isset( $data['country'] ) ) {
@@ -129,7 +137,7 @@ class APIUser extends APIFactory {
 
 	/**
 	 * @param string $format
-	 * @param null $data
+	 * @param array $data
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
@@ -143,7 +151,7 @@ class APIUser extends APIFactory {
 	 * @param array $data filter data, see reference for details.
 	 * @see UserListFactory::getAPISearchByCompanyIdAndArrayCriteria() To see a description of the ListFactory that is used.
 	 * @param boolean $disable_paging disables paging and returns all records.
-	 * @return array
+	 * @return array|bool
 	 */
 	function getUser( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
@@ -160,7 +168,7 @@ class APIUser extends APIFactory {
 		if ( isset($data['permission_section']) AND $data['permission_section'] != '' ) {
 			if ( in_array( trim( strtolower( $data['permission_section'] ) ), $valid_permission_sections ) ) {
 				$permission_section = trim( strtolower( $data['permission_section'] ) );
-			} else {
+		} else {
 				Debug::Text('ERROR: NOT ALLOWED: permission_section: '. $data['permission_section'], __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
@@ -238,7 +246,9 @@ class APIUser extends APIFactory {
 	/**
 	 * Set user data for one or more users.
 	 * @param array $data user data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setUser( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -261,12 +271,12 @@ class APIUser extends APIFactory {
 			$permission_children_ids = $this->getPermissionChildren();
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' Users', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -280,7 +290,7 @@ class APIUser extends APIFactory {
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 				}
 
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get user object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $row['company_id'] );
@@ -296,7 +306,7 @@ class APIUser extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('user', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							//$row = array_merge( $lf->getCurrent()->getObjectAsArray(), $row );
 							$lf = $lf->getCurrent(); //Make the current $lf variable the current object, so we can ignore some fields if needed.
 							$row = array_merge( $lf->getObjectAsArray(), $row );
@@ -405,12 +415,12 @@ class APIUser extends APIFactory {
 						}
 
 						if ( isset($udf_obj) AND is_object($udf_obj) ) {
-							if ( !isset($row['permission_control_id']) AND $udf_obj->getPermissionControl() > 0 ) {
+							if ( !isset($row['permission_control_id']) AND $udf_obj->getPermissionControl() != TTUUID::getZeroID() AND $udf_obj->getPermissionControl() != $udf_obj::getNotExistID() ) {
 								Debug::Text('Using default permissions...', __FILE__, __LINE__, __METHOD__, 10);
 								$lf->setPermissionControl( $udf_obj->getPermissionControl() );
 							}
 
-							if ( !isset($row['pay_period_schedule_id']) AND $udf_obj->getPayPeriodSchedule() > 0 ) {
+							if ( !isset($row['pay_period_schedule_id']) AND $udf_obj->getPayPeriodSchedule() != TTUUID::getZeroID() AND $udf_obj->getPayPeriodSchedule() != $udf_obj::getNotExistID() ) {
 								Debug::Text('Using default pay period schedule...', __FILE__, __LINE__, __METHOD__, 10);
 								$lf->setPayPeriodSchedule( $udf_obj->getPayPeriodSchedule() );
 							}
@@ -456,10 +466,10 @@ class APIUser extends APIFactory {
 	/**
 	 * Delete one or more users.
 	 * @param array $data user data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteUser( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -483,7 +493,7 @@ class APIUser extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -492,7 +502,7 @@ class APIUser extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					if ( $this->getPermissionObject()->Check('company', 'view') == TRUE ) {
 						$lf->getById( $id );//Allow deleting employees in other companies.
 					} else {
@@ -505,7 +515,7 @@ class APIUser extends APIFactory {
 								OR ( $this->getPermissionObject()->Check('user', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								OR ( $this->getPermissionObject()->Check('user', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )) {
 
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -568,7 +578,7 @@ class APIUser extends APIFactory {
 	/**
 	 * Check if username is unique or not.
 	 * @param string $user_name user name
-	 * @return bool
+	 * @return array|bool
 	 */
 	function isUniqueUserName( $user_name ) {
 		Debug::Text('Checking for unique user name: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
@@ -584,7 +594,7 @@ class APIUser extends APIFactory {
 	 * @param string $new_password
 	 * @param string $new_password2
 	 * @param string $type
-	 * @return bool
+	 * @return array|bool
 	 */
 	function changePassword( $current_password, $new_password, $new_password2, $type = 'web' ) {
 		$ulf = TTnew( 'UserListFactory' );
@@ -718,6 +728,10 @@ class APIUser extends APIFactory {
 		return $retarr;
 	}
 
+	/**
+	 * @param $email
+	 * @return bool
+	 */
 	function UnsubscribeEmail( $email ) {
 		if ( $email != '' AND $this->getPermissionObject()->Check('company', 'edit') ) {
 			return UserFactory::UnsubscribeEmail( $email );
@@ -726,6 +740,10 @@ class APIUser extends APIFactory {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_ids UUID
+	 * @return bool
+	 */
 	function sendValidationEmail( $user_ids ) {
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_child') OR $this->getPermissionObject()->Check('user', 'add') ) ) {
@@ -770,6 +788,11 @@ class APIUser extends APIFactory {
 		return $this->getUser( $data, $disable_paging );
 	}
 
+	/**
+	 * @param $rating
+	 * @param bool $message
+	 * @return array|bool
+	 */
 	function setUserFeedbackRating( $rating, $message = FALSE ) {
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getByIdAndCompanyId( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
@@ -777,17 +800,17 @@ class APIUser extends APIFactory {
 			$u_obj = $ulf->getCurrent();
 
 			if ( $rating != $u_obj->getFeedbackRating() ) {
-				$u_obj->setFeedbackRating( $rating );
-				if ( $u_obj->isValid() ) {
-					$retval = $u_obj->Save( FALSE );
-					if ( $retval == TRUE ) {
-						$ttsc = new TimeTrexSoapClient();
-						$ttsc->sendUserFeedback( $rating, $message, $u_obj );
+			$u_obj->setFeedbackRating( $rating );
+			if ( $u_obj->isValid() ) {
+				$retval = $u_obj->Save( FALSE );
+				if ( $retval == TRUE ) {
+					$ttsc = new TimeTrexSoapClient();
+					$ttsc->sendUserFeedback( $rating, $message, $u_obj );
 
-						//Since we are updating the user record, the audit log will contain the rating change.
-						//TTLog::addEntry( $u_obj->getId(), 500, TTi18n::getText('Feedback Rating').': '. $rating .' '. TTi18n::getText('Message') .': '. $message, $u_obj->getId(), $u_obj->getTable() );
-					}
+					//Since we are updating the user record, the audit log will contain the rating change.
+					//TTLog::addEntry( $u_obj->getId(), 500, TTi18n::getText('Feedback Rating').': '. $rating .' '. TTi18n::getText('Message') .': '. $message, $u_obj->getId(), $u_obj->getTable() );
 				}
+			}
 			} elseif ( $message != '' ) {
 				$ttsc = new TimeTrexSoapClient();
 				$ttsc->sendUserFeedback( $rating, $message, $u_obj );

@@ -385,13 +385,14 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	var bank_account = new RibbonSubMenu( {
-		label: $.i18n._( 'Bank<br>Accounts' ),
-		id: 'EmployeeBankAccount',
+		label: $.i18n._( 'Payment<br>Methods' ),
+		id: 'RemittanceDestinationAccount',
 		group: employeeSubMenuGroup,
 		icon: 'bank_accounts-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'EmployeeBankAccount' ),
-		permission: permission.user
+		permission_result: PermissionManager.checkTopLevelPermission( 'RemittanceDestinationAccount' ),
+		permission: permission.remittance_destination_account
 	} );
+
 
 	var user_title = new RibbonSubMenu( {
 		label: $.i18n._( 'Job Titles' ),
@@ -480,6 +481,15 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission: permission.company
 	} );
 
+	var legal_entity = new RibbonSubMenu( {
+		label: (LocalCacheData.getCurrentCompany().product_edition_id > 10) ? $.i18n._( 'Legal<br>Entities' ) : $.i18n._( 'Legal<br>Entity' ),
+		id: 'LegalEntity',
+		group: companySubMenuGroup,
+		icon: 'legal_entity-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'LegalEntity' ),
+		permission: permission.legal_entity
+	} );
+
 	var pay_period_schedule = new RibbonSubMenu( {
 		label: $.i18n._( 'Pay Period<br>Schedules' ),
 		id: 'PayPeriodSchedule',
@@ -562,14 +572,6 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission: permission.currency
 
 	} );
-	var company_bank_account = new RibbonSubMenu( {
-		label: $.i18n._( 'Bank<br>Account' ),
-		id: 'CompanyBankAccount',
-		group: companySubMenuGroup,
-		icon: 'bank_accounts-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'CompanyBankAccount' ),
-		permission: permission.user
-	} );
 	var other_field = new RibbonSubMenu( {
 		label: $.i18n._( 'Custom<br>Fields' ),
 		id: 'OtherField',
@@ -619,11 +621,29 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission: permission.pay_stub
 	} );
 
+	var remittance_wizard = new RibbonSubMenu( {
+		label: $.i18n._( 'Tax<br>Wizard' ),
+		id: 'PayrollRemittanceAgencyEventWizard',
+		group: payrollSubMenuGroup,
+		icon: Icons.wizard,
+		permission_result: PermissionManager.checkTopLevelPermission( 'PayrollProcessWizard' ),
+		permission: permission.pay_stub
+	} );
+
 	var pay_stub = new RibbonSubMenu( {
 		label: $.i18n._( 'Pay<br>Stubs' ),
 		id: 'PayStub',
 		group: payrollSubMenuGroup,
 		icon: 'pay_stubs-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'PayStub' ),
+		permission: permission.pay_stub
+	} );
+
+	var pay_stub_transaction = new RibbonSubMenu( {
+		label: $.i18n._( 'Pay Stub<br>Transactions' ),
+		id: 'PayStubTransaction',
+		group: payrollSubMenuGroup,
+		icon: 'direct_deposit-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'PayStub' ),
 		permission: permission.pay_stub
 	} );
@@ -692,6 +712,24 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		icon: 'taxes_deductions-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'CompanyTaxDeduction' ),
 		permission: permission.company_tax_deduction
+	} );
+
+	var payroll_remittance_agency = new RibbonSubMenu( {
+		label: $.i18n._( 'Remittance<br>Agencies' ),
+		id: 'PayrollRemittanceAgency',
+		group: payrollSubMenuGroup,
+		icon: 'payroll_remittance_agency-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'PayrollRemittanceAgency' ),
+		permission: permission.payroll_remittance_agency
+	} );
+
+	var remittance_source_account = new RibbonSubMenu( {
+		label: $.i18n._( 'Remittance<br>Sources' ),
+		id: 'RemittanceSourceAccount',
+		group: payrollSubMenuGroup,
+		icon: 'payment_methods-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'RemittanceSourceAccount' ),
+		permission: permission.remittance_source_account
 	} );
 
 	var user_expense = new RibbonSubMenu( {
@@ -1310,15 +1348,6 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission: permission.user
 	} );
 
-	var login_user_bank_account = new RibbonSubMenu( {
-		label: $.i18n._( 'Bank<br>Information' ),
-		id: 'LoginUserBankAccount',
-		group: myAccountGroup,
-		icon: 'bank_accounts-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'LoginUserBankAccount' ),
-		permission: permission.user
-	} );
-
 	var login_user_preference = new RibbonSubMenu( {
 		label: $.i18n._( 'Preferences' ),
 		id: 'LoginUserPreference',
@@ -1414,6 +1443,17 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission_result: true,
 		permission: true
 	} );
+
+	if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && APIGlobal.pre_login_data['sandbox_url'] &&  APIGlobal.pre_login_data['sandbox_url'] != false && APIGlobal.pre_login_data['sandbox_url'].length > 0 && !APIGlobal.pre_login_data['sandbox']) {
+		var sandbox = new RibbonSubMenu({
+			label: $.i18n._('Testing<br>Sandbox'),
+			id: 'Sandbox',
+			group: help_group,
+			icon: Icons.login,
+			permission_result: true,
+			permission: true
+		});
+	}
 
 	var whats_new = new RibbonSubMenu( {
 		label: $.i18n._( "What's New" ),
@@ -1557,6 +1597,14 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		var pay_stub_summary = new RibbonSubMenuNavItem( {
 			label: $.i18n._( 'Pay Stub Summary' ),
 			id: 'PayStubSummaryReport',
+			nav: payroll_reports
+		} );
+	}
+
+	if ( PermissionManager.checkTopLevelPermission( 'PayStubSummaryReport' ) ) {
+		var pay_stub_transaction_summary = new RibbonSubMenuNavItem( {
+			label: $.i18n._( 'Pay Stub Transaction Summary' ),
+			id: 'PayStubTransactionSummaryReport',
 			nav: payroll_reports
 		} );
 	}

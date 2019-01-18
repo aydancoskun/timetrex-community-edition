@@ -2,8 +2,10 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 	el: '#user_date_total_view_container', //Must set el here and can only set string, so events can work
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	_required_files: ['APIUserDateTotal', 'APICurrency'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserDateTotalEditView.html';
 		this.permission_id = 'user_date_total';
 		this.script_name = 'UserDateTotalView';
@@ -612,17 +614,17 @@ UserDateTotalViewController = BaseViewController.extend( {
 		this.detachElement( 'meal_policy_id' );
 		this.detachElement( 'break_policy_id' );
 		var key = '';
-		if ( this.current_edit_record['object_type_id'] === 20 ) {
+		if ( this.current_edit_record['object_type_id'] == 20 ) {
 			key = 'regular_policy_id';
-		} else if ( this.current_edit_record['object_type_id'] === 25 || this.current_edit_record['object_type_id'] === 50 ) {
+		} else if ( this.current_edit_record['object_type_id'] == 25 || this.current_edit_record['object_type_id'] == 50 ) {
 			key = 'absence_policy_id';
-		} else if ( this.current_edit_record['object_type_id'] === 30 ) {
+		} else if ( this.current_edit_record['object_type_id'] == 30 ) {
 			key = 'overtime_policy_id';
-		} else if ( this.current_edit_record['object_type_id'] === 40 ) {
+		} else if ( this.current_edit_record['object_type_id'] == 40 ) {
 			key = 'premium_policy_id';
-		} else if ( this.current_edit_record['object_type_id'] === 100 || this.current_edit_record['object_type_id'] === 101 ) {
+		} else if ( this.current_edit_record['object_type_id'] == 100 || this.current_edit_record['object_type_id'] == 101 ) {
 			key = 'meal_policy_id';
-		} else if ( this.current_edit_record['object_type_id'] === 110 || this.current_edit_record['object_type_id'] === 111 ) {
+		} else if ( this.current_edit_record['object_type_id'] == 110 || this.current_edit_record['object_type_id'] == 111 ) {
 			key = 'break_policy_id';
 		}
 		if ( key ) {
@@ -659,7 +661,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 	},
 
 	search: function( set_default_menu, page_action, page_number, callBack ) {
-		this.refresh_id = 0;
+		this.refresh_id = null;
 		this._super( 'search', set_default_menu, page_action, page_number, callBack )
 	},
 
@@ -669,12 +671,12 @@ UserDateTotalViewController = BaseViewController.extend( {
 		for ( var i = 0; i < this.object_type_array.length; i++ ) {
 			var item = this.object_type_array[i];
 
-			if ( item.value === 20 ||
-				item.value === 25 ||
-				item.value === 30 ||
-				item.value === 40 ||
-				item.value === 100 ||
-				item.value === 110 ) {
+			if ( item.value == 20 ||
+				item.value == 25 ||
+				item.value == 30 ||
+				item.value == 40 ||
+				item.value == 100 ||
+				item.value == 110 ) {
 				array.push( item );
 			}
 
@@ -1080,7 +1082,10 @@ UserDateTotalViewController.loadSubView = function( container, beforeViewLoadedF
 			container.html( template( args ) );
 
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				afterViewLoadedFun( sub_user_date_total_view_controller );
+
+				TTPromise.wait('BaseViewController', 'initialize', function() {
+					afterViewLoadedFun(sub_user_date_total_view_controller);
+				});
 			}
 
 		}

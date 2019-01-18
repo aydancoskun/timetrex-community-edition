@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,11 @@ class UserTitleFactory extends Factory {
 	protected $table = 'user_title';
 	protected $pk_sequence_name = 'user_title_id_seq'; //PK Sequence name
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -78,6 +83,10 @@ class UserTitleFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -93,38 +102,38 @@ class UserTitleFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset( $this->data['company_id'] ) ) {
-			return (int)$this->data['company_id'];
-		}
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'company',
-															$clf->getByID($id),
-															TTi18n::gettext('Company is invalid')
-															) ) {
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -146,168 +155,179 @@ class UserTitleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset( $this->data['name'] ) ) {
-			return $this->data['name'];
-		}
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim($name);
-
-		if	(	$this->Validator->isLength(		'name',
-												$name,
-												TTi18n::gettext('Name is too short or too long'),
-												2,
-												100)
-					AND
-						$this->Validator->isTrue(		'name',
-														$this->isUniqueName($name),
-														TTi18n::gettext('Title already exists'))
-
-												) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim( $value);
+
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID1() {
-		if ( isset($this->data['other_id1']) ) {
-			return $this->data['other_id1'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id1' );
 	}
-	function setOtherID1($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID1( $value) {
 		$value = trim($value);
 
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id1',
-											$value,
-											TTi18n::gettext('Other ID 1 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id1'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id1', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID2() {
-		if ( isset($this->data['other_id2']) ) {
-			return $this->data['other_id2'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id2' );
 	}
-	function setOtherID2($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID2( $value) {
 		$value = trim($value);
 
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id2',
-											$value,
-											TTi18n::gettext('Other ID 2 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id2'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id2', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID3() {
-		if ( isset($this->data['other_id3']) ) {
-			return $this->data['other_id3'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id3' );
 	}
-	function setOtherID3($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID3( $value) {
 		$value = trim($value);
 
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id3',
-											$value,
-											TTi18n::gettext('Other ID 3 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id3'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id3', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID4() {
-		if ( isset($this->data['other_id4']) ) {
-			return $this->data['other_id4'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id4' );
 	}
-	function setOtherID4($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID4( $value) {
 		$value = trim($value);
 
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id4',
-											$value,
-											TTi18n::gettext('Other ID 4 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id4'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id4', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID5() {
-		if ( isset($this->data['other_id5']) ) {
-			return $this->data['other_id5'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id5' );
 	}
-	function setOtherID5($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID5( $value) {
 		$value = trim($value);
 
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id5',
-											$value,
-											TTi18n::gettext('Other ID 5 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id5'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id5', $value );
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+
+		//Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows( 'company',
+											   $clf->getByID( $this->getCompany() ),
+											   TTi18n::gettext( 'Company is invalid' ) );
+
+		//Name
 		if ( $this->getName() == '' ) {
 			$this->Validator->isTRUE(	'name',
 										FALSE,
-										TTi18n::gettext('Name not specified') );
+										TTi18n::gettext('Name not specified')
+			);
 
 		}
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isLength( 'name',
+											$this->getName(),
+											TTi18n::gettext( 'Name is too short or too long' ),
+											2,
+											100 );
+		}
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue( 'name',
+									  $this->isUniqueName( $this->getName() ),
+									  TTi18n::gettext( 'Title already exists' ) );
+		}
 
+		//OtherIDs 1-5
+		if ( $this->getOtherID1() != '' ) {
+			$this->Validator->isLength( 'other_id1',
+										$this->getOtherID1(),
+										TTi18n::gettext( 'Other ID 1 is invalid' ),
+										1, 255 );
+		}
+		if ( $this->getOtherID2() != '' ) {
+			$this->Validator->isLength( 'other_id2',
+										$this->getOtherID2(),
+										TTi18n::gettext( 'Other ID 2 is invalid' ),
+										1, 255 );
+		}
+		if ( $this->getOtherID3() != '' ) {
+			$this->Validator->isLength( 'other_id3',
+										$this->getOtherID3(),
+										TTi18n::gettext( 'Other ID 3 is invalid' ),
+										1, 255 );
+		}
+		if ( $this->getOtherID4() != '' ) {
+			$this->Validator->isLength( 'other_id4',
+										$this->getOtherID4(),
+										TTi18n::gettext( 'Other ID 4 is invalid' ),
+										1, 255 );
+		}
+		if ( $this->getOtherID5() != '' ) {
+			$this->Validator->isLength( 'other_id5',
+										$this->getOtherID5(),
+										TTi18n::gettext( 'Other ID 5 is invalid' ),
+										1, 255 );
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		return TRUE;
 	}
 
@@ -318,16 +338,20 @@ class UserTitleFactory extends Factory {
 			$uf = TTnew( 'UserFactory' );
 			$udf = TTnew( 'UserDefaultFactory' );
 
-			$query = 'update '. $uf->getTable() .' set title_id = 0 where company_id = '. (int)$this->getCompany() .' AND title_id = '. (int)$this->getId();
+			$query = 'update '. $uf->getTable() .' set title_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND title_id = \''.  TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $udf->getTable() .' set title_id = 0 where company_id = '. (int)$this->getCompany() .' AND title_id = '. (int)$this->getId();
+			$query = 'update '. $udf->getTable() .' set title_id = \''. TTUUID::getZeroID() .'\' where company_id = \''.  TTUUID::castUUID($this->getCompany()) .'\' AND title_id = \''.  TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 		}
 	}
 
 	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -354,6 +378,10 @@ class UserTitleFactory extends Factory {
 	}
 
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -378,6 +406,10 @@ class UserTitleFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Employee Title'), NULL, $this->getTable(), $this );
 	}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,10 +42,12 @@ class KPIGroupFactory extends Factory {
 	protected $table = 'kpi_group';
 	protected $pk_sequence_name = 'kpi_group_id_seq'; //PK Sequence name
 
-	protected $fasttree_obj = NULL;
-
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
-
 		$retval = NULL;
 		switch( $name ) {
 			case 'columns':
@@ -76,6 +78,10 @@ class KPIGroupFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -87,80 +93,52 @@ class KPIGroupFactory extends Factory {
 		return $variable_function_map;
 	}
 
-	function getFastTreeObject() {
-
-		if ( is_object($this->fasttree_obj) ) {
-			return $this->fasttree_obj;
-		} else {
-			global $fast_tree_kpi_group_options;
-			$this->fasttree_obj = new FastTree($fast_tree_kpi_group_options);
-
-			return $this->fasttree_obj;
-		}
-	}
-
+	/**
+	 * @return bool
+	 */
 	function getCompany() {
-		if( isset( $this->data['company_id'] ) ) {
-			return (int)$this->data['company_id'];
+		return $this->getGenericDataValue( 'company_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'company_id',
-															$clf->getByID($id),
-															TTi18n::gettext('Company is invalid')
-															) ) {
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
-	//Use this for completly editing a row in the tree
-	//Basically "old_id".
-	function getPreviousParent() {
-		if ( isset($this->tmp_data['previous_parent_id']) ) {
-			return $this->tmp_data['previous_parent_id'];
-		}
-
-		return FALSE;
-	}
-	function setPreviousParent($id) {
-
-		$this->tmp_data['previous_parent_id'] = $id;
-
-		return TRUE;
-	}
-
+	/**
+	 * @return bool|mixed
+	 */
 	function getParent() {
-		if ( isset($this->tmp_data['parent_id']) ) {
-			return $this->tmp_data['parent_id'];
-		}
-
-		return FALSE;
-	}
-	function setParent($id) {
-
-		$this->tmp_data['parent_id'] = (int)$id;
-
-		return TRUE;
+		return $this->getGenericDataValue( 'parent_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setParent( $value) {
+		return $this->setGenericDataValue( 'parent_id', TTUUID::castUUID($value) );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -182,36 +160,55 @@ class KPIGroupFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getName() {
-		if ( isset( $this->data['name'] ) ) {
-			return $this->data['name'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
-	function setName($name) {
-		$name = trim($name);
 
-		if	(	$this->Validator->isLength(		'name',
-												$name,
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
+	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		if ( $this->getCompany() != TTUUID::getZeroID() ) {
+			$clf = TTnew( 'CompanyListFactory' );
+			$this->Validator->isResultSetWithRows(	'company_id',
+															$clf->getByID($this->getCompany()),
+															TTi18n::gettext('Company is invalid')
+														);
+		}
+		// Name
+		$this->Validator->isLength(		'name',
+												$this->getName(),
 												TTi18n::gettext('Name is too short or too long'),
 												2,
-												100)
-					AND
-						$this->Validator->isTrue(		'name',
-														$this->isUniqueName($name),
-														TTi18n::gettext('Group already exists'))
-
-												) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
+												100
+											);
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(		'name',
+												$this->isUniqueName($this->getName()),
+												TTi18n::gettext('Group already exists')
+											);
 		}
 
-		return FALSE;
-	}
-
-	function Validate( $ignore_warning = TRUE ) {
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 
 		if ( $this->isNew() == FALSE
 				AND $this->getId() == $this->getParent() ) {
@@ -221,14 +218,9 @@ class KPIGroupFactory extends Factory {
 											);
 		} else {
 			if ( $this->isNew() == FALSE ) {
-				$this->getFastTreeObject()->setTree( $this->getCompany() );
-				//$children_ids = array_keys( $this->getFastTreeObject()->getAllChildren( $this->getID(), 'RECURSE' ) );
-
-				$children_ids = $this->getFastTreeObject()->getAllChildren( $this->getID(), 'RECURSE' );
-				if ( is_array($children_ids) ) {
-					$children_ids = array_keys( $children_ids );
-				}
-
+				$kglf = TTnew('KPIGroupListFactory');
+				$nodes = $kglf->getByCompanyIdArray( $this->getCompany() );
+				$children_ids = TTTree::getElementFromNodes( TTTree::flattenArray( TTTree::createNestedArrayWithDepth( $nodes, $this->getId() ) ), 'id' );
 				if ( is_array($children_ids) AND in_array( $this->getParent(), $children_ids) == TRUE ) {
 					Debug::Text(' Objects cant be re-parented to their own children...', __FILE__, __LINE__, __METHOD__, 10);
 					$this->Validator->isTrue(	'parent',
@@ -242,28 +234,36 @@ class KPIGroupFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
-
-		if ( $this->isNew() ) {
-			Debug::Text(' Setting Insert Tree TRUE ', __FILE__, __LINE__, __METHOD__, 10);
-			$this->insert_tree = TRUE;
-		} else {
-			Debug::Text(' Setting Insert Tree FALSE ', __FILE__, __LINE__, __METHOD__, 10);
-			$this->insert_tree = FALSE;
-		}
-
 		return TRUE;
 	}
 
 	//Must be postSave because we need the ID of the object.
+
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 
 		$this->StartTransaction();
 
-		$this->getFastTreeObject()->setTree( $this->getCompany() );
 		if ( $this->getDeleted() == TRUE ) {
-			//FIXME: Get parent of this object, and re-parent all groups to it.
-			$parent_id = $this->getFastTreeObject()->getParentId( $this->getId() );
+			//Get parent of this object, and re-parent all groups to it.
+			$kglf = TTnew('KPIGroupListFactory');
+			$kglf->getByCompanyIdAndParentId( $this->getCompany(), $this->getId() );
+			if ( $kglf->getRecordCount() > 0 ) {
+				foreach( $kglf as $kg_obj ) {
+					Debug::Text(' Re-Parenting ID: '. $kg_obj->getId() .' To: '. $this->getParent(), __FILE__, __LINE__, __METHOD__, 10);
+					$kg_obj->setParent( $this->getParent() );
+					if ( $kg_obj->isValid() ) {
+						$kg_obj->Save();
+					}
+				}
+			}
+
 			//Get items by group id.
 			$klf = TTnew( 'KPIListFactory' );
 			$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
@@ -274,11 +274,9 @@ class KPIGroupFactory extends Factory {
 				foreach( $klf as $obj ) {
 					Debug::Text(' Re-Grouping Item: '. $obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 					$ids[] = $obj->getId();
-					//$obj->setGroup($parent_id);
-					//$obj->Save();
 				}
 			}
-			$this->getFastTreeObject()->delete( $this->getId() );
+
 			$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 2010, $this->getID() );
 			if ( $cgmlf->getRecordCount() > 0 ) {
 				foreach( $cgmlf as $cgm_obj ) {
@@ -286,18 +284,20 @@ class KPIGroupFactory extends Factory {
 					$cgm_obj->Delete();
 				}
 			}
+
 			if ( empty($ids) == FALSE ) {
 				foreach( $ids as $id ) {
-					if ( $parent_id > 0 ) {
-						$cgmlf->getByCompanyIDAndObjectTypeAndObjectIDAndMapID( $this->getCompany(), 2020, $id, $parent_id );
+					if ( $this->getParent() != '' ) {
+						$cgmlf->getByCompanyIDAndObjectTypeAndObjectIDAndMapID( $this->getCompany(), 2020, $id, $this->getParent() );
 						if ( $cgmlf->getRecordCount() == 0 ) {
 							$cgmf->setCompany( $this->getCompany() );
 							$cgmf->setObjectType( 2020 );
 							$cgmf->setObjectID( $id );
-							$cgmf->setMapId( $parent_id );
+							$cgmf->setMapId( $this->getParent() );
 							$cgmf->Save();
 						}
 					}
+
 					$cgmlf->getByCompanyIDAndObjectTypeAndObjectIDAndMapID($this->getCompany(), 2020, $id, $this->getId());
 					if ( $cgmlf->getRecordCount() > 0 ) {
 						foreach( $cgmlf as $cgm_obj ) {
@@ -305,50 +305,19 @@ class KPIGroupFactory extends Factory {
 							$cgm_obj->Delete();
 						}
 					}
-					//$query = 'delete from ' . $cgmf->getTable() . ' where map_id = ' . $this->getId() . ' and object_id = ' . $id . ' and company_id = ' . $this->getCompany() . ' and object_type_id = 2020 ';
-					//$this->db->Execute($query);
 				}
 			}
-			$this->CommitTransaction();
-			return TRUE;
-		} else {
-
-			$retval = TRUE;
-			//if ( $this->getId() === FALSE ) {
-
-			if ( $this->insert_tree === TRUE ) {
-				Debug::Text(' Adding Node ', __FILE__, __LINE__, __METHOD__, 10);
-
-				//echo "Current ID: ".	$this->getID() ."<br>\n";
-				//echo "Parent ID: ".  $this->getParent() ."<br>\n";
-
-				//Add node to tree
-				if ( $this->getFastTreeObject()->add( $this->getID(), $this->getParent() ) === FALSE ) {
-					Debug::Text(' Failed adding Node ', __FILE__, __LINE__, __METHOD__, 10);
-
-					$this->Validator->isTrue(	'name',
-												FALSE,
-												TTi18n::gettext('Name is already in use')
-												);
-					$retval = FALSE;
-				}
-			} else {
-				Debug::Text(' Editing Node ', __FILE__, __LINE__, __METHOD__, 10);
-
-				//Edit node.
-				$retval = $this->getFastTreeObject()->move( $this->getID(), $this->getParent() );
-			}
-
-			if ( $retval === TRUE ) {
-				$this->CommitTransaction();
-			} else {
-				$this->FailTransaction();
-			}
-
-			return $retval;
 		}
+
+		$this->CommitTransaction();
+
+		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -374,6 +343,11 @@ class KPIGroupFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE   ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -400,6 +374,10 @@ class KPIGroupFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('KPI Group'), NULL, $this->getTable(), $this );
 	}

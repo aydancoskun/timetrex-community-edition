@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,7 +60,13 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -61,7 +74,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => (int)$id,
+						'id' => TTUUID::castUUID($id),
 						);
 
 			$query = '
@@ -80,7 +93,13 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByIdList($ids, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $ids UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByIdList( $ids, $where = NULL, $order = NULL) {
 		if ( $ids == '' ) {
 			return FALSE;
 		}
@@ -94,7 +113,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					from	'. $this->getTable() .' as a,
 							'. $ppsf->getTable() .' as b
 					where	a.pay_period_schedule_id = b.id
-						AND a.id in ( '. $this->getListSQL($ids, $ph) .' )
+						AND a.id in ( '. $this->getListSQL($ids, $ph, 'uuid') .' )
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -104,7 +123,14 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByIdListArray($ids, $where = NULL, $order = NULL, $enable_names = TRUE ) {
+	/**
+	 * @param string $ids UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param bool $enable_names
+	 * @return array|bool
+	 */
+	function getByIdListArray( $ids, $where = NULL, $order = NULL, $enable_names = TRUE ) {
 		if ( $ids == '' ) {
 			return FALSE;
 		}
@@ -117,7 +143,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 
 		$use_names = FALSE;
-		if ( $enable_names == TRUE AND empty($pay_period_schedule_id) == FALSE ) {
+		if ( $enable_names == TRUE AND empty($pay_period_schedule_id) == FALSE AND $pay_period_schedule_id != TTUUID::getZeroID()  ) {
 			$use_names = TRUE;
 		}
 
@@ -140,7 +166,13 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return FALSE;
 	}
 
-	function getArrayByListFactory($lf, $include_blank = TRUE, $sort_prefix = FALSE ) {
+	/**
+	 * @param $lf
+	 * @param bool $include_blank
+	 * @param bool $sort_prefix
+	 * @return array|bool
+	 */
+	function getArrayByListFactory( $lf, $include_blank = TRUE, $sort_prefix = FALSE ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
@@ -148,7 +180,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		Debug::Text('Total Rows: '. $lf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		$use_names = FALSE;
@@ -188,7 +220,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return FALSE;
 	}
 
-	function getByPayPeriodScheduleId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByPayPeriodScheduleId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -201,7 +241,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -218,7 +258,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -233,7 +281,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -253,7 +301,14 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIdAndStatus($company_id, $status_ids, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $status_ids
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByCompanyIdAndStatus( $company_id, $status_ids, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -272,7 +327,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -293,7 +348,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIdAndStatusAndTransactionDate($company_id, $status_ids, $transaction_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $status_ids
+	 * @param int $transaction_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByCompanyIdAndStatusAndTransactionDate( $company_id, $status_ids, $transaction_date, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -312,7 +375,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'transaction_date' => $this->db->BindTimeStamp( $transaction_date ),
 					);
 
@@ -334,7 +397,14 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -344,8 +414,8 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -362,7 +432,14 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIdAndEndDate($company_id, $end_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByCompanyIdAndEndDate( $company_id, $end_date, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -372,7 +449,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'start_date' => $this->db->BindTimeStamp( $end_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_date ),
 					);
@@ -392,7 +469,14 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIdAndTransactionDate($company_id, $transaction_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $transaction_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByCompanyIdAndTransactionDate( $company_id, $transaction_date, $where = NULL, $order = NULL) {
 		if ( $transaction_date == '' ) {
 			return FALSE;
 		}
@@ -400,7 +484,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'start_date' => $this->db->BindTimeStamp( $transaction_date ),
 					'end_date' => $this->db->BindTimeStamp( $transaction_date ),
 					);
@@ -424,7 +508,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIdAndTransactionStartDateAndTransactionEndDate($company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByCompanyIdAndTransactionStartDateAndTransactionEndDate( $company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -440,7 +532,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'start_date' => $this->db->BindTimeStamp( $start_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_date ),
 					);
@@ -463,7 +555,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByUserId($user_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByUserId( $user_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -479,7 +579,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -503,7 +603,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByUserIdAndStartDateAndEndDate( $user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -523,7 +631,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'start_date' => $this->db->BindTimeStamp( $start_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_date ),
 					);
@@ -553,7 +661,16 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	}
 
 	//Gets all pay periods that start or end between the two dates. Ideal for finding all pay periods that affect a given week.
-	function getByCompanyIdAndOverlapStartDateAndEndDate($company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+
+	/**
+	 * @param string $company_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByCompanyIdAndOverlapStartDateAndEndDate( $company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -572,7 +689,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'start_date' => $this->db->BindTimeStamp( $start_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_date ),
 					'start_date2' => $this->db->BindTimeStamp( $start_date ),
@@ -607,7 +724,16 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	}
 
 	//Gets all pay periods that start or end between the two dates. Ideal for finding all pay periods that affect a given week.
-	function getByUserIdAndOverlapStartDateAndEndDate($user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+
+	/**
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByUserIdAndOverlapStartDateAndEndDate( $user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -620,7 +746,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'start_date' => $this->db->BindTimeStamp( $start_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_date ),
 					'start_date2' => $this->db->BindTimeStamp( $start_date ),
@@ -657,7 +783,14 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByUserIdAndEndDate($user_id, $end_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByUserIdAndEndDate( $user_id, $end_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -670,7 +803,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'start_date' => $this->db->BindTimeStamp( $end_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_date ),
 					);
@@ -699,7 +832,14 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByUserIdAndTransactionDate($user_id, $transaction_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $transaction_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByUserIdAndTransactionDate( $user_id, $transaction_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -712,7 +852,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'start_date' => $this->db->BindTimeStamp( $transaction_date ),
 					'end_date' => $this->db->BindTimeStamp( $transaction_date ),
 					);
@@ -740,7 +880,16 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getConflictingByPayPeriodScheduleIdAndStartDateAndEndDate($pay_period_schedule_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $pay_period_schedule_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getConflictingByPayPeriodScheduleIdAndStartDateAndEndDate( $pay_period_schedule_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
 		Debug::Text('Pay Period Schedule ID: '. $pay_period_schedule_id .' Start Date: '. $start_date .' End Date: '. $end_date .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $pay_period_schedule_id == '' ) {
@@ -755,6 +904,10 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 			return FALSE;
 		}
 
+		if ( $id == '' ) {
+			$id = TTUUID::getZeroId(); //Leaving this as NULL can cause the SQL query to not return rows when it should.
+		}
+
 		//MySQL is picky when it comes to timestamp filters on datestamp columns.
 		$start_datestamp = $this->db->BindDate( $start_date );
 		$end_datestamp = $this->db->BindDate( $end_date );
@@ -763,10 +916,10 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$end_timestamp = $this->db->BindTimeStamp( $end_date );
 
 		$ph = array(
-				'pay_period_schedule_id' => (int)$pay_period_schedule_id,
+				'pay_period_schedule_id' => TTUUID::castUUID($pay_period_schedule_id),
 				'start_date_a' => $start_datestamp,
 				'end_date_b' => $end_datestamp,
-				'id' => (int)$id,
+				'id' => TTUUID::castUUID($id),
 				'start_date1' => $start_timestamp,
 				'end_date1' => $end_timestamp,
 				'start_date2' => $start_timestamp,
@@ -810,7 +963,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByPayPeriodScheduleIdAndStartTransactionDateAndEndTransactionDate($id, $start_transaction_date, $end_transaction_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $start_transaction_date EPOCH
+	 * @param int $end_transaction_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByPayPeriodScheduleIdAndStartTransactionDateAndEndTransactionDate( $id, $start_transaction_date, $end_transaction_date, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -824,7 +985,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					'start_date' => $this->db->BindTimeStamp( $start_transaction_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_transaction_date ),
 					);
@@ -847,7 +1008,18 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIDAndPayPeriodScheduleIdAndStartTransactionDateAndEndTransactionDate($company_id, $id, $start_transaction_date, $end_transaction_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param int $start_transaction_date EPOCH
+	 * @param int $end_transaction_date EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByCompanyIDAndPayPeriodScheduleIdAndStartTransactionDateAndEndTransactionDate( $company_id, $id, $start_transaction_date, $end_transaction_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -874,7 +1046,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'start_date' => $this->db->BindTimeStamp( $start_transaction_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_transaction_date ),
 					);
@@ -886,7 +1058,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					where	ppsf.company_id = ?
 						AND a.transaction_date >= ?
 						AND a.transaction_date <= ?
-						AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'int' ) .' )
+						AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'uuid' ) .' )
 						AND a.deleted=0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -898,7 +1070,19 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIDAndPayPeriodScheduleIdAndStatusAndStartTransactionDateAndEndTransactionDate($company_id, $id, $status_id, $start_transaction_date, $end_transaction_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param int $status_id
+	 * @param int $start_transaction_date EPOCH
+	 * @param int $end_transaction_date EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByCompanyIDAndPayPeriodScheduleIdAndStatusAndStartTransactionDateAndEndTransactionDate( $company_id, $id, $status_id, $start_transaction_date, $end_transaction_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -929,7 +1113,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'start_date' => $this->db->BindTimeStamp( $start_transaction_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_transaction_date ),
 					);
@@ -941,7 +1125,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					where	ppsf.company_id = ?
 						AND a.transaction_date >= ?
 						AND a.transaction_date <= ?
-						AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'int' ) .' )
+						AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'uuid' ) .' )
 						AND a.status_id in ( '. $this->getListSQL( $status_id, $ph, 'int' ) .' )
 						AND a.deleted=0';
 		$query .= $this->getWhereSQL( $where );
@@ -954,7 +1138,17 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIDAndPayPeriodScheduleIdAndAnyDate($company_id, $id, $date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param int $date EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByCompanyIDAndPayPeriodScheduleIdAndAnyDate( $company_id, $id, $date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -973,7 +1167,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'start_date' => $this->db->BindTimeStamp( $date ),
 					'end_date' => $this->db->BindTimeStamp( $date ),
 					'transaction_date' => $this->db->BindTimeStamp( $date ),
@@ -985,7 +1179,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( a.pay_period_schedule_id = ppsf.id )
 					where	ppsf.company_id = ?
 						AND ( a.start_date >= ? OR a.end_date >= ? OR a.transaction_date >= ? )
-						AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'int' ) .' )
+						AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'uuid' ) .' )
 						AND a.deleted=0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -997,7 +1191,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate($company_id, $id, $date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param int $date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $company_id, $id, $date, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -1011,7 +1213,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsuf = new PayPeriodScheduleUserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'start_date' => $this->db->BindTimeStamp( $date ),
 					'end_date' => $this->db->BindTimeStamp( $date ),
 					);
@@ -1025,9 +1227,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						AND a.end_date >= ?
 						AND EXISTS ( SELECT 1 FROM '. $ppsuf->getTable() .' as ppsuf WHERE a.pay_period_schedule_id = ppsuf.pay_period_schedule_id )';
 
-		if ( isset($id[0]) AND !in_array(-1, (array)$id) ) {
-			$query .= ' AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'int' ) .' ) ';
-		}
+		$query .= ( isset($id) ) ? $this->getWhereClauseSQL( 'a.pay_period_schedule_id', $id, 'uuid_list', $ph ) : NULL;
 
 		$query .= '		AND ( a.deleted = 0 AND ppsf.deleted = 0)';
 
@@ -1039,7 +1239,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate($company_id, $id, $date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param int $date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $company_id, $id, $date, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -1060,7 +1268,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsuf = new PayPeriodScheduleUserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'end_date' => $this->db->BindTimeStamp( $date ),
 					);
 
@@ -1082,9 +1290,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					where a.pay_period_schedule_id = pp2.pay_period_schedule_id
 						AND a.start_date = pp2.start_date ';
 
-		if ( isset($id[0]) AND !in_array(-1, (array)$id) ) {
-			$query .= ' AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'int' ) .' ) ';
-		}
+		$query .= ( isset($id) ) ? $this->getWhereClauseSQL( 'a.pay_period_schedule_id', $id, 'uuid_list', $ph ) : NULL;
 
 		$query .= '		AND ( a.deleted = 0 )';
 
@@ -1096,7 +1302,14 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByPayPeriodScheduleIdAndTransactionDate($id, $transaction_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $transaction_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByPayPeriodScheduleIdAndTransactionDate( $id, $transaction_date, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -1106,7 +1319,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					'start_date' => $this->db->BindTimeStamp( $transaction_date ),
 					'end_date' => $this->db->BindTimeStamp( $transaction_date ),
 					);
@@ -1129,7 +1342,12 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getPayPeriodEndDateByUserIdAndTransactionDate($user_id, $transaction_date = NULL ) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $transaction_date EPOCH
+	 * @return mixed
+	 */
+	function getPayPeriodEndDateByUserIdAndTransactionDate( $user_id, $transaction_date = NULL ) {
 		if ($transaction_date == '' ) {
 			$transaction_date = TTDate::getTime();
 		}
@@ -1146,7 +1364,11 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $epoch;
 	}
 
-	function getPreviousPayPeriodById($id) {
+	/**
+	 * @param string $id UUID
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getPreviousPayPeriodById( $id) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -1160,7 +1382,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'pay_period_schedule_id' => (int)$pay_period_schedule_id,
+					'pay_period_schedule_id' => TTUUID::castUUID($pay_period_schedule_id),
 					'start_date' => $this->db->BindTimeStamp( $pay_period_obj->getStartDate() )
 					);
 
@@ -1178,7 +1400,13 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByStatus($status, $where = NULL, $order = NULL) {
+	/**
+	 * @param $status
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByStatus( $status, $where = NULL, $order = NULL) {
 		if ( $status == '' ) {
 			return FALSE;
 		}
@@ -1201,7 +1429,14 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByUserIdListAndNotStatus($user_ids, $status_ids, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_ids UUID
+	 * @param int $status_ids
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByUserIdListAndNotStatus( $user_ids, $status_ids, $where = NULL, $order = NULL) {
 		if ( $user_ids == '' ) {
 			return FALSE;
 		}
@@ -1223,7 +1458,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 							from
 									'. $ppsuf->getTable() .' as x,
 									'. $ppsf->getTable() .' as z
-							where x.user_id in ( '. $this->getListSQL( $user_ids, $ph, 'int' ) .' )
+							where x.user_id in ( '. $this->getListSQL( $user_ids, $ph, 'uuid') .' )
 								AND z.deleted=0)
 						AND a.status_id not in ( '. $this->getListSQL( $status_ids, $ph, 'int' ) .' )
 						AND a.deleted=0';
@@ -1235,7 +1470,16 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByUserIdListAndNotStatusAndStartDateAndEndDate($user_ids, $status_ids, $start_date, $end_date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_ids UUID
+	 * @param int $status_ids
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByUserIdListAndNotStatusAndStartDateAndEndDate( $user_ids, $status_ids, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $user_ids == '' ) {
 			return FALSE;
 		}
@@ -1257,7 +1501,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 
 		$ph = array();
 
-		$user_ids_sql = $this->getListSQL( $user_ids, $ph, 'int' );
+		$user_ids_sql = $this->getListSQL( $user_ids, $ph, 'uuid');
 
 		$ph['start_date'] = $this->db->BindTimeStamp( $start_date );
 		$ph['end_date'] = $this->db->BindTimeStamp( $end_date );
@@ -1286,7 +1530,13 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getFirstStartDateAndLastEndDateByPayPeriodScheduleId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool
+	 */
+	function getFirstStartDateAndLastEndDateByPayPeriodScheduleId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -1299,7 +1549,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -1317,7 +1567,11 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $retarr;
 	}
 
-	function getYearsArrayByCompanyId($company_id) {
+	/**
+	 * @param string $company_id UUID
+	 * @return array|bool
+	 */
+	function getYearsArrayByCompanyId( $company_id) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -1325,7 +1579,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$ppsf = new PayPeriodScheduleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -1353,7 +1607,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $retarr;
 	}
 
-	function getPayPeriodsWithPayStubsByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getPayPeriodsWithPayStubsByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -1366,7 +1628,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$psf = new PayStubFactory();
@@ -1396,7 +1658,69 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
+	/**
+	 * @param $id
+	 * @param $company_id
+	 * @param null $transaction_date
+	 * @param null $limit
+	 * @param null $page
+	 * @param null $where
+	 * @param null $order
+	 * @return $this|bool
+	 */
+	function getByRemittanceAgencyIdAndCompanyIdAndTransactionDateAndPayPeriodSchedule( $id, $company_id, $transaction_date = NULL, $pay_period_schedule = NULL, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+
+		Debug::Text( 'Remittance Agency Id: '.$id. ' company: '.$company_id. ' t_date: '.$transaction_date, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		$udf = new UserDeductionFactory();
+		$cdf = new CompanyDeductionFactory();
+		$ppsuf = new PayPeriodScheduleUserFactory();
+
+		$ph = array(
+				'payroll_remittance_agency_id' => TTUUID::castUUID($id),
+				'transaction_date' => date('r', $transaction_date ),
+				'company_id' => TTUUID::castUUID($company_id),
+		);
+
+		$query = '
+				SELECT pp.* FROM '. $this->getTable() .' AS pp
+				  LEFT JOIN '. $ppsuf->getTable() .' AS ppsu ON pp.pay_period_schedule_id = ppsu.pay_period_schedule_id
+				  LEFT JOIN '.$udf->getTable().' AS ud ON ppsu.user_id = ud.user_id
+				  LEFT JOIN '.$cdf->getTable().' AS cd ON ud.company_deduction_id = cd.id
+				WHERE cd.payroll_remittance_agency_id = ?
+					AND pp.transaction_date > ?
+					AND pp.company_id = ?
+					';
+
+		if ( is_array($pay_period_schedule) AND $pay_period_schedule[0] != TTUUID::getNotExistID() AND $pay_period_schedule[0] != TTUUID::getZeroID() ) {
+			$query .= 'AND pp.pay_period_schedule_id in ( ' . $this->getListSQL( $pay_period_schedule, $ph, 'uuid' ) . ' )
+			';
+		}
+		$query .= 'AND pp.deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		//Debug::Arr($ph,'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		return $this;
+	}
+
 	//Get last 6mths worth of pay periods and prepare a JS array so they can be highlighted in the calendar.
+
+	/**
+	 * @param bool $include_all_pay_period_schedules
+	 * @return bool|mixed
+	 */
 	function getJSCalendarPayPeriodArray( $include_all_pay_period_schedules = FALSE ) {
 		global $current_company, $current_user;
 
@@ -1442,6 +1766,15 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $retarr;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -1480,7 +1813,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -1501,9 +1834,9 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
@@ -1515,7 +1848,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'b.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['pay_period_schedule_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_schedule_id', $filter_data['pay_period_schedule_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_schedule_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_schedule_id', $filter_data['pay_period_schedule_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['pay_period_schedule']) ) ? $this->getWhereClauseSQL( 'b.name', $filter_data['pay_period_schedule'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'b.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.start_date', $filter_data['start_date'], 'date_range_timestamp', $ph ) : NULL;
@@ -1535,8 +1868,13 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date_stamp EPOCH
+	 * @return bool
+	 */
 	static function findPayPeriod( $user_id, $date_stamp ) {
-		if ( $date_stamp > 0 AND $user_id > 0 ) {
+		if ( $date_stamp > 0 AND $user_id != '' ) {
 			//FIXME: With MySQL since it doesn't handle timezones very well I think we need to
 			//get the timezone of the payperiod schedule for this user, and set the timezone to that
 			//before we go searching for a pay period, otherwise the wrong payperiod might be returned.

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,8 @@ class CompanyDeductionFactory extends Factory {
 	protected $pk_sequence_name = 'company_deduction_id_seq'; //PK Sequence name
 
 	var $company_obj = NULL;
+	var $legal_entity_obj = NULL;
+	var $payroll_remittance_agency_obj = NULL;
 	var $pay_stub_entry_account_link_obj = NULL;
 	var $pay_stub_entry_account_obj = NULL;
 
@@ -218,6 +220,11 @@ class CompanyDeductionFactory extends Factory {
 										40 => 'previous+ytd_adjustment',
 									);
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -527,13 +534,15 @@ class CompanyDeductionFactory extends Factory {
 				$retval = array(
 										'-1010-status' => TTi18n::gettext('Status'),
 										'-1020-type' => TTi18n::gettext('Type'),
-										'-1030-name' => TTi18n::gettext('Name'),
-										'-1040-calculation' => TTi18n::gettext('Calculation'),
+										'-1030-legal_entity_legal_name' => TTi18n::gettext('Legal Entity'),
+										'-1040-payroll_remittance_agency' => TTi18n::gettext('Remittance Agency'),
+										'-1050-name' => TTi18n::gettext('Name'),
+										'-1060-calculation' => TTi18n::gettext('Calculation'),
 
-										'-1050-start_date' => TTi18n::gettext('Start Date'),
-										'-1060-end_Date_date' => TTi18n::gettext('End Date'),
+										'-1070-start_date' => TTi18n::gettext('Start Date'),
+										'-1080-end_Date_date' => TTi18n::gettext('End Date'),
 
-										'-1070-calculation_order' => TTi18n::gettext('Calculation Order'),
+										'-1090-calculation_order' => TTi18n::gettext('Calculation Order'),
 
 										'-1100-total_users' => TTi18n::gettext('Employees'),
 
@@ -548,6 +557,8 @@ class CompanyDeductionFactory extends Factory {
 				$list_columns = array(
 								'status',
 								'type',
+								'legal_entity_id',
+								'legal_entity_legal_name',
 								'name',
 								'calculation',
 								);
@@ -558,9 +569,11 @@ class CompanyDeductionFactory extends Factory {
 				$retval = array(
 								'status',
 								'type',
+								'legal_entity_legal_name',
 								'name',
 								'calculation',
 								'total_users',
+								'payroll_remittance_agency',
 								);
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
@@ -603,6 +616,10 @@ class CompanyDeductionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -611,6 +628,10 @@ class CompanyDeductionFactory extends Factory {
 										'status' => FALSE,
 										'type_id' => 'Type',
 										'type' => FALSE,
+										'payroll_remittance_agency_id' => 'PayrollRemittanceAgency', //Set this before name, so unique names can be determined by legal entity.
+										'payroll_remittance_agency'	=> FALSE,
+										'legal_entity_id'	=> 'LegalEntity',
+										'legal_entity_legal_name'	=> FALSE,
 										'name' => 'Name',
 										'start_date' => 'StartDate',
 										'end_date' => 'EndDate',
@@ -679,10 +700,16 @@ class CompanyDeductionFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getPayStubEntryAccountLinkObject() {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
@@ -698,97 +725,148 @@ class CompanyDeductionFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPayStubEntryAccountObject() {
 		return $this->getGenericObject( 'PayStubEntryAccountListFactory', $this->getPayStubEntryAccount(), 'pay_stub_entry_account_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getLengthOfServiceContributingPayCodePolicyObject() {
 		return $this->getGenericObject( 'ContributingPayCodePolicyListFactory', $this->getLengthOfServiceContributingPayCodePolicy(), 'length_of_service_contributing_pay_code_policy_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getPayrollRemittanceAgencyObject() {
+		return $this->getGenericObject( 'PayrollRemittanceAgencyListFactory', $this->getPayrollRemittanceAgency(), 'payroll_remittance_agency_obj' );
+	}
+
+
+	/**
+	 * @return bool
+	 */
+	function getLegalEntityObject() {
+		return $this->getGenericObject( 'LegalEntityListFactory', $this->getLegalEntity(), 'legal_entity_obj' );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getLegalEntity() {
+		return $this->getGenericDataValue( 'legal_entity_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLegalEntity( $value) {
+		$value = trim( $value );
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('Legal Entity ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'legal_entity_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getPayrollRemittanceAgency() {
+		return $this->getGenericDataValue( 'payroll_remittance_agency_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPayrollRemittanceAgency( $value) {
+		$value = trim( $value );
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			//Must allow this to be NONE for upgrading purposes and for cases where the Tax/Deduction is not remitted at all.
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('Payroll Remittance Agency ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'payroll_remittance_agency_id', $value );
+	}
+
+	/**
+	 * @return int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status_id',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @return int
+	 */
 	function getType() {
-		if ( isset($this->data['type_id']) ) {
-			return (int)$this->data['type_id'];
-		}
-
-		return FALSE;
-	}
-	function setType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'type_id',
-											$type,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
-
-			$this->data['type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'type_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'type_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
+					'payroll_remittance_agency_id' => TTUUID::castUUID($this->getPayrollRemittanceAgency()),
 					'name' => TTi18n::strtolower($name),
 					);
 
-		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
+		$query = 'select id from '. $this->getTable() .' where company_id = ? AND payroll_remittance_agency_id = ? AND lower(name) = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
 		//Debug::Arr($id, 'Unique Pay Stub Account: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -802,133 +880,98 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
-	function setName($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
 		$value = trim($value);
-
-		if	(
-					$this->Validator->isLength(		'name',
-													$value,
-													TTi18n::gettext('Name is too short or too long'),
-													2,
-													100)
-				AND
-				$this->Validator->isTrue(				'name',
-														$this->isUniqueName($value),
-														TTi18n::gettext('Name is already in use')
-													)
-													) {
-
-			$this->data['name'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'name', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayStubEntryDescription() {
-		if ( isset($this->data['pay_stub_entry_description']) ) {
-			return $this->data['pay_stub_entry_description'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_stub_entry_description' );
 	}
-	function setPayStubEntryDescription($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPayStubEntryDescription( $value) {
 		$value = trim($value);
-
-		if	(
-				strlen($value) == 0
-				OR
-				$this->Validator->isLength(		'pay_stub_entry_description',
-												$value,
-												TTi18n::gettext('Description is too short or too long'),
-												0,
-												100)
-												) {
-
-			$this->data['pay_stub_entry_description'] = htmlspecialchars( $value );
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'pay_stub_entry_description', htmlspecialchars( $value ) );
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool|int|mixed
+	 */
 	function getStartDate( $raw = FALSE ) {
-		if ( isset($this->data['start_date']) ) {
+		$value = $this->getGenericDataValue('start_date');
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['start_date'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['start_date'] );
+				return TTDate::strtotime( $value );
 			}
 		}
-
-		return FALSE;
-	}
-	function setStartDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ( $epoch == '' ) {
-			$epoch = NULL;
-		}
-
-		if	(
-				$epoch == NULL
-				OR
-				$this->Validator->isDate(		'start_date',
-												$epoch,
-												TTi18n::gettext('Incorrect start date'))
-			) {
-
-			$this->data['start_date'] = $epoch;
-
-			return TRUE;
-		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStartDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'start_date', $value );
+	}
+
+	/**
+	 * @param bool $raw
+	 * @return bool|int|mixed
+	 */
 	function getEndDate( $raw = FALSE ) {
-		if ( isset($this->data['end_date']) ) {
+		$value = $this->getGenericDataValue( 'end_date' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['end_date'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['end_date'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setEndDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ( $epoch == '' ) {
-			$epoch = NULL;
-		}
-
-		if	(	$epoch == NULL
-				OR
-				$this->Validator->isDate(		'end_date',
-												$epoch,
-												TTi18n::gettext('Incorrect end date'))
-			) {
-
-			$this->data['end_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEndDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'end_date', $value );
 	}
 
 	//Check if this date is within the effective date range
+
+	/**
+	 * @param object $ud_obj
+	 * @param int $pp_end_date EPOCH
+	 * @param int $pp_transaction_date EPOCH
+	 * @return bool
+	 */
 	function isActiveDate( $ud_obj, $pp_end_date = NULL, $pp_transaction_date = NULL ) {
 		$pp_end_date = TTDate::getBeginDayEpoch( $pp_end_date );
 
@@ -941,8 +984,8 @@ class CompanyDeductionFactory extends Factory {
 					AND ( TTDate::getEndDayEpoch( $pp_transaction_date ) <= TTDate::getEndMonthEpoch( (int)$ud_obj->getEndDate() ) OR $ud_obj->getEndDate() == '' ) ) {
 				Debug::text('CPP: Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10);
 
-				return TRUE;
-			}
+			return TRUE;
+		}
 
 			Debug::text('CPP: Epoch: '. TTDate::getDate('DATE+TIME', $pp_transaction_date) .' is outside Start: '. TTDate::getDate('DATE+TIME', $ud_obj->getStartDate()) .' and End Date: '. TTDate::getDate('DATE+TIME', $ud_obj->getEndDate()), __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
@@ -955,405 +998,287 @@ class CompanyDeductionFactory extends Factory {
 			}
 
 			Debug::text('Epoch: '. TTDate::getDate('DATE+TIME', $pp_end_date) .' is outside Start: '. TTDate::getDate('DATE+TIME', $ud_obj->getStartDate()) .' and End Date: '. TTDate::getDate('DATE+TIME', $ud_obj->getEndDate()), __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
-		}
+		return FALSE;
+	}
 	}
 
+	/**
+	 * @return float
+	 */
 	function getMinimumLengthOfServiceDays() {
-		if ( isset($this->data['minimum_length_of_service_days']) ) {
-			return (float)$this->data['minimum_length_of_service_days'];
-		}
-
-		return FALSE;
+		return (float)$this->getGenericDataValue( 'minimum_length_of_service_days' );
 	}
-	function setMinimumLengthOfServiceDays($int) {
-		$int = (float)trim($int);
 
-		Debug::text('aLength of Service Days: '. $int, __FILE__, __LINE__, __METHOD__, 10);
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMinimumLengthOfServiceDays( $value) {
+		$value = (float)trim($value);
+		Debug::text( 'aLength of Service Days: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 
-		if	(	$int >= 0
-				AND
-				$this->Validator->isFloat(			'minimum_length_of_service',
-													$int,
-													TTi18n::gettext('Minimum length of service is invalid')) ) {
-
-			$this->data['minimum_length_of_service_days'] = bcmul( $int, $this->length_of_service_multiplier[(int)$this->getMinimumLengthOfServiceUnit()], 4);
-
-			return TRUE;
+		if	( $value >= 0 ) {
+			return $this->setGenericDataValue( 'minimum_length_of_service_days', bcmul( $value, $this->length_of_service_multiplier[(int)$this->getMinimumLengthOfServiceUnit()], 4) );
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @return float
+	 */
 	function getMinimumLengthOfService() {
-		if ( isset($this->data['minimum_length_of_service']) ) {
-			return (float)$this->data['minimum_length_of_service'];
-		}
-
-		return FALSE;
+		return (float)$this->getGenericDataValue( 'minimum_length_of_service' );
 	}
-	function setMinimumLengthOfService($int) {
-		$int = (float)trim($int);
 
-		Debug::text('bLength of Service: '. $int, __FILE__, __LINE__, __METHOD__, 10);
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMinimumLengthOfService( $value) {
+		$value = (float)trim($value);
 
-		if	(	$int >= 0
-				AND
-				$this->Validator->isFloat(			'minimum_length_of_service',
-													$int,
-													TTi18n::gettext('Minimum length of service is invalid')) ) {
-
-			$this->data['minimum_length_of_service'] = $int;
-
-			return TRUE;
+		Debug::text('bLength of Service: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		if ( $value >= 0 ) {
+			return $this->setGenericDataValue( 'minimum_length_of_service', $value );
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getMinimumLengthOfServiceUnit() {
-		if ( isset($this->data['minimum_length_of_service_unit_id']) ) {
-			return (int)$this->data['minimum_length_of_service_unit_id'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'minimum_length_of_service_unit_id' );
 	}
-	function setMinimumLengthOfServiceUnit($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMinimumLengthOfServiceUnit( $value) {
 		$value = trim($value);
-
-		if ( $value == ''
-				OR $this->Validator->inArrayKey(	'minimum_length_of_service_unit_id',
-											$value,
-											TTi18n::gettext('Incorrect minimum length of service unit'),
-											$this->getOptions('length_of_service_unit')) ) {
-
-			$this->data['minimum_length_of_service_unit_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'minimum_length_of_service_unit_id', $value );
 	}
 
+	/**
+	 * @return float
+	 */
 	function getMaximumLengthOfServiceDays() {
-		if ( isset($this->data['maximum_length_of_service_days']) ) {
-			return (float)$this->data['maximum_length_of_service_days'];
-		}
-
-		return FALSE;
-	}
-	function setMaximumLengthOfServiceDays($int) {
-		$int = (float)trim($int);
-
-		Debug::text('aLength of Service Days: '. $int, __FILE__, __LINE__, __METHOD__, 10);
-
-		//Allow negative values which are calculated from the termination date.
-		if	(
-				//$int >= 0
-				//AND
-				$this->Validator->isFloat(			'maximum_length_of_service',
-													$int,
-													TTi18n::gettext('Maximum length of service is invalid')) ) {
-
-			$this->data['maximum_length_of_service_days'] = bcmul( $int, $this->length_of_service_multiplier[(int)$this->getMaximumLengthOfServiceUnit()], 4);
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (float)$this->getGenericDataValue( 'maximum_length_of_service_days' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMaximumLengthOfServiceDays( $value) {
+		$value = (float)trim($value);
+		Debug::text('aLength of Service Days: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'maximum_length_of_service_days', bcmul( $value, $this->length_of_service_multiplier[(int)$this->getMaximumLengthOfServiceUnit()], 4) );
+	}
+
+	/**
+	 * @return float
+	 */
 	function getMaximumLengthOfService() {
-		if ( isset($this->data['maximum_length_of_service']) ) {
-			return (float)$this->data['maximum_length_of_service'];
-		}
-
-		return FALSE;
-	}
-	function setMaximumLengthOfService($int) {
-		$int = (float)trim($int);
-
-		Debug::text('bLength of Service: '. $int, __FILE__, __LINE__, __METHOD__, 10);
-
-		//Allow negative values which are calculated from the termination date.
-		if	(
-				//$int >= 0
-				//AND
-				$this->Validator->isFloat(			'maximum_length_of_service',
-													$int,
-													TTi18n::gettext('Maximum length of service is invalid')) ) {
-
-			$this->data['maximum_length_of_service'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (float)$this->getGenericDataValue( 'maximum_length_of_service' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMaximumLengthOfService( $value) {
+		$value = (float)trim($value);
+		Debug::text('bLength of Service: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'maximum_length_of_service', $value );
+	}
+
+	/**
+	 * @return int
+	 */
 	function getMaximumLengthOfServiceUnit() {
-		if ( isset($this->data['maximum_length_of_service_unit_id']) ) {
-			return (int)$this->data['maximum_length_of_service_unit_id'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'maximum_length_of_service_unit_id' );
 	}
-	function setMaximumLengthOfServiceUnit($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMaximumLengthOfServiceUnit( $value) {
 		$value = trim($value);
-
-		if ( $value == ''
-				OR $this->Validator->inArrayKey(	'maximum_length_of_service_unit_id',
-											$value,
-											TTi18n::gettext('Incorrect maximum length of service unit'),
-											$this->getOptions('length_of_service_unit')) ) {
-
-			$this->data['maximum_length_of_service_unit_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'maximum_length_of_service_unit_id', $value );
 	}
 
+	/**
+	 * @return float
+	 */
 	function getMinimumUserAge() {
-		if ( isset($this->data['minimum_user_age']) ) {
-			return (float)$this->data['minimum_user_age'];
-		}
-
-		return FALSE;
+		return (float)$this->getGenericDataValue( 'minimum_user_age' );
 	}
-	function setMinimumUserAge($int) {
-		$int = (float)trim($int);
 
-		Debug::text('Minimum User Age: '. $int, __FILE__, __LINE__, __METHOD__, 10);
-
-		if	(	$int >= 0
-				AND
-				$this->Validator->isFloat(			'minimum_user_age',
-													$int,
-													TTi18n::gettext('Minimum employee age is invalid')) ) {
-
-			$this->data['minimum_user_age'] = $int;
-
-			return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMinimumUserAge( $value) {
+		$value = (float)trim($value);
+		Debug::text('Minimum User Age: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		if	( $value >= 0 ) {
+			return $this->setGenericDataValue( 'minimum_user_age', $value );
 		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @return float
+	 */
 	function getMaximumUserAge() {
-		if ( isset($this->data['maximum_user_age']) ) {
-			return (float)$this->data['maximum_user_age'];
-		}
-
-		return FALSE;
+		return (float)$this->getGenericDataValue( 'maximum_user_age' );
 	}
-	function setMaximumUserAge($int) {
-		$int = (float)trim($int);
 
-		Debug::text('Maximum User Age: '. $int, __FILE__, __LINE__, __METHOD__, 10);
-
-		if	(	$int >= 0
-				AND
-				$this->Validator->isFloat(			'maximum_user_age',
-													$int,
-													TTi18n::gettext('Maximum employee age is invalid')) ) {
-
-			$this->data['maximum_user_age'] = $int;
-
-			return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMaximumUserAge( $value) {
+		$value = (float)trim($value);
+		Debug::text('Maximum User Age: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		if	( $value >= 0 ) {
+			return $this->setGenericDataValue( 'maximum_user_age', $value );
 		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLengthOfServiceContributingPayCodePolicy() {
-		if ( isset($this->data['length_of_service_contributing_pay_code_policy_id']) ) {
-			return (int)$this->data['length_of_service_contributing_pay_code_policy_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'length_of_service_contributing_pay_code_policy_id' );
 	}
-	function setLengthOfServiceContributingPayCodePolicy($id) {
-		$id = trim($id);
 
-		$csplf = TTnew( 'ContributingPayCodePolicyListFactory' );
-
-		if (	$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'length_of_service_contributing_pay_code_policy_id',
-													$csplf->getByID($id),
-													TTi18n::gettext('Contributing Pay Code Policy is invalid')
-													) ) {
-
-			$this->data['length_of_service_contributing_pay_code_policy_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLengthOfServiceContributingPayCodePolicy( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'length_of_service_contributing_pay_code_policy_id', $value );
 	}
 
 	//
 	// Calendar
 	//
+	/**
+	 * @return int
+	 */
 	function getApplyFrequency() {
-		if ( isset($this->data['apply_frequency_id']) ) {
-			return (int)$this->data['apply_frequency_id'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'apply_frequency_id' );
 	}
-	function setApplyFrequency($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequency( $value) {
 		$value = trim($value);
-
-		if (
-				$this->Validator->inArrayKey(	'apply_frequency_id',
-												$value,
-												TTi18n::gettext('Incorrect frequency'),
-												$this->getOptions('apply_frequency')) ) {
-
-			$this->data['apply_frequency_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'apply_frequency_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getApplyFrequencyMonth() {
-		if ( isset($this->data['apply_frequency_month']) ) {
-			return $this->data['apply_frequency_month'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'apply_frequency_month' );
 	}
-	function setApplyFrequencyMonth($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequencyMonth( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				$this->Validator->inArrayKey(	'apply_frequency_month',
-											$value,
-											TTi18n::gettext('Incorrect frequency month'),
-											TTDate::getMonthOfYearArray() ) ) {
-
-			$this->data['apply_frequency_month'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'apply_frequency_month', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getApplyFrequencyDayOfMonth() {
-		if ( isset($this->data['apply_frequency_day_of_month']) ) {
-			return $this->data['apply_frequency_day_of_month'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'apply_frequency_day_of_month' );
 	}
-	function setApplyFrequencyDayOfMonth($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequencyDayOfMonth( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				$this->Validator->inArrayKey(	'apply_frequency_day_of_month',
-											$value,
-											TTi18n::gettext('Incorrect frequency day of month'),
-											TTDate::getDayOfMonthArray() ) ) {
-
-			$this->data['apply_frequency_day_of_month'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'apply_frequency_day_of_month', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getApplyFrequencyDayOfWeek() {
-		if ( isset($this->data['apply_frequency_day_of_week']) ) {
-			return $this->data['apply_frequency_day_of_week'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'apply_frequency_day_of_week' );
 	}
-	function setApplyFrequencyDayOfWeek($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequencyDayOfWeek( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				$this->Validator->inArrayKey(	'apply_frequency_day_of_week',
-											$value,
-											TTi18n::gettext('Incorrect frequency day of week'),
-											TTDate::getDayOfWeekArray() ) ) {
-
-			$this->data['apply_frequency_day_of_week'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'apply_frequency_day_of_week', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getApplyFrequencyQuarterMonth() {
-		if ( isset($this->data['apply_frequency_quarter_month']) ) {
-			return $this->data['apply_frequency_quarter_month'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'apply_frequency_quarter_month' );
 	}
-	function setApplyFrequencyQuarterMonth($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequencyQuarterMonth( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				(
-					$this->Validator->isGreaterThan(	'apply_frequency_quarter_month',
-												$value,
-												TTi18n::gettext('Incorrect frequency quarter month'),
-												1 )
-					AND
-					$this->Validator->isLessThan(	'apply_frequency_quarter_month',
-												$value,
-												TTi18n::gettext('Incorrect frequency quarter month'),
-												3 )
-				)
-				) {
-
-			$this->data['apply_frequency_quarter_month'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'apply_frequency_quarter_month', $value );
 	}
 
+	/**
+	 * @return int
+	 */
 	function getApplyPayrollRunType() {
-		if ( isset($this->data['apply_payroll_run_type_id']) ) {
-			return (int)$this->data['apply_payroll_run_type_id'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'apply_payroll_run_type_id' );
 	}
-	function setApplyPayrollRunType($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyPayrollRunType( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				$this->Validator->inArrayKey(	'apply_payroll_run_type_id',
-												$value,
-												TTi18n::gettext('Incorrect payroll run type'),
-												$this->getOptions('apply_payroll_run_type')) ) {
-
-			$this->data['apply_payroll_run_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'apply_payroll_run_type_id', $value );
 	}
 
+	/**
+	 * @param int $pay_period_start_date EPOCH
+	 * @param int $pay_period_end_date EPOCH
+	 * @param int $hire_date EPOCH
+	 * @param int $termination_date EPOCH
+	 * @param int $birth_date EPOCH
+	 * @return bool
+	 */
 	function inApplyFrequencyWindow( $pay_period_start_date, $pay_period_end_date, $hire_date = NULL, $termination_date = NULL, $birth_date = NULL ) {
 		if ( $this->getApplyFrequency() == FALSE OR $this->getApplyFrequency() == 10 ) { //Each pay period
 			return TRUE;
@@ -1393,6 +1318,10 @@ class CompanyDeductionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param int $type_id
+	 * @return bool
+	 */
 	function inApplyPayrollRunType( $type_id ) {
 		if ( $this->getApplyPayrollRunType() == 0 OR $type_id == $this->getApplyPayrollRunType() ) {
 			return TRUE;
@@ -1402,6 +1331,12 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @return bool|int
+	 */
 	function getWorkedTimeByUserIdAndEndDate( $user_id, $start_date = NULL, $end_date = NULL ) {
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -1428,6 +1363,12 @@ class CompanyDeductionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param object $ud_obj
+	 * @param int $epoch EPOCH
+	 * @param bool $pay_period_start_date
+	 * @return bool
+	 */
 	function isActiveLengthOfService( $ud_obj, $epoch, $pay_period_start_date = FALSE  ) {
 		//Epoch will normally be pay period end date.
 
@@ -1453,7 +1394,7 @@ class CompanyDeductionFactory extends Factory {
 
 
 		if ( $this->getMaximumLengthOfServiceDays() < 0 ) {
-			if ( $ud_obj->getEndDate()!= '' ) {
+			if ( $ud_obj->getEndDate() != '' ) {
 				$length_of_service_date = $ud_obj->getEndDate();
 			} else {
 				$length_of_service_date = $ud_obj->getUserObject()->getTerminationDate();
@@ -1488,6 +1429,11 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $birth_date EPOCH
+	 * @param int $pp_transaction_date EPOCH
+	 * @return bool
+	 */
 	function isCPPAgeEligible( $birth_date, $pp_transaction_date = NULL  ) {
 		//CPP starts on the first transaction date *after* the month they turn 18, and ends on the first transaction date after they turn 70.
 		//  Basically so pro-rating is for whole months rather than partial months.
@@ -1540,6 +1486,12 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $birth_date EPOCH
+	 * @param int $pp_end_date EPOCH
+	 * @param int $pp_transaction_date EPOCH
+	 * @return bool
+	 */
 	function isActiveUserAge( $birth_date, $pp_end_date = NULL, $pp_transaction_date = NULL ) {
 		$user_age = TTDate::getYearDifference( $birth_date, $pp_end_date );
 		Debug::Text('User Age: '. $user_age .' Min: '. $this->getMinimumUserAge() .' Max: '. $this->getMaximumUserAge(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1547,14 +1499,18 @@ class CompanyDeductionFactory extends Factory {
 		if ( $this->getCalculation() == 90 ) { //CPP
 			return $this->isCPPAgeEligible( $birth_date, $pp_transaction_date );
 		} else {
-			if ( ( $this->getMinimumUserAge() == 0 OR $user_age >= $this->getMinimumUserAge() ) AND ( $this->getMaximumUserAge() == 0 OR $user_age <= $this->getMaximumUserAge() ) ) {
-				return TRUE;
-			}
+		if ( ( $this->getMinimumUserAge() == 0 OR $user_age >= $this->getMinimumUserAge() ) AND ( $this->getMaximumUserAge() == 0 OR $user_age <= $this->getMaximumUserAge() ) ) {
+			return TRUE;
+		}
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @param string $calculation_id UUID
+	 * @return bool
+	 */
 	function isCountryCalculationID( $calculation_id ) {
 		if ( in_array($calculation_id, $this->country_calculation_ids ) ) {
 			return TRUE;
@@ -1562,6 +1518,11 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param string $calculation_id UUID
+	 * @return bool
+	 */
 	function isProvinceCalculationID( $calculation_id ) {
 		if ( in_array($calculation_id, $this->province_calculation_ids ) ) {
 			return TRUE;
@@ -1569,6 +1530,11 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param string $calculation_id UUID
+	 * @return bool
+	 */
 	function isDistrictCalculationID( $calculation_id ) {
 		if ( in_array($calculation_id, $this->district_calculation_ids ) ) {
 			return TRUE;
@@ -1578,6 +1544,12 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 
+	/**
+	 * @param string $calculation_id UUID
+	 * @param null $country
+	 * @param null $province
+	 * @return bool|mixed
+	 */
 	function getCombinedCalculationID( $calculation_id = NULL, $country = NULL, $province = NULL ) {
 		if ( $calculation_id == '' ) {
 			$calculation_id = $this->getCalculation();
@@ -1612,121 +1584,84 @@ class CompanyDeductionFactory extends Factory {
 
 		return $retval;
 	}
+
+	/**
+	 * @return int
+	 */
 	function getCalculation() {
-		if ( isset($this->data['calculation_id']) ) {
-			return (int)$this->data['calculation_id'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'calculation_id' );
 	}
-	function setCalculation($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCalculation( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'calculation_id',
-											$value,
-											TTi18n::gettext('Incorrect Calculation'),
-											$this->getOptions('calculation')) ) {
-
-			$this->data['calculation_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'calculation_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCalculationOrder() {
-		if ( isset($this->data['calculation_order']) ) {
-			return $this->data['calculation_order'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'calculation_order' );
 	}
-	function setCalculationOrder($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCalculationOrder( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->isNumeric(		'calculation_order',
-												$value,
-												TTi18n::gettext('Invalid Calculation Order')
-										) ) {
-
-
-			$this->data['calculation_order'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'calculation_order', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCountry() {
-		if ( isset($this->data['country']) ) {
-			return $this->data['country'];
-		}
-
-		return FALSE;
-	}
-	function setCountry($country) {
-		$country = trim($country);
-
-		$cf = TTnew( 'CompanyFactory' );
-
-		if (	$country == ''
-				OR
-				$this->Validator->inArrayKey(	'country',
-												$country,
-												TTi18n::gettext('Invalid Country'),
-												$cf->getOptions('country') ) ) {
-
-			$this->data['country'] = $country;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'country' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCountry( $value) {
+		$value = trim($value);
+		if( $value == TTUUID::getZeroID() ) {
+			$value = '';
+		}
+		return $this->setGenericDataValue( 'country', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getProvince() {
-		if ( isset($this->data['province']) ) {
-			return $this->data['province'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'province' );
 	}
-	function setProvince($province) {
-		$province = trim($province);
 
-		Debug::Text('Country: '. $this->getCountry() .' Province: '. $province, __FILE__, __LINE__, __METHOD__, 10);
-
-		$cf = TTnew( 'CompanyFactory' );
-		$options_arr = $cf->getOptions('province');
-		if ( isset($options_arr[$this->getCountry()]) ) {
-			$options = $options_arr[$this->getCountry()];
-		} else {
-			$options = array();
-		}
-
-		if (	$province == ''
-				OR
-				$this->Validator->inArrayKey(	'province',
-												$province,
-												TTi18n::gettext('Invalid Province/State'),
-												$options ) ) {
-
-			$this->data['province'] = $province;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setProvince( $value) {
+		$value = trim($value);
+		Debug::Text('Country: '. $this->getCountry() .' Province: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'province', $value );
 	}
 
 	//Used for getting district name on W2's
+
+	/**
+	 * @return bool|mixed|null
+	 */
 	function getDistrictName() {
 		$retval = NULL;
 
-		if ( strtolower($this->getDistrict()) == 'all'
-				OR strtolower($this->getDistrict()) == '00' ) {
+		if ( $this->getDistrict() == 'ALL' OR $this->getDistrict() == '00' ) {
 			if ( $this->getUserValue5() != '' ) {
 				$retval = $this->getUserValue5();
 			}
@@ -1736,68 +1671,43 @@ class CompanyDeductionFactory extends Factory {
 
 		return $retval;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDistrict() {
-		if ( isset($this->data['district']) ) {
-			return $this->data['district'];
-		}
-
-		return FALSE;
-	}
-	function setDistrict($district) {
-		$district = trim($district);
-
-		Debug::Text('Country: '. $this->getCountry() .' District: '. $district, __FILE__, __LINE__, __METHOD__, 10);
-
-		$cf = TTnew( 'CompanyFactory' );
-		$options_arr = $cf->getOptions('district');
-		if ( isset($options_arr[$this->getCountry()][$this->getProvince()]) ) {
-			$options = $options_arr[$this->getCountry()][$this->getProvince()];
-		} else {
-			$options = array();
-		}
-
-		if (	( $district == '' OR $district == '00' )
-				OR
-				$this->Validator->inArrayKey(	'district',
-												$district,
-												TTi18n::gettext('Invalid District'),
-												$options ) ) {
-
-			$this->data['district'] = $district;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return strtoupper( $this->getGenericDataValue( 'district' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDistrict( $value) {
+		$value = strtoupper( trim($value) );
+		Debug::Text('Country: '. $this->getCountry() .' District: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'district', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyValue1() {
-		if ( isset($this->data['company_value1']) ) {
-			return $this->data['company_value1'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_value1' );
 	}
-	function setCompanyValue1($value) {
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompanyValue1( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'company_value1',
-												$value,
-												TTi18n::gettext('Company Value 1 is too short or too long'),
-												1,
-												4096) ) { //This is the Custom Formula, some of them need to be quite long.
-
-			$this->data['company_value1'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_value1', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyValue1Options() {
 		//Debug::Text('Calculation: '. $this->getCalculation(), __FILE__, __LINE__, __METHOD__, 10);
 		switch ( $this->getCalculation() ) {
@@ -1815,497 +1725,314 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyValue2() {
-		if ( isset($this->data['company_value2']) ) {
-			return $this->data['company_value2'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_value2' );
 	}
-	function setCompanyValue2($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompanyValue2( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'company_value2',
-												$value,
-												TTi18n::gettext('Company Value 2 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['company_value2'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_value2', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyValue3() {
-		if ( isset($this->data['company_value3']) ) {
-			return $this->data['company_value3'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_value3' );
 	}
-	function setCompanyValue3($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompanyValue3( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'company_value3',
-												$value,
-												TTi18n::gettext('Company Value 3 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['company_value3'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_value3', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyValue4() {
-		if ( isset($this->data['company_value4']) ) {
-			return $this->data['company_value4'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_value4' );
 	}
-	function setCompanyValue4($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompanyValue4( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'company_value4',
-												$value,
-												TTi18n::gettext('Company Value 4 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['company_value4'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_value4', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyValue5() {
-		if ( isset($this->data['company_value5']) ) {
-			return $this->data['company_value5'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_value5' );
 	}
-	function setCompanyValue5($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompanyValue5( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'company_value5',
-												$value,
-												TTi18n::gettext('Company Value 5 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['company_value5'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_value5', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyValue6() {
-		if ( isset($this->data['company_value6']) ) {
-			return $this->data['company_value6'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_value6' );
 	}
-	function setCompanyValue6($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompanyValue6( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'company_value6',
-												$value,
-												TTi18n::gettext('Company Value 6 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['company_value6'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_value6', $value );
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyValue7() {
-		if ( isset($this->data['company_value7']) ) {
-			return $this->data['company_value7'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_value7' );
 	}
-	function setCompanyValue7($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompanyValue7( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'company_value7',
-												$value,
-												TTi18n::gettext('Company Value 7 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['company_value7'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_value7', $value );
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyValue8() {
-		if ( isset($this->data['company_value8']) ) {
-			return $this->data['company_value8'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_value8' );
 	}
-	function setCompanyValue8($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompanyValue8( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'company_value8',
-												$value,
-												TTi18n::gettext('Company Value 8 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['company_value8'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_value8', $value );
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyValue9() {
-		if ( isset($this->data['company_value9']) ) {
-			return $this->data['company_value9'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_value9' );
 	}
-	function setCompanyValue9($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompanyValue9( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'company_value9',
-												$value,
-												TTi18n::gettext('Company Value 9 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['company_value9'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_value9', $value );
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyValue10() {
-		if ( isset($this->data['company_value10']) ) {
-			return $this->data['company_value10'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_value10' );
 	}
-	function setCompanyValue10($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompanyValue10( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'company_value10',
-												$value,
-												TTi18n::gettext('Company Value 10 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['company_value10'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_value10', $value );
 	}
 
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserValue1() {
-		if ( isset($this->data['user_value1']) ) {
-			return $this->data['user_value1'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value1' );
 	}
-	function setUserValue1($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue1( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value1',
-												$value,
-												TTi18n::gettext('User Value 1 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value1'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value1', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserValue2() {
-		if ( isset($this->data['user_value2']) ) {
-			return $this->data['user_value2'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value2' );
 	}
-	function setUserValue2($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue2( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value2',
-												$value,
-												TTi18n::gettext('User Value 2 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value2'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value2', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserValue3() {
-		if ( isset($this->data['user_value3']) ) {
-			return $this->data['user_value3'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value3' );
 	}
-	function setUserValue3($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue3( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value3',
-												$value,
-												TTi18n::gettext('User Value 3 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value3'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value3', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserValue4() {
-		if ( isset($this->data['user_value4']) ) {
-			return $this->data['user_value4'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value4' );
 	}
-	function setUserValue4($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue4( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value4',
-												$value,
-												TTi18n::gettext('User Value 4 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value4'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value4', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserValue5() {
-		if ( isset($this->data['user_value5']) ) {
-			return $this->data['user_value5'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value5' );
 	}
-	function setUserValue5($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue5( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value5',
-												$value,
-												TTi18n::gettext('User Value 5 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value5'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value5', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserValue6() {
-		if ( isset($this->data['user_value6']) ) {
-			return $this->data['user_value6'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value6' );
 	}
-	function setUserValue6($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue6( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value6',
-												$value,
-												TTi18n::gettext('User Value 6 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value6'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value6', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserValue7() {
-		if ( isset($this->data['user_value7']) ) {
-			return $this->data['user_value7'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value7' );
 	}
-	function setUserValue7($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue7( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value7',
-												$value,
-												TTi18n::gettext('User Value 7 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value7'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value7', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserValue8() {
-		if ( isset($this->data['user_value8']) ) {
-			return $this->data['user_value8'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value8' );
 	}
-	function setUserValue8($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue8( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value8',
-												$value,
-												TTi18n::gettext('User Value 8 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value8'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value8', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserValue9() {
-		if ( isset($this->data['user_value9']) ) {
-			return $this->data['user_value9'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value9' );
 	}
-	function setUserValue9($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue9( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value9',
-												$value,
-												TTi18n::gettext('User Value 9 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value9'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value9', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserValue10() {
-		if ( isset($this->data['user_value10']) ) {
-			return $this->data['user_value10'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value10' );
 	}
-	function setUserValue10($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue10( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value10',
-												$value,
-												TTi18n::gettext('User Value 10 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value10'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value10', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue1Options() {
 		//Debug::Text('Calculation: '. $this->getCalculation(), __FILE__, __LINE__, __METHOD__, 10);
 		switch ( $this->getCalculation() ) {
@@ -2346,125 +2073,181 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayStubEntryAccount() {
-		if ( isset($this->data['pay_stub_entry_account_id']) ) {
-			return (int)$this->data['pay_stub_entry_account_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayStubEntryAccount($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (
-				( $id == '' OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'pay_stub_entry_account',
-														$psealf->getByID($id),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													) ) {
-
-			$this->data['pay_stub_entry_account_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_stub_entry_account_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPayStubEntryAccount( $value) {
+		$value = trim( $value );
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'pay_stub_entry_account_id', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLockUserValue1() {
-		return $this->fromBool( $this->data['lock_user_value1'] );
-	}
-	function setLockUserValue1($bool) {
-		$this->data['lock_user_value1'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'lock_user_value1' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLockUserValue1( $value) {
+		return $this->setGenericDataValue( 'lock_user_value1', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLockUserValue2() {
-		return $this->fromBool( $this->data['lock_user_value2'] );
-	}
-	function setLockUserValue2($bool) {
-		$this->data['lock_user_value2'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'lock_user_value2' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLockUserValue2( $value) {
+		return $this->setGenericDataValue( 'lock_user_value2', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLockUserValue3() {
-		return $this->fromBool( $this->data['lock_user_value3'] );
-	}
-	function setLockUserValue3($bool) {
-		$this->data['lock_user_value3'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'lock_user_value3' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLockUserValue3( $value) {
+		return $this->setGenericDataValue( 'lock_user_value3', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLockUserValue4() {
-		return $this->fromBool( $this->data['lock_user_value4'] );
-	}
-	function setLockUserValue4($bool) {
-		$this->data['lock_user_value4'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'lock_user_value4' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLockUserValue4( $value) {
+		return $this->setGenericDataValue( 'lock_user_value4', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLockUserValue5() {
-		return $this->fromBool( $this->data['lock_user_value5'] );
-	}
-	function setLockUserValue5($bool) {
-		$this->data['lock_user_value5'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'lock_user_value5' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLockUserValue5( $value) {
+		return $this->setGenericDataValue( 'lock_user_value5', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLockUserValue6() {
-		return $this->fromBool( $this->data['lock_user_value6'] );
-	}
-	function setLockUserValue6($bool) {
-		$this->data['lock_user_value6'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'lock_user_value6' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLockUserValue6( $value) {
+		return $this->setGenericDataValue( 'lock_user_value6', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLockUserValue7() {
-		return $this->fromBool( $this->data['lock_user_value7'] );
-	}
-	function setLockUserValue7($bool) {
-		$this->data['lock_user_value7'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'lock_user_value7' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLockUserValue7( $value) {
+		return $this->setGenericDataValue( 'lock_user_value7', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLockUserValue8() {
-		return $this->fromBool( $this->data['lock_user_value8'] );
-	}
-	function setLockUserValue8($bool) {
-		$this->data['lock_user_value8'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'lock_user_value8' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLockUserValue8( $value) {
+		return $this->setGenericDataValue( 'lock_user_value8', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLockUserValue9() {
-		return $this->fromBool( $this->data['lock_user_value9'] );
-	}
-	function setLockUserValue9($bool) {
-		$this->data['lock_user_value9'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'lock_user_value9' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLockUserValue9( $value) {
+		return $this->setGenericDataValue( 'lock_user_value9', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLockUserValue10() {
-		return $this->fromBool( $this->data['lock_user_value10'] );
-	}
-	function setLockUserValue10($bool) {
-		$this->data['lock_user_value10'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'lock_user_value10' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLockUserValue10( $value) {
+		return $this->setGenericDataValue( 'lock_user_value10', $this->toBool($value) );
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return mixed|string
+	 */
 	function getAccountAmountTypeMap( $id ) {
 		if ( isset( $this->account_amount_type_map[$id]) ) {
 			return $this->account_amount_type_map[$id];
@@ -2475,6 +2258,10 @@ class CompanyDeductionFactory extends Factory {
 		return 'amount'; //Default to amount.
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @return mixed|string
+	 */
 	function getAccountAmountTypePSEntriesMap( $id ) {
 		if ( isset( $this->account_amount_type_ps_entries_map[$id]) ) {
 			return $this->account_amount_type_ps_entries_map[$id];
@@ -2486,29 +2273,25 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getIncludeAccountAmountType() {
-		if ( isset($this->data['include_account_amount_type_id']) ) {
-			return (int)$this->data['include_account_amount_type_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'include_account_amount_type_id' );
 	}
-	function setIncludeAccountAmountType($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setIncludeAccountAmountType( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'include_account_amount_type_id',
-											$value,
-											TTi18n::gettext('Incorrect include account amount type'),
-											$this->getOptions('account_amount_type')) ) {
-
-			$this->data['include_account_amount_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'include_account_amount_type_id', $value );
 	}
 
+	/**
+	 * @return array|bool|mixed|null
+	 */
 	function getIncludePayStubEntryAccount() {
 		$cache_id = 'include_pay_stub_entry-'. $this->getId();
 		$list = $this->getCache( $cache_id );
@@ -2531,7 +2314,12 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
-	function setIncludePayStubEntryAccount($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setIncludePayStubEntryAccount( $ids) {
 		Debug::text('Setting Include IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( !is_array($ids) ) {
 			$ids = array($ids);
@@ -2588,29 +2376,25 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getExcludeAccountAmountType() {
-		if ( isset($this->data['exclude_account_amount_type_id']) ) {
-			return (int)$this->data['exclude_account_amount_type_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'exclude_account_amount_type_id' );
 	}
-	function setExcludeAccountAmountType($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setExcludeAccountAmountType( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'exclude_account_amount_type_id',
-											$value,
-											TTi18n::gettext('Incorrect exclude account amount type'),
-											$this->getOptions('account_amount_type')) ) {
-
-			$this->data['exclude_account_amount_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'exclude_account_amount_type_id', $value );
 	}
 
+	/**
+	 * @return array|bool|mixed|null
+	 */
 	function getExcludePayStubEntryAccount() {
 		$cache_id = 'exclude_pay_stub_entry-'. $this->getId();
 		$list = $this->getCache( $cache_id );
@@ -2633,7 +2417,12 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
-	function setExcludePayStubEntryAccount($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setExcludePayStubEntryAccount( $ids) {
 		Debug::text('Setting Exclude IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( !is_array($ids) ) {
 			$ids = array($ids);
@@ -2690,6 +2479,9 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getUser() {
 		$udlf = TTnew( 'UserDeductionListFactory' );
 		$udlf->getByCompanyIdAndCompanyDeductionId( $this->getCompany(), $this->getId() );
@@ -2705,7 +2497,12 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
-	function setUser($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setUser( $ids) {
 		if ( !is_array($ids) ) {
 			$ids = array($ids);
 		}
@@ -2761,12 +2558,19 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getTotalUsers() {
 		$udlf = TTnew( 'UserDeductionListFactory' );
 		$udlf->getByCompanyDeductionId( $this->getId() );
 		return $udlf->getRecordCount();
 	}
 
+	/**
+	 * @param string $ids UUID
+	 * @return array
+	 */
 	function getExpandedPayStubEntryAccountIDs( $ids ) {
 		//Debug::Arr($ids, 'Total Gross ID: '. $this->getPayStubEntryAccountLinkObject()->getTotalGross() .' IDs:', __FILE__, __LINE__, __METHOD__, 10);
 		$ids = (array)$ids;
@@ -2809,6 +2613,13 @@ class CompanyDeductionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param object $pay_stub_obj
+	 * @param string|array $ids UUID
+	 * @param string $ps_entries
+	 * @param string $return_value
+	 * @return bool|string
+	 */
 	function getPayStubEntryAmountSum( $pay_stub_obj, $ids, $ps_entries = 'current', $return_value = 'amount' ) {
 		if ( !is_object($pay_stub_obj) ) {
 			return FALSE;
@@ -2850,7 +2661,7 @@ class CompanyDeductionFactory extends Factory {
 		if ( empty($type_ids) == FALSE ) {
 			$type_amount_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( $ps_entries, $type_ids );
 		}
-
+		$amount_arr = array();
 		$amount_arr[$return_value] = 0;
 		if ( count($ids) > 0 ) {
 			//Still other IDs left to total.
@@ -2864,6 +2675,12 @@ class CompanyDeductionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param object $pay_stub_obj
+	 * @param int $include_account_amount_type_id ID
+	 * @param int $exclude_account_amount_type_id ID
+	 * @return bool|string
+	 */
 	function getCalculationPayStubAmount( $pay_stub_obj, $include_account_amount_type_id = NULL, $exclude_account_amount_type_id = NULL ) {
 		if ( !is_object($pay_stub_obj) ) {
 			return FALSE;
@@ -2913,6 +2730,9 @@ class CompanyDeductionFactory extends Factory {
 	//
 	// Lookback functions.
 	//
+	/**
+	 * @return bool
+	 */
 	function isLookbackCalculation() {
 		if ( $this->getCalculation() == 69 AND isset($this->length_of_service_multiplier[(int)$this->getCompanyValue3()]) AND $this->getCompanyValue2() > 0 ) {
 			return TRUE;
@@ -2921,6 +2741,11 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $include_account_amount_type_id ID
+	 * @param int $exclude_account_amount_type_id ID
+	 * @return int|string
+	 */
 	function getLookbackCalculationPayStubAmount( $include_account_amount_type_id = NULL, $exclude_account_amount_type_id = NULL ) {
 		$amount = 0;
 		if ( isset($this->lookback_pay_stub_lf) AND $this->lookback_pay_stub_lf->getRecordCount() > 0 ) {
@@ -2935,6 +2760,11 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	//Handle look back period, which is always based on the transaction date *before* the current pay periods transaction date.
+
+	/**
+	 * @param object $pay_period_obj
+	 * @return array
+	 */
 	function getLookbackStartAndEndDates( $pay_period_obj ) {
 		$retarr = array(
 						'start_date' => FALSE,
@@ -2955,6 +2785,11 @@ class CompanyDeductionFactory extends Factory {
 		return $retarr;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param object $pay_period_obj
+	 * @return array
+	 */
 	function getLookbackPayStubs( $user_id, $pay_period_obj ) {
 		$lookback_dates = $this->getLookbackStartAndEndDates( $pay_period_obj );
 
@@ -2985,6 +2820,10 @@ class CompanyDeductionFactory extends Factory {
 		return $retarr;
 	}
 
+	/**
+	 * @param object $pay_stub_obj
+	 * @return bool|int|string
+	 */
 	function getCalculationYTDAmount( $pay_stub_obj ) {
 		if ( !is_object($pay_stub_obj) ) {
 			return FALSE;
@@ -3009,6 +2848,10 @@ class CompanyDeductionFactory extends Factory {
 		return $amount;
 	}
 
+	/**
+	 * @param object $pay_stub_obj
+	 * @return bool|int|string
+	 */
 	function getPayStubEntryAccountYTDAmount( $pay_stub_obj ) {
 		if ( !is_object($pay_stub_obj) ) {
 			return FALSE;
@@ -3028,6 +2871,9 @@ class CompanyDeductionFactory extends Factory {
 		return $amount;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getJavaScriptArrays() {
 		$output = 'var fields = '. Misc::getJSArray( $this->calculation_id_fields, 'fields', TRUE );
 
@@ -3038,6 +2884,12 @@ class CompanyDeductionFactory extends Factory {
 		return $output;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param int $type_id
+	 * @param $name
+	 * @return bool
+	 */
 	static function getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, $type_id, $name ) {
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 		$psealf->getByCompanyIdAndTypeAndFuzzyName( $company_id, $type_id, $name );
@@ -3048,13 +2900,494 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
-		if ( $this->getName() == '' ) {
-			$this->Validator->isTrue(		'name',
-											 FALSE,
-											 TTi18n::gettext('Name not specified'));
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Legal Entity
+		if ( $this->getLegalEntity() != TTUUID::getZeroID() ) {
+			$clf = TTnew( 'LegalEntityListFactory' );
+			$this->Validator->isResultSetWithRows(	'legal_entity_id',
+														$clf->getByID($this->getLegalEntity()),
+														TTi18n::gettext('Legal Entity is invalid')
+													);
 		}
 
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+													$clf->getByID($this->getCompany()),
+													TTi18n::gettext('Company is invalid')
+												);
+
+		// Payroll remittance agency
+		if ( $this->getPayrollRemittanceAgency() !== FALSE AND $this->getPayrollRemittanceAgency() != TTUUID::getZeroID() ) {
+			$clf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+			$this->Validator->isResultSetWithRows(	'payroll_remittance_agency_id',
+														$clf->getByID( $this->getPayrollRemittanceAgency() ),
+														TTi18n::gettext('Payroll remittance agency is invalid')
+													);
+		}
+
+		// Status
+		$this->Validator->inArrayKey(	'status_id',
+												$this->getStatus(),
+												TTi18n::gettext('Incorrect Status'),
+												$this->getOptions('status')
+											);
+		// Type
+		$this->Validator->inArrayKey(	'type_id',
+												$this->getType(),
+												TTi18n::gettext('Incorrect Type'),
+												$this->getOptions('type')
+											);
+		// Name
+		if ( $this->getName() == '' ) {
+			$this->Validator->isTrue(		'name',
+											FALSE,
+											TTi18n::gettext('Name not specified'));
+		}
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isLength(		'name',
+													$this->getName(),
+													TTi18n::gettext('Name is too short or too long'),
+													2,
+													100
+												);
+		}
+
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(				'name',
+													$this->isUniqueName($this->getName()),
+													TTi18n::gettext('Name is already in use')
+												);
+		}
+		// Pay Stub Entry Description
+		if ( strlen($this->getPayStubEntryDescription()) != 0 ) {
+			$this->Validator->isLength(		'pay_stub_entry_description',
+													$this->getPayStubEntryDescription(),
+													TTi18n::gettext('Description is too short or too long'),
+													0,
+													100
+												);
+		}
+		// Start date
+		if ( $this->getStartDate() != NULL ) {
+			$this->Validator->isDate(		'start_date',
+													$this->getStartDate(),
+													TTi18n::gettext('Incorrect start date')
+												);
+		}
+		// End Date
+		if ( $this->getEndDate() != NULL ) {
+			$this->Validator->isDate(		'end_date',
+													$this->getEndDate(),
+													TTi18n::gettext('Incorrect end date')
+												);
+		}
+		// Minimum length of service days
+		if ( $this->getMinimumLengthOfServiceDays() !== FALSE AND $this->getMinimumLengthOfServiceDays() >= 0 ) {
+			$this->Validator->isFloat(			'minimum_length_of_service_days',
+													$this->getMinimumLengthOfServiceDays(),
+													TTi18n::gettext('Minimum length of service days is invalid')
+												);
+		}
+		// Maximum length of service days
+		if ( $this->getMaximumLengthOfServiceDays() !== FALSE ) {
+			$this->Validator->isFloat(			'maximum_length_of_service_days',
+													$this->getMaximumLengthOfServiceDays(),
+													TTi18n::gettext('Maximum length of service days is invalid')
+												);
+		}
+		//  minimum length of service unit
+		if ( $this->getMinimumLengthOfServiceUnit() != '' ) {
+			$this->Validator->inArrayKey(	'minimum_length_of_service_unit_id',
+													$this->getMinimumLengthOfServiceUnit(),
+													TTi18n::gettext('Incorrect minimum length of service unit'),
+													$this->getOptions('length_of_service_unit')
+												);
+		}
+		// maximum length of service unit
+		if ( $this->getMaximumLengthOfServiceUnit() != '' ) {
+			$this->Validator->inArrayKey(	'maximum_length_of_service_unit_id',
+													$this->getMaximumLengthOfServiceUnit(),
+													TTi18n::gettext('Incorrect maximum length of service unit'),
+													$this->getOptions('length_of_service_unit')
+												);
+		}
+		// Minimum length of service
+		if ( $this->getMinimumLengthOfService() !== FALSE AND $this->getMinimumLengthOfService() >= 0 ) {
+			$this->Validator->isFloat(			'minimum_length_of_service',
+													$this->getMinimumLengthOfService(),
+													TTi18n::gettext('Minimum length of service is invalid')
+												);
+
+		}
+		// Maximum length of service
+		if ( $this->getMaximumLengthOfService() !== FALSE ) {
+			$this->Validator->isFloat(			'maximum_length_of_service',
+													$this->getMaximumLengthOfService(),
+													TTi18n::gettext('Maximum length of service is invalid')
+												);
+		}
+
+		// Minimum employee age
+		if ( $this->getMinimumUserAge() !== FALSE AND $this->getMinimumUserAge() >= 0 ) {
+			$this->Validator->isFloat(			'minimum_user_age',
+														$this->getMinimumUserAge(),
+														TTi18n::gettext('Minimum employee age is invalid')
+													);
+		}
+
+		// Maximum employee age
+		if ( $this->getMaximumUserAge() !== FALSE AND $this->getMaximumUserAge() >= 0 ) {
+			$this->Validator->isFloat(			'maximum_user_age',
+														$this->getMaximumUserAge(),
+														TTi18n::gettext('Maximum employee age is invalid')
+													);
+		}
+
+		// Contributing Pay Code Policy
+		if ( $this->getLengthOfServiceContributingPayCodePolicy() !== FALSE AND $this->getLengthOfServiceContributingPayCodePolicy() != TTUUID::getZeroID() ) {
+			$csplf = TTnew( 'ContributingPayCodePolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'length_of_service_contributing_pay_code_policy_id',
+															$csplf->getByID($this->getLengthOfServiceContributingPayCodePolicy()),
+															TTi18n::gettext('Contributing Pay Code Policy is invalid')
+														);
+		}
+
+		// Apply Frequency
+		if ( $this->getApplyFrequency() != 0 ) {
+			$this->Validator->inArrayKey( 'apply_frequency_id',
+										  $this->getApplyFrequency(),
+										  TTi18n::gettext( 'Incorrect frequency' ),
+										  $this->getOptions( 'apply_frequency' )
+			);
+		}
+
+		// Frequency Month
+		if ( $this->getApplyFrequencyMonth() != 0 ) {
+			$this->Validator->inArrayKey(	'apply_frequency_month',
+												$this->getApplyFrequencyMonth(),
+												TTi18n::gettext('Incorrect frequency month'),
+												TTDate::getMonthOfYearArray()
+											);
+		}
+
+		// frequency day of month
+		if ( $this->getApplyFrequencyDayOfMonth() != 0 ) {
+			$this->Validator->inArrayKey(	'apply_frequency_day_of_month',
+												$this->getApplyFrequencyDayOfMonth(),
+												TTi18n::gettext('Incorrect frequency day of month'),
+												TTDate::getDayOfMonthArray()
+											);
+		}
+
+		// frequency day of week
+		if ( $this->getApplyFrequencyDayOfWeek() != 0 ) {
+			$this->Validator->inArrayKey(	'apply_frequency_day_of_week',
+												$this->getApplyFrequencyDayOfWeek(),
+												TTi18n::gettext('Incorrect frequency day of week'),
+												TTDate::getDayOfWeekArray()
+											);
+		}
+
+		//  frequency quarter month
+		if ( $this->getApplyFrequencyQuarterMonth() != 0 ) {
+			$this->Validator->isGreaterThan(	'apply_frequency_quarter_month',
+												$this->getApplyFrequencyQuarterMonth(),
+												TTi18n::gettext('Incorrect frequency quarter month'),
+												1
+											);
+			if ( $this->Validator->isError('apply_frequency_quarter_month') == FALSE ) {
+				$this->Validator->isLessThan(	'apply_frequency_quarter_month',
+												$this->getApplyFrequencyQuarterMonth(),
+												TTi18n::gettext('Incorrect frequency quarter month'),
+												3
+											);
+			}
+		}
+
+		// Payroll Run Type
+		if ( $this->getApplyPayrollRunType() != 0 ) {
+			$this->Validator->inArrayKey(	'apply_payroll_run_type_id',
+												$this->getApplyPayrollRunType(),
+												TTi18n::gettext('Incorrect payroll run type'),
+												$this->getOptions('apply_payroll_run_type')
+											) ;
+		}
+
+		// Calculation
+		$this->Validator->inArrayKey(	'calculation_id',
+												$this->getCalculation(),
+												TTi18n::gettext('Incorrect Calculation'),
+												$this->getOptions('calculation')
+											);
+
+		// Calculation Order
+		$this->Validator->isNumeric(		'calculation_order',
+												$this->getCalculationOrder(),
+												TTi18n::gettext('Invalid Calculation Order')
+											);
+
+		$cf = TTnew( 'CompanyFactory' );
+		// Country
+		if ( $this->getCountry() != '' ) {
+			$this->Validator->inArrayKey(	'country',
+												$this->getCountry(),
+												TTi18n::gettext('Invalid Country'),
+												$cf->getOptions('country')
+											);
+		}
+
+		// Province
+		if ( $this->getProvince() != '' ) {
+			$options_arr = $cf->getOptions('province');
+			if ( isset($options_arr[$this->getCountry()]) ) {
+				$options = $options_arr[$this->getCountry()];
+			} else {
+				$options = array();
+			}
+			$this->Validator->inArrayKey(	'province',
+												$this->getProvince(),
+												TTi18n::gettext('Invalid Province/State'),
+												$options
+											);
+			unset( $options, $options_arr );
+		}
+
+		// District
+		if ( $this->getDistrict() != '' AND $this->getDistrict() != '00' AND $this->getDistrict() != TTUUID::getZeroID() ) {
+			$options_arr = $cf->getOptions('district');
+			if ( isset($options_arr[$this->getCountry()][$this->getProvince()]) ) {
+				$options = $options_arr[$this->getCountry()][$this->getProvince()];
+			} else {
+				$options = array();
+			}
+			$this->Validator->inArrayKey(	'district',
+													$this->getDistrict(),
+													TTi18n::gettext('Invalid District'),
+													$options
+												);
+			unset( $options, $options_arr );
+		}
+
+		// Company Value 1
+		if ( $this->getCompanyValue1() != '' ) {
+			$this->Validator->isLength(		'company_value1',
+													$this->getCompanyValue1(),
+													TTi18n::gettext('Company Value 1 is too short or too long'),
+													1,
+													4096
+												);
+		}
+		// Company Value 2
+		if ( $this->getCompanyValue2() != '' ) {
+			$this->Validator->isLength(		'company_value2',
+													$this->getCompanyValue2(),
+													TTi18n::gettext('Company Value 2 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// Company Value 3
+		if ( $this->getCompanyValue3() != '' ) {
+			$this->Validator->isLength(		'company_value3',
+													$this->getCompanyValue3(),
+													TTi18n::gettext('Company Value 3 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// Company Value 4
+		if ( $this->getCompanyValue4() != '' ) {
+			$this->Validator->isLength(		'company_value4',
+													$this->getCompanyValue4(),
+													TTi18n::gettext('Company Value 4 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// Company Value 5
+		if ( $this->getCompanyValue5() != '' ) {
+			$this->Validator->isLength(		'company_value5',
+													$this->getCompanyValue5(),
+													TTi18n::gettext('Company Value 5 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// Company Value 6
+		if ( $this->getCompanyValue6() != '' ) {
+			$this->Validator->isLength(		'company_value6',
+													$this->getCompanyValue6(),
+													TTi18n::gettext('Company Value 6 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// Company Value 7
+		if ( $this->getCompanyValue7() != '' ) {
+			$this->Validator->isLength(		'company_value7',
+													$this->getCompanyValue7(),
+													TTi18n::gettext('Company Value 7 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// Company Value 8
+		if ( $this->getCompanyValue8() != '' ) {
+			$this->Validator->isLength(		'company_value8',
+													$this->getCompanyValue8(),
+													TTi18n::gettext('Company Value 8 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// Company Value 9
+		if ( $this->getCompanyValue9() != '' ) {
+			$this->Validator->isLength(		'company_value9',
+													$this->getCompanyValue9(),
+													TTi18n::gettext('Company Value 9 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// Company Value 10
+		if ( $this->getCompanyValue10() != '' ) {
+			$this->Validator->isLength(		'company_value10',
+													$this->getCompanyValue10(),
+													TTi18n::gettext('Company Value 10 is too short or too long'),
+													1,
+													20
+												);
+		}
+
+		// User Value 1
+		if ( $this->getUserValue1() != '' ) {
+			$this->Validator->isLength(		'user_value1',
+													$this->getUserValue1(),
+													TTi18n::gettext('User Value 1 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 2
+		if ( $this->getUserValue2() != '' ) {
+			$this->Validator->isLength(		'user_value2',
+												$this->getUserValue2(),
+												TTi18n::gettext('User Value 2 is too short or too long'),
+												1,
+												20
+											);
+		}
+		// User Value 3
+		if ( $this->getUserValue3() != '' ) {
+			$this->Validator->isLength(		'user_value3',
+												$this->getUserValue3(),
+												TTi18n::gettext('User Value 3 is too short or too long'),
+												1,
+												20
+											);
+		}
+		// User Value 4
+		if ( $this->getUserValue4() != '' ) {
+			$this->Validator->isLength(		'user_value4',
+												$this->getUserValue4(),
+												TTi18n::gettext('User Value 4 is too short or too long'),
+												1,
+												20
+											);
+		}
+		// User Value 5
+		if ( $this->getUserValue5() != '' ) {
+			$this->Validator->isLength(		'user_value5',
+												$this->getUserValue5(),
+												TTi18n::gettext('User Value 5 is too short or too long'),
+												1,
+												20
+											);
+		}
+		// User Value 6
+		if ( $this->getUserValue6() != '' ) {
+			$this->Validator->isLength(		'user_value6',
+												$this->getUserValue6(),
+												TTi18n::gettext('User Value 6 is too short or too long'),
+												1,
+												20
+											);
+		}
+		// User Value 7
+		if ( $this->getUserValue7() != '' ) {
+			$this->Validator->isLength(		'user_value7',
+												$this->getUserValue7(),
+												TTi18n::gettext('User Value 7 is too short or too long'),
+												1,
+												20
+											);
+		}
+		// User Value 8
+		if ( $this->getUserValue8() != '' ) {
+			$this->Validator->isLength(		'user_value8',
+												$this->getUserValue8(),
+												TTi18n::gettext('User Value 8 is too short or too long'),
+												1,
+												20
+											);
+		}
+		// User Value 9
+		if ( $this->getUserValue9() != '' ) {
+			$this->Validator->isLength(		'user_value9',
+													$this->getUserValue9(),
+													TTi18n::gettext('User Value 9 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 10
+		if ( $this->getUserValue10() != '' ) {
+			$this->Validator->isLength(		'user_value10',
+													$this->getUserValue10(),
+													TTi18n::gettext('User Value 10 is too short or too long'),
+													1,
+													20
+												);
+		}
+
+		// Pay Stub Account
+		if ( $this->getPayStubEntryAccount() != TTUUID::getZeroID() ) {
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'pay_stub_entry_account',
+													$psealf->getByID($this->getPayStubEntryAccount()),
+													TTi18n::gettext('Pay Stub Account is invalid')
+												);
+		}
+
+		// Include account amount type
+		if ( $this->getIncludeAccountAmountType() !== FALSE ) {
+			$this->Validator->inArrayKey( 'include_account_amount_type_id',
+										  $this->getIncludeAccountAmountType(),
+										  TTi18n::gettext( 'Incorrect include account amount type' ),
+										  $this->getOptions( 'account_amount_type' )
+			);
+		}
+
+		//  Exclude account amount type
+		if ( $this->getExcludeAccountAmountType() !== FALSE ) {
+			$this->Validator->inArrayKey( 'exclude_account_amount_type_id',
+										  $this->getExcludeAccountAmountType(),
+										  TTi18n::gettext( 'Incorrect exclude account amount type' ),
+										  $this->getOptions( 'account_amount_type' )
+			);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL AND $this->getCalculation() == 69 ) {
 			$valid_formula = TTMath::ValidateFormula( TTMath::translateVariables( $this->getCompanyValue1(), TTMath::clearVariables( Misc::trimSortPrefix( $this->getOptions('formula_variables') ) ) ) );
 
@@ -3068,6 +3401,383 @@ class CompanyDeductionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|mixed|string
+	 */
+	function getPayrollRemittanceAgencyIdByNameOrCalculation() {
+		//Based on current object information, guess what payroll remittance agency it should be assigned to.
+
+		$retval = FALSE;
+
+		$calculation_id = $this->getCalculation();
+		$name = $this->getName();
+		Debug::text( 'Search Name: ' . $name . ' Calculation ID: ' . $calculation_id, __FILE__, __LINE__, __METHOD__, 10 );
+
+		//Try to base decision off the calculation type first.
+		$calculation_type_map = array(82, 83, 84, 85, 90, 91, 100, 200, 300);
+		if ( in_array( $calculation_id, $calculation_type_map ) ) {
+			Debug::text( 'Using calculation search...', __FILE__, __LINE__, __METHOD__, 10 );
+			switch ( $calculation_id ) {
+				case 82: //US - Medicare Formula (Employee)'),
+				case 83: //US - Medicare Formula (Employer)'),
+				case 84: //US - Social Security Formula (Employee)'),
+				case 85: //US - Social Security Formula (Employer)'),
+					$retval = '10:US:00:00:0010';
+					break;
+				case 90: //Canada - Custom Formulas CPP and EI
+				case 91: //Canada - Custom Formulas CPP and EI
+					$retval = '10:CA:00:00:0010';
+					break;
+				case 100: //Federal Income Tax Formula
+					$retval = '10:' . $this->getCountry() . ':00:00:0010';
+					break;
+				case 200: //Province/State Income Tax Formula
+					switch ( strtolower( $this->getCountry() ) ) {
+						case 'ca':
+							$retval = '10:CA:00:00:0010';
+							break;
+						default:
+							$retval = '20:' . $this->getCountry() . ':' . $this->getProvince() . ':00:0010';
+							break;
+					}
+					break;
+				case 300: //District/County Income Tax Formula
+					$retval = '20:' . $this->getCountry() . ':' . $this->getProvince() . ':' . $this->getDistrict() . ':0010';
+					break;
+			}
+		} else {
+			Debug::text( 'Using name search...', __FILE__, __LINE__, __METHOD__, 10 );
+			//Fall back to name as a last resort.
+			$name_map = array(
+				//Canada
+				'CA - Addl. Income Tax'         => '10:CA:00:00:0010',
+				'CPP - Employer' 				=> '10:CA:00:00:0010',
+				'EI - Employer' 				=> '10:CA:00:00:0010',
+
+				//US
+				'US - Addl. Income Tax'         => '10:US:00:00:0010',
+				'Additional Federal Income Tax' => '10:US:00:00:0010',
+
+				'US - Federal Unemployment Insurance'    => '10:US:00:00:0010',
+				'Federal Unemployment Insurance'         => '10:US:00:00:0010',
+				'FUTA'                                   => '10:US:00:00:0010',
+
+				//US State Addl Income Tax
+				'AL - Addl. Income Tax'                  => '20:US:AL:00:0010',
+				'AK - Addl. Income Tax'                  => '20:US:AK:00:0010',
+				'AZ - Addl. Income Tax'                  => '20:US:AZ:00:0010',
+				'AR - Addl. Income Tax'                  => '20:US:AR:00:0010',
+				//'CA - Addl. Income Tax' => '20:US:CA:00:0010', //This is a duplicate with Canada "CA - Addl. Income Tax"
+				'CO - Addl. Income Tax'                  => '20:US:CO:00:0010',
+				'CT - Addl. Income Tax'                  => '20:US:CT:00:0010',
+				'DE - Addl. Income Tax'                  => '20:US:DE:00:0010',
+				'DC - Addl. Income Tax'                  => '20:US:DC:00:0010',
+				'FL - Addl. Income Tax'                  => '20:US:FL:00:0010',
+				'GA - Addl. Income Tax'                  => '20:US:GA:00:0010',
+				'HI - Addl. Income Tax'                  => '20:US:HI:00:0010',
+				'ID - Addl. Income Tax'                  => '20:US:ID:00:0010',
+				'IL - Addl. Income Tax'                  => '20:US:IL:00:0010',
+				'IN - Addl. Income Tax'                  => '20:US:IN:00:0010',
+				'IA - Addl. Income Tax'                  => '20:US:IA:00:0010',
+				'KS - Addl. Income Tax'                  => '20:US:KS:00:0010',
+				'KY - Addl. Income Tax'                  => '20:US:KY:00:0010',
+				'LA - Addl. Income Tax'                  => '20:US:LA:00:0010',
+				'ME - Addl. Income Tax'                  => '20:US:ME:00:0010',
+				'MD - Addl. Income Tax'                  => '20:US:MD:00:0010',
+				'MA - Addl. Income Tax'                  => '20:US:MA:00:0010',
+				'MI - Addl. Income Tax'                  => '20:US:MI:00:0010',
+				'MN - Addl. Income Tax'                  => '20:US:MN:00:0010',
+				'MS - Addl. Income Tax'                  => '20:US:MS:00:0010',
+				'MO - Addl. Income Tax'                  => '20:US:MO:00:0010',
+				'MT - Addl. Income Tax'                  => '20:US:MT:00:0010',
+				'NE - Addl. Income Tax'                  => '20:US:NE:00:0010',
+				'NV - Addl. Income Tax'                  => '20:US:NV:00:0010',
+				'NH - Addl. Income Tax'                  => '20:US:NH:00:0010',
+				'NM - Addl. Income Tax'                  => '20:US:NM:00:0010',
+				'NJ - Addl. Income Tax'                  => '20:US:NJ:00:0010',
+				'NY - Addl. Income Tax'                  => '20:US:NY:00:0010',
+				'NC - Addl. Income Tax'                  => '20:US:NC:00:0010',
+				'ND - Addl. Income Tax'                  => '20:US:ND:00:0010',
+				'OH - Addl. Income Tax'                  => '20:US:OH:00:0010',
+				'OK - Addl. Income Tax'                  => '20:US:OK:00:0010',
+				'OR - Addl. Income Tax'                  => '20:US:OR:00:0010',
+				'PA - Addl. Income Tax'                  => '20:US:PA:00:0010',
+				'RI - Addl. Income Tax'                  => '20:US:RI:00:0010',
+				'SC - Addl. Income Tax'                  => '20:US:SC:00:0010',
+				'SD - Addl. Income Tax'                  => '20:US:SD:00:0010',
+				'TN - Addl. Income Tax'                  => '20:US:TN:00:0010',
+				'TX - Addl. Income Tax'                  => '20:US:TX:00:0010',
+				'UT - Addl. Income Tax'                  => '20:US:UT:00:0010',
+				'VT - Addl. Income Tax'                  => '20:US:VT:00:0010',
+				'VA - Addl. Income Tax'                  => '20:US:VA:00:0010',
+				'WA - Addl. Income Tax'                  => '20:US:WA:00:0010',
+				'WV - Addl. Income Tax'                  => '20:US:WV:00:0010',
+				'WI - Addl. Income Tax'                  => '20:US:WI:00:0010',
+				'WY - Addl. Income Tax'                  => '20:US:WY:00:0010',
+				'AL - State Addl. Income Tax'            => '20:US:AL:00:0010',
+				'AK - State Addl. Income Tax'            => '20:US:AK:00:0010',
+				'AZ - State Addl. Income Tax'            => '20:US:AZ:00:0010',
+				'AR - State Addl. Income Tax'            => '20:US:AR:00:0010',
+				'CA - State Addl. Income Tax'            => '20:US:CA:00:0010',
+				'CO - State Addl. Income Tax'            => '20:US:CO:00:0010',
+				'CT - State Addl. Income Tax'            => '20:US:CT:00:0010',
+				'DE - State Addl. Income Tax'            => '20:US:DE:00:0010',
+				'DC - State Addl. Income Tax'            => '20:US:DC:00:0010',
+				'FL - State Addl. Income Tax'            => '20:US:FL:00:0010',
+				'GA - State Addl. Income Tax'            => '20:US:GA:00:0010',
+				'HI - State Addl. Income Tax'            => '20:US:HI:00:0010',
+				'ID - State Addl. Income Tax'            => '20:US:ID:00:0010',
+				'IL - State Addl. Income Tax'            => '20:US:IL:00:0010',
+				'IN - State Addl. Income Tax'            => '20:US:IN:00:0010',
+				'IA - State Addl. Income Tax'            => '20:US:IA:00:0010',
+				'KS - State Addl. Income Tax'            => '20:US:KS:00:0010',
+				'KY - State Addl. Income Tax'            => '20:US:KY:00:0010',
+				'LA - State Addl. Income Tax'            => '20:US:LA:00:0010',
+				'ME - State Addl. Income Tax'            => '20:US:ME:00:0010',
+				'MD - State Addl. Income Tax'            => '20:US:MD:00:0010',
+				'MA - State Addl. Income Tax'            => '20:US:MA:00:0010',
+				'MI - State Addl. Income Tax'            => '20:US:MI:00:0010',
+				'MN - State Addl. Income Tax'            => '20:US:MN:00:0010',
+				'MS - State Addl. Income Tax'            => '20:US:MS:00:0010',
+				'MO - State Addl. Income Tax'            => '20:US:MO:00:0010',
+				'MT - State Addl. Income Tax'            => '20:US:MT:00:0010',
+				'NE - State Addl. Income Tax'            => '20:US:NE:00:0010',
+				'NV - State Addl. Income Tax'            => '20:US:NV:00:0010',
+				'NH - State Addl. Income Tax'            => '20:US:NH:00:0010',
+				'NM - State Addl. Income Tax'            => '20:US:NM:00:0010',
+				'NJ - State Addl. Income Tax'            => '20:US:NJ:00:0010',
+				'NY - State Addl. Income Tax'            => '20:US:NY:00:0010',
+				'NC - State Addl. Income Tax'            => '20:US:NC:00:0010',
+				'ND - State Addl. Income Tax'            => '20:US:ND:00:0010',
+				'OH - State Addl. Income Tax'            => '20:US:OH:00:0010',
+				'OK - State Addl. Income Tax'            => '20:US:OK:00:0010',
+				'OR - State Addl. Income Tax'            => '20:US:OR:00:0010',
+				'PA - State Addl. Income Tax'            => '20:US:PA:00:0010',
+				'RI - State Addl. Income Tax'            => '20:US:RI:00:0010',
+				'SC - State Addl. Income Tax'            => '20:US:SC:00:0010',
+				'SD - State Addl. Income Tax'            => '20:US:SD:00:0010',
+				'TN - State Addl. Income Tax'            => '20:US:TN:00:0010',
+				'TX - State Addl. Income Tax'            => '20:US:TX:00:0010',
+				'UT - State Addl. Income Tax'            => '20:US:UT:00:0010',
+				'VT - State Addl. Income Tax'            => '20:US:VT:00:0010',
+				'VA - State Addl. Income Tax'            => '20:US:VA:00:0010',
+				'WA - State Addl. Income Tax'            => '20:US:WA:00:0010',
+				'WV - State Addl. Income Tax'            => '20:US:WV:00:0010',
+				'WI - State Addl. Income Tax'            => '20:US:WI:00:0010',
+				'WY - State Addl. Income Tax'            => '20:US:WY:00:0010',
+
+				//US State Unemployment Insurance
+				'AL - Unemployment Insurance'            => '20:US:AL:00:0020',
+				'AK - Unemployment Insurance'            => '20:US:AK:00:0020',
+				'AZ - Unemployment Insurance'            => '20:US:AZ:00:0020',
+				'AR - Unemployment Insurance'            => '20:US:AR:00:0020',
+				'CA - Unemployment Insurance'            => '20:US:CA:00:0010', //Combined with State.
+				'CO - Unemployment Insurance'            => '20:US:CO:00:0020',
+				'CT - Unemployment Insurance'            => '20:US:CT:00:0020',
+				'DE - Unemployment Insurance'            => '20:US:DE:00:0020',
+				'DC - Unemployment Insurance'            => '20:US:DC:00:0020',
+				'FL - Unemployment Insurance'            => '20:US:FL:00:0020',
+				'GA - Unemployment Insurance'            => '20:US:GA:00:0020',
+				'HI - Unemployment Insurance'            => '20:US:HI:00:0020',
+				'ID - Unemployment Insurance'            => '20:US:ID:00:0020',
+				'IL - Unemployment Insurance'            => '20:US:IL:00:0020',
+				'IN - Unemployment Insurance'            => '20:US:IN:00:0020',
+				'IA - Unemployment Insurance'            => '20:US:IA:00:0020',
+				'KS - Unemployment Insurance'            => '20:US:KS:00:0020',
+				'KY - Unemployment Insurance'            => '20:US:KY:00:0020',
+				'LA - Unemployment Insurance'            => '20:US:LA:00:0020',
+				'ME - Unemployment Insurance'            => '20:US:ME:00:0020',
+				'MD - Unemployment Insurance'            => '20:US:MD:00:0020',
+				'MA - Unemployment Insurance'            => '20:US:MA:00:0020',
+				'MI - Unemployment Insurance'            => '20:US:MI:00:0020',
+				'MN - Unemployment Insurance'            => '20:US:MN:00:0020',
+				'MS - Unemployment Insurance'            => '20:US:MS:00:0020',
+				'MO - Unemployment Insurance'            => '20:US:MO:00:0020',
+				'MT - Unemployment Insurance'            => '20:US:MT:00:0020',
+				'NE - Unemployment Insurance'            => '20:US:NE:00:0020',
+				'NV - Unemployment Insurance'            => '20:US:NV:00:0020',
+				'NH - Unemployment Insurance'            => '20:US:NH:00:0020',
+				'NM - Unemployment Insurance'            => '20:US:NM:00:0010', //Combined with State.
+				'NJ - Unemployment Insurance'            => '20:US:NJ:00:0020',
+				'NY - Unemployment Insurance'            => '20:US:NY:00:0010', //Combined with State.
+				'NC - Unemployment Insurance'            => '20:US:NC:00:0020',
+				'ND - Unemployment Insurance'            => '20:US:ND:00:0020',
+				'OH - Unemployment Insurance'            => '20:US:OH:00:0020',
+				'OK - Unemployment Insurance'            => '20:US:OK:00:0020',
+				'OR - Unemployment Insurance'            => '20:US:OR:00:0010', //Combined with State.
+				'PA - Unemployment Insurance'            => '20:US:PA:00:0020',
+				'RI - Unemployment Insurance'            => '20:US:RI:00:0020',
+				'SC - Unemployment Insurance'            => '20:US:SC:00:0020',
+				'SD - Unemployment Insurance'            => '20:US:SD:00:0020',
+				'TN - Unemployment Insurance'            => '20:US:TN:00:0020',
+				'TX - Unemployment Insurance'            => '20:US:TX:00:0020',
+				'UT - Unemployment Insurance'            => '20:US:UT:00:0020',
+				'VT - Unemployment Insurance'            => '20:US:VT:00:0020',
+				'VA - Unemployment Insurance'            => '20:US:VA:00:0020',
+				'WA - Unemployment Insurance'            => '20:US:WA:00:0020',
+				'WV - Unemployment Insurance'            => '20:US:WV:00:0020',
+				'WI - Unemployment Insurance'            => '20:US:WI:00:0020',
+				'WY - Unemployment Insurance'            => '20:US:WY:00:0020',
+
+				//US State Unemployment Insurance - Employer
+				'AL - Unemployment Insurance - Employer' => '20:US:AL:00:0020',
+				'AK - Unemployment Insurance - Employer' => '20:US:AK:00:0020',
+				'AZ - Unemployment Insurance - Employer' => '20:US:AZ:00:0020',
+				'AR - Unemployment Insurance - Employer' => '20:US:AR:00:0020',
+				'CA - Unemployment Insurance - Employer' => '20:US:CA:00:0010', //Combined with State.
+				'CO - Unemployment Insurance - Employer' => '20:US:CO:00:0020',
+				'CT - Unemployment Insurance - Employer' => '20:US:CT:00:0020',
+				'DE - Unemployment Insurance - Employer' => '20:US:DE:00:0020',
+				'DC - Unemployment Insurance - Employer' => '20:US:DC:00:0020',
+				'FL - Unemployment Insurance - Employer' => '20:US:FL:00:0020',
+				'GA - Unemployment Insurance - Employer' => '20:US:GA:00:0020',
+				'HI - Unemployment Insurance - Employer' => '20:US:HI:00:0020',
+				'ID - Unemployment Insurance - Employer' => '20:US:ID:00:0020',
+				'IL - Unemployment Insurance - Employer' => '20:US:IL:00:0020',
+				'IN - Unemployment Insurance - Employer' => '20:US:IN:00:0020',
+				'IA - Unemployment Insurance - Employer' => '20:US:IA:00:0020',
+				'KS - Unemployment Insurance - Employer' => '20:US:KS:00:0020',
+				'KY - Unemployment Insurance - Employer' => '20:US:KY:00:0020',
+				'LA - Unemployment Insurance - Employer' => '20:US:LA:00:0020',
+				'ME - Unemployment Insurance - Employer' => '20:US:ME:00:0020',
+				'MD - Unemployment Insurance - Employer' => '20:US:MD:00:0020',
+				'MA - Unemployment Insurance - Employer' => '20:US:MA:00:0020',
+				'MI - Unemployment Insurance - Employer' => '20:US:MI:00:0020',
+				'MN - Unemployment Insurance - Employer' => '20:US:MN:00:0020',
+				'MS - Unemployment Insurance - Employer' => '20:US:MS:00:0020',
+				'MO - Unemployment Insurance - Employer' => '20:US:MO:00:0020',
+				'MT - Unemployment Insurance - Employer' => '20:US:MT:00:0020',
+				'NE - Unemployment Insurance - Employer' => '20:US:NE:00:0020',
+				'NV - Unemployment Insurance - Employer' => '20:US:NV:00:0020',
+				'NH - Unemployment Insurance - Employer' => '20:US:NH:00:0020',
+				'NM - Unemployment Insurance - Employer' => '20:US:NM:00:0010', //Combined with State.
+				'NJ - Unemployment Insurance - Employer' => '20:US:NJ:00:0020',
+				'NY - Unemployment Insurance - Employer' => '20:US:NY:00:0010', //Combined with State.
+				'NC - Unemployment Insurance - Employer' => '20:US:NC:00:0020',
+				'ND - Unemployment Insurance - Employer' => '20:US:ND:00:0020',
+				'OH - Unemployment Insurance - Employer' => '20:US:OH:00:0020',
+				'OK - Unemployment Insurance - Employer' => '20:US:OK:00:0020',
+				'OR - Unemployment Insurance - Employer' => '20:US:OR:00:0010', //Combined with State.
+				'PA - Unemployment Insurance - Employer' => '20:US:PA:00:0020',
+				'RI - Unemployment Insurance - Employer' => '20:US:RI:00:0020',
+				'SC - Unemployment Insurance - Employer' => '20:US:SC:00:0020',
+				'SD - Unemployment Insurance - Employer' => '20:US:SD:00:0020',
+				'TN - Unemployment Insurance - Employer' => '20:US:TN:00:0020',
+				'TX - Unemployment Insurance - Employer' => '20:US:TX:00:0020',
+				'UT - Unemployment Insurance - Employer' => '20:US:UT:00:0020',
+				'VT - Unemployment Insurance - Employer' => '20:US:VT:00:0020',
+				'VA - Unemployment Insurance - Employer' => '20:US:VA:00:0020',
+				'WA - Unemployment Insurance - Employer' => '20:US:WA:00:0020',
+				'WV - Unemployment Insurance - Employer' => '20:US:WV:00:0020',
+				'WI - Unemployment Insurance - Employer' => '20:US:WI:00:0020',
+				'WY - Unemployment Insurance - Employer' => '20:US:WY:00:0020',
+
+				//Other
+				'TX - UI Obligation Assessment' => '20:US:TX:00:0020',
+				'AL - Employment Security Assessment' => '20:US:AL:00:0020',
+				'AZ - Job Training Surcharge' => '20:US:AZ:00:0020',
+				'CA - Disability Insurance' => '20:US:CA:00:0010',
+				'CA - State Disability Insurance' => '20:US:CA:00:0010',
+				'CA - Employee Training Tax' => '20:US:CA:00:0010', //Same as Employment Training Tax below.
+				'CA - Employment Training Tax' => '20:US:CA:00:0010',
+				'DC - Administrative Assessment' => '20:US:DC:00:0020',
+				'GA - Administrative Assessment' => '20:US:GA:00:0020',
+				'HI - E&T Assessment' => '20:US:HI:00:0020',
+				//'HI - Health Insurance' => '20:US:HI:00:0020', //Needs confirmation.
+				'HI - Disability Insurance' => '20:US:HI:00:0020',
+				'ID - Administrative Reserve' => '20:US:ID:00:0020',
+				'ID - Workforce Development' => '20:US:ID:00:0020',
+				'IA - Reserve Fund' => '20:US:IA:00:0020',
+				'IA - Surcharge' => '20:US:IA:00:0020',
+				'ME - Competitive Skills' => '20:US:ME:00:0020',
+				'MA - Health Insurance' => '20:US:MA:00:0020',
+				'MA - Workforce Training Fund' => '20:US:MA:00:0020',
+				'MN - Workforce Enhancement Fee' => '20:US:MA:00:0020',
+				'MS - Training Contribution' => '20:US:MS:00:0020',
+				'MT - Administrative Fund' => '20:US:MT:00:0020',
+				'NE - SUIT' => '20:US:NE:00:0020',
+				'NV - Career Enhancement' => '20:US:NV:00:0020',
+				'NH - Administrative Contribution' => '20:US:NH:00:0020',
+				'NJ - Disability Insurance - Employee' => '20:US:NJ:00:0020',
+				'NJ - Disability Insurance - Employer' => '20:US:NJ:00:0020',
+				'NJ - Workforce Development - Employee' => '20:US:NJ:00:0020',
+				'NJ - Workforce Development - Employer' => '20:US:NJ:00:0020',
+				'NJ - Healthcare Subsidy - Employee' => '20:US:NJ:00:0020',
+				'NJ - Healthcare Subsidy - Employer' => '20:US:NJ:00:0020',
+				'NJ - Family Leave Insurance' => '20:US:NJ:00:0020',
+				'NM - State Trust Fund' => '20:US:NM:00:0010',
+				'NY - Reemployment Service Fund' => '20:US:NY:00:0010',
+				//'NY - Disability Insurance' => '20:US:NY:00:0010', //Private or State Agency
+				//'NY - Disability Insurance - Male' => '20:US:NY:00:0010', //Private or State Agency
+				//'NY - Disability Insurance - Female' => '20:US:NY:00:0010', //Private or State Agency
+				'NY - Metropolitan Commuter Tax' => '20:US:NY:00:0010',
+				'NY - New York City Income Tax' => '20:US:NY:00:0010',
+				'NY - Yonkers Income Tax' => '20:US:NY:00:0010',
+				'OR - Workers Benefit - Employee' => '20:US:OR:00:0010',
+				'OR - Workers Benefit - Employer' => '20:US:OR:00:0010',
+				'OR - Tri-Met Transit District' => '20:US:OR:00:0010',
+				'OR - Lane Transit District' => '20:US:OR:00:0010',
+				'OR - Special Payroll Tax Offset' => '20:US:OR:00:0010',
+				'RI - Employment Security' => '20:US:RI:00:0020',
+				'RI - Job Development Fund' => '20:US:RI:00:0020',
+				'RI - Temporary Disability Insurance' => '20:US:RI:00:0020',
+				'SC - Contingency Assessment' => '20:US:SC:00:0020',
+				'SD - Investment Fee' => '20:US:SD:00:0020',
+				'SD - UI Surcharge' => '20:US:SD:00:0020',
+				'TN - Job Skills Fee' => '20:US:TN:00:0020',
+				'TX - Employment & Training' => '20:US:TX:00:0020',
+				'TX - UI Obligation Assessment' => '20:US:TX:00:0020',
+				'WA - Industrial Insurance - Employee' => '20:US:WA:00:0020',
+				'WA - Industrial Insurance - Employer' => '20:US:WA:00:0020',
+				'WA - Employment Admin Fund' => '20:US:WA:00:0020',
+				'WY - Employment Support Fund' => '20:US:WY:00:0020',
+			);
+
+			if ( is_object( $this->getLegalEntityObject() ) AND $this->getLegalEntityObject()->getCountry() != '' ) {
+				Debug::text( '  Adding country specific names...', __FILE__, __LINE__, __METHOD__, 10 );
+				$country_name_map = array();
+				switch ( strtolower( $this->getLegalEntityObject()->getCountry() ) ) {
+					case 'ca':
+						$country_name_map = array(
+									'Additional Income Tax' => '10:CA:00:00:0010',
+									'Workers Compensation - Employer' => '20:CA:'. strtoupper( $this->getLegalEntityObject()->getProvince() ) .':00:0100',
+									'WCB - Employer' => '20:CA:'. strtoupper( $this->getLegalEntityObject()->getProvince() ) .':00:0100',
+									'Workers Compensation' => '20:CA:'. strtoupper( $this->getLegalEntityObject()->getProvince() ) .':00:0100', //Wildcard
+									'WCB' => '20:CA:'. strtoupper( $this->getLegalEntityObject()->getProvince() ) .':00:0100', //Wildcard
+									'WSIB' => '20:CA:ON:00:0100', //Wildcard
+									'Child Support' => '20:CA:'. strtoupper( $this->getLegalEntityObject()->getProvince() ) .':00:0040',
+						);
+						break;
+					case 'us':
+						$country_name_map = array(
+									'Workers Compensation' => '20:US:'. strtoupper( $this->getLegalEntityObject()->getProvince() ) .':00:0100',
+									'Child Support' => '20:US:'. strtoupper( $this->getLegalEntityObject()->getProvince() ) .':00:0040',
+						);
+						break;
+					default:
+						break;
+				}
+
+				$name_map = array_merge( $name_map, $country_name_map );
+			}
+
+			foreach ( $name_map as $tmp_name => $agency_id ) {
+				if ( stripos( $name, $tmp_name ) !== FALSE ) { //$tmp_name must be the needle so we can do wildcard search like 'WCB'
+					$retval = $agency_id;
+					break;
+				}
+			}
+		}
+
+		Debug::text( 'Retval: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
+
+		return $retval;
+	}
+
+	/**
+	 * @param int $date EPOCH
+	 * @return bool
+	 */
 	function updateCompanyDeductionForTaxYear( $date ) {
 		require_once( Environment::getBasePath(). DIRECTORY_SEPARATOR . 'classes'. DIRECTORY_SEPARATOR .'payroll_deduction'. DIRECTORY_SEPARATOR .'PayrollDeduction.class.php');
 
@@ -3092,7 +3802,7 @@ class CompanyDeductionFactory extends Factory {
 					if ( (float)$cd_obj->getUserValue1() != (float)$claim_amount ) {
 						Debug::text( 'Updating claim amounts... Old: ' . $cd_obj->getUserValue1() . ' New: ' . $claim_amount, __FILE__, __LINE__, __METHOD__, 9 );
 						//Use a SQL query instead of modifying the CompanyDeduction class, as that can cause errors when we add columns to the table later on.
-						$query = 'UPDATE ' . $cd_obj->getTable() . ' set user_value1 = ' . (float)$claim_amount . ' where id = ' . (int)$cd_obj->getId();
+						$query = 'UPDATE ' . $cd_obj->getTable() . ' set user_value1 = ' . (float)$claim_amount . ' where id = \''. TTUUID::castUUID($cd_obj->getId()) .'\'';
 						$this->db->Execute( $query );
 					} else {
 						Debug::text( 'Amount matches, no changes needed... Old: ' . $cd_obj->getUserValue1() . ' New: ' . $claim_amount, __FILE__, __LINE__, __METHOD__, 9 );
@@ -3105,6 +3815,9 @@ class CompanyDeductionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getStatus() == '' ) {
 			$this->setStatus( 10 );
@@ -3114,6 +3827,13 @@ class CompanyDeductionFactory extends Factory {
 		}
 		if ( $this->getName() == '' ) {
 			$this->setName( '' );
+		}
+
+		if ( $this->getIncludeAccountAmountType() == '' ) {
+			$this->setIncludeAccountAmountType(10);
+		}
+		if ( $this->getExcludeAccountAmountType() == '' ) {
+			$this->setExcludeAccountAmountType(10);
 		}
 
 		//Set Length of service in days.
@@ -3127,6 +3847,9 @@ class CompanyDeductionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 		$this->removeCache( 'include_pay_stub_entry-'. $this->getId() );
@@ -3152,6 +3875,10 @@ class CompanyDeductionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -3183,6 +3910,12 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @param bool $include_user_id
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE, $include_user_id = FALSE ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -3192,6 +3925,10 @@ class CompanyDeductionFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'legal_entity_legal_name':
+						case 'payroll_remittance_agency':
+							$data[$variable] = $this->getColumn( $variable );
+							break;
 						case 'status':
 						case 'type':
 						case 'calculation':
@@ -3225,6 +3962,10 @@ class CompanyDeductionFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Tax / Deduction'), NULL, $this->getTable(), $this );
 	}

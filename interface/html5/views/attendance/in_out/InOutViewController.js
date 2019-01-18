@@ -1,5 +1,9 @@
 InOutViewController = BaseViewController.extend( {
 
+	_required_files: {
+		10: ['APIPunch', 'APIStation', 'APIBranch', 'APIDepartment' , 'APICompany'],
+		20: ['APIJob', 'APIJobItem']
+	},
 	type_array: null,
 
 	job_api: null,
@@ -19,9 +23,9 @@ InOutViewController = BaseViewController.extend( {
 	original_note: false,
 	new_note: false,
 
-	initialize: function( options ) {
+    init: function( options ) {
 		Global.setUINotready(true);
-		this._super( 'initialize', options );
+
 		this.permission_id = 'punch';
 		this.viewId = 'InOut';
 		this.script_name = 'InOutView';
@@ -306,9 +310,9 @@ InOutViewController = BaseViewController.extend( {
 	openEditView: function() {
 		var $this = this;
 
-		if ( $this.edit_only_mode ) {
+		if ( this.edit_only_mode && this.api) {
 
-			$this.initOptions( function( result ) {
+			this.initOptions( function( result ) {
 
 				if ( !$this.edit_view ) {
 					$this.initEditViewUI( 'InOut', 'InOutEditView.html' );
@@ -533,10 +537,10 @@ InOutViewController = BaseViewController.extend( {
 
 				if ( result.isValid() ) {
 					var result_data = result.getResult();
-					// Error: TypeError: $this.current_edit_record is null in /interface/html5/framework/jquery.min.js?v=8.0.6-20150417-082707 line 2 > eval line 550 
+					// Error: TypeError: $this.current_edit_record is null in /interface/html5/framework/jquery.min.js?v=8.0.6-20150417-082707 line 2 > eval line 550
 					if ( result_data === true && $this.current_edit_record ) {
 						$this.refresh_id = $this.current_edit_record.id;
-					} else if ( result_data > 0 ) {
+					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 						$this.refresh_id = result_data
 					}
 

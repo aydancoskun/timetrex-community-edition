@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,10 @@ class UserGenericDataFactory extends Factory {
 	protected $table = 'user_generic_data';
 	protected $pk_sequence_name = 'user_generic_data_id_seq'; //PK Sequence name
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -56,81 +60,67 @@ class UserGenericDataFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(			'company',
-															$clf->getByID($id),
-															TTi18n::gettext('Invalid Company')
-															) ) {
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value ) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
-	}
-	function setUser($id) {
-		$id = (int)trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getScript() {
-		if ( isset($this->data['script']) ) {
-			return $this->data['script'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'script' );
 	}
-	function setScript($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScript( $value) {
 		//Strip out double slashes, as sometimes those occur and they cause the saved settings to not appear.
 		$value = self::handleScriptName( trim($value) );
-		if (	$this->Validator->isLength(	'script',
-											$value,
-											TTi18n::gettext('Invalid script'),
-											1, 250)
-						) {
-
-			$this->data['script'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'script', $value );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		if ( $this->getCompany() == FALSE ) {
 			return FALSE;
 		}
@@ -147,7 +137,7 @@ class UserGenericDataFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'script' => $this->getScript(),
 					'name' => TTi18n::strtolower( $name ),
 					);
@@ -158,9 +148,9 @@ class UserGenericDataFactory extends Factory {
 						AND script = ?
 						AND lower(name) = ? ';
 		if (  $this->getUser() != '' ) {
-			$query .= ' AND user_id = '. (int)$this->getUser();
+			$query .= ' AND user_id = \''. TTUUID::castUUID($this->getUser()) .'\'';
 		} else {
-			$query .= ' AND ( user_id = 0 OR user_id is NULL )';
+			$query .= ' AND ( user_id = \''. TTUUID::getZeroID() .'\' OR user_id is NULL )';
 		}
 		$query .= ' AND deleted = 0';
 
@@ -178,93 +168,142 @@ class UserGenericDataFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim( $name );
-
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Invalid name'),
-											1, 100)
-				AND
-				$this->Validator->isTrue(		'name',
-												$this->isUniqueName($name),
-												TTi18n::gettext('Name already exists'))
-
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value ) {
+		$value = trim( $value );
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getDefault() {
-		if ( isset($this->data['is_default']) ) {
-			return $this->fromBool( $this->data['is_default'] );
-		}
-
-		return FALSE;
-	}
-	function setDefault($bool) {
-		$this->data['is_default'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'is_default' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDefault( $value ) {
+		return $this->setGenericDataValue( 'is_default', $this->toBool($value)  );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getData() {
-		$retval = @unserialize( $this->data['data'] ); //If the data is corrupted, stop any PHP warning.
+		$retval = @unserialize( $this->getGenericDataValue( 'data' ) ); //If the data is corrupted, stop any PHP warning.
 		if ( $retval !== FALSE ) {
 			return $retval;
 		}
 
-		Debug::Text('Failed to unserialize data: "'. $this->data['data'] .'"', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Failed to unserialize data: "'. $this->getGenericDataValue( 'data' ) .'"', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
-	function setData($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setData( $value) {
 		$value = serialize($value);
 
-		$this->data['data'] = $value;
+		$this->setGenericDataValue( 'data', $value );
 
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
-		if ( $this->getName() == '' ) {
-			$this->Validator->isTRUE(	'name',
-										FALSE,
-										TTi18n::gettext('Invalid name'));
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+
+		if ( $this->getDeleted() == FALSE ) {
+			// Company
+			$clf = TTnew( 'CompanyListFactory' );
+			$this->Validator->isResultSetWithRows( 'company',
+												   $clf->getByID( $this->getCompany() ),
+												   TTi18n::gettext( 'Invalid Company' )
+			);
+			// User
+			if ( $this->getUser() != '' AND $this->getUser() != TTUUID::getZeroID() ) {
+				$ulf = TTnew( 'UserListFactory' );
+				$this->Validator->isResultSetWithRows( 'user',
+													   $ulf->getByID( $this->getUser() ),
+													   TTi18n::gettext( 'Invalid Employee' )
+				);
+			}
+			// Script
+			$this->Validator->isLength( 'script',
+										$this->getScript(),
+										TTi18n::gettext( 'Invalid script' ),
+										1, 250
+			);
+			// Name
+			$this->Validator->isLength( 'name',
+										$this->getName(),
+										TTi18n::gettext( 'Invalid name' ),
+										1, 100
+			);
+			if ( $this->Validator->isError( 'name' ) == FALSE ) {
+				$this->Validator->isTrue( 'name',
+										  $this->isUniqueName( $this->getName() ),
+										  TTi18n::gettext( 'Name already exists' )
+				);
+			}
+
+			//
+			// ABOVE: Validation code moved from set*() functions.
+			//
+			if ( $this->getName() == '' ) {
+				$this->Validator->isTRUE( 'name',
+										  FALSE,
+										  TTi18n::gettext( 'Invalid name' ) );
+			}
 		}
 
 		return TRUE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getUser() == '' ) {
-			$this->setUser(0); //Use 0 instead of NULL;
+			$this->setUser( TTUUID::getZeroID() ); //Use 0 instead of NULL;
 		}
 
 		if ( $this->getDefault() == TRUE ) {
 			//Remove default flag from all other entries.
 			$ugdlf = TTnew( 'UserGenericDataListFactory' );
-			if ( $this->getUser() == FALSE ) {
-				$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getUser(), $this->getScript(), TRUE );
+			if ( $this->getUser() == TTUUID::getZeroID() OR $this->getUser() == '' ) {
+				$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getCompany(), $this->getScript(), TRUE );
 			} else {
 				$ugdlf->getByUserIdAndScriptAndDefault( $this->getUser(), $this->getScript(), TRUE );
 			}
 			if ( $ugdlf->getRecordCount() > 0 ) {
 				foreach( $ugdlf as $ugd_obj ) {
-					Debug::Text('Removing Default Flag From: '. $ugd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-					$ugd_obj->setDefault(FALSE);
-					if ( $ugd_obj->isValid() ) {
-						$ugd_obj->Save();
+					if ( $ugd_obj->getId() != $this->getId() ) { //Don't remove default flag from ourselves when editing an existing record.
+						Debug::Text( '  Removing Default Flag From: ' . $ugd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+						$ugd_obj->setDefault( FALSE );
+						if ( $ugd_obj->isValid() ) {
+							$ugd_obj->Save();
+						}
 					}
 				}
 			}
@@ -284,214 +323,18 @@ class UserGenericDataFactory extends Factory {
 	}
 */
 
+	/**
+	 * @param $script_name
+	 * @return mixed
+	 */
 	static function handleScriptName( $script_name ) {
 		return str_replace('//', '/', $script_name);
 	}
 
-	static function getSearchFormData( $saved_search_id, $sort_column ) {
-		global $current_user;
-
-		$retarr = array();
-
-		$ugdlf = TTnew( 'UserGenericDataListFactory' );
-		if ( isset($saved_search_id) AND $saved_search_id != 0 AND $saved_search_id != '' ) {
-			$ugdlf->getByUserIdAndId( $current_user->getId(), $saved_search_id );
-		} else {
-			$ugdlf->getByUserIdAndScriptAndDefault( $current_user->getId(), self::handleScriptName( $_SERVER['SCRIPT_NAME'] ) );
-		}
-
-		if ( $ugdlf->getRecordCount() > 0 ) {
-			$ugd_obj = $ugdlf->getCurrent();
-			Debug::Text('Found Search Criteria for Saved Search ID: '. $ugd_obj->getId() .' Sort Column: '. $sort_column, __FILE__, __LINE__, __METHOD__, 10);
-
-			$retarr['saved_search_id'] = $ugd_obj->getId();
-			$retarr['filter_data'] = $ugd_obj->getData();
-			//Debug::Arr($retarr['filter_data'], 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
-			unset($ugd_obj);
-
-			Debug::Text('aSort Column: '. $sort_column, __FILE__, __LINE__, __METHOD__, 10);
-			if ( $sort_column == '' AND isset($retarr['filter_data']['sort_column']) AND $retarr['filter_data']['sort_column'] != '') {
-				$retarr['sort_column'] = Misc::trimSortPrefix($retarr['filter_data']['sort_column']);
-				$retarr['sort_order'] = $retarr['filter_data']['sort_order'];
-				Debug::Text('bSort Column: '. $retarr['sort_column'], __FILE__, __LINE__, __METHOD__, 10);
-			}
-		}
-
-		return $retarr;
-	}
-
-	static function searchFormDataHandler( $action, $filter_data, $redirect_url ) {
-		global $current_company, $current_user;
-
-		if ( $action == '' ) {
-			return FALSE;
-		}
-
-		if ( !is_array($filter_data) ) {
-			return FALSE;
-		}
-
-		$saved_search_id = FALSE;
-
-		$ugdlf = TTnew( 'UserGenericDataListFactory' );
-		$ugdf = TTnew( 'UserGenericDataFactory' );
-		if ( $action == 'search_form_update' OR $action == 'search_form_save' ) {
-			Debug::Text('Save Report!', __FILE__, __LINE__, __METHOD__, 10);
-
-			if ( $action == 'search_form_update' AND isset($filter_data['saved_search_id']) AND $filter_data['saved_search_id'] != '' AND $filter_data['saved_search_id'] != 0 ) {
-				$ugdlf->getByUserIdAndId( $current_user->getId(), $filter_data['saved_search_id'] );
-				if ( $ugdlf->getRecordCount() > 0 ) {
-					$ugdf = $ugdlf->getCurrent();
-				}
-				$ugdf->setID( $filter_data['saved_search_id'] );
-			}
-
-			$ugdf->setCompany( $current_company->getId() );
-			$ugdf->setUser( $current_user->getId() );
-			$ugdf->setScript( self::handleScriptName( $_SERVER['SCRIPT_NAME'] ) );
-
-			if ( isset($filter_data['saved_search_name']) AND $filter_data['saved_search_name'] != '' ) {
-				$ugdf->setName( $filter_data['saved_search_name'] );
-			}
-
-			$ugdf->setData( $filter_data );
-			$ugdf->setDefault( FALSE );
-		} elseif ( $action == 'search_form_clear' OR $action == 'search_form_search' ) {
-			Debug::Text('Search!', __FILE__, __LINE__, __METHOD__, 10);
-
-			//When they click search it saves the criteria as the default, so it always loads from then on.
-			//Unless cleared.
-			$ugdlf->getByUserIdAndScriptAndDefault( $current_user->getId(), self::handleScriptName( $_SERVER['SCRIPT_NAME'] ), TRUE );
-			if ( $ugdlf->getRecordCount() > 0 ) {
-				$ugdf = $ugdlf->getCurrent();
-				$saved_search_id = $filter_data['saved_search_id'] = $ugdf->getId();
-			}
-			$ugdf->setCompany( $current_company->getId() );
-			$ugdf->setUser( $current_user->getId() );
-			$ugdf->setScript( self::handleScriptName( $_SERVER['SCRIPT_NAME'] ) );
-			$ugdf->setName( TTi18n::gettext('-Default-') );
-			$ugdf->setData( $filter_data );
-			$ugdf->setDefault( TRUE );
-		} elseif ( isset($filter_data['saved_search_id']) AND $filter_data['saved_search_id'] != '' ) {
-			$ugdlf->getByUserIdAndId( $current_user->getId(), $filter_data['saved_search_id'] );
-			if ( $ugdlf->getRecordCount() > 0 ) {
-				$ugd_obj = $ugdlf->getCurrent();
-
-				$ugd_obj->setDeleted(TRUE);
-				$ugd_obj->Save();
-			}
-
-			Redirect::Page( $redirect_url );
-
-			return TRUE;
-		}
-
-		if ( is_object($ugdf) AND $ugdf->isValid() ) {
-			$ugf_id = $ugdf->Save();
-
-			if ( is_numeric($ugf_id) ) {
-				$saved_search_id = $ugf_id;
-			} elseif ( $ugf_id === TRUE ) {
-				$saved_search_id = $filter_data['saved_search_id'];
-			}
-			unset($ugf_id);
-		}
-
-		return $saved_search_id;
-	}
-
-	static function getReportFormData( $saved_search_id ) {
-		global $current_user;
-
-		$retarr = array();
-
-		$ugdlf = TTnew( 'UserGenericDataListFactory' );
-		if ( isset($saved_search_id) AND $saved_search_id != 0 AND $saved_search_id != '' ) {
-			$ugdlf->getByUserIdAndId( $current_user->getId(), $saved_search_id );
-		} else {
-			$ugdlf->getByUserIdAndScriptAndDefault( $current_user->getId(), self::handleScriptName( $_SERVER['SCRIPT_NAME'] ) );
-		}
-
-		if ( $ugdlf->getRecordCount() > 0 ) {
-			$ugd_obj = $ugdlf->getCurrent();
-			Debug::Text('Found Search Criteria for Saved Search ID: '. $ugd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-
-			$retarr['saved_search_id'] = $ugd_obj->getId();
-			$retarr['filter_data'] = $ugd_obj->getData();
-			//Debug::Arr($retarr['filter_data'], 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
-			unset($ugd_obj);
-		}
-
-		return $retarr;
-	}
-
-	static function reportFormDataHandler( $action, $filter_data, $generic_data, $redirect_url ) {
-		global $current_company, $current_user;
-
-		if ( $action == '' ) {
-			return FALSE;
-		}
-
-		if ( !is_array($generic_data) ) {
-			return FALSE;
-		}
-
-		$saved_report_id = FALSE;
-
-		$ugdlf = TTnew( 'UserGenericDataListFactory' );
-		$ugdf = TTnew( 'UserGenericDataFactory' );
-		if ( $action == 'save' OR $action == 'update' ) {
-			Debug::Text('Save Report!', __FILE__, __LINE__, __METHOD__, 10);
-
-			if ( isset($generic_data['id']) AND $generic_data['id'] != '' AND $generic_data['id'] != 0 ) {
-				$ugdlf->getByUserIdAndId( $current_user->getId(), $generic_data['id'] );
-				if ( $ugdlf->getRecordCount() > 0 ) {
-					$ugdf = $ugdlf->getCurrent();
-				}
-				$ugdf->setID( $generic_data['id'] );
-			}
-
-			$ugdf->setCompany( $current_company->getId() );
-			$ugdf->setUser( $current_user->getId() );
-			$ugdf->setScript( self::handleScriptName( $_SERVER['SCRIPT_NAME'] ) );
-
-			if ( isset($generic_data['name']) AND $generic_data['name'] != '' ) {
-				$ugdf->setName( $generic_data['name'] );
-			}
-
-			$ugdf->setData( $filter_data );
-			if ( isset($generic_data['is_default']) ) {
-				$ugdf->setDefault( TRUE );
-			}
-		} elseif ( $action == 'delete' AND isset($generic_data['id']) AND $generic_data['id'] != '' ) {
-			$ugdlf->getByUserIdAndId( $current_user->getId(), $generic_data['id'] );
-			if ( $ugdlf->getRecordCount() > 0 ) {
-				$ugd_obj = $ugdlf->getCurrent();
-
-				$ugd_obj->setDeleted(TRUE);
-				$ugd_obj->Save();
-			}
-
-			Redirect::Page( $redirect_url );
-
-			return TRUE;
-		}
-
-		if ( is_object($ugdf) AND $ugdf->isValid() ) {
-			$ugf_id = $ugdf->Save();
-
-			if ( is_numeric($ugf_id) ) {
-				$saved_report_id = $ugf_id;
-			} elseif ( $ugf_id === TRUE ) {
-				$saved_report_id = $generic_data['id'];
-			}
-			unset($ugf_id);
-		}
-
-		return $saved_report_id;
-	}
-
-	//Support setting created_by, updated_by especially for importing data.
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -517,6 +360,10 @@ class UserGenericDataFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();

@@ -1,5 +1,6 @@
 BaseWizardController = BaseWindowController.extend( {
 
+	_required_files: null,
 	steps: 0,
 	title: 'Wizard',
 	current_step: 1,
@@ -41,6 +42,29 @@ BaseWizardController = BaseWindowController.extend( {
 		'click .done-btn': 'onDoneClick'
 	},
 
+	/**
+	 * When changing this function, you need to look for all occurences of this function because it was needed in several bases
+	 * BaseViewController, HomeViewController, BaseWizardController
+	 *
+	 * @returns {Array}
+	 */
+	filterRequiredFiles: function() {
+		var retval = [];
+
+		if ( this._required_files && this._required_files[0] ) {
+			retval = this._required_files;
+		} else {
+			for ( var edition_id in this._required_files ) {
+				if ( LocalCacheData.getCurrentCompany().product_edition_id >= edition_id ) {
+					retval = retval.concat(this._required_files[edition_id])
+				}
+			}
+		}
+
+		Debug.Arr(retval,'RETVAL','BaseWizardController.js','BaseWizardController','filterRequiredFiles',10)
+		return retval;
+	},
+
 	initialize: function( options ) {
 		this.content_div = $( this.el ).find( '.content' );
 		this.stepsWidgetDic = {};
@@ -55,9 +79,12 @@ BaseWizardController = BaseWindowController.extend( {
 		this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
 
 		LocalCacheData.current_open_wizard_controller = this;
-
-		this.setDefaultDataToSteps();
-
+		var $this = this;
+		require( this.filterRequiredFiles(),function() {
+			$this.setDefaultDataToSteps();
+			$this.init();
+			TTPromise.resolve('BaseViewController', 'initialize');
+		});
 	},
 
 	setDefaultDataToSteps: function() {
@@ -552,6 +579,11 @@ BaseWizardController = BaseWindowController.extend( {
 				onSelectRow: function( e ) {
 					$this.onGridSelectRow( e );
 				},
+				onSelectAll: function( e ) {
+					for ( var n in e ) {
+						$this.onGridSelectRow( e[n] );
+					}
+				},
 				ondblClickRow: function() {
 					$this.onGridDblClickRow();
 				},
@@ -575,7 +607,7 @@ BaseWizardController = BaseWindowController.extend( {
 			$this.setGridGroupColumns( gridId );
 
 		} );
-
+		return grid; //allowing chaining off this method.
 	},
 
 	setGridGroupColumns: function( gridId ) {
@@ -604,7 +636,23 @@ BaseWizardController = BaseWindowController.extend( {
 		var button = $( '<li><div class="ribbon-sub-menu-icon" id="' + id + '"><img src="' + icon + '" >' + label + '</div></li>' );
 
 		return button;
-	}
+	},
+
+
+	showNoResultCover: function(grid_div) {
+		this.removeNoResultCover(grid_div);
+		var no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
+		no_result_box.NoResultBox( {related_view_controller: this, is_new: false} );
+		no_result_box.attr( 'class', 'no-result-div' );
+
+		grid_div.append( no_result_box );
+	},
+
+	removeNoResultCover: function(grid_div) {
+		grid_div.find('.no-result-div').remove();
+	},
+
+
 
 } );
 
@@ -612,7 +660,7 @@ BaseWizardController.default_data = null;
 BaseWizardController.callBack = null;
 
 BaseWizardController.openWizard = function( viewId, templateName ) {
-	if ( LocalCacheData.current_open_wizard_controller ) {
+	if (  viewId != 'ReportViewWizard' && LocalCacheData.current_open_wizard_controller ) {
 		LocalCacheData.current_open_wizard_controller.onCloseClick();
 	}
 	Global.loadViewSource( viewId, templateName, function( result ) {
@@ -621,4 +669,5 @@ BaseWizardController.openWizard = function( viewId, templateName ) {
 		$( 'body' ).append( template( args ) );
 		Global.setUIInitComplete();
 	} );
+
 };

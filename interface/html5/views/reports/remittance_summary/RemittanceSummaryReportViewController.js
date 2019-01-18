@@ -1,7 +1,8 @@
 RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function( options ) {
-		this.__super( 'initialize', options );
+	_required_files: ['APIRemittanceSummaryReport', 'APIPayStubEntryAccount'],
+
+	initReport: function( options ) {
 		this.script_name = 'RemittanceSummaryReport';
 		this.viewId = 'RemittanceSummaryReport';
 		this.context_menu_name = $.i18n._( 'Remittance Summary' );
@@ -9,9 +10,6 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		this.view_file = 'RemittanceSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIRemittanceSummaryReport' ))();
 		this.include_form_setup = true;
-
-		this.buildContextMenu();
-
 	},
 
 	buildContextMenuModels: function() {
@@ -130,13 +128,15 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 
 		switch ( id ) {
 			case ContextMenuIconName.view:
+				ProgressBar.showOverlay();
 				this.onViewClick();
 				break;
 			case ContextMenuIconName.view_html:
-
+				ProgressBar.showOverlay();
 				this.onViewClick('html');
 				break;
 			case ContextMenuIconName.view_html_new_window:
+				ProgressBar.showOverlay();
 				this.onViewClick('html', true);
 				break;
 			case ContextMenuIconName.export_excel:

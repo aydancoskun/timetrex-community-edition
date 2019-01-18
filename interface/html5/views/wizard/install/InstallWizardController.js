@@ -14,8 +14,10 @@ InstallWizardController = BaseWizardController.extend( {
 
 	edit_view_error_ui_dic: {},
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	_required_files: ['APIInstall'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.title_1 = $( this.el ).find( '.title-1' );
 		this.steps = 5;
 		this.script_name = 'wizard_install';

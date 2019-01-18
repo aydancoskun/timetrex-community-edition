@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,7 +60,13 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CurrencyRateListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -61,7 +74,7 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => (int)$id,
+						'id' => TTUUID::castUUID($id),
 						);
 
 			$query = '
@@ -80,7 +93,15 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		return $this;
 	}
 
-	function getByCurrencyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CurrencyRateListFactory
+	 */
+	function getByCurrencyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -93,7 +114,7 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -110,7 +131,14 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CurrencyRateListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -122,8 +150,8 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		$cf = new CurrencyFactory();
 
 		$ph = array(
-			'id' => (int)$id,
-			'company_id' => (int)$company_id,
+			'id' => TTUUID::castUUID($id),
+			'company_id' => TTUUID::castUUID($company_id),
 		);
 
 		$query = '
@@ -141,7 +169,12 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		return $this;
 	}
 
-	function getByCurrencyIdAndDateStamp($id, $date_stamp) {
+	/**
+	 * @param string $id UUID
+	 * @param int $date_stamp EPOCH
+	 * @return bool|CurrencyRateListFactory
+	 */
+	function getByCurrencyIdAndDateStamp( $id, $date_stamp) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -151,7 +184,7 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					'date_stamp' => $this->db->bindDate( $date_stamp ),
 					);
 
@@ -167,6 +200,12 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		return $this;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @return bool|CurrencyRateListFactory
+	 */
 	function getByCurrencyIdAndStartDateAndEndDate( $id, $start_date, $end_date ) {
 		if ( $id == '') {
 			return FALSE;
@@ -181,7 +220,7 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					'start_date' => $this->db->bindDate( $start_date ),
 					'end_date' => $this->db->bindDate( $end_date ),
 					);
@@ -199,7 +238,13 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		return $this;
 	}
 
-	function getByIdAndCurrencyId($id, $currency_id, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $currency_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CurrencyRateListFactory
+	 */
+	function getByIdAndCurrencyId( $id, $currency_id, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -209,8 +254,8 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		}
 
 		$ph = array(
-					'currency_id' => (int)$currency_id,
-					'id' => (int)$id,
+					'currency_id' => TTUUID::castUUID($currency_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -226,6 +271,15 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CurrencyRateListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -256,7 +310,7 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -274,19 +328,12 @@ class CurrencyRateListFactory extends CurrencyRateFactory implements IteratorAgg
 					where	cf.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'cf.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'cf.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['currency_id']) ) ? $this->getWhereClauseSQL( 'a.currency_id', $filter_data['currency_id'], 'numeric_list', $ph ) : NULL;
-
-		if ( isset($filter_data['iso_code']) AND isset($filter_data['iso_code'][0]) AND !in_array(-1, (array)$filter_data['iso_code']) ) {
-			$query .= ( isset($filter_data['iso_code']) ) ? $this->getWhereClauseSQL( 'cf.iso_code', $filter_data['iso_code'], 'numeric_list', $ph ) : NULL;
-		}
-		if ( isset($filter_data['iso_code']) AND !is_array( $filter_data['iso_code'] ) AND trim($filter_data['iso_code']) != '' AND !is_array($filter_data['iso_code']) ) {
-			$query .= ( isset($filter_data['iso_code']) ) ? $this->getWhereClauseSQL( 'cf.iso_code', $filter_data['iso_code'], 'text', $ph ) : NULL;
-		}
-
+		$query .= ( isset($filter_data['currency_id']) ) ? $this->getWhereClauseSQL( 'a.currency_id', $filter_data['currency_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['iso_code']) ) ? $this->getWhereClauseSQL( 'cf.iso_code', $filter_data['iso_code'], 'text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'cf.name', $filter_data['name'], 'text', $ph ) : NULL;
 
 		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {

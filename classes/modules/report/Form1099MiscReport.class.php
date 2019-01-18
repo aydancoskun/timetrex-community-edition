@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,9 @@ class Form1099MiscReport extends Report {
 
 	protected $user_ids = array();
 
+	/**
+	 * Form1099MiscReport constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('Form 1099-MISC Report');
 		$this->file_name = 'form_1099misc';
@@ -51,6 +54,11 @@ class Form1099MiscReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
 				AND $this->getPermissionObject()->Check('report', 'view_form1099misc', $user_id, $company_id ) ) {
@@ -60,6 +68,9 @@ class Form1099MiscReport extends Report {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	protected function _validateConfig() {
 		$config = $this->getConfig();
 
@@ -71,6 +82,11 @@ class Form1099MiscReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -96,7 +112,7 @@ class Form1099MiscReport extends Report {
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
 										'-1010-time_period' => TTi18n::gettext('Time Period'),
-
+										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -165,6 +181,9 @@ class Form1099MiscReport extends Report {
 			case 'static_columns':
 				$retval = array(
 										//Static Columns - Aggregate functions can't be used on these.
+										'-0900-legal_entity_legal_name' => TTi18n::gettext('Legal Entity Name'),
+										'-0910-legal_entity_trade_name' => TTi18n::gettext( 'Legal Entity Trade Name' ),
+
 										'-1000-first_name' => TTi18n::gettext('First Name'),
 										'-1001-middle_name' => TTi18n::gettext('Middle Name'),
 										'-1002-last_name' => TTi18n::gettext('Last Name'),
@@ -422,6 +441,9 @@ class Form1099MiscReport extends Report {
 		return $retval;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getFormObject() {
 		if ( !isset($this->form_obj['gf']) OR !is_object($this->form_obj['gf']) ) {
 			//
@@ -438,6 +460,18 @@ class Form1099MiscReport extends Report {
 		return $this->form_obj['gf'];
 	}
 
+	/**
+	 * @return bool
+	 */
+	function clearFormObject() {
+		$this->form_obj['gf'] = FALSE;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return mixed
+	 */
 	function getF1099MiscObject() {
 		if ( !isset($this->form_obj['f1099m']) OR !is_object($this->form_obj['f1099m']) ) {
 			$this->form_obj['f1099m'] = $this->getFormObject()->getFormObject( '1099misc', 'US' );
@@ -447,6 +481,27 @@ class Form1099MiscReport extends Report {
 		return $this->form_obj['f1099m'];
 	}
 
+	/**
+	 * @return bool
+	 */
+	function clearF1099MiscObject() {
+		$this->form_obj['f1099m'] = FALSE;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
+	function clearRETURN1040Object() {
+		$this->form_obj['return1040'] = FALSE;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return array
+	 */
 	function formatFormConfig() {
 		$default_include_exclude_arr = array( 'include_pay_stub_entry_account' => array(), 'exclude_pay_stub_entry_account' => array() );
 
@@ -461,20 +516,25 @@ class Form1099MiscReport extends Report {
 	}
 
 	//Get raw data for report
-	function _getData( $format = NULL ) {
-		$this->tmp_data = array( 'pay_stub_entry' => array() );
 
-		
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
+	function _getData( $format = NULL ) {
+		$this->tmp_data = array( 'pay_stub_entry' => array(), 'remittancy_agency' => array() );
+
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
+		$tax_deductions = array();
+		$user_deduction_data = array();
+		$tax_deduction_pay_stub_account_id_map = array();
 
 		//
 		//Figure out state/locality wages/taxes.
 		//
 		$cdlf = TTnew( 'CompanyDeductionListFactory' );
 		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10, 20), 10 );
-		$tax_deductions = array();
-		$tax_deduction_pay_stub_account_id_map = array();
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach( $cdlf as $cd_obj ) {
 				$tax_deductions[$cd_obj->getId()] = array(
@@ -491,7 +551,18 @@ class Form1099MiscReport extends Report {
 											'user_value1' => $cd_obj->getUserValue1(),
 											'user_value5' => $cd_obj->getUserValue5(), //District
 										);
-				$tax_deduction_pay_stub_account_id_map[$cd_obj->getPayStubEntryAccount()][] = $cd_obj->getId();
+
+				//Need to determine start/end dates for each CompanyDeduction/User pair, so we can break down total wages earned in the date ranges.
+				$udlf = TTnew( 'UserDeductionListFactory' );
+				$udlf->getByCompanyIdAndCompanyDeductionId( $cd_obj->getCompany(), $cd_obj->getId() );
+				if ( $udlf->getRecordCount() > 0 ) {
+					foreach( $udlf as $ud_obj ) {
+						if ( $ud_obj->getStartDate() != '' OR $ud_obj->getEndDate() != '' ) {
+							//Debug::Text('  User Deduction: ID: '. $ud_obj->getID() .' User ID: '. $ud_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
+							$user_deduction_data[$ud_obj->getCompanyDeduction()][$ud_obj->getUser()] = $ud_obj;
+						}
+					}
+				}
 			}
 			Debug::Arr($tax_deductions, 'Tax Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
 		} else {
@@ -504,12 +575,11 @@ class Form1099MiscReport extends Report {
 			foreach( $pself as $pse_obj ) {
 
 				$user_id = $this->user_ids[] = $pse_obj->getColumn('user_id');
-				//$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
+				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') );
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
-				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id]) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id] = array(
-																'date_stamp' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]) ) {
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = array(
 																'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
 																'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
 																'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
@@ -517,51 +587,78 @@ class Form1099MiscReport extends Report {
 															);
 				}
 
-
-				if ( isset($this->tmp_data['pay_stub_entry'][$user_id]['psen_ids'][$pay_stub_entry_name_id]) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
+				if ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id]) ) {
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
 				} else {
-					$this->tmp_data['pay_stub_entry'][$user_id]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
 				}
 			}
 
-			if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
-				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_b) {
-					$this->tmp_data['pay_stub_entry'][$user_id]['l4']		= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l4']['include_pay_stub_entry_account'], $form_data['l4']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['l6']		= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l6']['include_pay_stub_entry_account'], $form_data['l6']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['l7']		= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l7']['include_pay_stub_entry_account'], $form_data['l7']['exclude_pay_stub_entry_account'] );
+			if ( isset( $this->tmp_data['pay_stub_entry'] ) AND is_array( $this->tmp_data['pay_stub_entry'] ) ) {
+				foreach ( $this->tmp_data['pay_stub_entry'] as $user_id => $data_a ) {
+					foreach ( $data_a as $date_stamp => $data_b ) {
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l4'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l4']['include_pay_stub_entry_account'], $form_data['l4']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l6'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l6']['include_pay_stub_entry_account'], $form_data['l6']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l7'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l7']['include_pay_stub_entry_account'], $form_data['l7']['exclude_pay_stub_entry_account'] );
 
-					if ( is_array($data_b['psen_ids']) ) {
-						foreach( $data_b['psen_ids'] as $psen_id => $psen_amount ) {
-							if ( isset($tax_deduction_pay_stub_account_id_map[$psen_id]) ) {
-								foreach( $tax_deduction_pay_stub_account_id_map[$psen_id] as $tax_deduction_id ) {
-									$tax_deduction_arr = $tax_deductions[$tax_deduction_id];
+						if ( is_array($data_b['psen_ids']) AND empty($tax_deductions) == FALSE ) {
+							//Support multiple tax/deductions that deposit to the same pay stub account.
+							//Also make sure we handle tax/deductions that may not have anything deducted/withheld, but do have wages to be displayed.
+							//  For example an employee not earning enough to have State income tax taken off yet.
+							//Now that user_deduction supports start/end dates per employee, we could use that to better handle employees switching between Tax/Deduction records mid-year
+							//  while still accounting for cases where nothing is deducted/withheld but still needs to be displayed.
+							foreach( $tax_deductions as $tax_deduction_id => $tax_deduction_arr ) {
+								//Found Tax/Deduction associated with this pay stub account.
+								$tax_withheld_amount = Misc::calculateMultipleColumns( $data_b['psen_ids'], array($tax_deduction_arr['pay_stub_entry_account_id']) );
+								if ( $tax_withheld_amount > 0 OR in_array( $user_id, (array)$tax_deduction_arr['user_ids']) ) {
+									Debug::Text('Found User ID: '. $user_id .' in Tax Deduction Name: '. $tax_deduction_arr['name'] .'('.$tax_deduction_arr['id'].') Calculation ID: '. $tax_deduction_arr['calculation_id'] .' Withheld Amount: '. $tax_withheld_amount, __FILE__, __LINE__, __METHOD__, 10);
 
-									//determine how many district/states currently exist for this employee.
-									foreach( range('a', 'z') as $z ) {
-										if ( !isset($this->tmp_data['pay_stub_entry'][$user_id]['l16'.$z]) ) {
-											$state_id = $z;
-											break;
-										}
+									$is_active_date = TRUE;
+									if ( isset( $user_deduction_data ) AND isset( $user_deduction_data[$tax_deduction_id] ) AND isset( $user_deduction_data[$tax_deduction_id][$user_id] ) ) {
+										$is_active_date = $cdlf->isActiveDate( $user_deduction_data[$tax_deduction_id][$user_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] );
+										Debug::Text('  Date Restrictions Found... Is Active: '. (int)$is_active_date .' Date: '. TTDate::getDate('DATE', $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 									}
 
-									//Found Tax/Deduction associated with this pay stub account.
-									Debug::Text('Found User ID: '. $user_id .' in Tax Deduction Name: '. $tax_deduction_arr['name'] .'('.$tax_deduction_arr['id'].') Pay Stub Entry Account ID: '. $psen_id .' Calculation ID: '. $tax_deduction_arr['calculation_id'], __FILE__, __LINE__, __METHOD__, 10);
+									//State records must come before district, so they can be matched up.
 									if ( $tax_deduction_arr['calculation_id'] == 200 AND $tax_deduction_arr['province'] != '' ) {
+										//determine how many district/states currently exist for this employee.
+										foreach( range('a', 'z') as $z ) {
+											//Make sure we are able to combine multiple state Tax/Deduction amounts together in the case
+											//where they are using different Pay Stub Accounts for the State Income Tax and State Addl. Income Tax PSA's.
+											//Need to have per user state detection vs per user/date, so we can make sure the state_id is unique across all possible data.
+											if ( !( isset($this->tmp_data['state_ids'][$user_id]['l16'.$z]) AND isset($this->tmp_data['state_ids'][$user_id]['l17'. $z .'_state']) AND $this->tmp_data['state_ids'][$user_id]['l17'. $z .'_state'] != $tax_deduction_arr['province'] ) ) {
+												$state_id = $z;
+												break;
+											}
+										}
+
 										//State Wages/Taxes
-										$this->tmp_data['pay_stub_entry'][$user_id]['l17'. $state_id .'_state'] = $tax_deduction_arr['province'];
-										$this->tmp_data['pay_stub_entry'][$user_id]['l18'. $state_id] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $tax_deduction_arr['include'], $tax_deduction_arr['exclude'] );
-										$this->tmp_data['pay_stub_entry'][$user_id]['l16'. $state_id] = Misc::calculateMultipleColumns( $data_b['psen_ids'], array($tax_deduction_arr['pay_stub_entry_account_id']) );
-									} else {
+										$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l17'. $state_id .'_state'] = $this->tmp_data['state_ids'][$user_id]['l17'. $state_id .'_state'] = $tax_deduction_arr['province'];
+
+										if ( $is_active_date == TRUE ) {
+											if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l18'. $state_id]) OR ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l18'. $state_id]) AND $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l18'. $state_id] == 0 ) ) {
+												$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l18'. $state_id] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $tax_deduction_arr['include'], $tax_deduction_arr['exclude'] );
+											}
+										}
+										if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l16'. $state_id]) ) {
+											$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l16'. $state_id] = $this->tmp_data['state_ids'][$user_id]['l16'. $state_id] = 0;
+										}
+										//Just combine the tax withheld part, not the wages/earnings, as we don't want to double up on that.
+										$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l16'. $state_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l16'. $state_id], Misc::calculateMultipleColumns( $data_b['psen_ids'], array($tax_deduction_arr['pay_stub_entry_account_id']) ) );
+										$this->tmp_data['state_ids'][$user_id]['l16'. $state_id] = bcadd( $this->tmp_data['state_ids'][$user_id]['l16'. $state_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l16'. $state_id] );
+
+										//Debug::Text('State ID: '. $state_id .' Withheld: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l16'. $state_id], __FILE__, __LINE__, __METHOD__, 10);
+
 										Debug::Text('Not State or Local income tax: '. $tax_deduction_arr['id'] .' Calculation: '. $tax_deduction_arr['calculation_id'] .' District: '. $tax_deduction_arr['district'] .' UserValue5: '.$tax_deduction_arr['user_value5'] .' CompanyValue1: '. $tax_deduction_arr['company_value1'], __FILE__, __LINE__, __METHOD__, 10);
 									}
-									unset($tax_deduction_arr);
+								} else {
+									Debug::Text('User is either not assigned to Tax/Deduction, or they do not have any calculated amounts...', __FILE__, __LINE__, __METHOD__, 10);
 								}
+								unset($tax_withheld_amount);
 							}
+							unset($state_id, $district_id, $district_name, $tax_deduction_id, $tax_deduction_arr);
 						}
-						unset($psen_id, $psen_amount, $state_id);
 					}
-
 				}
 			}
 		}
@@ -579,69 +676,126 @@ class Form1099MiscReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
+			$this->tmp_data['user'][$u_obj->getId()]['user_id'] = $u_obj->getId();
+			$this->tmp_data['user'][$u_obj->getId()]['legal_entity_id'] = $u_obj->getLegalEntity();
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+		}
+
+		//Get legal entity data for joining.
+		/** @var LegalEntityListFactory $lelf */
+		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		Debug::Text( ' Legal Entity Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
+		if ( $lelf->getRecordCount() > 0 ) {
+			foreach ( $lelf as $key => $le_obj ) {
+				if ( $format == 'html' OR $format == 'pdf' ) {
+					$this->tmp_data['legal_entity'][$le_obj->getId()] = Misc::addKeyPrefix( 'legal_entity_', (array)$le_obj->getObjectAsArray( Misc::removeKeyPrefix( 'legal_entity_', $this->getColumnDataConfig() ) ) );
+					$this->tmp_data['legal_entity'][$le_obj->getId()]['legal_entity_id'] = $le_obj->getId();
+				} else {
+					$this->form_data['legal_entity'][$le_obj->getId()] = $le_obj;
+				}
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			}
+		}
+
+		//Get user data for joining.
+		//$ulf = TTnew( 'UserListFactory' );
+		$filter_data['type_id'] = array(10, 20); //federal and state
+		$filter_data['country'] = array('US'); //US federal
+		/** @var PayrollRemittanceAgencyListFactory $ralf */
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
+		if ( $ralf->getRecordCount() > 0 ) {
+			foreach ( $ralf as $key => $ra_obj ) {
+				/** @var PayrollRemittanceAgencyFactory $ra_obj */
+				if ( $ra_obj->parseAgencyID( NULL, 'id') == 10 ) {
+					$province_id = ( $ra_obj->getType() == 20 ) ? $ra_obj->getProvince() : '00';
+					$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$province_id] = $ra_obj;
+				}
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			}
+			unset($province_id);
 		}
 
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-	function _preProcess() {
+	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
+	 * @param null $format
+	 * @return bool
+	 */
+	function _preProcess( $format = NULL ) {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
 		//Merge time data with user data
 		$key = 0;
-		if ( isset($this->tmp_data['pay_stub_entry']) ) {
-			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $row ) {
+		if ( isset($this->tmp_data['pay_stub_entry']) AND isset($this->tmp_data['user']) ) {
+			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
-					$date_columns = TTDate::getReportDates( NULL, $row['date_stamp'], FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-					$processed_data	 = array(
-											'user_id' => $user_id,
-											);
+					foreach ( $level_1 as $date_stamp => $row ) {
+						$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
+						$processed_data = array();
 
-					$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data );
+						$tmp_legal_array = array();
+						if ( isset($this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']]) ) {
+							$tmp_legal_array = $this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']];
+						}
+						$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $tmp_legal_array );
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-					$key++;
+						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+						$key++;
+					}
 				}
 			}
-			unset($this->tmp_data, $row, $date_columns, $processed_data);
+			unset($this->tmp_data, $row, $date_columns, $processed_data, $tmp_legal_array);
+
+			//Total data per employee for the W2 forms. Just include the columns that are necessary for the form.
+			if ( is_array($this->data) AND !($format == 'html' OR $format == 'pdf') ) {
+				Debug::Text('Calculating Form Data...', __FILE__, __LINE__, __METHOD__, 10);
+				foreach( $this->data as $row ) {
+					if ( !isset($this->form_data[$row['user_id']]) ) {
+						$this->form_data[$row['user_id']] = array( 'user_id' => $row['user_id'] );
+					}
+
+					foreach( $row as $key => $value ) {
+						if ( preg_match( '/^l[0-9]{1,2}[a-z]?_(state|district)$/i', $key ) == TRUE ) { //Static keys
+							$this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] = $value;
+						} elseif( is_numeric($value) AND preg_match( '/^l[0-9]{1,2}[a-z]?$/i', $key ) == TRUE ) { //Dynamic keys.
+							if ( !isset($this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key]) ) {
+								$this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] = 0;
+							}
+							$this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] = bcadd( $this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key], $value );
+						}
+					}
+				}
+			}
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		$this->form_data = $this->data; //Copy data to Form Data so group/sort doesn't affect it.
+		//Debug::Arr($this->form_data, 'Form Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
 	}
 
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _outputPDFForm( $format = NULL ) {
+		$file_arr = array();
 		$show_background = TRUE;
 		if ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) {
 			$show_background = FALSE;
 		}
 		Debug::Text('Generating Form... Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
+		$current_user = $this->getUserObject();
 		$setup_data = $this->getFormConfig();
 		$filter_data = $this->getFilterConfig();
 		//Debug::Arr($filter_data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		$current_company = $this->getUserObject()->getCompanyObject();
-		if ( !is_object($current_company) ) {
-			Debug::Text('Invalid company object...', __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
-		}
-
-		$current_user = $this->getUserObject();
-		if ( !is_object($current_user) ) {
-			Debug::Text('Invalid user object...', __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
-		}
-
-		$this->sortFormData(); //Make sure forms are sorted.
-
-		$f1099m = $this->getF1099MiscObject();
-		$f1099m->setDebug(FALSE);
-		$f1099m->setShowBackground( $show_background );
 
 		if ( stristr( $format, 'government' ) ) {
 			$form_type = 'government';
@@ -650,99 +804,166 @@ class Form1099MiscReport extends Report {
 		}
 		Debug::Text('Form Type: '. $form_type, __FILE__, __LINE__, __METHOD__, 10);
 
-		$f1099m->setType( $form_type );
-		$f1099m->year = TTDate::getYear( $filter_data['end_date'] );
+		if ( isset( $this->form_data['user'] ) AND is_array( $this->form_data['user'] ) ) {
+			foreach ( $this->form_data['user'] as $legal_entity_id => $user_rows ) {
+				//$total_row = array();
 
-		//Add support for the user to manually set this data in the setup_data. That way they can use multiple tax IDs for different employees, all beit manually.
-		$f1099m->ein = ( isset($setup_data['ein']) AND $setup_data['ein'] != '' ) ? $setup_data['ein'] : $current_company->getBusinessNumber();
-		$f1099m->name = ( isset($setup_data['name']) AND $setup_data['name'] != '' ) ? $setup_data['name'] : $this->getUserObject()->getFullName();
-		$f1099m->trade_name = ( isset($setup_data['company_name']) AND $setup_data['company_name'] != '' ) ? $setup_data['company_name'] : $current_company->getName();
-		$f1099m->company_address1 = ( isset($setup_data['address1']) AND $setup_data['address1'] != '' ) ? $setup_data['address1'] : $current_company->getAddress1() .' '. $current_company->getAddress2();
-		$f1099m->company_city = ( isset($setup_data['city']) AND $setup_data['city'] != '' ) ? $setup_data['city'] : $current_company->getCity();
-		$f1099m->company_state = ( isset($setup_data['province']) AND ( $setup_data['province'] != '' AND $setup_data['province'] != 0 ) ) ? $setup_data['province'] : $current_company->getProvince();
-		$f1099m->company_zip_code = ( isset($setup_data['postal_code']) AND $setup_data['postal_code'] != '' ) ? $setup_data['postal_code'] : $current_company->getPostalCode();
-
-		if ( isset($this->form_data) AND count($this->form_data) > 0 ) {
-			$i = 0;
-			$n = 1;
-			foreach((array)$this->form_data as $row) {
-				if ( !isset($row['user_id']) ) {
-					Debug::Text('User ID not set!', __FILE__, __LINE__, __METHOD__, 10);
+				if ( isset( $this->form_data['legal_entity'][ $legal_entity_id ] ) == FALSE ) {
+					Debug::Text( 'Missing Legal Entity: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
 					continue;
 				}
 
-				$ulf = TTnew( 'UserListFactory' );
-				$ulf->getById( (int)$row['user_id'] );
-				if ( $ulf->getRecordCount() == 1 ) {
-					$user_obj = $ulf->getCurrent();
+				if ( isset( $this->form_data['remittance_agency'][ $legal_entity_id ] ) == FALSE ) {
+					Debug::Text( 'Missing Remittance Agency: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
+					continue;
+				}
 
-					$ee_data = array(
-								'control_number' => $n,
-								'first_name' => $user_obj->getFirstName(),
-								'middle_name' => $user_obj->getMiddleName(),
-								'last_name' => $user_obj->getLastName(),
-								'address1' => $user_obj->getAddress1(),
-								'address2' => $user_obj->getAddress2(),
-								'city' => $user_obj->getCity(),
-								'state' => $user_obj->getProvince(),
-								'employment_province' => $user_obj->getProvince(),
-								'postal_code' => $user_obj->getPostalCode(),
-								'ssn' => $user_obj->getSIN(),
-								'employee_number' => $user_obj->getEmployeeNumber(),
-								'l4' => $row['l4'],
-								'l6' => $row['l6'],
-								'l7' => $row['l7'],
-								);
+				/** @var LegalEntityFactory $le_obj */
+				$legal_entity_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
 
-					foreach( range('a', 'z') as $z ) {
-						//State income tax
-						if ( isset($row['l16'.$z]) ) {
-							if ( isset($setup_data['state'][$row['l17'.$z.'_state']]) ) {
-								$ee_data['l17'.$z.'_state_id'] = $setup_data['state'][$row['l17'.$z.'_state']]['state_id'];
+				$this->sortFormData(); //Make sure forms are sorted.
+
+				$f1099m = $this->getF1099MiscObject();
+				$f1099m->setDebug(FALSE);
+				$f1099m->setShowBackground( $show_background );
+
+				$f1099m->setType( $form_type );
+				$f1099m->year = TTDate::getYear( $filter_data['end_date'] );
+
+				$f1099m->name = $this->getUserObject()->getFullName();
+				$f1099m->trade_name = $legal_entity_obj->getTradeName();
+				$f1099m->company_address1 = $legal_entity_obj->getAddress1() . ' ' . $legal_entity_obj->getAddress2();
+				$f1099m->company_city = $legal_entity_obj->getCity();
+				$f1099m->company_state = $legal_entity_obj->getProvince();
+				$f1099m->company_zip_code = $legal_entity_obj->getPostalCode();
+				$f1099m->payer_id = $this->form_data['remittance_agency'][$legal_entity_id]['00']->getPrimaryIdentification(); //Use Federal Remittance Agency always.
+
+				if ( isset( $this->form_data ) AND count( $this->form_data ) > 0 ) {
+					$i = 0;
+					foreach ( $user_rows as $user_id => $row ) {
+						if ( !isset( $user_id ) OR TTUUID::isUUID( $user_id ) == FALSE ) {
+							Debug::Text( 'User ID not set!', __FILE__, __LINE__, __METHOD__, 10 );
+							continue;
+						}
+
+						$ulf = TTnew( 'UserListFactory' );
+						$ulf->getById( TTUUID::castUUID( $user_id ) );
+						if ( $ulf->getRecordCount() == 1 ) {
+							$user_obj = $ulf->getCurrent();
+
+							$ee_data = array(
+									'control_number' => $i + 1,
+									'first_name' => $user_obj->getFirstName(),
+									'middle_name' => $user_obj->getMiddleName(),
+									'last_name' => $user_obj->getLastName(),
+									'address1' => $user_obj->getAddress1(),
+									'address2' => $user_obj->getAddress2(),
+									'city' => $user_obj->getCity(),
+									'state' => $user_obj->getProvince(),
+									'employment_province' => $user_obj->getProvince(),
+									'postal_code' => $user_obj->getPostalCode(),
+									'recipient_id' => $user_obj->getSIN(),
+									'employee_number' => $user_obj->getEmployeeNumber(),
+									'l4' => $row['l4'],
+									'l6' => $row['l6'],
+									'l7' => $row['l7'],
+							);
+
+							foreach ( range( 'a', 'z' ) as $z ) {
+								//Make sure state information is included if its just local income taxes.
+								if ( isset( $row[ 'l18' . $z ] ) AND ( isset( $row[ 'l17' . $z . '_state' ] ) AND isset( $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l17' . $z . '_state' ] ] ) AND $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l17' . $z . '_state' ] ]->getType() == 20 ) ) {
+									$ee_data[ 'l17' . $z . '_state_id' ] = $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l17' . $z . '_state' ] ]->getPrimaryIdentification();
+									//$ee_data[ 'l17' . $z . '_state' ] = $row[ 'l17' . $z . '_state' ];
+									$ee_data[ 'l17' . $z ] = $row[ 'l17' . $z . '_state' ];
+									if ( isset($ee_data['l17'.$z.'_state_id']) AND $ee_data['l17'.$z.'_state_id'] != '' ) {
+										$ee_data['l17'.$z] .= ' / '. $ee_data['l17'.$z.'_state_id'];
+									}
+								} else {
+									$ee_data[ 'l17' . $z . '_state_id' ] = NULL;
+									$ee_data[ 'l17' . $z . '_state' ] = NULL;
+								}
+
+								//State income tax
+								if ( isset( $row[ 'l18' . $z ] ) ) {
+									$ee_data[ 'l18' . $z ] = $row[ 'l18' . $z ];
+									$ee_data[ 'l16' . $z ] = $row[ 'l16' . $z ];
+								} else {
+									$ee_data[ 'l18' . $z ] = NULL;
+									$ee_data[ 'l16' . $z ] = NULL;
+								}
 							}
-							$ee_data['l17'.$z] = $row['l17'.$z.'_state'];
-							if ( isset($ee_data['l17'.$z.'_state_id']) ) {
-								$ee_data['l17'.$z] .= ' / '. $ee_data['l17'.$z.'_state_id'];
+
+							$f1099m->addRecord( $ee_data );
+							unset($ee_data);
+
+							if ( $format == 'pdf_form_publish_employee' ) {
+								// generate PDF for every employee and assign to each government document records
+								$this->getFormObject()->addForm( $f1099m );
+								GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 220, TTDate::getEndYearEpoch( $filter_data['end_date'] ), $this->getFormObject()->output( 'PDF' ) );
+								$this->getFormObject()->clearForms();
 							}
-							$ee_data['l16'.$z] = $row['l16'.$z];
-							$ee_data['l18'.$z] = $row['l18'.$z];
+
+							$i++;
 						}
 					}
-					$f1099m->addRecord( $ee_data );
-					unset($ee_data);
-
-					if ( $format == 'pdf_form_publish_employee' ) {
-						// generate PDF for every employee and assign to each government document records
-						$this->getFormObject()->addForm( $f1099m );
-						GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 220, TTDate::getEndYearEpoch( $filter_data['end_date'] ), $this->getFormObject()->output( 'PDF' ) );
-						$this->getFormObject()->clearForms();
-					}
-
-					$i++;
-					$n++;
 				}
+
+				if ( $format == 'pdf_form_publish_employee' ) {
+					$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $current_user->getId() );
+
+					return $user_generic_status_batch_id;
+				}
+
+				$this->getFormObject()->addForm( $f1099m );
+
+				if ( $format == 'efile' ) {
+					$output_format = 'EFILE';
+					if ( $f1099m->getDebug() == TRUE ) {
+						$file_name = '1099misc_efile_' . date( 'Y_m_d' ) . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.csv';
+					} else {
+						$file_name = '1099misc_efile_' . date( 'Y_m_d' ) . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.txt';
+					}
+					$mime_type = 'applications/octet-stream'; //Force file to download.
+				} elseif ( $format == 'efile_xml' ) {
+					$output_format = 'XML';
+					$file_name = '1099misc_efile_' . date( 'Y_m_d' ) . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.xml';
+					$mime_type = 'applications/octet-stream'; //Force file to download.
+				} else {
+					$output_format = 'PDF';
+					$file_name = $this->file_name . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.pdf';
+					$mime_type = $this->file_mime_type;
+				}
+
+				$output = $this->getFormObject()->output( $output_format );
+
+				$file_arr[] = array('file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output);
+
+				$this->clearFormObject();
+				$this->clearF1099MiscObject();
 			}
 		}
 
-		if ( $format == 'pdf_form_publish_employee' ) {
-			$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $current_user->getId() );
-			return $user_generic_status_batch_id;
+		if ( isset($file_name) AND $file_name != '' ) {
+			$zip_filename = explode( '.', $file_name );
+			if ( isset( $zip_filename[ ( count( $zip_filename ) - 1 ) ] ) ) {
+				$zip_filename = str_replace( '.', '', str_replace( $zip_filename[ ( count( $zip_filename ) - 1 ) ], '', $file_name ) ) . '.zip';
+			} else {
+				$zip_filename = str_replace( '.', '', $file_name ) . '.zip';
+			}
+
+			return Misc::zip( $file_arr, $zip_filename, TRUE );
 		}
 
-		$this->getFormObject()->addForm( $f1099m );
-
-		if ( $format == 'efile_xml' ) {
-			$output_format = 'XML';
-		} else {
-			$output_format = 'PDF';
-		}
-
-		$output = $this->getFormObject()->output( $output_format );
-
-		return $output;
+		Debug::Text(' Returning FALSE!', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
 	}
 
 	//Short circuit this function, as no postprocessing is required for exporting the data.
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _postProcess( $format = NULL ) {
 		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'pdf_form_publish_employee' ) {
 			Debug::Text('Skipping postProcess! Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
@@ -752,6 +973,10 @@ class Form1099MiscReport extends Report {
 		}
 	}
 
+	/**
+	 * @param null $format
+	 * @return array|bool
+	 */
 	function _output( $format = NULL ) {
 		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'pdf_form_publish_employee' ) {
 			return $this->_outputPDFForm( $format );

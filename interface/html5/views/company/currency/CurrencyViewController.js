@@ -1,12 +1,15 @@
 CurrencyViewController = BaseViewController.extend( {
 	el: '#currency_view_container',
+
+	_required_files: ['APICurrency'],
+
 	status_array: null,
 	iso_codes_array: null,
 	round_decimal_places_array: null,
 	sub_currency_rate_view_controller: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'CurrencyEditView.html';
 		this.permission_id = 'currency';
 		this.viewId = 'Currency';

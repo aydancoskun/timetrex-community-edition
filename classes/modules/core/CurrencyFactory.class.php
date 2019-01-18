@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,11 @@ class CurrencyFactory extends Factory {
 	protected $table = 'currency';
 	protected $pk_sequence_name = 'currency_id_seq'; //PK Sequence name
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -355,6 +360,10 @@ class CurrencyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -377,66 +386,60 @@ class CurrencyFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	static function getISOCodesArray() {
 		return TTi18n::getCurrencyArray();
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'company',
-															$clf->getByID($id),
-															TTi18n::gettext('Company is invalid')
-															) ) {
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -458,160 +461,123 @@ class CurrencyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim($name);
-
-		if	(	$this->Validator->isLength(		'name',
-												$name,
-												TTi18n::gettext('Name is too short or too long'),
-												2,
-												100)
-					AND
-						$this->Validator->isTrue(		'name',
-														$this->isUniqueName($name),
-														TTi18n::gettext('Currency already exists'))
-
-												) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
-	function getISOCode() {
-		if ( isset($this->data['iso_code']) ) {
-			return $this->data['iso_code'];
-		}
-
-		return FALSE;
-	}
-	function setISOCode($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
 		$value = trim($value);
-
-		if	(	$this->Validator->inArrayKey(	'iso_code',
-												$value,
-												TTi18n::gettext('ISO code is invalid'),
-												$this->getISOCodesArray() ) ) {
-
-			$this->data['iso_code'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'name', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
+	function getISOCode() {
+		return $this->getGenericDataValue( 'iso_code' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setISOCode( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'iso_code', $value );
+	}
+
+	/**
+	 * @return string
+	 */
 	function getReverseConversionRate() {
 		return bcdiv( 1, $this->getConversionRate() );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getConversionRate() {
-		if ( isset($this->data['conversion_rate']) ) {
-			return $this->data['conversion_rate']; //Don't cast to (float) as it may strip some precision.
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'conversion_rate' ); //Don't cast to (float) as it may strip some precision.
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setConversionRate( $value ) {
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-
-		if ( $this->Validator->isTrue( 'conversion_rate',
-									   $value,
-									   TTi18n::gettext( 'Conversion rate not specified' ) )
-				AND $this->Validator->isFloat( 'conversion_rate',
-											   $value,
-											   TTi18n::gettext( 'Incorrect Conversion Rate' ) )
-				AND $this->Validator->isLessThan( 'conversion_rate',
-												  $value,
-												  TTi18n::gettext( 'Conversion Rate is too high' ),
-												  99999999 )
-				AND $this->Validator->isGreaterThan( 'conversion_rate',
-													 $value,
-													 TTi18n::gettext( 'Conversion Rate is too low' ),
-													 -99999999 )
-		) {
-			$this->data['conversion_rate'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'conversion_rate', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getAutoUpdate() {
-		return $this->fromBool( $this->data['auto_update'] );
-	}
-	function setAutoUpdate($bool) {
-		$this->data['auto_update'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'auto_update' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAutoUpdate( $value) {
+		return $this->setGenericDataValue( 'auto_update', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getActualRate() {
-		if ( isset($this->data['actual_rate']) ) {
-			return $this->data['actual_rate'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'actual_rate' );
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setActualRate( $value ) {
 		$value = trim($value);
 
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-
 		//Ignore any boolean values passed in to this function.
-		if (	is_numeric( $value )
-				AND
-				$this->Validator->isFloat(	'actual_rate',
-											$value,
-											TTi18n::gettext('Incorrect Actual Rate')) ) {
-
-			$this->data['actual_rate'] = $value;
-
-			return TRUE;
+		if ( is_numeric( $value ) ) {
+			return $this->setGenericDataValue( 'actual_rate', $value );
 		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getActualRateUpdatedDate() {
-		if ( isset($this->data['actual_rate_updated_date']) ) {
-			return (int)$this->data['actual_rate_updated_date'];
-		}
-
-		return FALSE;
-	}
-	function setActualRateUpdatedDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
-		}
-
-		if	(	$this->Validator->isDate(		'actual_rate_updated_date',
-												$epoch,
-												TTi18n::gettext('Incorrect Updated Date') ) ) {
-
-			$this->data['actual_rate_updated_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'actual_rate_updated_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setActualRateUpdatedDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ($value == NULL) {
+			$value = TTDate::getTime();
+		}
+		return $this->setGenericDataValue( 'actual_rate_updated_date', $value );
+	}
+
+	/**
+	 * @param $rate
+	 * @return string
+	 */
 	function getPercentModifiedRate( $rate ) {
 		if ( $this->getRateModifyPercent() == 0 ) {
 			$percent = 1;
@@ -620,31 +586,28 @@ class CurrencyFactory extends Factory {
 		}
 		return bcmul( $rate, $percent );
 	}
-	function getRateModifyPercent() {
-		if ( isset($this->data['rate_modify_percent']) ) {
-			return $this->data['rate_modify_percent'];
-		}
 
-		return FALSE;
+	/**
+	 * @return bool|mixed
+	 */
+	function getRateModifyPercent() {
+		return $this->getGenericDataValue( 'rate_modify_percent' );
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setRateModifyPercent( $value ) {
 		$value = (float)trim($value);
-
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-
-		if (	$this->Validator->isFloat(	'rate_modify_percent',
-											$value,
-											TTi18n::gettext('Incorrect Modify Percent')) ) {
-
-			$this->data['rate_modify_percent'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'rate_modify_percent', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isUniqueDefault() {
 		$ph = array(
 					'company_id' => $this->getCompany(),
@@ -665,30 +628,24 @@ class CurrencyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getDefault() {
-		return $this->fromBool( $this->data['is_default'] );
-	}
-	function setDefault($bool) {
-
-		if	(
-				$bool == TRUE
-				AND
-				$this->Validator->isTrue(		'is_default',
-												$this->isUniqueDefault(),
-												TTi18n::gettext('There is already a default currency set')
-												)
-			) {
-
-			$this->data['is_default'] = $this->toBool(TRUE);
-
-			return TRUE;
-		}
-
-		$this->data['is_default'] = $this->toBool(FALSE);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'is_default' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDefault( $value) {
+		return $this->setGenericDataValue( 'is_default', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function isUniqueBase() {
 		$ph = array(
 					'company_id' => $this->getCompany(),
@@ -709,67 +666,84 @@ class CurrencyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getBase() {
-		return $this->fromBool( $this->data['is_base'] );
-	}
-	function setBase($bool) {
-
-		if	(
-				$bool == TRUE
-				AND
-				$this->Validator->isTrue(		'is_base',
-												$this->isUniqueBase(),
-												TTi18n::gettext('There is already a base currency set')
-												)
-			) {
-
-			$this->data['is_base'] = $this->toBool(TRUE);
-
-			return TRUE;
-		}
-
-		$this->data['is_base'] = $this->toBool(FALSE);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'is_base' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setBase( $value) {
+		return $this->setGenericDataValue( 'is_base', $this->toBool($value)  );
+	}
+
+	/**
+	 * @return mixed|string
+	 */
 	function getSymbol() {
 		return TTi18n::getCurrencySymbol( $this->getISOCode() );
 	}
 
+	/**
+	 * @return int
+	 */
 	function getRoundDecimalPlaces() {
-		if ( isset($this->data['round_decimal_places']) ) {
-			return $this->data['round_decimal_places'];
+		$value = $this->getGenericDataValue( 'round_decimal_places' );
+		if ( $value !== FALSE ) {
+			return $value;
 		}
 
 		return 2;
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setRoundDecimalPlaces( $value ) {
 		if ( version_compare( APPLICATION_VERSION, 5.5, '>' ) ) {
 			$value = trim($value);
-
-			if (
-				$this->Validator->inArrayKey(	'round_decimal_places',
-												$value,
-												TTi18n::gettext('Incorrect rounding decimal places'),
-												$this->getOptions('round_decimal_places')) ) {
-
-				$this->data['round_decimal_places'] = $value;
-
-				return TRUE;
-			}
+			return $this->setGenericDataValue( 'round_decimal_places', $value );
 		}
-
 		return FALSE;
-
 	}
 
+	/**
+	 * @param $value
+	 * @return string
+	 */
 	function round( $value ) {
 		//This needs to be number_format, as round strips trailing 0's.
 		return number_format( (float)$value, (int)$this->getRoundDecimalPlaces(), '.', '');
 		//return round( (float)$value, (int)$this->getRoundDecimalPlaces() );
 	}
 
+	/**
+	 * @param $src_rate
+	 * @param $dst_rate
+	 * @return int|string
+	 */
+	static function getCrossConversionRate( $src_rate, $dst_rate ) {
+		if ( $src_rate == $dst_rate ) {
+			$retval = 1;
+		} else {
+			$retval = bcmul( bcdiv(1, $src_rate ), $dst_rate );
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * @param $src_rate
+	 * @param $dst_rate
+	 * @param $amount
+	 * @param int $round_decimal_places
+	 * @return float
+	 */
 	static function convert( $src_rate, $dst_rate, $amount, $round_decimal_places = 2 ) {
 		$base_amount = bcmul( bcdiv(1, $src_rate), $amount );
 		$retval = round( bcmul( $dst_rate, $base_amount ), (int)$round_decimal_places );
@@ -777,6 +751,12 @@ class CurrencyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param string $src_currency_id UUID
+	 * @param string $dst_currency_id UUID
+	 * @param int $amount
+	 * @return bool|float|int
+	 */
 	static function convertCurrency( $src_currency_id, $dst_currency_id, $amount = 1 ) {
 		//Debug::Text('Source Currency: '. $src_currency_id .' Destination Currency: '. $dst_currency_id .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -820,6 +800,12 @@ class CurrencyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $amount
+	 * @param $rate
+	 * @param bool $convert
+	 * @return string
+	 */
 	function getBaseCurrencyAmount( $amount, $rate, $convert = TRUE ) {
 		if ( $convert == TRUE AND $rate !== 1 ) { //Don't bother converting if rate is 1.
 			$amount = bcmul( $rate, $amount );
@@ -828,6 +814,10 @@ class CurrencyFactory extends Factory {
 		return $this->round( $amount );
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	static function updateCurrencyRates( $company_id ) {
 		/*
 
@@ -1006,38 +996,220 @@ class CurrencyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		if ( $this->getCompany() != FALSE AND $this->getCompany() != TTUUID::getZeroID() ) {
+			$clf = TTnew( 'CompanyListFactory' );
+			$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		}
+		// Status
+		if ( $this->getStatus() != '' ) {
+			$this->Validator->inArrayKey(	'status',
+													$this->getStatus(),
+													TTi18n::gettext('Incorrect Status'),
+													$this->getOptions('status')
+												);
+		}
+		// Name
+		if ( $this->getName() !== FALSE ) {
+			$this->Validator->isLength(		'name',
+													$this->getName(),
+													TTi18n::gettext('Name is too short or too long'),
+													2,
+													100
+												);
+			if ( $this->Validator->isError('name') == FALSE ) {
+				$this->Validator->isTrue(		'name',
+														$this->isUniqueName($this->getName()),
+														TTi18n::gettext('Currency already exists')
+													);
+			}
+		}
+		// ISO code
+		if ( $this->getISOCode() !== FALSE ) {
+			$this->Validator->inArrayKey(	'iso_code',
+													$this->getISOCode(),
+													TTi18n::gettext('ISO code is invalid'),
+													$this->getISOCodesArray()
+												);
+		}
+		// Conversion rate
+		if ( $this->getConversionRate() !== FALSE ) {
+			$this->Validator->isTrue( 'conversion_rate',
+											$this->getConversionRate(),
+											TTi18n::gettext( 'Conversion rate not specified' )
+										);
+			if ( $this->Validator->isError('conversion_rate') == FALSE ) {
+				$this->Validator->isFloat( 'conversion_rate',
+													$this->getConversionRate(),
+													TTi18n::gettext( 'Incorrect Conversion Rate' )
+												);
+			}
+			if ( $this->Validator->isError('conversion_rate') == FALSE ) {
+				$this->Validator->isLessThan( 'conversion_rate',
+													$this->getConversionRate(),
+													TTi18n::gettext( 'Conversion Rate is too high' ),
+													99999999
+												);
+			}
+			if ( $this->Validator->isError('conversion_rate') == FALSE ) {
+				$this->Validator->isGreaterThan( 'conversion_rate',
+														$this->getConversionRate(),
+														TTi18n::gettext( 'Conversion Rate is too low' ),
+														-99999999
+													);
+			}
+		}
+		// Actual Rate
+		if ( $this->getActualRate() !== FALSE AND is_numeric( $this->getActualRate() ) ) {
+			$this->Validator->isFloat(	'actual_rate',
+												$this->getActualRate(),
+												TTi18n::gettext('Incorrect Actual Rate')
+											);
+		}
+
+		// Updated Date
+		if ( $this->getActualRateUpdatedDate() !== FALSE ) {
+			$this->Validator->isDate( 'actual_rate_updated_date',
+									  $this->getActualRateUpdatedDate(),
+									  TTi18n::gettext( 'Incorrect Actual Rate Updated Date' )
+			);
+		}
+		// Modify Percent
+		if ( $this->getRateModifyPercent() !== FALSE ) {
+			$this->Validator->isFloat( 'rate_modify_percent',
+									   $this->getRateModifyPercent(),
+									   TTi18n::gettext( 'Incorrect Modify Percent' )
+			);
+		}
+		// Is Default
+		if ( $this->getDefault() !== FALSE ) {
+			$this->Validator->isTrue(		'is_default',
+													$this->isUniqueDefault(),
+													TTi18n::gettext('There is already a default currency set')
+												);
+		}
+		// Is Base
+		if ( $this->getBase() !== FALSE ) {
+			$this->Validator->isTrue(		'is_base',
+													$this->isUniqueBase(),
+													TTi18n::gettext('There is already a base currency set')
+												);
+		}
+		// Rounding decimal places
+		if ( $this->getRoundDecimalPlaces() != 2 ) {
+			$this->Validator->inArrayKey(	'round_decimal_places',
+													$this->getRoundDecimalPlaces(),
+													TTi18n::gettext('Incorrect rounding decimal places'),
+													$this->getOptions('round_decimal_places')
+												);
+		}
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 
 		if ( $this->getDeleted() == TRUE ) {
 			//CHeck to make sure currency isnt in-use by paystubs/employees/wages, if so, don't delete.
-			$invalid = FALSE;
 
-			$pslf = TTnew( 'PayStubListFactory' );
-			$pslf->getByCurrencyId( $this->getId() );
-			if ( $pslf->getRecordCount() > 0 ) {
-				$invalid = TRUE;
+			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
+				/** @var ProductListFactory $splf */
+				$splf = TTnew( 'RemittanceSourceAccountListFactory' );
+				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
+				if ( $splf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE( 'in_use',
+											  FALSE,
+											  TTi18n::gettext( 'This currency is currently in use' ) . ' ' . TTi18n::gettext( 'by remittance sources' ) );
+				}
 			}
-
-			if ( $invalid == FALSE ) {
-				$ulf = TTnew( 'UserListFactory' );
-				$ulf->getByCurrencyId( $this->getId() );
-				if ( $ulf->getRecordCount() > 0 ) {
-					$invalid = TRUE;
+			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
+				/** @var ProductListFactory $splf */
+				$splf = TTnew( 'ProductListFactory' );
+				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
+				if ( $splf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE( 'in_use',
+											  FALSE,
+											  TTi18n::gettext( 'This currency is currently in use' ) . ' ' . TTi18n::gettext( 'by invoice products' ) );
+				}
+			}
+			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
+				/** @var ProductListFactory $splf */
+				$splf = TTnew( 'UserListFactory' );
+				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
+				if ( $splf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE( 'in_use',
+											  FALSE,
+											  TTi18n::gettext( 'This currency is currently in use' ) . ' ' . TTi18n::gettext( 'by employees' ) );
+				}
+			}
+			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
+				/** @var InvoiceListFactory $splf */
+				$splf = TTnew( 'InvoiceListFactory' );
+				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
+				if ( $splf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE( 'in_use',
+											  FALSE,
+											  TTi18n::gettext( 'This currency is currently in use' ) . ' ' . TTi18n::gettext( 'by invoices' ) );
+				}
+			}
+			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
+				/** @var ClientContactListFactory $splf */
+				$splf = TTnew( 'ClientContactListFactory' );
+				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
+				if ( $splf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE( 'in_use',
+											  FALSE,
+											  TTi18n::gettext( 'This currency is currently in use' ) . ' ' . TTi18n::gettext( 'by client contacts' ) );
 				}
 			}
 
-			//FIXME: Add checks for products as well.
-
-			if ( $invalid == TRUE ) {
-				$this->Validator->isTRUE(	'in_use',
-											FALSE,
-											TTi18n::gettext('This currency is in use'));
+			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
+				/** @var ProductListFactory $splf */
+				$splf = TTnew( 'RemittanceDestinationAccountListFactory' );
+				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
+				if ( $splf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE( 'in_use',
+											  FALSE,
+											  TTi18n::gettext( 'This currency is currently in use' ) . ' ' . TTi18n::gettext( 'by employee payment methods' ) );
+				}
+			}
+			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
+				/** @var ProductListFactory $splf */
+				$splf = TTnew( 'TransactionListFactory' );
+				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
+				if ( $splf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE( 'in_use',
+											  FALSE,
+											  TTi18n::gettext( 'This currency is currently in use' ) . ' ' . TTi18n::gettext( 'by invoice transactions' ) );
+				}
+			}
+			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
+				/** @var ProductListFactory $splf */
+				$splf = TTnew( 'PayStubListFactory' );
+				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'pay_stub_currency_id' => $this->getId() ), 1 );
+				if ( $splf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE( 'in_use',
+											  FALSE,
+											  TTi18n::gettext( 'This currency is currently in use' ) . ' ' . TTi18n::gettext( 'by pay stubs' ) );
+				}
 			}
 		}
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getBase() == TRUE ) {
 			$this->setConversionRate( '1.00' );
@@ -1047,6 +1219,9 @@ class CurrencyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 		$this->removeCache( $this->getCompany().$this->getBase() );
@@ -1076,6 +1251,10 @@ class CurrencyFactory extends Factory {
 
 	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -1107,6 +1286,10 @@ class CurrencyFactory extends Factory {
 	}
 
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		/*
 		$include_columns = array(
@@ -1152,6 +1335,10 @@ class CurrencyFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Currency').': '. $this->getISOCode() .' '.  TTi18n::getText('Rate').': '. $this->getConversionRate(), NULL, $this->getTable(), $this );
 	}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,11 @@ class AccrualBalanceFactory extends Factory {
 
 	var $user_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -82,6 +87,10 @@ class AccrualBalanceFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 			$variable_function_map = array(
 											'user_id' => 'User',
@@ -100,121 +109,153 @@ class AccrualBalanceFactory extends Factory {
 			return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getAccrualPolicyAccount() {
-		if ( isset($this->data['accrual_policy_account_id']) ) {
-			return (int)$this->data['accrual_policy_account_id'];
-		}
-
-		return FALSE;
-	}
-	function setAccrualPolicyAccount($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$apalf = TTnew( 'AccrualPolicyAccountListFactory' );
-
-		if ( $id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'accrual_policy_account',
-													$apalf->getByID($id),
-													TTi18n::gettext('Accrual Account is invalid')
-													) ) {
-
-			$this->data['accrual_policy_account_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'accrual_policy_account_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAccrualPolicyAccount( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'accrual_policy_account_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getBalance() {
-		if ( isset($this->data['balance']) ) {
-			return $this->data['balance'];
-		}
-
-		return FALSE;
-	}
-	function setBalance($int) {
-		$int = trim($int);
-
-		if ( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isNumeric(		'balance',
-													$int,
-													TTi18n::gettext('Incorrect Balance'))
-				) {
-			$this->data['balance'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'balance' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setBalance( $value) {
+		$value = trim($value);
+		if ( empty($value) ) {
+			$value = 0;
+		}
+		return $this->setGenericDataValue('balance', $value);
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getUpdatedBy() {
 		return FALSE;
 	}
-	function setUpdatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {
-		return FALSE;
-	}
-	function getDeletedBy() {
-		return FALSE;
-	}
-	function setDeletedBy($id = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getDeletedBy() {
+		return FALSE;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
+		return FALSE;
+	}
+
+	/**
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @return bool
+	 */
 	static function calcBalance( $user_id, $accrual_policy_account_id = NULL ) {
 		global $profiler;
 
@@ -270,18 +311,65 @@ class AccrualBalanceFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+
+
+		// User
+		$ulf = TTnew( 'UserListFactory' );
+		$this->Validator->isResultSetWithRows(	'user_id',
+													$ulf->getByID( $this->getUser() ),
+													TTi18n::gettext('Invalid Employee')
+												);
+
+		// Accrual Policy Account
+		if ( $this->getAccrualPolicyAccount() != TTUUID::getZeroID() ) {
+			$apalf = TTnew( 'AccrualPolicyAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'accrual_policy_account_id',
+													$apalf->getByID($this->getAccrualPolicyAccount()),
+													TTi18n::gettext('Accrual Account is invalid')
+												);
+		}
+		// Balance
+		if ( $this->getBalance() != 0 ) {
+			$this->Validator->isNumeric(		'balance',
+													$this->getBalance(),
+													TTi18n::gettext('Incorrect Balance')
+												);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();

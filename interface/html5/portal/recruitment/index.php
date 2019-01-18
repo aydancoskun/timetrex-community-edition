@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,7 +45,8 @@ $system_settings = array();
 $primary_company = FALSE;
 $clf = new CompanyListFactory();
 if ( ( !isset($disable_database_connection) OR ( isset($disable_database_connection) AND $disable_database_connection != TRUE ) )
-		AND ( !isset($config_vars['other']['installer_enabled']) OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] != TRUE ) )) {
+		AND ( !isset($config_vars['other']['installer_enabled']) OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] != TRUE ) )
+		AND ( ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] != TRUE ) ) ) {
 	//Get all system settings, so they can be used even if the user isn't logged in, such as the login page.
 	try {
 		$sslf = new SystemSettingListFactory();
@@ -111,32 +112,12 @@ unset($authentication);
 	<link title="application css" rel="stylesheet" type="text/css" href="../../theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">
 	<link rel="stylesheet" type="text/css" href="../../theme/default/css/jquery-ui/jquery-ui.custom.css?v=<?php echo APPLICATION_BUILD?>">
 	<link rel="stylesheet" type="text/css" href="../../theme/default/css/views/login/LoginView.css?v=<?php echo APPLICATION_BUILD?>">
-	<script src="../../framework/jquery.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../framework/bootstrap/js/bootstrap.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../framework/bootstrap-select/dist/js/bootstrap-select.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../framework/bootstrap-toolkit.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../framework/jquery.form.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../framework/jquery.i18n.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../framework/backbone/underscore-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../framework/backbone/backbone-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../framework/tinymce/tinymce.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../framework/tinymce/jquery.tinymce.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../global/CookieSetting.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../global/RateLimit.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../global/Global.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script async src="../../framework/rightclickmenu/rightclickmenu.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script async src="../../framework/rightclickmenu/jquery.ui.position.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script async src="../../services/APIFactory.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="../../global/LocalCacheData.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script>
-		Global.url_offset = '../../';
 
-		Global.addCss( "right_click_menu/rightclickmenu.css" );
-		Global.addCss( "views/wizard/Wizard.css" );
-		Global.addCss( "image_area_select/imgareaselect-default.css" );
-	</script>
+    <script>
+		APPLICATION_BUILD = '<?php echo APPLICATION_BUILD; ?>';
+		DISABLE_DB = <?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '1'; } else { echo '0'; }?>;
+    </script>
+    <script src="../../global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
 </head>
 
 <!--z-index
@@ -254,70 +235,7 @@ Login view:10
 </div>
 
 </body>
-<script>
-	//Hide elements that show hidden link for search friendly
-	hideElements();
-	//Don't not show loading bar if refresh
-	if ( Global.isSet( LocalCacheData.getPortalLoginUser() ) ) {
-		$( ".loading-view" ).hide();
-	} else {
-		setProgress()
-	}
-
-	function setProgress() {
-		loading_bar_time = setInterval( function() {
-			var progress_bar = $( ".progress-bar" )
-			var c_value = progress_bar.attr( "value" );
-
-			if ( c_value < 90 ) {
-				progress_bar.attr( "value", c_value + 10 );
-			}
-		}, 1000 );
-	}
-
-	function cleanProgress() {
-		if ( $( ".loading-view" ).is( ":visible" ) ) {
-
-			var progress_bar = $( ".progress-bar" )
-			progress_bar.attr( "value", 100 );
-			clearInterval( loading_bar_time );
-
-			loading_bar_time = setInterval( function() {
-				$( ".progress-bar-div" ).hide();
-				clearInterval( loading_bar_time );
-			}, 50 );
-		}
-	}
-
-	function hideElements(){
-		var elements = document.getElementsByClassName( 'need-hidden-element' );
-
-		for ( var i = 0; i < elements.length; i++ ) {
-			elements[i].style.display = 'none';
-		}
-	}
-</script>
-<script src="../../views/portal/PortalBaseViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/JobApplicantSubBaseViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/header/HeaderViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/sign_in/SignInController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/sign_in/PortalForgotPasswordController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/sign_in/PortalResetForgotPasswordController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/header/HeaderUploadResumeWidget.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/recruitment/PortalJobVacancyRowController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/recruitment/PortalJobVacancyDetailController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/JobApplicantEmploymentSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/JobApplicantReferenceSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/JobApplicantLocationSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/JobApplicantSkillSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/JobApplicantEducationSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/JobApplicantMembershipSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/JobApplicantLicenseSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/JobApplicantLanguageSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/JobApplicationSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
-<script src="../../views/portal/hr/my_profile/DocumentSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
 <script src="../../framework/require.js" data-main="main.js?v=<?php echo APPLICATION_BUILD?>"></script>
-
 <!-- <?php echo Misc::getInstanceIdentificationString( $primary_company, $system_settings );?>  -->
 </html>
 <?php

@@ -51,6 +51,11 @@ var ProgressBar = (function() {
 	};
 
 	var closeOverlay = function() {
+		//this variable is set in BaseViewController::onContextMenuClick
+		if(window.clickProcessing == true) {
+			window.clickProcessing = false;
+			window.clearTimeout( window.clickProcessingHandle );
+		}
 		Global.overlay().removeClass( 'overlay' );
 		Global.setUIReady();
 		TTPromise.resolve('ProgressBar','overlay_visible');

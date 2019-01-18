@@ -1,5 +1,7 @@
 CompanyViewController = BaseViewController.extend( {
 
+	_required_files: ['TImage','TImageAdvBrowser', 'APICompany'],
+
 	product_edition_array: null,
 	industry_array: null,
 	country_array: null,
@@ -12,8 +14,8 @@ CompanyViewController = BaseViewController.extend( {
 
 	file_browser: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		var $this = this;
 
 		this.permission_id = 'company';
 		this.viewId = 'Company';
@@ -35,12 +37,10 @@ CompanyViewController = BaseViewController.extend( {
 		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
-
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
-
 	},
 
 	initOptions: function( callBack ) {
@@ -259,7 +259,7 @@ CompanyViewController = BaseViewController.extend( {
 					var result_data = result.getResult();
 					if ( result_data === true ) {
 						$this.refresh_id = $this.current_edit_record.id;
-					} else if ( result_data > 0 ) {
+					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 						$this.refresh_id = result_data
 					}
 
@@ -525,9 +525,9 @@ CompanyViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Industry' ), form_item_input, tab_company_column1 );
 
 		// Business/Employer ID Number
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'business_number', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Business/Employer ID Number' ), form_item_input, tab_company_column1 );
+//		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+//		form_item_input.TTextInput( {field: 'business_number', width: 149} );
+//		this.addEditFieldToColumn( $.i18n._( 'Business/Employer ID Number' ), form_item_input, tab_company_column1 );
 
 		// Address (Line 1)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -618,22 +618,22 @@ CompanyViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Primary Support Contact' ), form_item_input, tab_company_column2 );
 
-		//Direct Deposit (EFT)
-		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Direct Deposit (EFT)' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab_company_column2 );
-
-		// Originator ID / Immediate Origin
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'originator_id', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Originator ID / Immediate Origin' ), form_item_input, tab_company_column2 );
-
-		// Data Center / Immediate Destination
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'data_center_id', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Data Center / Immediate Destination' ), form_item_input, tab_company_column2 );
+		// //Direct Deposit (EFT)
+		// form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
+		// form_item_input.SeparatedBox( {label: $.i18n._( 'Direct Deposit (EFT)' )} );
+		// this.addEditFieldToColumn( null, form_item_input, tab_company_column2 );
+		//
+		// // Originator ID / Immediate Origin
+		// form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		//
+		// form_item_input.TTextInput( {field: 'originator_id', width: 149} );
+		// this.addEditFieldToColumn( $.i18n._( 'Originator ID / Immediate Origin' ), form_item_input, tab_company_column2 );
+		//
+		// // Data Center / Immediate Destination
+		// form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		//
+		// form_item_input.TTextInput( {field: 'data_center_id', width: 149} );
+		// this.addEditFieldToColumn( $.i18n._( 'Data Center / Immediate Destination' ), form_item_input, tab_company_column2 );
 
 		// Company Settings
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
@@ -683,7 +683,7 @@ CompanyViewController = BaseViewController.extend( {
 			}} );
 		}
 
-		this.addEditFieldToColumn( $.i18n._( 'Photo' ), this.file_browser, tab_company_column2, '', null, false, true );
+		this.addEditFieldToColumn( $.i18n._( 'Logo' ), this.file_browser, tab_company_column2, '', null, false, true );
 
 		// Enable Second Surname
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
@@ -860,7 +860,7 @@ CompanyViewController = BaseViewController.extend( {
 	},
 
 	onTypeChange: function() {
-		if ( this.current_edit_record.ldap_authentication_type_id === 0 ) {
+		if ( this.current_edit_record.ldap_authentication_type_id == 0 ) {
 			this.detachElement('ldap_host');
 			this.detachElement('ldap_port');
 			this.detachElement('ldap_bind_user_name');

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,20 +40,26 @@
  */
 class InstallSchema_1012A extends InstallSchema_Base {
 
+	/**
+	 * @return bool
+	 */
 	function preInstall() {
 		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postInstall() {
-		
+
 		// @codingStandardsIgnoreStart
 		global $cache;
 		// @codingStandardsIgnoreEnd
-		
+
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
-		
+
 		//Get all pay period schedules.
 		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
 		$ppslf->getAll();
@@ -73,15 +79,15 @@ class InstallSchema_1012A extends InstallSchema_Base {
 							}
 						}
 					}
-					
+
 					arsort($time_zone_arr);
-					
+
 					//Grab the first time zone, as it is most common
-					foreach( $time_zone_arr as $time_zone => $count ) {				
+					foreach( $time_zone_arr as $time_zone => $count ) {
 						break;
 					}
 					unset($count); //code standards
-					
+
 					if ( $time_zone != '' ) {
 						//Set pay period timezone to the timezone of the majority of the users are in.
 						$pps_obj->setTimeZone( $time_zone );
@@ -92,9 +98,9 @@ class InstallSchema_1012A extends InstallSchema_Base {
 				}
 			}
 		}
-		
+
 		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
-				
+
 		return TRUE;
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,7 +39,12 @@
  * @package Core
  */
 class DBError extends Exception {
-	function __construct($e, $code = 'DBError' ) {
+	/**
+	 * DBError constructor.
+	 * @param string $e
+	 * @param string $code
+	 */
+	function __construct( $e, $code = 'DBError' ) {
 		global $db, $skip_db_error_exception;
 
 		if ( isset($skip_db_error_exception) AND $skip_db_error_exception === TRUE ) { //Used by system_check script.
@@ -81,7 +86,7 @@ class DBError extends Exception {
 
 		if ( $e->getTrace() != '' ) {
 			ob_start(); //ADDBO_BACKTRACE() always insists on printing its output and returning it, so capture the output and drop it, so we can use the $e variable instead.
-			$e = adodb_backtrace( $e->getTrace(), 9999, 0, FALSE );
+			$e = adodb_backtrace( $e->getTrace(), 9999, FALSE );
 			ob_end_clean();
 			Debug::Arr( $e, 'Exception...', __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -89,13 +94,14 @@ class DBError extends Exception {
 		Debug::Text('End Exception...', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( !defined( 'UNIT_TEST_MODE' ) OR UNIT_TEST_MODE === FALSE ) { //When in unit test mode don't exit/redirect
-			//Dump debug buffer.
-			Debug::Display();
-			Debug::writeToLog();
 
 			if ( DEPLOYMENT_ON_DEMAND == TRUE OR ( DEPLOYMENT_ON_DEMAND == FALSE AND in_array( $code, array( 'DBConnectionFailed', 'DBNoSpaceOnDevice', 'DBConnectionLost' ) ) == FALSE ) ) {
 				Debug::emailLog();
 			}
+
+			//Dump debug buffer.
+			Debug::Display();
+			Debug::writeToLog();
 
 			//Prevent PHP error by checking to make sure output buffer exists before clearing it.
 			if ( ob_get_level() > 0 ) {
@@ -180,7 +186,11 @@ class DBError extends Exception {
  * @package Core
  */
 class GeneralError extends Exception {
-	function __construct($message) {
+	/**
+	 * GeneralError constructor.
+	 * @param string $message
+	 */
+	function __construct( $message) {
 		global $db;
 
 		//debug_print_backtrace();

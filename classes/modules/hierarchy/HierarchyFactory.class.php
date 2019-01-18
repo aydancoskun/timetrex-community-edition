@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,10 @@ class HierarchyFactory extends Factory {
 
 	protected $fasttree_obj = NULL;
 	//protected $tmp_data = array(); //Tmp data.
+
+	/**
+	 * @return FastTree|null
+	 */
 	function getFastTreeObject() {
 
 		if ( is_object($this->fasttree_obj) ) {
@@ -56,92 +60,109 @@ class HierarchyFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getId() {
-		if ( isset($this->data['id']) ) {
-			return $this->data['id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'id' );
 	}
-	function setId($id) {
 
-		$this->data['id'] = $id;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setId( $value) {
+		$this->setGenericDataValue( 'id', TTUUID::castUUID( $value ) );
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getHierarchyControl() {
-		if ( isset($this->data['hierarchy_control_id']) ) {
-			return (int)$this->data['hierarchy_control_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'hierarchy_control_id' );
 	}
-	function setHierarchyControl($id) {
 
-		$this->data['hierarchy_control_id'] = $id;
-
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setHierarchyControl( $value) {
+		$this->setGenericDataValue( 'hierarchy_control_id', TTUUID::castUUID( $value ) );
 		return TRUE;
 	}
 
 	//Use this for completly editing a row in the tree
 	//Basically "old_id".
+	/**
+	 * @return bool|mixed
+	 */
 	function getPreviousUser() {
-		if ( isset($this->data['previous_user_id']) ) {
-			return (int)$this->data['previous_user_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'previous_user_id' );
 	}
-	function setPreviousUser($id) {
 
-		$this->data['previous_user_id'] = $id;
-
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPreviousUser( $value) {
+		$this->setGenericDataValue( 'previous_user_id', TTUUID::castUUID( $value ) );
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getParent() {
-		if ( isset($this->data['parent_user_id']) ) {
-			return (int)$this->data['parent_user_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'parent_user_id' );
 	}
-	function setParent($id) {
 
-		$this->data['parent_user_id'] = $id;
-
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setParent( $value) {
+		$this->setGenericDataValue( 'parent_user_id', TTUUID::castUUID( $value ) );
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
-	function setUser($id) {
 
-		$this->data['user_id'] = $id;
-
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$this->setGenericDataValue( 'user_id', TTUUID::castUUID( $value ) );
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getShared() {
-		if ( isset( $this->data['shared'] ) ) {
-			return $this->fromBool( $this->data['shared'] );
-		}
-
-		return FALSE;
-	}
-	function setShared($bool) {
-		$this->data['shared'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'shared' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setShared( $value) {
+		return $this->setGenericDataValue( 'shared', $this->toBool($value) );
+	}
 
+
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
 
 		if ( $this->getUser() == $this->getParent() ) {
@@ -163,13 +184,13 @@ class HierarchyFactory extends Factory {
 		unset($ulf);
 
 
-		if ( $this->getUser() == 0 AND $this->getParent() == 0 ) {
-			$parent_company_id = 0;
-			$user_company_id = 0;
-		} elseif ( $this->getUser() == 0 ) {
+		if ( $this->getUser() == TTUUID::getZeroID() AND $this->getParent() == TTUUID::getZeroID() ) {
+			$parent_company_id = TTUUID::getZeroID();
+			$user_company_id = TTUUID::getZeroID();
+		} elseif ( $this->getUser() == TTUUID::getZeroID() ) {
 			$parent_company_id = $parent->getCompany();
 			$user_company_id = $parent->getCompany();
-		} elseif ( $this->getParent() == 0 ) {
+		} elseif ( $this->getParent() == TTUUID::getZeroID() ) {
 			$parent_company_id = $user->getCompany();
 			$user_company_id = $user->getCompany();
 		} else {
@@ -177,7 +198,7 @@ class HierarchyFactory extends Factory {
 			$user_company_id = $user->getCompany();
 		}
 
-		if ( $user_company_id > 0 AND $parent_company_id > 0 ) {
+		if ( TTUUID::isUUID($user_company_id) AND $user_company_id != TTUUID::getZeroID() AND $user_company_id != TTUUID::getNotExistID() AND TTUUID::isUUID($parent_company_id) AND $parent_company_id != TTUUID::getZeroID() AND $parent_company_id != TTUUID::getNotExistID() ) {
 
 			Debug::Text(' User Company: '. $user_company_id .' Parent Company: '. $parent_company_id, __FILE__, __LINE__, __METHOD__, 10);
 			if ( $user_company_id != $parent_company_id ) {
@@ -205,6 +226,11 @@ class HierarchyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $reset_data
+	 * @param bool $force_lookup
+	 * @return bool
+	 */
 	function Save( $reset_data = TRUE, $force_lookup = FALSE ) {
 		$this->StartTransaction();
 
@@ -251,6 +277,9 @@ class HierarchyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function Delete() {
 		if ( $this->getUser() !== FALSE ) {
 			return TRUE;
@@ -260,50 +289,110 @@ class HierarchyFactory extends Factory {
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
+
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
 		return FALSE;
 	}
-	function setDeleted($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCreatedDate() {
 		return FALSE;
 	}
-	function setCreatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getUpdatedBy() {
 		return FALSE;
 	}
-	function setUpdatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
 		return FALSE;
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getDeletedBy() {
 		return FALSE;
 	}
-	function setDeletedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
 		return FALSE;
 	}
 

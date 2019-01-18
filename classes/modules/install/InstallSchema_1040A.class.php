@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,12 +40,18 @@
  */
 class InstallSchema_1040A extends InstallSchema_Base {
 
+	/**
+	 * @return bool
+	 */
 	function preInstall() {
 		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postInstall() {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
@@ -101,7 +107,7 @@ class InstallSchema_1040A extends InstallSchema_Base {
 						}
 					}
 				}
-				Debug::Text('Closest Match For: '. $name .' ID: '. (int)$closest_preset_id .' Level: '. $preset_level, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text('Closest Match For: '. $name .' ID: '. TTUUID::castUUID($closest_preset_id) .' Level: '. $preset_level, __FILE__, __LINE__, __METHOD__, 10);
 
 				//Update level for permission group.
 				$pc_obj->setLevel( $preset_level );

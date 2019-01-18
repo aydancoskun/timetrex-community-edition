@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,12 +41,16 @@
 class InstallSchema_Base {
 
 	protected $schema_sql_file_name = NULL;
-	protected $schema_failure_state_file = NULL;
+	public $schema_failure_state_file = NULL;
 	protected $version = NULL;
 	protected $db = NULL;
 	protected $is_upgrade = FALSE;
 	protected $install_obj = FALSE;
 
+	/**
+	 * InstallSchema_Base constructor.
+	 * @param bool $install_obj
+	 */
 	function __construct( $install_obj = FALSE ) {
 		if ( is_object( $install_obj ) ) {
 			$this->install_obj = $install_obj;
@@ -55,35 +59,65 @@ class InstallSchema_Base {
 		return TRUE;
 	}
 
+	/**
+	 * @param $db
+	 */
 	function setDatabaseConnection( $db ) {
 		$this->db = $db;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getDatabaseConnection() {
 		return $this->db;
 	}
 
+	/**
+	 * @param $val
+	 */
 	function setIsUpgrade( $val ) {
 		$this->is_upgrade = (bool)$val;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getIsUpgrade() {
 		return $this->is_upgrade;
 	}
 
-	function setVersion($value) {
+	/**
+	 * @param $value
+	 */
+	function setVersion( $value) {
 		$this->version = $value;
 	}
+
+	/**
+	 * @return null
+	 */
 	function getVersion() {
 		return $this->version;
 	}
 
-	function setSchemaSQLFilename($file_name) {
+	/**
+	 * @param $file_name
+	 */
+	function setSchemaSQLFilename( $file_name) {
 		$this->schema_sql_file_name = $file_name;
 	}
+
+	/**
+	 * @return null
+	 */
 	function getSchemaSQLFilename() {
 		return $this->schema_sql_file_name;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getSchemaGroup() {
 		$schema_group = substr( $this->getVersion(), -1, 1 );
 		Debug::text('Schema: '. $this->getVersion() .' Group: '. $schema_group, __FILE__, __LINE__, __METHOD__, 9);
@@ -92,6 +126,11 @@ class InstallSchema_Base {
 	}
 
 	//Copied from Install class.
+
+	/**
+	 * @param $table_name
+	 * @return bool
+	 */
 	function checkTableExists( $table_name ) {
 		Debug::text('Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__, 9);
 		$db_conn = $this->getDatabaseConnection();
@@ -112,6 +151,10 @@ class InstallSchema_Base {
 	}
 
 	//load Schema file data
+
+	/**
+	 * @return bool|string
+	 */
 	function getSchemaSQLFileData() {
 		//Read SQL data into memory
 		if ( is_readable( $this->getSchemaSQLFilename() ) ) {
@@ -127,6 +170,10 @@ class InstallSchema_Base {
 		return FALSE;
 	}
 
+	/**
+	 * @param $sql
+	 * @return string
+	 */
 	function removeSchemaSQLFileComments( $sql ) {
 		$retval = '';
 
@@ -144,6 +191,32 @@ class InstallSchema_Base {
 		return $retval;
 	}
 
+	//Add support for custom variables in SQL files so we can access PHP variables in SQL and keep PostgreSQL vs. MySQL schema files similar.
+
+	/**
+	 * @param $sql
+	 * @return mixed
+	 */
+	function replaceSQLVariables( $sql ) {
+		if ( $this->getVersion() != '1000A' ) { //Don't replace any variables on first schema version, as TTUUID requires a registration key, which itself requires the system_settings table.
+			$uuid_prefix = TTUUID::getConversionPrefix(); //Conversion prefix can't be used until at least after 1000A is done and system_setting table exists. Preferrably not until after a registration key has also been created.
+			$search_arr = array('#UUID_PREFIX#');
+			$replace_arr = array($uuid_prefix);
+
+			$retval = str_ireplace( $search_arr, $replace_arr, $sql );
+
+			return $retval;
+		} else {
+			Debug::text('Skipping SQL variable replace, as this is the first schema version: 1000A...', __FILE__, __LINE__, __METHOD__, 9);
+		}
+
+		return $sql;
+	}
+
+	/**
+	 * @return bool
+	 * @throws DBError
+	 */
 	private function _InstallSchema() {
 		//Run the actual SQL queries here
 
@@ -169,7 +242,10 @@ class InstallSchema_Base {
 		}
 
 		if ( $sql !== FALSE AND strlen($sql) > 0 ) {
-			Debug::text('Schema SQL has data, executing commands!', __FILE__, __LINE__, __METHOD__, 9);
+			//Handle variable replacements on the entire schema version file at once to avoid having initialize the search/replace variables for every line.
+			$sql = $this->replaceSQLVariables( $sql );
+
+			Debug::text('Schema SQL has data, executing commands! Version: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 			$i = 0;
 
@@ -177,6 +253,7 @@ class InstallSchema_Base {
 			//in a single query() call.
 			$split_sql = explode(';', $sql);
 			if ( is_array($split_sql) ) {
+				$total_sql_queries = count($split_sql);
 				foreach( $split_sql as $sql_line ) {
 					if ( isset($schema_failure_state[$this->getVersion()]) ) {
 						if ( $i < ( $schema_failure_state[$this->getVersion()] ) ) {
@@ -185,10 +262,11 @@ class InstallSchema_Base {
 							continue;
 						}
 					}
-					
+
 					//Debug::text('SQL Line: '. trim($sql_line), __FILE__, __LINE__, __METHOD__, 9);
 					if ( trim($sql_line) != '' AND substr( trim($sql_line), 0, 2 ) != '--' ) {
 						try {
+							Debug::text('  Executing SQL command: '. $i .' of: '. $total_sql_queries, __FILE__, __LINE__, __METHOD__, 10);
 							$this->getDatabaseConnection()->Execute( $sql_line );
 						} catch ( Exception $e ) {
 							$schema_failure_state = array( $this->getVersion() => $i );
@@ -212,34 +290,33 @@ class InstallSchema_Base {
 		}
 
 		//Clear state file only once postInstall() has completed.
-		
+
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	private function _postPostInstall() {
 		Debug::text('Modify Schema version in system settings table!', __FILE__, __LINE__, __METHOD__, 9);
 		//Modify schema version in system_settings table.
 
-		$sslf = TTnew( 'SystemSettingListFactory' );
-		$sslf->getByName('schema_version_group_'. $this->getSchemaGroup() );
-		if ( $sslf->getRecordCount() == 1 ) {
-			$obj = $sslf->getCurrent();
-		} else {
-			$obj = TTnew( 'SystemSettingListFactory' );
-		}
+		Debug::text('Setting Schema Version to: '. $this->getVersion() .' Group: '. $this->getSchemaGroup(), __FILE__, __LINE__, __METHOD__, 9);
 
-		$obj->setName( 'schema_version_group_'. $this->getSchemaGroup() );
-		$obj->setValue( $this->getVersion() );
-		if ( $obj->isValid() ) {
-			Debug::text('Setting Schema Version to: '. $this->getVersion() .' Group: '. $this->getSchemaGroup(), __FILE__, __LINE__, __METHOD__, 9);
-			$obj->Save();
+		//Clear the ADODB GETINSERTSQL static cache, which is required when the schema changes specifically for the SystemSetting/SystemLog tables after the cache has been populated. ie: pre-UUID to post-UUID.
+		global $ADODB_GETINSERTSQL_CLEAR_CACHE;
+		$ADODB_GETINSERTSQL_CLEAR_CACHE = TRUE;
 
-			return TRUE;
-		}
+		$retval = SystemSettingFactory::setSystemSetting( 'schema_version_group_'. $this->getSchemaGroup(), $this->getVersion() );
 
-		return FALSE;
+		$ADODB_GETINSERTSQL_CLEAR_CACHE = FALSE;
+
+		return $retval;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function InstallSchema() {
 		$this->getDatabaseConnection()->StartTrans();
 
@@ -265,5 +342,7 @@ class InstallSchema_Base {
 
 		return FALSE;
 	}
+
+
 }
 ?>

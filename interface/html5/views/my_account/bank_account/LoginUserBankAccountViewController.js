@@ -1,11 +1,13 @@
 LoginUserBankAccountViewController = BaseViewController.extend( {
 
+	_required_files: ['APIBankAccount'],
+
 	ach_transaction_type_array: null,
 
 	user_api: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 
 		this.permission_id = 'user';
 		this.viewId = 'LoginUserBankAccount';
@@ -181,7 +183,7 @@ LoginUserBankAccountViewController = BaseViewController.extend( {
 				var result_data = result.getResult();
 				if ( result_data === true ) {
 					$this.refresh_id = $this.current_edit_record.id;
-				} else if ( result_data > 0 ) {
+				} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 					$this.refresh_id = result_data;
 				}
 

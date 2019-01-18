@@ -143,6 +143,7 @@
 /tools/import/import_punches.csv
 /tools/import/import_punches2.csv
 /tools/import/user_column_map.txt
+/tools/fix_mysql.php
 
 /maint/AddRecurringPayStubAmendment.php
 
@@ -1286,3 +1287,6 @@
 /interface/ConfirmEmail.php
 /interface/DownForMaintenance.php
 /interface/client/ForgotPassword.php
+
+/interface/html5/employees/bank_account/
+/interface/html5/company/bank_accounts/

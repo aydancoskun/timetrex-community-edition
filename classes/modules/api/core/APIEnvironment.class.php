@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,22 +41,39 @@
 class APIEnvironment {
 	protected $main_class = '';
 
+	/**
+	 * APIEnvironment constructor.
+	 */
 	public function __construct() {
 		return TRUE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getBaseURL() {
 		return Environment::getBaseURL();
 	}
 
+	/**
+	 * @param null $api
+	 * @return mixed
+	 */
 	function getAPIBaseURL( $api = NULL ) {
 		return Environment::getAPIBaseURL( $api );
 	}
 
+	/**
+	 * @param null $api
+	 * @return string
+	 */
 	function getAPIURL( $api = NULL ) {
 		return Environment::getAPIURL( $api );
 	}
 
+	/**
+	 * @return string
+	 */
 	function getImagesURL() {
 		return Environment::getImagesURL();
 	}

@@ -1,13 +1,16 @@
 HolidayPolicyViewController = BaseViewController.extend( {
 	el: '#holiday_policy_view_container',
+
+	_required_files: ['APIHolidayPolicy', 'APIRecurringHoliday', 'APIContributingShiftPolicy', 'APIRoundIntervalPolicy', 'APIAbsencePolicy'],
+
 	type_array: null,
 	default_schedule_status_array: null,
 	shift_on_holiday_type_array: null,
 	worked_scheduled_days_array: null,
 	date_api: null,
 	sub_holiday_view_controller: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'HolidayPolicyEditView.html';
 		this.permission_id = 'holiday_policy';
 		this.viewId = 'HolidayPolicy';
@@ -367,7 +370,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 	},
 
 	onTypeChange: function() {
-		if ( this.current_edit_record['type_id'] === 10 ) {
+		if ( this.current_edit_record['type_id'] == 10 ) {
 			this.detachElement( 'minimum_worked_days' );
 			this.detachElement( 'shift_on_holiday_type_id' );
 			this.detachElement( 'minimum_worked_after_days' );
@@ -382,7 +385,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			this.detachElement( 'eligible_contributing_shift_policy_id' );
 			this.detachElement( 'contributing_shift_policy_id' );
 
-		} else if ( this.current_edit_record['type_id'] === 20 ) {
+		} else if ( this.current_edit_record['type_id'] == 20 ) {
 			this.attachElement( 'minimum_worked_days' );
 			this.attachElement( 'shift_on_holiday_type_id' );
 			this.attachElement( 'minimum_worked_after_days' );
@@ -397,7 +400,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			this.attachElement( 'eligible_contributing_shift_policy_id' );
 			this.detachElement( 'contributing_shift_policy_id' );
 
-		} else if ( this.current_edit_record['type_id'] === 30 ) {
+		} else if ( this.current_edit_record['type_id'] == 30 ) {
 			this.attachElement( 'minimum_worked_days' );
 			this.attachElement( 'shift_on_holiday_type_id' );
 			this.attachElement( 'minimum_worked_after_days' );

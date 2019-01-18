@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,7 +39,11 @@
  * @package Core
  */
 class Redirect {
-	static function page($url = NULL) {
+	/**
+	 * @param null $url
+	 * @return bool
+	 */
+	static function page( $url = NULL) {
 		if ( empty($url) AND !empty($_SERVER['HTTP_REFERER']) ) {
 			$url = $_SERVER['HTTP_REFERER'];
 		}

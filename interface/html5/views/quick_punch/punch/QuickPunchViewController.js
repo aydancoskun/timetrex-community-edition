@@ -31,20 +31,36 @@ QuickPunchViewController = Backbone.View.extend({
         this.edit_view_error_ui_dic = {};
         this.permission_id = 'punch';
         this.other_fields = [];
-        this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
-        this.branch_api = new (APIFactory.getAPIClass( 'APIBranch' ))();
-        this.department_api = new (APIFactory.getAPIClass( 'APIDepartment' ))();
-        this.other_field_api = new (APIFactory.getAPIClass( 'APIOtherField' ))();
-        if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-            this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
-            this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
-        }
-        this.initPermission();
-        ProgressBar.showOverlay();
-        this.getUserPunch( function( result ) {
-            // $this.current_edit_record = result;
-            $this.render();
-        } );
+        require([
+            'APIPunch',
+			'APIBranch',
+			'APIDepartment',
+			'APIOtherField',
+			'APIJob',
+			'APIJobItem',
+            'APICompany',
+            'APIStation',
+			'APICurrentUser',
+            '../global/TTUUID'
+        ], function(){
+			$this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
+			$this.branch_api = new (APIFactory.getAPIClass( 'APIBranch' ))();
+            $this.department_api = new (APIFactory.getAPIClass( 'APIDepartment' ))();
+            $this.other_field_api = new (APIFactory.getAPIClass( 'APIOtherField' ))();
+            if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+                $this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
+                $this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+            }
+			$this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+			$this.api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
+			$this.current_user_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
+            $this.initPermission();
+            ProgressBar.showOverlay();
+            $this.getUserPunch( function( result ) {
+                // $this.current_edit_record = result;
+                $this.render();
+            } );
+		});
     },
 
     initPermission: function() {
@@ -99,9 +115,8 @@ QuickPunchViewController = Backbone.View.extend({
         var result = false;
 
         // Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
-        var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
-        if ( company_api && _.isFunction( company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
-            result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( {async: false} );
+        if ( this.company_api && _.isFunction( this.company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
+            result = this.company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( {async: false} );
         }
 
         //tried to fix Unable to get property 'getResult' of undefined or null reference, added if(!result)
@@ -354,12 +369,18 @@ QuickPunchViewController = Backbone.View.extend({
             }
             if ( event.keyCode === 9 && event.shiftKey ) {
                 if (attrs['tab-start']) {
-                    $this.$('button[tabindex=0]', $this.$el)[0].focus();
+                    var button = $this.$('button[tabindex=0]', $this.$el)
+                    if( button.length > 0 ) { // Uncaught TypeError: Cannot read property 'focus' of undefined
+						button[0].focus();
+					}
                     event.preventDefault();
                 }
             }
             if ( attrs['tab-end'] && event.shiftKey === false ) {
-                $this.$('input[tabindex=1]', $this.$el)[0].focus();
+                var button = $this.$('input[tabindex=1]', $this.$el);
+                if (button.length > 0 ) { //Uncaught TypeError: Cannot read property 'focus' of undefined
+					button[0].focus();
+				}
                 event.preventDefault();
             }
         });
@@ -370,16 +391,15 @@ QuickPunchViewController = Backbone.View.extend({
         var $this = this;
 
         var station_id = Global.getStationID();
-        var api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
 
         if ( station_id ) {
-            api_station.getCurrentStation( station_id, '10', {
+            this.api_station.getCurrentStation( station_id, '10', {
                 onResult: function( result ) {
                     doNext( result );
                 }
             } );
         } else {
-            api_station.getCurrentStation( '', '10', {
+			this.api_station.getCurrentStation( '', '10', {
                 onResult: function( result ) {
                     doNext( result );
                 }
@@ -688,7 +708,8 @@ QuickPunchViewController = Backbone.View.extend({
         };
         var job_item_widget = $this.$('select[name="' + job_item_id_col_name + '"]');
         var current_job_item_id = job_item_widget.val();
-        if ( parseInt( current_job_item_id ) > 0 ) {
+
+        if ( TTUUID.isUUID(current_job_item_id) && current_job_item_id != TTUUID.zero_id && current_job_item_id != TTUUID.not_exist_id ) {
             var new_arg = Global.clone( args );
             new_arg.filter_data.job_id = job;
             $this.job_item_api.getJobItem( new_arg, {
@@ -835,8 +856,7 @@ QuickPunchViewController = Backbone.View.extend({
 
     doLogout: function() {
         //Don't wait for result of logout in case of slow or disconnected internet. Just clear local cookies and move on.
-        var current_user_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
-        current_user_api.Logout({onResult:function(){}})
+        this.current_user_api.Logout({onResult:function(){}})
         Global.setAnalyticDimensions();
         if ( typeof(ga) != "undefined" && APIGlobal.pre_login_data.analytics_enabled === true ) {
             ga('send', 'pageview', {'sessionControl': 'end'});

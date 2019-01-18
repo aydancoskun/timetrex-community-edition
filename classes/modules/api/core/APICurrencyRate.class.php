@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APICurrencyRate extends APIFactory {
 	protected $main_class = 'CurrencyRateFactory';
 
+	/**
+	 * APICurrencyRate constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APICurrencyRate extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -81,6 +84,7 @@ class APICurrencyRate extends APIFactory {
 	/**
 	 * Get CurrencyRate data for one or more CurrencyRates.
 	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function getCurrencyRate( $data = NULL, $disable_paging = FALSE ) {
@@ -95,7 +99,7 @@ class APICurrencyRate extends APIFactory {
 
 		//Allow getting users from other companies, so we can change admin contacts when using the master company.
 		if ( isset($data['filter_data']['company_id'])
-				AND $data['filter_data']['company_id'] > 0
+				AND TTUUID::isUUID( $data['filter_data']['company_id'] ) AND $data['filter_data']['company_id'] != TTUUID::getZeroID() AND $data['filter_data']['company_id'] != TTUUID::getNotExistID()
 				AND ( $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'view') ) ) {
 			$company_id = $data['filter_data']['company_id'];
 		} else {
@@ -140,7 +144,9 @@ class APICurrencyRate extends APIFactory {
 	/**
 	 * Set CurrencyRate data for one or more CurrencyRatees.
 	 * @param array $data CurrencyRate data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setCurrencyRate( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -152,25 +158,25 @@ class APICurrencyRate extends APIFactory {
 
 		if ( !$this->getPermissionObject()->Check('currency', 'enabled')
 				OR !( $this->getPermissionObject()->Check('currency', 'edit') OR $this->getPermissionObject()->Check('currency', 'edit_own') OR $this->getPermissionObject()->Check('currency', 'edit_child') OR $this->getPermissionObject()->Check('currency', 'add') ) ) {
-			return	$this->getPermissionObject()->PermissionDenied();
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' CurrencyRates', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'CurrencyRateListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get CurrencyRate object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -184,7 +190,7 @@ class APICurrencyRate extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('currency', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -199,6 +205,8 @@ class APICurrencyRate extends APIFactory {
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('currency', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+				$primary_validator->setValidateOnly( $validate_only );
 
 				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
@@ -246,10 +254,10 @@ class APICurrencyRate extends APIFactory {
 	/**
 	 * Delete one or more CurrencyRates.
 	 * @param array $data CurrencyRate data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteCurrencyRate( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -266,14 +274,14 @@ class APICurrencyRate extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'CurrencyRateListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get CurrencyRate object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -281,7 +289,7 @@ class APICurrencyRate extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('currency', 'delete')
 								OR ( $this->getPermissionObject()->Check('currency', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -332,7 +340,7 @@ class APICurrencyRate extends APIFactory {
 	 * @return array
 	 */
 	function copyCurrencyRate( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 

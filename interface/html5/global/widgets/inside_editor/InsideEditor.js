@@ -95,7 +95,7 @@
 			var minus_icon = row.find( '.minus-icon' );
 
 			plus_icon.click( function() {
-				$this.addRow( null, $( this ).parent().parent().index(), row );
+				$this.addRow( null, $( this ).parents('tr').index(), row );
 			} );
 
 			minus_icon.click( function() {

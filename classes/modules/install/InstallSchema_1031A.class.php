@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,9 @@
  */
 class InstallSchema_1031A extends InstallSchema_Base {
 
+	/**
+	 * @return bool
+	 */
 	function preInstall() {
 		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
@@ -50,7 +53,14 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postInstall() {
+		//As of v11 and the switch to UUID, we need to make sure fast_tree_options for the hierarchy_tree is still available for conversion.
+		global $fast_tree_options, $db;
+		$fast_tree_options = array( 'db' => $db, 'table' => 'hierarchy_tree' ); //This is required for upgrading 1031A schema.
+
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Go through all pay period schedules and update the annual pay period column
@@ -203,7 +213,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 											unset($level, $superior_ids, $superior_id);
 										}
 
-										if ( isset($name) ) {
+										if ( isset($name) AND is_array($name) ) {
 											$name = $hc_obj->getName() .' '. implode(', ', $name ) .' (#'.rand(1000, 9999).')';
 										} else {
 											$name = $hc_obj->getName() .' (#'.rand(1000, 9999).')';
@@ -355,7 +365,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 								$cd_obj->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ));
 							}
 
-							$cd_obj->ignore_column_list = TRUE; //Prevents SQL errors due to new columns being added later on.							
+							$cd_obj->ignore_column_list = TRUE; //Prevents SQL errors due to new columns being added later on.
 							if ( $cd_obj->isValid() ) {
 								$cd_obj->Save();
 							}

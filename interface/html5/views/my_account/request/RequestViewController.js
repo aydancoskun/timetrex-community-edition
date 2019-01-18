@@ -1,5 +1,11 @@
 RequestViewController = RequestViewCommonController.extend( {
 	el: '#request_view_container',
+
+	_required_files: {
+		10:[ 'APIRequest', 'APIMessageControl', 'APIAuthorization', 'APISchedulePolicy', 'APISchedule', 'APIAbsencePolicy', 'APISchedulePolicy', 'APIBranch', 'APIDepartment'],
+		15:[ 'APIRequestSchedule'],
+		20:[ 'APIJob', 'APIJobItem']
+	},
 	type_array: null,
 	status_array: null,
 
@@ -9,8 +15,8 @@ RequestViewController = RequestViewCommonController.extend( {
 	messages: null,
 
 
-	initialize: function( options ) {
-        this._super('initialize', options);
+	init: function( options ) {
+        //this._super('initialize', options);
         this.edit_view_tpl = 'RequestEditView.html';
         this.permission_id = 'request';
         this.viewId = 'Request';
@@ -936,7 +942,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				this.api_request_schedule.getRequestScheduleDefaultData(filter, {onResult: function(res){
 
 					data = res.getResult();
-					data.request_schedule_status_id = data.status_id
+					data.request_schedule_status_id = data.status_id;
 					data.date_stamp = data.start_date;
 
 					//force = true is required to set the current_edit_record and populate edit_view_ui_dic
@@ -1044,7 +1050,7 @@ RequestViewController = RequestViewCommonController.extend( {
 	},
 
 	search: function( set_default_menu, page_action, page_number, callBack ) {
-		this.refresh_id = 0;
+		this.refresh_id = null;
 		this._super( 'search', set_default_menu, page_action, page_number, callBack )
 	},
 

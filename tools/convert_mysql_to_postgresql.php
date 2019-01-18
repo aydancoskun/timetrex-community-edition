@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,20 +48,19 @@ require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR
 
  1. Upgrade to latest version of TimeTrex still using MySQL.
 
- 2. Run: convert_mysql_to_postgresql.php sequence > update_sequences.sql
- 3. Run: convert_mysql_to_postgresql.php truncate > delete_all_data.sql
+ 2. Run: convert_mysql_to_postgresql.php truncate > delete_all_data.sql
 
- 4. Dump MySQL database with the following command:
-	mysqldump -t --skip-add-locks --compatible=postgresql --complete-insert <TimeTrex_Database_Name> > timetrex_mysql.sql
+ 3. Dump MySQL database with the following command:
+	mysqldump -t --tz-utc=true --skip-add-locks --compatible=postgresql --complete-insert <TimeTrex_Database_Name> > timetrex_mysql.sql
+
+ 4. Add "SET TIME ZONE 'UTC'" to top of timetrex_mysql.sql file so both databases are using consistent timezones.
 
  5. Install a fresh copy of TimeTrex on PostgreSQL, make sure its the latest version of TimeTrex and it matches the version
 	currently installed and running on MySQL.
 
  6. Run: psql <TimeTrex_Database_Name> < delete_all_data.sql
+
  7. Run: psql <TimeTrex_Database_Name> < timetrex_mysql.sql.
-		- There will be a few errors because it will try to update non-existant *_seq tables.
-			This is fine because the next step handles this.
- 8. Run: psql <TimeTrex_Database_Name> < update_sequences.sql
 
  9. Done!
 
@@ -70,7 +69,7 @@ require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR
 
 if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output = "Usage: convert_mysql_to_postgresql.php [data]\n";
-	$help_output .= " [data] = 'sequence' or 'truncate'\n";
+	$help_output .= " [data] = 'truncate'\n";
 	echo $help_output;
 } else {
 	//Handle command line arguments
@@ -91,17 +90,8 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 
 		$out = NULL;
 		foreach( $tables as $table ) {
-			if ( strpos($table, '_seq') !== FALSE ) {
-				if ( $type == 'sequence' ) {
-					//echo "Found Sequence Table: ". $table ."<br>\n";
-					$query = 'select id from '. $table;
-					$last_sequence_value = $db->GetOne($query) + $sequence_modifier;
-					echo 'ALTER SEQUENCE '. $table .' RESTART WITH '. $last_sequence_value .';'."\n";
-				}
-			} else {
-				if ( $type == 'truncate' ) {
-					echo 'TRUNCATE '. $table .';'."\n";
-				}
+			if ( $type == 'truncate' ) {
+				echo 'TRUNCATE '. $table .';'."\n";
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,12 @@ class UserLicenseFactory extends Factory {
 	protected $qualification_obj = NULL;
 
 	protected $license_number_validator_regex = '/^[A-Z_\/:;\-\.\ 0-9]{1,250}$/i';
+
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -93,6 +99,10 @@ class UserLicenseFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -117,172 +127,197 @@ class UserLicenseFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getQualificationObject() {
 
 		return $this->getGenericObject( 'QualificationListFactory', $this->getQualification(), 'qualification_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-		return FALSE;
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'user_id',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid Employee')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value ) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getQualification() {
-		if ( isset( $this->data['qualification_id'] ) ) {
-			return (int)$this->data['qualification_id'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'qualification_id' );
 	}
 
-	function setQualification( $id ) {
-		$id = trim( $id );
-
-		$qlf = TTnew( 'QualificationListFactory' );
-
-		if( $this->Validator->isResultSetWithRows( 'qualification_id',
-																	$qlf->getById( $id ),
-																	TTi18n::gettext('Invalid Qualification')
-																	) ) {
-			$this->data['qualification_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setQualification( $value ) {
+		$value = trim( $value );
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'qualification_id', $value );
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function getLicenseNumber() {
-		if ( isset( $this->data['license_number'] ) ) {
-			return $this->data['license_number'];
-		}
-		return FALSE;
+		return $this->getGenericDataValue( 'license_number' );
 	}
 
 
-	function setLicenseNumber( $license_number ) {
-		$license_number = trim($license_number);
-
-		if (	$license_number == ''
-				OR
-				$this->Validator->isRegEx(		'license_number',
-												$license_number,
-												TTi18n::gettext('License number is invalid'),
-												$this->license_number_validator_regex)	) {
-				$this->data['license_number'] = $license_number;
-				return	TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLicenseNumber( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'license_number', $value );
 	}
 
 
+	/**
+	 * @return bool|int
+	 */
 	function getLicenseIssuedDate() {
-		if ( isset($this->data['license_issued_date']) ) {
-			return (int)$this->data['license_issued_date'];
-		}
-
-		return FALSE;
-	}
-	function setLicenseIssuedDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ( $epoch == '' ) {
-			$epoch = NULL;
-		}
-
-		if	( $epoch == NULL
-				OR
-				$this->Validator->isDate(		'license_issued_date',
-												$epoch,
-												TTi18n::gettext('Incorrect license issued date'))
-			) {
-
-			$this->data['license_issued_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'license_issued_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setLicenseIssuedDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'license_issued_date', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getLicenseExpiryDate() {
-		if ( isset($this->data['license_expiry_date']) ) {
-			return (int)$this->data['license_expiry_date'];
-		}
-
-		return FALSE;
-	}
-	function setLicenseExpiryDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ( $epoch == '' ) {
-			$epoch = NULL;
-		}
-
-		if	(	$epoch == NULL
-				OR
-				$this->Validator->isDate(		'license_expiry_date',
-												$epoch,
-												TTi18n::gettext('Incorrect license expiry date'))
-			) {
-
-			$this->data['license_expiry_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'license_expiry_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setLicenseExpiryDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'license_expiry_date', $value );
+	}
+
+	/**
+	 * @return bool|string
+	 */
 	function getTag() {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
-		if ( isset($this->tmp_data['tags']) ) {
-			return $this->tmp_data['tags'];
-		} elseif ( is_object( $this->getQualificationObject() ) AND $this->getQualificationObject()->getCompany() > 0 AND $this->getID() > 0 ) {
+		$value = $this->getGenericTempDataValue( 'tags' );
+		if ( $value !== FALSE ) {
+			return $value;
+		} elseif ( is_object( $this->getQualificationObject() ) AND
+				TTUUID::isUUID( $this->getQualificationObject()->getCompany() ) AND $this->getQualificationObject()->getCompany() != TTUUID::getZeroID() AND $this->getQualificationObject()->getCompany() != TTUUID::getNotExistID() AND
+				TTUUID::isUUID( $this->getID() ) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
 			return CompanyGenericTagMapListFactory::getStringByCompanyIDAndObjectTypeIDAndObjectID( $this->getQualificationObject()->getCompany(), 253, $this->getID() );
 		}
 
 		return FALSE;
 	}
-	function setTag( $tags ) {
-		$tags = trim($tags);
 
+	/**
+	 * @param $tags
+	 * @return bool
+	 */
+	function setTag( $value ) {
+		$value = trim($value);
 		//Save the tags in temporary memory to be committed in postSave()
-		$this->tmp_data['tags'] = $tags;
-
-		return TRUE;
+		return $this->setGenericTempDataValue( 'tags', $value );
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
-		//$this->setProvince( $this->getProvince() ); //Not sure why this was there, but it causes duplicate errors if the province is incorrect.
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Employee
+		if ( $this->getUser() !== FALSE ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user_id',
+															$ulf->getByID($this->getUser()),
+															TTi18n::gettext('Employee must be specified')
+														);
+		}
+		// Qualification
+		if ( $this->getQualification() !== FALSE ) {
+			$qlf = TTnew( 'QualificationListFactory' );
+			$this->Validator->isResultSetWithRows( 'qualification_id',
+															$qlf->getById( $this->getQualification() ),
+															TTi18n::gettext('License must be specified')
+														);
+		}
+		// License number
+		if ( $this->getLicenseNumber() != '' ) {
+			$this->Validator->isRegEx(		'license_number',
+													$this->getLicenseNumber(),
+													TTi18n::gettext('License number is invalid'),
+													$this->license_number_validator_regex
+												);
+		}
+		// License issued date
+		if ( $this->getLicenseIssuedDate() != '' ) {
+			$this->Validator->isDate(		'license_issued_date',
+													$this->getLicenseIssuedDate(),
+													TTi18n::gettext('Incorrect license issued date')
+												);
+		}
+		// License expiry date
+		if ( $this->getLicenseExpiryDate() != '' ) {
+			$this->Validator->isDate(		'license_expiry_date',
+													$this->getLicenseExpiryDate(),
+													TTi18n::gettext('Incorrect license expiry date')
+												);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 		$this->removeCache( $this->getUser().$this->getQualification() );
@@ -294,6 +329,10 @@ class UserLicenseFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 
 		if ( is_array( $data ) ) {
@@ -326,6 +365,11 @@ class UserLicenseFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -369,6 +413,10 @@ class UserLicenseFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('License'), NULL, $this->getTable(), $this );
 	}

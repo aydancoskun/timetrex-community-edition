@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,46 +41,42 @@
 class HelpGroupControlFactory extends Factory {
 	protected $table = 'help_group_control';
 	protected $pk_sequence_name = 'help_group_control_id_seq'; //PK Sequence name
+
+	/**
+	 * @return mixed
+	 */
 	function getScriptName() {
-		return $this->data['script_name'];
+		return $this->getGenericDataValue( 'script_name' );
 	}
-	function setScriptName($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScriptName( $value) {
 		$value = trim($value);
-
-		if (	$this->Validator->isLength(	'script_name',
-											$value,
-											TTi18n::gettext('Incorrect Script Name'),
-											2, 255) ) {
-
-			$this->data['script_name'] = $value;
-
-			return FALSE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'script_name', $value );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getName() {
-		return $this->data['name'];
+		return $this->getGenericDataValue( 'name' );
 	}
-	function setName($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'name',
-											$value,
-											TTi18n::gettext('Incorrect Name'),
-											2, 255) ) {
-
-			$this->data['name'] = $value;
-
-			return FALSE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'name', $value );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getHelp() {
 		$hglf = TTnew( 'HelpGroupListFactory' );
 		$hglf->getByHelpGroupControlId( $this->getId() );
@@ -94,7 +90,12 @@ class HelpGroupControlFactory extends Factory {
 
 		return FALSE;
 	}
-	function setHelp($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setHelp( $ids) {
 		//If needed, delete mappings first.
 		$hglf = TTnew( 'HelpGroupListFactory' );
 		$hglf->getByHelpGroupControlId( $this->getId() );
@@ -104,10 +105,10 @@ class HelpGroupControlFactory extends Factory {
 			$help_id = $help_group_entry->getHelp();
 			Debug::text('Help ID: '. $help_group_entry->getHelp(), __FILE__, __LINE__, __METHOD__, 10);
 
-			//Delete all items first.				
+			//Delete all items first.
 			$help_group_entry->Delete();
 		}
-		
+
 		if (is_array($ids) AND count($ids) > 0) {
 
 			//Insert new mappings.
@@ -118,7 +119,7 @@ class HelpGroupControlFactory extends Factory {
 					$hgf->setHelpGroupControl( $this->getId() );
 					$hgf->setOrder( $i );
 					$hgf->setHelp( $id );
-					
+
 
 					if ($this->Validator->isTrue(		'help',
 														$hgf->Validator->isValid(),
@@ -132,6 +133,33 @@ class HelpGroupControlFactory extends Factory {
 			//return TRUE;
 		}
 
+		return TRUE;
+	}
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Script Name
+		$this->Validator->isLength(	'script_name',
+											$this->getScriptName(),
+											TTi18n::gettext('Incorrect Script Name'),
+											2, 255
+										);
+		// Name
+		$this->Validator->isLength(	'name',
+											$this->getName(),
+											TTi18n::gettext('Incorrect Name'),
+											2, 255
+										);
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		return TRUE;
 	}
 

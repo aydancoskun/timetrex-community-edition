@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIAccrualPolicy extends APIFactory {
 	protected $main_class = 'AccrualPolicyFactory';
 
+	/**
+	 * APIAccrualPolicy constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APIAccrualPolicy extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -86,6 +89,7 @@ class APIAccrualPolicy extends APIFactory {
 	/**
 	 * Get accrual_policy data for one or more accrual_policyes.
 	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function getAccrualPolicy( $data = NULL, $disable_paging = FALSE ) {
@@ -117,7 +121,7 @@ class APIAccrualPolicy extends APIFactory {
 
 	/**
 	 * @param string $format
-	 * @param null $data
+	 * @param array $data
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
@@ -147,7 +151,9 @@ class APIAccrualPolicy extends APIFactory {
 	/**
 	 * Set accrual_policy data for one or more accrual_policyes.
 	 * @param array $data accrual_policy data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setAccrualPolicy( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -166,18 +172,18 @@ class APIAccrualPolicy extends APIFactory {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' AccrualPolicys', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'AccrualPolicyListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get accrual_policy object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -191,7 +197,7 @@ class APIAccrualPolicy extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('accrual_policy', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -252,10 +258,10 @@ class APIAccrualPolicy extends APIFactory {
 	/**
 	 * Delete one or more accrual_policys.
 	 * @param array $data accrual_policy data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteAccrualPolicy( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -272,14 +278,14 @@ class APIAccrualPolicy extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'AccrualPolicyListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get accrual_policy object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -287,7 +293,7 @@ class APIAccrualPolicy extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('accrual_policy', 'delete')
 								OR ( $this->getPermissionObject()->Check('accrual_policy', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -338,7 +344,7 @@ class APIAccrualPolicy extends APIFactory {
 	 * @return array
 	 */
 	function copyAccrualPolicy( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -355,7 +361,7 @@ class APIAccrualPolicy extends APIFactory {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
 				$original_ids[$key] = $src_rows[$key]['id'];
-				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
+				unset($src_rows[$key]['id']); //Clear fields that can't be copied
 				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -370,12 +376,13 @@ class APIAccrualPolicy extends APIFactory {
 				foreach( $original_ids as $key => $original_id ) {
 					$new_id = NULL;
 					if ( is_array($retval) ) {
-						if ( isset($retval['api_retval']) AND is_numeric($retval['api_retval']) AND $retval['api_retval'] > 0 ) {
+						if ( isset($retval['api_retval'])
+								AND TTUUID::isUUID( $retval['api_retval'] ) AND $retval['api_retval'] != TTUUID::getZeroID() AND $retval['api_retval'] != TTUUID::getNotExistID() ) {
 							$new_id = $retval['api_retval'];
 						} elseif ( isset($retval['api_details']['details'][$key]) ) {
 							$new_id = $retval['api_details']['details'][$key];
 						}
-					} elseif ( is_numeric($retval) ) {
+					} elseif ( TTUUID::isUUID( $retval ) ) {
 						$new_id = $retval;
 					}
 
@@ -407,7 +414,10 @@ class APIAccrualPolicy extends APIFactory {
 
 	/**
 	 * ReCalculate accrual policies
-	 * @return bool
+	 * @param string $accrual_policy_ids UUID
+	 * @param $time_period_arr
+	 * @param string $user_ids UUID
+	 * @return array|bool
 	 */
 	function reCalculateAccrual( $accrual_policy_ids, $time_period_arr, $user_ids = NULL ) {
 		//Debug::text('Recalculating Employee Timesheet: User ID: '. $user_ids .' Pay Period ID: '. $pay_period_ids, __FILE__, __LINE__, __METHOD__, 10);
@@ -426,7 +436,7 @@ class APIAccrualPolicy extends APIFactory {
 		$report_obj = TTNew('Report');
 		$date_arr = $report_obj->convertTimePeriodToStartEndDate( $time_period_arr, NULL, TRUE ); //Force start/end dates even if pay periods selected.
 		Debug::Arr($date_arr, 'Date Arr', __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		if ( isset($date_arr['start_date']) AND isset($date_arr['end_date']) ) {
 			$total_days = TTDate::getDays( ( $date_arr['end_date'] - $date_arr['start_date'] ) );
 

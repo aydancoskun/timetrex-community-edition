@@ -5,7 +5,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,34 +48,41 @@ require_once('../../../includes/API.inc.php');
 Header('Content-Type: application/json; charset=UTF-8'); //Make sure content type is not text/HTML to help avoid XSS.
 
 function unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth ) {
+	global $config_vars;
 	TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in
 
 	Debug::text('Handling UNAUTHENTICATED JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id, __FILE__, __LINE__, __METHOD__, 10);
-	$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
-	if ( $class_name != '' AND in_array( $class_name, $valid_unauthenticated_classes ) AND class_exists( $class_name ) ) {
-		$obj = new $class_name;
-		if ( method_exists( $obj, 'setAMFMessageID') ) {
-			$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
-		}
-		if ( $method != '' AND method_exists( $obj, $method ) ) {
-			$retval = call_user_func_array( array($obj, $method), (array)$arguments );
-			//If the function returns anything else, encode into JSON and return it.
-			//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
-			echo json_encode( $retval );
-			$json_error = getJSONError();
-			if ( $json_error !== FALSE ) {
-				Debug::Arr($retval, 'ERROR: JSON: '. $json_error, __FILE__, __LINE__, __METHOD__, 10);
-				echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', 'ERROR: JSON: '. $json_error ) );
+
+	if ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) {
+		$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
+		if ( $class_name != '' AND in_array( $class_name, $valid_unauthenticated_classes ) AND class_exists( $class_name ) ) {
+			$obj = new $class_name;
+			if ( method_exists( $obj, 'setAMFMessageID') ) {
+				$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
+			}
+			if ( $method != '' AND method_exists( $obj, $method ) ) {
+				$retval = call_user_func_array( array($obj, $method), (array)$arguments );
+				//If the function returns anything else, encode into JSON and return it.
+				//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+				echo json_encode( $retval );
+				$json_error = getJSONError();
+				if ( $json_error !== FALSE ) {
+					Debug::Arr($retval, 'ERROR: JSON: '. $json_error, __FILE__, __LINE__, __METHOD__, 10);
+					echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', 'ERROR: JSON: '. $json_error ) );
+				}
+			} else {
+				$validator = TTnew('Validator');
+				Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
+				echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Method %1 does not exist.', array( $validator->escapeHTML( $method ) ) ) ) );
 			}
 		} else {
 			$validator = TTnew('Validator');
-			Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
-			echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Method %1 does not exist.', array( $validator->escapeHTML( $method ) ) ) ) );
+			Debug::text('Class: '. $class_name .' does not exist! (unauth)', __FILE__, __LINE__, __METHOD__, 10);
+			echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Class %1 does not exist, or unauthenticated.', array( $validator->escapeHTML( $class_name ) ) ) ) );
 		}
 	} else {
-		$validator = TTnew('Validator');
-		Debug::text('Class: '. $class_name .' does not exist! (unauth)', __FILE__, __LINE__, __METHOD__, 10);
-		echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Class %1 does not exist, or unauthenticated.', array( $validator->escapeHTML( $class_name ) ) ) ) );
+		Debug::text('WARNING: Installer/Down For Maintenance is enabled... Service is disabled!', __FILE__, __LINE__, __METHOD__, 10);
+		echo json_encode( $api_auth->returnHandler( FALSE, 'DOWN_FOR_MAINTENANCE', TTi18n::gettext('%1 is currently undergoing maintenance. We apologize for any inconvenience this may cause, please try again later.', array(APPLICATION_NAME) ) ) );
 	}
 
 	return TRUE;

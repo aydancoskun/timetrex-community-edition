@@ -1,13 +1,17 @@
 PayStubAmendmentViewController = BaseViewController.extend( {
 	el: '#pay_stub_amendment_view_container',
+
+	_required_files: ['APIPayPeriod', 'APIPayStubAmendment', 'APIUserGroup', 'APIPayStubEntryAccount', 'APIUserTitle', 'APIBranch', 'APIDepartment'],
+
 	user_status_array: null,
 	filtered_status_array: null,
 	type_array: null,
+	is_mass_adding: false,
 
 	user_api: null,
 	user_group_api: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayStubAmendmentEditView.html';
 		this.permission_id = 'pay_stub_amendment';
 		this.viewId = 'PayStubAmendment';
@@ -693,23 +697,34 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		this.current_edit_record[key] = c_value;
 
-		if ( key === 'type_id' ) {
-			this.onTypeChange();
-		}
-
-		if ( key === 'rate' || key === 'units' || key === 'amount' ) {
-			if ( this.is_mass_editing ) {
-				if ( target.isChecked() ) {
-					this.edit_view_ui_dic['rate'].setCheckBox( true );
-					this.edit_view_ui_dic['units'].setCheckBox( true );
-					this.edit_view_ui_dic['amount'].setCheckBox( true );
+		switch ( key ) {
+			case 'user_id':
+				if ( $.isArray(this.current_edit_record.user_id) && this.current_edit_record.user_id.length > 1 ) {
+					this.is_mass_adding = true;
 				} else {
-					this.edit_view_ui_dic['rate'].setCheckBox( false );
-					this.edit_view_ui_dic['units'].setCheckBox( false );
-					this.edit_view_ui_dic['amount'].setCheckBox( false );
+					this.is_mass_adding = false;
 				}
-			}
-			this.current_edit_record['amount'] = this.edit_view_ui_dic['amount'].getValue();
+				this.setEditMenu();
+				break;
+			case 'type_id':
+				this.onTypeChange();
+				break;
+			case 'rate':
+			case 'units':
+			case 'amount':
+				if ( this.is_mass_editing ) {
+					if ( target.isChecked() ) {
+						this.edit_view_ui_dic['rate'].setCheckBox( true );
+						this.edit_view_ui_dic['units'].setCheckBox( true );
+						this.edit_view_ui_dic['amount'].setCheckBox( true );
+					} else {
+						this.edit_view_ui_dic['rate'].setCheckBox( false );
+						this.edit_view_ui_dic['units'].setCheckBox( false );
+						this.edit_view_ui_dic['amount'].setCheckBox( false );
+					}
+				}
+				this.current_edit_record['amount'] = this.edit_view_ui_dic['amount'].getValue();
+				break;
 		}
 
 		if ( !doNotValidate ) {
@@ -719,14 +734,14 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	},
 
 	onTypeChange: function() {
-		if ( this.current_edit_record.type_id === 10 ) {
+		if ( this.current_edit_record.type_id == 10 ) {
 			this.detachElement( 'percent_amount' );
 			this.detachElement( 'percent_amount_entry_name_id' );
 			this.attachElement( 'rate' );
 			this.attachElement( 'units' );
 			this.attachElement( 'amount' );
 
-		} else if ( this.current_edit_record.type_id === 20 ) {
+		} else if ( this.current_edit_record.type_id == 20 ) {
 			this.attachElement( 'percent_amount' );
 			this.attachElement( 'percent_amount_entry_name_id' );
 			this.detachElement( 'rate' );
@@ -865,55 +880,6 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 					IndexViewController.openEditView( this, 'Employee', user_ids[0] );
 				}
 				break;
-//			case 'CostaRicaSTDForm1':
-//				post_data = {0: args, 1: true, 2: '-2050-cheque_cr_standard_form_1'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'CostaRicaSTDForm2':
-//				post_data = {0: args, 1: true, 2: '-2060-cheque_cr_standard_form_2'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'NEBS9085':
-//				post_data = {0: args, 1: true, 2: '-2010-cheque_9085'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'NEBS9209P':
-//				post_data = {0: args, 1: true, 2: '-2020-cheque_9209p'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'NEBSDLT103':
-//				post_data = {0: args, 1: true, 2: '-2030-cheque_dlt103'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'NEBSDLT104':
-//				post_data = {0: args, 1: true, 2: '-2040-cheque_dlt104'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'Beanstream':
-//				post_data = {0: args, 1: true, 2: '-1050-eft_BEANSTREAM'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'CanadaEFT105':
-//				post_data = {0: args, 1: true, 2: '-1030-eft_105'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'CanadaEFT1464':
-//				post_data = {0: args, 1: true, 2: '-1020-eft_1464'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'CanadaEFTCIBC':
-//				post_data = {0: args, 1: true, 2: '-1022-eft_1464_cibc'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'CanadaHSBCEFTPC':
-//				post_data = {0: args, 1: true, 2: '-1040-eft_HSBC'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'UnitedStatesACH':
-//				post_data = {0: args, 1: true, 2: '-1010-eft_ACH'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-
 		}
 
 	},
@@ -922,8 +888,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.onReportPrintClick( id );
 	},
 
+	//not currently called. are we reimplementing the eft code commented out above in this class?
 	doFormIFrameCall: function( postData ) {
-		this.sendIframeCall(this.api.className, 'get' + this.api.key_name, postData);
+		Global.APIFileDownload( this.api.className, 'get' + this.api.key_name, postData );
 	},
 
 	setCurrentEditRecordData: function() {
@@ -965,67 +932,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 	openEditView: function() {
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
-
-
 	},
-
-//	onCopyAsNewClick: function() {
-//		var $this = this;
-//		this.is_add = true;
-//		LocalCacheData.current_doing_context_action = 'copy_as_new';
-//
-//		var selectedId;
-//
-//		if ( Global.isSet( this.edit_view ) ) {
-//			this.current_edit_record.id = '';
-//			var navigation_div = this.edit_view.find( '.navigation-div' );
-//			navigation_div.css( 'display', 'none' );
-//			this.setEditMenu();
-//			this.setTabStatus();
-//			ProgressBar.closeOverlay();
-//
-//		} else {
-//
-//			var filter = {};
-//			var grid_selected_id_array = this.getGridSelectIdArray();
-//			var grid_selected_length = grid_selected_id_array.length;
-//
-//			if ( grid_selected_length > 0 ) {
-//				selectedId = grid_selected_id_array[0];
-//			} else {
-//				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
-//				return;
-//			}
-//
-//			filter.filter_data = {};
-//			filter.filter_data.id = [selectedId];
-//
-//			this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-//
-//				var result_data = result.getResult();
-//
-//				if ( !result_data ) {
-//					result_data = [];
-//				}
-//
-//				result_data = result_data[0];
-//
-//				result_data.id = '';
-//
-//				$this.openEditView(); // Put it here is to avoid if the selected one is not existed in data or have deleted by other pragram. in this case, the edit view should not be opend.
-//
-//				if ( $this.sub_view_mode && $this.parent_key ) {
-//					result_data[$this.parent_key] = $this.parent_value;
-//				}
-//
-//				$this.current_edit_record = result_data;
-//				$this.initEditView();
-//
-//			}} );
-//
-//		}
-//
-//	},
 
 	validate: function() {
 
@@ -1049,32 +956,40 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		} else {
 			record = this.current_edit_record;
 		}
-		if ( $.isArray( record.user_id ) ) {
 
-			records_data = [];
+		var record = this.processMassAdd(record);
+
+		this.api['validate' + this.api.key_name]( record, {onResult: function( result ) {
+			$this.validateResult( result );
+
+		}} );
+	},
+	removeEditView: function(){
+		this.is_mass_adding = false;
+		this._super( 'removeEditView' );
+	},
+
+	processMassAdd: function (record ) {
+		if ( $.isArray( record.user_id ) ) {
+			var records_data = [];
 			var length = record.user_id.length;
-			// if the length > 0, loop it.
 			if ( length > 0 ) {
 				for ( var i = 0; i < length; i++ ) {
 					var record_data = Global.clone( record );
 					record_data.user_id = record.user_id[i];
 					records_data.push( record_data );
 				}
+				this.setEditMenu();
+
+				return records_data;
+
 			} else {
-				// if the length is 0, set it to string
 				record.user_id = record.user_id.toString();
 			}
 
 		}
 
-		if ( Global.isSet( records_data ) && records_data.length > 0 ) {
-			record = records_data;
-		}
-
-		this.api['validate' + this.api.key_name]( record, {onResult: function( result ) {
-			$this.validateResult( result );
-
-		}} );
+		return record;
 	},
 
 	onSaveAndContinue: function( ignoreWarning ) {
@@ -1085,7 +1000,6 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.is_changed = false;
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save_and_continue';
-		this.current_edit_record.user_id = this.current_edit_record.user_id[0];
 		this.api['set' + this.api.key_name]( this.current_edit_record, false, ignoreWarning, {onResult: function( result ) {
 			$this.onSaveAndContinueResult( result );
 
@@ -1125,31 +1039,14 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			record = this.current_edit_record;
 		}
 
-		if ( $.isArray( record.user_id ) ) {
-			records_data = [];
-			var length = record.user_id.length;
-			if ( length > 0 ) {
-				for ( var i = 0; i < length; i++ ) {
-					var record_data = Global.clone( record );
-					record_data.user_id = record.user_id[i];
-					records_data.push( record_data );
-				}
-			} else {
-				record.user_id = record.user_id.toString();
-			}
-
-		}
-
-		if ( Global.isSet( records_data ) && records_data.length > 0 ) {
-			record = records_data;
-		}
+		var record = this.processMassAdd(record);
 
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 			if ( result.isValid() ) {
 				var result_data = result.getResult();
 				if ( result_data === true ) {
 					$this.refresh_id = $this.current_edit_record.id;
-				} else if ( result_data > 0 ) {
+				} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 					$this.refresh_id = result_data;
 				}
 				$this.search();
@@ -1177,24 +1074,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		var records_data = null;
 		this.clearNavigationData();
 
-		if ( $.isArray( record.user_id ) ) {
-			records_data = [];
-			var length = record.user_id.length;
-			if ( length > 0 ) {
-				for ( var i = 0; i < length; i++ ) {
-					var record_data = Global.clone( record );
-					record_data.user_id = record.user_id[i];
-					records_data.push( record_data );
-				}
-			} else {
-				record.user_id = record.user_id.toString();
-			}
-
-		}
-
-		if ( Global.isSet( records_data ) && records_data.length > 0 ) {
-			record = records_data;
-		}
+		var record = this.processMassAdd(record);
 
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 			if ( result.isValid() ) {
@@ -1202,7 +1082,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				if ( result_data === true ) {
 					$this.refresh_id = $this.current_edit_record.id;
 
-				} else if ( result_data > 0 ) {
+				} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 					$this.refresh_id = result_data;
 				}
 				$this.search( false );
@@ -1226,31 +1106,16 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		var records_data = null;
 
-		if ( $.isArray( record.user_id ) ) {
-			records_data = [];
-			var length = record.user_id.length;
-			if ( length > 0 ) {
-				for ( var i = 0; i < length; i++ ) {
-					var record_data = Global.clone( record );
-					record_data.user_id = record.user_id[i];
-					records_data.push( record_data );
-				}
-			} else {
-				record.user_id = record.user_id.toString();
-			}
 
-		}
+		var record = this.processMassAdd(record);
 
-		if ( Global.isSet( records_data ) && records_data.length > 0 ) {
-			record = records_data;
-		}
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 			if ( result.isValid() ) {
 				var result_data = result.getResult();
 				if ( result_data === true ) {
 					$this.refresh_id = $this.current_edit_record.id;
 
-				} else if ( result_data > 0 ) {
+				} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 					$this.refresh_id = result_data;
 				}
 				$this.search( false );
@@ -1266,7 +1131,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn, pId );
 
-		if ( this.is_mass_editing || this.is_viewing || (Global.isArray( this.current_edit_record.user_id ) && this.current_edit_record.user_id.length > 1) ) {
+		if ( this.is_mass_adding || this.is_mass_editing || this.is_viewing || (Global.isArray( this.current_edit_record.user_id ) && this.current_edit_record.user_id.length > 1) ) {
 			context_btn.addClass( 'disable-image' );
 		}
 	},

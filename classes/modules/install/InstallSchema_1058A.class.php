@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,12 +40,18 @@
  */
 class InstallSchema_1058A extends InstallSchema_Base {
 
+	/**
+	 * @return bool
+	 */
 	function preInstall() {
 		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postInstall() {
 		global $config_vars;
 
@@ -63,7 +69,7 @@ class InstallSchema_1058A extends InstallSchema_Base {
 					//Disable detailed audit logging while updating permissions, as this can create millions of records and slow the upgrade down substantially.
 					$config_vars['other']['disable_audit_log_detail'] = TRUE;
 					$config_vars['other']['disable_audit_log'] = TRUE;
-					
+
 					$pclf = TTnew( 'PermissionControlListFactory' );
 					// Update all the HR related permissions for the Standard/Business Edition (KPIs, reviews, qualifications, etc..., but *not* job vacancy or job applicants)
 					$pclf->getByCompanyID( $c_obj->getID(), NULL, NULL, NULL, array( 'id' => 'asc' ) );
@@ -96,7 +102,7 @@ class InstallSchema_1058A extends InstallSchema_Base {
 					//Re-enable audit logging after permissions were updated.
 					$config_vars['other']['disable_audit_log_detail'] = FALSE;
 					$config_vars['other']['disable_audit_log'] = FALSE;
-					
+
 					//Delete duplicate OPEN shifts before todays date.
 					$sf = new ScheduleFactory();
 					$udf = new UserDateFactory();

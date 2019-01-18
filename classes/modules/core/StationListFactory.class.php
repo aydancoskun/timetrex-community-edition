@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class StationListFactory extends StationFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -77,7 +90,15 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationListFactory
+	 */
+	function getByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -98,7 +119,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -123,7 +144,13 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -133,8 +160,8 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -150,7 +177,13 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyIdAndTypeId($company_id, $type_id, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $type_id
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationListFactory
+	 */
+	function getByCompanyIdAndTypeId( $company_id, $type_id, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -160,7 +193,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -177,7 +210,12 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 	}
 
 
-	function getByStationId($station_id, $order = NULL) {
+	/**
+	 * @param string $station_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationListFactory
+	 */
+	function getByStationId( $station_id, $order = NULL) {
 		if ( $station_id == '' OR strtolower($station_id) == 'any' ) {
 			return FALSE;
 		}
@@ -211,7 +249,13 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByStationIdAndCompanyId($station_id, $company_id, $order = NULL) {
+	/**
+	 * @param string $station_id UUID
+	 * @param string $company_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationListFactory
+	 */
+	function getByStationIdAndCompanyId( $station_id, $company_id, $order = NULL) {
 		if ( $station_id == '') {
 			return FALSE;
 		}
@@ -228,7 +272,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'station_id' => (string)$station_id,
 					);
 
@@ -245,7 +289,14 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByStationIdAndStatusIdAndTypeId($station_id, $status_id, $type_id, $order = NULL) {
+	/**
+	 * @param string $station_id UUID
+	 * @param int|array $status_id
+	 * @param int|array $type_id
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationListFactory
+	 */
+	function getByStationIdAndStatusIdAndTypeId( $station_id, $status_id, $type_id, $order = NULL) {
 		if ( $station_id == '') {
 			return FALSE;
 		}
@@ -276,7 +327,13 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getPendingSynchronizationByCompanyIdAndTypeId($company_id, $type_id, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $type_id
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationListFactory
+	 */
+	function getPendingSynchronizationByCompanyIdAndTypeId( $company_id, $type_id, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -286,7 +343,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -310,7 +367,13 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndStatusAndType($user_id, $status, $type) {
+	/**
+	 * @param string $user_id UUID
+	 * @param $status
+	 * @param $type
+	 * @return bool|StationListFactory
+	 */
+	function getByUserIdAndStatusAndType( $user_id, $status, $type, $station_id = NULL ) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -411,23 +474,27 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 								)
 								OR EXISTS( select e.user_id from '. $siuf->getTable() .' as e WHERE a.id = e.station_id AND e.user_id = z.id )
 							)
-						AND ( a.deleted = 0 AND z.deleted = 0 )
-						ORDER BY lower(a.source) = \'any\' desc, lower(station_id) = \'any\' desc
-						';
+						AND ( a.deleted = 0 AND z.deleted = 0 ) ';
 
-		//Try to order the SQL query to hit wildcard stations first.
+		$query .= ' ORDER BY lower(a.source) = \'any\' desc, lower(station_id) = \'any\' desc'; //Try to order the SQL query to hit wildcard stations first.
+		if ( $station_id != '' ) {
+			$query .= ', station_id = \'' . preg_replace( '/[^A-Za-z0-9\.]/', '', $station_id ) . '\' desc'; //Try to order by the specific station_id next
+		}
+		$query .= ', last_punch_time_stamp desc'; //Finally order by stations that was used most recently.
 
 		//$query .= $this->getSortSQL( $order, $strict );
 
-		//Debug::text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::arr($ph, 'PH: ', __FILE__, __LINE__, __METHOD__, 10);
-
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
-	function getByCompanyIdArray($company_id) {
+	/**
+	 * @param string $company_id UUID
+	 * @return array|bool
+	 */
+	function getByCompanyIdArray( $company_id) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -436,7 +503,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$blf->getByCompanyId($company_id);
 
 		$branch_list = array();
-		$branch_list[0] = '--';
+		$branch_list[TTUUID::getZeroID()] = '--';
 
 		foreach ($blf as $branch) {
 			$branch_list[$branch->getID()] = $branch->getName();
@@ -445,7 +512,13 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $branch_list;
 	}
 
-	function getCountByCompanyIdAndTypeId($company_id, $type_id, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $type_id
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationListFactory
+	 */
+	function getCountByCompanyIdAndTypeId( $company_id, $type_id, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -455,7 +528,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					//'company_id' => (int)$company_id,
+					//'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		//Only include ENABLED stations.
@@ -467,10 +540,8 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 					where
 							status_id = 20
 							AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .') ';
-							
-		if ( $company_id != '' AND ( isset($company_id[0]) AND !in_array(-1, (array)$company_id) ) ) {
-			$query	.=	' AND company_id in ('. $this->getListSQL( $company_id, $ph, 'int' ) .') ';
-		}
+
+		$query .= ( isset($company_id) AND $company_id != '' ) ? $this->getWhereClauseSQL( 'company_id', $company_id, 'uuid_list', $ph ) : NULL;
 
 		$query .= ' AND deleted = 0 GROUP BY company_id, type_id';
 		$query .= $this->getSortSQL( $order );
@@ -480,6 +551,14 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
 	function getAPITimeClockStationsByArrayCriteria( $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( !is_array($order) ) {
 			//Use Filter Data ordering if its set.
@@ -528,9 +607,9 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 					where 1=1
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
@@ -558,6 +637,15 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -594,7 +682,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -611,9 +699,9 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );

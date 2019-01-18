@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,9 @@
 class APIPayStub extends APIFactory {
 	protected $main_class = 'PayStubFactory';
 
+	/**
+	 * APIPayStub constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -52,7 +55,7 @@ class APIPayStub extends APIFactory {
 	 * overridden to get different columns based on permissions.
 	 * @param bool $name
 	 * @param null $parent
-	 * @return object
+	 * @return bool|object
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -85,7 +88,7 @@ class APIPayStub extends APIFactory {
 			$end_date = TTDate::getDate('DATE', $pp_obj->getEndDate() );
 			$transaction_date = TTDate::getDate('DATE', $pp_obj->getTransactionDate() );
 		} else {
-			$pay_period_id = 0;
+			$pay_period_id = TTUUID::getZeroID();
 			$start_date = TTDate::getDate('DATE', time() );
 			$end_date = TTDate::getDate('DATE', time() );
 			$transaction_date = TTDate::getDate('DATE', time() );
@@ -110,34 +113,63 @@ class APIPayStub extends APIFactory {
 	/**
 	 * Get pay_stub data for one or more pay_stubes.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @param bool $format
+	 * @param bool $hide_employer_rows
+	 * @return array|bool
 	 */
 	function getPayStub( $data = NULL, $disable_paging = FALSE, $format = FALSE, $hide_employer_rows = TRUE ) {
-		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
-				OR !( $this->getPermissionObject()->Check('pay_stub', 'view') OR $this->getPermissionObject()->Check('pay_stub', 'view_own') OR $this->getPermissionObject()->Check('pay_stub', 'view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check( 'pay_stub', 'enabled' )
+				OR !( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) OR $this->getPermissionObject()->Check( 'pay_stub', 'view_own' ) OR $this->getPermissionObject()->Check( 'pay_stub', 'view_child' ) )
+		) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$format = Misc::trimSortPrefix( $format );
-
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
 
-		if ( $this->getPermissionObject()->Check('pay_stub', 'view') == FALSE AND $this->getPermissionObject()->Check('pay_stub', 'view_child') == FALSE ) {
+		if ( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) == FALSE AND $this->getPermissionObject()->Check( 'pay_stub', 'view_child' ) == FALSE ) {
 			//Only display PAID pay stubs.
 			$data['filter_data']['status_id'] = array(40);
 		}
 
 		//Always hide employer rows unless they have permissions to view all pay stubs.
-		if ( $this->getPermissionObject()->Check('pay_stub', 'view') == FALSE ) {
+		if ( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) == FALSE ) {
 			$hide_employer_rows = TRUE;
 		}
 
-		$pslf = TTnew( 'PayStubListFactory' );
-		$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
-		Debug::Text('Record Count: '. $pslf->getRecordCount() .' Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
+		if ( ($format == 10 OR $format == 20 OR $format == 30) AND $this->getPermissionObject()->Check( 'pay_stub', 'view' ) == TRUE ) {
+			$data['filter_data']['transaction_status_id'] = array(10, 200); //10=Pending, 200=ReIssue
+			$data['filter_data']['transaction_type_id'] = 10; //10=Valid (Enabled)
+			if ( isset($data['filter_data']['id']) ) {
+				$data['filter_data']['pay_stub_id'] = $data['filter_data']['id'];
+			}
+			unset($data['filter_data']['id']);
 
-		if ( strtolower($format) == 'pdf' ) {
+			if ( $format == 20 ) {
+				$data['filter_data']['remittance_destination_account_type_id'] = array(3000);
+			}
+
+			if ( $format == 30 ) {
+				$data['filter_data']['remittance_destination_account_type_id'] = array(2000);
+			}
+
+			//Specific sort order to ensure consistent transaction order in the EFT files. Keep in mind exportPayStubTransaction() sorts the transactions again too, but this helps.
+			$data['filter_sort'] = array( 'lef.id' => 'asc', 'rsaf.id' => 'asc', 'psf.transaction_date' => 'asc', 'destination_user_last_name' => 'asc', 'destination_first_last_name' => 'asc', 'rdaf.id' => 'asc' );
+
+			/** @var PayStubTransactionListFactory $pslf */
+			$pslf = TTnew( 'PayStubTransactionListFactory' );
+			$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+			Debug::Text( 'PSTLF Record Count: ' . $pslf->getRecordCount() . ' Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
+		} else {
+			/** @var PayStubListFactory $pslf */
+			$pslf = TTnew( 'PayStubListFactory' );
+			$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+			Debug::Text( 'PSLF Record Count: ' . $pslf->getRecordCount() . ' Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
+		}
+
+		if ( $format == 'pdf' ) {
 			if ( $pslf->getRecordCount() > 0 ) {
 				$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
@@ -153,52 +185,28 @@ class APIPayStub extends APIFactory {
 					return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('ERROR: No data to export...') );
 				}
 			}
-		} elseif ( strpos( strtolower($format), 'cheque_' ) !== FALSE AND $this->getPermissionObject()->Check('pay_stub', 'view') == TRUE ) {
+		} elseif ( ($format == 10 OR $format == 20 OR $format == 30) AND $this->getPermissionObject()->Check('pay_stub', 'view') == TRUE ) {
 			if ( $pslf->getRecordCount() > 0 ) {
 				$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
 				$pslf->setProgressBarObject( $this->getProgressBarObject() ); //Expose progress bar object to pay stub object.
 
-				$output = $pslf->exportPayStub( $pslf, strtolower($format) );
+				$output = $pslf->exportPayStubTransaction( $pslf, $format);
 
 				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-				if ( $output != '' ) {
-					return Misc::APIFileDownload( 'checks_'. str_replace(array('/', ',', ' '), '_', TTDate::getDate('DATE', time() ) ) .'.pdf', 'application/pdf', $output );
+				if ( is_array($output) AND count($output) > 0 ) {
+					$filename = FALSE;
+					if ( $format == 10 ) {
+						$filename = 'pay_stub_transactions_'.TTDate::getDate( 'DATE', time() ).'.zip';
+					}
+					$zip_file = Misc::zip($output, $filename, TRUE);
+					return Misc::APIFileDownload($zip_file['file_name'], $zip_file['mime_type'], $zip_file['data'] );
 				} else {
 					return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('ERROR: No data to export...') );
 				}
-			}
-		} elseif ( strpos( strtolower($format), 'eft_' ) !== FALSE AND $this->getPermissionObject()->Check('pay_stub', 'view') == TRUE ) {
-			if ( $pslf->getRecordCount() > 0 ) {
-				$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
-				$pslf->setProgressBarObject( $this->getProgressBarObject() ); //Expose progress bar object to pay stub object.
-
-				$output = $pslf->exportPayStub( $pslf, strtolower($format) );
-
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
-
-				if ( $output != '' ) {
-					//Include file creation number in the exported file name, so the user knows what it is without opening the file,
-					//and can generate multiple files if they need to match a specific number.
-					$ugdlf = TTnew( 'UserGenericDataListFactory' );
-					$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getCurrentCompanyObject()->getId(), 'PayStubFactory', TRUE );
-					if ( $ugdlf->getRecordCount() > 0 ) {
-						$ugd_obj = $ugdlf->getCurrent();
-						$setup_data = $ugd_obj->getData();
-					}
-
-					if ( isset($setup_data) ) {
-						$file_creation_number = $setup_data['file_creation_number']++;
-					} else {
-						$file_creation_number = 0;
-					}
-
-					return Misc::APIFileDownload( 'eft_'.$file_creation_number.'_'.date('Y_m_d').'.txt', 'application/pdf', $output );
-				} else {
-					return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('ERROR: No data to export...') );
-				}
+			} else {
+				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('All transactions have already been processed') );
 			}
 		} else {
 			if ( $pslf->getRecordCount() > 0 ) {
@@ -206,6 +214,7 @@ class APIPayStub extends APIFactory {
 
 				$this->setPagerObject( $pslf );
 
+				$retarr = array();
 				foreach( $pslf as $ps_obj ) {
 					$retarr[] = $ps_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
@@ -223,8 +232,9 @@ class APIPayStub extends APIFactory {
 
 	/**
 	 * Export data to csv
-	 * @param array $data filter data
 	 * @param string $format file format (csv)
+	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function exportPayStub( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
@@ -253,7 +263,9 @@ class APIPayStub extends APIFactory {
 	/**
 	 * Set pay_stub data for one or more pay_stubes.
 	 * @param array $data pay_stub data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setPayStub( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -272,20 +284,21 @@ class APIPayStub extends APIFactory {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' PayStubs', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
+				/** @var PayStubListFactory $lf */
 				$lf = TTnew( 'PayStubListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get pay_stub object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -299,7 +312,7 @@ class APIPayStub extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('pay_stub', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 
 							//Check to see if the transaction date changed, so we can trigger setEnableCalcYTD().
@@ -357,49 +370,52 @@ class APIPayStub extends APIFactory {
 
 						$processed_entries = 0;
 						foreach ( $row['entries'] as $pay_stub_entry ) {
-							if ( (
-											( isset( $pay_stub_entry['id'] ) AND $pay_stub_entry['id'] > 0 )
-											OR
-											( isset( $pay_stub_entry['pay_stub_entry_name_id'] ) AND $pay_stub_entry['pay_stub_entry_name_id'] > 0 )
+							if ( 	(
+											( isset( $pay_stub_entry['id'] ) AND TTUUID::isUUID( $pay_stub_entry['id'] ) AND $pay_stub_entry['id'] != TTUUID::getZeroID() AND $pay_stub_entry['id'] != TTUUID::getNotExistID() )
+										OR
+											( isset( $pay_stub_entry['pay_stub_entry_name_id'] )
+													AND TTUUID::isUUID( $pay_stub_entry['pay_stub_entry_name_id'] ) AND $pay_stub_entry['pay_stub_entry_name_id'] != TTUUID::getZeroID() AND $pay_stub_entry['pay_stub_entry_name_id'] != TTUUID::getNotExistID()
+											)
 									)
 									AND
 									(
 											!isset( $pay_stub_entry['type'] )
-											OR
+										OR
 											( isset( $pay_stub_entry['type'] ) AND $pay_stub_entry['type'] != 40 )
 									)
 									AND isset( $pay_stub_entry['amount'] )
-							) {
+								) {
 								Debug::Text( 'Pay Stub Entry ID: ' . $pay_stub_entry['id'] . ' Amount: ' . $pay_stub_entry['amount'] . ' Pay Stub ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
 
 								//Populate $pay_stub_entry_obj so we can find validation errors before postSave() is called.
-								if ( $pay_stub_entry['id'] > 0 ) {
+								if ( isset($pay_stub_entry['id']) AND $pay_stub_entry['id'] != '' ) {
 									$pself = TTnew( 'PayStubEntryListFactory' );
 									$pself->getById( $pay_stub_entry['id'] );
 									if ( $pself->getRecordCount() > 0 ) {
 										$pay_stub_entry_obj = $pself->getCurrent();
 									}
+								} else {
+									$pay_stub_entry_obj = TTnew( 'PayStubEntryListFactory' );
+									//$pay_stub_entry_obj->setPayStub( $lf->getId() ); //Don't set this here as it will cause validation failures. Its handled in addEntry instead.
 								}
 
-								if ( !isset( $pay_stub_entry_obj ) ) {
-									$pay_stub_entry_obj = TTnew( 'PayStubEntryListFactory' );
-									//$pay_stub_entry_obj->setPayStub( $row['id'] ); //When creating a new pay stub, we don't have the ID, so this just causes an error anyways.
+								if ( isset($pay_stub_entry['pay_stub_entry_name_id']) AND $pay_stub_entry['pay_stub_entry_name_id'] != '' ) {
 									$pay_stub_entry_obj->setPayStubEntryNameId( $pay_stub_entry['pay_stub_entry_name_id'] );
+								}
 
-									if ( isset( $pay_stub_entry['pay_stub_amendment_id'] ) AND $pay_stub_entry['pay_stub_amendment_id'] != '' ) {
-										$pay_stub_entry_obj->setPayStubAmendment( $pay_stub_entry['pay_stub_amendment_id'], $lf->getStartDate(), $lf->getEndDate() );
-									}
+								if ( isset( $pay_stub_entry['pay_stub_amendment_id'] ) AND $pay_stub_entry['pay_stub_amendment_id'] != '' ) {
+									$pay_stub_entry_obj->setPayStubAmendment( $pay_stub_entry['pay_stub_amendment_id'], $lf->getStartDate(), $lf->getEndDate() );
+								}
 
-									if ( isset( $pay_stub_entry['rate'] ) AND $pay_stub_entry['rate'] != '' ) {
-										$pay_stub_entry_obj->setRate( $pay_stub_entry['rate'] );
-									}
-									if ( isset( $pay_stub_entry['units'] ) AND $pay_stub_entry['units'] != '' ) {
-										$pay_stub_entry_obj->setUnits( $pay_stub_entry['units'] );
-									}
+								if ( isset( $pay_stub_entry['rate'] ) AND $pay_stub_entry['rate'] != '' ) {
+									$pay_stub_entry_obj->setRate( $pay_stub_entry['rate'] );
+								}
+								if ( isset( $pay_stub_entry['units'] ) AND $pay_stub_entry['units'] != '' ) {
+									$pay_stub_entry_obj->setUnits( $pay_stub_entry['units'] );
+								}
 
-									if ( isset( $pay_stub_entry['amount'] ) AND $pay_stub_entry['amount'] != '' ) {
-										$pay_stub_entry_obj->setAmount( $pay_stub_entry['amount'] );
-									}
+								if ( isset( $pay_stub_entry['amount'] ) AND $pay_stub_entry['amount'] != '' ) {
+									$pay_stub_entry_obj->setAmount( $pay_stub_entry['amount'] );
 								}
 
 								if ( !isset( $pay_stub_entry['units'] ) OR $pay_stub_entry['units'] == '' ) {
@@ -419,9 +435,9 @@ class APIPayStub extends APIFactory {
 								}
 
 								$ytd_adjustment = FALSE;
-								if ( $pay_stub_entry['pay_stub_amendment_id'] > 0 ) {
+								if ( TTUUID::isUUID( $pay_stub_entry['pay_stub_amendment_id'] ) AND $pay_stub_entry['pay_stub_amendment_id'] != TTUUID::getZeroID() AND $pay_stub_entry['pay_stub_amendment_id'] != TTUUID::getNotExistID() ) {
 									$psamlf = TTNew( 'PayStubAmendmentListFactory' );
-									$psamlf->getByIdAndCompanyId( (int)$pay_stub_entry['pay_stub_amendment_id'], $this->getCurrentCompanyObject()->getId() );
+									$psamlf->getByIdAndCompanyId( TTUUID::castUUID($pay_stub_entry['pay_stub_amendment_id']), $this->getCurrentCompanyObject()->getId() );
 									if ( $psamlf->getRecordCount() > 0 ) {
 										$ytd_adjustment = $psamlf->getCurrent()->getYTDAdjustment();
 									}
@@ -433,14 +449,19 @@ class APIPayStub extends APIFactory {
 									$processed_entries++;
 								} else {
 									Debug::Text( ' ERROR: Unable to save PayStubEntry... ', __FILE__, __LINE__, __METHOD__, 10 );
-									$lf->Validator->isTrue( 'pay_stub_entry', FALSE, TTi18n::getText( '%1 entry for amount: %2 is invalid', array($pay_stub_entry_obj->getPayStubEntryAccountObject()->getName(), Misc::MoneyFormat( $pay_stub_entry['amount'] )) ) );
+									$tmp_pay_stub_entry_account_name = TTi18n::getText('N/A');
+									if ( is_object( $pay_stub_entry_obj->getPayStubEntryAccountObject() ) ) {
+										$tmp_pay_stub_entry_account_name = $pay_stub_entry_obj->getPayStubEntryAccountObject()->getName();
+									}
+
+									$lf->Validator->isTrue( 'pay_stub_entry', FALSE, TTi18n::getText( '%1 entry for amount: %2 is invalid', array($tmp_pay_stub_entry_account_name, Misc::MoneyFormat( $pay_stub_entry['amount'] )) ) );
 								}
 							} else {
 								Debug::Text( ' Skipping Total Entry. ', __FILE__, __LINE__, __METHOD__, 10 );
 							}
 							unset( $pay_stub_entry_obj );
 						}
-						unset( $pay_stub_entry_id, $pay_stub_entry );
+						unset( $pay_stub_entry );
 
 						if ( $processed_entries > 0 ) {
 							$lf->setTainted( TRUE ); //Make sure tainted flag is set when any entries are processed.
@@ -450,6 +471,88 @@ class APIPayStub extends APIFactory {
 						}
 					} else {
 						Debug::Text( ' Skipping ALL Entries... ', __FILE__, __LINE__, __METHOD__, 10 );
+					}
+
+					if ( ( isset($row['transactions']) AND is_array($row['transactions']) AND count($row['transactions']) > 0 ) ) {
+						Debug::Text( ' Found modified transactions!', __FILE__, __LINE__, __METHOD__, 10 );
+						$processed_transactions = 0;
+						if ( count($row['transactions']) > 0 ) {
+							foreach ( $row['transactions'] as $pay_stub_transaction ) {
+								//Debug::Arr($pay_stub_transaction,'Paystub transaction row...', __FILE__, __LINE__, __METHOD__, 10);
+								if ( $pay_stub_transaction['amount'] == 0 ) { //Skip any transactions of $0.00
+									continue;
+								}
+
+								if ( isset( $pay_stub_transaction['id'] )
+										AND TTUUID::isUUID( $pay_stub_transaction['id'] ) AND $pay_stub_transaction['id'] != TTUUID::getZeroID() AND $pay_stub_transaction['id'] != TTUUID::getNotExistID() ) {
+									/** @var PayStubTransactionListFactory $pstlf */
+									$pstlf = TTnew( 'PayStubTransactionListFactory' );
+									$pstlf->getByIdAndCompanyId( $pay_stub_transaction['id'], $this->getCurrentCompanyObject()->getId() );
+									if ( $pstlf->getRecordCount() > 0 ) {
+										$pst_obj = $pstlf->getCurrent();
+									}
+									unset( $pstlf );
+								} else {
+									/** @var PayStubTransactionFactory $pst_obj */
+									$pst_obj = TTnew('PayStubTransactionFactory');
+									//$pst_obj->setPayStub( $lf->getId() ); //Don't set this here as it will cause validation failures. Its handled in addTransaction() instead.
+								}
+
+								$pst_obj->setType( 10 ); //Enabled
+
+								if ( isset($pay_stub_transaction['status_id']) AND $pay_stub_transaction['status_id'] != '' ) {
+									$pst_obj->setStatus( $pay_stub_transaction['status_id'] );
+								} else {
+									$pst_obj->setStatus( 10 ); //Pending
+								}
+
+								if ( isset( $pay_stub_transaction['deleted']) AND $pay_stub_transaction['deleted'] == 1 ) {
+									// Deleted is set instead of populating the object to provide for the case where a
+									// user enters invalid data then deletes the row, removing it from the UI
+									$pst_obj->setDeleted(TRUE);
+								} else{
+									if ( isset( $pay_stub_transaction['remittance_destination_account_id'] ) ) {
+										$pst_obj->setRemittanceDestinationAccount($pay_stub_transaction['remittance_destination_account_id']);
+									}
+
+									if ( isset( $pay_stub_transaction['transaction_date'] ) ) {
+										$pst_obj->setTransactionDate( TTDate::parseDateTime($pay_stub_transaction['transaction_date']) );
+									}
+
+									if ( isset( $pay_stub_transaction['amount'] ) ) {
+										$pst_obj->setAmount($pay_stub_transaction['amount']);
+									}
+
+									if ( isset( $pay_stub_transaction['note'] ) ) {
+										$pst_obj->setNote($pay_stub_transaction['note']);
+									}
+								}
+
+								if ( $pst_obj->isValid() ) {
+									$lf->addTransaction( $pst_obj );
+									$processed_transactions++;
+								} else {
+									if ( isset( $pay_stub_transaction['deleted']) == FALSE OR $pay_stub_transaction['deleted'] == 0 ) {
+										$tmp_remittance_destination_account_name = TTi18n::getText('N/A');
+										if ( is_object( $pst_obj->getRemittanceDestinationAccountObject() ) ) {
+											$tmp_remittance_destination_account_name = $pst_obj->getRemittanceDestinationAccountObject()->getName();
+										}
+										$lf->Validator->isTrue( 'pay_stub_transaction', FALSE, TTi18n::getText( '%1 transaction for amount: %2 is invalid', array($tmp_remittance_destination_account_name, Misc::MoneyFormat( $pst_obj->getAmount() )) ) );
+										unset($tmp_remittance_destination_account_name);
+									}
+								}
+								unset($pst_obj);
+							}
+
+						}
+
+						if ( $processed_transactions > 0 ) {
+							$lf->setTainted( TRUE ); //Make sure tainted flag is set when any entries are processed.
+							$lf->setEnableProcessTransactions( TRUE );
+							//$lf->processTransactions();
+						}
+					} else {
+						Debug::Text(' Skipping ALL transactions... ', __FILE__, __LINE__, __METHOD__, 10);
 					}
 
 					$lf->Validator->setValidateOnly( $validate_only );
@@ -492,10 +595,10 @@ class APIPayStub extends APIFactory {
 	/**
 	 * Delete one or more pay_stubs.
 	 * @param array $data pay_stub data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deletePayStub( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -512,7 +615,7 @@ class APIPayStub extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -521,7 +624,7 @@ class APIPayStub extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'PayStubListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get pay_stub object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -529,7 +632,7 @@ class APIPayStub extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('pay_stub', 'delete')
 								OR ( $this->getPermissionObject()->Check('pay_stub', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -578,6 +681,15 @@ class APIPayStub extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @param string $pay_period_ids UUID
+	 * @param string $user_ids UUID
+	 * @param bool $enable_correction
+	 * @param bool $run_id
+	 * @param int $type_id
+	 * @param int $transaction_date EPOCH
+	 * @return array|bool
+	 */
 	function generatePayStubs( $pay_period_ids, $user_ids = NULL, $enable_correction = FALSE, $run_id = FALSE, $type_id = 10, $transaction_date = NULL ) {
 		global $profiler;
 		Debug::Text('Generate Pay Stubs!', __FILE__, __LINE__, __METHOD__, 10);
@@ -593,9 +705,9 @@ class APIPayStub extends APIFactory {
 		$pay_period_ids = array_unique( $pay_period_ids );
 
 
-		if ( $user_ids !== NULL AND !is_array($user_ids) AND $user_ids > 0 ) {
+		if ( $user_ids !== NULL AND !is_array($user_ids) AND $user_ids != '' ) {
 			$user_ids = array($user_ids);
-		} elseif ( is_array($user_ids) AND isset($user_ids[0]) AND $user_ids[0] == 0 ) {
+		} elseif ( is_array($user_ids) AND isset($user_ids[0]) AND $user_ids[0] == TTUUID::getZeroID() ) {
 			$user_ids = NULL;
 		}
 
@@ -626,7 +738,7 @@ class APIPayStub extends APIFactory {
 					Debug::text('  Using Run ID: '. $run_id, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Check to make sure pay stubs with a transaction date before today are not open, as that can cause the payroll run number to be incorrectly determined on its own.
-					$open_pay_stub_transaction_date = ( TTDate::getMiddleDayEpoch( time() ) >= TTDate::getMiddleDayEpoch( $pay_period_obj->getTransactionDate() ) ) ? $pay_period_obj->getTransactionDate() : TTDate::getBeginDayEpoch( time() );
+					$open_pay_stub_transaction_date = ( TTDate::getMiddleDayEpoch( $epoch ) >= TTDate::getMiddleDayEpoch( $pay_period_obj->getTransactionDate() ) ) ? $pay_period_obj->getTransactionDate() : TTDate::getBeginDayEpoch( $epoch );
 					$pslf->getByCompanyIdAndPayPeriodIdAndStatusIdAndTransactionDateBeforeDate( $this->getCurrentCompanyObject()->getId(), $pay_period_id, array(25), $open_pay_stub_transaction_date, 1 );
 					if ( $pslf->getRecordCount() > 0 ) {
 						UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Pay Stubs with a transaction date before today are still OPEN, all pay stubs must be PAID on or before their transaction date'), NULL );
@@ -648,7 +760,7 @@ class APIPayStub extends APIFactory {
 
 					//Grab all users for pay period
 					$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
-					if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( -1, $user_ids ) ) {
+					if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( TTUUID::getNotExistID(), $user_ids ) ) {
 						Debug::text('Generating pay stubs for specific users...', __FILE__, __LINE__, __METHOD__, 10);
 						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Company Pay Stubs for Pay Period').': '. $pay_period_id, $this->getCurrentUserObject()->getId(), 'pay_stub' ); //Notice
 						$ppsulf->getByCompanyIDAndPayPeriodScheduleIdAndUserID( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getPayPeriodSchedule(), $user_ids );
@@ -671,7 +783,7 @@ class APIPayStub extends APIFactory {
 						$pslf = TTnew( 'PayStubListFactory' );
 						$pslf->getByCompanyIdAndPayPeriodIdAndRun( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getId(), $run_id );
 						foreach ( $pslf as $pay_stub_obj ) {
-							if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( -1, $user_ids ) AND in_array( $pay_stub_obj->getUser(), $user_ids ) == FALSE ) {
+							if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( TTUUID::getNotExistID(), $user_ids ) AND in_array( $pay_stub_obj->getUser(), $user_ids ) == FALSE ) {
 								continue; //Only generating pay stubs for individual employees, skip ones not in the list.
 							}
 							Debug::text('Existing Pay Stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
@@ -684,8 +796,12 @@ class APIPayStub extends APIFactory {
 									AND TTDate::getMiddleDayEpoch( $pay_stub_obj->getEndDate() ) == TTDate::getMiddleDayEpoch( $pay_period_obj->getEndDate() )
 									AND ( is_object( $pay_stub_obj->getUserObject() ) AND ( $pay_stub_obj->getUserObject()->getTerminationDate() == '' OR TTDate::getMiddleDayEpoch( $pay_stub_obj->getUserObject()->getTerminationDate() ) >= TTDate::getMiddleDayEpoch( $pay_period_obj->getStartDate() ) ) ) ) {
 								Debug::text('Deleting pay stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-								$pay_stub_obj->setDeleted(TRUE);
-								$pay_stub_obj->Save();
+								$pay_stub_obj->setDeleted( TRUE );
+								if ( $pay_stub_obj->isValid() == TRUE ) { //Make sure we validate on delete, in case there are paid transactions.
+									$pay_stub_obj->Save();
+								} else {
+									Debug::text('ERROR: Unable to delete old pay stub to regenerate it...', __FILE__, __LINE__, __METHOD__, 10);
+								}
 							} else {
 								Debug::text('Pay stub does not need regenerating, or it is LOCKED! ID: '. $pay_stub_obj->getID() .' Status: '. $pay_stub_obj->getStatus() .' Tainted: '. (int)$pay_stub_obj->getTainted() .' Pay Stub End Date: '. $pay_stub_obj->getEndDate() .' Pay Period End Date: '. $pay_period_obj->getEndDate(), __FILE__, __LINE__, __METHOD__, 10);
 							}
@@ -746,6 +862,10 @@ class APIPayStub extends APIFactory {
 		return $this->returnHandler( TRUE, TRUE, FALSE, FALSE, FALSE, $user_generic_status_batch_id );
 	}
 
+	/**
+	 * @param string $pay_period_ids UUID
+	 * @return int
+	 */
 	function getCurrentPayRun( $pay_period_ids ) {
 		$retval = 1;
 		if ( is_array($pay_period_ids) AND count($pay_period_ids) > 0 ) {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIAuthorization extends APIFactory {
 	protected $main_class = 'AuthorizationFactory';
 
+	/**
+	 * APIAuthorization constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -62,7 +65,8 @@ class APIAuthorization extends APIFactory {
 	/**
 	 * Get authorization data for one or more authorizations.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getAuthorization( $data = NULL, $disable_paging = FALSE ) {
 		Debug::Arr($data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -102,6 +106,16 @@ class APIAuthorization extends APIFactory {
 			Debug::Text('No valid object_type_id specified...', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->getPermissionObject()->PermissionDenied();
 		}
+
+		//Make sure there is always a object_type_id/object_id to prevent the SQL call from skipping these filters and returning more data than it should.
+		if ( !isset($data['filter_data']['object_type_id']) ) {
+			$data['filter_data']['object_type_id'] = TTUUID::notExistID();
+		}
+
+		if ( !isset($data['filter_data']['object_id']) ) {
+			$data['filter_data']['object_id'] = TTUUID::notExistID();
+		}
+
 		//Debug::Arr($data['filter_data']['permission_children_ids'], 'Permission Children: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
@@ -150,7 +164,9 @@ class APIAuthorization extends APIFactory {
 	/**
 	 * Set authorization data for one or more authorizations.
 	 * @param array $data authorization data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setAuthorization( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -168,12 +184,12 @@ class APIAuthorization extends APIFactory {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' Authorizations', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -181,7 +197,7 @@ class APIAuthorization extends APIFactory {
 				$primary_validator = $tertiary_validator = new Validator();
 				$lf = TTnew( 'AuthorizationListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get authorization object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -199,7 +215,7 @@ class APIAuthorization extends APIFactory {
 								)
 							) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -219,13 +235,13 @@ class APIAuthorization extends APIFactory {
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					//Handle authorizing timesheets that have no PPTSVF records yet.
 					if ( isset($row['object_type_id']) AND $row['object_type_id'] == 90
-							AND isset($row['object_id']) AND $row['object_id'] == -1
+							AND isset($row['object_id']) AND $row['object_id'] == TTUUID::getNotExistID()
 							AND isset($row['user_id']) AND isset($row['pay_period_id']) ) {
 						$api_ts = new APITimeSheet();
 						$api_raw_retval = $api_ts->verifyTimeSheet( $row['user_id'], $row['pay_period_id'] );
 						Debug::Arr($api_raw_retval, 'API Retval: ', __FILE__, __LINE__, __METHOD__, 10);
 						$api_retval = $this->stripReturnHandler( $api_raw_retval );
-						if ( $api_retval > 0 ) {
+						if ( TTUUID::isUUID( $api_retval ) AND $api_retval != TTUUID::getZeroID() AND $api_retval != TTUUID::getNotExistID() ) {
 							$row['object_id'] = $api_retval;
 						} else {
 							$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $api_raw_retval, $tertiary_validator );
@@ -287,10 +303,10 @@ class APIAuthorization extends APIFactory {
 	/**
 	 * Delete one or more authorizations.
 	 * @param array $data authorization data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteAuthorization( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -306,7 +322,7 @@ class APIAuthorization extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -315,7 +331,7 @@ class APIAuthorization extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'AuthorizationListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get authorization object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -328,7 +344,7 @@ class APIAuthorization extends APIFactory {
 							OR
 							$this->getPermissionObject()->Check('user_expense', 'authorize')
 							) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );

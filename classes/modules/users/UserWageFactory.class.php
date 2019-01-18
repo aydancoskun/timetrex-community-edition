@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,6 +48,11 @@ class UserWageFactory extends Factory {
 	var $wage_group_obj = NULL;
 
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -113,6 +118,10 @@ class UserWageFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 			$variable_function_map = array(
 											'id' => 'ID',
@@ -142,10 +151,16 @@ class UserWageFactory extends Factory {
 			return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getWageGroupObject() {
 		if ( is_object($this->wage_group_obj) ) {
 			return $this->wage_group_obj;
@@ -164,220 +179,143 @@ class UserWageFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'user_id',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid Employee')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getWageGroup() {
-		if ( isset($this->data['wage_group_id']) ) {
-			return (int)$this->data['wage_group_id'];
-		}
-
-		return FALSE;
-	}
-	function setWageGroup($id) {
-		$id = trim($id);
-
-		Debug::Text('Wage Group ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$wglf = TTnew( 'WageGroupListFactory' );
-
-		if (
-				$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'wage_group_id',
-														$wglf->getByID($id),
-														TTi18n::gettext('Group is invalid')
-													) ) {
-
-			$this->data['wage_group_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'wage_group_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setWageGroup( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('Wage Group ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'wage_group_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getType() {
-		if ( isset($this->data['type_id']) ) {
-			return (int)$this->data['type_id'];
-		}
-
-		return FALSE;
-	}
-	function setType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'type_id',
-											$type,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
-
-			$this->data['type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'type_id', $value );
+	}
+
+	/**
+	 * @return bool|string
+	 */
 	function getWage() {
-		if ( isset($this->data['wage']) ) {
-			return Misc::removeTrailingZeros( (float)$this->data['wage'] );
-		}
-
-		return FALSE;
-	}
-	function setWage($wage) {
-		//Pull out only digits and periods.
-		$wage = $this->Validator->stripNonFloat($wage);
-
-		if (
-				$this->Validator->isNotNull('wage',
-											$wage,
-											TTi18n::gettext('Please specify a wage'))
-				AND
-				$this->Validator->isFloat(	'wage',
-											$wage,
-											TTi18n::gettext('Incorrect Wage'))
-				AND
-				$this->Validator->isLength(	'wage',
-											$wage,
-											TTi18n::gettext('Wage has too many digits'),
-											0,
-											21) //Need to include decimal.
-				AND
-				$this->Validator->isLengthBeforeDecimal(	'wage',
-											$wage,
-											TTi18n::gettext('Wage has too many digits before the decimal'),
-											0,
-											16)
-				AND
-				$this->Validator->isLengthAfterDecimal(	'wage',
-											$wage,
-											TTi18n::gettext('Wage has too many digits after the decimal'),
-											0,
-											4)
-				) {
-
-			$this->data['wage'] = $wage;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return Misc::removeTrailingZeros( (float)$this->getGenericDataValue( 'wage' ) );
 	}
 
-	function getHourlyRate() {
-		if ( isset($this->data['hourly_rate']) ) {
-			return (float)$this->data['hourly_rate'];
-		}
-
-		return FALSE;
-	}
-	function setHourlyRate($rate) {
-		//Pull out only digits and periods.
-		$rate = $this->Validator->stripNonFloat($rate);
-
-		if ( $rate == '' OR empty($rate) ) {
-			$rate = NULL;
-		}
-
-		if ( $rate == NULL
-				OR
-				$this->Validator->isFloat(	'hourly_rate',
-											$rate,
-											TTi18n::gettext('Incorrect Hourly Rate')) ) {
-
-			$this->data['hourly_rate'] = $rate;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getWeeklyTime() {
-		if ( isset($this->data['weekly_time']) ) {
-			//Debug::Text('Weekly Time: '. $this->data['weekly_time'], __FILE__, __LINE__, __METHOD__, 10);
-
-			return $this->data['weekly_time'];
-		}
-
-		return FALSE;
-
-	}
-	function setWeeklyTime($value) {
-		//$value = $value;
-
-		if (	$value == NULL
-				OR
-				$this->Validator->isNumeric(	'weekly_time',
-											$value,
-											TTi18n::gettext('Incorrect Weekly Time')) ) {
-
-			$this->data['weekly_time'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getLaborBurdenPercent() {
-		if ( isset($this->data['labor_burden_percent']) ) {
-			return (float)$this->data['labor_burden_percent'];
-		}
-
-		return FALSE;
-	}
-	function setLaborBurdenPercent($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setWage( $value ) {
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
+		return $this->setGenericDataValue( 'wage', $value );
+	}
 
-		if (	$this->Validator->isFloat(	'labor_burden_percent',
-											$value,
-											TTi18n::gettext('Incorrect Labor Burden Percent')) ) {
+	/**
+	 * @return bool|float
+	 */
+	function getHourlyRate() {
+		return (float)$this->getGenericDataValue( 'hourly_rate' );
+	}
 
-			$this->data['labor_burden_percent'] = $value;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setHourlyRate( $value ) {
+		//Pull out only digits and periods.
+		$value = $this->Validator->stripNonFloat($value);
+		return $this->setGenericDataValue( 'hourly_rate', $value );
+	}
 
-			return TRUE;
-		}
+	/**
+	 * @return bool
+	 */
+	function getWeeklyTime() {
+		return $this->getGenericDataValue( 'weekly_time' );
+	}
 
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setWeeklyTime( $value) {
+		//$value = $value;
+		return $this->setGenericDataValue( 'weekly_time', $value );
+	}
+
+	/**
+	 * @return bool|float
+	 */
+	function getLaborBurdenPercent() {
+		return (float)$this->getGenericDataValue( 'labor_burden_percent' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLaborBurdenPercent( $value) {
+		//Pull out only digits and periods.
+		$value = $this->Validator->stripNonFloat($value);
+		return $this->setGenericDataValue( 'labor_burden_percent', $value );
 	}
 
 
-	function isValidEffectiveDate($epoch) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function isValidEffectiveDate( $epoch) {
 		//Check to see if this is the first default wage entry, or if we are editing the first record.
-		if ( $this->getWageGroup() != 0 ) { //If we aren't the default wage group, return valid always.
+		if ( $this->getWageGroup() != TTUUID::getZeroID() ) { //If we aren't the default wage group, return valid always.
 			return TRUE;
 		}
 
 		$must_validate = FALSE;
 
 		$uwlf = TTnew( 'UserWageListFactory' );
-		$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getUser(), 0, $epoch, 1, NULL, NULL, array('effective_date' => 'asc') );
+		$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getUser(), TTUUID::getZeroID(), $epoch, 1, NULL, NULL, array('effective_date' => 'asc') );
 		Debug::text(' Total Rows: '. $uwlf->getRecordCount() .' User: '. $this->getUser() .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $uwlf->getRecordCount() <= 1 ) {
@@ -408,10 +346,14 @@ class UserWageFactory extends Factory {
 		return TRUE;
 	}
 
-	function isUniqueEffectiveDate($effective_date) {
+	/**
+	 * @param int $effective_date EPOCH
+	 * @return bool
+	 */
+	function isUniqueEffectiveDate( $effective_date) {
 		$ph = array(
-					'user_id' => (int)$this->getUser(),
-					'wage_group_id' => (int)$this->getWageGroup(),
+					'user_id' => TTUUID::castUUID($this->getUser()),
+					'wage_group_id' => TTUUID::castUUID($this->getWageGroup()),
 					'effective_date' => $this->db->BindDate( $effective_date )
 					);
 
@@ -430,67 +372,53 @@ class UserWageFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getEffectiveDate( $raw = FALSE ) {
-		if ( isset($this->data['effective_date']) ) {
+		$value = $this->getGenericDataValue( 'effective_date' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['effective_date'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['effective_date'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setEffectiveDate($epoch) {
-		$epoch = TTDate::getBeginDayEpoch( trim($epoch) );
 
-		Debug::Text('Effective Date: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-
-		if	(	$this->Validator->isDate(		'effective_date',
-												$epoch,
-												TTi18n::gettext('Incorrect Effective Date'))
-				AND
-					$this->Validator->isTrue(		'effective_date',
-													$this->isUniqueEffectiveDate($epoch),
-													TTi18n::gettext('Employee already has a wage entry on this date for the same wage group. Try using a different date instead.')
-													)
-			) {
-
-			$this->data['effective_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setEffectiveDate( $value ) {
+		$value = TTDate::getBeginDayEpoch( trim($value) );
+		Debug::Text('Effective Date: '. TTDate::getDate('DATE+TIME', $value ), __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'effective_date', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getNote() {
-		if ( isset($this->data['note']) ) {
-			return $this->data['note'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'note' );
 	}
-	function setNote($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setNote( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-						$this->Validator->isLength(		'note',
-														$value,
-														TTi18n::gettext('Note is too long'),
-														1,
-														2048)
-			) {
-
-			$this->data['note'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'note', $value );
 	}
 
+	/**
+	 * @param bool $rate
+	 * @return float
+	 */
 	function getLaborBurdenHourlyRate( $rate = FALSE ) {
 		if ( $rate == '' ) {
 			$rate = $this->getHourlyRate();
@@ -508,6 +436,10 @@ class UserWageFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $rate
+	 * @return bool|float|int
+	 */
 	function getBaseCurrencyHourlyRate( $rate ) {
 		if ( $rate == '' ) {
 			return FALSE;
@@ -534,6 +466,9 @@ class UserWageFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int|string
+	 */
 	function getAnnualWage() {
 		$annual_wage = 0;
 
@@ -560,6 +495,11 @@ class UserWageFactory extends Factory {
 		return $annual_wage;
 	}
 
+	/**
+	 * @param bool $epoch
+	 * @param bool $accurate_calculation
+	 * @return float
+	 */
 	function calcHourlyRate( $epoch = FALSE, $accurate_calculation = FALSE ) {
 		$hourly_wage = 0;
 		if ( $this->getType() == 10 ) {
@@ -579,6 +519,12 @@ class UserWageFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $annual_wage
+	 * @param bool $epoch
+	 * @param bool $accurate_calculation
+	 * @return bool|int|string
+	 */
 	function getAnnualHourlyRate( $annual_wage, $epoch = FALSE, $accurate_calculation = FALSE ) {
 		if ( $epoch == FALSE ) {
 			$epoch = TTDate::getTime();
@@ -622,7 +568,17 @@ class UserWageFactory extends Factory {
 		return $hourly_wage;
 	}
 
-	static function proRateSalary($salary, $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $hire_date = FALSE, $termination_date = FALSE ) {
+	/**
+	 * @param $salary
+	 * @param int $wage_effective_date EPOCH
+	 * @param int $prev_wage_effective_date EPOCH
+	 * @param int $pp_start_date EPOCH
+	 * @param int $pp_end_date EPOCH
+	 * @param bool $hire_date
+	 * @param bool $termination_date
+	 * @return int|string
+	 */
+	static function proRateSalary( $salary, $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $hire_date = FALSE, $termination_date = FALSE ) {
 		$pro_rate_dates_arr = self::proRateSalaryDates( $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $hire_date, $termination_date );
 		if ( is_array($pro_rate_dates_arr) ) {
 			Debug::text('Salary: '. $salary .' Total Pay Period Days: '. $pro_rate_dates_arr['total_pay_period_days'] .' Wage Effective Days: '. $pro_rate_dates_arr['total_wage_effective_days'], __FILE__, __LINE__, __METHOD__, 10);
@@ -640,6 +596,15 @@ class UserWageFactory extends Factory {
 		return $pro_rate_salary;
 	}
 
+	/**
+	 * @param int $wage_effective_date EPOCH
+	 * @param int $prev_wage_effective_date EPOCH
+	 * @param int $pp_start_date EPOCH
+	 * @param int $pp_end_date EPOCH
+	 * @param bool $hire_date
+	 * @param bool $termination_date
+	 * @return array
+	 */
 	static function proRateSalaryDates( $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $hire_date = FALSE, $termination_date = FALSE ) {
 		$prev_wage_effective_date = (int)$prev_wage_effective_date;
 
@@ -686,6 +651,11 @@ class UserWageFactory extends Factory {
 		return $retarr;
 	}
 
+	/**
+	 * @param int $date EPOCH
+	 * @param $wage_arr
+	 * @return bool|mixed
+	 */
 	static function getWageFromArray( $date, $wage_arr ) {
 		if ( !is_array($wage_arr) ) {
 			return FALSE;
@@ -708,6 +678,12 @@ class UserWageFactory extends Factory {
 	}
 
 	//Takes the employees
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @return bool|string
+	 */
 	static function calculateLaborBurdenPercent( $company_id, $user_id ) {
 		if ( $company_id == '' ) {
 			return FALSE;
@@ -736,6 +712,9 @@ class UserWageFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getType() == 10 ) { //Hourly
 			$this->setWeeklyTime( NULL );
@@ -745,8 +724,129 @@ class UserWageFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
-		if ( $ignore_warning == FALSE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Employee
+		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing, but must check when adding a new record..
+			if ( $this->getUser() == TTUUID::getZeroID() ) {
+				$this->Validator->isTRUE(	'user_id',
+												FALSE,
+													TTi18n::gettext('No employee specified')
+				);
+			}
+		}
+		if ( $this->getUser() !== FALSE ) {
+			if ( $this->Validator->isError('user_id') == FALSE ) {
+				$ulf = TTnew( 'UserListFactory' );
+				$this->Validator->isResultSetWithRows(	'user_id',
+																$ulf->getByID($this->getUser()),
+																TTi18n::gettext('Invalid Employee')
+															);
+			}
+		}
+		// Group
+		if ( $this->getWageGroup() !== FALSE AND $this->getWageGroup() != TTUUID::getZeroID() ) {
+			$wglf = TTnew( 'WageGroupListFactory' );
+			$this->Validator->isResultSetWithRows(	'wage_group_id',
+														$wglf->getByID($this->getWageGroup()),
+														TTi18n::gettext('Group is invalid')
+													);
+		}
+		// Type
+		if ( $this->getType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'type_id',
+													$this->getType(),
+													TTi18n::gettext('Incorrect Type'),
+													$this->getOptions('type')
+												);
+		}
+		// Wage
+		$this->Validator->isNotNull('wage',
+											$this->getWage(),
+											TTi18n::gettext('Please specify a wage')
+										);
+		if ( $this->Validator->isError('wage') == FALSE ) {
+			$this->Validator->isFloat(	'wage',
+												$this->getWage(),
+												TTi18n::gettext('Incorrect Wage')
+											);
+		}
+		if ( $this->Validator->isError('wage') == FALSE ) {
+			$this->Validator->isLength(	'wage',
+												$this->getWage(),
+												TTi18n::gettext('Wage has too many digits'),
+												0,
+												21
+											); //Need to include decimal.
+		}
+		if ( $this->Validator->isError('wage') == FALSE ) {
+			$this->Validator->isLengthBeforeDecimal(	'wage',
+																$this->getWage(),
+																TTi18n::gettext('Wage has too many digits before the decimal'),
+																0,
+																16
+															);
+		}
+		if ( $this->Validator->isError('wage') == FALSE ) {
+			$this->Validator->isLengthAfterDecimal(	'wage',
+															$this->getWage(),
+															TTi18n::gettext('Wage has too many digits after the decimal'),
+															0,
+															4
+														);
+		}
+		// Hourly Rate
+		if ( $this->getHourlyRate() != '' ) {
+			$this->Validator->isFloat(	'hourly_rate',
+												$this->getHourlyRate(),
+												TTi18n::gettext('Incorrect Hourly Rate')
+											);
+		}
+		// Weekly Time
+		if ( $this->getWeeklyTime() != '' ) {
+			$this->Validator->isNumeric(	'weekly_time',
+													$this->getWeeklyTime(),
+													TTi18n::gettext('Incorrect Weekly Time')
+												);
+		}
+		// Labor Burden Percent
+		$this->Validator->isFloat(	'labor_burden_percent',
+											$this->getLaborBurdenPercent(),
+											TTi18n::gettext('Incorrect Labor Burden Percent')
+										);
+		// Effective Date
+		if ( $this->getEffectiveDate() !== FALSE ) {
+			$this->Validator->isDate(		'effective_date',
+													$this->getEffectiveDate(),
+													TTi18n::gettext('Incorrect Effective Date')
+												);
+			if ( $this->Validator->isError('effective_date') == FALSE ) {
+				$this->Validator->isTrue(		'effective_date',
+														$this->isUniqueEffectiveDate($this->getEffectiveDate()),
+														TTi18n::gettext('Employee already has a wage entry on this date for the same wage group. Try using a different date instead.')
+													);
+			}
+		}
+		// Note
+		if ( $this->getNote() != '' ) {
+			$this->Validator->isLength(		'note',
+													$this->getNote(),
+													TTi18n::gettext('Note is too long'),
+													1,
+													2048
+												);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		if ( $ignore_warning == FALSE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing, but must check when adding a new record..
 			if ( $this->getWage() <= 1 ) {
 				$this->Validator->Warning( 'wage', TTi18n::gettext('Wage may be too low') );
 			}
@@ -774,13 +874,6 @@ class UserWageFactory extends Factory {
 				$this->Validator->Warning( 'effective_date', TTi18n::gettext('When changing wages retroactively, you may need to recalculate this employees timesheet for the affected pay period(s)') );
 			}
 		}
-
-		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getUser() == '' ) {
-			$this->Validator->isTRUE(	'user_id',
-										FALSE,
-										TTi18n::gettext('No employee specified') );
-		}
-
 		if ( $this->getDeleted() == FALSE ) {
 			if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getHireDate() ) {
 				$hire_date = $this->getUserObject()->getHireDate();
@@ -796,6 +889,9 @@ class UserWageFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 		$this->removeCache( $this->getId().$this->getUser() ); //Used in some reports.
@@ -803,6 +899,10 @@ class UserWageFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -838,6 +938,11 @@ class UserWageFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -893,6 +998,10 @@ class UserWageFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {

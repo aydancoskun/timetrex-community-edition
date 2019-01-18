@@ -1,6 +1,11 @@
 PunchesViewController = BaseViewController.extend( {
 	el: '#punches_view_container',
 
+	_required_files: {
+		10: ['APIPunch', 'APIUser', 'APIUserGroup', 'APIStation', 'APIBranch', 'APIDepartment' , 'APIPayPeriod', 'APIUserTitle'],
+		20: ['APIJob', 'APIJobItem']
+	},
+
 	user_api: null,
 	user_group_api: null,
 	api_station: null,
@@ -10,8 +15,8 @@ PunchesViewController = BaseViewController.extend( {
 
 	is_mass_adding: false,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'PunchesEditView.html';
 		this.permission_id = 'punch';
 		this.viewId = 'Punches';
@@ -24,18 +29,21 @@ PunchesViewController = BaseViewController.extend( {
 		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-
 			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
 			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
-
 		}
+
 		this.api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
 
 		this.initPermission();
 		this.render();
-		this.buildContextMenu();
-		this.initData();
-		this.setSelectRibbonMenuIfNecessary();
+
+		$this = this;
+		require(['TImage'],function() {
+			$this.buildContextMenu();
+			$this.initData();
+			$this.setSelectRibbonMenuIfNecessary();
+		});
 
 	},
 
@@ -827,10 +835,16 @@ PunchesViewController = BaseViewController.extend( {
 		//LocalCacheData.current_doing_context_action = '';
 		this.setTabOVisibility( true );
 
-		if ( !this.is_mass_adding ) {
+		if ( this.is_edit == true ) {
 			this.edit_view_ui_dic.user_id.setAllowMultipleSelection( false );
 		} else {
 			this.edit_view_ui_dic.user_id.setAllowMultipleSelection( true );
+		}
+
+		if ( this.is_edit == false && ( this.current_edit_record.latitude == 0 || this.current_edit_record.longitude == 0 ) ) {
+			$('.widget-h-box-mapLocationWrapper').parents('.edit-view-form-item-div').hide();
+		} else {
+			$('.widget-h-box-mapLocationWrapper').parents('.edit-view-form-item-div').show();
 		}
 
 		TTPromise.resolve('init','init');
@@ -852,6 +866,7 @@ PunchesViewController = BaseViewController.extend( {
 
 				return filter;
 			};
+
 			$this.sub_log_view_controller.initData();
 			return;
 		}
@@ -879,8 +894,9 @@ PunchesViewController = BaseViewController.extend( {
 				return filter;
 			};
 			$this.sub_log_view_controller.parent_view_controller = $this;
-			$this.sub_log_view_controller.initData();
-
+			$this.sub_log_view_controller.postInit = function() {
+				this.initData();
+			}
 		}
 	},
 
@@ -912,7 +928,6 @@ PunchesViewController = BaseViewController.extend( {
 		if ( $this.edit_view_ui_dic[field] ) {
 			form_item_input = $this.edit_view_ui_dic[field];
 			form_item_input.setValue( $this.current_edit_record[field] );
-			form_item_input.css( 'opacity', 1 );
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			form_item_input.TTextInput( {field: field} );
@@ -921,8 +936,9 @@ PunchesViewController = BaseViewController.extend( {
 			input_div.insertBefore( this.edit_view_form_item_dic['note'] );
 
 			form_item_input.setValue( $this.current_edit_record[field] );
-			form_item_input.css( 'opacity', 1 );
 		}
+		form_item_input.css( 'opacity', 1 );
+		form_item_input.css( 'minWidth', 300 );
 
 		if ( $this.is_viewing ) {
 			form_item_input.setEnabled( false );
@@ -1341,7 +1357,6 @@ PunchesViewController = BaseViewController.extend( {
 		var $this = this;
 		this.is_viewing = false;
 		this.is_edit = false;
-		this.is_mass_adding = true;
 		LocalCacheData.current_doing_context_action = 'new';
 		$this.openEditView();
 
@@ -2021,6 +2036,13 @@ PunchesViewController = BaseViewController.extend( {
 
 		switch ( key ) {
 			case 'user_id':
+				if( $.isArray(this.current_edit_record.user_id) && this.current_edit_record.user_id.length > 1) {
+					this.is_mass_adding = true;
+				} else {
+					this.is_mass_adding = false;
+				}
+				this.setEditMenu();
+				break;
 			case 'punch_dates':
 				this.setEditMenu();
 				break;

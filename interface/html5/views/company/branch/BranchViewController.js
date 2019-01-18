@@ -1,5 +1,11 @@
 BranchViewController = BaseViewController.extend( {
 	el: '#branch_view_container',
+
+	_required_files: {
+		10:["APIBranch", "APICompanyGenericTag"],
+		20: ['APIGEOFence']
+	},
+
 	status_array: null,
 	country_array: null,
 	province_array: null,
@@ -8,8 +14,8 @@ BranchViewController = BaseViewController.extend( {
 
 	company_api: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'BranchEditView.html';
 		this.permission_id = 'branch';
 		this.viewId = 'Branch';
@@ -289,11 +295,7 @@ BranchViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
 		form_item_input.TTagInput( {field: 'tag', object_type_id: 110} );
-		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_branch_column1, '' );
-
-
-
-
+		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_branch_column1, '', null, null, true );
 	},
 
 	setProvince: function( val, m ) {

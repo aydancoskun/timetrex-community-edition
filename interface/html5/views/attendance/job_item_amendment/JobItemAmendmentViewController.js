@@ -1,10 +1,11 @@
 JobItemAmendmentViewController = BaseViewController.extend( {
 	el: '#job_item_amendment_view_container',
 
+	_required_files: ['APIJobItemAmendment'],
 	current_default_record: {},
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'JobItemAmendmentEditView.html';
 		this.permission_id = 'job_item';
 		this.viewId = 'JobItemAmendment';
@@ -431,7 +432,10 @@ JobItemAmendmentViewController.loadSubView = function( container, beforeViewLoad
 		if ( Global.isSet( container ) ) {
 			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				afterViewLoadedFun( sub_job_item_amendment_view_controller );
+
+				TTPromise.wait('BaseViewController', 'initialize', function() {
+					afterViewLoadedFun(sub_job_item_amendment_view_controller);
+				});
 			}
 		}
 	} );

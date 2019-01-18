@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,11 @@ class CompanySettingFactory extends Factory {
 	protected $table = 'company_setting';
 	protected $pk_sequence_name = 'company_setting_id_seq'; //PK Sequence name
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -57,6 +62,10 @@ class CompanySettingFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -70,7 +79,11 @@ class CompanySettingFactory extends Factory {
 		return $variable_function_map;
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		Debug::Arr($this->getCompany(), 'Company: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->getCompany() == FALSE ) {
 			return FALSE;
@@ -82,7 +95,7 @@ class CompanySettingFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -104,115 +117,93 @@ class CompanySettingFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
-	function setCompany($id) {
-		$id = trim($id);
 
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'company',
-															$clf->getByID($id),
-															TTi18n::gettext('Company is invalid')
-															) ) {
-			$this->data['company_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_id', $value );
 	}
+
+	/**
+	 * @return int
+	 */
 	function getType() {
-		if ( isset($this->data['type_id']) ) {
-			return (int)$this->data['type_id'];
-		}
-
-		return FALSE;
-	}
-	function setType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'type',
-											$type,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
-
-			$this->data['type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'type_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
-	function setName($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
 		$value = trim($value);
-		if (	$this->Validator->isLength(	'name',
-											$value,
-											TTi18n::gettext('Name is too short or too long'),
-											1, 250)
-				AND
-						$this->Validator->isTrue(		'name',
-														$this->isUniqueName($value),
-														TTi18n::gettext('Name already exists')
-														)
-
-						) {
-
-			$this->data['name'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'name', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getValue() {
-		if ( isset($this->data['value']) ) {
-			return $this->data['value'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'value' );
 	}
-	function setValue($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setValue( $value) {
 		$value = trim($value);
-		if (	$this->Validator->isLength(	'value',
-											$value,
-											TTi18n::gettext('Value is too short or too long'),
-											1, 4096)
-						) {
-
-			$this->data['value'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'value', $value );
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getCompany().$this->getName() );
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -238,6 +229,10 @@ class CompanySettingFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		$data = array();
@@ -268,10 +263,64 @@ class CompanySettingFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		if ( $this->getCompany() != TTUUID::getZeroID() ) {
+			$clf = TTnew( 'CompanyListFactory' );
+			$this->Validator->isResultSetWithRows(	'company',
+															$clf->getByID($this->getCompany()),
+															TTi18n::gettext('Company is invalid')
+														);
+		}
+		// Type
+		$this->Validator->inArrayKey(	'type',
+												$this->getType(),
+												TTi18n::gettext('Incorrect Type'),
+												$this->getOptions('type')
+											);
+		// Name
+		$this->Validator->isLength(	'name',
+											$this->getName(),
+											TTi18n::gettext('Name is too short or too long'),
+											1, 250
+										);
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(		'name',
+													$this->isUniqueName($this->getName()),
+													TTi18n::gettext('Name already exists')
+												);
+		}
+		// Value
+		$this->Validator->isLength(	'value',
+											$this->getValue(),
+											TTi18n::gettext('Value is too short or too long'),
+											1, 4096
+										);
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Company Setting - Name').': '. $this->getName() .' '. TTi18n::getText('Value').': '. $this->getValue(), NULL, $this->getTable() );
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $name
+	 * @return bool
+	 */
 	static function getCompanySettingObjectByName( $company_id, $name ) {
 		$cslf = new CompanySettingListFactory();
 		$cslf->getByCompanyIdAndName( $company_id, $name );
@@ -283,6 +332,11 @@ class CompanySettingFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $name
+	 * @return bool
+	 */
 	static function getCompanySettingArrayByName( $company_id, $name ) {
 		$cs_obj = self::getCompanySettingObjectByName( $company_id, $name );
 		if ( is_object( $cs_obj ) ) {
@@ -292,6 +346,11 @@ class CompanySettingFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $name
+	 * @return null
+	 */
 	static function getCompanySettingValueByName( $company_id, $name ) {
 		$cs_obj = self::getCompanySettingObjectByName( $company_id, $name );
 		if ( is_object( $cs_obj ) ) {
@@ -301,9 +360,16 @@ class CompanySettingFactory extends Factory {
 		return NULL;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $name
+	 * @param $value
+	 * @param int $type_id
+	 * @return bool
+	 */
 	static function setCompanySetting( $company_id, $name, $value, $type_id = 10 ) {
 		$row = array(
-			'company_id' => (int)$company_id,
+			'company_id' => $company_id,
 			'name' => $name,
 			'value' => $value,
 			'type_id' => $type_id
@@ -327,6 +393,11 @@ class CompanySettingFactory extends Factory {
 
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $name
+	 * @return bool
+	 */
 	static function deleteCompanySetting( $company_id, $name ) {
 		$cslf = new CompanySettingListFactory();
 		$cslf->getByCompanyIdAndName( $company_id, $name );

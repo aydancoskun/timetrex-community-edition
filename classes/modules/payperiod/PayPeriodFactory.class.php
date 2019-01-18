@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,9 +41,15 @@
 class PayPeriodFactory extends Factory {
 	protected $table = 'pay_period';
 	protected $pk_sequence_name = 'pay_period_id_seq'; //PK Sequence name
+	protected $old_status_id = NULL;
 
 	var $pay_period_schedule_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -68,6 +74,8 @@ class PayPeriodFactory extends Factory {
 										'-1060-transaction_date' => TTi18n::gettext('Transaction Date'),
 
 										'-1500-total_punches' => TTi18n::gettext('Punches'),
+										'-1501-total_manual_timesheets' => TTi18n::gettext('Manual TimeSheets'),
+										'-1502-total_absences' => TTi18n::gettext('Absences'),
 										'-1505-pending_requests' => TTi18n::gettext('Pending Requests'),
 										'-1510-exceptions_critical' => TTi18n::gettext('Critical'),
 										'-1510-exceptions_high' => TTi18n::gettext('High'),
@@ -78,6 +86,7 @@ class PayPeriodFactory extends Factory {
 										'-1524-total_timesheets' => TTi18n::gettext('Total'),
 										'-1530-ps_amendments' => TTi18n::gettext('PS Amendments'),
 										'-1540-pay_stubs' => TTi18n::gettext('Pay Stubs'),
+										'-1542-pay_stubs_open' => TTi18n::gettext('Pay Stubs (OPEN)'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -115,6 +124,10 @@ class PayPeriodFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 			$variable_function_map = array(
 											'id' => 'ID',
@@ -136,6 +149,8 @@ class PayPeriodFactory extends Factory {
 											//'tainted_by' => 'TaintedBy',
 
 											'total_punches' => 'TotalPunches',
+											'total_manual_timesheets' => 'TotalManualTimeSheets',
+											'total_absences' => 'TotalAbsences',
 											'pending_requests' => 'PendingRequests',
 											'exceptions_critical' => 'Exceptions',
 											'exceptions_high' => 'Exceptions',
@@ -146,12 +161,16 @@ class PayPeriodFactory extends Factory {
 											'total_timesheets' => 'TimeSheets',
 											'ps_amendments' => 'PayStubAmendments',
 											'pay_stubs' => 'PayStubs',
+											'pay_stubs_open' => 'PayStubsOpen',
 
 											'deleted' => 'Deleted',
 											);
 			return $variable_function_map;
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getPayPeriodScheduleObject() {
 		if ( is_object($this->pay_period_schedule_obj) ) {
 			return $this->pay_period_schedule_obj;
@@ -168,106 +187,79 @@ class PayPeriodFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getCompany() {
-		return (int)$this->data['company_id'];
+		return $this->getGenericDataValue( 'company_id' );
 	}
-	function setCompany($id) {
-		$id = trim($id);
 
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = (int)trim($status);
-
-		$status_options = $this->getOptions('status');
-		$validate_msg = TTi18n::gettext('Invalid Status');
-
-		Debug::Text('Current Status: '. $this->getStatus() .' New Status: '. $status, __FILE__, __LINE__, __METHOD__, 10);
-		switch ( $this->getStatus() ) {
-			case 20: //Closed
-				$valid_statuses = array( 20, 30 );
-				$status_options = Misc::arrayIntersectByKey( $valid_statuses, $status_options );
-				$validate_msg = TTi18n::gettext('Status can only be changed from Closed to Post Adjustment');
-				break;
-			case 30: //Post Adjustment
-				$valid_statuses = array( 20, 30 );
-				$status_options = Misc::arrayIntersectByKey( $valid_statuses, $status_options );
-				$validate_msg = TTi18n::gettext('Status can only be changed from Post Adjustment to Closed');
-				break;
-			default:
-				break;
-		}
-
-		if ( $this->Validator->inArrayKey(	'status_id',
-											$status,
-											$validate_msg,
-											$status_options ) ) {
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		Debug::Text('Current Status: '. $this->getStatus() .' New Status: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		$this->old_status_id = $this->getStatus();
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayPeriodSchedule() {
-		if ( isset($this->data['pay_period_schedule_id']) ) {
-			return (int)$this->data['pay_period_schedule_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayPeriodSchedule($id) {
-		$id = trim($id);
-
-		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'pay_period_schedule',
-															$ppslf->getByID($id),
-															TTi18n::gettext('Incorrect Pay Period Schedule')
-															) ) {
-			$this->data['pay_period_schedule_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_period_schedule_id' );
 	}
 
-	function isValidStartDate($epoch) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayPeriodSchedule( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'pay_period_schedule_id', $value );
+	}
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function isValidStartDate( $epoch) {
 		if ( $this->isNew() ) {
-			$id = 0;
+			$id = TTUUID::getZeroID();
 		} else {
 			$id = $this->getId();
 		}
 
 		$ph = array(
-					'pay_period_schedule_id' => (int)$this->getPayPeriodSchedule(),
+					'pay_period_schedule_id' => TTUUID::castUUID($this->getPayPeriodSchedule()),
 					'start_date' => $this->db->BindTimeStamp($epoch),
 					'end_date' => $this->db->BindTimeStamp($epoch),
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 		//Used to have LIMIT 1 at the end, but GetOne() should do that for us.
@@ -295,11 +287,14 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isConflicting() {
 		Debug::Text('PayPeriod Schedule ID: '. $this->getPayPeriodSchedule() .' DateStamp: '. $this->getStartDate(), __FILE__, __LINE__, __METHOD__, 10);
 		//Make sure we're not conflicting with any other schedule shifts.
 		$pplf = TTnew( 'PayPeriodListFactory' );
-		$pplf->getConflictingByPayPeriodScheduleIdAndStartDateAndEndDate( $this->getPayPeriodSchedule(), $this->getStartDate(), $this->getEndDate(), (int)$this->getID() );
+		$pplf->getConflictingByPayPeriodScheduleIdAndStartDateAndEndDate( $this->getPayPeriodSchedule(), $this->getStartDate(), $this->getEndDate(), TTUUID::castUUID($this->getID()) );
 		if ( $pplf->getRecordCount() > 0 ) {
 			foreach( $pplf as $conflicting_pp_obj ) {
 				if ( $conflicting_pp_obj->isNew() === FALSE
@@ -313,6 +308,12 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $filter_start_date EPOCH
+	 * @param int $filter_end_date EPOCH
+	 * @param bool $include_pay_period_id
+	 * @return array|bool
+	 */
 	function getPayPeriodDates( $filter_start_date = NULL, $filter_end_date = NULL, $include_pay_period_id = FALSE ) {
 		//Debug::Text('Start Date: '. TTDate::getDate('DATE', $this->getStartDate()) .' End Date: '. TTDate::getDate('DATE', $this->getEndDate()) .' Filter: Start: '. TTDate::getDate('DATE', $filter_start_date ) .' End: '. TTDate::getDate('DATE', $filter_end_date), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->getStartDate() > 0 AND $this->getEndDate() > 0 ) {
@@ -339,110 +340,105 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getStartDate( $raw = FALSE ) {
-		if ( isset($this->data['start_date']) ) {
+		$value = $this->getGenericDataValue( 'start_date' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['start_date'];
+				return $value;
 			} else {
 				//return $this->db->UnixTimeStamp( $this->data['start_date'] );
 				//strtotime is MUCH faster than UnixTimeStamp
 				//Must use ADODB for times pre-1970 though.
-				return TTDate::strtotime( $this->data['start_date'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setStartDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ( $epoch != '' ) {
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setStartDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+
+		if ( $value != '' ) {
 			//Make sure all pay periods start at the first second of the day.
-			$epoch = TTDate::getTimeLockedDate( strtotime('00:00:00', $epoch), $epoch);
+			$value = TTDate::getTimeLockedDate( strtotime('00:00:00', $value), $value);
 		}
-
-		if	(	$this->Validator->isDate(		'start_date',
-												$epoch,
-												TTi18n::gettext('Incorrect start date'))
-				AND
-				$this->Validator->isTrue(		'start_date',
-												$this->isValidStartDate($epoch),
-												TTi18n::gettext('Conflicting start date'))
-			) {
-
-			$this->data['start_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'start_date', $value );
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getEndDate( $raw = FALSE ) {
-		if ( isset($this->data['end_date']) ) {
+		$value = $this->getGenericDataValue( 'end_date' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['end_date'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['end_date'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setEndDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ( $epoch != '' ) {
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setEndDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+
+		if ( $value != '' ) {
 			//Make sure all pay periods end at the last second of the day.
-			$epoch = TTDate::getTimeLockedDate( strtotime('23:59:59', $epoch), $epoch);
+			$value = TTDate::getTimeLockedDate( strtotime('23:59:59', $value), $value);
 		}
-
-		if	(	$this->Validator->isDate(		'end_date',
-												$epoch,
-												TTi18n::gettext('Incorrect end date')) ) {
-
-			$this->data['end_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'end_date', $value );
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getTransactionDate( $raw = FALSE ) {
-		if ( isset($this->data['transaction_date']) ) {
+		$value = $this->getGenericDataValue( 'transaction_date' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['transaction_date'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['transaction_date'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setTransactionDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ( $epoch != '' ) {
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setTransactionDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+
+		if ( $value != '' ) {
 			//Make sure all pay periods transact at noon.
-			$epoch = TTDate::getTimeLockedDate( strtotime('12:00:00', $epoch), $epoch);
+			$value = TTDate::getTimeLockedDate( strtotime('12:00:00', $value), $value);
 
 			//Unless they are on the same date as the end date, then it should match that.
-			if ( $this->getEndDate() != '' AND $this->getEndDate() > $epoch ) {
-				$epoch = $this->getEndDate();
+			if ( $this->getEndDate() != '' AND $this->getEndDate() > $value ) {
+				$value = $this->getEndDate();
 			}
 		}
-
-		if	(	$this->Validator->isDate(		'transaction_date',
-												$epoch,
-												TTi18n::gettext('Incorrect transaction date')) ) {
-
-			$this->data['transaction_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'transaction_date', $value );
 	}
 
 	/*
@@ -462,7 +458,7 @@ class PayPeriodFactory extends Factory {
 												$epoch,
 												TTi18n::gettext('Incorrect advance end date')) ) {
 
-			$this->data['advance_end_date'] = $epoch;
+			$this->setGenericDataValue( 'advance_end_date', $epoch );
 
 			return TRUE;
 		}
@@ -491,7 +487,7 @@ class PayPeriodFactory extends Factory {
 												$epoch,
 												TTi18n::gettext('Incorrect advance transaction date')) ) {
 
-			$this->data['advance_transaction_date'] = $epoch;
+			$this->setGenericDataValue( 'advance_transaction_date', $epoch );
 
 			return TRUE;
 		}
@@ -500,16 +496,26 @@ class PayPeriodFactory extends Factory {
 	}
 	*/
 
+	/**
+	 * @return bool
+	 */
 	function getPrimary() {
-		return $this->fromBool( $this->data['is_primary'] );
-	}
-	function setPrimary($bool) {
-		$this->data['is_primary'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'is_primary' ) );
 	}
 
-	function setPayStubStatus($status) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPrimary( $value) {
+		return $this->setGenericDataValue( 'is_primary', $this->toBool($value) );
+	}
+
+	/**
+	 * @param $status
+	 * @return bool
+	 */
+	function setPayStubStatus( $status, $dry_run = FALSE ) {
 		Debug::text('setPayStubStatus: '. $status, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->StartTransaction();
@@ -522,7 +528,14 @@ class PayPeriodFactory extends Factory {
 				Debug::text('Changing Status of Pay Stub ID: '. $pay_stub->getId(), __FILE__, __LINE__, __METHOD__, 10);
 				$pay_stub->setStatus($status);
 				if ( $pay_stub->isValid() ) {
-					$pay_stub->save();
+					if ( $dry_run != TRUE ) { //Dry-run can be used to validate that all pay stubs can at least be changed to PAID and saved, so we can give better validation error messages to the user on closing of pay periods.
+						$pay_stub->Save();
+					}
+				} else {
+					Debug::text('  ERROR: Changing pay stub to paid failed, rolling back transaction!', __FILE__, __LINE__, __METHOD__, 10);
+					$this->FailTransaction();
+					$this->CommitTransaction();
+					return FALSE;
 				}
 			}
 		}
@@ -532,76 +545,71 @@ class PayPeriodFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getTainted() {
-		return $this->fromBool( $this->data['tainted'] );
-	}
-	function setTainted($bool) {
-		$this->data['tainted'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'tainted' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTainted( $value) {
+		return $this->setGenericDataValue( 'tainted', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTaintedDate() {
-		if ( isset($this->data['tainted_date']) ) {
-			return $this->data['tainted_date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'tainted_date' );
 	}
-	function setTaintedDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setTaintedDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+
+		if ($value == NULL) {
+			$value = TTDate::getTime();
 		}
-
-		if	(	$this->Validator->isDate(		'tainted_date',
-												$epoch,
-												TTi18n::gettext('Incorrect tainted date') ) ) {
-
-			$this->data['tainted_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'tainted_date', $value );
 
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTaintedBy() {
-		if ( isset($this->data['tainted_by']) ) {
-			return $this->data['tainted_by'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'tainted_by' );
 	}
-	function setTaintedBy($id = NULL) {
-		$id = trim($id);
 
-		if ( empty($id) ) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setTaintedBy( $value = NULL) {
+		$value = trim($value);
+
+		if ( empty($value) ) {
 			global $current_user;
 
 			if ( is_object($current_user) ) {
-				$id = $current_user->getID();
+				$value = $current_user->getID();
 			} else {
 				return FALSE;
 			}
 		}
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'tainted_by',
-													$ulf->getByID($id),
-													TTi18n::gettext('Incorrect tainted employee')
-													) ) {
-
-			$this->data['tainted_by'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'tainted_by', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getTimeSheetVerifyType() {
 		if ( is_object( $this->getPayPeriodScheduleObject() ) ) {
 			return $this->getPayPeriodScheduleObject()->getTimeSheetVerifyType();
@@ -609,6 +617,10 @@ class PayPeriodFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getTimeSheetVerifyWindowStartDate() {
 		if ( is_object( $this->getPayPeriodScheduleObject() ) ) {
 			//Since PP end dates are usually at 11:59:59PM, add one second to the PP end date prior to calculating the timesheet verification window start date,
@@ -618,6 +630,10 @@ class PayPeriodFactory extends Factory {
 
 		return $this->getEndDate();
 	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getTimeSheetVerifyWindowEndDate() {
 		if ( is_object( $this->getPayPeriodScheduleObject() ) ) {
 			return (int)( $this->getTransactionDate() - ( $this->getPayPeriodScheduleObject()->getTimeSheetVerifyBeforeTransactionDate() * 86400 ) );
@@ -626,6 +642,9 @@ class PayPeriodFactory extends Factory {
 		return $this->getTransactionDate();
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getIsLocked() {
 		if ( $this->getStatus() == 10 OR $this->getStatus() == 30 OR $this->isNew() == TRUE ) {
 			return FALSE;
@@ -634,7 +653,11 @@ class PayPeriodFactory extends Factory {
 		return TRUE;
 	}
 
-	function getName($include_schedule_name = FALSE) {
+	/**
+	 * @param bool $include_schedule_name
+	 * @return string
+	 */
+	function getName( $include_schedule_name = FALSE) {
 		$schedule_name = NULL;
 		if ( $include_schedule_name == TRUE AND is_object( $this->getPayPeriodScheduleObject() ) ) {
 			$schedule_name = '('. $this->getPayPeriodScheduleObject()->getName() .') ';
@@ -645,6 +668,9 @@ class PayPeriodFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableImportOrphanedData() {
 		if ( isset($this->import_orphaned_data) ) {
 			return $this->import_orphaned_data;
@@ -652,12 +678,20 @@ class PayPeriodFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableImportOrphanedData($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableImportOrphanedData( $bool) {
 		$this->import_orphaned_data = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableImportData() {
 		if ( isset($this->import_data) ) {
 			return $this->import_data;
@@ -665,13 +699,22 @@ class PayPeriodFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableImportData($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableImportData( $bool) {
 		$this->import_data = $bool;
 
 		return TRUE;
 	}
 
 	//Check to make sure previous pay period is closed.
+
+	/**
+	 * @return bool
+	 */
 	function isPreviousPayPeriodClosed() {
 		$pplf = TTnew('PayPeriodListFactory');
 		$pplf->getPreviousPayPeriodById( $this->getID() );
@@ -686,6 +729,9 @@ class PayPeriodFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isFirstPayPeriodInYear() {
 		$pplf = TTnew('PayPeriodListFactory');
 		$pplf->getPreviousPayPeriodById( $this->getID() );
@@ -701,6 +747,10 @@ class PayPeriodFactory extends Factory {
 	}
 
 	//Imports only data not assigned to other pay periods
+
+	/**
+	 * @return bool
+	 */
 	function importOrphanedData() {
 		//Make sure current pay period isnt closed.
 		if ( $this->getStatus() == 20 ) {
@@ -714,12 +764,13 @@ class PayPeriodFactory extends Factory {
 			$pplf->StartTransaction();
 
 			//UserDateTotal
+			/** @var UserDateTotalFactory $f */
 			$f = TTnew('UserDateTotalFactory');
 			$ph = array(
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE ( pay_period_id = 0 OR pay_period_id IS NULL ) AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE ( pay_period_id = \''. TTUUID::getZeroID() .'\' OR pay_period_id IS NULL ) AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'UserDateTotal Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -729,7 +780,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE ( pay_period_id = 0 OR pay_period_id IS NULL ) AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE ( pay_period_id = \''. TTUUID::getZeroID() .'\' OR pay_period_id IS NULL ) AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'PunchControl Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -739,7 +790,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE ( pay_period_id = 0 OR pay_period_id IS NULL ) AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE ( pay_period_id = \''. TTUUID::getZeroID() .'\' OR pay_period_id IS NULL ) AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'Schedule Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -749,7 +800,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE ( pay_period_id = 0 OR pay_period_id IS NULL ) AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE ( pay_period_id = \''. TTUUID::getZeroID() .'\' OR pay_period_id IS NULL ) AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'Request Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -759,7 +810,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE ( pay_period_id = 0 OR pay_period_id IS NULL ) AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE ( pay_period_id = \''. TTUUID::getZeroID() .'\' OR pay_period_id IS NULL ) AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'Exception Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -769,7 +820,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE ( pay_period_id = 0 OR pay_period_id IS NULL ) AND start_date >= ? AND end_date <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE ( pay_period_id = \''. TTUUID::getZeroID() .'\' OR pay_period_id IS NULL ) AND start_date >= ? AND end_date <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'PayStub Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -785,6 +836,12 @@ class PayPeriodFactory extends Factory {
 	}
 
 	//Imports all data from other pay periods into this one.
+
+	/**
+	 * @param bool $user_ids
+	 * @param bool $pay_period_id
+	 * @return bool
+	 */
 	function importData( $user_ids = FALSE, $pay_period_id = FALSE ) {
 		$pps_obj = $this->getPayPeriodScheduleObject();
 
@@ -802,7 +859,7 @@ class PayPeriodFactory extends Factory {
 			}
 		}
 
-		$pay_period_ids = array( 0 ); //Always include a 0 pay_period_id so orphaned data is pulled over too.
+		$pay_period_ids = array( TTUUID::getZeroID() ); //Always include a 0 pay_period_id so orphaned data is pulled over too.
 
 		$pplf = TTnew('PayPeriodListFactory');
 		$pplf->StartTransaction();
@@ -832,14 +889,14 @@ class PayPeriodFactory extends Factory {
 			}
 		}
 
-		if ( isset($pay_period_ids) AND is_array($pay_period_ids) AND count($pay_period_ids) > 0 AND (int)$this->getID() > 0 ) {
+		if ( isset($pay_period_ids) AND is_array($pay_period_ids) AND count($pay_period_ids) > 0 AND $this->getID() != '' ) {
 			//UserDateTotal
 			$f = TTnew('UserDateTotalFactory');
 			$ph = array(
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE pay_period_id != \''. TTUUID::castUUID($this->getID()) .'\' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'UserDateTotal Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -850,7 +907,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE pay_period_id != \''. TTUUID::castUUID($this->getID()) .'\' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'PunchControl Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -861,7 +918,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE pay_period_id != \''. TTUUID::castUUID($this->getID()) .'\' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'Schedule Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -872,7 +929,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE pay_period_id != \''. TTUUID::castUUID($this->getID()) .'\' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'Request Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -883,7 +940,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE pay_period_id != \''. TTUUID::castUUID($this->getID()) .'\' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'Exception Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -893,7 +950,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE ( pay_period_id = 0 OR pay_period_id IS NULL ) AND start_date >= ? AND end_date <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE ( pay_period_id = \''. TTUUID::getZeroID() .'\' OR pay_period_id IS NULL ) AND start_date >= ? AND end_date <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'PayStub Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -909,6 +966,10 @@ class PayPeriodFactory extends Factory {
 	}
 
 	//Delete all data assigned to this pay period.
+
+	/**
+	 * @return bool
+	 */
 	function deleteData() {
 		//Make sure current pay period isnt closed.
 		if ( $this->getStatus() == 20 ) {
@@ -918,38 +979,38 @@ class PayPeriodFactory extends Factory {
 		$pplf = TTnew('PayPeriodListFactory');
 		$pplf->StartTransaction();
 
-		if ( (int)$this->getID() > 0 ) {
+		if ( $this->getID() != '' ) {
 			//UserDateTotal
 			$f = TTnew('UserDateTotalFactory');
-			$query = 'UPDATE '. $f->getTable() .' SET deleted = 1 WHERE pay_period_id = '. (int)$this->getID() .' AND deleted = 0';
+			$query = 'UPDATE '. $f->getTable() .' SET deleted = 1 WHERE pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' AND deleted = 0';
 			$f->db->Execute( $query );
 			Debug::Text('Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
 
 			//PunchControl
 			$f = TTnew('PunchControlFactory');
-			$query = 'UPDATE '. $f->getTable() .' SET deleted = 1 WHERE pay_period_id = '. (int)$this->getID() .' AND deleted = 0';
+			$query = 'UPDATE '. $f->getTable() .' SET deleted = 1 WHERE pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' AND deleted = 0';
 			$f->db->Execute( $query );
 			Debug::Text('Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
 
 			//Schedule
 			$f = TTnew('ScheduleFactory');
-			$query = 'UPDATE '. $f->getTable() .' SET deleted = 1 WHERE pay_period_id = '. (int)$this->getID() .' AND deleted = 0';
+			$query = 'UPDATE '. $f->getTable() .' SET deleted = 1 WHERE pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' AND deleted = 0';
 			$f->db->Execute( $query );
 			Debug::Text('Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
 
 			//Requests
 			$f = TTnew('RequestFactory');
-			$query = 'UPDATE '. $f->getTable() .' SET deleted = 1 WHERE pay_period_id = '. (int)$this->getID() .' AND deleted = 0';
+			$query = 'UPDATE '. $f->getTable() .' SET deleted = 1 WHERE pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' AND deleted = 0';
 			$f->db->Execute( $query );
 			Debug::Text('Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
 
 			//Exceptions
 			$f = TTnew('ExceptionFactory');
-			$query = 'UPDATE '. $f->getTable() .' SET deleted = 1 WHERE pay_period_id = '. (int)$this->getID() .' AND deleted = 0';
+			$query = 'UPDATE '. $f->getTable() .' SET deleted = 1 WHERE pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' AND deleted = 0';
 			$f->db->Execute( $query );
 			Debug::Text('Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -964,6 +1025,9 @@ class PayPeriodFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getPendingRequests() {
 		if ( $this->getCompany() != '' AND $this->isNew() == FALSE ) {
 			//Get all pending requests
@@ -979,6 +1043,9 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return array
+	 */
 	function getExceptions() {
 		$retarr = array(
 						'exceptions_low' => 0,
@@ -1010,6 +1077,9 @@ class PayPeriodFactory extends Factory {
 		return $retarr;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getTotalPunches() {
 		//Count how many punches are in this pay period.
 		$plf = TTnew( 'PunchListFactory' );
@@ -1018,6 +1088,31 @@ class PayPeriodFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return mixed
+	 */
+	function getTotalManualTimeSheets() {
+		//Count how many punches are in this pay period.
+		$udtlf = TTnew( 'UserDateTotalListFactory' );
+		$retval = $udtlf->getTotalByPayPeriodIdAndObjectTypeAndOverride( $this->getID(), 10, TRUE );
+		Debug::Text(' Total Manual TimeSheets: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		return $retval;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	function getTotalAbsences() {
+		//Count how many punches are in this pay period.
+		$udtlf = TTnew( 'UserDateTotalListFactory' );
+		$retval = $udtlf->getTotalByPayPeriodIdAndObjectTypeAndOverride( $this->getID(), 25, FALSE );
+		Debug::Text(' Total Absence Records: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		return $retval;
+	}
+
+	/**
+	 * @return array
+	 */
 	function getTimeSheets() {
 		$retarr = array(
 						'verified_timesheets' => 0,
@@ -1046,6 +1141,9 @@ class PayPeriodFactory extends Factory {
 		return $retarr;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getPayStubAmendments() {
 		//Get PS Amendments.
 		$psalf = TTnew( 'PayStubAmendmentListFactory' );
@@ -1059,15 +1157,122 @@ class PayPeriodFactory extends Factory {
 		return $total_ps_amendments;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getPayStubs() {
 		//Count how many pay stubs for each pay period.
 		$pslf = TTnew( 'PayStubListFactory' );
 		$total_pay_stubs = $pslf->getByPayPeriodId( $this->getId() )->getRecordCount();
+		//$total_pay_stubs = $pslf->getByCompanyIdAndPayPeriodIdAndStatusId( $this->getCompany(), $this->getId());
 		//Debug::Text(' Total Pay Stubs: '. $total_pay_stubs, __FILE__, __LINE__, __METHOD__, 10);
 		return $total_pay_stubs;
 	}
 
+	/**
+	 * @return mixed
+	 */
+	function getPayStubsOpen() {
+		//Count how many pay stubs for each pay period.
+		$pslf = TTnew( 'PayStubListFactory' );
+		$total_pay_stubs = $pslf->getByCompanyIdAndPayPeriodIdAndStatusId( $this->getCompany(), $this->getId(), 25 )->getRecordCount(); //25=Open
+		//Debug::Text(' Total Pay Stubs: '. $total_pay_stubs, __FILE__, __LINE__, __METHOD__, 10);
+		return $total_pay_stubs;
+	}
+
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		// Status
+		if ( $this->getStatus() !== FALSE ) {
+			$status_options = $this->getOptions('status');
+			$validate_msg = TTi18n::gettext('Invalid Status');
+			switch ( $this->old_status_id ) {
+				case 20: //Closed
+					$valid_statuses = array( 20, 30 );
+					$status_options = Misc::arrayIntersectByKey( $valid_statuses, $status_options );
+					$validate_msg = TTi18n::gettext('Status can only be changed from Closed to Post Adjustment');
+					break;
+				case 30: //Post Adjustment
+					$valid_statuses = array( 20, 30 );
+					$status_options = Misc::arrayIntersectByKey( $valid_statuses, $status_options );
+					$validate_msg = TTi18n::gettext('Status can only be changed from Post Adjustment to Closed');
+					break;
+				default:
+					break;
+			}
+			$this->Validator->inArrayKey(	'status_id',
+													$this->getStatus(),
+													$validate_msg,
+													$status_options
+												);
+		}
+		// Pay Period Schedule
+		if ( $this->getPayPeriodSchedule() !== FALSE AND $this->getPayPeriodSchedule() != TTUUID::getZeroID() ) {
+			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+			$this->Validator->isResultSetWithRows(	'pay_period_schedule',
+															$ppslf->getByID($this->getPayPeriodSchedule()),
+															TTi18n::gettext('Incorrect Pay Period Schedule')
+														);
+		}
+		// Start Date
+		if ( $this->getStartDate() !== FALSE ) {
+			$this->Validator->isDate(		'start_date',
+													$this->getStartDate(),
+													TTi18n::gettext('Incorrect start date')
+												);
+			if ( $this->Validator->isError('start_date') == FALSE ) {
+				$this->Validator->isTrue(		'start_date',
+														$this->isValidStartDate( $this->getStartDate() ),
+														TTi18n::gettext('Conflicting start date')
+													);
+			}
+		}
+		// End Date
+		if ( $this->getEndDate() !== FALSE ) {
+			$this->Validator->isDate(		'end_date',
+													$this->getEndDate(),
+													TTi18n::gettext('Incorrect end date')
+												);
+		}
+		// Transaction date
+		if ( $this->getTransactionDate() !== FALSE ) {
+			$this->Validator->isDate(		'transaction_date',
+													$this->getTransactionDate(),
+													TTi18n::gettext('Incorrect transaction date')
+												);
+		}
+		// Tainted date
+		if ( $this->getTaintedDate() !== FALSE ) {
+			$this->Validator->isDate(		'tainted_date',
+													$this->getTaintedDate(),
+													TTi18n::gettext('Incorrect tainted date')
+												);
+		}
+		// Tainted employee
+		if ( $this->getTaintedBy() !== FALSE ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'tainted_by',
+															$ulf->getByID($this->getTaintedBy()),
+															TTi18n::gettext('Incorrect tainted employee')
+														);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
 		//Make sure we aren't trying to create a pay period with no dates...
 		if ( $this->isNew() == TRUE AND $this->Validator->getValidateOnly() == FALSE ) {
 			Debug::text('New: Start Date: '. $this->getStartDate() .' End Date: '. $this->getEndDate(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1100,10 +1305,11 @@ class PayPeriodFactory extends Factory {
 											TTi18n::gettext('Conflicting end date'));
 		}
 
-		if ( $this->getDeleted() == FALSE AND ( $this->getStartDate() != FALSE AND $this->getEndDate() != '' AND $this->getPayPeriodSchedule() > 0 ) ) {
+		if ( $this->getDeleted() == FALSE AND ( $this->getStartDate() != FALSE AND $this->getEndDate() != ''
+						AND TTUUID::isUUID( $this->getPayPeriodSchedule() ) AND $this->getPayPeriodSchedule() != TTUUID::getZeroID() AND $this->getPayPeriodSchedule() != TTUUID::getNotExistID() ) ) {
 			$this->Validator->isTrue(		'start_date',
 											 !$this->isConflicting(), //Reverse the boolean.
-											 TTi18n::gettext('Conflicting start/end date, pay period already exists.'));
+											 TTi18n::gettext('Conflicting start/end date, pay period already exists'));
 		} else {
 			Debug::text('Not checking for conflicts... DateStamp: '. (int)$this->getStartDate(), __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -1117,12 +1323,18 @@ class PayPeriodFactory extends Factory {
 		if ( ( $this->getStatus() == 20 OR $this->getStatus() == 30 ) AND $this->getEndDate() > 0 AND TTDate::getBeginDayEpoch( time() ) <= $this->getEndDate() ) {
 			$this->Validator->isTrue(		'status_id',
 											FALSE,
-											TTi18n::gettext('Invalid status, unable to lock or close pay periods before their end date.'));
+											TTi18n::gettext('Invalid status, unable to lock or close pay periods before their end date'));
+		}
+
+		if ( $this->getDeleted() == TRUE AND $this->getStatus() == 20 ) {
+			$this->Validator->isTrue(		'status_id',
+											 FALSE,
+											 TTi18n::gettext('Closed Pay Periods can not be deleted'));
 		}
 
 		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
 		$ppslf->getById( $this->getPayPeriodSchedule() );
-		if ( $this->getStartDate() != '' AND $this->getPayPeriodSchedule() == '' ) {
+		if ( $this->getStartDate() != '' AND $this->getPayPeriodSchedule() == TTUUID::getZeroID() ) {
 			//When mass editing pay periods, we try to validate with no pay period schedule set because it could be editing across multiple pay period schedules.
 			//In this case ignore this check.
 			Debug::text('Pay Period Schedule not found: '. $this->getPayPeriodSchedule(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1131,9 +1343,22 @@ class PayPeriodFactory extends Factory {
 											TTi18n::gettext('Please choose a Pay Period Schedule') );
 		}
 
+		if ( $this->getStatus() == 20 ) { //Closed
+			//Mark pay stubs as PAID once the pay period is closed?
+			if ( $this->setPayStubStatus(40, TRUE ) == FALSE ) { //Dry-run only to ensure that they can be closed.
+				$this->Validator->isTrue(		'status_id',
+												 FALSE,
+												 TTi18n::gettext('Unable to set pay stubs to PAID. Please ensure all pay stubs have transactions and that they have been processed (PAID).') );
+			}
+		}
+
+
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		$this->StartTransaction();
 
@@ -1154,6 +1379,9 @@ class PayPeriodFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
@@ -1162,23 +1390,23 @@ class PayPeriodFactory extends Factory {
 			//Unassign user_date_total rows from this pay period, no need to delete this data anymore as it can be easily done otherways
 			//and users don't realize how much data will actually be deleted.
 			$udtf = TTnew( 'UserDateTotalFactory' );
-			$query = 'update '. $udtf->getTable() .' set pay_period_id = 0 where pay_period_id = '. (int)$this->getId();
+			$query = 'update '. $udtf->getTable() .' set pay_period_id = \''. TTUUID::getZeroID() .'\' where pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
 			$pcf = TTnew( 'PunchControlFactory' );
-			$query = 'update '. $pcf->getTable() .' set pay_period_id = 0 where pay_period_id = '. (int)$this->getId();
+			$query = 'update '. $pcf->getTable() .' set pay_period_id = \''. TTUUID::getZeroID() .'\' where pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
 			$sf = TTnew( 'ScheduleFactory' );
-			$query = 'update '. $sf->getTable() .' set pay_period_id = 0 where pay_period_id = '. (int)$this->getId();
+			$query = 'update '. $sf->getTable() .' set pay_period_id = \''. TTUUID::getZeroID() .'\' where pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
 			$rf = TTnew( 'RequestFactory' );
-			$query = 'update '. $rf->getTable() .' set pay_period_id = 0 where pay_period_id = '. (int)$this->getId();
+			$query = 'update '. $rf->getTable() .' set pay_period_id = \''. TTUUID::getZeroID() .'\' where pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
 			$ef = TTnew( 'ExceptionFactory' );
-			$query = 'update '. $ef->getTable() .' set pay_period_id = 0 where pay_period_id = '. (int)$this->getId();
+			$query = 'update '. $ef->getTable() .' set pay_period_id = \''. TTUUID::getZeroID() .'\' where pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
 			//Now that v9 has multiple payroll runs, if the user tries deleting multiple pay periods that have pay stubs assigned to them, this will fail due to unique constraint.
@@ -1187,13 +1415,13 @@ class PayPeriodFactory extends Factory {
 			$psf = TTnew( 'PayStubFactory' );
 			$uf = TTNew('UserFactory');
 
-			$query = 'SELECT  max(run_id) FROM '. $psf->getTable() .' as a LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id ) WHERE b.company_id = '. (int)$this->getCompany() .' AND a.pay_period_id = 0';
+			$query = 'SELECT  max(run_id) FROM '. $psf->getTable() .' as a LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id ) WHERE b.company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND a.pay_period_id = \''. TTUUID::getZeroID() .'\'';
 			$run_id = (int)$this->db->GetOne($query);
 			Debug::text('Next Run ID for PayPeriodID=0: '. $run_id .' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 			//Rather than update run_id to whatever the last run_id + 1 is, which will fail if there are multiple pay runs in the deleted pay period as its consolidating them all into a single payroll run
 			//  update run_id to always add the maximum run number and that should avoid the unique constraint issue.
-			$query = 'UPDATE '. $psf->getTable() .' SET pay_period_id = 0, run_id = ( run_id + '. (int)$run_id .' ) WHERE pay_period_id = '. (int)$this->getId() .' AND deleted = 0';
+			$query = 'UPDATE '. $psf->getTable() .' SET pay_period_id = \''. TTUUID::getZeroID() .'\', run_id = ( run_id + '. (int)$run_id .' ) WHERE pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\' AND deleted = 0';
 			$this->db->Execute($query);
 		} else {
 			if ( $this->getStatus() == 20 ) { //Closed
@@ -1250,6 +1478,10 @@ class PayPeriodFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -1282,6 +1514,10 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -1295,6 +1531,10 @@ class PayPeriodFactory extends Factory {
 					$exceptions_arr = array();
 					$timesheet_arr = array();
 					switch( $variable ) {
+						case 'tainted': //Don't allow this to be set from the API.
+						case 'tainted_by':
+						case 'tainted_date':
+							break;
 						case 'status':
 							$function = 'get'.$variable;
 							if ( method_exists( $this, $function ) ) {
@@ -1317,9 +1557,12 @@ class PayPeriodFactory extends Factory {
 							}
 							break;
 						case 'total_punches':
+						case 'total_manual_timesheets':
+						case 'total_absences':
 						case 'pending_requests':
 						case 'ps_amendments':
 						case 'pay_stubs':
+						case 'pay_stubs_open':
 							//These functions are slow to obtain, so make sure the column is requested explicitly before we include it.
 							if ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) {
 								$data[$variable] = $this->$function();
@@ -1365,6 +1608,10 @@ class PayPeriodFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Period') .' - '. TTi18n::getText('Start Date') .': '. TTDate::getDate('DATE+TIME', $this->getStartDate() ) .' '. TTi18n::getText('End Date') .': '. TTDate::getDate('DATE+TIME', $this->getEndDate() ) .' '. TTi18n::getText('Transaction Date') .': '. TTDate::getDate('DATE+TIME', $this->getTransactionDate() ), NULL, $this->getTable(), $this );
 	}

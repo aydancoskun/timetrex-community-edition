@@ -1,6 +1,10 @@
 ScheduleShiftViewController = BaseViewController.extend( {
 	el: '#schedule_shift_view_container',
 
+	_required_files: {
+		10:['APISchedule', 'APIAbsencePolicy', 'APIUserGroup',  'APIPayPeriod', 'APIBranch', 'APIDepartment', 'APIUserTitle', 'APISchedulePolicy'],
+		20:['APIJob', 'APIJobItem'],
+		},
 	schedule_status_array: null,
 
 	user_status_array: null,
@@ -15,8 +19,10 @@ ScheduleShiftViewController = BaseViewController.extend( {
 	total_time: null,
 	pre_total_time: 0,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	is_mass_adding: false,
+
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'ScheduleShiftEditView.html';
 		this.permission_id = 'schedule';
 		this.viewId = 'ScheduleShift';
@@ -477,8 +483,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			result_data[$this.parent_key] = $this.parent_value;
 		}
 		// Default to Open
-		result_data === true && (result_data = {user_id: 0});
-		!result_data.user_id && (result_data.user_id = 0);
+		result_data === true && (result_data = {user_id: TTUUID.zero_id});
+		!result_data.user_id && (result_data.user_id = TTUUID.zero_id);
 		$this.current_edit_record = result_data;
 		$this.initEditView();
 	},
@@ -507,7 +513,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		var first_item = {};
 		$.each( display_columns, function( index, content ) {
 
-			first_item.id = '0';
+			first_item.id = TTUUID.zero_id;
 			first_item[content.name] = Global.open_item;
 
 			return false;
@@ -736,7 +742,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				job_item_widget.setValue( job.default_item_id );
 				$this.current_edit_record.job_item_id = job.default_item_id;
 
-				if ( job.default_item_id === false || job.default_item_id === 0 ) {
+				if ( job.default_item_id === false || job.default_item_id === 0 || job.default_item_id === TTUUID.zero_id ) {
 					$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
 				}
 
@@ -786,8 +792,14 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic['absence_policy_id'].setValue( false );
 				this.current_edit_record['absence_policy_id'] = false;
 				this.getAbsencePolicy( this.current_edit_record[key] );
-				break;
 
+				if( $.isArray(this.current_edit_record[key]) && this.current_edit_record[key].length > 1 ){
+					this.is_mass_adding = true;
+				} else {
+					this.is_mass_adding = false;
+				}
+				this.setEditMenu();
+				break;
 		}
 
 		this.getScheduleTotalTime();
@@ -977,9 +989,9 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 	onStatusChange: function() {
 
-		if ( this.current_edit_record['status_id'] === 10 ) {
+		if ( this.current_edit_record['status_id'] == 10 ) {
 			this.detachElement( 'absence_policy_id' )
-		} else if ( this.current_edit_record['status_id'] === 20 ) {
+		} else if ( this.current_edit_record['status_id'] == 20 ) {
 			this.attachElement( 'absence_policy_id' )
 		}
 

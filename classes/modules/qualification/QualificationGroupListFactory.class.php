@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,12 +39,18 @@
  * @package Modules\Qualification
  */
 class QualificationGroupListFactory extends QualificationGroupFactory implements IteratorAggregate {
-
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
-					WHERE deleted = 0';
+				';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
@@ -53,21 +59,26 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|QualificationGroupListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
+		if ( $id == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
-					);
-
+				'id' => TTUUID::castUUID($id),
+		);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
-						AND deleted = 0';
+				';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
@@ -76,56 +87,36 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 		return $this;
 	}
 
-	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '') {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|QualificationGroupListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
+		if ( $id == '' ) {
 			return FALSE;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'name' => 'asc' );
-			$strict = FALSE;
-		} else {
-			$strict = TRUE;
+		if ( $company_id == '' ) {
+			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
-					);
-
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'id' => TTUUID::castUUID($id),
+		);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND deleted = 0';
+						AND id = ?
+						AND deleted = 0
+				';
+
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict );
-
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		return $this;
-	}
-
-	function getByIdAndCompanyId($id, $company_id, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
-					);
-
-		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where	company_id = ?
-						AND	id = ?
-						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
@@ -133,110 +124,152 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 		return $this;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|QualificationGroupListFactory
+	 */
+	function getByCompanyId( $id, $where = NULL, $order = NULL) {
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		$ph = array(
+				'id' => TTUUID::castUUID( $id ),
+		);
+
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where	company_id = ?
+						AND deleted = 0
+				';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @param string $parent_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|QualificationGroupListFactory
+	 */
+	function getByCompanyIdAndParentId( $id, $parent_id, $where = NULL, $order = NULL) {
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		if ( $parent_id == '' ) {
+			return FALSE;
+		}
+
+		$ph = array(
+				'id' => TTUUID::castUUID( $id ),
+				'parent_id' => TTUUID::castUUID( $parent_id ),
+		);
+
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where	company_id = ?
+						AND parent_id = ?
+						AND deleted = 0
+				';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return array|bool
+	 */
 	function getByCompanyIdArray( $id ) {
-		$this->getFastTreeObject()->setTree( $id );
-
-		$children = $this->getFastTreeObject()->getAllChildren(NULL, 'RECURSE');
-
-		if ( $children !== FALSE ) {
-			$qglf = new QualificationGroupListFactory();
-
+		$lf = new QualificationGroupListFactory();
+		$lf->getAPISearchByCompanyIdAndArrayCriteria($id, array());
+		if ( $lf->getRecordCount() > 0 ) {
 			$nodes = array();
-			foreach ($children as $object_id => $level ) {
-
-				if ( $object_id !== 0 ) {
-					$obj = $qglf->getById ( $object_id )->getCurrent();
-
-					$nodes[] = array(
-									'id' => $object_id,
-									'name' => $obj->getName(),
-									'level' => $level
-									);
-				}
-
+			foreach ( $lf as $obj ) {
+				$nodes[] = $obj->getObjectAsArray(); //this needs to have created and updated info for the audit tab.
 			}
 
-			if ( empty($nodes) == FALSE ) {
-				return $nodes;
-			}
-		}
 
-		return FALSE;
-	}
+			$retarr = TTTree::flattenArray( TTTree::FormatArray( $nodes ) );
 
-	function getByCompanyIdAndGroupIdAndSubGroupsArray($id, $group_id, $include_sub_groups = TRUE ) {
-		$this->getFastTreeObject()->setTree( $id );
-
-		if ( $include_sub_groups == TRUE ) {
-			$recurse = 'RECURSE';
-		} else {
-			$recurse = FALSE;
-		}
-
-		$children = $this->getFastTreeObject()->getAllChildren( $group_id, $recurse);
-
-		if ( $children !== FALSE ) {
-			$nodes = array();
-			foreach ($children as $object_id => $level ) {
-				$nodes[] = $object_id;
-			}
-			unset($level);//code standards
-			
-			if ( empty($nodes) == FALSE ) {
-				return $nodes;
-			}
-		}
-
-		return FALSE;
-	}
-
-	function getArrayByListFactory($lf, $include_blank = TRUE ) {
-		if ( !is_object($lf) ) {
-			return FALSE;
-		}
-
-		$list = array();
-		if ( $include_blank == TRUE ) {
-			$list[0] = TTi18n::getText('-Default-');
-		}
-
-		foreach ($lf as $obj) {
-			$list[$obj->getID()] = $obj->getName();
-		}
-
-		if ( empty($list) == FALSE) {
-			return $list;
-		}
-
-		return FALSE;
-	}
-
-	function getArrayByNodes($nodes, $include_blank = TRUE, $sort_prefix = FALSE ) {
-		if ( !is_array( $nodes ) ) {
-			return FALSE;
-		}
-
-		$prefix = NULL;
-		$i = 0;
-		$retarr = array();
-		foreach($nodes as $node) {
-			if ( $sort_prefix == TRUE ) {
-				$prefix = '-'.str_pad( $i, 4, 0, STR_PAD_LEFT).'-';
-			}
-
-			$retarr[$prefix.$node['id']] = $node['text'];
-
-			$i++;
-		}
-
-
-		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @param string $group_id UUID
+	 * @param bool $include_sub_groups
+	 * @return array|bool
+	 */
+	function getByCompanyIdAndGroupIdAndSubGroupsArray( $id, $group_id, $include_sub_groups = TRUE ) {
+		$lf = new QualificationGroupListFactory();
+		$lf->getByCompanyId( $id );
+		if ( $lf->getRecordCount() > 0 ) {
+			foreach ( $lf as $obj ) {
+				$nodes[] = array('id' => $obj->getId(), 'name' => $obj->getName(), 'parent_id' => $obj->getParent());
+			}
+
+			$retarr = TTTree::getElementFromNodes( TTTree::flattenArray( TTTree::createNestedArrayWithDepth( $nodes, $group_id ) ), 'id' );
+
+			return $retarr;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param $lf
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getArrayByListFactory( $lf, $include_blank = TRUE ) {
+		if ( !is_object($lf) ) {
+			return FALSE;
+		}
+
+		$list = array();
+		if ( $include_blank == TRUE ) {
+			$list[TTUUID::getZeroID()] = '--';
+		}
+
+		foreach ($lf as $obj) {
+			$list[$obj->getID()] = $obj->getName();
+		}
+
+		if ( empty($list) == FALSE ) {
+			return $list;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|QualificationGroupListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -268,7 +301,7 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -285,9 +318,9 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 

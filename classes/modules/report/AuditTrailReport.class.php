@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,9 @@
  */
 class AuditTrailReport extends Report {
 
+	/**
+	 * AuditTrailReport constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('Audit Trail Report');
 		$this->file_name = 'audit_trail_report';
@@ -49,6 +52,11 @@ class AuditTrailReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
 				AND $this->getPermissionObject()->Check('report', 'view_system_log', $user_id, $company_id ) ) {
@@ -58,6 +66,9 @@ class AuditTrailReport extends Report {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	protected function _validateConfig() {
 		$config = $this->getConfig();
 
@@ -69,6 +80,11 @@ class AuditTrailReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|mixed|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -87,6 +103,7 @@ class AuditTrailReport extends Report {
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
 										'-1010-time_period' => TTi18n::gettext('Time Period'),
+										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -377,6 +394,11 @@ class AuditTrailReport extends Report {
 	}
 
 	//Get raw data for report
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array(
 							'user' => array(),
@@ -404,24 +426,28 @@ class AuditTrailReport extends Report {
 		//Get system log data for joining.
 		if ( count($this->tmp_data['user']) > 0 ) {
 			$filter_data['user_id'] = array_keys($this->tmp_data['user']); //Filter only selected users, otherwise too many rows can be returned that wont be displayed.
-					
+
 			$llf = TTnew( 'LogListFactory' );
-			$llf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, 5000 );
-	
+			$llf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, 5000 );
+
 			Debug::Text(' Log Rows: '. $llf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $llf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 			foreach ( $llf as $key => $l_obj ) {
 				$this->tmp_data['log'][$l_obj->getUser()][] = array_merge( (array)$l_obj->getObjectAsArray( $columns ), array('total_log' => 1 ) );
-	
+
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-			}			
+			}
 			//Debug::Arr($this->tmp_data['log'], 'TMP Log Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
-		
+
 		return TRUE;
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
+
+	/**
+	 * @return bool
+	 */
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['log']), NULL, TTi18n::getText('Pre-Processing Data...') );
 		if ( isset($this->tmp_data['user']) ) {

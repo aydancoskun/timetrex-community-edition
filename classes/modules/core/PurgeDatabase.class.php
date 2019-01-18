@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,6 +35,9 @@
  ********************************************************************************/
 
 
+/**
+ * Class PurgeDatabase
+ */
 class PurgeDatabase {
 	static $parent_table_column_map = array(
 											'users' => 'user_id',
@@ -564,6 +567,9 @@ class PurgeDatabase {
 														)
 										);
 
+	/**
+	 * @return bool
+	 */
 	static function Execute() {
 		global $db;
 
@@ -879,7 +885,6 @@ class PurgeDatabase {
 							$query[] = 'DELETE FROM '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( d.status_id = 20 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .')';
 							break;
 						case 'user_identification':
-						case 'user_generic_data':
 						case 'pay_period_time_sheet_verify':
 						case 'message_sender':
 						case 'message_recipient':
@@ -933,7 +938,7 @@ class PurgeDatabase {
 							$query[] = 'DELETE FROM '. $table .' as a WHERE NOT EXISTS ( select 1 from company as b WHERE a.company_id = b.id )';
 
 							//bank_account can have user_id is NULL or user_id = 0, we don't want to purge those records in either case.
-							$query[] = 'DELETE FROM '. $table .' as a WHERE ( a.user_id is NOT NULL AND a.user_id != 0 ) AND NOT EXISTS ( select 1 from users as b WHERE a.user_id = b.id )';
+							$query[] = 'DELETE FROM '. $table .' as a WHERE ( a.user_id is NOT NULL AND a.user_id != \''. TTUUID::getZeroID() .'\' ) AND NOT EXISTS ( select 1 from users as b WHERE a.user_id = b.id )';
 							break;
 						case 'user_group_tree':
 						case 'document_group_tree':
@@ -1042,7 +1047,7 @@ class PurgeDatabase {
 
 								//Delete rows where the parent table rows are already deleted.
 								//Keep records where ID = 0 or NULL as those can still be valid in some cases.
-								$query[] = 'DELETE FROM '. $table .' as a WHERE a.'. $parent_table_column .' != 0 AND a.'. $parent_table_column .' is NOT NULL AND NOT EXISTS ( SELECT 1 FROM '. $parent_table .' as b WHERE a.'. $parent_table_column .' = b.id )';
+								$query[] = 'DELETE FROM '. $table .' as a WHERE a.'. $parent_table_column .' != \''. TTUUID::getZeroID() .'\' AND a.'. $parent_table_column .' is NOT NULL AND NOT EXISTS ( SELECT 1 FROM '. $parent_table .' as b WHERE a.'. $parent_table_column .' = b.id )';
 							}
 
 							unset($parent_table_column, $parent_table);
@@ -1084,7 +1089,7 @@ class PurgeDatabase {
 					if ( $plf->getRecordCount() > 0 ) {
 						foreach( $plf as $p_obj ) {
 							Debug::text('  Punch ID: '. $p_obj->getID() .' Date: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ) .' Image File Name: '. $p_obj->getImageFileName(), __FILE__, __LINE__, __METHOD__, 10);
-							$query = 'UPDATE '. $plf->getTable() .' SET has_image = 0 WHERE id = '. (int)$p_obj->getID();
+							$query = 'UPDATE '. $plf->getTable() .' SET has_image = 0 WHERE id = \''. TTUUID::castUUID($p_obj->getID()) .'\'';
 							if ( $plf->db->Execute( $query ) !== FALSE ) {
 								$p_obj->cleanStoragePath();
 							} else {

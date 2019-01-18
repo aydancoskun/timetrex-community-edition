@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -47,6 +47,11 @@ class UserDeductionFactory extends Factory {
 	var $company_deduction_obj = NULL;
 	var $pay_stub_entry_account_link_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -91,6 +96,10 @@ class UserDeductionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -129,15 +138,25 @@ class UserDeductionFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyDeductionObject() {
 		return $this->getGenericObject( 'CompanyDeductionListFactory', $this->getCompanyDeduction(), 'company_deduction_obj' );
 	}
 
 	//Do not replace this with getGenericObject() as it uses the CompanyID not the ID itself.
+
+	/**
+	 * @return bool|null
+	 */
 	function getPayStubEntryAccountLinkObject() {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
@@ -153,34 +172,34 @@ class UserDeductionFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
-	function isUniqueCompanyDeduction($deduction_id) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value ) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @param string $deduction_id UUID
+	 * @return bool
+	 */
+	function isUniqueCompanyDeduction( $deduction_id) {
 		$ph = array(
-					'user_id' => (int)$this->getUser(),
-					'deduction_id' => (int)$deduction_id,
+					'user_id' => TTUUID::castUUID($this->getUser()),
+					'deduction_id' => TTUUID::castUUID($deduction_id),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where user_id = ? AND company_deduction_id = ? AND deleted = 0';
@@ -197,43 +216,40 @@ class UserDeductionFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompanyDeduction() {
-		if ( isset($this->data['company_deduction_id']) ) {
-			return (int)$this->data['company_deduction_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompanyDeduction($id) {
-		$id = trim($id);
-
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$cdlf = TTnew( 'CompanyDeductionListFactory' );
-
-		if (	(
-					$id != 0
-					OR
-					$this->Validator->isResultSetWithRows(	'company_deduction',
-															$cdlf->getByID($id),
-															TTi18n::gettext('Tax/Deduction is invalid')
-														)
-				) ) {
-
-			$this->data['company_deduction_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_deduction_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompanyDeduction( $value ) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'company_deduction_id', $value );
+	}
+
+	/**
+	 * @param bool $raw
+	 * @return bool|int|mixed
+	 */
 	function getLengthOfServiceDate( $raw = FALSE ) {
 		$retval = FALSE;
-		if ( isset($this->data['length_of_service_date']) ) {
+		$value  = $this->getGenericDataValue( 'length_of_service_date' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				$retval = $this->data['length_of_service_date'];
+				$retval = $value;
 			} else {
-				$retval = TTDate::strtotime( $this->data['length_of_service_date'] );
+				$retval = TTDate::strtotime( $value );
 			}
 		}
 
@@ -247,35 +263,31 @@ class UserDeductionFactory extends Factory {
 			return $retval;
 		}
 	}
-	function setLengthOfServiceDate($epoch) {
-		if ( $epoch != '' ) {
-			$epoch = TTDate::getBeginDayEpoch( trim($epoch) );
+
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setLengthOfServiceDate( $value ) {
+		if ( $value != '' ) {
+			$value = TTDate::getBeginDayEpoch( trim($value) );
 		}
-
-		Debug::Arr($epoch, 'Length of Service Date: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-
-		if	(	$epoch == ''
-				OR
-				$this->Validator->isDate(		'length_of_service_date',
-												$epoch,
-												TTi18n::gettext('Incorrect Length Of Service Date'))
-			) {
-
-			$this->data['length_of_service_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		Debug::Arr($value, 'Length of Service Date: '. TTDate::getDate('DATE+TIME', $value ), __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'length_of_service_date', $value );
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool|int|mixed
+	 */
 	function getStartDate( $raw = FALSE ) {
+		$value = $this->getGenericDataValue( 'start_date' );
 		$retval = FALSE;
-		if ( isset($this->data['start_date']) ) {
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				$retval = $this->data['start_date'];
+				$retval = $value;
 			} else {
-				$retval = TTDate::strtotime( $this->data['start_date'] );
+				$retval = TTDate::strtotime( $value );
 			}
 		}
 
@@ -289,35 +301,31 @@ class UserDeductionFactory extends Factory {
 			return $retval;
 		}
 	}
-	function setStartDate($epoch) {
-		if ( $epoch != '' ) {
-			$epoch = TTDate::getBeginDayEpoch( trim($epoch) );
+
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setStartDate( $value ) {
+		if ( $value != '' ) {
+			$value = TTDate::getBeginDayEpoch( trim($value) );
 		}
-
-		Debug::Arr($epoch, 'Start Date: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-
-		if	(	$epoch == ''
-				OR
-				$this->Validator->isDate(		'start_date',
-												$epoch,
-												TTi18n::gettext('Incorrect Start Date'))
-			) {
-
-			$this->data['start_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		Debug::Arr($value, 'Start Date: '. TTDate::getDate('DATE+TIME', $value ), __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'start_date', $value );
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool|int|mixed
+	 */
 	function getEndDate( $raw = FALSE ) {
 		$retval = FALSE;
-		if ( isset($this->data['end_date']) ) {
+		$value = $this->getGenericDataValue( 'end_date' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				$retval = $this->data['end_date'];
+				$retval = $value;
 			} else {
-				$retval = TTDate::strtotime( $this->data['end_date'] );
+				$retval = TTDate::strtotime( $value );
 			}
 		}
 
@@ -331,289 +339,185 @@ class UserDeductionFactory extends Factory {
 			return $retval;
 		}
 	}
-	function setEndDate($epoch) {
-		if ( $epoch != '' ) {
-			$epoch = TTDate::getBeginDayEpoch( trim($epoch) );
+
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setEndDate( $value ) {
+		if ( $value != '' ) {
+			$value = TTDate::getBeginDayEpoch( trim($value) );
 		}
-
-		Debug::Arr($epoch, 'End Date: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-
-		if	(	$epoch == ''
-				OR
-				$this->Validator->isDate(		'end_date',
-												$epoch,
-												TTi18n::gettext('Incorrect End Date'))
-			) {
-
-			$this->data['end_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		Debug::Arr($value, 'End Date: '. TTDate::getDate('DATE+TIME', $value ), __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'end_date', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue1() {
-		if ( isset($this->data['user_value1']) ) {
-			return $this->data['user_value1'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value1' );
 	}
-	function setUserValue1($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue1( $value ) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value1',
-												$value,
-												TTi18n::gettext('User Value 1 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value1'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value1', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue2() {
-		if ( isset($this->data['user_value2']) ) {
-			return $this->data['user_value2'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value2' );
 	}
-	function setUserValue2($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue2( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value2',
-												$value,
-												TTi18n::gettext('User Value 2 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value2'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value2', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue3() {
-		if ( isset($this->data['user_value3']) ) {
-			return $this->data['user_value3'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value3' );
 	}
-	function setUserValue3($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue3( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value3',
-												$value,
-												TTi18n::gettext('User Value 3 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value3'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value3', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue4() {
-		if ( isset($this->data['user_value4']) ) {
-			return $this->data['user_value4'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value4' );
 	}
-	function setUserValue4($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue4( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value4',
-												$value,
-												TTi18n::gettext('User Value 4 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value4'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value4', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue5() {
-		if ( isset($this->data['user_value5']) ) {
-			return $this->data['user_value5'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value5' );
 	}
-	function setUserValue5($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue5( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value5',
-												$value,
-												TTi18n::gettext('User Value 5 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value5'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value5', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue6() {
-		if ( isset($this->data['user_value6']) ) {
-			return $this->data['user_value6'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value6' );
 	}
-	function setUserValue6($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue6( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value6',
-												$value,
-												TTi18n::gettext('User Value 6 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value6'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value6', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue7() {
-		if ( isset($this->data['user_value7']) ) {
-			return $this->data['user_value7'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value7' );
 	}
-	function setUserValue7($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue7( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value7',
-												$value,
-												TTi18n::gettext('User Value 7 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value7'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value7', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue8() {
-		if ( isset($this->data['user_value8']) ) {
-			return $this->data['user_value8'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value8' );
 	}
-	function setUserValue8($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue8( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value8',
-												$value,
-												TTi18n::gettext('User Value 8 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value8'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value8', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue9() {
-		if ( isset($this->data['user_value9']) ) {
-			return $this->data['user_value9'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value9' );
 	}
-	function setUserValue9($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue9( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value9',
-												$value,
-												TTi18n::gettext('User Value 9 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value9'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value9', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserValue10() {
-		if ( isset($this->data['user_value10']) ) {
-			return $this->data['user_value10'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value10' );
 	}
-	function setUserValue10($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue10( $value) {
 		$value = trim($value);
-
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'user_value10',
-												$value,
-												TTi18n::gettext('User Value 10 is too short or too long'),
-												1,
-												20) ) {
-
-			$this->data['user_value10'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value10', $value );
 	}
 
 	//Primarily used to display marital status/allowances/claim amounts on pay stubs.
+
+	/**
+	 * @param bool $transaction_date
+	 * @return bool|string
+	 */
 	function getDescription( $transaction_date = FALSE ) {
 		$retval = FALSE;
 
@@ -724,6 +628,13 @@ class UserDeductionFactory extends Factory {
 						case 'la':
 							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value3, $cd_obj->getOptions('state_la_filing_status') ) .' '. TTI18n::getText('Dependents') .': '. (int)$user_value2 .' '. TTI18n::getText('Exemptions') .': '. (int)$user_value1;
 							break;
+						case 'or':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
+							//As of 01-Jan-2017, Oregon law ( ORS 652.610 ) requires 'the name and business registry number or business identification number of the employer'; displayed on pay stubs.
+							if ( is_object( $cd_obj->getPayrollRemittanceAgencyObject() ) AND $cd_obj->getPayrollRemittanceAgencyObject()->getPrimaryIdentification() != '' ) {
+								$retval .= ' [#'. $cd_obj->getPayrollRemittanceAgencyObject()->getPrimaryIdentification() .']';
+							}
+							break;
 						default:
 							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
 							break;
@@ -735,6 +646,14 @@ class UserDeductionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param object $pay_stub_obj
+	 * @param object $pay_period_obj
+	 * @param int $formula_type_id
+	 * @param int $payroll_run_id
+	 * @return int|string
+	 */
 	function getDeductionAmount( $user_id, $pay_stub_obj, $pay_period_obj, $formula_type_id = 10, $payroll_run_id = 1 ) {
 		if ( $user_id == '' ) {
 			Debug::Text('Missing User ID: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1745,7 +1664,7 @@ class UserDeductionFactory extends Factory {
 				if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() != '' ) {
 					Debug::Text('Found Employee EI account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
-					$pd_obj->setYearToDateEIContribution( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
+					$pd_obj->setYearToDateEIContribution(  $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
 				}
 
 				$pd_obj->setGrossPayPeriodIncome( $amount );
@@ -2080,6 +1999,9 @@ class UserDeductionFactory extends Factory {
 	//Returns the maximum taxable wages for any given calculation formula.
 	//Returns FALSE for no maximum.
 	//Primary used in TaxSummary (Generic) report.
+	/**
+	 * @return bool|mixed
+	 */
 	function getMaximumPayStubEntryAccountAmount() {
 		$retval = FALSE;
 
@@ -2119,6 +2041,10 @@ class UserDeductionFactory extends Factory {
 	}
 
 	//Returns the percent rate when specified.
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getRate() {
 		$retval = FALSE;
 
@@ -2142,14 +2068,215 @@ class UserDeductionFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * migrates UserDeductions for
+	 * @param $user
+	 * @param $old_data
+	 */
+	static function MigrateLegalEntity( $user, $old_data ) {
+		$udlf = TTnew('UserDeductionListFactory');
+
+		Debug::Text('Searching for user deductions...', __FILE__, __LINE__, __METHOD__, 10);
+
+		$udlf->getByCompanyIdAndUserId($user->getCompanyObject()->getId(), $user->getId());
+		foreach ( $udlf as $udf_obj ) {
+			Debug::Text('  Found existing UserDeduction record ID: \''. TTUUID::castUUID($udf_obj->getId()) .'\' CompanyDeduction ID: '. $udf_obj->getCompanyDeductionObject()->getId() .' Name: '. $udf_obj->getCompanyDeductionObject()->getName() .'...', __FILE__, __LINE__, __METHOD__, 10);
+
+			$cdlf = TTnew('CompanyDeductionListFactory');
+			$cdlf->getByLegalEntityIdAndName($user->getLegalEntity(), $udf_obj->getCompanyDeductionObject()->getName());
+			$cdf = $cdlf->getCurrent();
+
+			$cdlf_original = TTnew('CompanyDeductionListFactory');
+			$cdlf_original->getById($udf_obj->getCompanyDeduction());
+			$cdf_original = $cdlf_original->getCurrent();
+
+			Debug::Text($cdlf->getRecordCount().' match(es) found...', __FILE__, __LINE__, __METHOD__, 10);
+			if ( $cdlf->getRecordCount() == 1
+					AND $cdf_original->getCountry() == $cdf->getCountry()
+					AND $cdf_original->getProvince() == $cdf->getProvince()
+					AND $cdf_original->getDistrict() == $cdf->getDistrict() ) {
+
+				Debug::Text('   Copying old record to CompanyDeduction ID: '. $cdf->getId() .'...', __FILE__, __LINE__, __METHOD__, 10);
+
+				//copy the object into a new user deduction factory.
+				$udf2 = TTnew ('UserDeductionFactory');
+				$udf2->setUser($user->getId());
+				$udf2->setCompanyDeduction($cdf->getId());
+				$udf2->setUserValue1($udf_obj->getUserValue1());
+				$udf2->setUserValue2($udf_obj->getUserValue2());
+				$udf2->setUserValue3($udf_obj->getUserValue3());
+				$udf2->setUserValue4($udf_obj->getUserValue4());
+				$udf2->setUserValue5($udf_obj->getUserValue5());
+				$udf2->setUserValue6($udf_obj->getUserValue6());
+				$udf2->setUserValue7($udf_obj->getUserValue7());
+				$udf2->setUserValue8($udf_obj->getUserValue8());
+				$udf2->setUserValue9($udf_obj->getUserValue9());
+				$udf2->setUserValue10($udf_obj->getUserValue10());
+
+				if ( $udf2->isValid() ) {
+					$insert_id = $udf2->Save();
+					Debug::Text('   New UserDeduction record saved ID: '. $insert_id .'...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			} else {
+				Debug::Text('   No exact match. Old: Country:'. $cdf_original->getCountry() .' Province: '.  $cdf_original->getProvince() .' District: '. $cdf_original->getDistrict() .' New: Country: '. $cdf->getCountry() .' Province: '.  $cdf->getProvince() .' District: '. $cdf->getDistrict() .'...', __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			Debug::Text('  Attempting to delete the old user deduction record...', __FILE__, __LINE__, __METHOD__, 10);
+			$udf_obj->setDeleted(TRUE);
+			if ( $udf_obj->isValid() ) {
+				$udf_obj->Save();
+			}
+			unset($cdlf, $cdlf_original);
+		}
+		unset( $rdalf, $udlf );
+	}
+
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// User
+		$ulf = TTnew( 'UserListFactory' );
+		$this->Validator->isResultSetWithRows(	'user',
+														$ulf->getByID($this->getUser()),
+														TTi18n::gettext('Invalid Employee')
+													);
+		// Tax/Deduction
+		if ( $this->getCompanyDeduction() == TTUUID::getZeroID() ) {
+			$cdlf = TTnew( 'CompanyDeductionListFactory' );
+			$this->Validator->isResultSetWithRows(	'company_deduction',
+															$cdlf->getByID($this->getCompanyDeduction()),
+															TTi18n::gettext('Tax/Deduction is invalid')
+														);
+		}
+		// Length Of Service Date
+		if ( $this->getLengthOfServiceDate() != '' ) {
+			$this->Validator->isDate(		'length_of_service_date',
+													$this->getLengthOfServiceDate(),
+													TTi18n::gettext('Incorrect Length Of Service Date')
+												);
+		}
+		// Start Date
+		if ( $this->getStartDate() != '' ) {
+			$this->Validator->isDate(		'start_date',
+													$this->getStartDate(),
+													TTi18n::gettext('Incorrect Start Date')
+												);
+		}
+		// End Date
+		if ( $this->getEndDate() != '' ) {
+			$this->Validator->isDate(		'end_date',
+													$this->getEndDate(),
+													TTi18n::gettext('Incorrect End Date')
+												);
+		}
+		// User Value 1
+		if ( $this->getUserValue1() != '' ) {
+			$this->Validator->isLength(		'user_value1',
+													$this->getUserValue1(),
+													TTi18n::gettext('User Value 1 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 2
+		if ( $this->getUserValue2() != '' ) {
+			$this->Validator->isLength(		'user_value2',
+													$this->getUserValue2(),
+													TTi18n::gettext('User Value 2 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 3
+		if ( $this->getUserValue3() != '' ) {
+			$this->Validator->isLength(		'user_value3',
+													$this->getUserValue3(),
+													TTi18n::gettext('User Value 3 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 4
+		if ( $this->getUserValue4() != '' ) {
+			$this->Validator->isLength(		'user_value4',
+													$this->getUserValue4(),
+													TTi18n::gettext('User Value 4 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 5
+		if ( $this->getUserValue5() != '' ) {
+			$this->Validator->isLength(		'user_value5',
+													$this->getUserValue5(),
+													TTi18n::gettext('User Value 5 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 6
+		if ( $this->getUserValue6() != '' ) {
+			$this->Validator->isLength(		'user_value6',
+													$this->getUserValue6(),
+													TTi18n::gettext('User Value 6 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 7
+		if ( $this->getUserValue7() != '' ) {
+			$this->Validator->isLength(		'user_value7',
+													$this->getUserValue7(),
+													TTi18n::gettext('User Value 7 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 8
+		if ( $this->getUserValue8() != '' ) {
+			$this->Validator->isLength(		'user_value8',
+													$this->getUserValue8(),
+													TTi18n::gettext('User Value 8 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 9
+		if ( $this->getUserValue9() != '' ) {
+			$this->Validator->isLength(		'user_value9',
+													$this->getUserValue9(),
+													TTi18n::gettext('User Value 9 is too short or too long'),
+													1,
+													20
+												);
+		}
+		// User Value 10
+		if ( $this->getUserValue10() != '' ) {
+			$this->Validator->isLength(		'user_value10',
+													$this->getUserValue10(),
+													TTi18n::gettext('User Value 10 is too short or too long'),
+													1,
+													20
+												);
+		}
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( $this->getUser() == FALSE ) {
 			$this->Validator->isTrue(		'user',
 											FALSE,
 											TTi18n::gettext('Employee not specified'));
 		}
 
-		if ( $this->getDeleted() == FALSE AND $this->getCompanyDeduction() > 0 AND is_object( $this->getCompanyDeductionObject() ) ) {
+		if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID()
+				AND $this->getDeleted() == FALSE
+				AND TTUUID::isUUID( $this->getCompanyDeduction() ) AND $this->getCompanyDeduction() != TTUUID::getZeroID() AND $this->getCompanyDeduction() != TTUUID::getNotExistID()
+				AND is_object( $this->getCompanyDeductionObject() ) ) {
 			$this->Validator->isTrue(				'company_deduction',
 													$this->isUniqueCompanyDeduction( $this->getCompanyDeduction() ),
 													TTi18n::gettext('Tax/Deduction is already assigned to employee').': '. $this->getCompanyDeductionObject()->getName()
@@ -2159,6 +2286,9 @@ class UserDeductionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		//If the length of service date matches the current hire date, make it blank so we always default to the hire date in case it changes later.
 		if ( is_object( $this->getUserObject() ) AND TTDate::getMiddleDayEpoch( $this->getLengthOfServiceDate() ) == TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) ) {
@@ -2177,12 +2307,19 @@ class UserDeductionFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -2215,6 +2352,10 @@ class UserDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -2261,6 +2402,10 @@ class UserDeductionFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		$obj = $this->getUserObject();
 		if ( is_object($obj) ) {

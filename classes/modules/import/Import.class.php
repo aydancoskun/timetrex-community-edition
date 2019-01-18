@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -66,6 +66,9 @@ class Import {
 
 	protected $search_column_priority = NULL;
 
+	/**
+	 * @return null|object
+	 */
 	function getObject() {
 		if ( !is_object($this->obj) ) {
 			$this->obj = TTnew( $this->class_name );
@@ -75,11 +78,17 @@ class Import {
 		return $this->obj;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
 		$cf = new CompanyFactory();
 		return $cf->getGenericObject( 'CompanyListFactory', $this->company_id, 'company_obj' );
 	}
 
+	/**
+	 * @return null|ProgressBar
+	 */
 	function getProgressBarObject() {
 		if	( !is_object( $this->progress_bar_obj ) ) {
 			$this->progress_bar_obj = new ProgressBar();
@@ -88,12 +97,21 @@ class Import {
 		return $this->progress_bar_obj;
 	}
 	//Returns the AMF messageID for each individual call.
+
+	/**
+	 * @return bool|null
+	 */
 	function getAMFMessageID() {
 		if ( $this->AMF_message_id != NULL ) {
 			return $this->AMF_message_id;
 		}
 		return FALSE;
 	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
 	function setAMFMessageID( $id ) {
 		if ( $id != '' ) {
 			$this->AMF_message_id = $id;
@@ -103,7 +121,12 @@ class Import {
 		return FALSE;
 	}
 
-	function getOptions($name, $parent = NULL) {
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|bool|mixed
+	 */
+	function getOptions( $name, $parent = NULL) {
 		if ( $parent == NULL OR $parent == '') {
 			$retarr = $this->_getFactoryOptions( $name );
 		} else {
@@ -126,10 +149,20 @@ class Import {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return bool
+	 */
 	protected function _getFactoryOptions( $name, $parent = NULL ) {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @return array|bool|mixed
+	 */
 	function getRawData( $limit = NULL ) {
 		if ( isset($this->data['raw_data']) ) {
 			Debug::Text('zRaw Data Size: '. count($this->data['raw_data']), __FILE__, __LINE__, __METHOD__, 10);
@@ -147,7 +180,12 @@ class Import {
 
 		return FALSE;
 	}
-	function setRawData($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setRawData( $value) {
 		if ( $value != '' ) {
 			Debug::Text('Raw Data Size: '. count($value), __FILE__, __LINE__, __METHOD__, 10);
 			$this->data['raw_data'] = $value;
@@ -157,6 +195,10 @@ class Import {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getRawDataFromFile() {
 		$file_name = $this->getStoragePath().$this->getLocalFileName();
 		if ( file_exists( $file_name ) ) {
@@ -167,6 +209,11 @@ class Import {
 		Debug::Text('Loading data from file: '. $file_name .' Failed!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
+
+	/**
+	 * @param $data
+	 * @return bool|int
+	 */
 	function saveRawDataToFile( $data ) {
 		Debug::Text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 		$dir = $this->getStoragePath();
@@ -179,6 +226,10 @@ class Import {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getRawDataColumns() {
 		$raw_data = $this->getRawData();
 		if ( is_array( $raw_data ) ) {
@@ -199,12 +250,20 @@ class Import {
 		return FALSE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getParsedData() {
 		if ( isset($this->data['parsed_data']) ) {
 			return $this->data['parsed_data'];
 		}
 	}
-	function setParsedData($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setParsedData( $value) {
 		if ( $value != '' ) {
 			$this->data['parsed_data'] = $value;
 
@@ -215,6 +274,10 @@ class Import {
 	}
 
 	//Generates a "best fit" column map array.
+
+	/**
+	 * @return array|bool
+	 */
 	function generateColumnMap() {
 		$raw_data_columns = $this->getRawDataColumns();
 		Debug::Arr($raw_data_columns, 'Raw Data Columns:', __FILE__, __LINE__, __METHOD__, 10);
@@ -263,16 +326,28 @@ class Import {
 	//Takes a saved column map and tries to merge it with existing column data from the file.
 	//Needs to account for manually added columns that don't exist in the file already.
 	//Needs to account for less/more columns added to the file itself.
+	/**
+	 * @param $saved_column_map
+	 * @return mixed
+	 */
 	function mergeColumnMap( $saved_column_map ) {
 		return $saved_column_map;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getColumnMap() {
 		if ( isset($this->data['column_map']) ) {
 			return $this->data['column_map'];
 		}
 	}
-	function setColumnMap($import_map_arr) {
+
+	/**
+	 * @param $import_map_arr
+	 * @return bool
+	 */
+	function setColumnMap( $import_map_arr) {
 		//
 		// Array(
 		//			$column_name => array( 'map_column_name' => 'user_name', 'default_value' => 'blah', 'parse_hint' => 'm/d/y' ),
@@ -307,6 +382,10 @@ class Import {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $key
+	 * @return bool|mixed|null
+	 */
 	function getImportOptions( $key = NULL ) {
 		if ( isset($this->data['import_options']) ) {
 			if ( $key == '' ) {
@@ -323,6 +402,11 @@ class Import {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setImportOptions( $value ) {
 		if ( is_array($value) ) {
 			$this->data['import_options'] = Misc::trimSortPrefix( $value );
@@ -334,6 +418,12 @@ class Import {
 		return FALSE;
 	}
 
+	/**
+	 * @param $function_name
+	 * @param $map_data
+	 * @param null $raw_row
+	 * @return mixed|string
+	 */
 	function callInputParseFunction( $function_name, $map_data, $raw_row = NULL ) {
 		$full_function_name = 'parse_'.$function_name;
 
@@ -383,6 +473,9 @@ class Import {
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function preProcess() {
 		if ( method_exists( $this, '_preProcess' ) ) {
 			return $this->_preProcess();
@@ -391,6 +484,11 @@ class Import {
 		return TRUE;
 	}
 
+	/**
+	 * @param $column_map
+	 * @param $raw_row
+	 * @return bool
+	 */
 	function mapRowData( $column_map, $raw_row ) {
 		foreach( $column_map as $import_column => $import_data ) {
 			//Debug::Arr($import_data, 'Import Data: Column: '. $import_column .' File Column Name: '. $import_data['map_column_name'], __FILE__, __LINE__, __METHOD__, 10);
@@ -420,6 +518,11 @@ class Import {
 		return FALSE;
 	}
 
+	/**
+	 * @param $row_number
+	 * @param $raw_row
+	 * @return mixed
+	 */
 	function preParseRow( $row_number, $raw_row ) {
 		if ( method_exists( $this, '_preParseRow' ) ) {
 			return $this->_preParseRow( $row_number, $raw_row );
@@ -427,6 +530,12 @@ class Import {
 
 		return $raw_row;
 	}
+
+	/**
+	 * @param $row_number
+	 * @param $raw_row
+	 * @return mixed
+	 */
 	function postParseRow( $row_number, $raw_row ) {
 
 		if ( method_exists( $this, '_postParseRow' ) ) {
@@ -452,6 +561,9 @@ class Import {
 	//Parse data while applying any parse hints.
 	//This converts the raw data into something that can be passed directly to the setObjectAsArray functions for this object.
 	//Which may include converting one column into multiples and vice versa.
+	/**
+	 * @return bool
+	 */
 	function parseData() {
 		$raw_data = $this->getRawData();
 		$column_map = $this->getColumnMap();
@@ -519,6 +631,11 @@ class Import {
 	}
 
 	//This function can't be named "import" as it will be called during __construct() then.
+
+	/**
+	 * @param bool $validate_only
+	 * @return bool
+	 */
 	function process( $validate_only = FALSE ) {
 		//Because parse functions can create additional records (like groups, titles, branches)
 		//we need to wrap those in a transaction so they can be rolled back on validate_only calls.
@@ -574,6 +691,9 @@ class Import {
 	//
 	// File upload functions.
 	//
+	/**
+	 * @return array|bool
+	 */
 	function getLocalFileData() {
 		$file_name = $this->getStoragePath().$this->getLocalFileName();
 		if ( file_exists($file_name) ) {
@@ -585,12 +705,20 @@ class Import {
 		return FALSE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getRemoteFileName() {
 		if ( isset($this->data['remote_file_name']) ) {
 			return $this->data['remote_file_name'];
 		}
 	}
-	function setRemoteFileName($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setRemoteFileName( $value) {
 		if ( $value != '' ) {
 			$this->data['remote_file_name'] = $value;
 
@@ -600,13 +728,20 @@ class Import {
 		return FALSE;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getLocalFileName() {
 		$retval = md5( $this->company_id.$this->user_id );
 		Debug::Text('Local File Name: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
-	function cleanStoragePath($company_id = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
+	function cleanStoragePath( $company_id = NULL) {
 		if ( $company_id == '' ) {
 			$company_id = $this->company_id;
 		}
@@ -628,6 +763,10 @@ class Import {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @return bool|string
+	 */
 	function getStoragePath( $company_id = NULL ) {
 		if ( $company_id == '' ) {
 			$company_id = $this->company_id;
@@ -641,6 +780,9 @@ class Import {
 		return $config_vars['cache']['dir'] . DIRECTORY_SEPARATOR .'import'. DIRECTORY_SEPARATOR . $company_id . DIRECTORY_SEPARATOR;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function renameLocalFile() {
 		$src_file = $this->getStoragePath().$this->getRemoteFileName();
 		$dst_file = $this->getStoragePath().$this->getLocalFileName();
@@ -653,6 +795,9 @@ class Import {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function deleteLocalFile() {
 		$file = $this->getStoragePath().$this->getLocalFileName();
 
@@ -667,6 +812,12 @@ class Import {
 	//
 	// Generic parser functions.
 	//
+	/**
+	 * @param $input
+	 * @param $options
+	 * @param int $match_percent
+	 * @return array|bool|mixed
+	 */
 	function findClosestMatch( $input, $options, $match_percent = 50 ) {
 		//We used to check for the option KEY, but that causes problems if the job code/job name are numeric values
 		//that happen to match the record ID in the database. Use this as a fallback method instead perhaps?
@@ -691,8 +842,13 @@ class Import {
 	}
 
 	//Used by sub-classes to get general users while importing data.
+
+	/**
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function getUserObject( $user_id ) {
-		if ( $user_id > 0 ) {
+		if ( $user_id != '' ) {
 			$ulf = TTnew( 'UserListFactory' );
 			$ulf->getByCompanyIdAndID( $this->company_id, $user_id );
 			if ( $ulf->getRecordCount() == 1 ) {
@@ -702,12 +858,20 @@ class Import {
 		return FALSE;
 	}
 
+	/**
+	 * @return array|null
+	 */
 	function getUserIdentificationColumns() {
 		$uf = TTNew('UserFactory');
 		$retval = Misc::arrayIntersectByKey( array('user_name', 'employee_number', 'sin'), Misc::trimSortPrefix( $uf->getOptions('columns') ) );
 
 		return $retval;
 	}
+
+	/**
+	 * @param $raw_row
+	 * @return bool
+	 */
 	function getUserIDByRowData( $raw_row ) {
 		//NOTE: Keep in mind that employee numbers can be duplicate based on status (ACTIVE vs TERMINATED), so
 		//if there are ever duplicate employee numbers, the import process won't be able to differentiate between them, and the
@@ -776,6 +940,14 @@ class Import {
 		return FALSE;
 	}
 
+	/**
+	 * @param $column
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed|string
+	 */
 	function _parse_name( $column, $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		if ( $parse_hint == '' ) {
 			$parse_hint = 'first_name';
@@ -845,16 +1017,46 @@ class Import {
 		return $retval;
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed|string
+	 */
 	function parse_first_name( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		return $this->_parse_name( 'first_name', $input, $default_value, $parse_hint, $raw_row );
 	}
+
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed|string
+	 */
 	function parse_middle_name( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		return $this->_parse_name( 'middle_name', $input, $default_value, $parse_hint, $raw_row );
 	}
+
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed|string
+	 */
 	function parse_last_name( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		return $this->_parse_name( 'last_name', $input, $default_value, $parse_hint, $raw_row );
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return string
+	 */
 	function parse_postal_code( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		//Excel likes to strip leading zeros from fields, so take 4 digit US zip codes and prepend the zero.
 		if ( is_numeric( $input) AND strlen( $input ) <= 4 AND strlen( $input ) >= 1 ) {
@@ -865,22 +1067,58 @@ class Import {
 	}
 
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed
+	 */
 	function parse_phone( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		$input = str_replace( array('/'), '-', $input);
 
 		return $input;
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed
+	 */
 	function parse_work_phone( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		return $this->parse_phone( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL );
 	}
+
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed
+	 */
 	function parse_home_phone( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		return $this->parse_phone( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL );
 	}
+
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed
+	 */
 	function parse_fax_phone( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		return $this->parse_phone( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL );
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return false|int
+	 */
 	function parse_date( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( $input != '' ) { //Don't try to parse a blank date, this helps in cases where hire/termination dates are imported blank.
 			if ( isset($parse_hint) AND $parse_hint != '' ) {
@@ -894,6 +1132,12 @@ class Import {
 		return $input;
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return bool|float|int|number|string
+	 */
 	function parse_time_unit( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( $input != '' ) { //Don't try to parse a blank date, this helps in cases where hire/termination dates are imported blank.
 			if ( isset($parse_hint) AND $parse_hint != '' ) {
@@ -907,6 +1151,13 @@ class Import {
 		return $input;
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return int
+	 */
 	function parse_sex( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		if ( strtolower( $input ) == 'f'
 				OR strtolower( $input ) == 'female' ) {
@@ -921,6 +1172,12 @@ class Import {
 		return $retval;
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|mixed
+	 */
 	function parse_country( $input, $default_value = NULL, $parse_hint = NULL ) {
 		$cf = TTnew('CompanyFactory');
 		$options = $cf->getOptions( 'country' );
@@ -936,6 +1193,14 @@ class Import {
 		}
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $map_data
+	 * @param null $raw_row
+	 * @return array|bool|mixed|string
+	 */
 	function parse_province( $input, $default_value = NULL, $parse_hint = NULL, $map_data = NULL, $raw_row = NULL ) {
 		$country = $this->callInputParseFunction( 'country', $map_data, $raw_row );
 		Debug::Text('Input: '. $input .' Country: '. $country, __FILE__, __LINE__, __METHOD__, 10);
@@ -967,6 +1232,9 @@ class Import {
 		return $input;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getBranchOptions() {
 		$this->branch_options = $this->branch_manual_id_options = array();
 		$blf = TTNew('BranchListFactory');
@@ -982,6 +1250,12 @@ class Import {
 		return TRUE;
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|int|mixed
+	 */
 	function parse_branch( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return 0; //No branch
@@ -1005,6 +1279,9 @@ class Import {
 		return $retval;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getDepartmentOptions() {
 		//Get departments
 		$this->department_options = $this->department_manual_id_options = array();
@@ -1020,6 +1297,13 @@ class Import {
 
 		return TRUE;
 	}
+
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|int|mixed
+	 */
 	function parse_department( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return 0; //No department
@@ -1044,6 +1328,9 @@ class Import {
 		return $retval;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getJobOptions() {
 		//Get jobs
 		$this->job_options = $this->job_manual_id_options = array();
@@ -1059,6 +1346,13 @@ class Import {
 
 		return TRUE;
 	}
+
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|int|mixed
+	 */
 	function parse_job( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return 0; //No job
@@ -1082,6 +1376,9 @@ class Import {
 		return $retval;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getJobItemOptions() {
 		//Get job_items
 		$this->job_item_options = $this->job_item_manual_id_options = array();
@@ -1097,6 +1394,13 @@ class Import {
 
 		return TRUE;
 	}
+
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|int|mixed
+	 */
 	function parse_job_item( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return 0; //No job_item

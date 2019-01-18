@@ -1,15 +1,17 @@
 TimesheetDetailReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function( options ) {
-		this.__super( 'initialize', options );
+	_required_files: {
+		10: ['APITimesheetDetailReport', 'APICurrency'],
+		20: ['APIJob', 'APIJobItem']
+	},
+
+	initReport: function( options ) {
 		this.script_name = 'TimesheetDetailReport';
 		this.viewId = 'TimesheetDetailReport';
 		this.context_menu_name = $.i18n._( 'TimeSheet Detail' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'TimesheetDetailReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APITimesheetDetailReport' ))();
-		this.buildContextMenu();
-
 	},
 
 	buildContextMenuModels: function() {

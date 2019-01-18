@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,9 +42,13 @@ class CronJobFactory extends Factory {
 	protected $table = 'cron';
 	protected $pk_sequence_name = 'cron_id_seq'; //PK Sequence name
 
-	protected $temp_time = NULL;
 	protected $execute_flag = FALSE;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -70,53 +74,43 @@ class CronJobFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim($name);
-
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is invalid'),
-											1, 250)
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @param $value_arr
+	 * @param $limit_arr
+	 * @return bool
+	 */
 	function isValidLimit( $value_arr, $limit_arr ) {
 		if ( is_array($value_arr) AND is_array($limit_arr) ) {
 			foreach($value_arr as $value ) {
@@ -137,199 +131,156 @@ class CronJobFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getMinute() {
-		if ( isset($this->data['minute']) ) {
-			return $this->data['minute'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'minute' );
 	}
-	function setMinute($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMinute( $value) {
 		$value = trim($value);
-
-		if (	$this->Validator->isLength(	'minute',
-											$value,
-											TTi18n::gettext('Minute is invalid'),
-											1, 250)
-						) {
-
-			$this->data['minute'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'minute', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getHour() {
-		if ( isset($this->data['hour']) ) {
-			return $this->data['hour'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'hour' );
 	}
-	function setHour($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setHour( $value) {
 		$value = trim($value);
-
-		if (	$this->Validator->isLength(	'hour',
-											$value,
-											TTi18n::gettext('Hour is invalid'),
-											1, 250)
-						) {
-
-			$this->data['hour'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'hour', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getDayOfMonth() {
-		if ( isset($this->data['day_of_month']) ) {
-			return $this->data['day_of_month'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'day_of_month' );
 	}
-	function setDayOfMonth($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDayOfMonth( $value) {
 		$value = trim($value);
-
-		if (	$this->Validator->isLength(	'day_of_month',
-											$value,
-											TTi18n::gettext('Day of Month is invalid'),
-											1, 250)
-						) {
-
-			$this->data['day_of_month'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'day_of_month', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getMonth() {
-		if ( isset($this->data['month']) ) {
-			return $this->data['month'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'month' );
 	}
-	function setMonth($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMonth( $value) {
 		$value = trim($value);
-
-		if (	$this->Validator->isLength(	'month',
-											$value,
-											TTi18n::gettext('Month is invalid'),
-											1, 250)
-						) {
-
-			$this->data['month'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'month', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getDayOfWeek() {
-		if ( isset($this->data['day_of_week']) ) {
-			return $this->data['day_of_week'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'day_of_week' );
 	}
-	function setDayOfWeek($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDayOfWeek( $value) {
 		$value = trim($value);
-
-		if (	$this->Validator->isLength(	'day_of_week',
-											$value,
-											TTi18n::gettext('Day of Week is invalid'),
-											1, 250)
-						) {
-
-			$this->data['day_of_week'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'day_of_week', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCommand() {
-		if ( isset($this->data['command']) ) {
-			return $this->data['command'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'command' );
 	}
-	function setCommand($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCommand( $value) {
 		$value = trim($value);
-
-		if (	$this->Validator->isLength(	'command',
-											$value,
-											TTi18n::gettext('Command is invalid'),
-											1, 250)
-						) {
-
-			$this->data['command'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'command', $value );
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getLastRunDate( $raw = FALSE ) {
-		if ( isset($this->data['last_run_date']) ) {
+		$value = $this->getGenericDataValue( 'last_run_date' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['last_run_date'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['last_run_date'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setLastRunDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if	(	$this->Validator->isDate(		'last_run',
-												$epoch,
-												TTi18n::gettext('Incorrect last run'))
-			) {
-
-			$this->data['last_run_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setLastRunDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'last_run_date', $value );
 	}
 
-	private function setTempTime( $epoch ) {
-		$this->temp_time = $epoch;
-	}
-
-	private function getTempTime() {
-		return $this->temp_time;
-	}
-
+	/**
+	 * @param $bool
+	 */
 	private function setExecuteFlag( $bool ) {
 		$this->execute_flag = (bool)$bool;
 	}
 
+	/**
+	 * @return bool
+	 */
 	private function getExecuteFlag() {
 		return $this->execute_flag;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isSystemLoadValid() {
 		return Misc::isSystemLoadValid();
 	}
 
 	//Check if job is scheduled to run right NOW.
 	//If the job has missed a run, it will run immediately.
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $last_run_date EPOCH
+	 * @return bool
+	 */
 	function isScheduledToRun( $epoch = NULL, $last_run_date = NULL ) {
 		//Debug::text('Checking if Cron Job is scheduled to run: '. $this->getName(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $epoch == '' ) {
@@ -346,6 +297,12 @@ class CronJobFactory extends Factory {
 	}
 
 	//Executes the CronJob
+
+	/**
+	 * @param null $php_cli
+	 * @param null $dir
+	 * @return bool
+	 */
 	function Execute( $php_cli = NULL, $dir = NULL ) {
 		global $config_vars;
 		$lock_file = new LockFile( $config_vars['cache']['dir'] . DIRECTORY_SEPARATOR . $this->getName().'.lock' );
@@ -435,7 +392,76 @@ class CronJobFactory extends Factory {
 
 		return FALSE;
 	}
-
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Status
+		$this->Validator->inArrayKey(	'status',
+												$this->getStatus(),
+												TTi18n::gettext('Incorrect Status'),
+												$this->getOptions('status')
+											);
+		// Name
+		$this->Validator->isLength(	'name',
+											$this->getName(),
+											TTi18n::gettext('Name is invalid'),
+											1, 250
+										);
+		// Minute
+		$this->Validator->isLength(	'minute',
+											$this->getMinute(),
+											TTi18n::gettext('Minute is invalid'),
+											1, 250
+										);
+		// Hour
+		$this->Validator->isLength(	'hour',
+											$this->getHour(),
+											TTi18n::gettext('Hour is invalid'),
+											1, 250
+										);
+		// Day of Month
+		$this->Validator->isLength(	'day_of_month',
+											$this->getDayOfMonth(),
+											TTi18n::gettext('Day of Month is invalid'),
+											1, 250
+										);
+		// Month
+		$this->Validator->isLength(	'month',
+											$this->getMonth(),
+											TTi18n::gettext('Month is invalid'),
+											1, 250
+										);
+		// Day of Week
+		$this->Validator->isLength(	'day_of_week',
+											$this->getDayOfWeek(),
+											TTi18n::gettext('Day of Week is invalid'),
+											1, 250
+										);
+		// Command
+		$this->Validator->isLength(	'command',
+											$this->getCommand(),
+											TTi18n::gettext('Command is invalid'),
+											1, 250
+										);
+		// last run
+		if ( $this->getLastRunDate() !== FALSE ) {
+			$this->Validator->isDate(		'last_run',
+													$this->getLastRunDate(),
+													TTi18n::gettext('Incorrect last run')
+												);
+		}
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getStatus() == '' ) {
 			$this->setStatus(10); //Ready
@@ -464,12 +490,19 @@ class CronJobFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
 		return TRUE;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		if ( $this->getExecuteFlag() == FALSE ) {
 			return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Cron Job'), NULL, $this->getTable() );

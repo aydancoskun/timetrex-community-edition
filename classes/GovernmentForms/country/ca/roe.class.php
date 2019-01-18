@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -993,7 +993,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 					$xml->ROE[ $e ]->addChild( 'B3', substr( $this->payroll_reference_number, 0, 15 ) ); //maxLength 15  minOccurs="0"
 				}
 				// Box5
-				$xml->ROE[ $e ]->addChild( 'B5', substr( $this->business_number, 0, 15 ) ); //maxLength 15
+				$xml->ROE[ $e ]->addChild( 'B5', substr( str_replace(' ', '', $this->business_number ), 0, 15 ) ); //maxLength 15 - Remove any spaces as well, to prevent business numbers like: 123456789 RP 0001 from causing problems.
 				// Box6
 				$xml->ROE[ $e ]->addChild( 'B6', $pay_period_type_options[ $this->pay_period_type_id ] ); //maxLength 1
 				// Box8

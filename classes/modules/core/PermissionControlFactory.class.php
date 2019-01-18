@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class PermissionControlFactory extends Factory {
 	protected $company_obj = NULL;
 	protected $tmp_previous_user_ids = array();
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -118,6 +123,10 @@ class PermissionControlFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -133,43 +142,45 @@ class PermissionControlFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
+	/**
+	 * @return bool|int|string
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -187,79 +198,66 @@ class PermissionControlFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return mixed
+	 */
 	function getName() {
-		return $this->data['name'];
-	}
-	function setName($name) {
-		$name = trim($name);
-
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is invalid'),
-											2, 50)
-				AND	$this->Validator->isTrue(	'name',
-												$this->isUniqueName($name),
-												TTi18n::gettext('Name is already in use')
-												)
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
-	function getDescription() {
-		return $this->data['description'];
-	}
-	function setDescription($description) {
-		$description = trim($description);
-
-		if (	$description == ''
-				OR $this->Validator->isLength(	'description',
-											$description,
-											TTi18n::gettext('Description is invalid'),
-											1, 255) ) {
-
-			$this->data['description'] = $description;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-
-	function getLevel() {
-		if ( isset($this->data['level']) ) {
-			return (int)$this->data['level'];
-		}
-
-		return FALSE;
-	}
-	function setLevel($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'level',
-											$value,
-											TTi18n::gettext('Incorrect Level'),
-											$this->getOptions('level')) ) {
-
-			$this->data['level'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'name', $value );
 	}
 
+	/**
+	 * @return mixed
+	 */
+	function getDescription() {
+		return $this->getGenericDataValue( 'description' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+
+	/**
+	 * @return bool|int
+	 */
+	function getLevel() {
+		return $this->getGenericDataValue( 'level' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLevel( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'level', $value );
+	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getUser() {
+		/** @var PermissionUserListFactory $pulf */
 		$pulf = TTnew( 'PermissionUserListFactory' );
 		$pulf->getByPermissionControlId( $this->getId() );
 
 		$list = array();
+		/** @var PermissionUserFactory $obj */
 		foreach ($pulf as $obj) {
 			$list[] = $obj->getUser();
 		}
@@ -270,7 +268,12 @@ class PermissionControlFactory extends Factory {
 
 		return FALSE;
 	}
-	function setUser($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setUser( $ids) {
 		Debug::text('Setting User IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( !is_array($ids) ) {
 			$ids = array($ids);
@@ -282,7 +285,7 @@ class PermissionControlFactory extends Factory {
 			//Remove any of the selected employees from other permission control objects first.
 			//So there we can switch employees from one group to another in a single action.
 			$pulf = TTnew( 'PermissionUserListFactory' );
-			$pulf->getByCompanyIdAndUserIdAndNotPermissionControlId( $this->getCompany(), $ids, (int)$this->getId() );
+			$pulf->getByCompanyIdAndUserIdAndNotPermissionControlId( $this->getCompany(), $ids, TTUUID::castUUID($this->getId()) );
 			if ( $pulf->getRecordCount() > 0 ) {
 				Debug::text('Found User IDs assigned to another Permission Group, unassigning them!', __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $pulf as $pu_obj ) {
@@ -341,7 +344,7 @@ class PermissionControlFactory extends Factory {
 					if ( $ulf->getRecordCount() > 0 ) {
 						$obj = $ulf->getCurrent();
 						if ($this->Validator->isTrue(		'user',
-															 $puf->Validator->isValid(),
+															 $puf->isValid(),
 															 TTi18n::gettext('Selected employee is invalid, or already assigned to another permission group').' ('. $obj->getFullName() .')' )) {
 							$puf->save();
 						}
@@ -356,6 +359,9 @@ class PermissionControlFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return array
+	 */
 	function getPermissionOptions() {
 		$product_edition = $this->getCompanyObject()->getProductEdition();
 
@@ -382,7 +388,11 @@ class PermissionControlFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getPermission() {
+		/** @var PermissionListFactory $plf */
 		$plf = TTnew( 'PermissionListFactory' );
 		$plf->getByCompanyIdAndPermissionControlId( $this->getCompany(), $this->getId() );
 		if ( $plf->getRecordCount() > 0 ) {
@@ -397,6 +407,12 @@ class PermissionControlFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @param $permission_arr
+	 * @param array $old_permission_arr
+	 * @return bool
+	 */
 	function setPermission( $permission_arr, $old_permission_arr = array() ) {
 		if ( $this->getId() == FALSE ) {
 			return FALSE;
@@ -446,10 +462,11 @@ class PermissionControlFactory extends Factory {
 						if ( $value == 0 OR $value == 1 ) {
 							Debug::Text('	 Modifying/Adding Section: '. $section .' Permission: '. $name .' - Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 							$tmp_pf = TTnew( 'PermissionFactory' );
+							$tmp_pf->setEnableSectionAndNameValidation( FALSE ); //Disable error checking for performance optimization, as we know they are correct.
 							$tmp_pf->setCompany( $this->getCompanyObject()->getId() );
 							$tmp_pf->setPermissionControl( $this->getId() );
-							$tmp_pf->setSection( $section, TRUE ); //Disable error checking for performance optimization.
-							$tmp_pf->setName( $name, TRUE ); //Disable error checking for performance optimization.
+							$tmp_pf->setSection( $section );
+							$tmp_pf->setName( $name );
 							$tmp_pf->setValue( (int)$value );
 							if ( $tmp_pf->isValid() ) {
 								$tmp_pf->save();
@@ -466,6 +483,12 @@ class PermissionControlFactory extends Factory {
 	}
 
 	//Quick way to touch the updated_date, updated_by when adding/removing employees from the UserFactory.
+
+	/**
+	 * @param string $permission_control_id UUID
+	 * @return bool
+	 * @throws DBError
+	 */
 	function touchUpdatedByAndDate( $permission_control_id = NULL ) {
 		global $current_user;
 
@@ -478,7 +501,7 @@ class PermissionControlFactory extends Factory {
 		$ph = array(
 					'updated_date' => TTDate::getTime(),
 					'updated_by' => $user_id,
-					'id' => ( $permission_control_id == '' ) ? (int)$this->getID() : (int)$permission_control_id,
+					'id' => ( $permission_control_id == '' ) ? TTUUID::castUUID($this->getID()) : TTUUID::castUUID($permission_control_id),
 					);
 
 		$query = 'update '. $this->getTable() .' set updated_date = ?, updated_by = ? where id = ?';
@@ -491,6 +514,51 @@ class PermissionControlFactory extends Factory {
 
 	}
 
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		// Name
+		$this->Validator->isLength(	'name',
+											$this->getName(),
+											TTi18n::gettext('Name is invalid'),
+											2, 50
+										);
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(	'name',
+											$this->isUniqueName($this->getName()),
+											TTi18n::gettext('Name is already in use')
+										);
+		}
+		// Description
+		if ( $this->getDescription() != '' ) {
+			$this->Validator->isLength(	'description',
+											$this->getDescription(),
+											TTi18n::gettext('Description is invalid'),
+											1, 255
+										);
+		}
+		// Level
+		$this->Validator->inArrayKey(	'level',
+											$this->getLevel(),
+											TTi18n::gettext('Incorrect Level'),
+											$this->getOptions('level')
+										);
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getLevel() == '' OR $this->getLevel() == 0 ) {
 			$this->setLevel( 1 );
@@ -510,6 +578,10 @@ class PermissionControlFactory extends Factory {
 
 	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -536,6 +608,10 @@ class PermissionControlFactory extends Factory {
 	}
 
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -563,6 +639,10 @@ class PermissionControlFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Permission Group').': '. $this->getName(), NULL, $this->getTable(), $this );
 	}

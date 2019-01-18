@@ -1,0 +1,54 @@
+Name	                    Path	                                                            TT V	    dist V          License	Download URL	NOTE
+autolinker	            interface/html5/framework/autolinker/Autolinker.min.js	                1.4.2	    1.4.4	        MIT	    https://github.com/gregjacobs/Autolinker.js
+backbone	            interface/html5/framework/backbone/backbone-min.js	                    ??	        1.3.3	        MIT	    backbonejs.org
+json2.js	            interface/html5/framework/backbone/json2.js	                            40835	    n/a	            NONE	n/a no longer supported
+underscore	            interface/html5/framework/backbone/underscore-min.js	                1.8.3	    1.8.3	        MIT	    http://underscorejs.org/
+bootstrap	            interface/html5/framework/bootstrap/js/bootstrap.js	                    v3.3.6	    v4.0.0-beta.2	MIT	    http://getbootstrap.com
+bootstrap-select	    interface/html5/framework/bootstrap-select/dist/js/bootstrap-select.js	1.11.2	    1.12.4	        MIT	    https://silviomoreto.github.io/bootstrap-select/
+jqueryui	            interface/html5/framework/jqueryui/js/jquery-ui.custom.min.js	        1.8.23	    1.12.1	        MIT	    http://jqueryui.com/download/
+leaflet	                interface/html5/framework/leaflet/leaflet.js	                        1.0.0-rc3	1.2.0	        BSD-2-Clause	http://leafletjs.com/download.html
+leaflet-draw	        interface/html5/framework/leaflet/leaflet-draw	                        ??	        0.2.0	        MIT	    https://github.com/Leaflet/Leaflet.draw
+leaflet-providers	    interface/html5/framework/leaflet/leaflet-providers/leaflet-providers.js ?	        ?	            copyright https://github.com/leaflet-extras/leaflet-providers
+leaflet-routing-machine	interface/html5/framework/leaflet/leaflet-routing-machine	            3.0.3	    3.2.5	        ISC	    http://www.liedman.net/leaflet-routing-machine/
+pdfjs	                interface/html5/framework/pdfjs	                                        ??	        1.8.188	        Apache License	https://mozilla.github.io/pdf.js/getting_started/#download
+qunit	                interface/html5/framework/qunit/qunit.js	                            2.0.1	    ??	            MIT	    https://qunitjs.com/
+rightclickmenu	        interface/html5/framework/rightclickmenu/rightclickmenu.js	            ??	        ??	            MIT/GPL	http://swisnl.github.io/jQuery-contextMenu/index.html
+tinymce	                interface/html5/framework/tinymce/tinymce.min.js	                    4.3.13	    4.7.1	        GPL	    https://www.tinymce.com/download/
+
+bootstrap-toolkit	    interface/html5/framework/bootstrap-toolkit.min.js	                    2.5.1	    2.6.3	        MIT	    https://github.com/maciej-gurban/responsive-bootstrap-toolkit
+date.js	                interface/html5/framework/date.js	                                    1.0 Alpha-1	??	            MIT	    www.datejs.com
+fastclick.js	        interface/html5/framework/fastclick.js	                                0.6.7	    ??	            MIT	    https://github.com/ftlabs/fastclick
+html2canvas.js	        interface/html5/framework/html2canvas.js	                            0.4.0	    0.5.5-beta4	    MIT	    https://github.com/niklasvh/html2canvas/releases
+html5shiv	            interface/html5/framework/html5shiv.min.js	                            3.7.2	    3.73	        MIT & GPL2 https://github.com/aFarkas/html5shiv
+interact.min.js	        interface/html5/framework/interact.min.js	                            1.2.9	    1.3.0	        ASIS	interactjs.io
+jed.js	                interface/html5/framework/jed.js	                                    0.5.0-beta	1.1.1	        WTFPL	https://github.com/SlexAxton/Jed
+jquery-ba-resize	    interface/html5/framework/jquery.ba-resize.js	                        1.1	        1.1	            MIT/GPL	https://github.com/cowboy/jquery-resize
+jquery.bridget	        interface/html5/framework/jquery.bridget.js	                            2.0.1	    2.0.1	        MIT	    https://github.com/desandro/jquery-bridget
+jquery.cookie	        interface/html5/framework/jquery.cookie.js	                            1.3	        2.1.4	        MIT	    https://github.com/js-cookie/js-cookie
+jquery.form	            interface/html5/framework/jquery.form.min.js	                        3.51.0-2014.06.20 4.2.2	    MIT/LGPL https://github.com/jquery-form/form
+jquery.i18n	            interface/html5/framework/jquery.i18n.js	                            1.1	        1.1.2	        AS IS	https://github.com/recurser/jquery-i18n
+jquery.imageareaselect	interface/html5/framework/jquery.imgareaselect.js	                    0.9.10	    0.9.10	        MIT/GPL	http://odyniec.net/projects/imgareaselect/
+jquery.json	            interface/html5/framework/jquery.json.js	                            2.4.0	    2.6.0	        MIT	    https://github.com/Krinkle/jquery-json
+jquery.localisation	    interface/html5/framework/jquery.localisation.min.js	                1.1.0	    1.1.0	        MIT/GPL	http://keith-wood.name/localisation.html
+jquery.masonry	        interface/html5/framework/jquery.masonry.min.js	                        4.2.0	    4.2.0	        MIT	    http://masonry.desandro.com
+jquery	                interface/html5/framework/jquery.min.js	                                1.11.1	1.12-stable, 2.2, 3.2.1	ASIS https://github.com/jquery/jquery
+jquery.qtip	            interface/html5/framework/jquery.qtip.min.js	                        1.0.0-rc2	3.0.3	        MIT/GPL2 https://github.com/Craga89/qTip1  http://qtip2.com/
+jquery.sortable	        interface/html5/framework/jquery.sortable.js	                        ??	        XX		        MIT     http://farhadi.ir/projects/html5sortable
+jquery.stickytableheaders	interface/html5/framework/jquery.stickytableheaders.min.js	        ??	        0.1.19	        ASIS	https://github.com/jmosbech/StickyTableHeaders
+jquery.tablednd	        interface/html5/framework/jquery.tablednd.js	                        0.4	        0.9.1	        MIT	    https://github.com/isocra/TableDnD
+json2.js	            interface/html5/framework/json2.js	                                    ??		    ??
+measurement	            interface/html5/framework/measurement.js	                            0.1	        1.1.0-1	        MIT	    https://www.measurementjs.com/
+moment	                interface/html5/framework/moment.min.js	                                2.7.0	    2.19.1	        MIT	    https://momentjs.com/
+nanobar	                interface/html5/framework/nanobar.min.js	                            != current	0.4.2	        MIT	    http://nanobar.jacoborus.codes/
+r	                    interface/html5/framework/r.js	                                        2.1.6	    2.3.5	        MIT or New BSD	https://github.com/requirejs/r.js
+require	                interface/html5/framework/require.js	                                2.1.20	    2.3.5	        MIT or New BSD	http://requirejs.org/
+require_async_plugin	interface/html5/framework/require_async_plugin.js	                    0.0.1	    0.1.2	        MIT	    https://github.com/millermedeiros/requirejs-plugins/tree/master/src
+respond	                interface/html5/framework/respond.min.js	                            1.4.2	    1.4.2	        ASIS	https://github.com/scottjehl/Respond
+sonic	                interface/html5/framework/sonic.js	                                    0.2.1	    0.2.1	        MIT	    https://github.com/padolsey/sonic.js
+stacktrace	            interface/html5/framework/stacktrace.js	                                ??	        2.0.0	        MIT	    https://www.stacktracejs.com/
+
+color-picker	        interface/html5/framework/widgets/color-picker	                        1.1.1	    1.1.1	        MIT	    https://github.com/PitPik/tinyColorPicker/blob/master/jqColorPicker.min.js
+datepicker	            interface/html5/framework/widgets/datepicker/jquery-ui-timepicker-addon.js 1.2	    1.6.3	        MIT	    http://trentrichardson.com/examples/timepicker/ https://github.com/trentrichardson/jQuery-Timepicker-Addon
+jqgrid	                interface/html5/framework/widgets/jqgrid/jquery.jqGrid.src.js	        4.4.1	    5.2.1	        MIT/GPL2 http://www.trirand.com
+grid.locale-en.js	    interface/html5/framework/widgets/jqgrid/grid.locale-en.js	            ??	        ??	            ??	        ?
+jquery-tagsinput.js	    interface/html5/framework/widgets/tag_input/jquery.tagsinput.min.js	    1.3.3	    ??	            MIT	    http://xoxco.com/clickable/jquery-tags-input

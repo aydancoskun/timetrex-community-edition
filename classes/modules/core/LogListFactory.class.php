@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class LogListFactory extends LogFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|LogListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,7 +89,14 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|LogListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -88,8 +108,8 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => (int)$id,
-					'company_id' => (int)$company_id
+					'id' => TTUUID::castUUID($id),
+					'company_id' => TTUUID::castUUID($company_id)
 					);
 
 		$query = '
@@ -107,7 +127,13 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|LogListFactory
+	 */
+	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -115,7 +141,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id
+					'company_id' => TTUUID::castUUID($company_id)
 					);
 
 		$query = '
@@ -132,7 +158,13 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getLastEntryByUserIdAndActionAndTable($user_id, $action, $table_name) {
+	/**
+	 * @param string $user_id UUID
+	 * @param $action
+	 * @param $table_name
+	 * @return bool|LogListFactory
+	 */
+	function getLastEntryByUserIdAndActionAndTable( $user_id, $action, $table_name) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -146,7 +178,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'table_name' => $table_name,
 					'action_id' => $action,
 					);
@@ -168,92 +200,13 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getSearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		if ( !is_array($order) ) {
-			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
-			}
-		}
-
-		$additional_order_fields = array('b.last_name');
-		if ( $order == NULL ) {
-			$order = array( 'date' => 'desc');
-			$strict = FALSE;
-		} else {
-			//Do order by column conversions, because if we include these columns in the SQL
-			//query, they contaminate the data array.
-			$strict = TRUE;
-		}
-		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
-
-
-		if ( isset($filter_data['user_ids']) ) {
-			$filter_data['user_id'] = $filter_data['user_ids'];
-		}
-		if ( isset($filter_data['log_action_ids']) ) {
-			$filter_data['log_action_id'] = $filter_data['log_action_ids'];
-		}
-		if ( isset($filter_data['log_table_name_ids']) ) {
-			$filter_data['log_table_name_id'] = $filter_data['log_table_name_ids'];
-		}
-
-		$uf = new UserFactory();
-
-		$ph = array(
-					'company_id' => (int)$company_id,
-					);
-
-		$query = '
-					select	a.*,
-					b.first_name as first_name,
-					b.middle_name as middle_name,
-					b.last_name as last_name
-					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
-					where	b.company_id = ?
-					';
-
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query	.=	' AND a.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query	.=	' AND a.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_user_id']) AND isset($filter_data['exclude_user_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_user_id']) ) {
-			$query	.=	' AND a.user_id not in ('. $this->getListSQL($filter_data['exclude_user_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['log_action_id']) AND isset($filter_data['log_action_id'][0]) AND !in_array(-1, (array)$filter_data['log_action_id']) ) {
-			$query	.=	' AND a.action_id in ('. $this->getListSQL($filter_data['log_action_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['log_table_name_id']) AND isset($filter_data['log_table_name_id'][0]) AND !in_array(-1, (array)$filter_data['log_table_name_id']) ) {
-			$query	.=	' AND a.table_name in ('. $this->getListSQL($filter_data['log_table_name_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $filter_data['start_date'];
-			$query	.=	' AND a.date >= ?';
-		}
-		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $filter_data['end_date'];
-			$query	.=	' AND a.date <= ?';
-		}
-
-		$query .= ' AND ( b.deleted = 0 ) ';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		return $this;
-	}
-
-	function getByPhonePunchDataByCompanyIdAndStartDateAndEndDate($company_id, $start_date, $end_date ) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @return bool|LogListFactory
+	 */
+	function getByPhonePunchDataByCompanyIdAndStartDateAndEndDate( $company_id, $start_date, $end_date ) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -267,7 +220,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					//'company_id' => (int)$company_id,
+					//'company_id' => TTUUID::castUUID($company_id),
 					'start_date' => $start_date,
 					'end_date' => $end_date,
 					);
@@ -297,9 +250,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 															AND ( a.description ILIKE \'Telephone Punch End%\' )
 															AND (a.date >= ? AND a.date < ? ) ';
 
-															if ( $company_id != '' AND ( isset($company_id[0]) AND !in_array(-1, (array)$company_id) ) ) {
-																$query	.=	' AND company_id in ('. $this->getListSQL( $company_id, $ph, 'int' ) .') ';
-															}
+															$query .= ( isset($company_id) AND $company_id != '' ) ? $this->getWhereClauseSQL( 'company_id', $company_id, 'uuid_list', $ph ) : NULL;
 
 		$query .= '									) as tmp
 										) as tmp2
@@ -317,6 +268,15 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|LogListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -351,10 +311,20 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
+		if ( isset($filter_data['user_ids']) ) {
+			$filter_data['user_id'] = $filter_data['user_ids'];
+		}
+		if ( isset($filter_data['log_action_id']) ) {
+			$filter_data['action_id'] = $filter_data['log_action_id'];
+		}
+		if ( isset($filter_data['log_table_name_id']) ) {
+			$filter_data['table_name'] = $filter_data['log_table_name_id'];
+		}
+
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -368,20 +338,23 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 					where	uf.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['include_user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['action']) AND !is_array($filter_data['action']) AND trim($filter_data['action']) != '' AND !isset($filter_data['action_id']) ) {
 			$filter_data['action_id'] = Option::getByFuzzyValue( $filter_data['action'], $this->getOptions('action') );
 		}
 		$query .= ( isset($filter_data['action_id']) ) ? $this->getWhereClauseSQL( 'a.action_id', $filter_data['action_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['object_id']) ) ? $this->getWhereClauseSQL( 'a.object_id', $filter_data['object_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['object_id']) ) ? $this->getWhereClauseSQL( 'a.object_id', $filter_data['object_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['table_name']) ) ? $this->getWhereClauseSQL( 'a.table_name', $filter_data['table_name'], 'text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['date']) ) ? $this->getWhereClauseSQL( 'a.date', $filter_data['date'], 'date_range', $ph ) : NULL;
+		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.date', $filter_data['start_date'], 'start_date', $ph ) : NULL;
+		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.date', $filter_data['end_date'], 'end_date', $ph ) : NULL;
 
 		if ( isset($filter_data['first_name']) AND !is_array($filter_data['first_name']) AND trim($filter_data['first_name']) != '' ) {
 			$ph[] = $this->handleSQLSyntax(strtolower(trim($filter_data['first_name'])));
@@ -397,7 +370,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 			$sub_query = array();
 			foreach( $filter_data['table_name_object_id'] as $table_name => $object_id ) {
 				$ph[] = strtolower(trim($table_name));
-				$sub_query[] =	'(a.table_name = ? AND a.object_id in ('. $this->getListSQL($object_id, $ph, 'int') .') )';
+				$sub_query[] =	'(a.table_name = ? AND a.object_id in ('. $this->getListSQL( $object_id, $ph, 'uuid' ) .') )';
 			}
 
 			if ( empty($sub_query) == FALSE ) {
@@ -411,9 +384,8 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

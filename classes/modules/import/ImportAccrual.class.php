@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class ImportAccrual extends Import {
 
 	public $accrual_policy_account_options = FALSE;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|bool|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -80,12 +85,22 @@ class ImportAccrual extends Import {
 	}
 
 
+	/**
+	 * @param $row_number
+	 * @param $raw_row
+	 * @return mixed
+	 */
 	function _preParseRow( $row_number, $raw_row ) {
 		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getAccrualDefaultData() );
 
 		return $retval;
 	}
 
+	/**
+	 * @param $row_number
+	 * @param $raw_row
+	 * @return mixed
+	 */
 	function _postParseRow( $row_number, $raw_row ) {
 		$raw_row['user_id'] = $this->getUserIdByRowData( $raw_row );
 		if ( $raw_row['user_id'] == FALSE ) {
@@ -99,6 +114,10 @@ class ImportAccrual extends Import {
 		return $raw_row;
 	}
 
+	/**
+	 * @param int $validate_only EPOCH
+	 * @return mixed
+	 */
 	function _import( $validate_only ) {
 		return $this->getObject()->setAccrual( $this->getParsedData(), $validate_only );
 	}
@@ -106,6 +125,9 @@ class ImportAccrual extends Import {
 	//
 	// Generic parser functions.
 	//
+	/**
+	 * @return bool
+	 */
 	function getAccrualPolicyAccountOptions() {
 		//Get accrual policies
 		$aplf = TTNew('AccrualPolicyAccountListFactory');
@@ -115,6 +137,13 @@ class ImportAccrual extends Import {
 
 		return TRUE;
 	}
+
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|int|mixed
+	 */
 	function parse_accrual_policy_account( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return 0; //Default Wage Group
@@ -132,10 +161,22 @@ class ImportAccrual extends Import {
 		return $retval;
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return false|int
+	 */
 	function parse_date_stamp( $input, $default_value = NULL, $parse_hint = NULL ) {
 		return $this->parse_date( $input, $default_value, $parse_hint );
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|mixed
+	 */
 	function parse_type( $input, $default_value = NULL, $parse_hint = NULL ) {
 		$af = TTnew('AccrualFactory');
 		$options = $af->getOptions( 'user_type' );
@@ -151,6 +192,13 @@ class ImportAccrual extends Import {
 		}
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return bool|float|int|number|string
+	 */
 	function parse_amount( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		$val = new Validator();
 

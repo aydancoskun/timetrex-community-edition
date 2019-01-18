@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -55,6 +55,11 @@ class UserDateTotalFactory extends Factory {
 	protected $timesheet_verification_check = FALSE;
 	static $calc_future_week = FALSE; //Used for BiWeekly overtime policies to schedule future week recalculating.
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
 		$product_edition_id = Misc::getCurrentCompanyProductEdition();
@@ -173,6 +178,10 @@ class UserDateTotalFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 						'id' => 'ID',
@@ -238,22 +247,37 @@ class UserDateTotalFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPayPeriodObject() {
 		return $this->getGenericObject( 'PayPeriodListFactory', $this->getPayPeriod(), 'pay_period_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPunchControlObject() {
 		return $this->getGenericObject( 'PunchControlListFactory', $this->getPunchControlID(), 'punch_control_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPayCodeObject() {
 		return $this->getGenericObject( 'PayCodeListFactory', $this->getPayCode(), 'pay_code_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getJobObject() {
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			return $this->getGenericObject( 'JobListFactory', $this->getJob(), 'job_obj' );
@@ -261,6 +285,10 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getJobItemObject() {
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			return $this->getGenericObject( 'JobItemListFactory', $this->getJobItem(), 'job_item_obj' );
@@ -270,132 +298,117 @@ class UserDateTotalFactory extends Factory {
 	}
 
 
+	/**
+	 * @return mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
+		return $this->getGenericDataValue( 'user_id' );
 	}
-	function setUser($id) {
-		$id = trim($id);
 
-		$ulf = TTnew( 'UserListFactory' );
-
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
 		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
-		if ( $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayPeriod() {
-		if ( isset($this->data['pay_period_id']) ) {
-			return (int)$this->data['pay_period_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_period_id' );
 	}
-	function setPayPeriod( $id = NULL ) {
-		$id = trim($id);
 
-		if ( $id == NULL ) {
-			$id = (int)PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayPeriod( $value = NULL) {
+		if ( $value == NULL ) {
+			$value = PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
 		}
-
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
 
 		//Allow NULL pay period, incase its an absence or something in the future.
 		//Cron will fill in the pay period later.
-		if (
-				$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'pay_period',
-														$pplf->getByID($id),
-														TTi18n::gettext('Invalid Pay Period')
-														) ) {
-			$this->data['pay_period_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'pay_period_id', $value );
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool
+	 */
 	function getDateStamp( $raw = FALSE ) {
-		if ( isset($this->data['date_stamp']) ) {
+		$value = $this->getGenericDataValue( 'date_stamp' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['date_stamp'];
+				return $value;
 			} else {
-				if ( !is_numeric( $this->data['date_stamp'] ) ) { //Optmization to avoid converting it when run in CalculatePolicy's loops
-					$this->data['date_stamp'] = TTDate::strtotime( $this->data['date_stamp'] );
+				if ( !is_numeric( $value ) ) { //Optimization to avoid converting it when run in CalculatePolicy's loops
+					$value = TTDate::strtotime( $value );
+					$this->setGenericDataValue( 'date_stamp', $value );
 				}
-				return $this->data['date_stamp'];
-			}
-		}
-
-		return FALSE;
-	}
-	function setDateStamp($epoch) {
-		$epoch = (int)$epoch;
-
-		if	(	$this->Validator->isDate(		'date_stamp',
-												$epoch,
-												TTi18n::gettext('Incorrect date'))
-			) {
-
-			if	( $epoch > 0 ) {
-				//Use middle day epoch to help avoid confusion with different timezones/DST.
-				//See comments about timezones in CalculatePolicy->_calculate().
-				$this->data['date_stamp'] = TTDate::getMiddleDayEpoch( $epoch );
-
-				$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
-				return TRUE;
-			} else {
-				$this->Validator->isTRUE(		'date_stamp',
-												FALSE,
-												TTi18n::gettext('Incorrect date'));
+				return $value;
 			}
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setDateStamp( $value) {
+		$value = (int)$value;
+
+		if ( $value > 0 ) {
+			//Use middle day epoch to help avoid confusion with different timezones/DST.
+			//See comments about timezones in CalculatePolicy->_calculate().
+			$retval = $this->setGenericDataValue( 'date_stamp', TTDate::getMiddleDayEpoch( $value ) );
+
+			$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
+
+			return $retval;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPunchControlID() {
-		if ( isset($this->data['punch_control_id']) ) {
-			return (int)$this->data['punch_control_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'punch_control_id' );
 	}
-	function setPunchControlID($id) {
-		$id = trim($id);
 
-		$pclf = TTnew( 'PunchControlListFactory' );
-
-		if ( $id == FALSE OR $id == 0 OR $id == '') {
-			$id = 0;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPunchControlID( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		if (  $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'punch_control_id',
-														$pclf->getByID($id),
-														TTi18n::gettext('Invalid Punch Control ID')
-														) ) {
-			$this->data['punch_control_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'punch_control_id', $value );
 	}
 
 	//Legacy functions for now:
+
+	/**
+	 * @return int
+	 */
 	function getStatus() {
 		if ( in_array( $this->getObjectType(), array(5,20,25,30,40,100,110) ) ) {
 			return 10;
@@ -405,6 +418,10 @@ class UserDateTotalFactory extends Factory {
 			return 30;
 		}
 	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getType() {
 		if ( in_array( $this->getObjectType(), array(5,10,50) ) ) {
 			return 10;
@@ -413,29 +430,26 @@ class UserDateTotalFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getObjectType() {
-		if ( isset($this->data['object_type_id']) ) {
-			return (int)$this->data['object_type_id'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'object_type_id' );
 	}
-	function setObjectType($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setObjectType( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'object_type',
-											$value,
-											TTi18n::gettext('Incorrect Object Type'),
-											$this->getOptions('object_type')) ) {
-
-			$this->data['object_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'object_type_id', $value );
 	}
 
+	/**
+	 * @param int $object_type_id
+	 * @return bool|object
+	 */
 	function getSourceObjectListFactory( $object_type_id ) {
 		//Debug::Text('Object Type: '. $object_type_id, __FILE__, __LINE__, __METHOD__, 10);
 		switch ( $object_type_id ) {
@@ -468,6 +482,10 @@ class UserDateTotalFactory extends Factory {
 
 		return $lf;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getSourceObjectObject() {
 		$lf = $this->getSourceObjectListFactory( $this->getObjectType() );
 		if ( is_object( $lf ) ) {
@@ -480,88 +498,77 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getSourceObject() {
-		if ( isset($this->data['src_object_id']) ) {
-			return (int)$this->data['src_object_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'src_object_id' );
 	}
-	function setSourceObject($id) {
-		if ( $id == FALSE OR $id == 0 OR $id == '') {
-			$id = 0;
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setSourceObject( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
 		//Debug::Text('Object Type: '. $this->getObjectType() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$lf = $this->getSourceObjectListFactory( $this->getObjectType() );
 
-		if ( $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'src_object_id',
-														( is_object($lf) ) ? $lf->getByID($id) : FALSE,
-														TTi18n::gettext('Invalid Source Object')
-											) ) {
+		$retval = $this->setGenericDataValue( 'src_object_id', $value );
 
-			$this->data['src_object_id'] = $id;
-
-			//Absences need to have pay codes set for the user created entry, then other policies can also be calculated on them too.
-			//This is so they can be linked directly with accrual policies rather than having to go through regular time policies first.
-			//But in cases where OT is calculated on absence time it may need to not have any pay code and just go through regular/OT policies instead.
-			//Do this here rather than in preSave() like it used to be since that could cause the validation checks to fail and the user wouldnt see the message.
-			//However we have to setSourceObject *after* setPayCode(), otherwise there is potential for the wrong pay code to be used.
-			if ( $this->getSourceObject() != 0 ) {
-				if ( $this->getObjectType() == 50 ) {
-					$lf = TTNew('AbsencePolicyListFactory');
-				} else {
-					$lf = NULL;
-				}
-
-				if ( is_object( $lf ) ) {
-					$lf->getByID( $this->getSourceObject() );
-					if ( $lf->getRecordCount() > 0 ) {
-						$obj = $lf->getCurrent();
-						Debug::text('Setting PayCode To: '. $obj->getPayCode(), __FILE__, __LINE__, __METHOD__, 10);
-						$this->setPayCode( $obj->getPayCode() );
-					}
-				}
+		//Absences need to have pay codes set for the user created entry, then other policies can also be calculated on them too.
+		//This is so they can be linked directly with accrual policies rather than having to go through regular time policies first.
+		//But in cases where OT is calculated on absence time it may need to not have any pay code and just go through regular/OT policies instead.
+		//Do this here rather than in preSave() like it used to be since that could cause the validation checks to fail and the user wouldnt see the message.
+		//However we have to setSourceObject *after* setPayCode(), otherwise there is potential for the wrong pay code to be used.
+		if ( $value != TTUUID::getZeroID() ) {
+			if ( $this->getObjectType() == 50 ) {
+				$lf = TTNew('AbsencePolicyListFactory');
+			} else {
+				$lf = NULL;
 			}
 
-			return TRUE;
+			if ( is_object( $lf ) ) {
+				$lf->getByID( $value );
+				if ( $lf->getRecordCount() > 0 ) {
+					$obj = $lf->getCurrent();
+					Debug::text('Setting PayCode To: '. $obj->getPayCode(), __FILE__, __LINE__, __METHOD__, 10);
+					$this->setPayCode( $obj->getPayCode() );
+				}
+			}
 		}
 
-		return FALSE;
+		return $retval;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayCode() {
-		if ( isset($this->data['pay_code_id']) ) {
-			return (int)$this->data['pay_code_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_code_id' );
 	}
-	function setPayCode($id) {
-		if ( $id == FALSE OR $id == 0 OR $id == '') {
-			$id = 0;
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayCode( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		$lf = TTNew('PayCodeListFactory');
-
-		if ( $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'pay_code_id',
-														$lf->getByID($id),
-														TTi18n::gettext('Invalid Pay Code')
-											) ) {
-
-			$this->data['pay_code_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'pay_code_id', $value );
 	}
 
 	//Returns an array of time categories that the object_type fits in.
+
+	/**
+	 * @param bool $include_total
+	 * @param bool $report_columns
+	 * @return array
+	 */
 	function getTimeCategory( $include_total = TRUE, $report_columns = FALSE ) {
 
 		$retarr = array();
@@ -616,9 +623,9 @@ class UserDateTotalFactory extends Factory {
 		//Don't include Absence Time Taken (ID: 50) with other 'pay_code-' categories, as that will double up on the absence time often. (ID:25 + ID:50).
 		//Include Lunch(100)/Break(110) so they can be displayed as their own separate column on reports.
 		if ( in_array($this->getObjectType(), array(20,25,30,40,100,110) ) ) {
-			$retarr[] = 'pay_code-'. $this->getColumn('pay_code_id');
+			$retarr[] = 'pay_code:'. $this->getColumn('pay_code_id');
 		} elseif ( $this->getObjectType() == 50 ) { //Break out absence time taken so we can have separate columns for it in reports. Prevents doubling up as described above.
-			$retarr[] = 'absence_taken_pay_code-'. $this->getColumn('pay_code_id');
+			$retarr[] = 'absence_taken_pay_code:'. $this->getColumn('pay_code_id');
 		}
 
 		//Make sure we don't include Absence (Taken) [50] in gross time, use Absence [25] instead so we don't double up on absence time.
@@ -629,333 +636,249 @@ class UserDateTotalFactory extends Factory {
 		return $retarr;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getBranch() {
-		if ( isset($this->data['branch_id']) ) {
-			return (int)$this->data['branch_id'];
-		}
-
-		return FALSE;
-	}
-	function setBranch($id) {
-		$id = trim($id);
-
-		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
-			$id = 0;
-		}
-
-		$blf = TTnew( 'BranchListFactory' );
-
-		if (  $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'branch_id',
-														$blf->getByID($id),
-														TTi18n::gettext('Branch does not exist')
-														) ) {
-			$this->data['branch_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'branch_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setBranch( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'branch_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDepartment() {
-		if ( isset($this->data['department_id']) ) {
-			return (int)$this->data['department_id'];
-		}
-
-		return FALSE;
-	}
-	function setDepartment($id) {
-		$id = trim($id);
-
-		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
-			$id = 0;
-		}
-
-		$dlf = TTnew( 'DepartmentListFactory' );
-
-		if (  $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'department_id',
-														$dlf->getByID($id),
-														TTi18n::gettext('Department does not exist')
-														) ) {
-			$this->data['department_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'department_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setDepartment( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'department_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getJob() {
-		if ( isset($this->data['job_id']) ) {
-			return (int)$this->data['job_id'];
-		}
-
-		return FALSE;
-	}
-	function setJob($id) {
-		$id = trim($id);
-
-		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
-			$id = 0;
-		}
-
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$jlf = TTnew( 'JobListFactory' );
-		} else {
-			$id = 0;
-		}
-
-		if (  $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'job_id',
-														$jlf->getByID($id),
-														TTi18n::gettext('Job does not exist')
-														) ) {
-			$this->data['job_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'job_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setJob( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'job_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getJobItem() {
-		if ( isset($this->data['job_item_id']) ) {
-			return (int)$this->data['job_item_id'];
-		}
-
-		return FALSE;
-	}
-	function setJobItem($id) {
-		$id = trim($id);
-
-		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
-			$id = 0;
-		}
-
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$jilf = TTnew( 'JobItemListFactory' );
-		} else {
-			$id = 0;
-		}
-
-		if (  $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'job_item_id',
-														$jilf->getByID($id),
-														TTi18n::gettext('Job Item does not exist')
-														) ) {
-			$this->data['job_item_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'job_item_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setJobItem( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'job_item_id', $value );
+	}
+
+	/**
+	 * @return bool|float
+	 */
 	function getQuantity() {
-		if ( isset($this->data['quantity']) ) {
-			return (float)$this->data['quantity'];
-		}
-
-		return FALSE;
-	}
-	function setQuantity($val) {
-		$val = TTi18n::parseFloat( $val );
-
-		if ( $val == FALSE OR $val == 0 OR $val == '' ) {
-			$val = 0;
-		}
-
-		if	(	$val == 0
-				OR
-				$this->Validator->isFloat(			'quantity',
-													$val,
-													TTi18n::gettext('Incorrect quantity')) ) {
-			$this->data['quantity'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (float)$this->getGenericDataValue( 'quantity' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setQuantity( $value) {
+		$value = TTi18n::parseFloat( $value );
+		if ( $value == FALSE OR $value == 0 OR $value == '' ) {
+			$value = 0;
+		}
+		return $this->setGenericDataValue( 'quantity', $value );
+	}
+
+	/**
+	 * @return bool|float
+	 */
 	function getBadQuantity() {
-		if ( isset($this->data['bad_quantity']) ) {
-			return (float)$this->data['bad_quantity'];
-		}
-
-		return FALSE;
-	}
-	function setBadQuantity($val) {
-		$val = TTi18n::parseFloat( $val );
-
-		if ( $val == FALSE OR $val == 0 OR $val == '' ) {
-			$val = 0;
-		}
-
-		if	(	$val == 0
-				OR
-				$this->Validator->isFloat(			'bad_quantity',
-													$val,
-													TTi18n::gettext('Incorrect bad quantity')) ) {
-			$this->data['bad_quantity'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (float)$this->getGenericDataValue( 'bad_quantity' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setBadQuantity( $value) {
+		$value = TTi18n::parseFloat( $value );
+		if ( $value == FALSE OR $value == 0 OR $value == '' ) {
+			$value = 0;
+		}
+		return $this->setGenericDataValue( 'bad_quantity', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getStartType() {
-		if ( isset($this->data['start_type_id']) ) {
-			return (int)$this->data['start_type_id'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue('start_type_id' );
 	}
-	function setStartType($value) {
-		$value = (int)$value;
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStartType( $value) {
+		$value = (int)$value;
 		if ( $value === 0 ) {
 			$value = '';
 		}
-
-		if ( $value == ''
-				OR
-				$this->Validator->inArrayKey(	'start_type',
-											$value,
-											TTi18n::gettext('Incorrect Start Type'),
-											$this->getOptions('start_type')) ) {
-
-			$this->data['start_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'start_type_id', $value );
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool
+	 */
 	function getStartTimeStamp( $raw = FALSE ) {
-		if ( isset($this->data['start_time_stamp']) ) {
+		$value = $this->getGenericDataValue( 'start_time_stamp' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['start_time_stamp'];
+				return $value;
 			} else {
 				//return $this->db->UnixTimeStamp( $this->data['start_date'] );
 				//strtotime is MUCH faster than UnixTimeStamp
 				//Must use ADODB for times pre-1970 though.
-				if ( !is_numeric( $this->data['start_time_stamp'] ) ) { //Optmization to avoid converting it when run in CalculatePolicy's loops
-					$this->data['start_time_stamp'] = TTDate::strtotime( $this->data['start_time_stamp'] );
+				if ( !is_numeric( $value ) ) { //Optimization to avoid converting it when run in CalculatePolicy's loops
+					$value = TTDate::strtotime( $value );
+					$this->setGenericDataValue( 'start_time_stamp', $value );
 				}
-				return $this->data['start_time_stamp'];
+				return $value;
 			}
 		}
 
 		return FALSE;
 	}
-	function setStartTimeStamp($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if	(	$epoch == ''
-				OR
-				$this->Validator->isDate(		'start_time_stamp',
-												$epoch,
-												TTi18n::gettext('Incorrect start time stamp'))
-			) {
-
-			$this->data['start_time_stamp'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setStartTimeStamp( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'start_time_stamp', $value );
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getEndType() {
-		if ( isset($this->data['end_type_id']) ) {
-			return (int)$this->data['end_type_id'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'end_type_id' );
 	}
-	function setEndType($value) {
-		$value = (int)$value;
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEndType( $value) {
+		$value = (int)$value;
 		if ( $value === 0 ) {
 			$value = '';
 		}
-
-		if ( $value == ''
-				OR
-				$this->Validator->inArrayKey(	'end_type',
-											$value,
-											TTi18n::gettext('Incorrect End Type'),
-											$this->getOptions('end_type')) ) {
-
-			$this->data['end_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'end_type_id', $value );
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool
+	 */
 	function getEndTimeStamp( $raw = FALSE ) {
-		if ( isset($this->data['end_time_stamp']) ) {
+		$value = $this->getGenericDataValue( 'end_time_stamp' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['end_time_stamp'];
+				return $value;
 			} else {
-				if ( !is_numeric( $this->data['end_time_stamp'] ) ) { //Optmization to avoid converting it when run in CalculatePolicy's loops
-					$this->data['end_time_stamp'] = TTDate::strtotime( $this->data['end_time_stamp'] );
+				//return $this->db->UnixTimeStamp( $this->data['start_date'] );
+				//strtotime is MUCH faster than UnixTimeStamp
+				//Must use ADODB for times pre-1970 though.
+				if ( !is_numeric( $value ) ) { //Optimization to avoid converting it when run in CalculatePolicy's loops
+					$value = TTDate::strtotime( $value );
+					$this->setGenericDataValue( 'end_time_stamp', $value );
 				}
-				return $this->data['end_time_stamp'];
+				return $value;
 			}
 		}
 
 		return FALSE;
 	}
-	function setEndTimeStamp($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if	(	$epoch == ''
-				OR
-				$this->Validator->isDate(		'end_time_stamp',
-												$epoch,
-												TTi18n::gettext('Incorrect end time stamp'))
-
-			) {
-
-			$this->data['end_time_stamp'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setEndTimeStamp( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'end_time_stamp', $value );
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getTotalTime() {
-		if ( isset($this->data['total_time']) ) {
-			return (int)$this->data['total_time'];
-		}
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'total_time' );
 	}
-	function setTotalTime($int) {
-		$int = (int)$int;
 
-		if	(	$this->Validator->isNumeric(		'total_time',
-													$int,
-													TTi18n::gettext('Incorrect total time')) ) {
-			$this->data['total_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTotalTime( $value) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'total_time', $value );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function calcTotalTime() {
 		if ( $this->getEndTimeStamp() != '' AND $this->getStartTimeStamp() != '' ) {
 			$retval = ( $this->getEndTimeStamp() - $this->getStartTimeStamp() );
@@ -965,172 +888,147 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getActualTotalTime() {
-		if ( isset($this->data['actual_total_time']) ) {
-			return (int)$this->data['actual_total_time'];
-		}
-		return FALSE;
-	}
-	function setActualTotalTime($int) {
-		$int = (int)$int;
-
-		if	(	$this->Validator->isNumeric(		'actual_total_time',
-													$int,
-													TTi18n::gettext('Incorrect actual total time')) ) {
-			$this->data['actual_total_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'actual_total_time' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setActualTotalTime( $value) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'actual_total_time', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCurrency() {
-		if ( isset($this->data['currency_id']) ) {
-			return (int)$this->data['currency_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'currency_id' );
 	}
-	function setCurrency($id, $disable_rate_lookup = FALSE ) {
+
+	/**
+	 * @param string $id UUID
+	 * @param bool $disable_rate_lookup
+	 * @return bool
+	 */
+	function setCurrency( $id, $disable_rate_lookup = FALSE ) {
 		$id = trim($id);
 
 		//Debug::Text('Currency ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$culf = TTnew( 'CurrencyListFactory' );
-
 		$old_currency_id = $this->getCurrency();
+		if ( is_object($culf->getByID($id)) ) {
+			$rs = $culf->getByID($id);
+			if ( isset($rs->rs) AND is_object($rs->rs) AND isset($rs->rs->_numOfRows) AND $rs->rs->_numOfRows > 0 ) {
+				$this->setGenericDataValue( 'currency_id', $id );
 
-		if (
-				$this->Validator->isResultSetWithRows(	'currency',
-														$culf->getByID($id),
-														TTi18n::gettext('Invalid Currency')
-													) ) {
-
-			$this->data['currency_id'] = $id;
-
-			if ( $disable_rate_lookup == FALSE
+				if ( $disable_rate_lookup == FALSE
 					AND $culf->getRecordCount() == 1
 					AND ( $this->isNew() OR $old_currency_id != $id ) ) {
-				$crlf = TTnew( 'CurrencyRateListFactory' );
-				$crlf->getByCurrencyIdAndDateStamp( $id, $this->getDateStamp() );
-				if ( $crlf->getRecordCount() > 0 ) {
-					$this->setCurrencyRate( $crlf->getCurrent()->getReverseConversionRate() );
+					$crlf = TTnew( 'CurrencyRateListFactory' );
+					$crlf->getByCurrencyIdAndDateStamp( $id, $this->getDateStamp() );
+					if ( $crlf->getRecordCount() > 0 ) {
+						$this->setCurrencyRate( $crlf->getCurrent()->getReverseConversionRate() );
+					}
 				}
+
+				return TRUE;
 			}
-
-			return TRUE;
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCurrencyRate() {
-		if ( isset($this->data['currency_rate']) ) {
-			return $this->data['currency_rate'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'currency_rate' );
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setCurrencyRate( $value ) {
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-
 		if ( $value == 0 ) {
 			$value = 1;
 		}
-
-		if (	$this->Validator->isFloat(	'currency_rate',
-											$value,
-											TTi18n::gettext('Incorrect Currency Rate')) ) {
-
-			$this->data['currency_rate'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'currency_rate', $value );
 	}
 
 	//This the base hourly rate used to obtain the final hourly rate from. Primarily used for FLSA calculations when adding overtime wages.
-	function getBaseHourlyRate() {
-		if ( isset($this->data['base_hourly_rate']) ) {
-			return $this->data['base_hourly_rate'];
-		}
 
-		return FALSE;
+	/**
+	 * @return bool|mixed
+	 */
+	function getBaseHourlyRate() {
+		return $this->getGenericDataValue( 'base_hourly_rate' );
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setBaseHourlyRate( $value ) {
 		if ( $value === FALSE OR $value === '' OR $value === NULL ) {
 			$value = 0;
 		}
-
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-
-		if (	$this->Validator->isFloat(	'base_hourly_rate',
-											$value,
-											TTi18n::gettext('Incorrect Base Hourly Rate')) ) {
-
-			$this->data['base_hourly_rate'] = number_format( $value, 4, '.', '' ); //Always make sure there are 4 decimal places.
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'base_hourly_rate', number_format( $value, 4, '.', '' ) );//Always make sure there are 4 decimal places.
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getHourlyRate() {
-		if ( isset($this->data['hourly_rate']) ) {
-			return $this->data['hourly_rate'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'hourly_rate' );
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setHourlyRate( $value ) {
 		if ( $value === FALSE OR $value === '' OR $value === NULL ) {
 			$value = 0;
 		}
-
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-
-		if (	$this->Validator->isFloat(	'hourly_rate',
-											$value,
-											TTi18n::gettext('Incorrect Hourly Rate')) ) {
-
-			$this->data['hourly_rate'] = number_format( $value, 4, '.', '' ); //Always make sure there are 4 decimal places.
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'hourly_rate', number_format( $value, 4, '.', '' ) );//Always make sure there are 4 decimal places.
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getTotalTimeAmount() {
-		if ( isset($this->data['total_time_amount']) ) {
-			return $this->data['total_time_amount'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'total_time_amount' );
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setTotalTimeAmount( $value ) {
 		if ( $value === FALSE OR $value === '' OR $value === NULL ) {
 			$value = 0;
 		}
-
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-
-		if (	$this->Validator->isFloat(	'total_time_amount',
-											$value,
-											TTi18n::gettext('Incorrect Total Time Amount')) ) {
-			$this->data['total_time_amount'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'total_time_amount', $value );
 	}
+
+	/**
+	 * @return string
+	 */
 	function calcTotalTimeAmount() {
 		//Before switching to *not* setting setLocale() LC_NUMERIC, calculating in es_ES locale, it returns float value using comma decimal symbol which causes a SQL error on insert.
 		$retval = ( TTDate::getHours( $this->getTotalTime() ) * $this->getHourlyRate() );
@@ -1138,102 +1036,88 @@ class UserDateTotalFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getHourlyRateWithBurden() {
-		if ( isset($this->data['hourly_rate_with_burden']) ) {
-			return $this->data['hourly_rate_with_burden'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'hourly_rate_with_burden' );
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setHourlyRateWithBurden( $value ) {
 		if ( $value === FALSE OR $value === '' OR $value === NULL ) {
 			$value = 0;
 		}
-
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-
-		if (	$this->Validator->isFloat(	'hourly_rate_with_burden',
-											$value,
-											TTi18n::gettext('Incorrect Hourly Rate with Burden')) ) {
-
-			$this->data['hourly_rate_with_burden'] = number_format( $value, 4, '.', '' ); //Always make sure there are 4 decimal places.
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'hourly_rate_with_burden', number_format( $value, 4, '.', '' ) );//Always make sure there are 4 decimal places.
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getTotalTimeAmountWithBurden() {
-		if ( isset($this->data['total_time_amount_with_burden']) ) {
-			return $this->data['total_time_amount_with_burden'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'total_time_amount_with_burden' );
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setTotalTimeAmountWithBurden( $value ) {
 		if ( $value === FALSE OR $value === '' OR $value === NULL ) {
 			$value = 0;
 		}
-
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-
-		if (	$this->Validator->isFloat(	'total_time_amount_with_burden',
-											$value,
-											TTi18n::gettext('Incorrect Total Time Amount with Burden')) ) {
-
-			$this->data['total_time_amount_with_burden'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'total_time_amount_with_burden', $value );
 	}
+
+	/**
+	 * @return string
+	 */
 	function calcTotalTimeAmountWithBurden() {
 		$retval = ( TTDate::getHours( $this->getTotalTime() ) * $this->getHourlyRateWithBurden() );
 		return $retval;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getOverride() {
-		if ( isset($this->data['override']) ) {
-			return $this->fromBool( $this->data['override'] );
-		}
-		return FALSE;
-	}
-	function setOverride($bool) {
-		$this->data['override'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'override' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOverride( $value) {
+		return $this->setGenericDataValue( 'override', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getNote() {
-		if ( isset($this->data['note']) ) {
-			return $this->data['note'];
-		}
-
-		return FALSE;
-	}
-	function setNote($val) {
-		$val = trim($val);
-
-		if	(	$val == ''
-				OR
-				$this->Validator->isLength(		'note',
-												$val,
-												TTi18n::gettext('Note is too long'),
-												0,
-												1024) ) {
-
-			$this->data['note'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'note' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setNote( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'note', $value );
+	}
+
+	/**
+	 * @return bool|string
+	 */
 	function getName() {
 		switch ( $this->getObjectType() ) {
 			case 5:
@@ -1284,6 +1168,9 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getIsPartialShift() {
 		if ( isset($this->is_partial_shift) ) {
 			return $this->is_partial_shift;
@@ -1291,12 +1178,20 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	function setIsPartialShift($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setIsPartialShift( $bool) {
 		$this->is_partial_shift = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableCalcSystemTotalTime() {
 		if ( isset($this->calc_system_total_time) ) {
 			return $this->calc_system_total_time;
@@ -1304,12 +1199,20 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableCalcSystemTotalTime($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableCalcSystemTotalTime( $bool) {
 		$this->calc_system_total_time = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableCalcWeeklySystemTotalTime() {
 		if ( isset($this->calc_weekly_system_total_time) ) {
 			return $this->calc_weekly_system_total_time;
@@ -1317,12 +1220,20 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableCalcWeeklySystemTotalTime($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableCalcWeeklySystemTotalTime( $bool) {
 		$this->calc_weekly_system_total_time = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableCalcException() {
 		if ( isset($this->calc_exception) ) {
 			return $this->calc_exception;
@@ -1330,12 +1241,20 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableCalcException($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableCalcException( $bool) {
 		$this->calc_exception = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnablePreMatureException() {
 		if ( isset($this->premature_exception) ) {
 			return $this->premature_exception;
@@ -1343,12 +1262,20 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnablePreMatureException($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnablePreMatureException( $bool) {
 		$this->premature_exception = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableCalcAccrualPolicy() {
 		if ( isset($this->calc_accrual_policy) ) {
 			return $this->calc_accrual_policy;
@@ -1356,12 +1283,20 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableCalcAccrualPolicy($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableCalcAccrualPolicy( $bool) {
 		$this->calc_accrual_policy = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	static function getEnableCalcFutureWeek() {
 		if ( isset(self::$calc_future_week) ) {
 			return self::$calc_future_week;
@@ -1369,12 +1304,20 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	static function setEnableCalcFutureWeek($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	static function setEnableCalcFutureWeek( $bool) {
 		self::$calc_future_week = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableTimeSheetVerificationCheck() {
 		if ( isset($this->timesheet_verification_check) ) {
 			return $this->timesheet_verification_check;
@@ -1382,12 +1325,20 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableTimeSheetVerificationCheck($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableTimeSheetVerificationCheck( $bool) {
 		$this->timesheet_verification_check = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableCalculatePolicy() {
 		if ( isset($this->is_calculate_policy) ) {
 			return $this->is_calculate_policy;
@@ -1395,12 +1346,20 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableCalculatePolicy($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableCalculatePolicy( $bool) {
 		$this->is_calculate_policy = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function calcSystemTotalTime() {
 		global $profiler;
 
@@ -1431,6 +1390,9 @@ class UserDateTotalFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function calcWeeklySystemTotalTime() {
 		if ( $this->getEnableCalcWeeklySystemTotalTime() == TRUE ) {
 			//Used to call reCalculateRange() for the remainder of the week, but this is handled automatically now.
@@ -1440,6 +1402,15 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param object $user_obj
+	 * @param int $date_stamps EPOCH
+	 * @param bool $enable_exception
+	 * @param bool $enable_premature_exceptions
+	 * @param bool $enable_future_exceptions
+	 * @param bool $enable_holidays
+	 * @return bool
+	 */
 	static function reCalculateDay( $user_obj, $date_stamps, $enable_exception = FALSE, $enable_premature_exceptions = FALSE, $enable_future_exceptions = TRUE, $enable_holidays = FALSE ) {
 		if ( !is_object( $user_obj ) ) {
 			return FALSE;
@@ -1464,7 +1435,218 @@ class UserDateTotalFactory extends Factory {
 		return $cp->Save();
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// User
+		$ulf = TTnew( 'UserListFactory' );
+		$this->Validator->isResultSetWithRows( 'user',
+											   $ulf->getByID( $this->getUser() ),
+											   TTi18n::gettext( 'Invalid Employee' )
+		);
+		// Pay Period
+		if ( $this->getPayPeriod() !== FALSE AND $this->getPayPeriod() != TTUUID::getZeroID() ) {
+			$pplf = TTnew( 'PayPeriodListFactory' );
+			$this->Validator->isResultSetWithRows( 'pay_period',
+												   $pplf->getByID( $this->getPayPeriod() ),
+												   TTi18n::gettext( 'Invalid Pay Period' )
+			);
+		}
+		// Date
+		$this->Validator->isDate( 'date_stamp',
+								  $this->getDateStamp(),
+								  TTi18n::gettext( 'Incorrect date' )
+		);
+		// Punch Control ID
+		if ( $this->getPunchControlID() !== FALSE AND $this->getPunchControlID() != TTUUID::getZeroID() ) {
+			$pclf = TTnew( 'PunchControlListFactory' );
+			$this->Validator->isResultSetWithRows( 'punch_control_id',
+												   $pclf->getByID( $this->getPunchControlID() ),
+												   TTi18n::gettext( 'Invalid Punch Control ID' )
+			);
+		}
+		// Object Type
+		$this->Validator->inArrayKey( 'object_type',
+									  $this->getObjectType(),
+									  TTi18n::gettext( 'Incorrect Object Type' ),
+									  $this->getOptions( 'object_type' )
+		);
+		// Source Object
+		if ( $this->getSourceObject() !== FALSE AND $this->getSourceObject() != TTUUID::getZeroID() ) {
+			$lf = $this->getSourceObjectListFactory( $this->getObjectType() );
+			$this->Validator->isResultSetWithRows( 'src_object_id',
+												   ( is_object( $lf ) ) ? $lf->getByID( $this->getSourceObject() ) : FALSE,
+												   TTi18n::gettext( 'Invalid Source Object' )
+			);
+		}
+		// Pay Code
+		if ( $this->getPayCode() !== FALSE AND $this->getPayCode() != TTUUID::getZeroID() ) {
+			$lf = TTNew( 'PayCodeListFactory' );
+			$this->Validator->isResultSetWithRows( 'pay_code_id',
+												   $lf->getByID( $this->getPayCode() ),
+												   TTi18n::gettext( 'Invalid Pay Code' )
+			);
+		}
+		// Branch
+		if ( $this->getBranch() !== FALSE AND $this->getBranch() != TTUUID::getZeroID() ) {
+			$blf = TTnew( 'BranchListFactory' );
+			$this->Validator->isResultSetWithRows( 'branch_id',
+												   $blf->getByID( $this->getBranch() ),
+												   TTi18n::gettext( 'Branch does not exist' )
+			);
+		}
+		// Department
+		if ( $this->getDepartment() !== FALSE AND $this->getDepartment() != TTUUID::getZeroID() ) {
+			$dlf = TTnew( 'DepartmentListFactory' );
+			$this->Validator->isResultSetWithRows( 'department_id',
+												   $dlf->getByID( $this->getDepartment() ),
+												   TTi18n::gettext( 'Department does not exist' )
+			);
+		}
+
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			// Job
+			if ( $this->getJob() !== FALSE AND $this->getJob() != TTUUID::getZeroID() ) {
+				$jlf = TTnew( 'JobListFactory' );
+				$this->Validator->isResultSetWithRows( 'job_id',
+													   $jlf->getByID( $this->getJob() ),
+													   TTi18n::gettext( 'Job does not exist' )
+				);
+			}
+			// Job Item
+			if ( $this->getJobItem() !== FALSE AND $this->getJobItem() != TTUUID::getZeroID() ) {
+				$jilf = TTnew( 'JobItemListFactory' );
+				$this->Validator->isResultSetWithRows( 'job_item_id',
+													   $jilf->getByID( $this->getJobItem() ),
+													   TTi18n::gettext( 'Job Item does not exist' )
+				);
+			}
+			// Quantity
+			if ( $this->getQuantity() != '' ) {
+				$this->Validator->isFloat( 'quantity',
+										   $this->getQuantity(),
+										   TTi18n::gettext( 'Incorrect quantity' )
+				);
+			}
+			// Bad Quantity
+			if ( $this->getBadQuantity() != '' ) {
+				$this->Validator->isFloat( 'bad_quantity',
+										   $this->getBadQuantity(),
+										   TTi18n::gettext( 'Incorrect bad quantity' )
+				);
+			}
+		}
+
+		// Start Type
+		if ( $this->getStartType() != '' ) {
+			$this->Validator->inArrayKey(	'start_type',
+													$this->getStartType(),
+													TTi18n::gettext('Incorrect Start Type'),
+													$this->getOptions('start_type')
+												);
+		}
+		// Start Time Stamp
+		if ( $this->getStartTimeStamp() != '' ) {
+			$this->Validator->isDate(		'start_time_stamp',
+													$this->getStartTimeStamp(),
+													TTi18n::gettext('Incorrect start time stamp')
+												);
+		}
+		// End Type
+		if ( $this->getEndType() != '' ) {
+			$this->Validator->inArrayKey(	'end_type',
+													$this->getEndType(),
+													TTi18n::gettext('Incorrect End Type'),
+													$this->getOptions('end_type')
+												);
+		}
+		// End Time Stamp
+		if ( $this->getEndTimeStamp() != '' ) {
+			$this->Validator->isDate(		'end_time_stamp',
+													$this->getEndTimeStamp(),
+													TTi18n::gettext('Incorrect end time stamp')
+												);
+		}
+		// Total time
+		$this->Validator->isNumeric(		'total_time',
+													$this->getTotalTime(),
+													TTi18n::gettext('Incorrect total time')
+												);
+		// Actual total time
+		$this->Validator->isNumeric(		'actual_total_time',
+													$this->getActualTotalTime(),
+													TTi18n::gettext('Incorrect actual total time')
+												);
+		// Currency
+		if ( $this->getCurrency() !== FALSE AND $this->getCurrency() != TTUUID::getZeroId() ) {
+			$culf = TTnew( 'CurrencyListFactory' );
+			$this->Validator->isResultSetWithRows( 'currency',
+												   $culf->getByID( $this->getCurrency() ),
+												   TTi18n::gettext( 'Invalid Currency' )
+			);
+		}
+		// Currency Rate
+		if ( $this->getCurrencyRate() !== FALSE ) {
+			$this->Validator->isFloat(	'currency_rate',
+												$this->getCurrencyRate(),
+												TTi18n::gettext('Incorrect Currency Rate')
+											);
+		}
+		// Base Hourly Rate
+		if ( $this->getBaseHourlyRate() !== FALSE ) {
+			$this->Validator->isFloat( 'base_hourly_rate',
+									   $this->getBaseHourlyRate(),
+									   TTi18n::gettext( 'Incorrect Base Hourly Rate' )
+			);
+		}
+		// Hourly Rate
+		if ( $this->getHourlyRate() !== FALSE ) {
+			$this->Validator->isFloat( 'hourly_rate',
+									   $this->getHourlyRate(),
+									   TTi18n::gettext( 'Incorrect Hourly Rate' )
+			);
+		}
+		// Total Time Amount
+		if ( $this->getTotalTimeAmount() !== FALSE ) {
+			$this->Validator->isFloat( 'total_time_amount',
+									   $this->getTotalTimeAmount(),
+									   TTi18n::gettext( 'Incorrect Total Time Amount' )
+			);
+		}
+		// Hourly Rate with Burden
+		if ( $this->getHourlyRateWithBurden() !== FALSE ) {
+			$this->Validator->isFloat(	'hourly_rate_with_burden',
+												$this->getHourlyRateWithBurden(),
+												TTi18n::gettext('Incorrect Hourly Rate with Burden')
+											);
+		}
+
+		// Total Time Amount with Burden
+		if ( $this->getTotalTimeAmountWithBurden() !== FALSE ) {
+			$this->Validator->isFloat(	'total_time_amount_with_burden',
+												$this->getTotalTimeAmountWithBurden(),
+												TTi18n::gettext('Incorrect Total Time Amount with Burden')
+											);
+		}
+
+		// Note
+		if ( $this->getNote() != '' ) {
+			$this->Validator->isLength(		'note',
+													$this->getNote(),
+													TTi18n::gettext('Note is too long'),
+													0,
+													1024
+												);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 
 		if ( $this->getUser() == FALSE ) {
 			$this->Validator->isTRUE(	'user_id',
@@ -1480,7 +1662,7 @@ class UserDateTotalFactory extends Factory {
 
 		//Check to make sure if this is an absence row, the absence policy is actually set.
 		if ( $this->getDeleted() == FALSE AND $this->getObjectType() == 50 ) {
-			if ( (int)$this->getSourceObject() == 0 ) {
+			if ( $this->getSourceObject() == '' ) {
 				$this->Validator->isTRUE(	'src_object_id',
 											FALSE,
 											TTi18n::gettext('Please specify an absence type'));
@@ -1501,31 +1683,31 @@ class UserDateTotalFactory extends Factory {
 
 		//Check to make sure if this is an absence row, the absence policy is actually set.
 		//if ( $this->getObjectType() == 50 AND $this->getPayCode() == FALSE ) {
-		if ( $this->getObjectType() == 50 AND (int)$this->getSourceObject() == 0 AND $this->getOverride() == FALSE ) {
+		if ( $this->getObjectType() == 50 AND $this->getSourceObject() == '' AND $this->getOverride() == FALSE ) {
 				$this->Validator->isTRUE(	'src_object_id',
 											FALSE,
 											TTi18n::gettext('Please specify an absence type'));
 		}
 		//Check to make sure if this is an overtime row, the overtime policy is actually set.
-		if ( $this->getObjectType() == 30 AND (int)$this->getSourceObject() == 0 AND $this->getOverride() == FALSE ) {
+		if ( $this->getObjectType() == 30 AND $this->getSourceObject() == '' AND $this->getOverride() == FALSE ) {
 				$this->Validator->isTRUE(	'over_time_policy_id',
 											FALSE,
 											TTi18n::gettext('Invalid Overtime Policy'));
 		}
 		//Check to make sure if this is an premium row, the premium policy is actually set.
-		if ( $this->getObjectType() == 40 AND (int)$this->getSourceObject() == 0 AND $this->getOverride() == FALSE ) {
+		if ( $this->getObjectType() == 40 AND $this->getSourceObject() == '' AND $this->getOverride() == FALSE ) {
 				$this->Validator->isTRUE(	'premium_policy_id',
 											FALSE,
 											TTi18n::gettext('Invalid Premium Policy'));
 		}
 		//Check to make sure if this is an meal row, the meal policy is actually set.
-		if ( $this->getObjectType() == 100 AND (int)$this->getSourceObject() == 0 AND $this->getOverride() == FALSE ) {
+		if ( $this->getObjectType() == 100 AND $this->getSourceObject() == '' AND $this->getOverride() == FALSE ) {
 				$this->Validator->isTRUE(	'meal_policy_id',
 											FALSE,
 											TTi18n::gettext('Invalid Meal Policy'));
 		}
 		//Check to make sure if this is an break row, the break policy is actually set.
-		if ( $this->getObjectType() == 110 AND (int)$this->getSourceObject() == 0 AND $this->getOverride() == FALSE ) {
+		if ( $this->getObjectType() == 110 AND $this->getSourceObject() == '' AND $this->getOverride() == FALSE ) {
 				$this->Validator->isTRUE(	'break_policy_id',
 											FALSE,
 											TTi18n::gettext('Invalid Break Policy'));
@@ -1536,7 +1718,7 @@ class UserDateTotalFactory extends Factory {
 			//Check that the user is allowed to be assigned to the absence policy
 			// Only do this when creating a new record, as the user may have had entries made then later have the absence policy disabled from the policy group.
 			//   In that case it would cause this record from not being saved properly then and possibly prevent recalculations from finishing.
-			if ( $this->getObjectType() == 50 AND (int)$this->getSourceObject() != 0 AND $this->getUser() != FALSE ) {
+			if ( $this->getObjectType() == 50 AND $this->getSourceObject() != '' AND $this->getUser() != FALSE ) {
 				$pglf = TTNew( 'PolicyGroupListFactory' );
 				$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array('user_id' => array($this->getUser()), 'absence_policy' => array($this->getSourceObject())) );
 				if ( $pglf->getRecordCount() == 0 ) {
@@ -1594,7 +1776,8 @@ class UserDateTotalFactory extends Factory {
 			//Debug::text('Checking for already existing overridden entries ... User ID: '. $this->getUser() .' DateStamp: '. $this->getDateStamp() .' Object Type ID: '. $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
 
 			$udtlf = TTnew( 'UserDateTotalListFactory' );
-			if ( $this->getObjectType() == 10 AND $this->getPunchControlID() > 0 ) {
+			if ( $this->getObjectType() == 10
+					AND TTUUID::isUUID( $this->getPunchControlID() ) AND $this->getPunchControlID() != TTUUID::getZeroID() AND $this->getPunchControlID() != TTUUID::getNotExistID() ) {
 				$udtlf->getByUserIdAndDateStampAndObjectTypeAndPunchControlIdAndOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getPunchControlID(), TRUE );
 			} elseif ( $this->getObjectType() == 50 OR $this->getObjectType() == 25 ) {
 				//Allow object_type_id=50 (absence taken) entries to override object_type_id=25 entries.
@@ -1603,7 +1786,7 @@ class UserDateTotalFactory extends Factory {
 
 				//Allow employee to have multiple absence entries on the same day as long as the branch, department, job, task are all different.
 				if ( $this->getDateStamp() != FALSE AND $this->getUser() != FALSE ) {
-					$filter_data = array( 	'user_id' => (int)$this->getUser(),
+					$filter_data = array( 	'user_id' => TTUUID::castUUID($this->getUser()),
 											'date_stamp' => $this->getDateStamp(),
 											//'object_type_id' => array( (int)$this->getObjectType(), 25 ),
 											'object_type_id' => (int)$this->getObjectType(),
@@ -1613,13 +1796,13 @@ class UserDateTotalFactory extends Factory {
 											//and still have multiple entries on the same day with the same branch/department/job/task.
 											//Some customers have 5-10 UNPAID absence policies all going to the same UNPAID pay code.
 											//This is required to allow more than one to be used on the same day.
-											'src_object_id' => (int)$this->getSourceObject(),
-											'pay_code_id' => (int)$this->getPayCode(),
+											'src_object_id' => TTUUID::castUUID( $this->getSourceObject() ),
+											'pay_code_id' => TTUUID::castUUID( $this->getPayCode() ),
 
-											'branch_id' => (int)$this->getBranch(),
-											'department_id' => (int)$this->getDepartment(),
-											'job_id' => (int)$this->getJob(),
-											'job_item_id' => (int)$this->getJobItem(),
+											'branch_id' => TTUUID::castUUID( $this->getBranch() ),
+											'department_id' => TTUUID::castUUID( $this->getDepartment() ),
+											'job_id' => TTUUID::castUUID( $this->getJob() ),
+											'job_item_id' => TTUUID::castUUID( $this->getJobItem() ),
 											'override' => TRUE, //To allow multiple holiday policies to be calculated on the same day, we need to only check for conflicts when override=TRUE
 										);
 					$udtlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
@@ -1630,7 +1813,8 @@ class UserDateTotalFactory extends Factory {
 				$udtlf->getByUserIdAndDateStampAndObjectTypeAndPayCodeIdAndOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getPayCode(), TRUE );
 			} elseif ( $this->getObjectType() == 100 ) {
 				$udtlf->getByUserIdAndDateStampAndObjectTypeAndPayCodeIdAndOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getPayCode(), TRUE );
-			} elseif ( $this->getObjectType() == 5 OR ( $this->getObjectType() == 20 AND $this->getPunchControlID() > 0 ) ) {
+			} elseif ( $this->getObjectType() == 5 OR ( $this->getObjectType() == 20
+						AND TTUUID::isUUID( $this->getPunchControlID() ) AND $this->getPunchControlID() != TTUUID::getZeroID() AND $this->getPunchControlID() != TTUUID::getNotExistID() ) ) {
 				$udtlf->getByUserIdAndDateStampAndObjectTypeAndPunchControlIdAndOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getPunchControlID(), TRUE );
 			}
 
@@ -1664,33 +1848,36 @@ class UserDateTotalFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getPayPeriod() == FALSE ) {
 			$this->setPayPeriod(); //Not specifying pay period forces it to be looked up.
 		}
 
 		if ( $this->getPayCode() === FALSE ) {
-			$this->setPayCode(0);
+			$this->setPayCode( TTUUID::getZeroID() );
 		}
 
 		if ( $this->getPunchControlID() === FALSE ) {
-			$this->setPunchControlID(0);
+			$this->setPunchControlID( TTUUID::getZeroID() );
 		}
 
 		if ( $this->getBranch() === FALSE ) {
-			$this->setBranch(0);
+			$this->setBranch( TTUUID::getZeroID() );
 		}
 
 		if ( $this->getDepartment() === FALSE ) {
-			$this->setDepartment(0);
+			$this->setDepartment( TTUUID::getZeroID() );
 		}
 
 		if ( $this->getJob() === FALSE ) {
-			$this->setJob(0);
+			$this->setJob( TTUUID::getZeroID() );
 		}
 
 		if ( $this->getJobItem() === FALSE ) {
-			$this->setJobItem(0);
+			$this->setJobItem( TTUUID::getZeroID() );
 		}
 
 		if ( $this->getQuantity() === FALSE ) {
@@ -1734,6 +1921,9 @@ class UserDateTotalFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		if ( $this->getEnableCalcSystemTotalTime() == TRUE ) {
 			Debug::text('Calc System Total Time Enabled: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1745,7 +1935,12 @@ class UserDateTotalFactory extends Factory {
 		return TRUE;
 	}
 
-	static function sortAccumulatedTimeByOrder($a, $b) {
+	/**
+	 * @param $a
+	 * @param $b
+	 * @return int
+	 */
+	static function sortAccumulatedTimeByOrder( $a, $b) {
 		if ( $a['order'] == $b['order'] ) {
 			return strnatcmp( $a['label'], $b['label'] );
 		} else {
@@ -1754,6 +1949,12 @@ class UserDateTotalFactory extends Factory {
 	}
 
 	//Takes UserDateTotal rows, and calculate the accumlated time sections
+
+	/**
+	 * @param $data
+	 * @param bool $include_daily_totals
+	 * @return array|bool
+	 */
 	static function calcAccumulatedTime( $data, $include_daily_totals = TRUE ) {
 		if ( is_array($data) AND count($data) > 0 ) {
 			$retval = array();
@@ -1936,7 +2137,7 @@ class UserDateTotalFactory extends Factory {
 					$retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['total_time'] += $row['total_time'];
 					$retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
 					//$retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['total_time'] ) : 1 ) );
-					$section_ids['branch'][] = (int)$row['branch_id'];
+					$section_ids['branch'][] = TTUUID::castUUID($row['branch_id']);
 
 					//Department
 					$department_name = $row['department'];
@@ -1949,7 +2150,7 @@ class UserDateTotalFactory extends Factory {
 					$retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time'] += $row['total_time'];
 					$retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
 					//$retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time'] ) : 1 ) );
-					$section_ids['department'][] = (int)$row['department_id'];
+					$section_ids['department'][] = TTUUID::castUUID($row['department_id']);
 
 					if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 					//Job
@@ -1963,7 +2164,7 @@ class UserDateTotalFactory extends Factory {
 					$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] += $row['total_time'];
 					$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
 					//$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] ) : 1 ) );
-					$section_ids['job'][] = (int)$row['job_id'];
+					$section_ids['job'][] = TTUUID::castUUID($row['job_id']);
 
 					//Job Item/Task
 					$job_item_name = $row['job_item'];
@@ -1976,7 +2177,7 @@ class UserDateTotalFactory extends Factory {
 					$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] += $row['total_time'];
 					$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
 					//$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] ) : 1 ) );
-					$section_ids['job_item'][] = (int)$row['job_item_id'];
+					$section_ids['job_item'][] = TTUUID::castUUID($row['job_item_id']);
 					}
 
 					//Debug::text('ID: '. $row['id'] .' User Date ID: '. $row['date_stamp'] .' Total Time: '. $row['total_time'] .' Branch: '. $branch_name .' Job: '. $job_name, __FILE__, __LINE__, __METHOD__, 10);
@@ -1988,7 +2189,7 @@ class UserDateTotalFactory extends Factory {
 				foreach( $section_ids as $section => $ids ) {
 					$ids = array_unique($ids);
 					sort($ids);
-					if ( isset($ids[0]) AND $ids[0] == 0 AND count($ids) == 1 ) {
+					if ( isset($ids[0]) AND $ids[0] == TTUUID::getZeroID() AND count($ids) == 1 ) {
 						foreach( $retval as $date_stamp => $day_data ) {
 							unset($retval[$date_stamp][$section.'_time']);
 						}
@@ -2014,6 +2215,10 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -2050,6 +2255,11 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$uf = TTnew( 'UserFactory' );
 
@@ -2079,16 +2289,18 @@ class UserDateTotalFactory extends Factory {
 							break;
 						case 'title_id':
 						case 'user_id':
-						case 'user_status_id':
 						case 'group_id':
 						case 'pay_period_id':
 						case 'default_branch_id':
 						case 'default_department_id':
 						case 'absence_policy_type_id':
-							$data[$variable] = (int)$this->getColumn( $variable );
+							$data[$variable] = TTUUID::castUUID( $this->getColumn( $variable ) );
 							break;
 						case 'object_type':
 							$data[$variable] = Option::getByKey( $this->getObjectType(), $this->getOptions( $variable ) );
+							break;
+						case 'user_status_id':
+							$data[$variable] = (int)$this->getColumn( $variable );
 							break;
 						case 'user_status':
 							$data[$variable] = Option::getByKey( (int)$this->getColumn( 'user_status_id' ), $uf->getOptions( 'status' ) );
@@ -2121,6 +2333,10 @@ class UserDateTotalFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		if ( $this->getOverride() == TRUE AND $this->getDateStamp() != FALSE ) {
 			if ( $this->getObjectType() == 50 ) { //Absence

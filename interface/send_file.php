@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -202,6 +202,20 @@ switch ($object_type) {
 
 		$cf = TTnew( 'CompanyFactory' );
 		$file_name = $cf->getLogoFileName( $current_company->getId() );
+		Debug::Text('File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+		if ( $file_name != '' AND file_exists($file_name) ) {
+			$params['file'] = $file_name;
+			$params['ContentType'] = Misc::getMimeType( $file_name );
+			//$params['ContentType'] = 'image/'. strtolower( pathinfo($file_name, PATHINFO_EXTENSION) );
+			$params['ContentDisposition'] = array( HTTP_DOWNLOAD_INLINE, basename( $file_name ) );
+			$params['cache'] = TRUE;
+		}
+		break;
+	case 'legal_entity_logo':
+		Debug::Text('Legal Entity Logo ['. $object_id .']...', __FILE__, __LINE__, __METHOD__, 10);
+
+		$lef = TTnew( 'LegalEntityFactory' );
+		$file_name = $lef->getLogoFileName( $object_id );
 		Debug::Text('File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $file_name != '' AND file_exists($file_name) ) {
 			$params['file'] = $file_name;

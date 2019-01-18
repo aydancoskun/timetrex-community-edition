@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,6 +48,11 @@ class UserGenericStatusFactory extends Factory {
 	static protected $static_queue = NULL;
 
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -89,154 +94,119 @@ class UserGenericStatusFactory extends Factory {
 	}
 
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return null|string
+	 */
 	function getNextBatchID() {
-		$this->batch_id = $this->db->GenID( $this->batch_sequence_name );
+		$this->batch_id = TTUUID::generateUUID();
 
 		return $this->batch_id;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getBatchID() {
-		if ( isset($this->data['batch_id']) ) {
-			return (int)$this->data['batch_id'];
-		}
-
-		return FALSE;
-	}
-	function setBatchID($val) {
-		$val = trim($val);
-		if (	$this->Validator->isNumeric(	'batch_id',
-												$val,
-												TTi18n::gettext('Invalid Batch ID') )
-						) {
-
-			$this->data['batch_id'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'batch_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setBatchID( $value ) {
+		//$val = trim($val);
+		return $this->setGenericDataValue( 'batch_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getLabel() {
-		if ( isset($this->data['label']) ) {
-			return $this->data['label'];
-		}
-
-		return FALSE;
-	}
-	function setLabel($val) {
-		$val = trim($val);
-		if (	$this->Validator->isLength(	'label',
-											$val,
-											TTi18n::gettext('Invalid label'),
-											1, 1024)
-						) {
-
-			$this->data['label'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'label' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLabel( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'label', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
-	}
-	function setDescription($val) {
-		$val = trim($val);
-		if (	$val == ''
-				OR
-				$this->Validator->isLength(	'description',
-											$val,
-											TTi18n::gettext('Invalid description'),
-											1, 1024)
-						) {
-
-			$this->data['description'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'description' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getLink() {
-		if ( isset($this->data['link']) ) {
-			return $this->data['link'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'link' );
 	}
-	function setLink($val) {
-		$val = trim($val);
-		if (	$val == ''
-				OR
-				$this->Validator->isLength(	'link',
-											$val,
-											TTi18n::gettext('Invalid link'),
-											1, 1024)
-						) {
 
-			$this->data['link'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLink( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'link', $value );
 	}
 
 	//Static Queue functions
+
+	/**
+	 * @return bool
+	 */
 	static function isStaticQueue() {
 		if ( is_array( self::$static_queue ) AND count(self::$static_queue) > 0 ) {
 			return TRUE;
@@ -244,15 +214,31 @@ class UserGenericStatusFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return null
+	 */
 	static function getStaticQueue() {
 		return self::$static_queue;
 	}
+
+	/**
+	 * @return bool
+	 */
 	static function clearStaticQueue() {
 		self::$static_queue = NULL;
 
 		return TRUE;
 	}
-	static function queueGenericStatus($label, $status, $description = NULL, $link = NULL ) {
+
+	/**
+	 * @param $label
+	 * @param $status
+	 * @param null $description
+	 * @param null $link
+	 * @return bool
+	 */
+	static function queueGenericStatus( $label, $status, $description = NULL, $link = NULL ) {
 		Debug::Text('Add Generic Status row to queue... Label: '. $label .' Status: '. $status, __FILE__, __LINE__, __METHOD__, 10);
 		$arr = array(
 					'label' => $label,
@@ -268,6 +254,11 @@ class UserGenericStatusFactory extends Factory {
 
 
 	//Non-Static Queue functions
+
+	/**
+	 * @param $queue
+	 * @return bool
+	 */
 	function setQueue( $queue ) {
 		$this->queue = $queue;
 
@@ -276,6 +267,9 @@ class UserGenericStatusFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function saveQueue() {
 		if ( is_array($this->queue) ) {
 			Debug::Arr($this->queue, 'Generic Status Queue', __FILE__, __LINE__, __METHOD__, 10);
@@ -283,7 +277,7 @@ class UserGenericStatusFactory extends Factory {
 
 				$ugsf = TTnew( 'UserGenericStatusFactory' );
 				$ugsf->setUser( $this->getUser() );
-				if ( $this->getBatchId() > 0 ) {
+				if ( TTUUID::isUUID( $this->getBatchId() ) AND $this->getBatchID() != TTUUID::getZeroID() AND $this->getBatchID() != TTUUID::getNotExistID() ) {
 					$ugsf->setBatchID( $this->getBatchID() );
 				} else {
 					$this->setBatchId( $this->getNextBatchId() );
@@ -330,7 +324,62 @@ class UserGenericStatusFactory extends Factory {
 		return FALSE;
 	}
 	*/
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// User
+		$ulf = TTnew( 'UserListFactory' );
+		$this->Validator->isResultSetWithRows(	'user',
+														$ulf->getByID($this->getUser()),
+														TTi18n::gettext('Invalid Employee')
+													);
+		// Batch ID
+		$this->Validator->isUUID(	'batch_id',
+											$this->getBatchID(),
+											TTi18n::gettext('Invalid Batch ID')
+										);
+		// Status
+		$this->Validator->inArrayKey(	'status',
+											$this->getStatus(),
+											TTi18n::gettext('Incorrect Status'),
+											$this->getOptions('status')
+										);
+		// Label
+		$this->Validator->isLength(	'label',
+											$this->getLabel(),
+											TTi18n::gettext('Invalid label'),
+											1, 1024
+										);
+		// Description
+		if ( $this->getDescription() != '' ) {
+			$this->Validator->isLength(	'description',
+												$this->getDescription(),
+												TTi18n::gettext('Invalid description'),
+												1, 1024
+											);
+		}
+		// Link
+		if ( $this->getLink() != '' ) {
+			$this->Validator->isLength(	'link',
+												$this->getLink(),
+												TTi18n::gettext('Invalid link'),
+												1, 1024
+											);
+		}
 
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}

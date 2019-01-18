@@ -1,8 +1,8 @@
 OtherFieldViewController = BaseViewController.extend( {
 	el: '#other_field_view_container',
 	type_array: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'OtherFieldEditView.html';
 		this.permission_id = 'other_field';
 		this.viewId = 'OtherField';

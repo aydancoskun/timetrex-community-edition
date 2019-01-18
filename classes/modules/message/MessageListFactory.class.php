@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class MessageListFactory extends MessageFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,15 +89,23 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageListFactory
+	 */
+	function getByCompanyId( $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
-		
+
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -103,7 +124,15 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyIdAndUserIdAndId($company_id, $user_id, $id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageListFactory
+	 */
+	function getByCompanyIdAndUserIdAndId( $company_id, $user_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -119,9 +148,9 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => (int)$id,
-					'user_id' => (int)$user_id,
-					'company_id' => (int)$company_id,
+					'id' => TTUUID::castUUID($id),
+					'user_id' => TTUUID::castUUID($user_id),
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -140,6 +169,12 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageListFactory
+	 */
 	function getMessagesInThreadById( $id, $where = NULL, $order = NULL ) {
 
 		if ( $id == '') {
@@ -148,9 +183,9 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 
 
 		$ph = array(
-					'id' => (int)$id,
-					'id2' => $id,
-					'id3' => $id,
+					'id' => TTUUID::castUUID($id),
+					'id2' => TTUUID::castUUID($id),
+					'id3' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -169,6 +204,10 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @return bool|int|mixed
+	 */
 	function getNewMessagesByUserId( $user_id ) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -183,7 +222,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$unread_messages = $this->getCache($user_id);
 		if ( $unread_messages === FALSE ) {
 			$ph = array(
-						'user_id' => (int)$user_id,
+						'user_id' => TTUUID::castUUID($user_id),
 						'id' => $user_id,
 						'created_by1' => $user_id,
 						'created_by2' => $user_id,
@@ -207,8 +246,8 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 										b.user_id = ?
 										OR d.id = ?
 										OR e.user_id = ?
-										OR a.parent_id in ( select parent_id FROM '. $this->getTable() .' WHERE created_by = ? AND parent_id != 0 )
-										OR a.parent_id in ( select id FROM '. $this->getTable() .' WHERE created_by = ? AND parent_id = 0 )
+										OR a.parent_id in ( select parent_id FROM '. $this->getTable() .' WHERE created_by = ? AND parent_id != \''. TTUUID::getZeroID() .'\' )
+										OR a.parent_id in ( select id FROM '. $this->getTable() .' WHERE created_by = ? AND parent_id = \''. TTUUID::getZeroID() .'\' )
 									)
 									AND a.created_by != ?
 								)
@@ -228,7 +267,16 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		return $unread_messages;
 	}
 
-	function getByUserIdAndFolder($user_id, $folder, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+	/**
+	 * @param string $user_id UUID
+	 * @param $folder
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageListFactory
+	 */
+	function getByUserIdAndFolder( $user_id, $folder, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -246,7 +294,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					//'id' => $user_id,
 					);
 
@@ -268,8 +316,8 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 			$folder_inbox_query_a = ' OR d.id = ?';
 			$folder_inbox_query_ab = ' OR e.user_id = ?';
 			//$folder_inbox_query_b = ' OR a.parent_id in ( select parent_id FROM '. $this->getTable() .' WHERE created_by = '. $user_id .' ) ';
-			$folder_inbox_query_b = ' OR a.parent_id in ( select parent_id FROM '. $this->getTable() .' WHERE created_by = ? AND parent_id != 0 ) ';
-			$folder_inbox_query_c = ' OR a.parent_id in ( select id FROM '. $this->getTable() .' WHERE created_by = ? AND parent_id = 0 ) ';
+			$folder_inbox_query_b = ' OR a.parent_id in ( select parent_id FROM '. $this->getTable() .' WHERE created_by = ? AND parent_id != \''. TTUUID::getZeroID() .'\' ) ';
+			$folder_inbox_query_c = ' OR a.parent_id in ( select id FROM '. $this->getTable() .' WHERE created_by = ? AND parent_id = \''. TTUUID::getZeroID() .'\' ) ';
 		} elseif ( $folder == 20 ) {
 			$ph['created_by4'] = $user_id;
 
@@ -322,16 +370,24 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 	}
 
 
-	function getByObjectTypeAndObjectAndId($object_type, $object_id, $id, $where = NULL, $order = NULL) {
+	/**
+	 * @param $object_type
+	 * @param string $object_id UUID
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageListFactory
+	 */
+	function getByObjectTypeAndObjectAndId( $object_type, $object_id, $id, $where = NULL, $order = NULL) {
 		if ( $object_type == '' OR $object_id == '' OR $id == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
 					'object_type' => $object_type,
-					'object_id' => (int)$object_id,
-					'id' => (int)$id,
-					'parent_id' => (int)$id,
+					'object_id' => TTUUID::castUUID($object_id),
+					'id' => TTUUID::castUUID($id),
+					'parent_id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -350,14 +406,21 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByObjectTypeAndObject($object_type, $object_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param $object_type
+	 * @param string $object_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|MessageListFactory
+	 */
+	function getByObjectTypeAndObject( $object_type, $object_id, $where = NULL, $order = NULL) {
 		if ( !isset($object_type) OR !isset($object_id) ) {
 			return FALSE;
 		}
 
 		$ph = array(
 					'object_type' => $object_type,
-					'object_id' => (int)$object_id,
+					'object_id' => TTUUID::castUUID($object_id),
 					);
 
 		$query = '

@@ -41,37 +41,28 @@ var TAlertManager = (function() {
 
 			var host = Global.getHost();
 
-			$.cookie( 'PreviousSessionID', null, {expires: 30, path: LocalCacheData.cookie_path, domain: host} );
-			$.cookie( 'PreviousSessionIDURL', null, {expires: 30, path: LocalCacheData.cookie_path, domain: host} );
-			$.cookie( 'PreviousSessionType', null, {expires: 30, path: LocalCacheData.cookie_path, domain: host} );
-			$.cookie( 'PreviousSessionIDHOST', null, {expires: 30, path: LocalCacheData.cookie_path, domain: host} );
-			$.cookie( 'NewSessionID', null, {expires: 30, path: LocalCacheData.cookie_path, domain: host} );
+			$.cookie( 'AlternateSessionData', null, {expires: 1, path: LocalCacheData.cookie_path, domain: host} );
 		}
 
 		function backToPreSession() {
-
 			var host = Global.getHost();
+			var alternate_session_data = JSON.parse( $.cookie( 'AlternateSessionData' ) );
+			var url = alternate_session_data.previous_session_url;
+			var previous_cookie_path = alternate_session_data.previous_cookie_path;
 
-			var url = $.cookie( 'PreviousSessionIDURL' );
+			alternate_session_data = {
+				new_session_id: alternate_session_data.previous_session_id,
+				previous_session_view: alternate_session_data.previous_session_view,
+			};
 
-			$.cookie( 'NewSessionID', $.cookie( 'PreviousSessionID' ), {
-				expires: 30,
-				path: LocalCacheData.cookie_path,
-				domain: host
-			} );
+			$.cookie( 'AlternateSessionData', JSON.stringify( alternate_session_data ), {expires: 1, path: previous_cookie_path, domain: host}  );
 
-			$.cookie( 'PreviousSessionID', null, {expires: 30, path: LocalCacheData.cookie_path, domain: host} );
-			$.cookie( 'PreviousSessionIDURL', null, {expires: 30, path: LocalCacheData.cookie_path, domain: host} );
-			$.cookie( 'PreviousSessionIDHOST', null, {expires: 30, path: LocalCacheData.cookie_path, domain: host} );
-
-			window.location = url;
+			window.location = url +'#!m=Login';
 			Global.needReloadBrowser = true;
 
 			result.remove();
 			result = null;
-
 		}
-
 	};
 
 	var closeBrowserBanner = function() {

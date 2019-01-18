@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class UserPreferenceListFactory extends UserPreferenceFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,7 +60,13 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserPreferenceListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -71,7 +84,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$query = '
 						select	*
 						from	'. $this->getTable() .'
-						where	id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+						where	id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND deleted = 0';
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
@@ -86,7 +99,13 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return $this;
 	}
 
-	function getUniqueLanguageByCompanyId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool
+	 */
+	function getUniqueLanguageByCompanyId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -94,7 +113,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -111,7 +130,13 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return $this->db->GetCol( $query, $ph );
 	}
 
-	function getByUserId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserPreferenceListFactory
+	 */
+	function getByUserId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -129,7 +154,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$query = '
 						select	*
 						from	'. $this->getTable() .'
-						where	user_id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+						where	user_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND deleted = 0';
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
@@ -144,7 +169,14 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return $this;
 	}
 
-	function getByUserIdAndStatus($id, $status_id = 10, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $status_id
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserPreferenceListFactory
+	 */
+	function getByUserIdAndStatus( $id, $status_id = 10, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -168,7 +200,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 						SELECT	*
 						FROM	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id )
-						WHERE	a.user_id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+						WHERE	a.user_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND b.status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
 							AND ( a.deleted = 0 AND b.deleted = 0 ) ';
 			$query .= $this->getWhereSQL( $where );
@@ -184,7 +216,12 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserPreferenceListFactory
+	 */
+	function getByCompanyId( $company_id, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -192,7 +229,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -209,7 +246,13 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserPreferenceListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -221,8 +264,8 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -240,7 +283,14 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return $this;
 	}
 
-	function getByUserIDAndCompanyID($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserPreferenceListFactory
+	 */
+	function getByUserIDAndCompanyID( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -252,8 +302,8 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => (int)$id,
-					'company_id' => (int)$company_id,
+					'id' => TTUUID::castUUID($id),
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -272,7 +322,14 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return $this;
 	}
 
-	function getIsModifiedByCompanyIdAndDate($company_id, $date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool
+	 */
+	function getIsModifiedByCompanyIdAndDate( $company_id, $date, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -282,7 +339,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'created_date' => $date,
 					'updated_date' => $date,
 					'deleted_date' => $date,
@@ -314,7 +371,14 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return FALSE;
 	}
 
-	function getByCompanyIdAndDateAndValidUserIDs($company_id, $date = NULL, $valid_user_ids = array(), $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $date EPOCH
+	 * @param array $valid_user_ids
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserPreferenceListFactory
+	 */
+	function getByCompanyIdAndDateAndValidUserIDs( $company_id, $date = NULL, $valid_user_ids = array(), $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -333,7 +397,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		//If the user record is modified, we have to consider the identification record to be modified as well,
@@ -366,7 +430,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 				if ( isset($date) AND $date > 0 ) {
 					$query .= ' OR ';
 				}
-				$query	.=	' a.user_id in ('. $this->getListSQL( $valid_user_ids, $ph, 'int' ) .') ';
+				$query	.=	' a.user_id in ('. $this->getListSQL( $valid_user_ids, $ph, 'uuid') .') ';
 			}
 
 			$query .= ' ) ';
@@ -381,6 +445,15 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserPreferenceListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -434,7 +507,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$utf = new UserTitleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -474,31 +547,33 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	b.company_id = ?';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'b.id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'b.id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'b.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'b.id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
 		}
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'b.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 
+		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'b.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
+
 		if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
 			$uglf = new UserGroupListFactory();
 			$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
 		}
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['group']) ) ? $this->getWhereClauseSQL( 'ugf.name', $filter_data['group'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_branch']) ) ? $this->getWhereClauseSQL( 'bf.name', $filter_data['default_branch'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department']) ) ? $this->getWhereClauseSQL( 'df.name', $filter_data['default_department'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title']) ) ? $this->getWhereClauseSQL( 'utf.name', $filter_data['title'], 'text', $ph ) : NULL;
 
 		if ( isset($filter_data['sex']) AND !is_array($filter_data['sex']) AND trim($filter_data['sex']) != '' AND !isset($filter_data['sex_id']) ) {

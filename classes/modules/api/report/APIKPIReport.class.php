@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,12 +41,20 @@
 class APIKPIReport extends APIReport {
 	protected $main_class = 'KPIReport';
 
+	/**
+	 * APIKPIReport constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
 		return TRUE;
 	}
 
+	/**
+	 * @param $config
+	 * @param string $format
+	 * @return array|bool
+	 */
 	function getKPIReport( $config, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}

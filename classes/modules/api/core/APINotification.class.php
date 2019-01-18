@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APINotification extends APIFactory {
 	protected $main_class = '';
 
+	/**
+	 * APINotification constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,7 +52,7 @@ class APINotification extends APIFactory {
 
 	/**
 	 * Returns array of notifications message to be displayed to the user.
-	 * @param string $action Action that is being performed, possible values: 'login', 'preference', 'notification', 'pay_period'
+	 * @param bool|string $action Action that is being performed, possible values: 'login', 'preference', 'notification', 'pay_period'
 	 * @return array
 	 */
 	function getNotifications( $action = FALSE ) {

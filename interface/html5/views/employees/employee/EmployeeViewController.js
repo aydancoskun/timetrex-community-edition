@@ -1,6 +1,14 @@
 EmployeeViewController = BaseViewController.extend( {
 	el: '#employee_view_container', //Must set el here and can only set string, so events can work
 
+	_required_files: {
+		10: ['APIUserGroup', 'APIHierarchyControl', 'APIBranch', 'APIDepartment', 'APIUserTitle', 'APICompanyGenericTag', 'TImage', 'APILegalEntity',
+			'APIPayPeriodSchedule', 'APIPolicyGroup', 'APICurrency', 'APIEthnicGroup','APIUserSkill', 'APIQualification', 'APIQualificationGroup',
+			'APIUserEducation', 'APIUserMembership', 'APIUserLicense', 'APIUserLanguage', 'APIRemittanceDestinationAccount', 'APIUserDefault', 'APIRemittanceSourceAccount','APIAccrualPolicyUserModifier',
+			'APIUserReviewControl', 'APIKPIGroup', 'APIUserReview', 'APIKPI','TImageAdvBrowser'],
+		20: ['APIJob', 'APIJobItem', ],
+	},
+
 	user_api: null,
 	user_group_api: null,
 	company_api: null,
@@ -25,6 +33,8 @@ EmployeeViewController = BaseViewController.extend( {
 	sub_user_language_view_controller: null,
 	sub_user_review_control_view_controller: null,
 
+	sub_payment_methods_view_controller: null,
+
 	hierarchy_options_dic: null,
 	hierarchy_ui_model: null,
 	show_hierarchy: false,
@@ -32,8 +42,8 @@ EmployeeViewController = BaseViewController.extend( {
 
 	sub_view_grid_autosize: true,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super( 'initialize', options );
 
 		this.edit_view_tpl = 'EmployeeEditView.html';
 		this.permission_id = 'user';
@@ -65,11 +75,16 @@ EmployeeViewController = BaseViewController.extend( {
 			this.invisible_context_menu_dic[ContextMenuIconName.pay_stub_amendment] = true; //Hide some context menus
 		}
 
-		this.initPermission();
-		this.render();
-		this.buildContextMenu();
-		this.initData();
-		this.setSelectRibbonMenuIfNecessary();
+		var $this = this;
+		require([
+			'TImageAdvBrowser',//only in the upload wizard
+			'TImage',//only in the upload wizard
+		],function(){
+			$this.render();
+			$this.buildContextMenu();
+			$this.initData();
+			$this.setSelectRibbonMenuIfNecessary();
+		});
 
 	},
 
@@ -339,7 +354,6 @@ EmployeeViewController = BaseViewController.extend( {
 
 	openEditView: function( id ) {
 		var $this = this;
-
 		if ( $this.edit_only_mode ) {
 
 			$this.initOptions( function( result ) {
@@ -355,7 +369,6 @@ EmployeeViewController = BaseViewController.extend( {
 					} else {
 						// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 						$this.current_edit_record = result;
-
 						$this.initEditView();
 					}
 
@@ -655,6 +668,15 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} else if ( this.edit_view_tab_selected_index === 5 ) {
 			if ( this.current_edit_record.id ) {
+				this.edit_view_tab.find( '#tab_payment_methods' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubPaymentMethodsView();
+			} else {
+				this.edit_view_tab.find( '#tab_payment_methods' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
+			}
+
+		} else if ( this.edit_view_tab_selected_index === 6 ) {
+			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_contacts' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubUserContactView();
 			} else {
@@ -662,7 +684,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 6 ) {
+		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 7 ) {
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_applications' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubJobApplicationView();
@@ -670,7 +692,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.edit_view_tab.find( '#tab_applications' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
-		} else if ( this.edit_view_tab_selected_index === 7 ) {
+		} else if ( this.edit_view_tab_selected_index === 8 ) {
 
 			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
 
@@ -691,7 +713,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 			}
 
-		} else if ( this.edit_view_tab_selected_index === 8 ) {
+		} else if ( this.edit_view_tab_selected_index === 9 ) {
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_qualifications' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubQualificationView();
@@ -700,7 +722,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
-		} else if ( this.edit_view_tab_selected_index === 9 ) {
+		} else if ( this.edit_view_tab_selected_index === 10 ) {
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_reviews' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubUserReviewControlView();
@@ -709,7 +731,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
-		} else if ( this.edit_view_tab_selected_index === 10 ) {
+		} else if ( this.edit_view_tab_selected_index === 11 ) {
 
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
@@ -719,7 +741,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
-		} else if ( this.edit_view_tab_selected_index === 11 ) {
+		} else if ( this.edit_view_tab_selected_index === 12 ) {
 
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
@@ -801,8 +823,10 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_skill_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_user_skill_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_skill_view_controller.parent_view_controller = $this;
-			$this.sub_user_skill_view_controller.initData();
-			TTPromise.resolve('Employee_Qualifications_Tab', 'UserSkillViewController');
+			$this.sub_user_skill_view_controller.postInit = function() {
+				this.initData();
+				TTPromise.resolve('Employee_Qualifications_Tab', 'UserSkillViewController');
+			};
 		}
 
 		function afterLoadUserLicenseView( subViewController ) {
@@ -812,8 +836,10 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_license_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_user_license_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_license_view_controller.parent_view_controller = $this;
-			$this.sub_user_license_view_controller.initData();
-			TTPromise.resolve('Employee_Qualifications_Tab', 'UserLicenseViewController');
+			$this.sub_user_license_view_controller.postInit = function() {
+				this.initData();
+				TTPromise.resolve('Employee_Qualifications_Tab', 'UserLicenseViewController');
+			};
 		}
 
 		function afterLoadUserLanguageView( subViewController ) {
@@ -823,8 +849,10 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_language_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_user_language_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_language_view_controller.parent_view_controller = $this;
-			$this.sub_user_language_view_controller.initData();
-			TTPromise.resolve('Employee_Qualifications_Tab', 'UserLanguageViewController');
+			$this.sub_user_language_view_controller.postInit = function() {
+				this.initData();
+				TTPromise.resolve('Employee_Qualifications_Tab', 'UserLanguageViewController');
+			};
 		}
 
 		function afterLoadUserEducationView( subViewController ) {
@@ -834,8 +862,10 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_education_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_user_education_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_education_view_controller.parent_view_controller = $this;
-			$this.sub_user_education_view_controller.initData();
-			TTPromise.resolve('Employee_Qualifications_Tab', 'UserEducationViewController');
+			$this.sub_user_education_view_controller.postInit = function() {
+				this.initData();
+				TTPromise.resolve('Employee_Qualifications_Tab', 'UserEducationViewController');
+			};
 		}
 
 		function afterLoadUserMembershipView( subViewController ) {
@@ -845,8 +875,10 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_membership_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_user_membership_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_membership_view_controller.parent_view_controller = $this;
-			$this.sub_user_membership_view_controller.initData();
-			TTPromise.resolve('Employee_Qualifications_Tab', 'UserMembershipViewController');
+			$this.sub_user_membership_view_controller.postInit = function() {
+				$this.sub_user_membership_view_controller.initData();
+				TTPromise.resolve('Employee_Qualifications_Tab', 'UserMembershipViewController');
+			};
 		}
 
 		TTPromise.resolve('Employee_Qualifications_Tab', 'initSubQualificationView');
@@ -884,7 +916,9 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_company_tax_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_company_tax_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_company_tax_view_controller.parent_view_controller = $this;
-			$this.sub_company_tax_view_controller.initData();
+			TTPromise.wait( 'BaseViewController', 'initialize', function() {
+				$this.sub_company_tax_view_controller.initData();
+			});
 		}
 
 	},
@@ -929,6 +963,50 @@ EmployeeViewController = BaseViewController.extend( {
 
 	},
 
+
+	initSubPaymentMethodsView: function() {
+		var $this = this;
+
+		if ( this.sub_payment_methods_view_controller ) {
+			this.sub_payment_methods_view_controller.buildContextMenu( true );
+			this.sub_payment_methods_view_controller.setDefaultMenu();
+			$this.sub_payment_methods_view_controller.parent_key = 'user_id';
+			$this.sub_payment_methods_view_controller.parent_value = $this.current_edit_record.id;
+			$this.sub_payment_methods_view_controller.parent_edit_record = $this.current_edit_record;
+			$this.sub_payment_methods_view_controller.initData();
+			return;
+		}
+
+		Global.loadScript( 'views/employees/remittance_destination_account/RemittanceDestinationAccountViewController.js', function() {
+			if ( !$this.edit_view_tab ) {
+				return;
+			}
+			var tab_payment_methods = $this.edit_view_tab.find( '#tab_payment_methods' );
+			var firstColumn = tab_payment_methods.find( '.first-column-sub-view' );
+
+			Global.trackView( 'Sub' + 'RemittanceDestinationAccount' + 'View' );
+			RemittanceDestinationAccountViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
+
+		} );
+
+		function beforeLoadView() {
+
+		}
+
+		function afterLoadView( subViewController ) {
+			$this.sub_payment_methods_view_controller = subViewController;
+			$this.sub_payment_methods_view_controller.is_subview = true;
+			$this.sub_payment_methods_view_controller.parent_key = 'user_id';
+			$this.sub_payment_methods_view_controller.parent_value = $this.current_edit_record.id;
+			$this.sub_payment_methods_view_controller.parent_edit_record = $this.current_edit_record;
+			$this.sub_payment_methods_view_controller.parent_view_controller = $this;
+			TTPromise.wait( 'BaseViewController', 'initialize', function() {
+				$this.sub_payment_methods_view_controller.initData();
+			});
+		}
+
+	},
+
 	initSubJobApplicationView: function() {
 		var $this = this;
 
@@ -963,7 +1041,9 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_job_application_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_job_application_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_job_application_view_controller.parent_view_controller = $this;
-			$this.sub_job_application_view_controller.initData();
+			TTPromise.wait( 'BaseViewController', 'initialize', function() {
+				$this.sub_job_application_view_controller.initData();
+			});
 		}
 
 	},
@@ -1002,7 +1082,9 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_contact_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_user_contact_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_contact_view_controller.parent_view_controller = $this;
-			$this.sub_user_contact_view_controller.initData();
+			TTPromise.wait( 'BaseViewController', 'initialize', function() {
+				$this.sub_user_contact_view_controller.initData();
+			});
 		}
 
 	},
@@ -1044,7 +1126,9 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_wage_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_wage_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_wage_view_controller.parent_view_controller = $this;
-			$this.sub_wage_view_controller.initData(); //Init data in this parent view
+			TTPromise.wait( 'BaseViewController', 'initialize', function() {
+				$this.sub_wage_view_controller.initData(); //Init data in this parent view
+			});
 		}
 	},
 
@@ -1090,7 +1174,9 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_accrual_policy_user_modifier_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_accrual_policy_user_modifier_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_accrual_policy_user_modifier_view_controller.parent_view_controller = $this;
-			$this.sub_accrual_policy_user_modifier_view_controller.initData(); //Init data in this parent view
+			TTPromise.wait( 'BaseViewController', 'initialize', function() {
+				$this.sub_accrual_policy_user_modifier_view_controller.initData(); //Init data in this parent view
+			});
 		}
 	},
 
@@ -1185,6 +1271,7 @@ EmployeeViewController = BaseViewController.extend( {
 			$( this.edit_view_tab.find( 'ul li a[ref="tab_hierarchy"]' ) ).parent().hide();
 			$( this.edit_view_tab.find( 'ul li a[ref="tab_wage"]' ) ).parent().hide();
 			$( this.edit_view_tab.find( 'ul li a[ref="tab_tax"]' ) ).parent().hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_payment_methods"]' ) ).parent().hide();
 			$( this.edit_view_tab.find( 'ul li a[ref="tab_contacts"]' ) ).parent().hide();
 			$( this.edit_view_tab.find( 'ul li a[ref="tab_applications"]' ) ).parent().hide();
 			$( this.edit_view_tab.find( 'ul li a[ref="tab_accruals"]' ) ).parent().hide();
@@ -1213,6 +1300,13 @@ EmployeeViewController = BaseViewController.extend( {
 				$( this.edit_view_tab.find( 'ul li a[ref="tab_tax"]' ) ).parent().show();
 			} else {
 				$( this.edit_view_tab.find( 'ul li a[ref="tab_tax"]' ) ).parent().hide();
+				this.edit_view_tab.tabs( 'select', 0 );
+			}
+			if ( PermissionManager.checkTopLevelPermission( 'RemittanceDestinationAccount' ) &&
+				this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_payment_methods"]' ) ).parent().show();
+			} else {
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_payment_methods"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 			if ( PermissionManager.checkTopLevelPermission( 'UserContact' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
@@ -1677,7 +1771,7 @@ EmployeeViewController = BaseViewController.extend( {
 		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
 		filter.filter_sort = this.select_layout.data.filter_sort;
 
-		if ( this.refresh_id > 0 ) {
+		if ( TTUUID.isUUID(this.refresh_id) ) {
 			filter.filter_data = {company_id: this.select_company_id}; // search by company_id
 			filter.filter_data.id = [this.refresh_id];
 
@@ -1701,7 +1795,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 					result_data = Global.formatGridData( result_data, $this.api.key_name );
 				}
-				if ( $this.refresh_id > 0 ) {
+				if ( TTUUID.isUUID($this.refresh_id) ) {
 					$this.refresh_id = null;
 					var grid_source_data = $this.grid.getGridParam( 'data' );
 					var len = grid_source_data.length;
@@ -1719,9 +1813,9 @@ EmployeeViewController = BaseViewController.extend( {
 							var record = grid_source_data[i];
 
 							//Fixed === issue. The id set by jQGrid is string type.
-							if ( !isNaN( parseInt( record.id ) ) ) {
-								record.id = parseInt( record.id );
-							}
+							// if ( !isNaN( parseInt( record.id ) ) ) {
+							// 	record.id = parseInt( record.id );
+							// }
 
 							if ( record.id == new_record.id ) {
 								$this.grid.setRowData( new_record.id, new_record );
@@ -1822,7 +1916,6 @@ EmployeeViewController = BaseViewController.extend( {
 
 	//Call this from setEditViewData
 	initTabData: function() {
-
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 3 ) {
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_wage' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
@@ -1842,13 +1935,21 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 5 ) {
 			if ( this.current_edit_record.id ) {
+				this.edit_view_tab.find( '#tab_payment_methods' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubPaymentMethodsView();
+			} else {
+				this.edit_view_tab.find( '#tab_payment_methods' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
+			}
+		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 6 ) {
+			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_contacts' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubUserContactView();
 			} else {
 				this.edit_view_tab.find( '#tab_contacts' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 6 ) {
+		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 7 ) {
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_applications' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubJobApplicationView();
@@ -1856,7 +1957,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.edit_view_tab.find( '#tab_applications' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 7 ) {
+		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 8 ) {
 			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
 
 				if ( this.current_edit_record.id ) {
@@ -1875,7 +1976,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 
 			}
-		} else if ( this.edit_view_tab_selected_index === 8 ) {
+		} else if ( this.edit_view_tab_selected_index === 9 ) {
 
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_qualifications' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
@@ -1885,7 +1986,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
-		} else if ( this.edit_view_tab_selected_index === 9 ) {
+		} else if ( this.edit_view_tab_selected_index === 10 ) {
 
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_reviews' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
@@ -1895,7 +1996,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 10 ) {
+		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 11 ) {
 
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
@@ -1905,7 +2006,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 11 ) {
+		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 12 ) {
 			if ( this.current_edit_record.id ) {
 				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubLogView( 'tab_audit' );
@@ -2042,6 +2143,17 @@ EmployeeViewController = BaseViewController.extend( {
 		this.sub_accrual_policy_user_modifier_view_controller = null;
 		this.sub_user_review_control_view_controller = null;
 		this.sub_job_application_view_controller = null;
+		this.sub_user_skill_view_controller = null;
+		this.sub_user_education_view_controller = null;
+
+		this.sub_user_membership_view_controller = null;
+
+		this.sub_user_license_view_controller = null;
+
+		this.sub_user_language_view_controller = null;
+
+
+		this.sub_payment_methods_view_controller = null;
 	},
 
 	buildEditViewUI: function() {
@@ -2055,6 +2167,7 @@ EmployeeViewController = BaseViewController.extend( {
 			'tab_hierarchy': $.i18n._( 'Hierarchy' ),
 			'tab_wage': $.i18n._( 'Wage' ),
 			'tab_tax': $.i18n._( 'Tax' ),
+			'tab_payment_methods': $.i18n._( 'Payment Methods' ),
 			'tab_contacts': $.i18n._( 'Contacts' ),
 			'tab_applications': $.i18n._( 'Applications' ),
 			'tab_accruals': $.i18n._( 'Accruals' ),
@@ -2106,6 +2219,19 @@ EmployeeViewController = BaseViewController.extend( {
 //		form_item_input.TText( {field: 'company'} );
 //		this.addEditFieldToColumn( $.i18n._( 'Company' ), form_item_input, tab_employee_column1, '' );
 
+
+		//Legal Entity
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.LEGAL_ENTITY,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'legal_entity_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Legal Entity' ), form_item_input, tab_employee_column1 );
+
 		//Status
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -2144,6 +2270,7 @@ EmployeeViewController = BaseViewController.extend( {
 			field: 'pay_period_schedule_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period Schedule' ), form_item_input, tab_employee_column1 );
+
 
 		//Policy Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -2281,6 +2408,8 @@ EmployeeViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Default Department' ), form_item_input, tab_employee_column2 );
 
+
+		this.initPermission(); //#2398 - job/task permissions were getting broken on multiple opens of same employee.
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -2589,7 +2718,7 @@ EmployeeViewController = BaseViewController.extend( {
 			var data = res.getResult();
 			for ( var key in data ) {
 				if ( parseInt(key) === 200 &&
-						LocalCacheData.getCurrentCompany().product_edition_id !== 25 ) {
+						LocalCacheData.getCurrentCompany().product_edition_id != 25 ) {
 					continue;
 				}
 				$this.hierarchy_options_dic[key] = Global.buildRecordArray( data[key] );
@@ -2600,7 +2729,7 @@ EmployeeViewController = BaseViewController.extend( {
 				$this.show_hierarchy = false;
 			}
 		}
-		if ( this.show_hierarchy ) {
+		if ( this.show_hierarchy && this.hierarchy_ui_model ) {
 			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.hierarchy-div' ).css( 'display', 'none' );
 			var len = this.hierarchy_ui_model.length;
@@ -2728,6 +2857,18 @@ EmployeeViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
+				label: $.i18n._( 'Legal Entity' ),
+				in_column: 1,
+				field: 'legal_entity_id',
+				layout_name: ALayoutIDs.LEGAL_ENTITY,
+				api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+				multiple: true,
+				custom_first_label: Global.any_item,
+				basic_search: PermissionManager.checkTopLevelPermission( 'LegalEntity' ) ? true : false,
+				adv_search: PermissionManager.checkTopLevelPermission( 'LegalEntity' ) ? true : false,
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
 				label: $.i18n._( 'Status' ),
 				in_column: 1,
 				field: 'status_id',
@@ -2767,7 +2908,7 @@ EmployeeViewController = BaseViewController.extend( {
 				field: 'tag',
 				basic_search: true,
 				adv_search: true,
-				in_column: 1,
+				in_column: 2,
 				object_type_id: 200,
 				form_item_type: FormItemType.TAG_INPUT
 			} ),
@@ -2961,44 +3102,6 @@ EmployeeViewController = BaseViewController.extend( {
 		return column_filter;
 	},
 
-	initSubDocumentView: function() {
-		var $this = this;
-
-		if ( this.sub_document_view_controller ) {
-			this.sub_document_view_controller.buildContextMenu( true );
-			this.sub_document_view_controller.setDefaultMenu();
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.initData();
-			return;
-		}
-
-		Global.loadScript( 'views/document/DocumentViewController.js', function() {
-			if ( !$this.edit_view_tab ) {
-				return;
-			}
-			var tab_contact_info = $this.edit_view_tab.find( '#tab_attachment' );
-			var firstColumn = tab_contact_info.find( '.first-column-sub-view' );
-			Global.trackView( 'Sub' + 'Document' + 'View' );
-			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_document_view_controller = subViewController;
-			$this.sub_document_view_controller.parent_key = 'object_id';
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.document_object_type_id = $this.document_object_type_id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.parent_view_controller = $this;
-			$this.sub_document_view_controller.initData();
-		}
-
-	},
 
 	getFilterColumnsFromDisplayColumns: function(column_filter, enable_system_columns ) {
 		if ( column_filter== undefined ) {

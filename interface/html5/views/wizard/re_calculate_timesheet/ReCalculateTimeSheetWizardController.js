@@ -2,8 +2,8 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 
 	el: '.wizard',
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'TimeSheet ReCalculation Wizard' );
 		this.steps = 3;

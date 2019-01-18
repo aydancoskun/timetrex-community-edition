@@ -1,5 +1,8 @@
 UserReviewControlViewController = BaseViewController.extend( {
 	el: '#user_review_control_view_container',
+
+	_required_files:['APIUserReviewControl', 'APIKPIGroup', 'APIUserReview', 'APIKPI', 'APICompanyGenericTag'],
+
 	type_array: null,
 	status_array: null,
 	term_array: null,
@@ -15,8 +18,8 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 	kpi_api: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserReviewControlEditView.html';
 		this.permission_id = 'user_review';
 		this.viewId = 'UserReviewControl';
@@ -637,42 +640,6 @@ UserReviewControlViewController = BaseViewController.extend( {
 		}
 	},
 
-	initSubDocumentView: function() {
-		var $this = this;
-
-		if ( this.sub_document_view_controller ) {
-			this.sub_document_view_controller.buildContextMenu( true );
-			this.sub_document_view_controller.setDefaultMenu();
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.initData();
-			return;
-		}
-
-		Global.loadScript( 'views/document/DocumentViewController.js', function() {
-			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
-			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
-			Global.trackView( 'Sub' + 'Document' + 'View' );
-			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_document_view_controller = subViewController;
-			$this.sub_document_view_controller.parent_key = 'object_id';
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.document_object_type_id = $this.document_object_type_id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.parent_view_controller = $this;
-			$this.sub_document_view_controller.initData();
-		}
-
-	},
-
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
 		this.initInsideEditorData();
@@ -861,7 +828,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			row.children().eq( 1 ).append( form_item_input );
 
 			// Rating
-			if ( parseInt( data.type_id ) === 10 ) {
+			if ( data.type_id == 10 ) {
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: 'rating', width: 40} );
 				form_item_input.setValue( data.rating ? data.rating : null );
@@ -874,7 +841,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 				this.setWidgetEnableBaseOnParentController( form_item_input );
 
-			} else if ( parseInt( data.type_id ) === 20 ) {
+			} else if ( data.type_id == 20 ) {
 				form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 				form_item_input.TCheckbox( {field: 'rating'} );
 				form_item_input.setValue( data.rating ? ( data.rating >= 1 ? true : false ) : null ); //Rating is numeric, so make sure we pass true/false to TCheckbox.
@@ -914,7 +881,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			var result_data = result.getResult();
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( result_data > 0 ) {
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 			}
 
@@ -939,7 +906,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
 
-			} else if ( result_data > 0 ) {
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 			}
 
@@ -1033,7 +1000,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
 
-			} else if ( result_data > 0 ) {
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 			}
 
@@ -1059,7 +1026,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
 
-			} else if ( result_data > 0 ) {
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 			}
 
@@ -1084,7 +1051,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			var result_data = result.getResult();
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( result_data > 0 ) {
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 			}
 
@@ -1129,7 +1096,9 @@ UserReviewControlViewController.loadSubView = function( container, beforeViewLoa
 		if ( Global.isSet( container ) ) {
 			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				afterViewLoadedFun( sub_user_review_control_view_controller );
+				TTPromise.wait('BaseViewController', 'initialize',function() {
+					afterViewLoadedFun(sub_user_review_control_view_controller);
+				});
 			}
 		}
 	} );

@@ -15,6 +15,10 @@ html, body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+
+    /** #1187 fix bold-looking text caused by mac text smoothing **/
+    -webkit-font-smoothing: antialiased; /* This needs to be set or some normal faced fonts look bold on Mac in Chrome/Webkit based browsers. */
+    -moz-osx-font-smoothing: grayscale; /* Fixes font bold issue in Firefox version 25+ on Mac */
 }
 input,select,textarea {
     font-family: Lucida Grande, Lucida Sans, Arial, sans-serif;
@@ -2761,4 +2765,94 @@ progress::-moz-progress-bar {
     font-smooth: never;
     -webkit-font-smoothing : none;
     image-rendering: pixelated;
+}
+
+.job-vacancy-summary-description {
+    width: (100% - 2px);
+    margin:0 auto;
+}
+
+.job-vacancy-summary-description .edit-view-form-item-label-div {
+    margin-left:1px;
+    border-radius:0 !important;
+}
+
+.payroll_remittance_agency_event_wizard_event_details .label{
+    font-weight:bolder;
+    text-align:right;
+}
+.payroll_remittance_agency_event_wizard_event_details table .label.col2{
+    padding-left:10pt;
+}
+.payroll_remittance_agency_event_wizard_event_details table .value{
+    text-align:left;
+}
+
+.payroll_remittance_agency_event_wizard_event_details table{
+    margin: 0 auto;
+    border: 1px solid #000;
+    padding:10pt;
+    margin-bottom:15pt;
+}
+
+.tax_wizard #cards{
+    margin-bottom:5pt;
+}
+
+.tax_wizard .wizard_icon_card {
+    display:block;
+    border: 1px solid #000;
+    text-align:left;
+    clear:both;
+    cursor:pointer;
+    background: #fff;
+    padding-left:15pt;
+    margin:10pt;
+    margin-top:0;
+    margin-bottom:5pt;
+    padding-bottom:8pt;
+    min-height:50pt;
+}
+.tax_wizard .wizard_icon_card img {
+    margin-left:0;
+    margin-right:10pt;
+    display:inline-block;
+}
+
+.tax_wizard .description{
+    font-size: 14px;
+}
+
+
+.tax_wizard .instructions {
+    font-weight:bolder;
+}
+
+.tax_wizard .wizard_icon_card .button_title{
+    display:block;
+    color:#000;
+}
+
+.tax_wizard .wizard_icon_card div{
+    text-align:left;
+}
+
+.tax_wizard .wizard_icon_card .right_container {
+    margin-left:10pt;
+    display:inline-block;
+    max-width: 650pt;
+}
+
+.wizard_icon_card.clicked_wizard_icon{
+    border: 1px dashed #ccc;
+}
+
+.wizard #cards{
+    border:none;
+}
+
+
+.sandbox_container {
+    border: 5px solid red;
+    width: (100vw - 10px) !important;
 }

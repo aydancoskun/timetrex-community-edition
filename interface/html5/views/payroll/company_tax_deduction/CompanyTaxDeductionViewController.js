@@ -1,6 +1,11 @@
 CompanyTaxDeductionViewController = BaseViewController.extend( {
-
 	el: '#company_tax_deduction_view_container', //Must set el here and can only set string, so events can work
+
+	_required_files: {
+		10: ['APICompanyDeduction', 'APIUser', 'APIUserDeduction', 'APIPayrollRemittanceAgency', 'APIPayStubEntryAccount', 'APILegalEntity', 'APIContributingPayCodePolicy'],
+		20: ['APIDocument', 'APIDocumentGroup', 'APIDocumentRevision', 'APIDocumentAttachment']
+	},
+
 	type_array: null,
 	status_array: null,
 	tax_formula_type_array: null,
@@ -20,6 +25,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	company_api: null,
 	date_api: null,
 	user_deduction_api: null,
+	user_api: null,
+	payroll_remittance_agency_api: null,
 	employee_setting_grid: null,
 	employee_setting_result: null,
 	final_c_id: null, // calculation_id from setDynamic function. use to set employee setting grid
@@ -35,9 +42,9 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	start_dates: null,
 	end_dates: null,
 
-	initialize: function( options ) {
+	init: function( options ) {
 
-		this._super( 'initialize', options );
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'CompanyTaxDeductionEditView.html';
 		if ( this.sub_view_mode ) {
 			this.permission_id = 'user_tax_deduction';
@@ -53,6 +60,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
 		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 		this.user_deduction_api = new (APIFactory.getAPIClass( 'APIUserDeduction' ))();
+		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
+		this.payroll_remittance_agency_api = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' ))();
 		this.month_of_quarter_array = Global.buildRecordArray( {1: 1, 2: 2, 3: 3} );
 		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
 		this.document_object_type_id = 300;
@@ -114,6 +123,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'state_wv_filing_status' );
 		this.initDropDownOption( 'state_filing_status' );
 		this.initDropDownOption( 'tax_formula_type' );
+
+		this.initDropDownOption( 'payroll_remittance_agency_id' );
 
 		this.company_api.getOptions( 'district', {
 			onResult: function( res ) {
@@ -621,7 +632,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			if ( !this.sub_view_mode ) {
 				if ( result_data === true ) {
 					$this.refresh_id = $this.current_edit_record.id; // as add
-				} else if ( result_data > 0 ) { // as new
+				} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
 					$this.refresh_id = result_data;
 				}
 				$this.saveInsideEditorData( function() {
@@ -652,7 +663,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			var result_data = result.getResult();
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( result_data > 0 ) { // as new
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
 				$this.refresh_id = result_data;
 			}
 			if ( !this.sub_view_mode ) {
@@ -676,7 +687,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
 
-			} else if ( result_data > 0 ) { // as new
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
 				$this.refresh_id = result_data;
 			}
 
@@ -698,7 +709,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
 
-			} else if ( result_data > 0 ) {
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 			}
 
@@ -786,7 +797,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			var result_data = result.getResult();
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( result_data > 0 ) {
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 			}
 
@@ -800,42 +811,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 			$this.setErrorMenu();
 		}
-	},
-
-	initSubDocumentView: function() {
-		var $this = this;
-
-		if ( this.sub_document_view_controller ) {
-			this.sub_document_view_controller.buildContextMenu( true );
-			this.sub_document_view_controller.setDefaultMenu();
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.initData();
-			return;
-		}
-
-		Global.loadScript( 'views/document/DocumentViewController.js', function() {
-			var tab_eligibility = $this.edit_view_tab.find( '#tab_attachment' );
-			var firstColumn = tab_eligibility.find( '.first-column-sub-view' );
-			Global.trackView( 'Sub' + 'Document' + 'View' );
-			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_document_view_controller = subViewController;
-			$this.sub_document_view_controller.parent_key = 'object_id';
-			$this.sub_document_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_document_view_controller.document_object_type_id = $this.document_object_type_id;
-			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_document_view_controller.parent_view_controller = $this;
-			$this.sub_document_view_controller.initData();
-		}
-
 	},
 
 	setTabStatus: function() {
@@ -995,13 +970,18 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			case 'maximum_length_of_service':
 				this.resetEmployeeSettingGridColumns();
 				break;
-
+			case 'legal_entity_id':
+				this.onLegalEntityChange();
+				this.updateEmployeeData();
+				break;
 		}
+
 
 		if ( key === 'country' ) {
 			this.onCountryChange();
 			return;
 		}
+
 		if ( !doNotValidate ) {
 			this.validate();
 		}
@@ -1012,7 +992,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		var $this = this;
 
 		this.original_current_record = Global.clone( this.current_edit_record );
-
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 
@@ -1053,13 +1032,63 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		}
 	},
 
+	onLegalEntityChange: function () {
+		var pra_value = this.edit_view_ui_dic.payroll_remittance_agency_id.getValue();
+		var new_arg = Global.clone( args );
+		new_arg.filter_data = { legal_entity_id: this.edit_view_ui_dic.legal_entity_id.getValue() };
+		new_arg.filter_columns = this.edit_view_ui_dic.payroll_remittance_agency_id.getColumnFilter();
+
+		var $this = this;
+		this.payroll_remittance_agency_api.getPayrollRemittanceAgency( new_arg, {
+			onResult: function( task_result ) {
+				var data = task_result.getResult();
+				if ( data.length > 0 ) {
+					$this.edit_view_ui_dic.payroll_remittance_agency_id.setSourceData( data );
+					var id_in_result = false;
+					for ( var i in  data) {
+						if ( data[i].id == pra_value ) {
+							id_in_result = true;
+							break;
+						}
+					}
+					if ( id_in_result === false ) {
+						pra_value = TTUUID.zero_id;
+					}
+					$this.current_edit_record.payroll_remittance_agency_id = pra_value;
+					$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue( pra_value );
+
+				} else {
+					$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue( TTUUID.zero_id );
+				}
+
+			}
+		} );
+	},
+
+	updateEmployeeData: function(){
+		var request_data = { filter_data:{} };
+		if( this.edit_view_ui_dic && this.edit_view_ui_dic.legal_entity_id && this.edit_view_ui_dic.legal_entity_id.getValue() ) {
+			request_data.filter_data.legal_entity_id = this.edit_view_ui_dic.legal_entity_id.getValue();
+			var $this = this;
+			this.user_api.getUser(request_data, {
+				onResult: function (result) {
+
+					//PREVENTS EXECPTION - "TypeError: $this.edit_view_ui_dic.user is undefined"
+					if ( $this.edit_view_ui_dic && $this.edit_view_ui_dic.user ) {
+						$this.edit_view_ui_dic.user.setSourceData(result.getResult());
+					}
+				}
+			});
+		}
+	},
+
 	onLengthOfServiceChange: function() {
 
 		if ( this.sub_view_mode ) {
 			return;
 		}
 
-		if ( this.current_edit_record['minimum_length_of_service_unit_id'] === 50 || this.current_edit_record['maximum_length_of_service_unit_id'] === 50 ) {
+		if ( this.current_edit_record['minimum_length_of_service_unit_id'] == 50 || this.current_edit_record['maximum_length_of_service_unit_id'] == 50 ) {
 			this.attachElement( 'length_of_service_contributing_pay_code_policy_id' );
 		} else {
 			this.detachElement( 'length_of_service_contributing_pay_code_policy_id' );
@@ -1071,7 +1100,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	initCompanyTaxDeductionData: function() {
 
 		var $this = this;
-		this.api.getCompanyDeduction( null, true, {
+
+		this.api.getCompanyDeduction( { filter_data: { legal_entity_id: this.parent_edit_record.legal_entity_id } }, true, {
 			onResult: function( result ) {
 				var result_data = result.getResult();
 				$this.edit_view_ui_dic.company_tax_deduction_ids.setUnselectedGridData( result_data );
@@ -1084,6 +1114,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.onApplyFrequencyChange();
 		this.initEmployeeSetting();
 
+		this.updateEmployeeData();
 	},
 
 	setDistrict: function( c ) {
@@ -1149,7 +1180,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		//prevent race condition by making double-sure that we get all the dynamic fields.
 		var $this = this;
-		TTPromise.wait(null, null, function(){
+		TTPromise.wait(null, null, function() {
 			$this.hideAllDynamicFields
 		});
 	},
@@ -2891,10 +2922,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 	setDistrictVisibility: function() {
 
-		if ( this.show_dc && this.provice_district_array && this.provice_district_array.length > 1 ) {
+		if ( this.show_dc && this.provice_district_array && this.provice_district_array.length > 0 ) {
 			this.attachElement( 'district' );
 		} else {
 			this.detachElement( 'district' );
+			this.current_edit_record.district = false;
 		}
 	},
 
@@ -2908,7 +2940,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		var c_id = this.current_edit_record.calculation_id;
 
-		if ( c_id === 20 ) {
+		if ( c_id == 20 ) {
 			this.detachElement( 'include_account_amount_type_id' );
 			this.detachElement( 'exclude_account_amount_type_id' );
 		} else {
@@ -3565,25 +3597,25 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	},
 
 	onApplyFrequencyChange: function() {
-		if ( this.current_edit_record.apply_frequency_id === 10 ||
-			this.current_edit_record.apply_frequency_id === 100 ||
-			this.current_edit_record === 110 ||
-			this.current_edit_record.apply_frequency_id === 120 ||
-			this.current_edit_record.apply_frequency_id === 130 ) {
+		if ( this.current_edit_record.apply_frequency_id == 10 ||
+			this.current_edit_record.apply_frequency_id == 100 ||
+			this.current_edit_record == 110 ||
+			this.current_edit_record.apply_frequency_id == 120 ||
+			this.current_edit_record.apply_frequency_id == 130 ) {
 
 			this.edit_view_ui_dic['apply_frequency_month'].parent().parent().css( 'display', 'none' );
 			this.edit_view_ui_dic['apply_frequency_day_of_month'].parent().parent().css( 'display', 'none' );
 			this.edit_view_ui_dic['apply_frequency_quarter_month'].parent().parent().css( 'display', 'none' );
 
-		} else if ( this.current_edit_record.apply_frequency_id === 20 ) {
+		} else if ( this.current_edit_record.apply_frequency_id == 20 ) {
 			this.edit_view_ui_dic['apply_frequency_month'].parent().parent().css( 'display', 'block' );
 			this.edit_view_ui_dic['apply_frequency_day_of_month'].parent().parent().css( 'display', 'block' );
 			this.edit_view_ui_dic['apply_frequency_quarter_month'].parent().parent().css( 'display', 'none' );
-		} else if ( this.current_edit_record.apply_frequency_id === 25 ) {
+		} else if ( this.current_edit_record.apply_frequency_id == 25 ) {
 			this.edit_view_ui_dic['apply_frequency_month'].parent().parent().css( 'display', 'none' );
 			this.edit_view_ui_dic['apply_frequency_day_of_month'].parent().parent().css( 'display', 'block' );
 			this.edit_view_ui_dic['apply_frequency_quarter_month'].parent().parent().css( 'display', 'block' );
-		} else if ( this.current_edit_record.apply_frequency_id === 30 ) {
+		} else if ( this.current_edit_record.apply_frequency_id == 30 ) {
 			this.edit_view_ui_dic['apply_frequency_month'].parent().parent().css( 'display', 'none' );
 			this.edit_view_ui_dic['apply_frequency_day_of_month'].parent().parent().css( 'display', 'block' );
 			this.edit_view_ui_dic['apply_frequency_quarter_month'].parent().parent().css( 'display', 'none' );
@@ -3648,6 +3680,31 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_tax_deductions_column1 );
 
+		//Legal entity
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.TText( {field: 'legal_entity_id'} );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.LEGAL_ENTITY,
+			show_search_inputs: false,
+			set_empty: false,
+			field: 'legal_entity_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Legal Entity' ), form_item_input, tab_tax_deductions_column1 );
+
+		//Payroll Remittance Agency
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
+			show_search_inputs: false,
+			set_empty: true,
+			field: 'payroll_remittance_agency_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Remittance Agency' ), form_item_input, tab_tax_deductions_column1 );
+
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'name', width: '100%'} );
@@ -3690,7 +3747,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		// District
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'district', set_empty: true} );
+		form_item_input.TComboBox( {field: 'district', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
 		this.addEditFieldToColumn( $.i18n._( 'District' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
@@ -3758,42 +3815,42 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
 			TTPromise.add('CompanyTaxDeduction','df_11');
-			Global.loadScript( 'global/widgets/formula_builder/FormulaBuilder.js', function(){
-				// Dynamic Field 11
-				form_item_input = Global.loadWidgetByName( FormItemType.FORMULA_BUILDER );
-				form_item_input.FormulaBuilder( {
-					field: 'df_11', width: '100%', onFormulaBtnClick: function() {
+			Global.loadScript( 'global/widgets/formula_builder/FormulaBuilder.js', function() {
+			// Dynamic Field 11
+			form_item_input = Global.loadWidgetByName( FormItemType.FORMULA_BUILDER );
+			form_item_input.FormulaBuilder( {
+				field: 'df_11', width: '100%', onFormulaBtnClick: function() {
 
-						var custom_column_api = new (APIFactory.getAPIClass( 'APIReportCustomColumn' ))();
+					var custom_column_api = new (APIFactory.getAPIClass( 'APIReportCustomColumn' ))();
 
-						custom_column_api.getOptions( 'formula_functions', {
-							onResult: function( fun_result ) {
-								var fun_res_data = fun_result.getResult();
+					custom_column_api.getOptions( 'formula_functions', {
+						onResult: function( fun_result ) {
+							var fun_res_data = fun_result.getResult();
 
-								$this.api.getOptions( 'formula_variables', {onResult: onColumnsResult} );
+							$this.api.getOptions( 'formula_variables', {onResult: onColumnsResult} );
 
-								function onColumnsResult( col_result ) {
-									var col_res_data = col_result.getResult();
+							function onColumnsResult( col_result ) {
+								var col_res_data = col_result.getResult();
 
-									var default_args = {};
-									default_args.functions = Global.buildRecordArray( fun_res_data );
-									default_args.variables = Global.buildRecordArray( col_res_data );
-									default_args.formula = $this.current_edit_record.company_value1;
-									default_args.current_edit_record = Global.clone( $this.current_edit_record );
-									default_args.api = $this.api;
+								var default_args = {};
+								default_args.functions = Global.buildRecordArray( fun_res_data );
+								default_args.variables = Global.buildRecordArray( col_res_data );
+								default_args.formula = $this.current_edit_record.company_value1;
+								default_args.current_edit_record = Global.clone( $this.current_edit_record );
+								default_args.api = $this.api;
 
-									IndexViewController.openWizard( 'FormulaBuilderWizard', default_args, function( val ) {
-										$this.current_edit_record.company_value1 = val;
-										$this.edit_view_ui_dic.df_11.setValue( val );
-									} );
-								}
-
+								IndexViewController.openWizard( 'FormulaBuilderWizard', default_args, function( val ) {
+									$this.current_edit_record.company_value1 = val;
+									$this.edit_view_ui_dic.df_11.setValue( val );
+								} );
 							}
-						} );
-					}
-				} );
+
+						}
+					} );
+				}
+			} );
 				$this.addEditFieldToColumn( 'df_11', form_item_input, tab_tax_deductions_column1, '', null, true );
-				form_item_input.parent().width( '45%' );
+			form_item_input.parent().width( '45%' );
 				TTPromise.resolve('CompanyTaxDeduction','df_11');
 			} );
 		} else {
@@ -4093,7 +4150,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			allow_drag_to_order: false,
 			display_column_settings: false
 		} );
-
 		this.addEditFieldToColumn( $.i18n._( 'Taxes / Deductions' ), form_item_input, tab5_column1, '', null, false, true );
 
 		form_item_input.setColumns( display_columns );
@@ -4230,6 +4286,17 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.TEXT_INPUT
 			} ),
 			new SearchField( {
+				label: $.i18n._( 'Legal Entity' ),
+				in_column: 1,
+				field: 'legal_entity_id',
+				layout_name: ALayoutIDs.LEGAL_ENTITY,
+				api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+				multiple: true,
+				basic_search: true,
+				adv_search: false,
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
 				label: $.i18n._( 'Pay Stub Account' ),
 				in_column: 1,
 				field: 'pay_stub_entry_name_id',
@@ -4238,6 +4305,17 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Remittance Agency' ),
+				in_column: 2,
+				field: 'payroll_remittance_agency_id',
+				layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
+				api_class: (APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' )),
+				multiple: true,
+				basic_search: true,
+				script_name: 'PayrollRemittanceAgencyView',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {

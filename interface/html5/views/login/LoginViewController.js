@@ -1,6 +1,9 @@
 LoginViewController = BaseViewController.extend( {
 
 	el: '#loginViewContainer', //Must set el here and can only set string, so events can work
+
+	_required_files: ['APICurrentUser', 'APICurrency', 'APIUserPreference', 'APIPermission'],
+
 	authentication_api: null,
 	currentUser_api: null,
 	currency_api: null,
@@ -13,8 +16,8 @@ LoginViewController = BaseViewController.extend( {
 
 	lan_selector: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		var $this = this;
 		this.authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
 		this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();

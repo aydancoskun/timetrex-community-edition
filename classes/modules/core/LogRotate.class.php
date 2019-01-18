@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -53,20 +53,39 @@ class LogRotate {
 
 	private $config_arr = array();
 
+	/**
+	 * LogRotate constructor.
+	 * @param null $config_arr
+	 */
 	function __construct( $config_arr = NULL ) {
 		$this->config_arr = $config_arr;
 		return TRUE;
 	}
 
+	/**
+	 * @param $arr
+	 * @return bool
+	 */
 	function addConfig( $arr ) {
 		$this->config_arr[] = $arr;
 		return TRUE;
 	}
 
+	/**
+	 * @param $start_dir
+	 * @param null $regex_filter
+	 * @param bool $recurse
+	 * @return array|bool
+	 */
 	function getFileList( $start_dir, $regex_filter = NULL, $recurse = FALSE ) {
 		return Misc::getFileList( $start_dir, $regex_filter, $recurse );
 	}
 
+	/**
+	 * @param $file
+	 * @param string $frequency
+	 * @return bool
+	 */
 	function isFileReadyToRotate( $file, $frequency = 'daily' ) {
 		$retval = FALSE;
 
@@ -89,6 +108,11 @@ class LogRotate {
 	}
 
 	//Checks to see if the file has a numeric extension signifying that it is not a primary file and has already been rotated.
+
+	/**
+	 * @param $file
+	 * @return bool
+	 */
 	function isFileRotatable( $file ) {
 		$extension = pathinfo( $file, PATHINFO_EXTENSION );
 		//Debug::Text(' File:  '. $file .' Extension: '. $extension, __FILE__, __LINE__, __METHOD__, 10);
@@ -101,6 +125,11 @@ class LogRotate {
 		return FALSE;
 	}
 
+	/**
+	 * @param $files
+	 * @param $primary_file
+	 * @return array|bool
+	 */
 	function getRotatedHistoryFiles( $files, $primary_file ) {
 		$retarr = array();
 		if ( is_array($files) ) {
@@ -120,6 +149,11 @@ class LogRotate {
 		return FALSE;
 	}
 
+	/**
+	 * @param $extension
+	 * @param $history
+	 * @return string
+	 */
 	function padExtension( $extension, $history ) {
 		if ( strlen($history) < 2 ) {
 			$pad_length = 2;
@@ -129,6 +163,11 @@ class LogRotate {
 		return str_pad( $extension, $pad_length, '0', STR_PAD_LEFT );
 	}
 
+	/**
+	 * @param $files
+	 * @param int $history
+	 * @return bool
+	 */
 	function handleHistoryFiles( $files, $history = 0 ) {
 		if ( is_array($files) ) {
 			rsort($files);
@@ -158,6 +197,11 @@ class LogRotate {
 		return FALSE;
 	}
 
+	/**
+	 * @param $files
+	 * @param $rotate_config
+	 * @return bool
+	 */
 	function _rotate( $files, $rotate_config ) {
 		if ( is_array($files) ) {
 			foreach( $files as $filename ) {
@@ -193,6 +237,9 @@ class LogRotate {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function Rotate() {
 		//Loop through config entries
 		if ( is_array($this->config_arr) AND isset($this->config_arr[0]) ) {

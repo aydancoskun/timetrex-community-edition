@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,13 @@
 class UserReviewListFactory extends UserReviewFactory implements IteratorAggregate
 {
 
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
 	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 
 		$urcf = new UserReviewControlFactory();
@@ -56,6 +63,12 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		return $this;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReviewListFactory
+	 */
 	function getById( $id, $where = NULL, $order = NULL ) {
 
 		if ( $id == '' ) {
@@ -64,7 +77,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		$urcf = new UserReviewControlFactory();
 		$this->rs = $this->getCache( $id );
 		if ( $this->rs === FALSE ) {
-			$ph = array( 'id' => (int)$id, );
+			$ph = array( 'id' => TTUUID::castUUID($id), );
 			$query = '
 						select	a.*
 						from	' . $this->getTable() . ' as a
@@ -80,13 +93,18 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		return $this;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReviewListFactory
+	 */
 	function getByUserReviewControlId( $id, $order = NULL ) {
 
 		if ( $id == '' ) {
 			return FALSE;
 		}
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'user_review_control_id' => (int)$id, );
+		$ph = array( 'user_review_control_id' => TTUUID::castUUID($id), );
 		$query = '
 					select	a.*
 					from	' . $this->getTable() . ' as a
@@ -100,14 +118,18 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 	}
 
 
-
+	/**
+	 * @param string $id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReviewListFactory
+	 */
 	function getByKpiId( $id, $order = NULL ) {
 
 		if ( $id == '' ) {
 			return FALSE;
 		}
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'kpi_id' => (int)$id, );
+		$ph = array( 'kpi_id' => TTUUID::castUUID($id), );
 		$query = '
                     select  *
                     from    ' . $this->getTable() . ' as a
@@ -120,6 +142,12 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReviewListFactory
+	 */
 	function getByCompanyId( $company_id, $where = NULL, $order = NULL ) {
 
 		if ( $company_id == '' ) {
@@ -127,7 +155,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		}
 		$kf = new KPIFactory();
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'company_id' => (int)$company_id, );
+		$ph = array( 'company_id' => TTUUID::castUUID($company_id), );
 		$query = '
 					select	a.*
 					from	' . $this->getTable() . ' as a
@@ -142,6 +170,13 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		return $this;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReviewListFactory
+	 */
 	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL ) {
 
 		if ( $id == '' ) {
@@ -152,7 +187,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		}
 		$kf = new KPIFactory();
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'id' => (int)$id, 'company_id' => (int)$company_id, );
+		$ph = array( 'id' => TTUUID::castUUID($id), 'company_id' => TTUUID::castUUID($company_id), );
 		$query = '
 					select	a.*
 					from	' . $this->getTable() . ' as a
@@ -168,6 +203,15 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReviewListFactory
+	 */
 	function  getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 
 		if ( $company_id == '' ) {
@@ -191,11 +235,11 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		$uf = new UserFactory();
 		$kf = new KPIFactory();
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'company_id' => (int)$company_id, );
+		$ph = array( 'company_id' => TTUUID::castUUID($company_id), );
 		$query = '
 					select	a.*,
 							kf.name,
@@ -216,16 +260,16 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 						LEFT JOIN ' . $uf->getTable() . ' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	kf.company_id = ? AND urcf.deleted = 0';
-		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		//$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['user_review_control_id'] ) ) ? $this->getWhereClauseSQL( 'a.user_review_control_id', $filter_data['user_review_control_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['kpi_id'] ) ) ? $this->getWhereClauseSQL( 'a.kpi_id', $filter_data['kpi_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		//$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_review_control_id'] ) ) ? $this->getWhereClauseSQL( 'a.user_review_control_id', $filter_data['user_review_control_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['kpi_id'] ) ) ? $this->getWhereClauseSQL( 'a.kpi_id', $filter_data['kpi_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset( $filter_data['term_id'] ) ) ? $this->getWhereClauseSQL( 'urcf.term_id', $filter_data['term_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset( $filter_data['severity_id'] ) ) ? $this->getWhereClauseSQL( 'urcf.severity_id', $filter_data['severity_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset( $filter_data['rating'] ) ) ? $this->getWhereClauseSQL( 'a.rating', $filter_data['rating'], 'numeric', $ph ) : NULL;
 		$query .= ( isset( $filter_data['note'] ) ) ? $this->getWhereClauseSQL( 'a.note', $filter_data['note'], 'text', $ph ) : NULL;
-		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 330, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 330, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_date']) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_date']) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date'], 'date_range', $ph ) : NULL;

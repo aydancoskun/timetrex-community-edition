@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -167,7 +167,7 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 	function getOSUser() {
 		if ( function_exists( 'posix_geteuid' ) AND function_exists( 'posix_getpwuid' ) ) {
 			$user = posix_getpwuid( posix_geteuid() );
-			Debug::text( 'Webserver running as User: '. $user['name'], __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Text( 'Webserver running as User: '. $user['name'], __FILE__, __LINE__, __METHOD__, 10 );
 
 			return $user['name'];
 		}
@@ -185,7 +185,7 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 			//Global.getUIReadyStatus will be == 2 when the screens are finished loading.
 			$javascript = array('script' => 'return Global.getUIReadyStatus();', 'args' => array());
 			$var = $this->execute($javascript);
-			Debug::text( 'waitForUI result: '. print_r($var, TRUE), __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Text( 'waitForUI result: '. print_r($var, TRUE), __FILE__, __LINE__, __METHOD__, 10 );
 			if ( isset($var) AND $var == 2) {
 				return TRUE;
 			}
@@ -219,7 +219,7 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 
 		//set the same sessionid for all tests
 		$javascript = array('script' => "$.cookie( 'StationID', 'UNITTESTS', {expires: 30, path: '$path'} );", 'args' => array());
-		$javascript = array('script' => "LocalCacheData.setStationID('UNITTEST')", 'args' => array());
+		$javascript = array('script' => "Global.setStationID('UNITTEST')", 'args' => array());
 		$this->execute($javascript);
 
 	}
@@ -235,5 +235,43 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 			}
 		}
 		return FALSE;
+	}
+
+	function waitThenClick( $selector ) {
+//		if ( stristr($selector, ':visible') == FALSE ) {
+//			$selector .= ':visible';
+//		}
+
+		if ( substr( $selector, 0, 1 ) == '#' AND strstr( $selector, ' ' ) == FALSE ) {
+			//need to do this because of malformed ids in the top menu causing wating by selector to fail.
+			$id = substr( $selector, 1, strlen($selector) );
+			Debug::Text( 'Waiting on id: '.$id, __FILE__, __LINE__, __METHOD__, 10 );
+			$this->waitUntilById( $id, 10000 );
+			Debug::Text( 'Clicking id: '.$id, __FILE__, __LINE__, __METHOD__, 10 );
+			$this->byId($id)->click();
+		} else {
+			Debug::Text( 'Waiting on selector: '.$selector, __FILE__, __LINE__, __METHOD__, 10 );
+			$this->waitUntilByCssSelector( $selector, 10000 );
+			Debug::Text( 'Clicking selector: '.$selector, __FILE__, __LINE__, __METHOD__, 10 );
+			$this->byCssSelector($selector)->click();
+			Debug::Text( 'Done: '.$selector, __FILE__, __LINE__, __METHOD__, 10 );
+		}
+	}
+
+	function getArrayBySelector( $css_selector ) {
+		Debug::Text( 'Getting array by: '.$css_selector, __FILE__, __LINE__, __METHOD__, 10 );
+		//$this->waitUntilByCssSelector( $css_selector,10000 );
+
+		//http://stackoverflow.com/questions/16637806/select-all-matching-elements-in-phpunit-selenium-2-test-case
+		$retval = $this->elements(
+				$this->using( 'css selector' )->value( $css_selector )
+		);
+		if( isset($retval) ) {
+			Debug::Text( count( $retval ) . ' RESULTS FOR: ' . $css_selector, __FILE__, __LINE__, __METHOD__, 10 );
+
+			return $retval;
+		}
+		return array();
+
 	}
 }

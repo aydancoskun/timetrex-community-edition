@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,11 @@ class CurrencyRateFactory extends Factory {
 
 	protected $currency_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -80,6 +85,10 @@ class CurrencyRateFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -96,72 +105,69 @@ class CurrencyRateFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCurrencyObject() {
 		return $this->getGenericObject( 'CurrencyListFactory', $this->getCurrency(), 'currency_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCurrency() {
-		if ( isset($this->data['currency_id']) ) {
-			return (int)$this->data['currency_id'];
-		}
-
-		return FALSE;
-	}
-	function setCurrency($id) {
-		$id = trim($id);
-
-		Debug::Text('Currency ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$culf = TTnew( 'CurrencyListFactory' );
-
-		if (
-				$this->Validator->isResultSetWithRows(	'currency_id',
-														$culf->getByID($id),
-														TTi18n::gettext('Invalid Currency')
-													) ) {
-
-			$this->data['currency_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'currency_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCurrency( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('Currency ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'currency_id', $value );
+	}
+
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getDateStamp( $raw = FALSE ) {
-		if ( isset($this->data['date_stamp']) ) {
+		$value = $this->getGenericDataValue( 'date_stamp' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['date_stamp'];
+				return $value;
 			} else {
 				//return $this->db->UnixTimeStamp( $this->data['start_date'] );
 				//strtotime is MUCH faster than UnixTimeStamp
 				//Must use ADODB for times pre-1970 though.
-				return TTDate::strtotime( $this->data['date_stamp'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setDateStamp($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if	( $epoch != ''
-				AND
-				$this->Validator->isDate(		'date_stamp',
-												$epoch,
-												TTi18n::gettext('Incorrect date'))
-			) {
-
-			$this->data['date_stamp'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setDateStamp( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'date_stamp', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isUnique() {
 		$ph = array(
-					'currency_id' => (int)$this->getCurrency(),
+					'currency_id' => TTUUID::castUUID( $this->getCurrency() ),
 					'date_stamp' => $this->db->BindDate( $this->getDateStamp() ),
 					);
 
@@ -180,6 +186,9 @@ class CurrencyRateFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getReverseConversionRate() {
 		$rate = $this->getConversionRate();
 		if ( $rate != 0 ) { //Prevent division by 0.
@@ -189,66 +198,110 @@ class CurrencyRateFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getConversionRate() {
-		if ( isset($this->data['conversion_rate']) ) {
-			return $this->data['conversion_rate']; //Don't cast to (float) as it may strip some precision.
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'conversion_rate' );//Don't cast to (float) as it may strip some precision.
 	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
 	function setConversionRate( $value ) {
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-
-		if ( $this->Validator->isTrue( 'conversion_rate',
-									   $value,
-									   TTi18n::gettext( 'Conversion rate not specified' ) )
-				AND $this->Validator->isFloat( 'conversion_rate',
-											   $value,
-											   TTi18n::gettext( 'Incorrect Conversion Rate' ) )
-				AND $this->Validator->isLessThan( 'conversion_rate',
-												  $value,
-												  TTi18n::gettext( 'Conversion Rate is too high' ),
-												  99999999 )
-				AND $this->Validator->isGreaterThan( 'conversion_rate',
-													 $value,
-													 TTi18n::gettext( 'Conversion Rate is too low' ),
-													 -99999999 )
-		) {
-			$this->data['conversion_rate'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'conversion_rate', $value );
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
-		if ( $this->getDeleted() == FALSE ) {
-			if ( $this->Validator->getValidateOnly() == FALSE AND $this->getDateStamp() == FALSE ) {
-				$this->Validator->isTrue(	'date_stamp',
-											FALSE,
-											TTi18n::gettext('Date not specified') );
-			} else if ( $this->Validator->getValidateOnly() == FALSE AND $this->isUnique() == FALSE ) {
-				$this->Validator->isTrue(	'date_stamp',
-											FALSE,
-											TTi18n::gettext('Currency rate already exists for this date') );
-			}
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Currency
+		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't do the follow validation checks during Mass Edit.
+			$culf = TTnew( 'CurrencyListFactory' );
+			$this->Validator->isResultSetWithRows( 'currency_id',
+												   $culf->getByID( $this->getCurrency() ),
+												   TTi18n::gettext( 'Invalid Currency' )
+			);
+		}
 
-			if ( $this->getConversionRate() == FALSE AND $this->Validator->hasError('conversion_rate') == FALSE ) {
-				$this->Validator->isTrue(		'conversion_rate',
-												FALSE,
-												TTi18n::gettext('Conversion rate not specified'));
+		// Date
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getDateStamp() != FALSE ) {
+			$this->Validator->isDate(		'date_stamp',
+													$this->getDateStamp(),
+													TTi18n::gettext('Incorrect date')
+												);
+		}
+
+		// Conversion rate
+		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't do the follow validation checks during Mass Edit.
+			$this->Validator->isTrue( 'conversion_rate',
+									  $this->getConversionRate(),
+									  TTi18n::gettext( 'Conversion rate not specified' )
+			);
+		}
+
+		if ( $this->getConversionRate() !== FALSE ) {
+			if ( $this->Validator->isError( 'conversion_rate' ) == FALSE ) {
+				$this->Validator->isFloat( 'conversion_rate',
+										   $this->getConversionRate(),
+										   TTi18n::gettext( 'Incorrect Conversion Rate' )
+				);
+			}
+			if ( $this->Validator->isError( 'conversion_rate' ) == FALSE ) {
+				$this->Validator->isLessThan( 'conversion_rate',
+											  $this->getConversionRate(),
+											  TTi18n::gettext( 'Conversion Rate is too high' ),
+											  99999999
+				);
+			}
+			if ( $this->Validator->isError( 'conversion_rate' ) == FALSE ) {
+				$this->Validator->isGreaterThan( 'conversion_rate',
+												 $this->getConversionRate(),
+												 TTi18n::gettext( 'Conversion Rate is too low' ),
+												 -99999999
+				);
+			}
+		}
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		if ( $this->getDeleted() == FALSE ) {
+			if ( $this->Validator->isError('date_stamp') == FALSE ) {
+				if ( $this->Validator->getValidateOnly() == FALSE AND $this->getDateStamp() == FALSE ) {
+					$this->Validator->isTrue( 'date_stamp',
+											  FALSE,
+											  TTi18n::gettext( 'Date not specified' ) );
+				} else {
+					if ( $this->Validator->getValidateOnly() == FALSE AND $this->isUnique() == FALSE ) {
+						$this->Validator->isTrue( 'date_stamp',
+												  FALSE,
+												  TTi18n::gettext( 'Currency rate already exists for this date' ) );
+					}
+				}
 			}
 		}
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
@@ -257,6 +310,10 @@ class CurrencyRateFactory extends Factory {
 
 	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -291,6 +348,10 @@ class CurrencyRateFactory extends Factory {
 	}
 
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		/*
 		$include_columns = array(
@@ -328,6 +389,10 @@ class CurrencyRateFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Currency Rate').': '. $this->getCurrencyObject()->getISOCode() .' '.  TTi18n::getText('Rate').': '. $this->getConversionRate(), NULL, $this->getTable(), $this );
 	}

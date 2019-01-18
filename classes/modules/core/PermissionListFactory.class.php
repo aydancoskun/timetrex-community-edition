@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,7 +39,14 @@
  * @package Core
  */
 class PermissionListFactory extends PermissionFactory implements IteratorAggregate {
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -52,13 +59,19 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PermissionListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -75,13 +88,19 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PermissionListFactory
+	 */
+	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$pcf = new PermissionControlFactory();
@@ -101,7 +120,14 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		return $this;
 	}
 
-	function getByCompanyIdAndPermissionControlId($company_id, $permission_control_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $permission_control_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PermissionListFactory
+	 */
+	function getByCompanyIdAndPermissionControlId( $company_id, $permission_control_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -111,8 +137,8 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'permission_control_id' => (int)$permission_control_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'permission_control_id' => TTUUID::castUUID($permission_control_id),
 					);
 
 		$pcf = new PermissionControlFactory();
@@ -133,7 +159,16 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		return $this;
 	}
 
-	function getByCompanyIdAndPermissionControlIdAndSectionAndName($company_id, $permission_control_id, $section, $name, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $permission_control_id UUID
+	 * @param $section
+	 * @param $name
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PermissionListFactory
+	 */
+	function getByCompanyIdAndPermissionControlIdAndSectionAndName( $company_id, $permission_control_id, $section, $name, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -151,8 +186,8 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'permission_control_id' => (int)$permission_control_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'permission_control_id' => TTUUID::castUUID($permission_control_id),
 					'section' => $section,
 					//'name' => $name, //Allow a list of names.
 					);
@@ -177,7 +212,17 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		return $this;
 	}
 
-	function getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue($company_id, $permission_control_id, $section, $name, $value, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $permission_control_id UUID
+	 * @param $section
+	 * @param $name
+	 * @param $value
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PermissionListFactory
+	 */
+	function getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_id, $permission_control_id, $section, $name, $value, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -195,8 +240,8 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'permission_control_id' => (int)$permission_control_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'permission_control_id' => TTUUID::castUUID($permission_control_id),
 					'section' => $section,
 					'value' => (int)$value,
 					//'name' => $name, //Allow a list of names.
@@ -223,7 +268,16 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		return $this;
 	}
 
-	function getByCompanyIdAndSectionAndDateAndValidIDs($company_id, $section, $date = NULL, $valid_ids = array(), $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param $section
+	 * @param int $date EPOCH
+	 * @param array $valid_ids
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PermissionListFactory
+	 */
+	function getByCompanyIdAndSectionAndDateAndValidIDs( $company_id, $section, $date = NULL, $valid_ids = array(), $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -237,7 +291,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$pcf = new PermissionControlFactory();
@@ -264,7 +318,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		if ( isset($valid_ids) AND is_array($valid_ids) AND count($valid_ids) > 0 ) {
-			$query	.=	' OR a.id in ('. $this->getListSQL( $valid_ids, $ph, 'int' ) .') ';
+			$query	.=	' OR a.id in ('. $this->getListSQL( $valid_ids, $ph, 'uuid') .') ';
 		}
 
 		$query .= '	)
@@ -277,7 +331,12 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		return $this;
 	}
 
-	function getAllPermissionsByCompanyIdAndUserId($company_id, $user_id) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @return bool|PermissionListFactory
+	 */
+	function getAllPermissionsByCompanyIdAndUserId( $company_id, $user_id) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -287,8 +346,8 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'user_id' => (int)$user_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$pcf = new PermissionControlFactory();
@@ -312,7 +371,14 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		return $this;
 	}
 
-	function getIsModifiedByCompanyIdAndDate($company_id, $date, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool
+	 */
+	function getIsModifiedByCompanyIdAndDate( $company_id, $date, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -322,7 +388,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'created_date' => $date,
 					'updated_date' => $date,
 					'deleted_date' => $date,

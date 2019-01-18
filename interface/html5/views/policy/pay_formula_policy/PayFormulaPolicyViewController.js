@@ -1,10 +1,13 @@
 PayFormulaPolicyViewController = BaseViewController.extend( {
 	el: '#pay_formula_policy_view_container',
+
+	_required_files: ['APIPayFormulaPolicy', 'APIAccrualPolicyAccount', 'APIContributingShiftPolicy', 'APIWageGroup'],
+
 	type_array: null,
 	pay_type_array: null,
 	wage_source_type_array: null,
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayFormulaPolicyEditView.html';
 		this.permission_id = 'pay_formula_policy';
 		this.viewId = 'PayFormulaPolicy';
@@ -191,26 +194,26 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 	},
 
 	onPayTypeChange: function() {
-		if ( this.current_edit_record['pay_type_id'] === 10 ) {
+		if ( this.current_edit_record['pay_type_id'] == 10 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ')' );
 			this.attachElement( 'wage_group_id' );
 			this.attachElement( 'wage_source_type_id' );
 
-		} else if ( this.current_edit_record['pay_type_id'] === 30 || this.current_edit_record['pay_type_id'] === 40 ) {
+		} else if ( this.current_edit_record['pay_type_id'] == 30 || this.current_edit_record['pay_type_id'] == 40 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
 			this.attachElement( 'wage_group_id' );
 			this.attachElement( 'wage_source_type_id' );
 
-		} else if ( this.current_edit_record['pay_type_id'] === 50 ) {
+		} else if ( this.current_edit_record['pay_type_id'] == 50 ) {
 
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Premium' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '0.75 for 75 cent/hr' ) + ')' );
 			this.attachElement( 'wage_group_id' );
 			this.attachElement('wage_source_type_id'  );
 
-		} else if ( this.current_edit_record['pay_type_id'] === 32 ) {
+		} else if ( this.current_edit_record['pay_type_id'] == 32 ) {
 
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
@@ -218,7 +221,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 			this.detachElement( 'wage_source_contributing_shift_policy_id' );
 			this.detachElement( 'time_source_contributing_shift_policy_id' );
 			this.detachElement( 'wage_source_type_id' );
-		} else if ( this.current_edit_record['pay_type_id'] === 42 ) {
+		} else if ( this.current_edit_record['pay_type_id'] == 42 ) {
 
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
@@ -231,7 +234,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 	},
 
 	onAccrualAccountChange: function() {
-		if ( this.current_edit_record['accrual_policy_account_id'] === false || typeof this.current_edit_record['accrual_policy_account_id'] === 'undefined' || this.current_edit_record['accrual_policy_account_id'] === 0 ) {
+		if ( this.current_edit_record['accrual_policy_account_id'] === false || typeof this.current_edit_record['accrual_policy_account_id'] == 'undefined' || this.current_edit_record['accrual_policy_account_id'] == TTUUID.zero_id ) {
 			this.detachElement( 'accrual_rate' );
 		} else {
 			this.attachElement( 'accrual_rate' )
@@ -240,25 +243,25 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 	},
 
 	onWageSourceTypeChange: function() {
-		if ( this.current_edit_record['wage_source_type_id'] === 10 ) {
+		if ( this.current_edit_record['wage_source_type_id'] == 10 ) {
 
 			this.detachElement( 'wage_source_contributing_shift_policy_id' );
 
 			this.detachElement( 'time_source_contributing_shift_policy_id' );
 
-			if ( this.current_edit_record['pay_type_id'] === 32 ) {
+			if ( this.current_edit_record['pay_type_id'] == 32 ) {
 				this.detachElement( 'wage_group_id' );
 			} else {
 				this.attachElement( 'wage_group_id' );
 			}
 
-		} else if ( this.current_edit_record['wage_source_type_id'] === 20 ) {
+		} else if ( this.current_edit_record['wage_source_type_id'] == 20 ) {
 
 			this.detachElement( 'wage_source_contributing_shift_policy_id' );
 			this.detachElement( 'time_source_contributing_shift_policy_id' );
 			this.detachElement( 'wage_group_id' );
 
-		} else if ( this.current_edit_record['wage_source_type_id'] === 30 ) {
+		} else if ( this.current_edit_record['wage_source_type_id'] == 30 ) {
 
 			if ( this.edit_view_form_item_dic['wage_source_type_id'].css( 'display' ) === 'block' ) {
 				this.attachElement( 'wage_source_contributing_shift_policy_id' );

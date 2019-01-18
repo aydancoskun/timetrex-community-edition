@@ -1,6 +1,8 @@
 PayPeriodScheduleViewController = BaseViewController.extend( {
-
 	el: '#pay_period_schedule_view_container', //Must set el here and can only set string, so events can work
+
+	_required_files: ['APIPayPeriodSchedule', 'APIUserPreference'],
+
 	user_preference_api: null,
 	type_array: null,
 	pay_period_starts_on_array: null,
@@ -12,9 +14,9 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 	timesheet_verify_type_array: null,
 	sub_pay_periods_view_controller: null,
 
-	initialize: function( options ) {
+	init: function( options ) {
 
-		this._super( 'initialize', options );
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayPeriodScheduleEditView.html';
 		this.permission_id = 'pay_period_schedule';
 		this.viewId = 'PayPeriodSchedule';
@@ -271,7 +273,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 	},
 
 	onVerifyTypeChange: function() {
-		if ( this.current_edit_record.timesheet_verify_type_id === 10 ) {
+		if ( this.current_edit_record.timesheet_verify_type_id == 10 ) {
 			this.detachElement( 'timesheet_verify_before_end_date' );
 			this.detachElement( 'timesheet_verify_before_transaction_date' );
 		} else {
@@ -331,7 +333,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 
-		if ( this.current_edit_record.type_id === 5 ) {
+		if ( this.current_edit_record.type_id == 5 ) {
 			this.detachElement( 'anchor_date' );
 		} else {
 
@@ -343,7 +345,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 		}
 
-		if ( this.current_edit_record.type_id === 5 ) {
+		if ( this.current_edit_record.type_id == 5 ) {
 			this.detachElement( 'primary' );
 			this.detachElement( 'primary_day_of_month' );
 			this.detachElement( 'primary_transaction_day_of_month' );
@@ -355,7 +357,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 			this.detachElement( 'transaction_date' );
 			this.detachElement( 'transaction_date_bd' );
 
-		} else if ( this.current_edit_record.type_id === 10 || this.current_edit_record.type_id === 20 || this.current_edit_record.type_id === 100 || this.current_edit_record.type_id === 200 ) {
+		} else if ( this.current_edit_record.type_id == 10 || this.current_edit_record.type_id == 20 || this.current_edit_record.type_id == 100 ) {
 			this.detachElement( 'primary' );
 			this.detachElement( 'primary_day_of_month' );
 			this.detachElement( 'primary_transaction_day_of_month' );
@@ -367,7 +369,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 			this.attachElement( 'transaction_date' );
 			this.attachElement( 'transaction_date_bd' );
 
-		} else if ( this.current_edit_record.type_id === 30 ) {
+		} else if ( this.current_edit_record.type_id == 30 ) {
 			this.attachElement( 'primary' );
 			this.attachElement( 'primary_day_of_month' );
 			this.attachElement( 'primary_transaction_day_of_month' );
@@ -378,7 +380,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 			this.detachElement( 'start_day_of_week' );
 			this.detachElement( 'transaction_date' );
 			this.attachElement( 'transaction_date_bd' );
-		} else if ( this.current_edit_record.type_id === 50 ) {
+		} else if ( this.current_edit_record.type_id == 50 ) {
 			this.attachElement( 'primary' );
 			this.attachElement( 'primary_day_of_month' );
 			this.attachElement( 'primary_transaction_day_of_month' );

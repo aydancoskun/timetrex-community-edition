@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,12 +43,19 @@ class APIProgressBar {
 
 	protected $obj = NULL;
 
+	/**
+	 * APIProgressBar constructor.
+	 */
 	public function __construct() {
 		$this->obj = new ProgressBar();
 
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $key
+	 * @return bool
+	 */
 	function get( $key = FALSE ) {
 		if ( $key != '' ) {
 			return $this->obj->get( $key );
@@ -57,6 +64,11 @@ class APIProgressBar {
 		return FALSE;
 	}
 
+	/**
+	 * @param $key
+	 * @param int $total_iterations
+	 * @return bool
+	 */
 	function test( $key, $total_iterations = 10 ) {
 		return $this->obj->test( $key, $total_iterations = 10 );
 	}

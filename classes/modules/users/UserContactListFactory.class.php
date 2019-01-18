@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class UserContactListFactory extends UserContactFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $order == NULL ) {
 			$order = array();
 			$strict = FALSE;
@@ -60,7 +67,13 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByStatus($status, $where = NULL, $order = NULL) {
+	/**
+	 * @param $status
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getByStatus( $status, $where = NULL, $order = NULL) {
 		$ph = array(
 					'status_id' => $status,
 					);
@@ -77,11 +90,18 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByCompanyIdAndStatus($company_id, $status, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param $status
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getByCompanyIdAndStatus( $company_id, $status, $where = NULL, $order = NULL) {
 		$uf = TTnew( 'UserFactory' );
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'status_id' => $status,
 					);
 
@@ -99,6 +119,10 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		return $this;
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
 	static function getFullNameById( $id ) {
 		if ( $id == '') {
 			return FALSE;
@@ -114,7 +138,11 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		return FALSE;
 	}
 
-	function getById($id) {
+	/**
+	 * @param string $id UUID
+	 * @return bool|UserContactListFactory
+	 */
+	function getById( $id) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -122,7 +150,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => (int)$id,
+						'id' => TTUUID::castUUID($id),
 						);
 
 			$query = '
@@ -139,7 +167,16 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserContactListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -157,7 +194,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 
 		$uf	 = TTnew('UserFactory');
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -165,7 +202,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $uf->getTable() .' as u ON	 ( u.id = a.user_id AND u.deleted = 0 )
 					where	u.company_id = ?
-						AND	a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+						AND	a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -178,7 +215,10 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 	}
 
 
-
+	/**
+	 * @param $email
+	 * @return bool|UserContactListFactory
+	 */
 	function getByHomeEmailOrWorkEmail( $email ) {
 		$email = trim(strtolower($email));
 
@@ -208,13 +248,20 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByIdAndStatus($id, $status, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param $status
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserContactListFactory
+	 */
+	function getByIdAndStatus( $id, $status, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					'status' => $status,
 					);
 
@@ -230,7 +277,15 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserContactListFactory
+	 */
+	function getByCompanyId( $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -244,7 +299,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 
 		$uf = TTnew('UserFactory');
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -262,14 +317,21 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 	}
 
 
-	function getByCompanyIdArray($company_id, $include_blank = TRUE, $include_disabled = TRUE, $last_name_first = TRUE ) {
+	/**
+	 * @param string $company_id UUID
+	 * @param bool $include_blank
+	 * @param bool $include_disabled
+	 * @param bool $last_name_first
+	 * @return array|bool
+	 */
+	function getByCompanyIdArray( $company_id, $include_blank = TRUE, $include_disabled = TRUE, $last_name_first = TRUE ) {
 
 		$uclf = new UserContactListFactory();
 		$uclf->getByCompanyId($company_id);
 
 		$user_list = array();
 		if ( $include_blank == TRUE ) {
-			$user_list[0] = '--';
+			$user_list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($uclf as $user) {
@@ -291,14 +353,20 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		return FALSE;
 	}
 
-	function getArrayByListFactory($lf, $include_blank = TRUE, $include_disabled = TRUE ) {
+	/**
+	 * @param $lf
+	 * @param bool $include_blank
+	 * @param bool $include_disabled
+	 * @return array|bool
+	 */
+	function getArrayByListFactory( $lf, $include_blank = TRUE, $include_disabled = TRUE ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 		$status_options = array();
 		foreach ($lf as $obj) {
@@ -324,7 +392,16 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		return FALSE;
 	}
 
-	function getDeletedByCompanyIdAndDate($company_id, $date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+	/**
+	 * @param string $company_id UUID
+	 * @param int $date EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserContactListFactory
+	 */
+	function getDeletedByCompanyIdAndDate( $company_id, $date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -334,7 +411,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		}
 		$uf = TTnew('UserFactory');
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'created_date' => $date,
 					'updated_date' => $date,
 					'deleted_date' => $date,
@@ -359,6 +436,15 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserContactListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -385,7 +471,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 			$order = array( 'employee_first_name' => 'asc', 'employee_last_name' => 'asc', 'last_name' => 'asc', 'first_name' => 'asc');
 			$strict = FALSE;
 		} else {
-			
+
 			if ( !isset($order['last_name']) ) {
 				$order['last_name'] = 'asc';
 			}
@@ -395,7 +481,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 
 			$strict = TRUE;
 		}
-		
+
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -406,7 +492,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$utf = new UserTitleFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -441,10 +527,10 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 						where u.company_id = ?
 						';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
@@ -477,7 +563,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$query .= ( isset($filter_data['work_email']) ) ? $this->getWhereClauseSQL( 'a.work_email', $filter_data['work_email'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_email']) ) ? $this->getWhereClauseSQL( 'a.home_email', $filter_data['home_email'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 230, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 230, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );

@@ -593,7 +593,7 @@ function _adodb_pageexecute_no_last_page(&$zthis, $sql, $nrows, $page, $inputarr
 
 		$rstest = $rsreturn;
 		if ($rstest) {
-			while ($rstest && $rstest->EOF && $pagecounter > 0) {
+			while ($rstest && $rstest->EOF && $pagecounter>0) {
 				$atlastpage = true;
 				$pagecounter--;
 				$pagecounteroffset = $nrows * ($pagecounter - 1);
@@ -809,7 +809,15 @@ function _adodb_getinsertsql(&$zthis,&$rs,$arrFields,$magicq=false,$force=2)
 static $cacheRS = false;
 static $cacheSig = 0;
 static $cacheCols;
-	global $ADODB_QUOTE_FIELDNAMES;
+	global $ADODB_QUOTE_FIELDNAMES, $ADODB_GETINSERTSQL_CLEAR_CACHE;
+
+	//Clears the _adodb_getinsertsql() static cache, since it can't be accessed from outside of this function.
+	// Required in cases where schema changes have occurred after the cache has been populated.
+	if ( $ADODB_GETINSERTSQL_CLEAR_CACHE == true ) {
+		$cacheRS = false;
+		$cacheSig = 0;
+		$cacheCols = null;
+	}
 
 	$tableName = '';
 	$values = '';

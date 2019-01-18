@@ -241,6 +241,108 @@ function runUnitTests() {
         TTPromise.resolve('testc','test2');
 
     });
+
+	QUnit.test("TTPromise Case 4: wait(category, key) on a single promise", function (assert) {
+		var done = assert.async();
+
+		TTPromise.clearAllPromises();
+		assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj length = 0.');
+		assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+
+		TTPromise.add('Reports','LoadReports');
+		assert.ok( typeof(TTPromise.promises['Reports']) == 'object' , "TTPromise.promises['test'] exists.");
+		assert.ok( Object.keys(TTPromise.promises['Reports']).length == 1 , 'promises object length = 1.');
+		assert.ok( TTPromise.filterPromiseArray('Reports').length == 1, 'TTPromise.filterPromiseArray(test).length == 1');
+
+		TTPromise.wait('Reports','LoadReports', function(){
+			//will be run on resolve()
+			assert.ok(1 == "1", "TEST Promise test resolved.");
+			assert.ok( typeof (TTPromise.promises['Reports']) == "undefined" , 'promises[Reports] is null.');
+			assert.ok( TTPromise.filterPromiseArray('Reports').length == 0, 'filterPromiseArray(Reports).length == 0.');
+			assert.ok( TTPromise.filterPromiseArray('Reports', 'LoadReports') == false , 'filterPromiseArray("Reports","LoadReports") length = 0.');
+			done();
+		});
+
+		assert.ok( typeof (TTPromise.promises['Reports']['LoadReports'])  == 'object', 'promises object length = 1.');
+		TTPromise.resolve('Reports','LoadReports');
+	});
+
+	QUnit.test("TTPromise Case w: wait(category, key,function) vs wait(null,null,function)", function (assert) {
+		var done = assert.async();
+        var group_promise_test = 0;
+
+		TTPromise.clearAllPromises();
+		assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj length = 0.');
+		assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+
+		TTPromise.add('groupone','one');
+		assert.ok( typeof(TTPromise.promises['groupone']) == 'object' , "TTPromise.promises['groupone'] exists.");
+		assert.ok( Object.keys(TTPromise.promises['groupone']).length == 1 , 'promises object length = 1.');
+		assert.ok( TTPromise.filterPromiseArray('groupone').length == 1, 'TTPromise.filterPromiseArray(groupone).length == 1');
+
+		TTPromise.wait('groupone','one', function(){
+			//will be run on resolve()
+            Debug.Text('SINGLE PROMISE test resolved second.','','','',10);
+			assert.ok( group_promise_test == "1", "SINGLE PROMISE test resolved second.");
+			group_promise_test = 2;
+			done();
+		});
+
+		TTPromise.add('grouptwo','one');
+		TTPromise.add('grouptwo','two');
+		TTPromise.add('grouptwo','three');
+		TTPromise.wait(null, null, function(){
+			//will be run on resolve()
+			assert.ok(group_promise_test == "0", "ALL PROMISE test resolved first.");
+			group_promise_test = 1;
+			Debug.Text('ALL PROMISE test resolved first.','','','',10);
+        })
+
+		TTPromise.resolve('grouptwo','one');
+		TTPromise.resolve('grouptwo','two');
+		TTPromise.resolve('groupone','one');
+		TTPromise.resolve('grouptwo','three');
+
+
+		TTPromise.resolve('Reports','LoadReports');
+	});
+
+
+	QUnit.test("Global.js sort-prefix", function (assert) {
+		var res = Global.removeSortPrefix('-1234-11111111-1111-1111-1111-111111111111')
+		assert.ok( res == '11111111-1111-1111-1111-111111111111' , 'stripped from synth uuid a.');
+
+		var res = Global.removeSortPrefix('11111111-1111-1111-1111-111111111111')
+		assert.ok( res == '11111111-1111-1111-1111-111111111111' , 'stripped from synth uuid no sort-prefix.');
+
+		var res = Global.removeSortPrefix('-1234-111')
+		assert.ok( res == '111' , 'stripped from int a.');
+
+		var res = Global.removeSortPrefix('111')
+		assert.ok( res == '111' , 'stripped from int with no sort-prefix.');
+
+		var res = Global.removeSortPrefix('-1234-testStringGalrblyBlah')
+		assert.ok( res == 'testStringGalrblyBlah' , 'stripped from string a.');
+
+		var res = Global.removeSortPrefix('testStringGalrblyBlah')
+		assert.ok( res == 'testStringGalrblyBlah' , 'stripped from string with no sort-prefix.');
+
+
+		var res = Global.removeSortPrefixFromArray({'-1112-testStringGalrblyBlah':'string', '-1113-1234':'int', '-1234-11111111-1111-1111-1111-111111111111':'uuid' });
+		var cnt = 0;
+		for( var key in res ) {
+			switch ( cnt ) {
+				case 0:
+					assert.ok( key == 'testStringGalrblyBlah' , 'strign passed');
+					assert.ok( res[key] == 'string' , 'value unaffected');
+					break;
+			}
+			cnt++;
+		}
+		debugger
+
+
+	});
 }
 
 function output_system_data(val){

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class StationUserListFactory extends StationUserFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable();
@@ -52,13 +59,19 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationUserListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -75,7 +88,13 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationUserListFactory
+	 */
+	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -83,7 +102,7 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		$sf = new StationFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -101,13 +120,19 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByStationId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationUserListFactory
+	 */
+	function getByStationId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -124,7 +149,13 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByIdAndStationId($id, $station_id, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $station_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationUserListFactory
+	 */
+	function getByIdAndStationId( $id, $station_id, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -134,8 +165,8 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		}
 
 		$ph = array(
-					'station_id' => (int)$station_id,
-					'id' => (int)$id,
+					'station_id' => TTUUID::castUUID($station_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -150,13 +181,19 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByUserId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationUserListFactory
+	 */
+	function getByUserId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -172,7 +209,13 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByIdAndUserId($id, $user_id, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $user_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationUserListFactory
+	 */
+	function getByIdAndUserId( $id, $user_id, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -182,8 +225,8 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'id' => (int)$id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -198,7 +241,13 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByStationIdAndUserId($station_id, $user_id, $order = NULL) {
+	/**
+	 * @param string $station_id UUID
+	 * @param string $user_id UUID
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|StationUserListFactory
+	 */
+	function getByStationIdAndUserId( $station_id, $user_id, $order = NULL) {
 		if ( $station_id == '') {
 			return FALSE;
 		}
@@ -208,8 +257,8 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 		}
 
 		$ph = array(
-					'station_id' => (int)$station_id,
-					'user_id' => (int)$user_id,
+					'station_id' => TTUUID::castUUID($station_id),
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '

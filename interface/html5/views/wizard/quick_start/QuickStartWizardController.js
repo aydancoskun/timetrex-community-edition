@@ -1,9 +1,13 @@
 QuickStartWizardController = BaseWizardController.extend( {
 
 	el: '.wizard',
+	selected_province_index: -1,
+	selected_country_index: -1,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	_required_files: ['APIPayPeriodSchedule', 'APIUserPreference', 'APICurrentUser'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Quick Start Wizard' );
 		this.steps = 5;
@@ -135,6 +139,23 @@ QuickStartWizardController = BaseWizardController.extend( {
 				guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Click' ) + ' <button style="display: inline" class="plus-icon"><span style="opacity: 0">.</span></button> ' + $.i18n._( 'icon to add additional locations' ) + '</span></div>' );
 				this.content_div.append( guide_label );
 
+				legal_entity_label = $( '<br><div><span class="clear-both-div">' + $.i18n._( 'Legal Entity' ) + '</span></div>' );
+				this.content_div.append( legal_entity_label );
+
+				var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+				form_item_input.TText( {field: 'legal_entity_id'} );
+				form_item_input.AComboBox( {
+					api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+					allow_multiple_selection: true,
+					layout_name: ALayoutIDs.LEGAL_ENTITY,
+					show_search_inputs: false,
+					set_empty: true,
+					custom_first_label: Global.all_item,
+				} );
+
+				this.content_div.append( form_item_input );
+				this.stepsWidgetDic[this.current_step].legal_entity_id = form_item_input;
+
 				//Inside editor
 
 				var args = {
@@ -245,7 +266,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 		var widgetContainer1 = $( "<li class='widget-h-box' style='float: left; margin-right: 10px'></li>" );
 
 		var country = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		country.TComboBox( {field: 'country', set_empty: true} );
+		country.TComboBox( {field: 'country', set_empty: true, set_select_item_when_set_source_data: true} );
 
 		var country_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 
@@ -254,58 +275,87 @@ QuickStartWizardController = BaseWizardController.extend( {
 				var result_data = result.getResult();
 				country.setSourceData( Global.buildRecordArray( result_data ) );
 
-				country.setValue( data.country );
+				if( $this.parent_controller.selected_country_index != -1 ) {
+					country.setSelectedIndex( $this.parent_controller.selected_country_index );
+				} else {
+					country.setValue( data.country );
+					$this.parent_controller.selected_country_index = country.getSelectedIndex();
+				}
 
+				if ( data.country != country.getValue() ) {
+					data.country = country.getValue();
+				}
+
+				widgets[country.getField()] = country;
+
+				country.bind( 'formItemChange', function( e, target ) {
+					$this.parent_controller.selected_country_index = country.getSelectedIndex();
+					TTPromise.add('QuickStartWizard','setProvince');
+					$this.parent_controller.setProvince( {country: target.getValue(), province: ''}, province );
+					TTPromise.wait('QuickStartWizard','setProvince', function () {
+						$this.parent_controller.selected_province_index = province.getSelectedIndex();
+					});
+				} );
+
+				widgetContainer1.append( country );
+
+				widgetContainer.append( widgetContainer1 );
+
+				row.children().eq( 0 ).append( widgetContainer );
+
+				// Province
+
+				widgetContainer = $( "<ul style='list-style: none; padding: 0; margin: 0;'></ul>" );
+
+				widgetContainer1 = $( "<li class='widget-h-box' style='float: left; margin-right: 10px'></li>" );
+
+				var province = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				province.TComboBox( {field: 'province', set_empty: false} );
+
+				TTPromise.add('QuickStartWizard','setProvince');
+				$this.parent_controller.setProvince(data, province);
+				TTPromise.wait('QuickStartWizard','setProvince', function () {
+					updateProvince( province );
+				});
+
+				province.bind( 'formItemChange', function() {
+					$this.parent_controller.selected_province_index = province.getSelectedIndex();
+				});
+
+				widgets[province.getField()] = province;
+
+				widgetContainer1.append( province );
+
+				widgetContainer.append( widgetContainer1 );
+
+				row.children().eq( 1 ).append( widgetContainer );
+
+				if ( typeof index != 'undefined' ) {
+
+					row.insertAfter( $( render ).find( 'tr' ).eq( index ) );
+					$this.rows_widgets_array.splice( (index), 0, widgets );
+
+				} else {
+					$( render ).append( row );
+					$this.rows_widgets_array.push( widgets );
+				}
+
+				widgets.current_edit_item = data;
+
+				$this.addIconsEvent( row ); //Bind event to add and minus icon
+				$this.removeLastRowLine();
+				$this.removeLastRowLine();
 			}
 		} );
 
-		widgets[country.getField()] = country;
-
-		country.bind( 'formItemChange', function( e, target ) {
-			$this.parent_controller.setProvince( {country: target.getValue(), province: ''}, province );
-
-		} );
-
-		widgetContainer1.append( country );
-
-		widgetContainer.append( widgetContainer1 );
-
-		row.children().eq( 0 ).append( widgetContainer );
-
-		// Province
-
-		widgetContainer = $( "<ul style='list-style: none; padding: 0; margin: 0;'></ul>" );
-
-		widgetContainer1 = $( "<li class='widget-h-box' style='float: left; margin-right: 10px'></li>" );
-
-		var province = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		province.TComboBox( {field: 'province', set_empty: true} );
-
-		this.parent_controller.setProvince( data, province );
-
-		widgets[province.getField()] = province;
-
-		widgetContainer1.append( province );
-
-		widgetContainer.append( widgetContainer1 );
-
-		row.children().eq( 1 ).append( widgetContainer );
-
-		if ( typeof index != 'undefined' ) {
-
-			row.insertAfter( $( render ).find( 'tr' ).eq( index ) );
-			this.rows_widgets_array.splice( (index), 0, widgets );
-
-		} else {
-			$( render ).append( row );
-			this.rows_widgets_array.push( widgets );
+		function updateProvince(province){
+			if( typeof index == 'undefined' ){
+				$this.parent_controller.selected_province_index = province.getSelectedIndex();
+			} else {
+				$this.parent_controller.selected_province_index++;
+				province.setSelectedIndex( $this.parent_controller.selected_province_index )
+			}
 		}
-
-		widgets.current_edit_item = data;
-
-		this.addIconsEvent( row ); //Bind event to add and minus icon
-		this.removeLastRowLine();
-
 	},
 
 	setProvince: function( val, province ) {
@@ -314,6 +364,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 		if ( !val.country ) {
 			province.setSourceData( [] );
 			province.setValue( 0 );
+			TTPromise.reject('QuickStart','setProvince');
 			return;
 
 		}
@@ -325,9 +376,8 @@ QuickStartWizardController = BaseWizardController.extend( {
 				res = res.getResult();
 
 				province.setSourceData( Global.buildRecordArray( res ) );
-
 				province.setValue( val.province );
-
+				TTPromise.resolve('QuickStartWizard','setProvince');
 			}
 		} );
 	},
@@ -912,10 +962,21 @@ QuickStartWizardController = BaseWizardController.extend( {
 			case 4:
 				Global.setWidgetEnabled( this.next_btn, false );
 				Global.setWidgetEnabled( this.back_btn, false );
+
 				current_step_data.country = current_step_ui.country.getValue();
+
+				current_step_data.legal_entity_id = null;
+				var selected_legal_entities = current_step_ui.legal_entity_id.getValue( true );
+				if ( selected_legal_entities && selected_legal_entities.length > 0 ) {
+					current_step_data.legal_entity_id = [];
+					for (var n in selected_legal_entities) {
+						current_step_data.legal_entity_id.push(selected_legal_entities[n].id);
+					}
+				}
+
 				if ( direction === 'forward' ) {
 					var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
-					company_api.createPresets( current_step_data.country, {
+					company_api.createPresets( current_step_data.country, current_step_data.legal_entity_id, {
 						onResult: function( result ) {
 
 							if ( result.isValid ) {

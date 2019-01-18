@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -133,6 +133,64 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 					0 => 'B',
 					1 => 'A',
 					);
+
+		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? TRUE : FALSE;
+		$this->assertEquals( $test1, TRUE );
+	}
+
+	function testCircularDependency_1B() {
+
+		//Unit Test 3 - Simple Circ. Dep test
+		$deptree = new DependencyTree();
+
+		$deptree->addNode('A', array('B'), array('A') ); //No sort order
+		$deptree->addNode('B', array('A'), array('B') ); //No sort order
+
+		$result = $deptree->_buildTree();
+
+		$should_match = array(
+				0 => 'A',
+				1 => 'B',
+
+		);
+
+		$test1 = $this->indexOf( 'A', $result ) < $this->indexOf( 'B', $result ) ? TRUE : FALSE;
+		$this->assertEquals( $test1, TRUE );
+	}
+
+	function testCircularDependency_2() {
+
+		//Unit Test 3 - Simple Circ. Dep test with large string based orders.
+		$deptree = new DependencyTree();
+
+		$deptree->addNode('A', array('B'), array('A'), 'BTEST12345678901234567890123456789012345678901234567890123456789012345678901234567890' );
+		$deptree->addNode('B', array('A'), array('B'), 'ATEST12345678901234567890123456789012345678901234567890123456789012345678901234567890' );
+
+		$result = $deptree->_buildTree();
+
+		$should_match = array(
+				0 => 'B',
+				1 => 'A',
+		);
+
+		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? TRUE : FALSE;
+		$this->assertEquals( $test1, TRUE );
+	}
+
+	function testCircularDependency_3() {
+
+		//Unit Test 3 - Simple Circ. Dep test with large string based orders.
+		$deptree = new DependencyTree();
+
+		$deptree->addNode('A', array('B'), array('A'), 'A12345678901234567890123456789012345678901234567890123456789012345678901234567890B' );
+		$deptree->addNode('B', array('A'), array('B'), 'A12345678901234567890123456789012345678901234567890123456789012345678901234567890A' );
+
+		$result = $deptree->_buildTree();
+
+		$should_match = array(
+				0 => 'B',
+				1 => 'A',
+		);
 
 		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? TRUE : FALSE;
 		$this->assertEquals( $test1, TRUE );

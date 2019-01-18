@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,11 @@ class PolicyGroupFactory extends Factory {
 
 	protected $company_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -83,6 +88,10 @@ class PolicyGroupFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -107,44 +116,47 @@ class PolicyGroupFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -162,57 +174,42 @@ class PolicyGroupFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim($name);
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is too short or too long'),
-											2, 50)
-				AND
-				$this->Validator->isTrue(	'name',
-											$this->isUniqueName($name),
-											TTi18n::gettext('Name is already in use') )
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
-	}
-	function setDescription($description) {
-		$description = trim($description);
-
-		if (	$description == ''
-				OR $this->Validator->isLength(	'description',
-												$description,
-												TTi18n::gettext('Description is invalid'),
-												1, 250) ) {
-
-			$this->data['description'] = $description;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'description' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getUser() {
 		$pgulf = TTnew( 'PolicyGroupUserListFactory' );
 		$pgulf->getByPolicyGroupId( $this->getId() );
@@ -228,7 +225,12 @@ class PolicyGroupFactory extends Factory {
 
 		return FALSE;
 	}
-	function setUser($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setUser( $ids) {
 		if ( !is_array($ids) ) {
 			$ids = array($ids);
 		}
@@ -269,7 +271,7 @@ class PolicyGroupFactory extends Factory {
 						$obj = $ulf->getCurrent();
 
 						if ($this->Validator->isTrue(		'user',
-															$pguf->Validator->isValid(),
+															$pguf->isValid(),
 															TTi18n::gettext('Selected employee is invalid or already assigned to another policy group').' ('. $obj->getFullName() .')' )) {
 							$pguf->save();
 						}
@@ -284,147 +286,269 @@ class PolicyGroupFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getTotalUsers() {
 		$pgulf = TTnew( 'PolicyGroupUserListFactory' );
 		return $pgulf->getTotalByPolicyGroupId( $this->getId() );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getRegularTimePolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 100, $this->getID() );
 	}
-	function setRegularTimePolicy($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setRegularTimePolicy( $ids) {
 		Debug::text('Setting Regular Time Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 100, $this->getID(), $ids );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getOverTimePolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 110, $this->getID() );
 	}
-	function setOverTimePolicy($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setOverTimePolicy( $ids) {
 		Debug::text('Setting OverTime Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 110, $this->getID(), $ids );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getPremiumPolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 120, $this->getID() );
 	}
-	function setPremiumPolicy($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setPremiumPolicy( $ids) {
 		Debug::text('Setting Premium Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 120, $this->getID(), $ids );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getRoundIntervalPolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 130, $this->getID() );
 	}
-	function setRoundIntervalPolicy($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setRoundIntervalPolicy( $ids) {
 		Debug::text('Setting Round Interval Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 130, $this->getID(), $ids );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getAccrualPolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 140, $this->getID() );
 	}
-	function setAccrualPolicy($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setAccrualPolicy( $ids) {
 		Debug::text('Setting Accrual Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 140, $this->getID(), $ids );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getMealPolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 150, $this->getID() );
 	}
-	function setMealPolicy($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setMealPolicy( $ids) {
 		Debug::text('Setting Meal Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 150, $this->getID(), $ids );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getBreakPolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 160, $this->getID() );
 	}
-	function setBreakPolicy($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setBreakPolicy( $ids) {
 		Debug::text('Setting Break Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 160, $this->getID(), $ids );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getAbsencePolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 170, $this->getID() );
 	}
 
-	function setAbsencePolicy($ids) {
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setAbsencePolicy( $ids) {
 		Debug::text('Setting Absence Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 170, $this->getID(), (array)$ids );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getHolidayPolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 180, $this->getID() );
 	}
-	function setHolidayPolicy($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setHolidayPolicy( $ids) {
 		Debug::text('Setting Holiday Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 180, $this->getID(), (array)$ids );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getExpensePolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 200, $this->getID() );
 	}
 
-	function setExpensePolicy($ids) {
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setExpensePolicy( $ids) {
 		Debug::text('Setting Expense Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 200, $this->getID(), (array)$ids );
 	}
 
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getExceptionPolicyControlID() {
-		if ( isset($this->data['exception_policy_control_id']) ) {
-			return (int)$this->data['exception_policy_control_id'];
-		}
-
-		return FALSE;
-	}
-	function setExceptionPolicyControlID($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$epclf = TTnew( 'ExceptionPolicyControlListFactory' );
-
-		if ( $id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'exception_policy',
-														$epclf->getByID($id),
-														TTi18n::gettext('Exception Policy is invalid')
-													) ) {
-
-			$this->data['exception_policy_control_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'exception_policy_control_id' );
 	}
 
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setExceptionPolicyControlID( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'exception_policy_control_id', $value );
+	}
+
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
-		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		// Name
+		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
 			if ( $this->getName() == '' ) {
 				$this->Validator->isTRUE(	'name',
 											FALSE,
 											TTi18n::gettext('Please specify a name') );
 			}
 		}
+		if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isLength(	'name',
+												$this->getName(),
+												TTi18n::gettext('Name is too short or too long'),
+												2, 50
+											);
+		}
+		if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(	'name',
+												$this->isUniqueName($this->getName()),
+												TTi18n::gettext('Name is already in use')
+											);
+		}
+		// Description
+		if ( $this->getDescription() != '' ) {
+			$this->Validator->isLength(	'description',
+												$this->getDescription(),
+												TTi18n::gettext('Description is invalid'),
+												1, 250
+											);
+		}
+		// Exception Policy
+		if ( $this->getExceptionPolicyControlID() !== FALSE AND $this->getExceptionPolicyControlID() != TTUUID::getZeroID() ) {
+			$epclf = TTnew( 'ExceptionPolicyControlListFactory' );
+			$this->Validator->isResultSetWithRows(	'exception_policy',
+															$epclf->getByID($this->getExceptionPolicyControlID()),
+															TTi18n::gettext('Exception Policy is invalid')
+														);
+		}
 
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		if ( $this->getDeleted() == TRUE ) {
 			Debug::Text('UnAssign Policy Group from User Defaults...'. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			$udf = TTnew( 'UserDefaultFactory' );
 
-			$query = 'update '. $udf->getTable() .' set policy_group_id = 0 where company_id = '. (int)$this->getCompany() .' AND policy_group_id = '. (int)$this->getId();
+			$query = 'update '. $udf->getTable() .' set policy_group_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND policy_group_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 		}
 
@@ -433,6 +557,10 @@ class PolicyGroupFactory extends Factory {
 
 	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -458,6 +586,10 @@ class PolicyGroupFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -485,6 +617,10 @@ class PolicyGroupFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Policy Group'), NULL, $this->getTable(), $this );
 	}

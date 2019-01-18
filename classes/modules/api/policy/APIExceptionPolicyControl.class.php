@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIExceptionPolicyControl extends APIFactory {
 	protected $main_class = 'ExceptionPolicyControlFactory';
 
+	/**
+	 * APIExceptionPolicyControl constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APIExceptionPolicyControl extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -82,6 +85,7 @@ class APIExceptionPolicyControl extends APIFactory {
 	/**
 	 * Get exception policy data for one or more exception policyes.
 	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function getExceptionPolicyControl( $data = NULL, $disable_paging = FALSE ) {
@@ -113,7 +117,7 @@ class APIExceptionPolicyControl extends APIFactory {
 
 	/**
 	 * @param string $format
-	 * @param null $data
+	 * @param array $data
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
@@ -143,7 +147,9 @@ class APIExceptionPolicyControl extends APIFactory {
 	/**
 	 * Set exception policy data for one or more exception policyes.
 	 * @param array $data exception policy data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setExceptionPolicyControl( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -162,18 +168,18 @@ class APIExceptionPolicyControl extends APIFactory {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' ExceptionPolicyControls', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'ExceptionPolicyControlListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get exception policy object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -187,7 +193,7 @@ class APIExceptionPolicyControl extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('exception_policy', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -248,10 +254,10 @@ class APIExceptionPolicyControl extends APIFactory {
 	/**
 	 * Delete one or more exception policys.
 	 * @param array $data exception policy data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteExceptionPolicyControl( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -268,14 +274,14 @@ class APIExceptionPolicyControl extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'ExceptionPolicyControlListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get exception policy object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -283,7 +289,7 @@ class APIExceptionPolicyControl extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('exception_policy', 'delete')
 								OR ( $this->getPermissionObject()->Check('exception_policy', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -334,7 +340,7 @@ class APIExceptionPolicyControl extends APIFactory {
 	 * @return array
 	 */
 	function copyExceptionPolicyControl( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -356,19 +362,22 @@ class APIExceptionPolicyControl extends APIFactory {
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			$retval = $this->stripReturnHandler( $this->setExceptionPolicyControl( $src_rows ) ); //Save copied rows
+			$retval = $this->setExceptionPolicyControl( $src_rows ); //Save copied rows
 
-			//Now we need to loop through the result set, and copy the milestones as well.
+			//Now we need to loop through the result set, and copy the exceptions themselves as well.
 			if ( empty($original_ids) == FALSE ) {
 				Debug::Arr($original_ids, ' Original IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				foreach( $original_ids as $key => $original_id ) {
 					$new_id = NULL;
 					if ( is_array($retval) ) {
-						if ( isset($retval['api_details']['details'][$key]) ) {
+						if ( isset($retval['api_retval'])
+								AND TTUUID::isUUID( $retval['api_retval'] ) AND $retval['api_retval'] != TTUUID::getZeroID() AND $retval['api_retval'] != TTUUID::getNotExistID() ) {
+							$new_id = $retval['api_retval'];
+						} elseif ( isset($retval['api_details']['details'][$key]) ) {
 							$new_id = $retval['api_details']['details'][$key];
 						}
-					} elseif ( is_numeric($retval) ) {
+					} elseif ( TTUUID::isUUID( $retval ) ) {
 						$new_id = $retval;
 					}
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,12 +40,18 @@
  */
 class InstallSchema_1046A extends InstallSchema_Base {
 
+	/**
+	 * @return bool
+	 */
 	function preInstall() {
 		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postInstall() {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
@@ -85,7 +91,7 @@ class InstallSchema_1046A extends InstallSchema_Base {
 				$ph = array(
 							'first_name_metaphone' => $u_obj->getFirstNameMetaphone( $u_obj->setFirstNameMetaphone( $u_obj->getFirstName() ) ),
 							'last_name_metaphone' => $u_obj->getLastNameMetaphone( $u_obj->setLastNameMetaphone( $u_obj->getLastName() ) ),
-							'id' => (int)$u_obj->getId(),
+							'id' => TTUUID::castUUID($u_obj->getId()),
 							);
 				$query = 'update '. $ulf->getTable() .' set first_name_metaphone = ?, last_name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
@@ -99,7 +105,7 @@ class InstallSchema_1046A extends InstallSchema_Base {
 
 				$ph = array(
 							'name_metaphone' => $c_obj->getNameMetaphone( $c_obj->setNameMetaphone( $c_obj->getName() ) ),
-							'id' => (int)$c_obj->getId(),
+							'id' => TTUUID::castUUID($c_obj->getId()),
 							);
 				$query = 'update '. $clf->getTable() .' set name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
@@ -113,7 +119,7 @@ class InstallSchema_1046A extends InstallSchema_Base {
 
 				$ph = array(
 							'name_metaphone' => $b_obj->getNameMetaphone( $b_obj->setNameMetaphone( $b_obj->getName() ) ),
-							'id' => (int)$b_obj->getId(),
+							'id' => TTUUID::castUUID($b_obj->getId()),
 							);
 				$query = 'update '. $blf->getTable() .' set name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
@@ -127,7 +133,7 @@ class InstallSchema_1046A extends InstallSchema_Base {
 
 				$ph = array(
 							'name_metaphone' => $d_obj->getNameMetaphone( $d_obj->setNameMetaphone( $d_obj->getName() ) ),
-							'id' => (int)$d_obj->getId(),
+							'id' => TTUUID::castUUID($d_obj->getId()),
 							);
 				$query = 'update '. $dlf->getTable() .' set name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );

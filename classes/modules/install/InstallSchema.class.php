@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,7 +43,17 @@ class InstallSchema extends Install {
 	protected $schema_version = NULL;
 	protected $obj = NULL;
 
+	/**
+	 * InstallSchema constructor.
+	 * @param $database_type
+	 * @param $version
+	 * @param $db_conn
+	 * @param bool $is_upgrade
+	 */
 	function __construct( $database_type, $version, $db_conn, $is_upgrade = FALSE ) {
+		global $config_vars;
+		$this->config_vars = $config_vars; //Variable is in the install_obj too, but we need to propegate it here so cleanCacheDirectory() can be called.
+
 		Debug::text('Database Type: '. $database_type .' Version: '. $version, __FILE__, __LINE__, __METHOD__, 10);
 		$this->database_type = $database_type;
 		$this->schema_version = $version;
@@ -57,7 +67,7 @@ class InstallSchema extends Install {
 		}
 
 		$schema_class_file_name = Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'install'. DIRECTORY_SEPARATOR .'InstallSchema_'. $version .'.class.php';
-		$schema_sql_file_name = $this->getSchemaSQLFilename( $version );
+		$schema_sql_file_name = $this->getSchemaSQLFilename();
 		if ( file_exists($schema_class_file_name)
 				AND file_exists($schema_sql_file_name ) ) {
 
@@ -79,10 +89,16 @@ class InstallSchema extends Install {
 		return FALSE;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getSQLFileDirectory() {
 		return Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'install'. DIRECTORY_SEPARATOR .'sql'. DIRECTORY_SEPARATOR . $this->database_type . DIRECTORY_SEPARATOR;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getSchemaSQLFilename() {
 		return $this->getSQLFileDirectory() . $this->schema_version .'.sql';
 	}
@@ -92,6 +108,9 @@ class InstallSchema extends Install {
 
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	private function getObject() {
 		if ( is_object($this->obj) ) {
 			return $this->obj;
@@ -100,7 +119,12 @@ class InstallSchema extends Install {
 		return FALSE;
 	}
 
-	function __call($function_name, $args = array() ) {
+	/**
+	 * @param $function_name
+	 * @param array $args
+	 * @return bool|mixed
+	 */
+	function __call( $function_name, $args = array() ) {
 		if ( $this->getObject() !== FALSE ) {
 			//Debug::text('Calling Sub-Class Function: '. $function_name, __FILE__, __LINE__, __METHOD__, 10);
 			if ( is_callable( array($this->getObject(), $function_name) ) ) {

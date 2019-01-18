@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIUserGenericData extends APIFactory {
 	protected $main_class = 'UserGenericDataFactory';
 
+	/**
+	 * APIUserGenericData constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -51,6 +54,7 @@ class APIUserGenericData extends APIFactory {
 	 * Get user data for one or more users.
 	 *   Default to disable paging as it would rarely be used for this.
 	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function getUserGenericData( $data = NULL, $disable_paging = TRUE ) {
@@ -58,12 +62,12 @@ class APIUserGenericData extends APIFactory {
 
 		//Only allow getting generic data for currently logged in user unless user_id = 0, then get company wide data.
 		//$data['filter_data']['user_id'] = $this->getCurrentUserObject()->getId();
-		if ( !isset($data['filter_data']['user_id']) OR ( isset($data['filter_data']['user_id']) AND (int)$data['filter_data']['user_id'] !== 0 ) ) {
+		if ( !isset($data['filter_data']['user_id']) OR ( isset($data['filter_data']['user_id']) AND $data['filter_data']['user_id'] != TTUUID::getZeroID() ) ) {
 			Debug::Text('Forcing User ID to current user: '. $this->getCurrentUserObject()->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			$data['filter_data']['user_id'] = $this->getCurrentUserObject()->getId();
 		} else {
 			Debug::Text('Company wide data...', __FILE__, __LINE__, __METHOD__, 10);
-			$data['filter_data']['user_id'] = 0; //Company wide data.
+			$data['filter_data']['user_id'] = TTUUID::getZeroID(); //Company wide data.
 		}
 
 		Debug::Arr($data, 'Getting User Generic Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -88,6 +92,7 @@ class APIUserGenericData extends APIFactory {
 	/**
 	 * Set user data for one or more users.
 	 * @param array $data user data
+	 * @param bool $ignore_warning
 	 * @return array
 	 */
 	function setUserGenericData( $data, $ignore_warning = TRUE ) {
@@ -95,21 +100,21 @@ class APIUserGenericData extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' Users', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$row['company_id'] = $this->getCurrentUserObject()->getCompany();
-				if ( !isset($row['user_id']) OR ( isset($row['user_id']) AND (int)$row['user_id'] !== 0 ) ) {
+				if ( !isset($row['user_id']) OR ( isset($row['user_id']) AND $row['user_id'] != '' AND $row['user_id'] != TTUUID::getZeroId() ) ) {
 					Debug::Text('Forcing User ID to current user: '. $this->getCurrentUserObject()->getId(), __FILE__, __LINE__, __METHOD__, 10);
 					$row['user_id'] = $this->getCurrentUserObject()->getId();
 				} else {
 					Debug::Text('Company wide data...', __FILE__, __LINE__, __METHOD__, 10);
-					$row['user_id'] = 0; //Company wide data.
+					$row['user_id'] = TTUUID::getZeroId(); //Company wide data.
 				}
 
 				$primary_validator = new Validator();
@@ -173,32 +178,28 @@ class APIUserGenericData extends APIFactory {
 	 * @return array
 	 */
 	function deleteUserGenericData( $data ) {
-		if ( is_numeric($data) ) {
-			$data = array($data);
-		}
-
 		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
+			$data = array($data);
 		}
 
 		Debug::Text('Received data for: '. count($data) .' Users', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserGenericDataListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get user object, so we can only modify just changed data for specific records if needed.
 					$lf->getByUserIdAndId( $this->getCurrentUserObject()->getId(), $id );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists
-						Debug::Text('User Generic Data Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::Text('User Generic Data Exists, getting current data for ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$lf = $lf->getCurrent();
 					} else {
 						//Object doesn't exist.

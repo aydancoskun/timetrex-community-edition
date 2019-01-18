@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualPolicyListFactory|bool
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,7 +89,14 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualPolicyListFactory|bool
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -86,15 +106,15 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					//'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					//'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+						AND id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -104,7 +124,14 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyIdAndTypeId($id, $type_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param int $type_id
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualPolicyListFactory|bool
+	 */
+	function getByCompanyIdAndTypeId( $id, $type_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -121,7 +148,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -139,7 +166,13 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualPolicyListFactory|bool
+	 */
+	function getByCompanyId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -155,7 +188,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -174,7 +207,14 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyIdAndAccrualPolicyAccount($id, $accrual_policy_account_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualPolicyListFactory|bool
+	 */
+	function getByCompanyIdAndAccrualPolicyAccount( $id, $accrual_policy_account_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -191,7 +231,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -199,7 +239,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 					select	*
 					from	'. $this->getTable() .' as a
 					where	company_id = ?
-						AND accrual_policy_account_id in ('. $this->getListSQL( $accrual_policy_account_id, $ph, 'int' ) .')
+						AND accrual_policy_account_id in ('. $this->getListSQL( $accrual_policy_account_id, $ph, 'uuid' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -209,7 +249,14 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByPolicyGroupUserIdAndAccrualPolicyAccount($user_id, $accrual_policy_account_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualPolicyListFactory|bool
+	 */
+	function getByPolicyGroupUserIdAndAccrualPolicyAccount( $user_id, $accrual_policy_account_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -230,7 +277,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 
@@ -244,7 +291,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 						AND ( b.id = c.object_id AND b.company_id = c.company_id AND c.object_type_id = 140 )
 						AND c.map_id = d.id
 						AND a.user_id = ?
-						AND d.accrual_policy_account_id in ('. $this->getListSQL( $accrual_policy_account_id, $ph, 'int' ) .')
+						AND d.accrual_policy_account_id in ('. $this->getListSQL( $accrual_policy_account_id, $ph, 'uuid' ) .')
 						AND ( b.deleted = 0 AND d.deleted = 0 )
 						';
 		$query .= $this->getWhereSQL( $where );
@@ -255,7 +302,14 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyIdAndContributingShiftPolicyId($id, $contributing_shift_policy_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $contributing_shift_policy_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualPolicyListFactory|bool
+	 */
+	function getByCompanyIdAndContributingShiftPolicyId( $id, $contributing_shift_policy_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -272,7 +326,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-				'id' => (int)$id,
+				'id' => TTUUID::castUUID($id),
 		);
 
 
@@ -280,7 +334,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 					select	*
 					from	'. $this->getTable() .' as a
 					where	company_id = ?
-						AND contributing_shift_policy_id in ('. $this->getListSQL( $contributing_shift_policy_id, $ph, 'int' ) .')
+						AND contributing_shift_policy_id in ('. $this->getListSQL( $contributing_shift_policy_id, $ph, 'uuid' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -290,7 +344,13 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualPolicyListFactory|bool
+	 */
+	function getByPolicyGroupUserId( $user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -307,7 +367,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -330,7 +390,14 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByPolicyGroupUserIdAndType($user_id, $type_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $type_id
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualPolicyListFactory|bool
+	 */
+	function getByPolicyGroupUserIdAndType( $user_id, $type_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -351,7 +418,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'type_id' => (int)$type_id,
 					);
 
@@ -376,14 +443,19 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getArrayByListFactory($lf, $include_blank = TRUE ) {
+	/**
+	 * @param $lf
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getArrayByListFactory( $lf, $include_blank = TRUE ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		$list = array();
@@ -398,7 +470,12 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return FALSE;
 	}
 
-	function getByCompanyIdArray($company_id, $include_blank = TRUE) {
+	/**
+	 * @param string $company_id UUID
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getByCompanyIdArray( $company_id, $include_blank = TRUE) {
 
 		$aplf = new AccrualPolicyListFactory();
 		$aplf->getByCompanyId($company_id);
@@ -419,6 +496,15 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return AccrualPolicyListFactory|bool
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -469,7 +555,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$apf = new AbsencePolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 /*
 								( select count(*) from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 140 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0)+
@@ -517,15 +603,15 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['length_of_service_contributing_pay_code_policy_id']) ) ? $this->getWhereClauseSQL( 'a.length_of_service_contributing_pay_code_policy_id', $filter_data['length_of_service_contributing_pay_code_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['length_of_service_contributing_pay_code_policy_id']) ) ? $this->getWhereClauseSQL( 'a.length_of_service_contributing_pay_code_policy_id', $filter_data['length_of_service_contributing_pay_code_policy_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,9 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 
 	protected $recurring_holiday_obj = NULL;
 
+	/**
+	 * @return bool|null
+	 */
 	function getRecurringHolidayObject() {
 		if ( is_object($this->recurring_holiday_obj) ) {
 			return $this->recurring_holiday_obj;
@@ -59,108 +62,187 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getHolidayPolicy() {
-		if ( isset($this->data['holiday_policy_id']) ) {
-			return (int)$this->data['holiday_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setHolidayPolicy($id) {
-		$id = trim($id);
-
-		if (
-			$this->Validator->isNumeric(	'holiday_policy',
-											$id,
-											TTi18n::gettext('Holiday Policy is invalid')
-
-			/*
-			$this->Validator->isResultSetWithRows(	'holiday_policy',
-													$hplf->getByID($id),
-													TTi18n::gettext('Holiday Policy is invalid')
-			 */
-															) ) {
-			$this->data['holiday_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'holiday_policy_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setHolidayPolicy( $value) {
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'holiday_policy_id', $value );
+	}
+
+	/**
+	 * @return mixed
+	 */
 	function getRecurringHoliday() {
-		if ( isset($this->data['recurring_holiday_id']) ) {
-			return (int)$this->data['recurring_holiday_id'];
-		}
+		return $this->getGenericDataValue( 'recurring_holiday_id' );
 	}
-	function setRecurringHoliday($id) {
-		$id = trim($id);
 
-		$rhlf = TTnew( 'RecurringHolidayListFactory' );
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setRecurringHoliday( $value) {
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'recurring_holiday_id', $value );
+	}
 
-		if ( $id != 0
-				AND $this->Validator->isResultSetWithRows(	'recurring_holiday',
-															$rhlf->getByID($id),
-															TTi18n::gettext('Selected Recurring Holiday is invalid')
-															)
-			) {
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
 
-			$this->data['recurring_holiday_id'] = $id;
-
-			return TRUE;
+		// Holiday Policy
+		if ( $this->getHolidayPolicy() == '' OR $this->getHolidayPolicy() == TTUUID::getZeroID() ) {
+			$hplf = TTnew( 'HolidayPolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'holiday_policy',
+													  $hplf->getByID($this->getHolidayPolicy()),
+													  TTi18n::gettext('Invalid Holiday Policy')
+			);
 		}
 
-		return FALSE;
+		// Selected Recurring Holiday
+		$rhlf = TTnew( 'RecurringHolidayListFactory' );
+		$this->Validator->isResultSetWithRows(	'recurring_holiday',
+														$rhlf->getByID($this->getRecurringHoliday()),
+														TTi18n::gettext('Selected Recurring Holiday is invalid')
+													);
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
+		return TRUE;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
+
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
 		return FALSE;
 	}
-	function setDeleted($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCreatedDate() {
 		return FALSE;
 	}
-	function setCreatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getUpdatedBy() {
 		return FALSE;
 	}
-	function setUpdatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
 		return FALSE;
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {
-		return FALSE;
-	}
-	function getDeletedBy() {
-		return FALSE;
-	}
-	function setDeletedBy($id = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getDeletedBy() {
+		return FALSE;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
+		return FALSE;
+	}
+
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		$obj = $this->getRecurringHolidayObject();
 		if ( is_object($obj) ) {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,9 @@
  */
 class UserSummaryReport extends Report {
 
+	/**
+	 * UserSummaryReport constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('Employee Summary Report');
 		$this->file_name = 'employee_summary_report';
@@ -49,6 +52,11 @@ class UserSummaryReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
 				AND $this->getPermissionObject()->Check('report', 'view_user_information', $user_id, $company_id ) ) {
@@ -58,6 +66,11 @@ class UserSummaryReport extends Report {
 		return FALSE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|mixed|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -84,6 +97,7 @@ class UserSummaryReport extends Report {
 										'-1095-password_time_period' => TTi18n::gettext('Password Time Period'), //Password change within this start/end date.
 										//'-1098-last_wage_time_period' => TTi18n::gettext('Last Wage Time Period'), //Wage change effective within this start/end date.
 
+										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -167,9 +181,11 @@ class UserSummaryReport extends Report {
 			case 'static_columns':
 				$retval = array(
 										//Static Columns - Aggregate functions can't be used on these.
-										'-1000-first_name' => TTi18n::gettext('First Name'),
-										'-1001-middle_name' => TTi18n::gettext('Middle Name'),
-										'-1002-last_name' => TTi18n::gettext('Last Name'),
+										'-1000-legal_name' => TTi18n::gettext('Legal Entity Name'),
+										'-1001-trade_name' => TTi18n::gettext( 'Legal Entity Trade Name' ),
+										'-1002-first_name' => TTi18n::gettext('First Name'),
+										'-1003-middle_name' => TTi18n::gettext('Middle Name'),
+										'-1004-last_name' => TTi18n::gettext('Last Name'),
 										'-1005-full_name' => TTi18n::gettext('Full Name'),
 
 										'-1010-user_name' => TTi18n::gettext('User Name'),
@@ -309,6 +325,7 @@ class UserSummaryReport extends Report {
 										'-1010-by_employee+contact' => TTi18n::gettext('Contact Information By Employee'),
 
 										'-1020-by_employee+employment' => TTi18n::gettext('Employment Information By Employee'), //Branch, Department, Title, Group, Hire Date?
+										'-1025-by_employee+new_hire' => TTi18n::gettext('New Hires By Employee'),
 
 										'-1030-by_employee+address' => TTi18n::gettext('Addresses By Employee'),
 										'-1040-by_employee+wage' => TTi18n::gettext('Wages By Employee'),
@@ -330,7 +347,7 @@ class UserSummaryReport extends Report {
 
 										'-1170-by_branch_by_department_by_employee+contact' => TTi18n::gettext('Contact Information By Branch/Department/Employee'),
 										'-1180-by_branch_by_department_by_employee+address' => TTi18n::gettext('Addresses By Branch/Department/Employee'),
-										'-1190-by_branch_by_department+wage' => TTi18n::gettext('Wages by Branch/Department/Employee'),
+										'-1190-by_branch_by_department_by_employee+wage' => TTi18n::gettext('Wages by Branch/Department/Employee'),
 										'-1200-by_branch_by_department+total_user' => TTi18n::gettext('Total Employees by Branch/Department'),
 
 										'-1205-by_hierarchy_by_branch_by_department_by_employee+contact' => TTi18n::gettext('Contact Information By Hierarchy/Branch/Department/Employee'),
@@ -341,6 +358,9 @@ class UserSummaryReport extends Report {
 
 										'-1230-by_hired_month+total_user' => TTi18n::gettext('Total Employees Hired By Month'),
 										'-1240-by_termination_month+total_user' => TTi18n::gettext('Total Employees Terminated By Month'),
+
+
+
 								);
 
 				break;
@@ -747,7 +767,38 @@ class UserSummaryReport extends Report {
 							$retval['sort'][] = array('type' => 'asc');
 							$retval['sort'][] = array('total_user' => 'desc');
 							break;
+						//Employment
+						case 'by_employee+new_hire':
+							$retval['-1003-hire_time_period']['time_period'] = 'last_14_days';
 
+							$retval['columns'][] = 'first_name';
+							$retval['columns'][] = 'middle_name';
+							$retval['columns'][] = 'last_name';
+							$retval['columns'][] = 'sin';
+							$retval['columns'][] = 'address1';
+							$retval['columns'][] = 'address2';
+							$retval['columns'][] = 'city';
+							$retval['columns'][] = 'province';
+							$retval['columns'][] = 'country';
+							$retval['columns'][] = 'postal_code';
+							$retval['columns'][] = 'home_phone';
+							$retval['columns'][] = 'sex';
+							$retval['columns'][] = 'title';
+
+							$retval['columns'][] = 'birth-date_stamp';
+							$retval['columns'][] = 'hire-date_stamp';
+
+							//Wage information
+							$retval['columns'][] = 'pay_period_schedule';
+							$retval['columns'][] = 'type';
+							$retval['columns'][] = 'wage';
+
+							$retval['columns'][] = 'user_group';
+							$retval['columns'][] = 'tag';
+
+							$retval['sort'][] = array('hire-date_stamp' => 'asc');
+							$retval['sort'][] = array('last_name' => 'asc');
+							break;
 						default:
 							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__, 10);
 							break;
@@ -791,6 +842,11 @@ class UserSummaryReport extends Report {
 	}
 
 	//Get raw data for report
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array('user' => array(), 'user_preference' => array(), 'user_wage' => array(), 'user_bank' => array(), 'branch' => array(), 'department' => array(), 'job' => array(), 'job_item' => array(), 'total_user' => array() );
 
@@ -868,15 +924,26 @@ class UserSummaryReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
-		//Get user bank data for joining.
-		$balf = TTnew( 'BankAccountListFactory' );
-		$balf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text(' User Bank Rows: '. $balf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $balf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-		foreach ( $balf as $key => $ba_obj ) {
-			$this->tmp_data['user_bank'][$ba_obj->getUser()] = (array)$ba_obj->getObjectAsArray( $columns );
+		$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' );
+		$rda_filter_data = $filter_data;
+		$rda_filter_data['status_id'] = 10; //Enabled
+		$rda_filter_data['type_id'] = 3000; //EFT payment methods only.
+		//FIXME: This report can only display a single bank account. We need to add a new report for just Employee Payment Methods in the future.
+		$rdalf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $rda_filter_data, NULL, NULL, NULL, array( 'priority' => 'desc' ) ); //Order priority DESC first so highest priority account comes last and overwrites any previous account.
+		Debug::Text(' Remittance Destination Account Rows: '. $rdalf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $rdalf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+		foreach ( $rdalf as $key => $rda_obj ) {
+			$this->tmp_data['user_bank'][$rda_obj->getUser()] = (array)$rda_obj->getObjectAsArray( array( 'user_id' => TRUE, 'value1' => TRUE, 'value2' => TRUE, 'value3' => TRUE ) );
+
+			//Map new RDA columns to legacy institution/transit/account columns.
+			$this->tmp_data['user_bank'][$rda_obj->getUser()]['institution'] = ( isset($this->tmp_data['user_bank'][$rda_obj->getUser()]['value1']) ) ? $this->tmp_data['user_bank'][$rda_obj->getUser()]['value1'] : NULL;
+			$this->tmp_data['user_bank'][$rda_obj->getUser()]['transit'] = ( isset($this->tmp_data['user_bank'][$rda_obj->getUser()]['value2']) ) ? $this->tmp_data['user_bank'][$rda_obj->getUser()]['value2'] : NULL;
+			$this->tmp_data['user_bank'][$rda_obj->getUser()]['account'] = ( isset($this->tmp_data['user_bank'][$rda_obj->getUser()]['value3']) ) ? $this->tmp_data['user_bank'][$rda_obj->getUser()]['value3'] : NULL;
+
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
+		unset( $rdalf, $rda_filter_data, $key, $rda_obj );
+
 
 		$blf = TTnew( 'BranchListFactory' );
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
@@ -915,7 +982,7 @@ class UserSummaryReport extends Report {
 			Debug::Text(' Job Total Rows: '. $jlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $jlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Jobs...') );
 			$job_column_config = array_merge( (array)Misc::removeKeyPrefix( 'job_', (array)$this->getColumnDataConfig() ), array('client_id' => TRUE ) ); //Always include client_id column so we can merge client data.
-			$this->tmp_data['job'][0] = array( 'name' => TTi18n::getText('No Job'), 'description' => TTi18n::getText('No Job'), 'job_manual_id' => 0 );
+			$this->tmp_data['job'][TTUUID::getZeroID()] = array( 'name' => TTi18n::getText('No Job'), 'description' => TTi18n::getText('No Job'), 'job_manual_id' => 0 );
 			foreach ( $jlf as $key => $j_obj ) {
 				$this->tmp_data['job'][$j_obj->getId()] = (array)Misc::addKeyPrefix( 'job_', (array)$j_obj->getObjectAsArray( $job_column_config ) );
 
@@ -928,7 +995,7 @@ class UserSummaryReport extends Report {
 			Debug::Text(' Job Item Total Rows: '. $jilf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $jilf->getRecordCount(), NULL, TTi18n::getText('Retrieving Tasks...') );
 			$job_item_column_config = Misc::removeKeyPrefix( 'job_item_', (array)$this->getColumnDataConfig() );
-			$this->tmp_data['job_item'][0] = array( 'name' => TTi18n::getText('No Task'), 'description' => TTi18n::getText('No Task'), 'job_item_manual_id' => 0 );
+			$this->tmp_data['job_item'][TTUUID::getZeroID()] = array( 'name' => TTi18n::getText('No Task'), 'description' => TTi18n::getText('No Task'), 'job_item_manual_id' => 0 );
 			foreach ( $jilf as $key => $ji_obj ) {
 				$this->tmp_data['job_item'][$ji_obj->getId()] = (array)Misc::addKeyPrefix( 'job_item_', (array)$ji_obj->getObjectAsArray( $job_item_column_config ) );
 
@@ -938,9 +1005,9 @@ class UserSummaryReport extends Report {
 		}
 
 		//Get user wage data for joining.
-		$filter_data['wage_group_id'] = array(0); //Use default wage groups only.
-		$filter_data['permission_children_ids'] = $wage_permission_children_ids;
 		$uwlf = TTnew( 'UserWageListFactory' );
+		$filter_data['wage_group_id'] = array( TTUUID::getZeroID() ); //Use default wage groups only.
+		$filter_data['permission_children_ids'] = $wage_permission_children_ids;
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -967,6 +1034,10 @@ class UserSummaryReport extends Report {
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
+
+	/**
+	 * @return bool
+	 */
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['user']), NULL, TTi18n::getText('Pre-Processing Data...') );
 

@@ -1,10 +1,11 @@
 CurrencyRateViewController = BaseViewController.extend( {
 
+	_required_files: ['APICurrencyRate'],
 	el: '#currency_rate_view_container', //Must set el here and can only set string, so events can work
 
-	initialize: function( options ) {
+	init: function( options ) {
 
-		this._super( 'initialize', options );
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'CurrencyRateEditView.html';
 		this.permission_id = 'currency';
 		this.script_name = 'CurrencyRateView';
@@ -186,7 +187,9 @@ CurrencyRateViewController.loadSubView = function( container, beforeViewLoadedFu
 			container.html( template(args) );
 
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				afterViewLoadedFun( sub_currency_rate_view_controller );
+				TTPromise.wait('BaseViewController', 'initialize',function() {
+					afterViewLoadedFun(sub_currency_rate_view_controller);
+				});
 			}
 
 		}

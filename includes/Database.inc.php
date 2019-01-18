@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,6 +37,8 @@
 
 require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb.inc.php');
 require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-exceptions.inc.php');
+
+$PRIMARY_KEY_IS_UUID = TRUE;
 
 //Use overloading to abstract $db and have calls directly to ADODB
 if ( !isset($disable_database_connection) ) {
@@ -160,16 +162,19 @@ if ( !isset($disable_database_connection) ) {
 			throw new DBError($e);
 		}
 
-		//Global options for FastTree class.
-		$fast_tree_options = array( 'db' => $db, 'table' => 'hierarchy_tree' );
-		$fast_tree_user_group_options = array( 'db' => $db, 'table' => 'user_group_tree' );
-		$fast_tree_qualification_group_options = array( 'db' => $db, 'table' => 'qualification_group_tree' );
-		$fast_tree_kpi_group_options = array( 'db' => $db, 'table' => 'kpi_group_tree' );
-		$fast_tree_job_group_options = array( 'db' => $db, 'table' => 'job_group_tree' );
-		$fast_tree_job_item_group_options = array( 'db' => $db, 'table' => 'job_item_group_tree' );
-		$fast_tree_client_group_options = array( 'db' => $db, 'table' => 'client_group_tree' );
-		$fast_tree_product_group_options = array( 'db' => $db, 'table' => 'product_group_tree' );
-		$fast_tree_document_group_options = array( 'db' => $db, 'table' => 'document_group_tree' );
+
+		if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == TRUE ) OR ( isset($_SERVER['SCRIPT_FILENAME']) AND stripos( $_SERVER['SCRIPT_FILENAME'], 'unattended_upgrade' ) !== FALSE ) ) { //Make sure we always check the schema versions when run from unattended_upgrade, just in case the upgrade failed and we need to determine if we are in UUID mode or not.
+			//Make sure that during initial installation we confirm that the database/table actually exists, otherwise this can throw a fatal SQL error.
+			$install_obj = new Install();
+			$install_obj->setDatabaseConnection( $db ); //Default connection
+			if ( $install_obj->checkSystemSettingTableExists() == TRUE ) {
+				//Check to see if the DB schema is before the UUID upgrade (schema 1070 or older) and set the $PRIMARY_KEY_IS_UUID accordingly.
+				//  THIS IS in tools/unattended_install.php, tools/unattended_upgrade.php, includes/database.inc.php  as well.
+				if ( (int)SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_A' ) < 1100 ) {
+					$PRIMARY_KEY_IS_UUID = FALSE;
+				}
+			}
+		}
 	} else {
 		Debug::Text( 'Database config options are not set... Unable to connect to database.', __FILE__, __LINE__, __METHOD__, 1);
 		throw new DBError( new Exception );

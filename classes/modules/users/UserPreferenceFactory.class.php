@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,11 @@ class UserPreferenceFactory extends Factory {
 
 	var $user_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param bool $include_sort_prefix
+	 * @return array|bool|null
+	 */
 	function _getFactoryOptions( $name, $include_sort_prefix = FALSE ) {
 
 		$retval = NULL;
@@ -543,7 +548,7 @@ class UserPreferenceFactory extends Factory {
 											'Brazil/West' => 'Brazil/West',
 											'Canada/Atlantic' => 'Canada/Atlantic',
 											'Canada/Central' => 'Canada/Central',
-											'Canada/East-Saskatchewan' => 'Canada/East-Saskatchewan',
+											//'Canada/East-Saskatchewan' => 'Canada/East-Saskatchewan', //10-Oct-17, PostgreSQL doesn't appear to support this anymore.
 											'Canada/Eastern' => 'Canada/Eastern',
 											'Canada/Mountain' => 'Canada/Mountain',
 											'Canada/Newfoundland' => 'Canada/Newfoundland',
@@ -1290,13 +1295,6 @@ class UserPreferenceFactory extends Factory {
 										2 => TTi18n::gettext('Enabled (UnAuthenticated)'),
 									);
 				break;
-			case 'schedule_icalendar_type':
-				$retval = array(
-										0 => TTi18n::gettext('Disabled'),
-										1 => TTi18n::gettext('Enabled (Authenticated)'),
-										2 => TTi18n::gettext('Enabled (UnAuthenticated)'),
-									);
-				break;
 			case 'default_login_screen':
 				$retval = array(
 										'Home' => TTi18n::gettext('Dashboard'),
@@ -1375,6 +1373,10 @@ class UserPreferenceFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -1443,63 +1445,58 @@ class UserPreferenceFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value ) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getLanguage() {
-		if ( isset($this->data['language']) ) {
-			return $this->data['language'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'language' );
 	}
-	function setLanguage($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLanguage( $value) {
 		$value = trim($value);
-
-		$language_options = TTi18n::getLanguageArray();
-		if ( $this->Validator->inArrayKey(	'language',
-											$value,
-											TTi18n::gettext('Incorrect language'),
-											$language_options ) ) {
-
-			$this->data['language'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'language', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getDateFormatExample() {
 		return Option::getByKey( $this->getDateFormat(), Misc::trimSortPrefix( $this->getOptions('date_format_example') ) );
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getJSDateFormat() {
 		$js_date_format = Option::getByKey($this->getDateFormat(), $this->getOptions('js_date_format') );
 		if ( $js_date_format != '' ) {
@@ -1509,36 +1506,34 @@ class UserPreferenceFactory extends Factory {
 
 		return '%d-%M-%y';
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDateFormat() {
-		if ( isset($this->data['date_format']) ) {
-			return $this->data['date_format'];
-		}
-
-		return FALSE;
-	}
-	function setDateFormat($date_format) {
-		$date_format = trim($date_format);
-
-		Debug::text('Date Format: '. $date_format .' Type: '. gettype($date_format), __FILE__, __LINE__, __METHOD__, 10);
-
-		if (	$date_format == ''
-				OR
-				$this->Validator->inArrayKey(	'date_format',
-												$date_format,
-												TTi18n::gettext('Incorrect date format'),
-												Misc::trimSortPrefix( $this->getOptions('date_format') ) ) ) {
-
-			$this->data['date_format'] = $date_format;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'date_format' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setDateFormat( $value ) {
+		$value = trim($value);
+		Debug::text('Date Format: '. $value .' Type: '. gettype($value), __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'date_format', $value );
+	}
+
+	/**
+	 * @return array|mixed
+	 */
 	function getTimeFormatExample() {
 		return Misc::trimSortPrefix( Option::getByKey( $this->getTimeFormat(), $this->getOptions('time_format_example') ) );
 	}
+
+	/**
+	 * @return bool|string
+	 */
 	function getJSTimeFormat() {
 		$js_time_format = Option::getByKey($this->getTimeFormat(), $this->getOptions('js_time_format') );
 		if ( $js_time_format != '' ) {
@@ -1548,29 +1543,31 @@ class UserPreferenceFactory extends Factory {
 
 		return '%l:%M %p';
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTimeFormat() {
-		if ( isset($this->data['time_format']) ) {
-			return $this->data['time_format'];
-		}
-
-		return FALSE;
-	}
-	function setTimeFormat($time_format) {
-		$time_format = trim($time_format);
-
-		if ( $this->Validator->inArrayKey(	'time_format',
-											$time_format,
-											TTi18n::gettext('Incorrect time format'),
-											$this->getOptions('time_format')) ) {
-
-			$this->data['time_format'] = $time_format;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'time_format' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeFormat( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'time_format', $value );
+	}
+
+	/**
+	 * @param $country
+	 * @param $province
+	 * @param bool $work_phone
+	 * @param bool $home_phone
+	 * @param bool $default
+	 * @return array|bool|mixed|string
+	 */
 	function getLocationTimeZone( $country, $province, $work_phone = FALSE, $home_phone = FALSE, $default = FALSE ) {
 		Debug::text('Country: '. $country .' Province: '. $province .' Work Phone: '. $work_phone .' Home Phone: '. $home_phone .' Default: '. $default, __FILE__, __LINE__, __METHOD__, 9);
 
@@ -1623,57 +1620,52 @@ class UserPreferenceFactory extends Factory {
 		return 'GMT';
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getTimeZone() {
-		if ( isset($this->data['time_zone']) ) {
-			return $this->data['time_zone'];
-		}
-
-		return FALSE;
-	}
-	function setTimeZone($time_zone) {
-		$time_zone = Misc::trimSortPrefix( trim($time_zone) );
-
-		if ( $this->Validator->inArrayKey(	'time_zone',
-											$time_zone,
-											TTi18n::gettext('Incorrect time zone'),
-											Misc::trimSortPrefix( $this->getOptions('time_zone') ) ) ) {
-
-			$this->data['time_zone'] = $time_zone;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'time_zone' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeZone( $value ) {
+		$value = Misc::trimSortPrefix( trim($value) );
+		return $this->setGenericDataValue( 'time_zone', $value );
+	}
+
+	/**
+	 * @return mixed
+	 */
 	function getTimeUnitFormatExample() {
 		$options = $this->getOptions('time_unit_format');
 
 		return $options[$this->getTimeUnitFormat()];
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTimeUnitFormat() {
-		if ( isset($this->data['time_unit_format']) ) {
-			return $this->data['time_unit_format'];
-		}
-
-		return FALSE;
-	}
-	function setTimeUnitFormat($time_unit_format) {
-		$time_unit_format = trim($time_unit_format);
-
-		if ( $this->Validator->inArrayKey(	'time_unit_format',
-											$time_unit_format,
-											TTi18n::gettext('Incorrect time units'),
-											$this->getOptions('time_unit_format')) ) {
-
-			$this->data['time_unit_format'] = $time_unit_format;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'time_unit_format' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeUnitFormat( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'time_unit_format', $value );
+	}
+
+	/**
+	 * @param $meters
+	 * @param null $format
+	 * @return bool|float|int
+	 */
 	function convertMetersToDistance( $meters, $format = NULL ) {
 		if ( $format == '' ) {
 			$format = self::getDistanceFormat();
@@ -1694,58 +1686,51 @@ class UserPreferenceFactory extends Factory {
 
 		return UnitConvert::convert( 'm', $dst_unit, $meters );
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDistanceFormat() {
-		if ( isset($this->data['distance_format']) ) {
-			return $this->data['distance_format'];
-		}
-
-		return FALSE;
-	}
-	function setDistanceFormat($distance_format) {
-		$distance_format = trim($distance_format);
-
-		if ( $this->Validator->inArrayKey(	'distance_format',
-			$distance_format,
-			TTi18n::gettext('Incorrect distance units'),
-			$this->getOptions('distance_format')) ) {
-
-			$this->data['distance_format'] = $distance_format;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'distance_format' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDistanceFormat( $value ) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'distance_format', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getItemsPerPage() {
-		if ( isset($this->data['items_per_page']) ) {
-			return $this->data['items_per_page'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'items_per_page' );
 	}
-	function setItemsPerPage($items_per_page) {
-		$items_per_page = trim($items_per_page);
 
-		$min = ( PRODUCTION == FALSE ) ? 1 : 5; //Allow lower numbers to help with testing.
-		if	($items_per_page != '' AND $items_per_page >= $min AND $items_per_page <= 2000) {
-			$this->data['items_per_page'] = $items_per_page;
-			return TRUE;
-		} else {
-			$this->Validator->isTrue(		'items_per_page',
-											FALSE,
-											TTi18n::gettext('Items per page must be between 5 and 2000'));
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setItemsPerPage( $value ) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'items_per_page', $value );
 	}
 
 	//A quick function to change just the timezone, without having to change
 	//date formats and such in the process.
+	/**
+	 * @return bool
+	 */
 	function setTimeZonePreferences() {
 		return TTDate::setTimeZone( $this->getTimeZone() );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function setDateTimePreferences() {
 		//TTDate::setTimeZone( $this->getTimeZone() );
 		if ( $this->setTimeZonePreferences() == FALSE ) {
@@ -1760,193 +1745,184 @@ class UserPreferenceFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getTimeSheetView() {
-		if ( isset($this->data['timesheet_view']) ) {
-			return $this->data['timesheet_view'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'timesheet_view' );
 	}
-	function setTimeSheetView($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeSheetView( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'timesheet_view',
-											$value,
-											TTi18n::gettext('Incorrect default TimeSheet view'),
-											$this->getOptions('timesheet_view')) ) {
-
-			$this->data['timesheet_view'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'timesheet_view', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getStartWeekDay() {
-		if ( isset($this->data['start_week_day']) ) {
-			return $this->data['start_week_day'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'start_week_day' );
 	}
-	function setStartWeekDay($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStartWeekDay( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'start_week_day',
-											$value,
-											TTi18n::gettext('Incorrect day to start a week on'),
-											$this->getOptions('start_week_day')) ) {
-
-			$this->data['start_week_day'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'start_week_day', $value );
 	}
 
 	//Used in Flex interface only, currently its hardcoded for now at least. Default: CTRL+ALT
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getShortcutKeySequence() {
-		if ( isset($this->data['shortcut_key_sequence']) ) {
-			return $this->data['shortcut_key_sequence'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'shortcut_key_sequence' );
 	}
-	function setShortcutKeySequence($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setShortcutKeySequence( $value) {
 		$value = trim($value);
-
-		if	(
-				$value == ''
-				OR
-				(
-					$this->Validator->isLength(		'shortcut_key_sequence',
-													$value,
-													TTi18n::gettext('Shortcut key sequence is too short or too long'),
-													0,
-													250)
-				)
-				) {
-
-			$this->data['shortcut_key_sequence'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'shortcut_key_sequence', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableAlwaysBlankTimeSheetRows() {
-		if ( isset($this->data['enable_always_blank_timesheet_rows']) ) {
-			return $this->fromBool( $this->data['enable_always_blank_timesheet_rows'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_always_blank_timesheet_rows' ) );
 	}
-	function setEnableAlwaysBlankTimeSheetRows($bool) {
-		$this->data['enable_always_blank_timesheet_rows'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableAlwaysBlankTimeSheetRows( $value ) {
+		return $this->setGenericDataValue( 'enable_always_blank_timesheet_rows', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableAutoContextMenu() {
-		if ( isset($this->data['enable_auto_context_menu']) ) {
-			return $this->fromBool( $this->data['enable_auto_context_menu'] );
-		}
-
-		return FALSE;
-	}
-	function setEnableAutoContextMenu($bool) {
-		$this->data['enable_auto_context_menu'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_auto_context_menu' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableAutoContextMenu( $value ) {
+		return $this->setGenericDataValue( 'enable_auto_context_menu', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableReportOpenNewWindow() {
-		if ( isset($this->data['enable_report_open_new_window']) ) {
-			return $this->fromBool( $this->data['enable_report_open_new_window'] );
-		}
-
-		return FALSE;
-	}
-	function setEnableReportOpenNewWindow($bool) {
-		$this->data['enable_report_open_new_window'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_report_open_new_window' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableReportOpenNewWindow( $value ) {
+		return $this->setGenericDataValue( 'enable_report_open_new_window', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableEmailNotificationException() {
-		if ( isset($this->data['enable_email_notification_exception']) ) {
-			return $this->fromBool( $this->data['enable_email_notification_exception'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_email_notification_exception' ) );
 	}
-	function setEnableEmailNotificationException($bool) {
-		$this->data['enable_email_notification_exception'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableEmailNotificationException( $value ) {
+		return $this->setGenericDataValue( 'enable_email_notification_exception', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableEmailNotificationMessage() {
-		if ( isset($this->data['enable_email_notification_message']) ) {
-			return $this->fromBool( $this->data['enable_email_notification_message'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_email_notification_message' ) );
 	}
-	function setEnableEmailNotificationMessage($bool) {
-		$this->data['enable_email_notification_message'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableEmailNotificationMessage( $value ) {
+		return $this->setGenericDataValue( 'enable_email_notification_message', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableEmailNotificationPayStub() {
-		if ( isset($this->data['enable_email_notification_pay_stub']) ) {
-			return $this->fromBool( $this->data['enable_email_notification_pay_stub'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_email_notification_pay_stub' ) );
 	}
-	function setEnableEmailNotificationPayStub($bool) {
-		$this->data['enable_email_notification_pay_stub'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableEmailNotificationPayStub( $value ) {
+		return $this->setGenericDataValue( 'enable_email_notification_pay_stub', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableEmailNotificationHome() {
-		if ( isset($this->data['enable_email_notification_home']) ) {
-			return $this->fromBool( $this->data['enable_email_notification_home'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_email_notification_home' ) );
 	}
-	function setEnableEmailNotificationHome($bool) {
-		$this->data['enable_email_notification_home'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableEmailNotificationHome( $value ) {
+		return $this->setGenericDataValue( 'enable_email_notification_home', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getScheduleIcalendarType() {
-		if ( isset($this->data['schedule_icalendar_type_id']) ) {
-			return (int)$this->data['schedule_icalendar_type_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'schedule_icalendar_type_id' );
 	}
-	function setScheduleIcalendarType($type) {
-		$type = trim($type);
 
-		if ( $this->Validator->inArrayKey(	'schedule_icalendar_type_id',
-											$type,
-											TTi18n::gettext('Incorrect option to enable calendar synchronization'),
-											$this->getOptions('schedule_icalendar_type')) ) {
-
-			$this->data['schedule_icalendar_type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScheduleIcalendarType( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'schedule_icalendar_type_id', $value );
 	}
 
 	//Helper functions for dealing with unauthenticated calendar access, required by Google Calendar for now.
+
+	/**
+	 * @param null $user_name
+	 * @param int $type_id ID
+	 * @return string
+	 */
 	function getScheduleIcalendarURL( $user_name = NULL, $type_id = NULL ) {
 		if ( $user_name == '' ) {
 			$user_name = $this->getUserObject()->getUserName();
@@ -1963,195 +1939,325 @@ class UserPreferenceFactory extends Factory {
 
 		return $retval;
 	}
+
+	/**
+	 * @param $key
+	 * @return bool
+	 */
 	function checkScheduleICalendarKey( $key ) {
 		Debug::text( 'Checking Key: '. $key .' Should Match: '. $this->getScheduleIcalendarKey(), __FILE__, __LINE__, __METHOD__, 10 );
-		if ( trim($key) == $this->getScheduleIcalendarKey() ) {
+		if ( trim($key) == $this->getScheduleIcalendarKey( TTPassword::getPasswordVersion( $key ) ) ) {
 			return TRUE;
 		}
 
 		return FALSE;
 	}
-	function getScheduleIcalendarKey() {
-		$salt = $this->getUserObject()->getPasswordSalt();
-		$user_id = $this->getUserObject()->getID();
 
-		return substr( md5( $this->getScheduleIcalendarEventName().$salt.$user_id ), 0, 12);
+	/**
+	 * @return bool|string
+	 */
+	function getScheduleIcalendarKey( $version = NULL ) {
+		if ( (int)$version == 1 ) {
+			$salt = TTPassword::getPasswordSalt();
+			$user_id = TTUUID::convertUUIDToInt( $this->getUserObject()->getID() );
+
+			$retval = substr( md5( $this->getScheduleIcalendarEventName().$salt.$user_id ), 0, 12);
+		} else { //Should be v3.
+			$user_name = TTUUID::castUUID( $this->getUserObject()->getUserName() );
+			$user_id = TTUUID::castUUID( $this->getUserObject()->getID() );
+
+			//Use the TTPassword class to better handle different versions of the hashed data.
+			$retval = strtoupper( substr( TTPassword::encryptPassword( $user_name, $user_id, $this->getScheduleIcalendarEventName(), $version ), 0, 12 ) );
+		}
+
+		Debug::text( 'Key: '. $retval, __FILE__, __LINE__, __METHOD__, 10 );
+		return $retval;
 	}
 
 	//Currently used as part of the unauthenticated key, so if this changes the key to access the calendar changes too.
+
+	/**
+	 * @return bool
+	 */
 	function getScheduleIcalendarEventName() {
-		return $this->fromBool( $this->data['schedule_icalendar_event_name'] );
+		return $this->fromBool( $this->getGenericDataValue( 'schedule_icalendar_event_name' ) );
 	}
-	function setScheduleIcalendarEventName($bool) {
-		$this->data['schedule_icalendar_event_name'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScheduleIcalendarEventName( $value ) {
+		return $this->setGenericDataValue( 'schedule_icalendar_event_name', $this->toBool($value) );
 	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getScheduleIcalendarAlarm1Working() {
-
-		if ( isset($this->data['schedule_icalendar_alarm1_working']) ) {
-			return (int)$this->data['schedule_icalendar_alarm1_working'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'schedule_icalendar_alarm1_working' );
 	}
-	function setScheduleIcalendarAlarm1Working($int) {
-		$int = (int)trim($int);
-		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm1_working',
-													$int,
-													TTi18n::gettext('Invalid time for alarm #1')) ) {
-			$this->data['schedule_icalendar_alarm1_working'] = $int;
-			return TRUE;
-		}
 
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScheduleIcalendarAlarm1Working( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'schedule_icalendar_alarm1_working', $value );
 
 	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getScheduleIcalendarAlarm2Working() {
-		if ( isset($this->data['schedule_icalendar_alarm2_working']) ) {
-			return (int)$this->data['schedule_icalendar_alarm2_working'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'schedule_icalendar_alarm2_working' );
 	}
-	function setScheduleIcalendarAlarm2Working($int) {
-		$int = (int)trim($int);
-		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm2_working',
-													$int,
-													TTi18n::gettext('Invalid time for alarm #2')) ) {
-			$this->data['schedule_icalendar_alarm2_working'] = $int;
 
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScheduleIcalendarAlarm2Working( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'schedule_icalendar_alarm2_working', $value );
 	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getScheduleIcalendarAlarm1Absence() {
-		if ( isset($this->data['schedule_icalendar_alarm1_absence']) ) {
-			return (int)$this->data['schedule_icalendar_alarm1_absence'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'schedule_icalendar_alarm1_absence' );
 	}
-	function setScheduleIcalendarAlarm1Absence($int) {
-		$int = (int)trim($int);
-		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm1_absence',
-													$int,
-													TTi18n::gettext('Invalid time for alarm #1')) ) {
-			$this->data['schedule_icalendar_alarm1_absence'] = $int;
 
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScheduleIcalendarAlarm1Absence( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'schedule_icalendar_alarm1_absence', $value );
 	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getScheduleIcalendarAlarm2Absence() {
-		if ( isset($this->data['schedule_icalendar_alarm2_absence']) ) {
-			return (int)$this->data['schedule_icalendar_alarm2_absence'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'schedule_icalendar_alarm2_absence' );
 	}
-	function setScheduleIcalendarAlarm2Absence($int) {
-		$int = (int)trim($int);
-		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm2_absence',
-													$int,
-													TTi18n::gettext('Invalid time for alarm #2')) ) {
-			$this->data['schedule_icalendar_alarm2_absence'] = $int;
 
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScheduleIcalendarAlarm2Absence( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'schedule_icalendar_alarm2_absence', $value );
 	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getScheduleIcalendarAlarm1Modified() {
-
-		if ( isset($this->data['schedule_icalendar_alarm1_modified']) ) {
-			return (int)$this->data['schedule_icalendar_alarm1_modified'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'schedule_icalendar_alarm1_modified' );
 	}
-	function setScheduleIcalendarAlarm1Modified($int) {
-		$int = (int)trim($int);
-		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm1_modified',
-													$int,
-													TTi18n::gettext('Invalid time for alarm #1')) ) {
-			$this->data['schedule_icalendar_alarm1_modified'] = $int;
 
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScheduleIcalendarAlarm1Modified( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'schedule_icalendar_alarm1_modified', $value );
 	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getScheduleIcalendarAlarm2Modified() {
-		if ( isset($this->data['schedule_icalendar_alarm2_modified']) ) {
-			return (int)$this->data['schedule_icalendar_alarm2_modified'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'schedule_icalendar_alarm2_modified' );
 	}
-	function setScheduleIcalendarAlarm2Modified($int) {
-		$int = (int)trim($int);
-		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm2_modified',
-													$int,
-													TTi18n::gettext('Invalid time for alarm #2')) ) {
-			$this->data['schedule_icalendar_alarm2_modified'] = $int;
 
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setScheduleIcalendarAlarm2Modified( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'schedule_icalendar_alarm2_modified', $value );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableSaveTimesheetState() {
-		if ( isset($this->data['enable_save_timesheet_state']) ) {
-			return $this->fromBool( $this->data['enable_save_timesheet_state'] );
-		}
-
-		return FALSE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_save_timesheet_state' ) );
 	}
-	function setEnableSaveTimesheetState($bool) {
-		$this->data['enable_save_timesheet_state'] = $this->toBool($bool);
 
-		return TRUE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableSaveTimesheetState( $value ) {
+		return $this->setGenericDataValue( 'enable_save_timesheet_state', $this->toBool($value) );
 	}
 
 	//Default: Home/Dashboard
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDefaultLoginScreen() {
-		if ( isset($this->data['default_login_screen']) ) {
-			return $this->data['default_login_screen'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'default_login_screen' );
 	}
-	function setDefaultLoginScreen($value) {
-		$value = trim($value);
 
-		if	(
-				$value == ''
-				OR
-				(
-					$this->Validator->isLength(		'default_login_screen',
-													$value,
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDefaultLoginScreen( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'default_login_screen', $value );
+	}
+
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
+	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// User
+		if ( $this->getUser() != TTUUID::getZeroID() ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+															$ulf->getByID($this->getUser()),
+															TTi18n::gettext('Invalid Employee')
+														);
+		}
+		// Language
+		$language_options = TTi18n::getLanguageArray();
+		$this->Validator->inArrayKey(	'language',
+												$this->getLanguage(),
+												TTi18n::gettext('Incorrect language'),
+												$language_options
+											);
+		// Date format
+		if ( $this->getDateFormat() != '' ) {
+			$this->Validator->inArrayKey(	'date_format',
+												$this->getDateFormat(),
+												TTi18n::gettext('Incorrect date format'),
+												Misc::trimSortPrefix( $this->getOptions('date_format') )
+											);
+		}
+		// Time format
+		$this->Validator->inArrayKey(	'time_format',
+												$this->getTimeFormat(),
+												TTi18n::gettext('Incorrect time format'),
+												$this->getOptions('time_format')
+											);
+		// Time zone
+		$this->Validator->inArrayKey(	'time_zone',
+												$this->getTimeZone(),
+												TTi18n::gettext('Incorrect time zone'),
+												Misc::trimSortPrefix( $this->getOptions('time_zone') )
+											);
+		// Time units
+		$this->Validator->inArrayKey(	'time_unit_format',
+												$this->getTimeUnitFormat(),
+												TTi18n::gettext('Incorrect time units'),
+												$this->getOptions('time_unit_format')
+											);
+		// Distance units
+		$this->Validator->inArrayKey(	'distance_format',
+												$this->getDistanceFormat(),
+												TTi18n::gettext('Incorrect distance units'),
+												$this->getOptions('distance_format')
+											);
+		// Items per page
+		$min = ( PRODUCTION == FALSE ) ? 1 : 5; //Allow lower numbers to help with testing.
+		if ( $this->getItemsPerPage() == '' OR $this->getItemsPerPage() < $min OR $this->getItemsPerPage() > 2000 ) {
+			$this->Validator->isTrue(		'items_per_page',
+											FALSE,
+											TTi18n::gettext('Items per page must be between 5 and 2000'));
+		}
+		// Default TimeSheet view'
+		if ( $this->getTimeSheetView() !== FALSE ) {
+			$this->Validator->inArrayKey(	'timesheet_view',
+													$this->getTimeSheetView(),
+													TTi18n::gettext('Incorrect default TimeSheet view'),
+													$this->getOptions('timesheet_view')
+												);
+		}
+		// Day to start a week on
+		$this->Validator->inArrayKey(	'start_week_day',
+												$this->getStartWeekDay(),
+												TTi18n::gettext('Incorrect day to start a week on'),
+												$this->getOptions('start_week_day')
+											);
+		// Shortcut key sequence
+		if ( $this->getShortcutKeySequence() != '' ) {
+			$this->Validator->isLength(		'shortcut_key_sequence',
+													$this->getShortcutKeySequence(),
+													TTi18n::gettext('Shortcut key sequence is too short or too long'),
+													0,
+													250
+												);
+		}
+		// Option to enable calendar synchronization
+		$this->Validator->inArrayKey(	'schedule_icalendar_type_id',
+												$this->getScheduleIcalendarType(),
+												TTi18n::gettext('Incorrect option to enable calendar synchronization'),
+												$this->getOptions('schedule_icalendar_type')
+											);
+		// Time for alarm #1
+		$this->Validator->isNumeric(		'schedule_icalendar_alarm1_working',
+												$this->getScheduleIcalendarAlarm1Working(),
+												TTi18n::gettext('Invalid time for alarm #1')
+											);
+		// Time for alarm #2
+		$this->Validator->isNumeric(		'schedule_icalendar_alarm2_working',
+												$this->getScheduleIcalendarAlarm2Working(),
+												TTi18n::gettext('Invalid time for alarm #2')
+											);
+		// Time for alarm #1
+		$this->Validator->isNumeric(		'schedule_icalendar_alarm1_absence',
+												$this->getScheduleIcalendarAlarm1Absence(),
+												TTi18n::gettext('Invalid time for alarm #1')
+											);
+		// Time for alarm #2
+		$this->Validator->isNumeric(		'schedule_icalendar_alarm2_absence',
+												$this->getScheduleIcalendarAlarm2Absence(),
+												TTi18n::gettext('Invalid time for alarm #2')
+											);
+		// Time for alarm #1
+		$this->Validator->isNumeric(		'schedule_icalendar_alarm1_modified',
+												$this->getScheduleIcalendarAlarm1Modified(),
+												TTi18n::gettext('Invalid time for alarm #1')
+											);
+		// Time for alarm #2
+		$this->Validator->isNumeric(		'schedule_icalendar_alarm2_modified',
+												$this->getScheduleIcalendarAlarm2Modified(),
+												TTi18n::gettext('Invalid time for alarm #2')
+											);
+		// Default login screen
+		if ( $this->getDefaultLoginScreen() != '' ) {
+			$this->Validator->isLength(		'default_login_screen',
+													$this->getDefaultLoginScreen(),
 													TTi18n::gettext('Default login screen is too short or too long'),
 													0,
-													250)
-				)
-				) {
-
-			$this->data['default_login_screen'] = $value;
-
-			return TRUE;
+													250
+												);
 		}
-
-		return FALSE;
-	}
-
-	function Validate( $ignore_warning = TRUE ) {
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( $this->getUser() == '' ) {
 			$this->Validator->isTRUE(	'user',
 										FALSE,
-										TTi18n::gettext('Invalid User') );
+										TTi18n::gettext('Invalid Employee') );
 
 		}
 
@@ -2165,6 +2271,9 @@ class UserPreferenceFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isPreferencesComplete() {
 		if ( $this->getItemsPerPage() == ''
 				OR $this->getTimeZone() == '' ) {
@@ -2176,6 +2285,9 @@ class UserPreferenceFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		//Check the locale, if its not english, we need to make sure the selected dateformat is correct for the language, or else force it.
 		if ( $this->getLanguage() != 'en' ) {
@@ -2191,6 +2303,9 @@ class UserPreferenceFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getUser() );
 		if ( is_object( $this->getUserObject() ) ) {
@@ -2203,6 +2318,10 @@ class UserPreferenceFactory extends Factory {
 
 	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -2229,6 +2348,11 @@ class UserPreferenceFactory extends Factory {
 	}
 
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$uf = TTnew( 'UserFactory' );
 		$data = array();
@@ -2321,6 +2445,10 @@ class UserPreferenceFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {

@@ -38,8 +38,8 @@ DashletWizardController = BaseWizardController.extend( {
 		ActiveShiftReport: 'APIActiveShiftReport'
 	},
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.title = $.i18n._( 'Dashlet Wizard' );
 		this.steps = 2;
 		this.current_step = 1;
@@ -63,6 +63,7 @@ DashletWizardController = BaseWizardController.extend( {
 		switch ( this.current_step ) {
 			case 1:
 				var label = this.getLabel();
+				var $this = this;
 				label.text( $.i18n._( 'Choose the type of dashlet' ) );
 				this.content_div.append( label );
 				combobox = this.getComboBox( 'dashlet_type', false );
@@ -70,6 +71,9 @@ DashletWizardController = BaseWizardController.extend( {
 					$this.stepsDataDic[2] = null;
 					$this.stepsWidgetDic[2] = null;
 				} );
+				combobox.off('change').on('change', function(e){
+					$this.step1ComboboxChanged( $(e.target).val() );
+				});
 				this.content_div.append( combobox );
 				this.stepsWidgetDic[this.current_step][combobox.getField()] = combobox;
 
@@ -227,6 +231,15 @@ DashletWizardController = BaseWizardController.extend( {
 				this.stepsWidgetDic[this.current_step][combobox.getField()] = combobox;
 
 				break;
+		}
+	},
+
+	step1ComboboxChanged: function( value ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id < 15 && ( value == 'custom_list' || value == 'custom_report' ) ) {
+			TAlertManager.showAlert( Global.getUpgradeMessage(), $.i18n._('Denied'));
+			Global.setWidgetEnabled( this.next_btn, false );
+		} else {
+			Global.setWidgetEnabled( this.next_btn, true );
 		}
 	},
 
@@ -513,6 +526,9 @@ DashletWizardController = BaseWizardController.extend( {
 			case 'PayStub':
 				result = 'PayStubView';
 				break;
+			case 'PayStubTransaction':
+				result = 'PayStubTransactionView';
+				break;
 			case 'PayPeriod':
 				result = 'PayPeriodsView';
 				break;
@@ -565,7 +581,7 @@ DashletWizardController = BaseWizardController.extend( {
 			this.stepsWidgetDic[2].name.setErrorStyle( 'Dashlet title can\'t be empty', true );
 			return;
 		}
-		
+
 		if ( dashlet_type == 'custom_list' ) {
 			var view_name = this.stepsDataDic[2].script;
 			var layout_id = this.stepsDataDic[2].layout;

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_' . uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
+		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertGreaterThan( 0, $this->company_id );
 
@@ -57,7 +58,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createUserWageGroups( $this->company_id );
 
-		$this->user_id = $dd->createUser( $this->company_id, 100 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
 		$this->assertGreaterThan( 0, $this->user_id );
 
 		return TRUE;
@@ -814,6 +815,91 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 //		$pslf->getByCompanyId( 1, 1, NULL, ( array('a.start_date >=' => $pslf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) ) ) ) );
 //		//$pslf->getByCompanyId( 1, 1, NULL, ( array('a.created_date' => "=1-- (SELECT 1)--") ) );
 //		var_dump( $pslf->rs->sql );
+	}
+
+
+	/**
+	 * Used to call protected methods in the Factory class.
+	 * @param $name
+	 * @return ReflectionMethod
+	 */
+	protected static function getMethod($name) {
+		$class = new ReflectionClass('UserListFactory');
+		$method = $class->getMethod($name);
+		$method->setAccessible(true);
+		return $method;
+	}
+
+	/**
+	 * @group SQL_testWhereClauseSQL
+	 */
+	function testWhereClauseSQL( ) {
+		$method = self::getMethod('getWhereClauseSQL');
+		$ulf = new UserListFactory();
+
+
+		//Boolean TRUE
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', (bool)TRUE, 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 1 );
+
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', (int)1, 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 1 );
+
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', 1, 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 1 );
+
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', 1.00, 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 1 );
+
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', '1', 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 1 );
+
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', 'TRUE', 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 1 );
+
+
+		//Boolean FALSE
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', (bool)FALSE, 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 0 );
+
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', (int)0, 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 0 );
+
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', 0, 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 0 );
+
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', 0.00, 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 0 );
+
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', '0', 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 0 );
+
+		$ph = array();
+		$retval = $method->invokeArgs($ulf, array( 'a.private', 'FALSE', 'boolean', &$ph ) );
+		$this->assertEquals( $retval, ' AND a.private = ? ' );
+		$this->assertEquals( $ph[0], 0 );
 	}
 
 }

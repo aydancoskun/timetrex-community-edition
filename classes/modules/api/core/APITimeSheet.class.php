@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APITimeSheet extends APIFactory {
 	protected $main_class = FALSE;
 
+	/**
+	 * APITimeSheet constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,10 +52,11 @@ class APITimeSheet extends APIFactory {
 
 	/**
 	 * Get all necessary dates for building the TimeSheet in a single call, this is mainly as a performance optimization.
-	 * @param array $data filter data
+	 * @param bool $base_date
 	 * @return array
+	 * @internal param array $data filter data
 	 */
-	function getTimeSheetDates( $base_date ) {
+	function getTimeSheetDates( $base_date = FALSE ) {
 		$epoch = TTDate::parseDateTime( $base_date );
 
 		if ( $epoch == '' ) {
@@ -77,15 +81,18 @@ class APITimeSheet extends APIFactory {
 
 	/**
 	 * Get all data for displaying the timesheet.
-	 * @return array
+	 * @param string $user_id UUID
+	 * @param int $base_date EPOCH
+	 * @param bool $data
+	 * @return array|bool
 	 */
 	function getTimeSheetData( $user_id, $base_date, $data = FALSE ) {
-		if ( $user_id == '' OR !is_numeric( $user_id ) ) {
+		if ( $user_id == '' OR TTUUID::isUUID( $user_id ) == FALSE ) {
 			//This isn't really permission issue, but in cases where the user can't see any employees timesheets, we want to display an error to them at least.
 			//return $this->returnHandler( FALSE );
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$user_id = (int)$user_id;
+		$user_id = TTUUID::castUUID($user_id);
 
 		if ( $base_date == '' ) {
 			return $this->returnHandler( FALSE );
@@ -193,7 +200,7 @@ class APITimeSheet extends APIFactory {
 				$punch_data[] = $p_obj->getObjectAsArray( $punch_columns );
 			}
 		}
-		$meal_and_break_total_data = PunchFactory::calcMealAndBreakTotalTime( $punch_data, TRUE );
+		$meal_and_break_total_data = PunchFactory::calcMealAndBreakTotalTime( $punch_data );
 		if ( $meal_and_break_total_data === FALSE ) {
 			$meal_and_break_total_data = array();
 		}
@@ -343,7 +350,7 @@ class APITimeSheet extends APIFactory {
 
 		$pp_user_date_total_data = array();
 		$pay_period_accumulated_user_date_total_data = array();
-		if ( isset($primary_pay_period_id) AND $primary_pay_period_id > 0 ) {
+		if ( isset($primary_pay_period_id) AND TTUUID::isUUID($primary_pay_period_id) AND $primary_pay_period_id != TTUUID::getZeroID() AND $primary_pay_period_id != TTUUID::getNotExistID() ) {
 			$pp_udt_filter_data = $this->initializeFilterAndPager( array( 'filter_data' => array( 'pay_period_id' => $primary_pay_period_id, 'user_id' => $user_id) ), TRUE );
 
 			//Carry over timesheet filter options.
@@ -466,7 +473,7 @@ class APITimeSheet extends APIFactory {
 		//Get timesheet verification information.
 		//
 		$timesheet_verify_data = array();
-		if ( isset($primary_pay_period_id) AND $primary_pay_period_id > 0 ) {
+		if ( isset($primary_pay_period_id) AND TTUUID::isUUID($primary_pay_period_id) AND $primary_pay_period_id != TTUUID::getZeroID() AND $primary_pay_period_id != TTUUID::getNotExistID() ) {
 			$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
 			$pptsvlf->getByPayPeriodIdAndUserId( $primary_pay_period_id, $user_id );
 
@@ -569,11 +576,14 @@ class APITimeSheet extends APIFactory {
 
 	/**
 	 * Get all data for displaying the timesheet.
+	 * @param string $user_id UUID
+	 * @param int $base_date EPOCH
 	 * @return array
 	 */
 	function getTimeSheetTotalData( $user_id, $base_date) {
-		$timesheet_data = $this->stripReturnHandler( $this->getTimeSheetData( $user_id, $base_date ) );
+		$retarr = array();
 
+		$timesheet_data = $this->stripReturnHandler( $this->getTimeSheetData( $user_id, $base_date ) );
 		if ( is_array( $timesheet_data ) ) {
 			$retarr = array(
 								'timesheet_dates' => $timesheet_data['timesheet_dates'],
@@ -593,7 +603,10 @@ class APITimeSheet extends APIFactory {
 
 	/**
 	 * ReCalculate timesheet/policies
-	 * @return bool
+	 * @param string $pay_period_ids UUID
+	 * @param string $user_ids UUID
+	 * @return array|bool
+	 * @throws DBError
 	 */
 	function reCalculateTimeSheet( $pay_period_ids, $user_ids = NULL ) {
 		//Debug::text('Recalculating Employee Timesheet: User ID: '. $user_ids .' Pay Period ID: '. $pay_period_ids, __FILE__, __LINE__, __METHOD__, 10);
@@ -620,8 +633,8 @@ class APITimeSheet extends APIFactory {
 					$recalculate_company = FALSE;
 
 					$ulf = TTnew( 'UserListFactory' );
-					if ( is_array($user_ids) AND count($user_ids) > 0
-							AND isset($user_ids[0]) AND $user_ids[0] > 0 ) {
+					if ( is_array($user_ids) AND count($user_ids) > 0 AND isset($user_ids[0])
+							AND	TTUUID::isUUID( $user_ids[0] ) AND $user_ids[0] != TTUUID::getZeroID() AND $user_ids[0] != TTUUID::getNotExistID() ) {
 						$ulf->getByIdAndCompanyId( $user_ids, $this->getCurrentCompanyObject()->getId() );
 					} elseif ( $this->getPermissionObject()->Check('punch', 'edit') == TRUE ) { //Make sure they have the permissions to recalculate all employees.
 						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Recalculating Company TimeSheet'), $this->getCurrentUserObject()->getId(), 'user_date_total' );
@@ -714,10 +727,10 @@ class APITimeSheet extends APIFactory {
 	 * Verify/Authorize timesheet
 	 * @param integer $user_id User ID of the timesheet that is being verified.
 	 * @param integer $pay_period_id Pay Period ID of the timesheet that is being verified.
-	 * @return bool
+	 * @return array|bool
 	 */
 	function verifyTimeSheet( $user_id, $pay_period_id ) {
-		if ( $user_id > 0 AND $pay_period_id > 0  ) {
+		if ( $user_id != '' AND $pay_period_id != ''  ) {
 			Debug::text('Verifying Pay Period TimeSheet ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
@@ -737,14 +750,18 @@ class APITimeSheet extends APIFactory {
 
 			if ( $pptsvf->isValid() ) {
 				$pptsvf->Save( FALSE );
-				$pptsvlf->CommitTransaction();
 
 				//return $this->returnHandler( TRUE );
-				return $this->returnHandler( $pptsvf->getId() );
+				$retval = $this->returnHandler( $pptsvf->getId() );
 			} else {
 				$pptsvlf->FailTransaction();
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $pptsvf->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
+
+				$retval = $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $pptsvf->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
 			}
+
+			$pptsvlf->CommitTransaction();
+
+			return $retval; //This is a returnHandler()
 		}
 
 		return $this->returnHandler( FALSE );

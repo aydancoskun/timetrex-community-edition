@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -47,6 +47,11 @@ class ROEFactory extends Factory {
 	var $initial_pay_period_earnings = NULL;
 	var $pay_period_earnings = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -122,6 +127,10 @@ class ROEFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -152,6 +161,9 @@ class ROEFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getUserObject() {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
@@ -163,6 +175,9 @@ class ROEFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getPayStubEntryAccountLinkObject() {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
@@ -178,351 +193,261 @@ class ROEFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getPayPeriodType() {
-		if ( isset($this->data['pay_period_type_id']) ) {
-			return (int)$this->data['pay_period_type_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_period_type_id' );
 	}
-	function setPayPeriodType($value) {
-		$value = trim($value);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPayPeriodType( $value) {
+		$value = (int)trim($value);
 		Debug::Text('Type ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-
-		$ppsf = TTnew( 'PayPeriodScheduleFactory' );
-		if ( $this->Validator->inArrayKey(	'pay_period_type_id',
-											$value,
-											TTi18n::gettext('Incorrect pay period type'),
-											$ppsf->getOptions('type')) ) {
-
-			$this->data['pay_period_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'pay_period_type_id', $value );
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getCode() {
-		if ( isset($this->data['code_id']) ) {
-			return (string)$this->data['code_id']; //Should not be cast to INT.
-		}
-
-		return FALSE;
+		return (string)$this->getGenericDataValue( 'code_id' );//Should not be cast to INT.
 	}
-	function setCode($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCode( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'code_id',
-											$value,
-											TTi18n::gettext('Incorrect code'),
-											$this->getOptions('code')) ) {
-
-			$this->data['code_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'code_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getFirstDate() {
-		if ( isset($this->data['first_date']) ) {
-			return $this->data['first_date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'first_date' );
 	}
-	function setFirstDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if	(	$this->Validator->isDate(		'first_date',
-												$epoch,
-												TTi18n::gettext('Invalid first date')) ) {
-
-			$this->data['first_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setFirstDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'first_date', $value );
 
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLastDate() {
-		if ( isset($this->data['last_date']) ) {
-			return $this->data['last_date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'last_date' );
 	}
-	function setLastDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
+
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setLastDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
 
 		//Include the entire day.
 		//$epoch = TTDate::getBeginDayEpoch( $epoch ) + (86400-120);
-		$epoch = TTDate::getEndDayEpoch( $epoch );
-
-		if	(	$this->Validator->isDate(		'last_date',
-												$epoch,
-												TTi18n::gettext('Invalid last date')) ) {
-
-			$this->data['last_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		$value = TTDate::getEndDayEpoch( $value );
+		return $this->setGenericDataValue( 'last_date', $value );
 
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayPeriodEndDate() {
-		if ( isset($this->data['pay_period_end_date']) ) {
-			return $this->data['pay_period_end_date'];
-		}
-
-		return FALSE;
-	}
-	function setPayPeriodEndDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if	(	$this->Validator->isDate(		'pay_period_end_date',
-												$epoch,
-												TTi18n::gettext('Invalid final pay period end date')) ) {
-
-			$this->data['pay_period_end_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_period_end_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setPayPeriodEndDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'pay_period_end_date', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getRecallDate() {
-		if ( isset($this->data['recall_date']) ) {
-			return $this->data['recall_date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'recall_date' );
 	}
-	function setRecallDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-		if ( $epoch == '' ) {
-			$epoch = NULL;
-		}
-		if	( $epoch == NULL
-				OR
-			$this->Validator->isDate(		'recall_date',
-												$epoch,
-												TTi18n::gettext('Invalid recall date')) ) {
 
-			$this->data['recall_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setRecallDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'recall_date', $value );
 
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getFinalPayStubEndDate() {
-		if ( isset($this->data['final_pay_stub_end_date']) ) {
-			return $this->data['final_pay_stub_end_date'];
-		}
-
-		return FALSE;
-	}
-	function setFinalPayStubEndDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if	(	$this->Validator->isDate(		'final_pay_stub_end_date',
-												$epoch,
-												TTi18n::gettext('Invalid final pay stub end date')) ) {
-
-			$this->data['final_pay_stub_end_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'final_pay_stub_end_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setFinalPayStubEndDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'final_pay_stub_end_date', $value );
+	}
+
+		/**
+
+			* @return bool|mixed
+*/
 	function getFinalPayStubTransactionDate() {
-		if ( isset($this->data['final_pay_stub_transaction_date']) ) {
-			return $this->data['final_pay_stub_transaction_date'];
-		}
-
-		return FALSE;
-	}
-	function setFinalPayStubTransactionDate($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if	(	$this->Validator->isDate(		'final_pay_stub_transaction_date',
-												$epoch,
-												TTi18n::gettext('Invalid final pay stub transaction date')) ) {
-
-			$this->data['final_pay_stub_transaction_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'final_pay_stub_transaction_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setFinalPayStubTransactionDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'final_pay_stub_transaction_date', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getInsurableHours() {
-		if ( isset($this->data['insurable_hours']) ) {
-			return $this->data['insurable_hours'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'insurable_hours' );
 	}
-	function setInsurableHours($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setInsurableHours( $value) {
 		$value = trim($value);
 		if ( $value == '' OR $value == NULL ) {
 			$value = 0;
 		}
-		if	(  $value == 0
-				OR
-				$this->Validator->isFloat(		'insurable_hours',
-												$value,
-												TTi18n::gettext('Invalid insurable hours')) ) {
-
-			$this->data['insurable_hours'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'insurable_hours', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getInsurableEarnings() {
-		if ( isset($this->data['insurable_earnings']) ) {
-			return $this->data['insurable_earnings'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'insurable_earnings' );
 	}
-	function setInsurableEarnings($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setInsurableEarnings( $value) {
 		$value = trim($value);
 		if ( $value == '' OR $value == NULL ) {
 			$value = 0;
 		}
-		if	( $value == 0
-				OR
-				$this->Validator->isFloat(		'insurable_earnings',
-												$value,
-												TTi18n::gettext('Invalid insurable earnings')) ) {
-
-			$this->data['insurable_earnings'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'insurable_earnings', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getVacationPay() {
-		if ( isset($this->data['vacation_pay']) ) {
-			return $this->data['vacation_pay'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'vacation_pay' );
 	}
-	function setVacationPay($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setVacationPay( $value) {
 		$value = trim($value);
-
-		if	(	$this->Validator->isFloat(		'vacation_pay',
-												$value,
-												TTi18n::gettext('Invalid vacation pay')) ) {
-
-			$this->data['vacation_pay'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'vacation_pay', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getSerial() {
-		if ( isset($this->data['serial']) ) {
-			return $this->data['serial'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'serial' );
 	}
-	function setSerial($value) {
-		$value = trim($value);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSerial( $value) {
+		$value = trim($value);
 		//Don't force serial numbers anymore, as online ROEs don't require them.
-		if	(	$value == ''
-				OR
-				$this->Validator->isLength(		'serial',
-												$value,
-												TTi18n::gettext('Serial number should be between 9 and 15 digits'),
-												9,
-												15) ) {
-
-			$this->data['serial'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'serial', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getComments() {
-		if ( isset($this->data['comments']) ) {
-			return $this->data['comments'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'comments' );
 	}
-	function setComments($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setComments( $value) {
 		$value = trim($value);
-
-		if	(	$this->Validator->isLength(		'comments',
-												$value,
-												TTi18n::gettext('Invalid comments'),
-												0,
-												1024) ) {
-
-			$this->data['comments'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'comments', $value );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getInsurableHoursReportPayPeriods() {
 		return $this->getInsurableEarningsReportPayPeriods( '15c' );
 	}
 
+	/**
+	 * @param string $line
+	 * @return mixed
+	 */
 	function getInsurableEarningsReportPayPeriods( $line = '15b' ) {
 		if ( $line == '15b' ) {
 			//Line 15b is a total of insurable earnings over a shorter period than displayed in 15b often.
@@ -560,6 +485,10 @@ class ROEFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $pay_periods
+	 * @return bool
+	 */
 	function getInsurablePayPeriodStartDate( $pay_periods ) {
 		Debug::Text('Pay Periods to Consider: '. $pay_periods, __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Text('First Day Worked: '. TTDate::getDate('DATE+TIME', $this->getFirstDate() ) .' Last Worked Day: '. TTDate::getDate('DATE+TIME', $this->getLastDate() ) .' Final Pay Stub End Date: '. TTDate::getDate('DATE+TIME', $this->getFinalPayStubEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
@@ -609,6 +538,9 @@ class ROEFactory extends Factory {
 		return $start_date;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableReCalculate() {
 		if ( isset($this->recalc) ) {
 			return $this->recalc;
@@ -616,12 +548,20 @@ class ROEFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableReCalculate($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableReCalculate( $bool) {
 		$this->recalc = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableReleaseAccruals() {
 		if ( isset($this->release_accruals) ) {
 			return $this->release_accruals;
@@ -629,11 +569,20 @@ class ROEFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableReleaseAccruals($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableReleaseAccruals( $bool) {
 		$this->release_accruals = $bool;
 
 		return TRUE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableGeneratePayStub() {
 		if ( isset($this->generate_pay_stub) ) {
 			return $this->generate_pay_stub;
@@ -641,12 +590,20 @@ class ROEFactory extends Factory {
 
 		return FALSE;
 	}
-	function setEnableGeneratePayStub($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableGeneratePayStub( $bool) {
 		$this->generate_pay_stub = $bool;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function calculateFirstDate() {
 		$user_id = $this->getUser();
 
@@ -678,6 +635,9 @@ class ROEFactory extends Factory {
 		return $first_date;
 	}
 
+	/**
+	 * @return int
+	 */
 	function calculateLastDate() {
 		$user_id = $this->getUser();
 
@@ -695,6 +655,9 @@ class ROEFactory extends Factory {
 		return $last_date;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function calculateFinalPayStubEndDate() {
 		$user_id = $this->getUser();
 
@@ -725,6 +688,9 @@ class ROEFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function calculateFinalPayStubTransactionDate() {
 		$user_id = $this->getUser();
 
@@ -753,6 +719,9 @@ class ROEFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isFinalPayStubExists() {
 		$user_id = $this->getUser();
 
@@ -779,6 +748,10 @@ class ROEFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $date EPOCH
+	 * @return array
+	 */
 	function calculatePayPeriodType( $date ) {
 		$user_id = $this->getUser();
 
@@ -811,6 +784,9 @@ class ROEFactory extends Factory {
 		return array( 'pay_period_type_id' => $pay_period_type_id, 'pay_period_end_date' => $pay_period_end_date );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getSetupData() {
 		//FIXME: Alert the user if they don't have enough information in TimeTrex to get accurate values.
 		//Get insurable hours, earnings, and vacation pay now that the final pay stub is generated
@@ -839,6 +815,10 @@ class ROEFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function combinePostTerminationPayPeriods( $data ) {
 
 		$retarr = array();
@@ -866,6 +846,10 @@ class ROEFactory extends Factory {
 		return $retarr;
 	}
 
+	/**
+	 * @param string $line
+	 * @return bool|null
+	 */
 	function getInsurableEarningsByPayPeriod( $line  = '15c' ) {
 		if ( $this->pay_period_earnings !== NULL ) {
 			return $this->pay_period_earnings;
@@ -885,7 +869,7 @@ class ROEFactory extends Factory {
 		if ( $pself->getRecordCount() > 0 ) {
 			$this->pay_period_earnings = $this->initial_pay_period_earnings;
 			foreach( $pself as $pse_obj ) {
-				$pay_period_id = (int)$pse_obj->getColumn('pay_period_id');
+				$pay_period_id = TTUUID::castUUID( $pse_obj->getColumn('pay_period_id') );
 
 				if ( $this->getLastDate() < strtotime( $pse_obj->getColumn('pay_period_start_date') ) ) {
 					$tmp_after_last_date = TRUE;
@@ -919,11 +903,17 @@ class ROEFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isPayPeriodWithNoEarnings() {
 		//Show earnings per pay period always, as some provinces require it for certain purposes like EI to determine highest weekly earnings.
 		return TRUE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getTotalInsurableEarnings() {
 		$total_earnings = 0;
 
@@ -938,6 +928,9 @@ class ROEFactory extends Factory {
 		return $total_earnings;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getLastPayPeriodVacationEarnings() {
 		$setup_data = $this->getSetupData();
 
@@ -968,6 +961,9 @@ class ROEFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function reCalculate() {
 		//Re-generate final pay stub
 		//get current pay period based off their last day of work
@@ -980,7 +976,7 @@ class ROEFactory extends Factory {
 		}
 		Debug::Text('Pay Period ID: '. $pay_period_id .' End Date: '. $this->getFinalPayStubEndDate(), __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( is_numeric($pay_period_id) == FALSE ) {
+		if ( TTUUID::isUUID($pay_period_id) == FALSE ) {
 			UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName(TRUE).' - '.TTi18n::gettext('Pay Stub'), 10, TTi18n::gettext('Pay Period is invalid!'), NULL );
 			return FALSE;
 		}
@@ -1076,6 +1072,9 @@ class ROEFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getFormObject() {
 		if ( !isset($this->form_obj['gf']) OR !is_object($this->form_obj['gf']) ) {
 			//
@@ -1094,6 +1093,9 @@ class ROEFactory extends Factory {
 		return $this->form_obj['gf'];
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getROEObject() {
 		if ( !isset($this->form_obj['roe']) OR !is_object($this->form_obj['roe']) ) {
 			$this->form_obj['roe'] = $this->getFormObject()->getFormObject( 'ROE', 'CA' );
@@ -1102,8 +1104,140 @@ class ROEFactory extends Factory {
 
 		return $this->form_obj['roe'];
 	}
-
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// User
+		if ( $this->getUser() !== FALSE ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+															$ulf->getByID($this->getUser()),
+															TTi18n::gettext('Invalid Employee')
+														);
+		}
+		// Pay period type
+		if ( $this->getPayPeriodType() !== FALSE ) {
+			$ppsf = TTnew( 'PayPeriodScheduleFactory' );
+			$this->Validator->inArrayKey(	'pay_period_type_id',
+													$this->getPayPeriodType(),
+													TTi18n::gettext('Incorrect pay period type'),
+													$ppsf->getOptions('type')
+												);
+		}
+		// Code
+		if ( $this->getCode() != '' ) {
+			$this->Validator->inArrayKey(	'code_id',
+													$this->getCode(),
+													TTi18n::gettext('Incorrect code'),
+													$this->getOptions('code')
+												);
+		}
+		// First date
+		if ( $this->getFirstDate() !== FALSE ) {
+			$this->Validator->isDate(		'first_date',
+													$this->getFirstDate(),
+													TTi18n::gettext('Invalid first date')
+												);
+		}
+		// Last date
+		if ( $this->getLastDate() !== FALSE ) {
+			$this->Validator->isDate(		'last_date',
+													$this->getLastDate(),
+													TTi18n::gettext('Invalid last date')
+												);
+		}
+		// Final pay period end date
+		if ( $this->getPayPeriodEndDate() !== FALSE ) {
+			$this->Validator->isDate(		'pay_period_end_date',
+													$this->getPayPeriodEndDate(),
+													TTi18n::gettext('Invalid final pay period end date')
+												);
+		}
+		// Recall date
+		if ( $this->getRecallDate() != '' ) {
+			$this->Validator->isDate(		'recall_date',
+													$this->getRecallDate(),
+													TTi18n::gettext('Invalid recall date')
+												);
+		}
+
+		if ( $this->getEnableReleaseAccruals() == TRUE OR $this->getEnableGeneratePayStub() == TRUE ) {
+			// Pay stub end date
+			if ( $this->getFinalPayStubEndDate() == '' ) {
+				$this->Validator->isTrue( 'final_pay_stub_end_date',
+										  FALSE,
+										  TTi18n::gettext( 'Final pay stub end date must be specified' )
+				);
+			}
+			// Pay stub transaction date
+			if ( $this->getFinalPayStubTransactionDate() == '' ) {
+				$this->Validator->isTRUE( 'final_pay_stub_transaction_date',
+										  FALSE,
+										  TTi18n::gettext( 'Final pay stub transaction date must be specified' )
+				);
+			}
+		}
+
+		// Pay stub end date
+		if ( $this->getFinalPayStubEndDate() != '' ) {
+			$this->Validator->isDate( 'final_pay_stub_end_date',
+									  $this->getFinalPayStubEndDate(),
+									  TTi18n::gettext( 'Invalid final pay stub end date' )
+			);
+		}
+		// Pay stub transaction date
+		if ( $this->getFinalPayStubTransactionDate() != '' ) {
+			$this->Validator->isDate( 'final_pay_stub_transaction_date',
+									  $this->getFinalPayStubTransactionDate(),
+									  TTi18n::gettext( 'Invalid final pay stub transaction date' )
+			);
+		}
+
+		// Insurable hours
+		if ( $this->getInsurableHours() !== FALSE AND $this->getInsurableHours() != 0 ) {
+			$this->Validator->isFloat(		'insurable_hours',
+													$this->getInsurableHours(),
+													TTi18n::gettext('Invalid insurable hours')
+												);
+		}
+		// Insurable earnings
+		if ( $this->getInsurableEarnings() !== FALSE AND $this->getInsurableEarnings() != 0 ) {
+			$this->Validator->isFloat(		'insurable_earnings',
+													$this->getInsurableEarnings(),
+													TTi18n::gettext('Invalid insurable earnings')
+												);
+		}
+		// Vacation pay
+		if ( $this->getVacationPay() !== FALSE ) {
+			$this->Validator->isFloat(		'vacation_pay',
+													$this->getVacationPay(),
+													TTi18n::gettext('Invalid vacation pay')
+												);
+		}
+		// Serial number
+		if ( $this->getSerial() !== FALSE AND $this->getSerial() != '' ) {
+			$this->Validator->isLength(		'serial',
+													$this->getSerial(),
+													TTi18n::gettext('Serial number should be between 9 and 15 digits'),
+													9,
+													15);
+		}
+		// Comments
+		$this->Validator->isLength(		'comments',
+												$this->getComments(),
+												TTi18n::gettext('Invalid comments'),
+												0,
+												1024);
+
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		//Make sure Final Pay Stub Transaction Date is equal or after Final End Date
 		if ( $this->getFinalPayStubTransactionDate() < $this->getFinalPayStubEndDate() ) {
 			$this->Validator->isTrue(		'final_pay_stub_transaction_date',
@@ -1114,21 +1248,29 @@ class ROEFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getEnableReleaseAccruals() == TRUE ) {
-			//Create PS amendment releasing all accruals
-			UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Pay Stub Amendment'), 30, TTi18n::gettext('Releasing all employee accruals'), NULL );
+			if ( $this->getFinalPayStubEndDate() != '' ) {
+				//Create PS amendment releasing all accruals
+				UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName( TRUE ) . ' - ' . TTi18n::gettext( 'Pay Stub Amendment' ), 30, TTi18n::gettext( 'Releasing all employee accruals' ), NULL );
 
-			//If the final pay stub end date is the same pay period as the Last Date, then use the last date as the effective date.
-			$pplf = TTnew( 'PayPeriodListFactory' );
-			$pay_period_obj = $pplf->getByUserIdAndEndDate( $this->getUser(), $this->getFinalPayStubEndDate() )->getCurrent();
-			Debug::Text('Final Pay Stub End Date - Pay Period ID: '. $pay_period_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			if ( $this->getLastDate() >= $pay_period_obj->getStartDate() AND $this->getLastDate() <= $pay_period_obj->getEndDate() ) {
-				$psa_effective_date = $this->getLastDate();
-			} else {
-				$psa_effective_date = $this->getFinalPayStubEndDate();
+				//If the final pay stub end date is the same pay period as the Last Date, then use the last date as the effective date.
+				$pplf = TTnew( 'PayPeriodListFactory' );
+				$pplf->getByUserIdAndEndDate( $this->getUser(), $this->getFinalPayStubEndDate() );
+				if ( $pplf->getRecordCount() == 1 ) {
+					$pay_period_obj = $pplf->getCurrent();
+					Debug::Text( 'Final Pay Stub End Date - Pay Period ID: ' . $pay_period_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $this->getLastDate() >= $pay_period_obj->getStartDate() AND $this->getLastDate() <= $pay_period_obj->getEndDate() ) {
+						$psa_effective_date = $this->getLastDate();
+					} else {
+						$psa_effective_date = $this->getFinalPayStubEndDate();
+					}
+					PayStubAmendmentFactory::releaseAllAccruals( $this->getUser(), $psa_effective_date );
+				}
 			}
-			PayStubAmendmentFactory::releaseAllAccruals( $this->getUser(), $psa_effective_date );
 		}
 
 		//Start these off as zero, until we can save this row, and re-calc them after
@@ -1143,6 +1285,9 @@ class ROEFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		//Handle dirty work here.
 		Debug::Text('ID we just saved: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1165,20 +1310,24 @@ class ROEFactory extends Factory {
 			}
 
 			//Warn user if employee has pay stubs or pay stub amendments after the Final Pay Stub End Date.
-			$pslf = TTnew( 'PayStubListFactory' );
+			if ( $this->getFinalPayStubTransactionDate() != '' ) {$pslf = TTnew( 'PayStubListFactory' );
 			$pslf->getNextPayStubByUserIdAndTransactionDateAndRun( $this->getUser(), $this->getFinalPayStubTransactionDate(), 1);
 			Debug::Text('Pay Stubs after final: '. $pslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $pslf->getRecordCount() > 0 ) {
 				UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Record of Employment'), 20, TTi18n::gettext('Pay stub exists after final pay stub transaction date, therefore this ROE may not be accurate'), NULL );
 			}
 			unset($pslf);
-
+			}
 			$this->ReCalculate();
 		}
 
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -1222,6 +1371,10 @@ class ROEFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		$data = array();
@@ -1284,6 +1437,10 @@ class ROEFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('ROE') .' - '. TTi18n::getText('Employee') .': '. $this->getUserObject()->getFullName() .' '. TTi18n::getText('Final End Date') .': '. TTDate::getDate( 'DATE', $this->getFinalPayStubEndDate() ) .' '. TTi18n::getText('Final Transaction Date') .': '. TTDate::getDate( 'DATE', $this->getFinalPayStubTransactionDate() ) .' '. TTi18n::getText('Insurable Earnings') .': '. Misc::MoneyFormat( $this->getInsurableEarnings() ), NULL, $this->getTable(), $this );
 	}

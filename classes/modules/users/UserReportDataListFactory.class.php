@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class UserReportDataListFactory extends UserReportDataFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReportDataListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,13 +89,19 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
-	function getByUserId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReportDataListFactory
+	 */
+	function getByUserId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'user_id' => (int)$id,
+					'user_id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -98,7 +117,14 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
-	function getByUserIdAndId($user_id, $id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReportDataListFactory
+	 */
+	function getByUserIdAndId( $user_id, $id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -108,8 +134,8 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
-					'id' => (int)$id,
+					'user_id' => TTUUID::castUUID($user_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -126,7 +152,14 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
-	function getByUserIdAndScript($user_id, $script, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param $script
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReportDataListFactory
+	 */
+	function getByUserIdAndScript( $user_id, $script, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -145,7 +178,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'script' => $script,
 					);
 
@@ -163,7 +196,15 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
-	function getByUserIdAndScriptAndDefault($user_id, $script, $default = TRUE, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param $script
+	 * @param bool $default
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReportDataListFactory
+	 */
+	function getByUserIdAndScriptAndDefault( $user_id, $script, $default = TRUE, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -182,7 +223,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'script' => $script,
 					'default' => $this->toBool($default),
 					);
@@ -202,14 +243,20 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
-	function getByUserIdAndScriptArray($user_id, $script, $include_blank = TRUE) {
+	/**
+	 * @param string $user_id UUID
+	 * @param $script
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getByUserIdAndScriptArray( $user_id, $script, $include_blank = TRUE) {
 
 		$ugdlf = new UserGenericDataListFactory();
 		$ugdlf->getByUserIdAndScript($user_id, $script);
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($ugdlf as $ugd_obj) {
@@ -233,13 +280,19 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		Company List Functions
 
 	*/
-	function getByCompanyId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReportDataListFactory
+	 */
+	function getByCompanyId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -257,7 +310,14 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
-	function getByCompanyIdAndId($company_id, $id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReportDataListFactory
+	 */
+	function getByCompanyIdAndId( $company_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -267,8 +327,8 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'id' => (int)$id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -286,7 +346,14 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
-	function getByCompanyIdAndScript($company_id, $script, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param $script
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReportDataListFactory
+	 */
+	function getByCompanyIdAndScript( $company_id, $script, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -305,7 +372,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'script' => $script
 					);
 
@@ -324,7 +391,15 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
-	function getByCompanyIdAndScriptAndDefault($company_id, $script, $default = TRUE, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param $script
+	 * @param bool $default
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReportDataListFactory
+	 */
+	function getByCompanyIdAndScriptAndDefault( $company_id, $script, $default = TRUE, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -343,7 +418,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'script' => $script,
 					'default' => $this->toBool($default)
 					);
@@ -364,6 +439,15 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserReportDataListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -398,7 +482,8 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		}
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID( $company_id ),
+
 					);
 
 		$query = '
@@ -420,10 +505,16 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 					where a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['script']) ) ? $this->getWhereClauseSQL( 'a.script', $filter_data['script'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+
+		//special case. this is an OR based on the report ids of possibly another user.
+		if ( isset($filter_data['include_user_report_id']) AND TTUUID::isUUID( $filter_data['include_user_report_id'] ) AND $filter_data['include_user_report_id'] != TTUUID::getZeroID() ) {
+			$query .= ' OR ( '. $this->getWhereClauseSQL( 'a.id', $filter_data['include_user_report_id'], 'uuid', $ph, NULL, FALSE);
+			$query .= $this->getWhereClauseSQL( 'a.company_id', $company_id, 'uuid_list', $ph) .')';
+		}
 
 		$query .= ( isset($filter_data['is_default']) ) ? $this->getWhereClauseSQL( 'a.is_default', $filter_data['is_default'], 'boolean', $ph ) : NULL;
 		//$query .= ( isset($filter_data['is_scheduled']) ) ? $this->getWhereClauseSQL( 'is_scheduled', $filter_data['is_scheduled'], 'boolean', $ph ) : NULL; //Unable to filter by a dynamically generated column.
@@ -444,14 +535,19 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return $this;
 	}
 
-	function getArrayByListFactory($lf, $include_blank = TRUE ) {
+	/**
+	 * @param $lf
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getArrayByListFactory( $lf, $include_blank = TRUE ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($lf as $obj) {
@@ -465,14 +561,20 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		return FALSE;
 	}
 
-	function getByCompanyIdAndScriptArray($company_id, $script, $include_blank = TRUE) {
+	/**
+	 * @param string $company_id UUID
+	 * @param $script
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getByCompanyIdAndScriptArray( $company_id, $script, $include_blank = TRUE) {
 
 		$ugdlf = new UserGenericDataListFactory();
 		$ugdlf->getByUserIdAndScript($company_id, $script);
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($ugdlf as $ugd_obj) {

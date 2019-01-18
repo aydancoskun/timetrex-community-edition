@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class PayCodeFactory extends Factory {
 	protected $company_obj = NULL;
 	protected $pay_stub_entry_account_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -100,6 +105,10 @@ class PayCodeFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -123,48 +132,54 @@ class PayCodeFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPayStubEntryAccountObject() {
 		return $this->getGenericObject( 'PayStubEntryAccountListFactory', $this->getPayStubEntryAccountID(), 'pay_stub_entry_account_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+
+		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -182,103 +197,74 @@ class PayCodeFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim($name);
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is too short or too long'),
-											2, 70) //Needs to be long enough for upgrade procedure when converting from other policies.
-				AND
-				$this->Validator->isTrue(	'name',
-											$this->isUniqueName($name),
-											TTi18n::gettext('Name is already in use') )
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
-	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
-	}
-	function setDescription($description) {
-		$description = trim($description);
-
-		if (	$description == ''
-				OR $this->Validator->isLength(	'description',
-												$description,
-												TTi18n::gettext('Description is invalid'),
-												1, 250) ) {
-
-			$this->data['description'] = $description;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getCode() {
-		if ( isset($this->data['code']) ) {
-			return $this->data['code'];
-		}
-
-		return FALSE;
-	}
-	function setCode($code) {
-		$code = trim($code);
-		if (	$this->Validator->isLength(	'code',
-											$code,
-											TTi18n::gettext('Code is too short or too long'),
-											1, 50)
-						) {
-
-			$this->data['code'] = $code;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getType() {
-		if ( isset($this->data['type_id']) ) {
-			return (int)$this->data['type_id'];
-		}
-
-		return FALSE;
-	}
-	function setType($value) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'type_id',
-											$value,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
-
-			$this->data['type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'name', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
+	function getDescription() {
+		return $this->getGenericDataValue( 'description' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getCode() {
+		return $this->getGenericDataValue( 'code' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCode( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'code', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
+	function getType() {
+		return $this->getGenericDataValue( 'type_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'type_id', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function isPaid() {
 		if ( $this->getType() == 10 OR $this->getType() == 12 ) {
 			return TRUE;
@@ -287,72 +273,126 @@ class PayCodeFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayFormulaPolicy() {
-		if ( isset($this->data['pay_formula_policy_id']) ) {
-			return (int)$this->data['pay_formula_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayFormulaPolicy($id) {
-		if ( $id == '' OR empty($id) ) {
-			$id = 0;
-		}
-
-		$pfplf = TTnew( 'PayFormulaPolicyListFactory' );
-
-		if ( $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'pay_formula_policy_id',
-													$pfplf->getByID($id),
-													TTi18n::gettext('Pay Formula Policy is invalid')
-													) ) {
-
-			$this->data['pay_formula_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_formula_policy_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayFormulaPolicy( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' OR empty($value) ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'pay_formula_policy_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayStubEntryAccountId() {
-		if ( isset($this->data['pay_stub_entry_account_id']) ) {
-			return (int)$this->data['pay_stub_entry_account_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_stub_entry_account_id' );
 	}
 
 	//Don't require a pay stub entry account to be defined, as there may be some cases
 	//in job costing situations where the rate of pay should be 1.0, but going to no pay stub account so their reports can reflect
 	//proper rates of pay but not have it actually appear on pay stubs.
-	function setPayStubEntryAccountId($id) {
-		$id = trim($id);
-
-		Debug::text('Entry Account ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayStubEntryAccountId( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (	$id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'pay_stub_entry_account_id',
-														$psealf->getById($id),
-														TTi18n::gettext('Invalid Pay Stub Account')
-														) ) {
-			$this->data['pay_stub_entry_account_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		Debug::text('Entry Account ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'pay_stub_entry_account_id', $value );
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+													$clf->getByID($this->getCompany()),
+													TTi18n::gettext('Company is invalid')
+												);
+		// Name
+		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+			if ( $this->getName() == '' ) {
+				$this->Validator->isTRUE(	'name',
+											FALSE,
+											TTi18n::gettext('Please specify a name') );
+									}
+		}
+		if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isLength(	'name',
+											$this->getName(),
+											TTi18n::gettext('Name is too short or too long'),
+											2, 70); //Needs to be long enough for upgrade procedure when converting from other policies.
+		}
+		if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(	'name',
+												$this->isUniqueName($this->getName()),
+												TTi18n::gettext('Name is already in use')
+											);
+		}
+		// Description
+		if ( $this->getDescription() != '' ) {
+			$this->Validator->isLength(	'description',
+												$this->getDescription(),
+												TTi18n::gettext('Description is invalid'),
+												1, 250
+											);
+		}
+		// Code
+		if ( $this->getCode() !== FALSE ) {
+			$this->Validator->isLength(	'code',
+												$this->getCode(),
+												TTi18n::gettext('Code is too short or too long'),
+												1, 50
+											);
+		}
+		// Type
+		if ( $this->getType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'type_id',
+												$this->getType(),
+												TTi18n::gettext('Incorrect Type'),
+												$this->getOptions('type')
+											);
+		}
+		// Pay Formula Policy
+		if ( $this->getPayFormulaPolicy() !== FALSE AND $this->getPayFormulaPolicy() != TTUUID::getZeroID() ) {
+			$pfplf = TTnew( 'PayFormulaPolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'pay_formula_policy_id',
+															$pfplf->getByID($this->getPayFormulaPolicy()),
+															TTi18n::gettext('Pay Formula Policy is invalid')
+														);
+		}
+		// Pay Stub Account
+		if ( $this->getPayStubEntryAccountId() !== FALSE AND $this->getPayStubEntryAccountId() != TTUUID::getZeroID() ) {
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'pay_stub_entry_account_id',
+															$psealf->getById($this->getPayStubEntryAccountId()),
+															TTi18n::gettext('Invalid Pay Stub Account')
+														);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no hours using this PayCode.
 			$udtlf = TTnew( 'UserDateTotalListFactory' );
@@ -419,15 +459,8 @@ class PayCodeFactory extends Factory {
 											 TTi18n::gettext('This pay code is currently in use')  .' '. TTi18n::gettext('by contributing pay code policies') );
 			}
 		} else {
-			if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
-				if ( $this->getName() === FALSE ) {
-					$this->Validator->isTRUE(	'name',
-												FALSE,
-												TTi18n::gettext('Please specify a name') );
-				}
-			}
-
-			if ( $this->getId() > 0 AND $this->getPayFormulaPolicy() == 0 ) { //Defined by Policy
+			if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID()
+					AND $this->getPayFormulaPolicy() == TTUUID::getZeroID() ) { //Defined by Policy
 				//Check to make sure all policies associated with this pay code have a pay formula defined
 				$rtplf = TTNew('RegularTimePolicyListFactory');
 				$rtplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
@@ -482,16 +515,22 @@ class PayCodeFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		if ( $this->getDeleted() == TRUE ) {
 			Debug::Text('UnAssign PayCode from ContributingShiftPolicies: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			$cgmf = TTnew('CompanyGenericMapFactory');
 
-			$query = 'delete from '. $cgmf->getTable() .' where company_id = '. (int)$this->getCompany() .' AND object_type_id = 90 AND map_id = '. (int)$this->getID();
+			$query = 'delete from '. $cgmf->getTable() .' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND object_type_id = 90 AND map_id = \''. TTUUID::castUUID($this->getID()) .'\'';
 			$this->db->Execute($query);
 		}
 
@@ -501,11 +540,18 @@ class PayCodeFactory extends Factory {
 	}
 
 	//Migrate data from one pay code to another, without recalculating timesheets.
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $src_ids UUID
+	 * @param string $dst_id UUID
+	 * @return bool
+	 */
 	function migrate( $company_id, $src_ids, $dst_id ) {
-		$dst_id = (int)$dst_id;
+		$dst_id = TTUUID::castUUID($dst_id);
 		$src_ids = array_unique( (array)$src_ids );
 
-		if ( empty($dst_id) ) {
+		if ( empty($dst_id) AND $dst_id != TTUUID::getZeroID() ) {
 			return FALSE;
 		}
 
@@ -525,17 +571,21 @@ class PayCodeFactory extends Factory {
 		}
 
 		$ph = array(
-					'dst_pay_code_id' => (int)$dst_id,
+					'dst_pay_code_id' => TTUUID::castUUID($dst_id),
 					);
 
 		$udtf = TTNew('UserDateTotalFactory');
 
-		$query = 'update '. $udtf->getTable() .' set pay_code_id = ? where pay_code_id in ('. $this->getListSQL($src_ids, $ph) .') AND deleted = 0';
+		$query = 'update '. $udtf->getTable() .' set pay_code_id = ? where pay_code_id in ('. $this->getListSQL($src_ids, $ph, 'uuid' ) .') AND deleted = 0';
 		$this->db->Execute($query, $ph);
 
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -561,6 +611,10 @@ class PayCodeFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -588,6 +642,10 @@ class PayCodeFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Code'), NULL, $this->getTable(), $this );
 	}

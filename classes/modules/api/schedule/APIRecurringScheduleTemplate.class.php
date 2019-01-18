@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIRecurringScheduleTemplate extends APIFactory {
 	protected $main_class = 'RecurringScheduleTemplateFactory';
 
+	/**
+	 * APIRecurringScheduleTemplate constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -56,7 +59,7 @@ class APIRecurringScheduleTemplate extends APIFactory {
 		Debug::Text('Getting recurring_schedule_template default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
-							'id' => -1,
+							'id' => TTUUID::getNotExistID(),
 							'week' => 1,
 							'mon' => TRUE,
 							'tue' => TRUE,
@@ -66,9 +69,9 @@ class APIRecurringScheduleTemplate extends APIFactory {
 							'start_time' => TTDate::getAPIDate( 'TIME', strtotime('08:00') ),
 							'end_time' => TTDate::getAPIDate( 'TIME', strtotime('17:00') ),
 							'total_time' => (9 * 3600),
-							'branch_id' => -1,
-							'department_id' => -1,
-							'schedule_policy_id' => 0,
+							'branch_id' => TTUUID::getNotExistID(),
+							'department_id' => TTUUID::getNotExistID(),
+							'schedule_policy_id' => TTUUID::getZeroID(),
 							'open_shift_multiplier' => 1,
 
 					);
@@ -79,7 +82,8 @@ class APIRecurringScheduleTemplate extends APIFactory {
 	/**
 	 * Get recurring_schedule_template data for one or more recurring_schedule_templatees.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getRecurringScheduleTemplate( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('recurring_schedule_template', 'enabled')
@@ -134,7 +138,9 @@ class APIRecurringScheduleTemplate extends APIFactory {
 	/**
 	 * Set recurring_schedule_template data for one or more recurring_schedule_templatees.
 	 * @param array $data recurring_schedule_template data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setRecurringScheduleTemplate( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -153,12 +159,12 @@ class APIRecurringScheduleTemplate extends APIFactory {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' RecurringScheduleTemplates', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -166,33 +172,33 @@ class APIRecurringScheduleTemplate extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'RecurringScheduleTemplateListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset( $row['id'] ) AND $row['id'] != '' AND $lf->isNew( TRUE, $row['id'] ) == FALSE ) {
 					//Modifying existing object.
 					//Get recurring_schedule_template object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							$validate_only == TRUE
-							OR
+								$validate_only == TRUE
+								OR
 								(
-								$this->getPermissionObject()->Check('recurring_schedule_template', 'edit')
-									OR ( $this->getPermissionObject()->Check('recurring_schedule_template', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-								) ) {
-
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+										$this->getPermissionObject()->Check( 'recurring_schedule_template', 'edit' )
+										OR ( $this->getPermissionObject()->Check( 'recurring_schedule_template', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								)
+						) {
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
+							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Edit permission denied' ) );
 						}
 					} else {
 						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
+						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('recurring_schedule_template', 'add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check( 'recurring_schedule_template', 'add' ), TTi18n::gettext( 'Add permission denied' ) );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -214,7 +220,7 @@ class APIRecurringScheduleTemplate extends APIFactory {
 						if ( $validate_only == TRUE ) {
 							$save_result[$key] = TRUE;
 						} else {
-							$save_result[$key] = $lf->Save();
+							$save_result[$key] = $lf->Save( TRUE, TRUE );
 						}
 						$validator_stats['valid_records']++;
 					}
@@ -247,10 +253,10 @@ class APIRecurringScheduleTemplate extends APIFactory {
 	/**
 	 * Delete one or more recurring_schedule_templates.
 	 * @param array $data recurring_schedule_template data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteRecurringScheduleTemplate( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -267,7 +273,7 @@ class APIRecurringScheduleTemplate extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -276,7 +282,7 @@ class APIRecurringScheduleTemplate extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'RecurringScheduleTemplateListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get recurring_schedule_template object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -284,7 +290,7 @@ class APIRecurringScheduleTemplate extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('recurring_schedule_template', 'delete')
 								OR ( $this->getPermissionObject()->Check('recurring_schedule_template', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -339,7 +345,7 @@ class APIRecurringScheduleTemplate extends APIFactory {
 	 * @return array
 	 */
 	function copyRecurringScheduleTemplate( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 

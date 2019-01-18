@@ -1,15 +1,17 @@
 ActiveShiftReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function( options ) {
-		this.__super( 'initialize', options );
+	_required_files: {
+		10: ['APIActiveShiftReport'],
+		20: ['APIJob', 'APIJobGroup', 'APIJobItemGroup', 'APIJobItem'],
+	},
+
+	initReport: function( options ) {
 		this.script_name = 'ActiveShiftReport';
 		this.viewId = 'ActiveShiftReport';
 		this.context_menu_name = $.i18n._( 'Whos In Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'ActiveShiftReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIActiveShiftReport' ))();
-		this.buildContextMenu();
-
 	},
 
 	buildContextMenuModels: function() {
@@ -111,13 +113,15 @@ ActiveShiftReportViewController = ReportBaseViewController.extend( {
 
 		switch ( id ) {
 			case ContextMenuIconName.view:
+				ProgressBar.showOverlay();
 				this.onViewClick();
 				break;
 			case ContextMenuIconName.view_html:
-
+				ProgressBar.showOverlay();
 				this.onViewClick( 'html' );
 				break;
 			case ContextMenuIconName.view_html_new_window:
+				ProgressBar.showOverlay();
 				this.onViewClick( 'html', true );
 				break;
 			case ContextMenuIconName.export_excel:

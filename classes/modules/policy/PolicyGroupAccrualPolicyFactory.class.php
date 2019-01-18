@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,100 +41,176 @@
 class PolicyGroupAccrualPolicyFactory extends Factory {
 	protected $table = 'policy_group_accrual_policy';
 	protected $pk_sequence_name = 'policy_group_accrual_policy_id_seq'; //PK Sequence name
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPolicyGroup() {
-		if ( isset($this->data['policy_group_id']) ) {
-			return (int)$this->data['policy_group_id'];
-		}
-
-		return FALSE;
-	}
-	function setPolicyGroup($id) {
-		$id = trim($id);
-
-		$pglf = TTnew( 'PolicyGroupListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'policy_group',
-															$pglf->getByID($id),
-															TTi18n::gettext('Policy Group is invalid')
-															) ) {
-			$this->data['policy_group_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'policy_group_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPolicyGroup( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'policy_group_id', $value );
+	}
+
+	/**
+	 * @return mixed
+	 */
 	function getAccrualPolicy() {
-		if ( isset($this->data['accrual_policy_id']) ) {
-			return (int)$this->data['accrual_policy_id'];
-		}
+		return $this->getGenericDataValue( 'accrual_policy_id' );
 	}
-	function setAccrualPolicy($id) {
-		$id = trim($id);
 
-		$aplf = TTnew( 'AccrualPolicyListFactory' );
-
-		if (	$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'over_time_policy',
-														$aplf->getByID($id),
-														TTi18n::gettext('Selected Accrual Policy is invalid')
-															)
-			) {
-
-			$this->data['accrual_policy_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setAccrualPolicy( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'accrual_policy_id', $value );
+	}
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Policy Group
+		$pglf = TTnew( 'PolicyGroupListFactory' );
+		$this->Validator->isResultSetWithRows(	'policy_group',
+														$pglf->getByID($this->getPolicyGroup()),
+														TTi18n::gettext('Policy Group is invalid')
+													);
+		// Accrual Policy
+		if ( $this->getAccrualPolicy() != TTUUID::getZeroID() ) {
+			$aplf = TTnew( 'AccrualPolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'over_time_policy',
+														$aplf->getByID($this->getAccrualPolicy()),
+														TTi18n::gettext('Selected Accrual Policy is invalid')
+													);
+		}
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
+
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
 		return FALSE;
 	}
-	function setDeleted($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCreatedDate() {
 		return FALSE;
 	}
-	function setCreatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
-		return FALSE;
-	}
-	function getUpdatedBy() {
-		return FALSE;
-	}
-	function setUpdatedBy($id = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getUpdatedBy() {
+		return FALSE;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
+		return FALSE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getDeletedBy() {
 		return FALSE;
 	}
-	function setDeletedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
 		return FALSE;
 	}
 }

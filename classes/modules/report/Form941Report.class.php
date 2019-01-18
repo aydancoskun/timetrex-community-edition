@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,9 @@ class Form941Report extends Report {
 
 	protected $user_ids = array();
 
+	/**
+	 * Form941Report constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('Form 941 Report');
 		$this->file_name = 'form_941';
@@ -51,6 +54,11 @@ class Form941Report extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
 				AND $this->getPermissionObject()->Check('report', 'view_form941', $user_id, $company_id ) ) {
@@ -60,6 +68,9 @@ class Form941Report extends Report {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	protected function _validateConfig() {
 		$config = $this->getConfig();
 
@@ -71,6 +82,11 @@ class Form941Report extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -95,7 +111,7 @@ class Form941Report extends Report {
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
 										'-1010-time_period' => TTi18n::gettext('Time Period'),
-
+										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -203,7 +219,6 @@ class Form941Report extends Report {
 										'-2050-medicare_wages' => TTi18n::gettext('Taxable Medicare Wages'), //Line 5c
 										'-2051-medicare_additional_wages' => TTi18n::gettext('Taxable Medicare Additional Wages'), //Line 5d
 										'-2060-sick_wages' => TTi18n::gettext('Sick Pay'), //Line 7b
-										'-2070-eic' => TTi18n::gettext('Earned Income Credit (EIC)'), //Line 9
 							);
 				break;
 			case 'columns':
@@ -431,6 +446,9 @@ class Form941Report extends Report {
 		return $retval;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getFormObject() {
 		if ( !isset($this->form_obj['gf']) OR !is_object($this->form_obj['gf']) ) {
 			//
@@ -447,6 +465,19 @@ class Form941Report extends Report {
 		return $this->form_obj['gf'];
 	}
 
+	/**
+	 * @return bool
+	 */
+	function clearFormObject() {
+		$this->form_obj['gf'] = FALSE;
+
+		return TRUE;
+	}
+
+
+	/**
+	 * @return mixed
+	 */
 	function getF941Object() {
 		if ( !isset($this->form_obj['f941']) OR !is_object($this->form_obj['f941']) ) {
 			$this->form_obj['f941'] = $this->getFormObject()->getFormObject( '941', 'US' );
@@ -456,6 +487,18 @@ class Form941Report extends Report {
 		return $this->form_obj['f941'];
 	}
 
+	/**
+	 * @return bool
+	 */
+	function clearF941Object() {
+		$this->form_obj['f941'] = FALSE;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return mixed
+	 */
 	function getRETURN941Object() {
 		if ( !isset($this->form_obj['return941']) OR !is_object($this->form_obj['return941']) ) {
 			$this->form_obj['return941'] = $this->getFormObject()->getFormObject( 'RETURN941', 'US' );
@@ -465,6 +508,18 @@ class Form941Report extends Report {
 		return $this->form_obj['return941'];
 	}
 
+	/**
+	 * @return bool
+	 */
+	function clearRETURN941Object() {
+		$this->form_obj['return941'] = FALSE;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return array
+	 */
 	function formatFormConfig() {
 		$default_include_exclude_arr = array( 'include_pay_stub_entry_account' => array(), 'exclude_pay_stub_entry_account' => array() );
 
@@ -475,14 +530,29 @@ class Form941Report extends Report {
 				'social_security_tips' => $default_include_exclude_arr,
 				'medicare_wages' => $default_include_exclude_arr,
 				'sick_wages' => $default_include_exclude_arr,
-				'eic' => $default_include_exclude_arr,
 			);
 
 		$retarr = array_merge( $default_arr, (array)$this->getFormConfig() );
 		return $retarr;
 	}
 
-	//Get raw data for report
+	function doesPayPeriodInclude12thOfLastMoQ( $start_date, $end_date ) {
+		$year_quarter = TTDate::getYearQuarterMonthNumber( $start_date );
+		if ( $year_quarter == 3 ) { //3rd month in quarter
+			$target_date = mktime(0, 0, 0, TTDate::getMonth( $start_date ), 12, TTDate::getYear( $start_date ) ); //Should be the 12 day of the last month of the quarter.
+			if ( $start_date <= $target_date AND $end_date >= $target_date ) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Get raw data for report
+	 * @param null $format
+	 * @return bool
+	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array( 'pay_stub_entry' => array() );
 
@@ -558,20 +628,25 @@ class Form941Report extends Report {
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach( $pself as $pse_obj ) {
-				$user_id = $this->user_ids[] = $pse_obj->getColumn('user_id');
-				//Always use middle day epoch, otherwise multiple entries could exist for the same day.
-				$date_stamp = TTDate::getMiddleDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ) );
-				$branch = $pse_obj->getColumn('default_branch');
-				$department = $pse_obj->getColumn('default_department');
+				$legal_entity_id = $pse_obj->getColumn('legal_entity_id');
+				$user_id = $pse_obj->getColumn('user_id');
+				$date_stamp = TTDate::getMiddleDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ) ); //Always use middle day epoch, otherwise multiple entries could exist for the same day.
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
 				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = array(
+																'legal_entity_id' => $legal_entity_id,
 																'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
 																'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
 																'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
 																'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
 															);
+				}
+
+				//The number of employees on your payroll for the pay period including March 12, June 12, September 12, or December 12
+				$is_paid_on_12th_of_month = $this->doesPayPeriodInclude12thOfLastMoQ( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_start_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] );
+				if ( $is_paid_on_12th_of_month == TRUE ) {
+					$this->user_ids[$legal_entity_id][$user_id] = TRUE; //Used for counting total number of employees.
 				}
 
 				if ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id]) ) {
@@ -580,10 +655,12 @@ class Form941Report extends Report {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
 				}
 			}
+			unset( $legal_entity_id, $user_id, $date_stamp, $pay_stub_entry_name_id, $pse_obj );
 
 			if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
 				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
 					foreach($data_a as $date_stamp => $data_b) {
+						$legal_entity_id = $data_b['legal_entity_id'];
 						$quarter_month = TTDate::getYearQuarterMonthNumber( $date_stamp );
 						//Debug::Text('Quarter Month: '. $quarter_month .' Epoch: '. TTDate::getDate('DATE', $date_stamp), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -652,62 +729,62 @@ class Form941Report extends Report {
 						//Debug::Text('User ID: '. $user_id .' DateStamp: '. TTDate::getDate('DATE', $date_stamp ) .' YTD Medicare Additional Wages: '. $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] .' This Pay Stub: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'], __FILE__, __LINE__, __METHOD__, 10);
 
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['sick_wages']				= ( isset($form_data['sick_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['sick_wages']['include_pay_stub_entry_account'], $form_data['sick_wages']['exclude_pay_stub_entry_account'] ) : 0;
-						//$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['eic']						= ( isset($form_data['eic']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['eic']['include_pay_stub_entry_account'], $form_data['eic']['exclude_pay_stub_entry_account'] ) : 0;
 
 						//Separate data used for reporting, grouping, sorting, from data specific used for the Form.
-						if ( !isset($this->form_data['pay_period'][$quarter_month][$date_stamp]) ) {
-							$this->form_data['pay_period'][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'income_tax', 'medicare_tax', 'social_security_tax', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ), 0 );
+						if ( !isset($this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]) ) {
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'income_tax', 'medicare_tax', 'social_security_tax', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ), 0 );
 						}
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l2'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l2'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages'] );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5a'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5a'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5b'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5b'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips'] );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5c'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5c'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5d'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5d'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l2'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l2'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages'] );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips'] );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] );
 
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5f'] = 0; //Not implemented currently.
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5f'] = 0; //Not implemented currently.
 
 						//Calculated fields, make sure we don't use += on these.
 						//Calculate amounts for Schedule B.
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5a2'] = bcmul( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5a'], $this->getF941Object()->social_security_rate );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5b2'] = bcmul( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5b'], $this->getF941Object()->social_security_rate );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5c2'] = bcmul( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5c'], $this->getF941Object()->medicare_rate );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5d2'] = bcmul( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5d'], $this->getF941Object()->medicare_additional_rate );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'], $this->getF941Object()->social_security_rate );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b'], $this->getF941Object()->social_security_rate );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c'], $this->getF941Object()->medicare_rate );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d'], $this->getF941Object()->medicare_additional_rate );
 
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5e'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5a2'], bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5b2'], bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5c2'], $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5d2']) ) );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5e'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a2'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b2'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c2'], $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d2']) ) );
 
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l6'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'], bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5e'], $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5f'] ) );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l6'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5e'], $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5f'] ) );
 
 						//Total up Social Security / Medicare Taxes withheld from the employee only, then double them for the employer portion, this helps calculate l7 further down.
 						// We can't just double the medicare_tax as it includes the additional tax which is not paid by the employer. So we have to back out the additional medicare tax for the employer portion after its doubled.
 						// The form setup for Medicare Taxes Witheld should only ever be setup for whatever the employee had withheld, now employee and employer.
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['income_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['income_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['social_security_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['social_security_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'], 2) );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['medicare_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['medicare_tax'], bcsub( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'], 2 ), $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['additional_medicare_tax'] ) );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['income_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['income_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'], 2) );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax'], bcsub( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'], 2 ), $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['additional_medicare_tax'] ) );
 
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l10'] = $this->form_data['pay_period'][$quarter_month][$date_stamp]['l6']; //Add L6 -> L9 if they are implemented later.
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l10'] = $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l6']; //Add L6 -> L9 if they are implemented later.
 					}
 				}
+				unset( $legal_entity_id, $quarter_month, $date_stamp, $user_id, $data_a, $data_b );
 
-				//Total all pay periods by month_id
+				//Total all pay periods by quarter
 				if ( isset($this->form_data['pay_period']) ) {
-					foreach( $this->form_data['pay_period'] as $month_id => $pp_data ) {
-						$this->form_data['quarter'][$month_id] = Misc::ArrayAssocSum($pp_data, NULL, 8);
-					}
+					foreach( $this->form_data['pay_period'] as $legal_entity_id => $legal_entity_data ) {
+						foreach( $this->form_data['pay_period'][$legal_entity_id] as $month_id => $pp_data ) {
+							$this->form_data['quarter'][$legal_entity_id][$month_id] = Misc::ArrayAssocSum($pp_data, NULL, 8);
+						}
 
-					//Total all quarters.
-					if ( isset($this->form_data['quarter']) ) {
-						$this->form_data['total'] = Misc::ArrayAssocSum( $this->form_data['quarter'], NULL, 6);
+						//Total all quarters.
+						if ( isset($this->form_data['quarter'][$legal_entity_id]) ) {
+							$this->form_data['total'][$legal_entity_id] = Misc::ArrayAssocSum( $this->form_data['quarter'][$legal_entity_id], NULL, 6);
+						}
 					}
+					unset( $legal_entity_id, $legal_entity_data );
 				}
-
 			}
 		}
 
-		$this->user_ids = array_unique( $this->user_ids ); //Used to get the total number of employees.
-
 		//Debug::Arr($this->user_ids, 'User IDs: ', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($this->form_data, 'Form Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->form_data, 'Form Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user data for joining.
@@ -717,14 +794,58 @@ class Form941Report extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
+			$this->tmp_data['user'][$u_obj->getId()]['user_id'] = $u_obj->getId();
+			$this->tmp_data['user'][$u_obj->getId()]['legal_entity_id'] = $u_obj->getLegalEntity();
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		//Get legal entity data for joining.
+		/** @var LegalEntityListFactory $lelf */
+		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		Debug::Text( ' Legal Entity Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
+		if ( $lelf->getRecordCount() > 0 ) {
+			foreach( $lelf as $key => $le_obj ) {
+				if ( $format == 'html' OR $format == 'pdf' ) {
+					$this->tmp_data['legal_entity'][$le_obj->getId()] = Misc::addKeyPrefix( 'legal_entity_', (array)$le_obj->getObjectAsArray( Misc::removeKeyPrefix( 'legal_entity_', $this->getColumnDataConfig() ) ) );
+					$this->tmp_data['legal_entity'][$le_obj->getId()]['legal_entity_id'] = $le_obj->getId();
+				} else {
+					$this->form_data['legal_entity'][$le_obj->getId()] = $le_obj;
+				}
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			}
+		}
+
+		//Get remittance agency for joining.
+		$filter_data['type_id'] = array(10, 20); //Federal/State (Need State here to determine if they are a multi-state employer or not.
+		$filter_data['country'] = array('US'); //US Federal
+		/** @var PayrollRemittanceAgencyListFactory $ralf */
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
+		if ( $ralf->getRecordCount() > 0 ) {
+			foreach( $ralf as $key => $ra_obj ) {
+				/** @var PayrollRemittanceAgencyFactory $ra_obj */
+				if ( $ra_obj->parseAgencyID( NULL, 'id') == 10 ) {
+					$province_id = ( $ra_obj->getType() == 20 ) ? $ra_obj->getProvince() : '00';
+					$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$province_id] = $ra_obj;
+				}
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			}
+			unset($province_id);
+		}
 
 		return TRUE;
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
+
+	/**
+	 * @return bool
+	 */
 	function _preProcess() {
 		if ( isset( $this->tmp_data['pay_stub_entry'] ) == FALSE ) {
 			return TRUE;
@@ -741,7 +862,11 @@ class Form941Report extends Report {
 											//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
 											);
 
-					$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data );
+					$tmp_legal_array = array();
+					if ( isset($this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']]) ) {
+						$tmp_legal_array = $this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']];
+					}
+					$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $tmp_legal_array );
 
 					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 					$key++;
@@ -754,6 +879,10 @@ class Form941Report extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param null $format
+	 * @return mixed
+	 */
 	function _outputPDFForm( $format = NULL ) {
 		$show_background = TRUE;
 		if ( $format == 'pdf_form_print' ) {
@@ -771,128 +900,168 @@ class Form941Report extends Report {
 			return FALSE;
 		}
 
-		if ( $format == 'efile_xml' ) {
-			$return941 = $this->getRETURN941Object();
-
-			$return941->TaxPeriodEndDate = TTDate::getDate('Y-m-d', TTDate::getEndDayEpoch( $filter_data['end_date'] ));
-			$return941->ReturnType = '';
-			$return941->ein = ( isset($setup_data['ein']) AND $setup_data['ein'] != '' ) ? $setup_data['ein'] : $current_company->getBusinessNumber();
-			$return941->BusinessName1 = '';
-			$return941->BusinessNameControl = '';
-
-			$return941->AddressLine = ( isset($setup_data['address1']) AND $setup_data['address1'] != '' ) ? $setup_data['address1'] : $current_company->getAddress1() .' '. $current_company->getAddress2();
-			$return941->City = ( isset($setup_data['city']) AND $setup_data['city'] != '' ) ? $setup_data['city'] : $current_company->getCity();
-			$return941->State = ( isset($setup_data['province']) AND ( $setup_data['province'] != '' AND $setup_data['province'] != 0 ) ) ? $setup_data['province'] : $current_company->getProvince();
-			$return941->ZIPCode = ( isset($setup_data['postal_code']) AND $setup_data['postal_code'] != '' ) ? $setup_data['postal_code'] : $current_company->getPostalCode();
-
-			$this->getFormObject()->addForm( $return941 );
-		}
-
-		$f941 = $this->getF941Object();
-		$f941->setDebug(FALSE);
-		$f941->setShowBackground( $show_background );
-
-		$f941->year = TTDate::getYear( $filter_data['end_date'] );
-
-		//Add support for the user to manually set this data in the setup_data. That way they can use multiple tax IDs for different employees, all beit manually.
-		$f941->ein = ( isset($setup_data['ein']) AND $setup_data['ein'] != '' ) ? $setup_data['ein'] : $current_company->getBusinessNumber();
-		$f941->name = ( isset($setup_data['name']) AND $setup_data['name'] != '' ) ? $setup_data['name'] : $this->getUserObject()->getFullName();
-		$f941->trade_name = ( isset($setup_data['company_name']) AND $setup_data['company_name'] != '' ) ? $setup_data['company_name'] : $current_company->getName();
-		$f941->address = ( isset($setup_data['address1']) AND $setup_data['address1'] != '' ) ? $setup_data['address1'] : $current_company->getAddress1() .' '. $current_company->getAddress2();
-		$f941->city = ( isset($setup_data['city']) AND $setup_data['city'] != '' ) ? $setup_data['city'] : $current_company->getCity();
-		$f941->state = ( isset($setup_data['province']) AND ( $setup_data['province'] != '' AND $setup_data['province'] != 0 ) ) ? $setup_data['province'] : $current_company->getProvince();
-		$f941->zip_code = ( isset($setup_data['postal_code']) AND $setup_data['postal_code'] != '' ) ? $setup_data['postal_code'] : $current_company->getPostalCode();
-
-		$f941->quarter = TTDate::getYearQuarter( $filter_data['end_date'] );
-
-		//Debug::Arr($this->form_data, 'Final Data for Form: ', __FILE__, __LINE__, __METHOD__, 10);
-		if ( isset($this->form_data) AND count($this->form_data) == 3 ) {
-
-			$f941->l1 = count($this->user_ids);
-			$f941->l2 = $this->form_data['total']['l2'];
-			$f941->l3 = $this->form_data['total']['l3'];
-
-			$f941->l5a = $this->form_data['total']['l5a'];
-			$f941->l5b = $this->form_data['total']['l5b'];
-			$f941->l5c = $this->form_data['total']['l5c'];
-			$f941->l5d = $this->form_data['total']['l5d'];
-
-			Debug::Text('L7 - Social Security Tax Total: '. $this->form_data['total']['social_security_tax'] .' Medicare Tax Total: '. $this->form_data['total']['medicare_tax'], __FILE__, __LINE__, __METHOD__, 10);
-			$f941->l7z = bcadd( $this->form_data['total']['social_security_tax'], $this->form_data['total']['medicare_tax'] ); //Input value used to calculate L7 itself.
-
-			if ( isset($setup_data['quarter_deposit']) AND $setup_data['quarter_deposit'] != ''	 ) {
-				$f941->l13 = Misc::MoneyFormat($setup_data['quarter_deposit'], FALSE);
-			}
-			//Debug::Text('L13: '. $f941->l13 .' L6: '. $f941->calcL6() .' - '. $this->form_data['total']['l10'], __FILE__, __LINE__, __METHOD__, 10);
-
-			$f941->l13b = TRUE;
-
-			if ( isset($setup_data['deposit_schedule']) AND $setup_data['deposit_schedule'] == 10 ) {
-				if ( isset($this->form_data['quarter'][1]['l10']) ) {
-					$f941->l16_month1 = $this->form_data['quarter'][1]['l10'];
+		if ( isset($this->form_data['total']) ) {
+			foreach ( $this->form_data['total'] as $legal_entity_id => $legal_entity_data ) {
+				if ( isset( $this->form_data['legal_entity'][$legal_entity_id] ) == FALSE ) {
+					Debug::Text( 'Missing Legal Entity: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
+					continue;
 				}
-				if ( isset($this->form_data['quarter'][2]['l10']) ) {
-					$f941->l16_month2 = $this->form_data['quarter'][2]['l10'];
-				}
-				if ( isset($this->form_data['quarter'][3]['l10']) ) {
-					$f941->l16_month3 = $this->form_data['quarter'][3]['l10'];
-				}
-			} elseif ( isset($setup_data['deposit_schedule']) AND $setup_data['deposit_schedule'] == 20 ) {
-				$f941sb = $this->getFormObject()->getFormObject( '941sb', 'US' );
-				$f941sb->setShowBackground( $show_background );
 
-				$f941sb->year = $f941->year;
-				$f941sb->ein = $f941->ein;
-				$f941sb->name = $f941->name;
-				$f941sb->quarter = $f941->quarter;
-				$f941sb_data = array();
+				if ( isset( $this->form_data['remittance_agency'][$legal_entity_id] ) == FALSE ) {
+					Debug::Text( 'Missing Remittance Agency: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
+					continue;
+				}
 
-				$f941->schedule_b_total = 0;
-				for( $i = 1; $i <= 3; $i++ ) {
-					if ( isset($this->form_data['pay_period'][$i]) ) {
-						foreach( $this->form_data['pay_period'][$i] as $pay_period_epoch => $data ) {
-							//Debug::Text('SB: Month: '. $i .' Pay Period Date: '. TTDate::getDate('DATE', $pay_period_epoch) .' DOM: '. TTDate::getDayOfMonth($pay_period_epoch) .' Amount: '. $data['l10'], __FILE__, __LINE__, __METHOD__, 10);
-							//$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = $data['l10']; //Don't round this as it can cause mismatches in the totals.
-							$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = bcadd($data['income_tax'], bcadd( $data['social_security_tax'], $data['medicare_tax'] ) ); //This should be values that appeared on the actual pay stubs, which are already rounded of course.
-							$f941->schedule_b_total = bcadd($f941->schedule_b_total, $f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] );
-						}
+				/** @var LegalEntityFactory $le_obj */
+				$legal_entity_obj = $this->form_data['legal_entity'][$legal_entity_id];
+
+				if ( $format == 'efile_xml' ) {
+					$return941 = $this->getRETURN941Object();
+
+					$return941->TaxPeriodEndDate = TTDate::getDate('Y-m-d', TTDate::getEndDayEpoch( $filter_data['end_date'] ));
+					$return941->ReturnType = '';
+					$return941->ein = $this->form_data['remittance_agency'][$legal_entity_id]['00']->getPrimaryIdentification(); //Always use EIN from Federal Agency.
+					$return941->BusinessName1 = '';
+					$return941->BusinessNameControl = '';
+
+					$return941->AddressLine = $legal_entity_obj->getAddress1() . ' ' . $legal_entity_obj->getAddress2();
+					$return941->City = $legal_entity_obj->getCity();
+					$return941->State = $legal_entity_obj->getProvince();
+					$return941->ZIPCode = $legal_entity_obj->getPostalCode();
+
+					$this->getFormObject()->addForm( $return941 );
+				}
+
+				$f941 = $this->getF941Object();
+				$f941->setDebug(FALSE);
+				$f941->setShowBackground( $show_background );
+
+				$f941->year = TTDate::getYear( $filter_data['end_date'] );
+
+				$f941->ein = $this->form_data['remittance_agency'][$legal_entity_id]['00']->getPrimaryIdentification(); //Always use EIN from Federal Agency.
+				$f941->name = $this->getUserObject()->getFullName();
+				$f941->trade_name = $legal_entity_obj->getTradeName();
+				$f941->address = $legal_entity_obj->getAddress1() . ' ' . $legal_entity_obj->getAddress2();
+				$f941->city = $legal_entity_obj->getCity();
+				$f941->state = $legal_entity_obj->getProvince();
+				$f941->zip_code = $legal_entity_obj->getPostalCode();
+
+				$f941->quarter = TTDate::getYearQuarter( $filter_data['end_date'] );
+
+				//Debug::Arr($this->form_data, 'Final Data for Form: ', __FILE__, __LINE__, __METHOD__, 10);
+				if ( isset($this->form_data) AND count($this->form_data) == 5 ) {
+					$f941->l1 = ( isset($this->user_ids[$legal_entity_id]) ) ? count($this->user_ids[$legal_entity_id]) : 0;
+					$f941->l2 = $this->form_data['total'][$legal_entity_id]['l2'];
+					$f941->l3 = $this->form_data['total'][$legal_entity_id]['l3'];
+
+					$f941->l5a = $this->form_data['total'][$legal_entity_id]['l5a'];
+					$f941->l5b = $this->form_data['total'][$legal_entity_id]['l5b'];
+					$f941->l5c = $this->form_data['total'][$legal_entity_id]['l5c'];
+					$f941->l5d = $this->form_data['total'][$legal_entity_id]['l5d'];
+
+					Debug::Text('L7 - Social Security Tax Total: '. $this->form_data['total'][$legal_entity_id]['social_security_tax'] .' Medicare Tax Total: '. $this->form_data['total'][$legal_entity_id]['medicare_tax'], __FILE__, __LINE__, __METHOD__, 10);
+					$f941->l7z = bcadd( $this->form_data['total'][$legal_entity_id]['social_security_tax'], $this->form_data['total'][$legal_entity_id]['medicare_tax'] ); //Input value used to calculate L7 itself.
+
+					if ( isset($setup_data['quarter_deposit']) AND $setup_data['quarter_deposit'] != ''	 ) {
+						$f941->l13 = Misc::MoneyFormat($setup_data['quarter_deposit'], FALSE);
 					}
-				}
-				//$f941->schedule_b_total += 1; Test mismatch of Schedule B totals.
+					//Debug::Text('L13: '. $f941->l13 .' L6: '. $f941->calcL6() .' - '. $this->form_data['total']['l10'], __FILE__, __LINE__, __METHOD__, 10);
 
-				if ( isset($f941sb_data[1]) ) {
-					$f941sb->month1 = $f941sb_data[1];
-				}
-				if ( isset($f941sb_data[2]) ) {
-					$f941sb->month2 = $f941sb_data[2];
-				}
-				if ( isset($f941sb_data[3]) ) {
-					$f941sb->month3 = $f941sb_data[3];
+					$f941->l13b = TRUE;
+
+					if ( isset($setup_data['deposit_schedule']) AND $setup_data['deposit_schedule'] == 10 ) {
+						if ( isset($this->form_data['quarter'][$legal_entity_id][1]['l10']) ) {
+							$f941->l16_month1 = $this->form_data['quarter'][$legal_entity_id][1]['l10'];
+						}
+						if ( isset($this->form_data['quarter'][$legal_entity_id][2]['l10']) ) {
+							$f941->l16_month2 = $this->form_data['quarter'][$legal_entity_id][2]['l10'];
+						}
+						if ( isset($this->form_data['quarter'][$legal_entity_id][3]['l10']) ) {
+							$f941->l16_month3 = $this->form_data['quarter'][$legal_entity_id][3]['l10'];
+						}
+					} elseif ( isset($setup_data['deposit_schedule']) AND $setup_data['deposit_schedule'] == 20 ) {
+						$f941sb = $this->getFormObject()->getFormObject( '941sb', 'US' );
+						$f941sb->setShowBackground( $show_background );
+
+						$f941sb->year = $f941->year;
+						$f941sb->ein = $f941->ein;
+						$f941sb->name = $f941->name;
+						$f941sb->quarter = $f941->quarter;
+						$f941sb_data = array();
+
+						$f941->schedule_b_total = 0;
+						for( $i = 1; $i <= 3; $i++ ) {
+							if ( isset($this->form_data['pay_period'][$legal_entity_id][$i]) ) {
+								foreach( $this->form_data['pay_period'][$legal_entity_id][$i] as $pay_period_epoch => $data ) {
+									//Debug::Text('SB: Month: '. $i .' Pay Period Date: '. TTDate::getDate('DATE', $pay_period_epoch) .' DOM: '. TTDate::getDayOfMonth($pay_period_epoch) .' Amount: '. $data['l10'], __FILE__, __LINE__, __METHOD__, 10);
+									//$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = $data['l10']; //Don't round this as it can cause mismatches in the totals.
+									$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = bcadd($data['income_tax'], bcadd( $data['social_security_tax'], $data['medicare_tax'] ) ); //This should be values that appeared on the actual pay stubs, which are already rounded of course.
+									$f941->schedule_b_total = bcadd($f941->schedule_b_total, $f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] );
+								}
+							}
+						}
+						//$f941->schedule_b_total += 1; Test mismatch of Schedule B totals.
+
+						if ( isset($f941sb_data[1]) ) {
+							$f941sb->month1 = $f941sb_data[1];
+						}
+						if ( isset($f941sb_data[2]) ) {
+							$f941sb->month2 = $f941sb_data[2];
+						}
+						if ( isset($f941sb_data[3]) ) {
+							$f941sb->month3 = $f941sb_data[3];
+						}
+
+						unset($i, $f941sb_data);
+					}
+				} else {
+					Debug::Arr($this->data, 'Invalid Form Data: ', __FILE__, __LINE__, __METHOD__, 10);
 				}
 
-				unset($i, $f941sb_data);
+				$this->getFormObject()->addForm( $f941 );
+
+				if ( isset($f941sb) AND is_object( $f941sb ) ) {
+					$this->getFormObject()->addForm( $f941sb );
+				}
+
+				if ( $format == 'efile_xml' ) {
+					$output_format = 'XML';
+					$file_name = '940_efile_' . date( 'Y_m_d' ) . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.xml';
+					$mime_type = 'applications/octet-stream'; //Force file to download.
+				} else {
+					$output_format = 'PDF';
+					$file_name = $this->file_name . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.pdf';
+					$mime_type = $this->file_mime_type;
+				}
+
+				$output = $this->getFormObject()->output( $output_format );
+				$file_arr[] = array('file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output);
+
+				$this->clearFormObject();
+				$this->clearF941Object();
+				$this->clearRETURN941Object();
 			}
-		} else {
-			Debug::Arr($this->data, 'Invalid Form Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		$this->getFormObject()->addForm( $f941 );
+		if ( isset($file_name) AND $file_name != '' ) {
+			$zip_filename = explode( '.', $file_name );
+			if ( isset( $zip_filename[ ( count( $zip_filename ) - 1 ) ] ) ) {
+				$zip_filename = str_replace( '.', '', str_replace( $zip_filename[ ( count( $zip_filename ) - 1 ) ], '', $file_name ) ) . '.zip';
+			} else {
+				$zip_filename = str_replace( '.', '', $file_name ) . '.zip';
+			}
 
-		if ( isset($f941sb) AND is_object( $f941sb ) ) {
-			$this->getFormObject()->addForm( $f941sb );
+			return Misc::zip( $file_arr, $zip_filename, TRUE );
 		}
 
-		if ( $format == 'efile_xml' ) {
-			$output_format = 'XML';
-		} else {
-			$output_format = 'PDF';
-		}
-
-		$output = $this->getFormObject()->output( $output_format );
-
-		return $output;
+		Debug::Text(' Returning FALSE!', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
 	}
 
+	/**
+	 * @param null $format
+	 * @return array|bool
+	 */
 	function _output( $format = NULL ) {
 		if ( $format == 'pdf_form' OR $format == 'pdf_form_print' OR $format == 'efile_xml' ) {
 			return $this->_outputPDFForm( $format );

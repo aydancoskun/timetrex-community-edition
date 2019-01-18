@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,11 @@ class CompanyGenericTagFactory extends Factory {
 
 	protected $name_validator_regex = '/^[a-z0-9-_\[\]\(\)=|\.@]{1,250}$/i'; //Deny +, -
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -150,6 +155,10 @@ class CompanyGenericTagFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -164,55 +173,46 @@ class CompanyGenericTagFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'company',
-															$clf->getByID($id),
-															TTi18n::gettext('Company is invalid')
-															) ) {
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return int
+	 */
 	function getObjectType() {
-		if ( isset($this->data['object_type_id']) ) {
-			return (int)$this->data['object_type_id'];
-		}
-
-		return FALSE;
-	}
-	function setObjectType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'object_type',
-											$type,
-											TTi18n::gettext('Object Type is invalid'),
-											$this->getOptions('object_type')) ) {
-
-			$this->data['object_type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'object_type_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setObjectType( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'object_type_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		Debug::Arr($this->getCompany(), 'Company: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->getCompany() == FALSE ) {
 			return FALSE;
@@ -224,7 +224,7 @@ class CompanyGenericTagFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'object_type_id' => (int)$this->getObjectType(),
 					'name' => TTi18n::strtolower($name),
 					);
@@ -248,85 +248,121 @@ class CompanyGenericTagFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
+		return $this->getGenericDataValue('name');
+	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim($value);
+		$this->setNameMetaphone( $value );
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getNameMetaphone() {
+		return $this->getGenericDataValue( 'name_metaphone' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setNameMetaphone( $value) {
+		$value = metaphone( trim($value) );
+		if	( $value != '' ) {
+			return $this->setGenericDataValue( 'name_metaphone', $value );
+		}
 		return FALSE;
 	}
-	function setName($name) {
-		$name = trim($name);
 
-		if	(	$this->Validator->isLength(		'name',
-												$name,
+	/**
+	 * @return bool|mixed
+	 */
+	function getDescription() {
+		return $this->getGenericDataValue( 'description' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		if ( $this->getCompany() != TTUUID::getZeroID() ) {
+			$clf = TTnew( 'CompanyListFactory' );
+			$this->Validator->isResultSetWithRows(	'company',
+															$clf->getByID($this->getCompany()),
+															TTi18n::gettext('Company is invalid')
+														);
+		}
+		// Object Type
+		$this->Validator->inArrayKey(	'object_type',
+												$this->getObjectType(),
+												TTi18n::gettext('Object Type is invalid'),
+												$this->getOptions('object_type')
+											);
+		// Tag name
+		$this->Validator->isLength(		'name',
+												$this->getName(),
 												TTi18n::gettext('Tag is too short or too long'),
 												2,
-												100)
-				AND
-				$this->Validator->isRegEx(		'name',
-												$name,
+												100
+											);
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isRegEx(		'name',
+												$this->getName(),
 												TTi18n::gettext('Incorrect characters in tag'),
-												$this->name_validator_regex)
-				AND
-				$this->Validator->isTrue(		'name',
-												$this->isUniqueName($name),
-												TTi18n::gettext('Tag already exists'))
-												) {
-
-			$this->data['name'] = $name;
-			$this->setNameMetaphone( $name );
-
-			return TRUE;
+												$this->name_validator_regex
+											);
 		}
-
-		return FALSE;
-	}
-	function getNameMetaphone() {
-		if ( isset($this->data['name_metaphone']) ) {
-			return $this->data['name_metaphone'];
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(		'name',
+												$this->isUniqueName($this->getName()),
+												TTi18n::gettext('Tag already exists')
+											);
 		}
-
-		return FALSE;
-	}
-	function setNameMetaphone($value) {
-		$value = metaphone( trim($value) );
-
-		if	( $value != '' ) {
-			$this->data['name_metaphone'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
-	}
-	function setDescription($description) {
-		$description = trim($description);
-
-		if (	$this->Validator->isLength(	'description',
-											$description,
+		// Description
+		$this->Validator->isLength(	'description',
+											$this->getDescription(),
 											TTi18n::gettext('Description is invalid'),
-											0, 255) ) {
-
-			$this->data['description'] = $description;
-
-			return TRUE;
-		}
-
-		return FALSE;
+											0, 255
+										);
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
@@ -337,6 +373,10 @@ class CompanyGenericTagFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -362,6 +402,10 @@ class CompanyGenericTagFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -396,7 +440,11 @@ class CompanyGenericTagFactory extends Factory {
 
 	//Each tag needs a + or -. + Adds new tags, - deletes tags. Tags without these are ignores.
 	//Tags are separated by a comma.
-	static function parseTags($tags) {
+	/**
+	 * @param $tags
+	 * @return array|bool
+	 */
+	static function parseTags( $tags) {
 		if ( $tags != '' AND !is_array($tags) ) {
 			$retarr = array(
 							'add' => array(),
@@ -434,6 +482,12 @@ class CompanyGenericTagFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param int $object_type_id
+	 * @param $parsed_tags
+	 * @return array|bool
+	 */
 	static function getOrCreateTags( $company_id, $object_type_id, $parsed_tags ) {
 		if ( is_array($parsed_tags) ) {
 			$existing_tags = array();
@@ -478,6 +532,10 @@ class CompanyGenericTagFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Tag') .': '. $this->getName(), NULL, $this->getTable(), $this );
 	}

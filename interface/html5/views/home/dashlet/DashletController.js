@@ -1,5 +1,4 @@
 DashletController = Backbone.View.extend( {
-
 	data: null,
 	api_dashboard: null,
 	api_user_report: null,
@@ -54,11 +53,11 @@ DashletController = Backbone.View.extend( {
 		if ( Global.isScrolledIntoView( $( $this.el ) ) ) {
 			doInit();
 		}
-		// remove first
-		interact( '#' + $( this.el ).attr( 'id' ) ).unset();
 
 		//BUG#2070 - Break resizable for mobile because it negatively impacts usability
 		if ( Global.detectMobileBrowser() == false ) {
+			// interact will not be available on mobile now.
+			interact( '#' + $( this.el ).attr( 'id' ) ).unset();
 			interact('#' + $(this.el).attr('id'))
 				.resizable({
 				edges: {left: true, right: true, bottom: true, top: true}
@@ -960,7 +959,7 @@ DashletController = Backbone.View.extend( {
 			len = data.length;
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
-				if ( item.status_id === 10 ) {
+				if ( item.status_id == 10 ) {
 					$( this.el ).find( "tr[id='" + item.id + "'] td" ).css( 'font-weight', 'bold' );
 				}
 			}
@@ -973,7 +972,7 @@ DashletController = Backbone.View.extend( {
 			len = data.length;
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
-				if ( item.status_id === 30 ) {
+				if ( item.status_id == 30 ) {
 					$( this.el ).find( "tr[id='" + item.id + "']" ).addClass( 'bolder-request' );
 				}
 			}
@@ -986,7 +985,7 @@ DashletController = Backbone.View.extend( {
 			len = data.length;
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
-				if ( item._status_id === 10 ) {
+				if ( item._status_id == 10 ) {
 					$( this.el ).find( "tr[id='" + (i + 1) + "']" ).addClass( 'light-green' );
 				} else if ( item.status === 'Out' ) {
 					$( this.el ).find( "tr[id='" + (i + 1) + "']" ).addClass( 'light-red' );
@@ -1002,7 +1001,7 @@ DashletController = Backbone.View.extend( {
 			len = data.length;
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
-				if ( item.status_id === 20 ) {
+				if ( item.status_id == 20 ) {
 					$( this.el ).find( "tr[id='" + item.id + "']" ).addClass( 'red-absence' );
 				}
 			}

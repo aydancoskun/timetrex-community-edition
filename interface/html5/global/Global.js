@@ -1,7 +1,7 @@
 //Global variables and functions will be used everywhere
 var Global = function() {
 };
-
+Global.sortOrderRegex = /^-\d{4}-.*/i;
 Global.current_ping = -1;
 
 Global.UNIT_TEST_MODE = false;
@@ -95,7 +95,7 @@ Global.sendErrorReport = function() {
 	RateLimit.setTimeFrame( 7200 ); //2hrs
 
 	if ( RateLimit.check() ) {
-		var api_authentication = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
+		var api_authentication = new APIAuthentication();
 		var login_user = LocalCacheData.getLoginUser();
 		/*
 		 * JavaScript exception ignore list
@@ -169,7 +169,7 @@ Global.sendErrorReport = function() {
 								Global.dont_check_browser_cache = true;
 								Global.sendErrorReport('Your web browser is caching incorrect data. Local Version' + ':  ' + result + 'Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '');
 
-								var timeout_handler = window.setTimeout( function(){
+								var timeout_handler = window.setTimeout( function() {
 									window.location.reload(true);
 								}, 120000 );
 
@@ -198,7 +198,6 @@ Global.sendErrorReport = function() {
 };
 
 Global.initStaticStrings = function() {
-
 	Global.network_lost_msg = $.i18n._( 'The network connection was lost. Please check your network connection then try again.' );
 
 	Global.any_item = '-- ' + $.i18n._( 'Any' ) + ' --';
@@ -253,33 +252,33 @@ Global.doPingIfNecessary = function() {
 	var api = new (APIFactory.getAPIClass( 'APIMisc' ))();
 	if ( Global.idle_time < 15 ) {
 		Global.idle_time = 0;
-		return;
-	}
+			return;
+		}
 
     Debug.Text( 'User is active again after idle for: ' + Global.idle_time + '... Resetting idle to 0', 'Global.js', '', 'doPingIfNecessary', 1 );
 	Global.idle_time = 0;
 
-	if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
-		return;
-	}
-	//Error: Uncaught TypeError: undefined is not a function in /interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
-	if ( !api || (typeof api.isLoggedIn) !== 'function' ) {
-		return;
-	}
-	api.isLoggedIn( false, {
-		onResult: function( result ) {
-			var res_data = result.getResult();
-
-			if ( res_data !== true ) {
-				api.ping( {
-					onResult: function() {
-
-					}
-				} );
-			}
-
+		if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
+			return;
 		}
-	} );
+		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
+		if ( !api || (typeof api.isLoggedIn) !== 'function' ) {
+			return;
+		}
+		api.isLoggedIn( false, {
+			onResult: function( result ) {
+				var res_data = result.getResult();
+
+				if ( res_data !== true ) {
+					api.ping( {
+						onResult: function() {
+
+						}
+					} );
+				}
+
+			}
+		} );
 }
 
 Global.setupPing = function() {
@@ -367,9 +366,9 @@ Global.cleanViewTab = function() {
 };
 
 Global.upCaseFirstLetter = function( str ) {
-	str = str.toLowerCase().replace( /\b[a-z]/g, function( letter ) {
-		return letter.toUpperCase();
-	} );
+	if ( typeof str == 'string' ) { //in case null or false is passed, we should check the type.
+		str = str.charAt(0).toUpperCase() + str.slice(1);
+	}
 	return str;
 };
 
@@ -703,6 +702,9 @@ Global.getScriptNameByAPI = function( api_class ) {
 		case 'APIPayStubEntryAccount':
 			script_name = 'PayStubEntryAccountView';
 			break;
+		case 'APIPayStubEntryAccountLink':
+			script_name = 'PayStubEntryAccountLinkView';
+			break;
 		case 'APIPayPeriod':
 		case 'APIPayPeriodSchedule':
 			script_name = 'PayPeriodsView';
@@ -894,6 +896,9 @@ Global.getScriptNameByAPI = function( api_class ) {
 		case 'APIPayStub':
 			script_name = 'PayStubView';
 			break;
+		case 'APIPayStubTransaction':
+			script_name = 'PayStubTransactionView';
+			break;
 		case 'APIPayStubEntry':
 			script_name = 'PayStubEntryView';
 			break;
@@ -905,6 +910,15 @@ Global.getScriptNameByAPI = function( api_class ) {
 			break;
 		case 'APIUserExpense':
 			script_name = 'UserExpenseView';
+			break;
+		case 'APILegalEntity':
+			script_name = 'LegalEntityView';
+			break;
+		case 'APIPayrollRemittanceAgency':
+			script_name = 'PayrollRemittanceAgencyView';
+			break;
+		case 'APIPayrollRemittanceAgencyEvent':
+			script_name = 'PayrollRemittanceAgencyViewEvent';
 			break;
 		case 'APIAbsencePolicy':
 			script_name = 'AbsencePolicyView';
@@ -1046,11 +1060,22 @@ Global.getParentIdByTreeRecord = function( array, selectId ) {
 	for ( var i = 0; i < array.length; i++ ) {
 		var item = array[i];
 		if ( item.id.toString() === selectId.toString() ) {
-			if ( Global.isSet( item.parent ) ) {
-				retval.push( {parent_id: item.parent.toString(), name: item.name} );
+			var new_row = {};
+			if ( typeof item.parent != 'undefined' ) {
+				new_row = {parent_id: item.parent.toString(), name: item.name};
 			} else {
-				retval.push( {name: item.name} );
+				new_row = {name: item.name};
 			}
+
+			//Without created and updated info, audit tab shows N/A for both
+			if( typeof item.created_by != 'undefined' ) {
+				new_row.created_by = item.created_by;
+				new_row.created_date = item.created_date;
+				new_row.updated_by = item.updated_by;
+				new_row.updated_date = item.updated_date;
+			}
+
+			retval.push(new_row);
 			break;
 		}
 	}
@@ -1069,14 +1094,30 @@ Global.addFirstItemToArray = function( array, firstItemType, customLabel ) {
 			} else {
 				label = Global.any_item;
 			}
-			array.unshift( {label: label, value: '-1', fullValue: '-1', orderValue: ''} );
+			//#2301 - don't duplicate the --Any-- case when the array is recycled.
+			if ( !array[0] || array[0].value != TTUUID.not_exist_id ) {
+				array.unshift({
+					label: label,
+					value: TTUUID.not_exist_id,
+					fullValue: TTUUID.not_exist_id,
+					orderValue: ''
+				});
+			}
 		} else if ( firstItemType === 'empty' ) {
 			if ( customLabel ) {
 				label = customLabel;
 			} else {
 				label = Global.empty_item;
 			}
-			array.unshift( {label: label, value: '0', fullValue: '0', orderValue: ''} );
+			//#2301 - don't duplicate the --None-- case when the array is recycled.
+			if (  !array[0] || array[0].value != TTUUID.zero_id ) {
+				array.unshift({
+					label: label,
+					value: TTUUID.zero_id,
+					fullValue: TTUUID.zero_id,
+					orderValue: ''
+				});
+			}
 		}
 	}
 
@@ -1096,32 +1137,33 @@ Global.convertRecordArrayToOptions = function( array ) {
 	return options;
 };
 
-Global.removeSortPrefix = function( array ) {
+Global.removeSortPrefixFromArray = function(array ) {
 	var finalArray = {};
 
 	if ( Global.isSet( array ) ) {
 
 		$.each( array, function( key, item ) {
-			var has_sort_by;
-			if ( typeof key === 'number' ) {
-				has_sort_by = null;
-			} else {
-				has_sort_by = key.match( /-\d{4}-.*/i );
-			}
-
-			if ( has_sort_by ) {
-				var new_key = key.substring( 6 );
-				finalArray[new_key] = item;
-			} else {
-				finalArray[key] = item;
-			}
-
+			finalArray[ Global.removeSortPrefix(key) ] = item;
 		} );
 
 		return finalArray;
 	}
 
 	return array;
+};
+
+Global.removeSortPrefix = function( key ) {
+	if ( typeof key == 'string' && key.match( Global.sortOrderRegex ) ) {
+		return key.substring(6);
+	}
+	return key;
+};
+
+Global.getSortValue = function( key ) {
+	if ( typeof key == 'string' && key.match( Global.sortOrderRegex ) ) {
+		return key.substring( 1, 5 );
+	}
+	return 999;
 };
 
 Global.convertToNumberIfPossible = function( val ) {
@@ -1146,31 +1188,10 @@ Global.buildRecordArray = function( array, first_item, orderType ) {
 
 	if ( Global.isSet( array ) ) {
 
-		$.each( array, function( key, item ) {
-			var has_sort_by;
-			if ( typeof key === 'number' ) {
-				has_sort_by = null;
-			} else {
-				has_sort_by = key.match( /-\d{4}-.*/i );
-			}
-
-			var value = 0;
-			var order_value = 0;
-
-			if ( has_sort_by ) {
-				value = key.substring( 6 );
-				order_value = key.substring( 1, 5 );
-			} else {
-				value = key;
-
-			}
-
-			value = Global.convertToNumberIfPossible( value );
-
-//
-//			if ( value && value.indexOf( '-' ) === -1 && parseInt( value ) >= 0  ) {
-//				value = parseInt( value );
-//			}
+		for ( var key in array ) {
+			var item = array[key];
+			var value = Global.removeSortPrefix(key);
+			var order_value = Global.getSortValue(key);
 
 			// 6/4 changed id to same as value to make flex show correct data when show search result saved in html5, flex use id if it existed.
 			var record = {label: item, value: value, fullValue: key, orderValue: order_value, id: value};
@@ -1178,7 +1199,8 @@ Global.buildRecordArray = function( array, first_item, orderType ) {
 			id = id + 1;
 
 			finalArray.push( record );
-		} );
+
+		}
 
 	}
 
@@ -1351,10 +1373,28 @@ Global.bodyHeight = function() {
 	return $( window ).height();
 };
 
+Global.hasRequireLoaded = function( scriptPath ) {
+	var scriptPath = scriptPath.split('/');
+	var id = scriptPath[ scriptPath.length -1 ];
+	id = id.replace('.js','');
+
+	if ( typeof require === "function" && typeof require.specified === "function" && require.specified( id ) ) {
+		return true;
+	}
+	return false;
+};
+
 Global.loadScript = function( scriptPath, onResult ) {
 	var async = true;
 	if ( typeof (onResult) === 'undefined' ) {
 		async = false;
+	}
+
+	if( Global.hasRequireLoaded(scriptPath) ){
+		if ( async ) {
+			onResult();
+		}
+		return true;
 	}
 
 	//Ensures that the js cached scripts are not loaded twice
@@ -1371,30 +1411,65 @@ Global.loadScript = function( scriptPath, onResult ) {
 
 	var successflag = false;
 
-	var realPath = scriptPath + '?v=' + APIGlobal.pre_login_data.application_build;
+	var realPath = scriptPath;
 
 	if ( Global.url_offset ) {
-		realPath = Global.url_offset + realPath;
+		realPath = Global.getBaseURL() + Global.url_offset + realPath;
 	}
 
-	jQuery.ajax( {
-		async: async,
-		type: 'GET',
-		url: realPath,
-		data: null,
-		cache: true,
-		success: function() {
-			successflag = true;
-			if ( async ) {
-				LocalCacheData.loadedScriptNames[scriptPath] = true;
-				onResult();
-			}
-		},
-		error: function( jqXHR, textStatus, errorThrown ) {
-			TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
-		},
-		dataType: 'script'
-	} );
+	if ( async ) {
+		Debug.Text('ASYNC-LOADING: '+scriptPath,'Global.js','Global','loadScript', 10);
+		//require will add the cachebuster (APIGlobal.pre_login_data.application_build) on its own.
+		if (typeof realPath == 'string' ) {
+			realPath = [realPath];
+		}
+		require(realPath, function() {
+			LocalCacheData.loadedScriptNames[scriptPath] = true;
+			onResult();
+		});
+	} else {
+		var calling_script = '';
+		if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId ) {
+			' from '+LocalCacheData.current_open_primary_controller.viewId+'ViewController';
+		}
+		console.error('SYNC-LOADING: '+ scriptPath + calling_script);
+
+
+		var id = scriptPath.split('/');
+		var id = id[ id.length -1 ];
+		id = id.replace('.js','');
+		if(!window.badScripts) {
+			window.badScripts = [];
+		}
+		window.badScripts.push(id);
+		//when the page is done loading punch "badScripts into the console to see a nice array of all the scripts that were not loaded async.
+
+		/**
+		 * this seems to work, but causes the script erro at line 0 problem.
+		 * try to refactor to not use jquery.ajax
+		 */
+		jQuery.ajax( {
+			async: false,
+			type: 'GET',
+			url: realPath + '?v=' + APIGlobal.pre_login_data.application_build,
+			crossOrigin:false,
+			data: null,
+			cache: true,
+			success: function() {
+				successflag = true;
+				if ( async ) {
+					LocalCacheData.loadedScriptNames[scriptPath] = true;
+					onResult();
+				}
+			},
+			error: function( jqXHR, textStatus, errorThrown ) {
+				TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
+			},
+			dataType: 'script'
+		} );
+	}
+
+
 
 	if ( !async ) {
 		LocalCacheData.loadedScriptNames[scriptPath] = true;
@@ -1543,7 +1618,7 @@ Global.addCss = function( path, callback ) {
 //JS think 0 is false, so use this to get 0 correctly.
 Global.isFalseOrNull = function( object ) {
 
-	if ( object === false || object === null || object === 0 || object === '0' ) {
+	if ( object === false || object === null || object === 0 || object === '0' || object == TTUUID.zero_id) {
 		return true;
 	} else {
 		return false;
@@ -1846,8 +1921,8 @@ Global.loadWidget = function( url ) {
 	if ( !responseData ) {
 		return null;
 	} else {
-		LocalCacheData.loadedWidgetCache[url] = responseData.responseText;
-		return (responseData.responseText);
+	LocalCacheData.loadedWidgetCache[url] = responseData.responseText;
+	return (responseData.responseText);
 	}
 
 };
@@ -1937,6 +2012,9 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'Employee':
 			path = 'views/employees/employee/';
 			break;
+		case 'RemittanceDestinationAccount':
+			path = 'views/employees/remittance_destination_account/';
+			break;
 		case 'Wage':
 			path = 'views/company/wage/';
 			break;
@@ -2015,6 +2093,16 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'PayPeriods':
 			path = 'views/payroll/pay_periods/';
 			break;
+		case 'LegalEntity':
+			path = 'views/company/legal_entity/';
+			break;
+		case 'PayrollRemittanceAgencyEvent':
+		case 'PayrollRemittanceAgency':
+			path = 'views/company/payroll_remittance_agency/';
+			break;
+		case 'RemittanceSourceAccount':
+			path = 'views/company/remittance_source_account/';
+			break;
 		case 'Branch':
 			path = 'views/company/branch/';
 			break;
@@ -2051,6 +2139,9 @@ Global.getViewPathByViewId = function( viewId ) {
 			break;
 		case 'PayStub':
 			path = 'views/payroll/pay_stub/';
+			break;
+		case 'PayStubTransaction':
+			path = 'views/payroll/pay_stub_transaction/';
 			break;
 		case 'GovernmentDocument':
 			path = 'views/payroll/government_document/';
@@ -2193,6 +2284,9 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'ExceptionSummaryReport':
 			path = 'views/reports/exception_summary/';
 			break;
+		case 'PayStubTransactionSummaryReport':
+			path = 'views/reports/pay_stub_transaction_summary/';
+			break;
 		case 'PayStubSummaryReport':
 			path = 'views/reports/pay_stub_summary/';
 			break;
@@ -2322,6 +2416,9 @@ Global.getViewPathByViewId = function( viewId ) {
 			break;
 		case 'ProcessPayrollWizard':
 			path = 'views/wizard/process_payroll/';
+			break;
+		case 'PayrollRemittanceAgencyEventWizardController':
+			path = 'views/payroll/remittance_wizard/';
 			break;
 		case 'ImportCSVWizard':
 			path = 'views/wizard/import_csv/';
@@ -2497,7 +2594,7 @@ Global.loadPage = function( url, onResult ) {
 };
 
 Global.getBaseURL = function() {
-
+	// #2349 - This breaks the recruitment portal if index.php is in the URL.
 	var url = location.href;  // entire url including querystring - also: window.location.href;
 	// if ( url.indexOf( '#!' ) !== -1 ) {
 	// 	url = url.substring( 0, url.indexOf( '#!' ) );
@@ -3255,7 +3352,9 @@ Global.loadStyleSheet = function( path, fn, scope ) {
 				if ( link[sheet] && link[sheet][cssRules].length ) { // SUCCESS! our style sheet has loaded
 					clearInterval( interval_id );                      // clear the counters
 					clearTimeout( timeout_id );
-					fn.call( scope || window, true, link );           // fire the callback with success == true
+					if ( typeof fn == 'function' ) {
+						fn.call(scope || window, true, link);           // fire the callback with success == true
+					}
 				}
 			} catch ( e ) {} finally {}
 		}, 10 ),                                                   // how often to check if the stylesheet is loaded
@@ -3263,7 +3362,9 @@ Global.loadStyleSheet = function( path, fn, scope ) {
 			clearInterval( timeout_id );             // clear the counters
 			clearTimeout( timeout_id );
 			head.removeChild( link );                // since the style sheet didn't load, remove the link node from the DOM
-			fn.call( scope || window, false, link ); // fire the callback with success == false
+			if ( typeof fn == 'function' ) {
+				fn.call(scope || window, false, link); // fire the callback with success == false
+			}
 		}, 15000 );                                 // how long to wait before failing
 	head.appendChild( link );  // insert the link node into the DOM and start loading the style sheet
 	return link; // return the link node;
@@ -3299,7 +3400,6 @@ Global.checkBeforeExit = function( functionToExecute ) {
 Global.detectMobileBrowser = function() {
 	return /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
 }
-
 /**
  * Allowing deep linking
  * @type {boolean}
@@ -3313,9 +3413,18 @@ Global.getDeepLink = function() {
 /**
  * Retrieves the deeplink from the current url.
  */
-Global.setDeepLink = function() {
+Global.setDeepLink = function( ) {
 	var newDeepLink = window.location.href.split( '#!m=' )[1];
-	if(newDeepLink != 'Login' && newDeepLink != undefined) {
+
+	if ( newDeepLink == 'Login' ) {
+		var alternate_session_data = $.cookie('AlternateSessionData');
+		if ( alternate_session_data ) {
+			alternate_session_data = JSON.parse( alternate_session_data );
+			if ( alternate_session_data.previous_session_view ) {
+				Global.deeplink = alternate_session_data.previous_session_view;
+			}
+		}
+	} else if( newDeepLink != undefined ) {
 		Global.deeplink = newDeepLink;
 	}
 };
@@ -3479,6 +3588,10 @@ Global.array_unique = function(arr) {
 
 //Special rounding function that handles values like 1.005 or 1.0049999999999999 properly, see: http://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places
 Global.MoneyRound = function(number, decimals) {
+	if ( isNaN(number) ) {
+		number = 0;
+	}
+
 	if ( !decimals ) {
 		decimals = 2;
 	}
@@ -3503,11 +3616,11 @@ Global.MoneyRound = function(number, decimals) {
 Global.getUIReadyStatus = function() {
 	return Global.UIReadyStatus;
 }
-Global.setUINotready = function(){
+Global.setUINotready = function() {
 	Global.UIReadyStatus = 0;
 	Debug.Text('Global ready status changed: 0', 'Global.js', 'Global','setUIReadyStatus',10);
 }
-Global.setUIReady = function(){
+Global.setUIReady = function() {
 	//need to check the document isn't already complete and ready for a screenshot.'
 	if ( Global.UIReadyStatus == 0 ) {
 		Global.UIReadyStatus = 1;
@@ -3574,6 +3687,37 @@ Global.convertValidationErrorToString = function(object) {
 	return retval;
 }
 
+Global.APIFileDownload = function( class_name, method, post_data, url ){
+
+	if ( url == undefined ) {
+		url = ServiceCaller.getURLWithSessionId('Class=' + class_name + '&Method=' + method);
+	}
+	var message_id = UUID.guid();
+	url = url + '&MessageID=' + message_id;
+
+	var tempForm = $( "<form></form>" );
+	tempForm.attr( 'id', 'temp_form' );
+	tempForm.attr( 'method', 'POST' );
+	tempForm.attr( 'action', url );
+
+	tempForm.attr('target', is_browser_iOS ? '_blank' : 'hideReportIFrame'); //hideReportIFrame
+
+	tempForm.css( 'display', 'none' );
+	if ( post_data ) {
+		var hideInput = $("<input type='hidden' name='json'>");
+		hideInput.attr('value', JSON.stringify(post_data));
+		tempForm.append(hideInput);
+	}
+	tempForm.appendTo( 'body' );
+	tempForm.css( 'display', 'none' );
+	tempForm.submit();
+	tempForm.remove();
+
+	if ( !is_browser_iOS ) {
+		ProgressBar.showProgressBar( message_id, true );
+	}
+}
+
 Global.setStationID = function (val) {
 	setCookie('StationID', val, 10000);
 }
@@ -3595,4 +3739,52 @@ Global.closeEditViews = function() {
 		TTPromise.resolve( 'base', 'closeEditViews');
 		TTPromise.resolve( 'base', 'onCancelClick');
 	}
+}
+
+//#2351 - red border for sandbox mode
+Global.styleSandbox = function () {
+	if ( APIGlobal.pre_login_data['sandbox'] && APIGlobal.pre_login_data['sandbox'] == true ){
+		$('body').addClass('sandbox_container');
+	}
+}
+
+//#2351 - Used for logging in as employee/client or switching to sandbox mode.
+Global.NewSession = function( user_id, client_id ) {
+
+	var api_auth = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
+	var $this = this;
+
+	api_auth.newSession( user_id, client_id, {
+		onResult: function( result ) {
+
+			if ( !result.isValid() ) {
+				return;
+			}
+
+			var result_data = result.getResult();
+			var current_session_id = $.cookie( Global.getSessionIDKey() );
+			var url = result_data.url;
+			var host = Global.getHost();
+			var cookie_base_url = result_data.cookie_base_url;
+
+			if ( url.indexOf( 'http' ) === -1 ) {
+				url = window.location.protocol + '//' + url;
+			}
+
+			var alternate_session_data = {
+				new_session_id: result_data.session_id,
+				previous_session_id: current_session_id,
+				previous_session_url: Global.getBaseURL() ,
+				previous_session_view: window.location.href.split( '#!m=' )[1],
+				previous_cookie_path: LocalCacheData.cookie_path,
+			};
+
+			var cookie_string = JSON.stringify(alternate_session_data);
+			$.cookie('AlternateSessionData', cookie_string, {expires: 1, path: cookie_base_url, domain: host} );
+
+			window.location = url + "html5/#!m=Login";
+			Global.needReloadBrowser = true;
+		}
+	} );
+
 }

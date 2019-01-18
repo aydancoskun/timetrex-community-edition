@@ -16,8 +16,10 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 	column_map_data: null, //Used to build grid data
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	_required_files: ['TImageBrowser', 'APIImport'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Import Wizard' );
 		this.steps = 6;
@@ -292,7 +294,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	getLayoutById: function( select_id ) {
 		var len = this.saved_layout_array.length;
 
-		select_id = parseInt( select_id );
+		select_id = select_id;
 
 		for ( var i = 0; i < len; i++ ) {
 			var layout = this.saved_layout_array[i];
@@ -1231,9 +1233,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 						this.api_import.className = 'APIImportAccrual';
 						this.api_import.key_name = 'ImportAccrual';
 						break;
-					case 'bank_account':
-						this.api_import.className = 'APIImportBankAccount';
-						this.api_import.key_name = 'ImportBankAccount';
+					case 'remittance_destination_account':
+						this.api_import.className = 'APIImportRemittanceDestinationAccount';
+						this.api_import.key_name = 'ImportRemittanceDestinationAccount';
 						break;
 					case 'department':
 						this.api_import.className = 'APIImportDepartment';

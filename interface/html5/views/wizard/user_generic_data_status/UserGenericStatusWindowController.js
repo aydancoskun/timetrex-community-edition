@@ -21,7 +21,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 
 	},
 
-	initialize: function( options ) {
+	init: function( options ) {
 		this.options = options;
 		this.content_div = $( this.el ).find( '.content' );
 		this.batch_id = this.options.batch_id;

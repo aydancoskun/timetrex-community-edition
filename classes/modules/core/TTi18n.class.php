@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -65,6 +65,10 @@ class TTi18n {
 	//default precision is 2 to stay consistent with legacy code.
 	static private $DEFAULT_NUMBER_FORMAT_PATTERN = '#,##0.##';
 
+	/**
+	 * @param $locale
+	 * @return bool
+	 */
 	static function setGetTextLocale( $locale ) {
 		// Beware: this is changing the locale process-wide.
 		// But *only* for LC_MESSAGES, not other LC_*.
@@ -76,9 +80,10 @@ class TTi18n {
 		//Because apparently LC_ALL doesn't matter on some Unix, it still doesn't set LC_MESSAGES.
 		//So if we didn't explicity set LC_MESSAGES above, do it here.
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
-			$rc = setlocale( LC_MESSAGES, $locale.'.UTF-8' );
+			setlocale( LC_MESSAGES, $locale.'.UTF-8' );
 
 			/* This often reports failure even if it works.
+			$rc = setlocale( LC_MESSAGES, $locale.'.UTF-8' );
 			if ( $rc == 0 ) {
 				Debug::text('setLocale failed!: '. (int)$rc .' Locale: '. $locale, __FILE__, __LINE__, __METHOD__, 10);
 			}
@@ -112,9 +117,17 @@ class TTi18n {
 		Locale setting functions
 
 	*/
+	/**
+	 * @return string
+	 */
 	static public function getLanguage() {
 		return self::$language;
 	}
+
+	/**
+	 * @param $language
+	 * @return bool
+	 */
 	static public function setLanguage( $language ) {
 		if ( $language == '' OR strlen( $language ) > 7 ) {
 			$language = 'en';
@@ -125,9 +138,17 @@ class TTi18n {
 		return TRUE;
 	}
 
+	/**
+	 * @return string
+	 */
 	static public function getCountry() {
 		return self::$country;
 	}
+
+	/**
+	 * @param $country
+	 * @return bool
+	 */
 	static public function setCountry( $country ) {
 		if ( $country == '' OR strlen( $country ) > 7 ) {
 			$country = 'US';
@@ -138,6 +159,10 @@ class TTi18n {
 		return TRUE;
 	}
 
+	/**
+	 * @param $locale_arr
+	 * @return string
+	 */
 	static public function getLocaleArrayAsString( $locale_arr ) {
 		if ( !is_array($locale_arr) ) {
 			$locale_arr = (array)$locale_arr;
@@ -147,6 +172,10 @@ class TTi18n {
 		return implode(',', $locale_arr);
 	}
 
+	/**
+	 * @param $locale
+	 * @return bool|string
+	 */
 	static public function tryLocale( $locale ) {
 		if ( !is_array($locale) ) {
 			$locale = (array)$locale;
@@ -177,6 +206,10 @@ class TTi18n {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $locale_arg
+	 * @return array|mixed
+	 */
 	static public function generateLocale( $locale_arg = NULL ) {
 		//Generate an array of possible locales to try in order.
 		//1. <language>_<country>
@@ -225,6 +258,9 @@ class TTi18n {
 		return $retarr;
 	}
 
+	/**
+	 * @return bool
+	 */
 	static public function setMasterLocale() {
 		if ( self::$master_locale != '' ) {
 			return self::setLocale( self::$master_locale );
@@ -233,7 +269,11 @@ class TTi18n {
 		return FALSE;
 	}
 
-	static public function stripUTF8($str) {
+	/**
+	 * @param $str
+	 * @return bool|string
+	 */
+	static public function stripUTF8( $str) {
 		//Only strip UTF8 if it actually exists, based on the ".".
 		$position_of_dot = strpos($str, '.');
 		if ( $position_of_dot !== FALSE ) {
@@ -243,6 +283,10 @@ class TTi18n {
 		return $str;
 	}
 
+	/**
+	 * @param null $locale
+	 * @return bool
+	 */
 	static public function setLocaleCookie( $locale = NULL ) {
 		if ( $locale == '' ) {
 			//Ensure locale never has ".UTF-8" on the end.
@@ -257,6 +301,10 @@ class TTi18n {
 
 		return TRUE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	static public function getLocaleCookie() {
 		if ( isset($_COOKIE['language']) AND strlen( $_COOKIE['language'] ) <= 7 ) { //Prevent user supplied locale from attempting XSS/SQL injection.
 			return $_COOKIE['language'];
@@ -265,6 +313,10 @@ class TTi18n {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $locale
+	 * @return bool|string
+	 */
 	static public function getLanguageFromLocale( $locale = NULL ) {
 		if ( $locale == '' ) {
 			$locale = self::getLocale();
@@ -282,6 +334,10 @@ class TTi18n {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $locale
+	 * @return bool
+	 */
 	static function getCountryFromLocale( $locale = NULL ) {
 		if ( $locale == '' ) {
 			$locale = self::getLocale();
@@ -295,13 +351,26 @@ class TTi18n {
 		return FALSE;
 	}
 
+	/**
+	 * @return null
+	 */
 	static public function getNormalizedLocale() {
 		return self::$normalized_locale;
 	}
 
+	/**
+	 * @return null
+	 */
 	static public function getLocale() {
 		return self::$locale;
 	}
+
+	/**
+	 * @param null $locale_arg
+	 * @param int $category
+	 * @param bool $force
+	 * @return bool
+	 */
 	static public function setLocale( $locale_arg = NULL, $category = LC_ALL, $force = FALSE ) {
 		Debug::Text('Generated/Passed In Locale: '. $locale_arg, __FILE__, __LINE__, __METHOD__, 11);
 		$locale = self::tryLocale( self::generateLocale( $locale_arg ) );
@@ -365,8 +434,7 @@ class TTi18n {
 
 	/**
 	 *
-	 * @param string|array $user_locale_pref
-	 * @return string|boolean
+	 * @return array
 	 * @author Dan Libby <dan@osc.co.cr>
 	 */
 	static public function getBrowserLanguage() {
@@ -488,6 +556,9 @@ class TTi18n {
 		Language Functions
 
 	*/
+	/**
+	 * @return array
+	 */
 	static public function getLanguageArray() {
 
 		$this_language = self::getLanguage();
@@ -518,6 +589,11 @@ class TTi18n {
 		return $retarr;
 	}
 
+	/**
+	 * @param $str
+	 * @param $args
+	 * @return string
+	 */
 	static public function getTextStringArgs( $str, $args ) {
 		if ( $args != '' ) {
 			if ( !is_array($args) ) {
@@ -537,6 +613,11 @@ class TTi18n {
 		return $str;
 	}
 
+	/**
+	 * @param $str
+	 * @param bool $args
+	 * @return string
+	 */
 	static public function getText( $str, $args = FALSE ) {
 		if ( $args != '' ) {
 			$str = self::getTextStringArgs( $str, $args );
@@ -549,6 +630,11 @@ class TTi18n {
 		return gettext( $str );
 	}
 
+	/**
+	 * @param $str
+	 * @param bool $args
+	 * @return string
+	 */
 	static public function gt( $str, $args = FALSE ) {
 		return self::getText( $str, $args );
 	}
@@ -610,7 +696,7 @@ class TTi18n {
 								'kl' => 'kl_GL',	// Kalaallisut	Greenland
 								'km' => 'km_KH',	// Khmer	Cambodia
 								'kn' => 'kn_IN',	// Kannada	India
-								'ko' => 'ko_KR',	// Korean	Korea (South)
+								//'ko' => 'ko_KR',	// Korean	Korea (South)
 								'ko' => 'kok_IN',	// Konkani	India
 								'lo' => 'lo_LA',	// Laotian	Laos
 								'lt' => 'lt_LT',	// Lithuanian	Lithuania
@@ -618,7 +704,7 @@ class TTi18n {
 								'mg' => 'mg_MG',	// Malagasy	Madagascar
 								'mk' => 'mk_MK',	// Macedonian	Macedonia
 								'ml' => 'ml_IN',	// Malayalam	India
-								'mn' => 'mn_MN',	// Mongolian	Mongolia
+								//'mn' => 'mn_MN',	// Mongolian	Mongolia
 								'mr' => 'mr_IN',	// Marathi	India
 								'ms' => 'ms_MY',	// Malay	Malaysia
 								'mt' => 'mt_MT',	// Maltese	Malta
@@ -686,6 +772,12 @@ class TTi18n {
 	}
 
 	//Returns PDF font appropriate for language.
+
+	/**
+	 * @param null $language
+	 * @param bool $encoding
+	 * @return string
+	 */
 	static function getPDFDefaultFont( $language = NULL, $encoding = FALSE ) {
 		if ( $language == '' ) {
 			$language = self::getLanguage();
@@ -706,6 +798,10 @@ class TTi18n {
 	  String functions
 
 	 */
+	/**
+	 * @param $str
+	 * @return string
+	 */
 	static public function strtolower( $str ) {
 		//Can't optimize this unfortunately, as users using 'en' may want to update records or names in 'fr' and such.
 		//if ( self::getLanguage() == 'en' ) {
@@ -717,6 +813,10 @@ class TTi18n {
 		return $str;
 	}
 
+	/**
+	 * @param $str
+	 * @return string
+	 */
 	static public function strtoupper( $str ) {
 		//Can't optimize this unfortunately, as users using 'en' may want to update records or names in 'fr' and such.
 		//if ( self::getLanguage() == 'en' ) {
@@ -733,6 +833,9 @@ class TTi18n {
 		Number/Currency functions
 
 	*/
+	/**
+	 * @return mixed
+	 */
 	static public function getCurrencyArray() {
 
 		$code_arr = array(
@@ -1016,6 +1119,7 @@ class TTi18n {
 
 	/**
 	 * Parses a locale specific string that represents a float (ie: -46,1234 or -46.1234) and converts it to a float that PHP will recognize for functions like number_format()/round, etc...
+	 * @param $value
 	 * @return string
 	 */
 	public static function parseFloat( $value ) {
@@ -1073,6 +1177,12 @@ class TTi18n {
 		}
 	}
 
+	/**
+	 * @param $number
+	 * @param int $min_decimals
+	 * @param int $max_decimals
+	 * @return int
+	 */
 	public static function getAfterDecimal( $number, $min_decimals = 0, $max_decimals = 16 ) {
 		//$seperator = self::getDecimalSymbol();
 		$seperator = '.'; //Since we call setLocale() *without* LC_NUMERIC now so casted (float) values always use decimal symbol, we should force it to decimal symbol always here.
@@ -1140,6 +1250,12 @@ class TTi18n {
 	//
 	// Show Code: 0 = No, 1 = Left, 2 = Right
 	//
+	/**
+	 * @param $amount
+	 * @param null $currency_code
+	 * @param int $show_code
+	 * @return mixed|string
+	 */
 	static public function formatCurrency( $amount, $currency_code = NULL, $show_code = 0 ) {
 		$currency_code_left_str = NULL;
 		$currency_code_right_str = NULL;
@@ -1186,6 +1302,10 @@ class TTi18n {
 		}
 	}
 
+	/**
+	 * @param $iso_code
+	 * @return mixed|string
+	 */
 	static function getCurrencySymbol( $iso_code ) {
 		static $currency_symbols = array (
 										'AED' => 'د.إ', //('United Arab Emirates')
@@ -1363,7 +1483,11 @@ class TTi18n {
 		return '$';
 	}
 
-	static function detectUTF8($string) {
+	/**
+	 * @param $string
+	 * @return bool
+	 */
+	static function detectUTF8( $string) {
 			return (bool)preg_match('%(?:
 			[\xC2-\xDF][\x80-\xBF]        # non-overlong 2-byte
 			|\xE0[\xA0-\xBF][\x80-\xBF]               # excluding overlongs

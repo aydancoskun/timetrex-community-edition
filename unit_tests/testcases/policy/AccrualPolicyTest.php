@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -51,6 +51,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
+		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
@@ -58,7 +59,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$dd->createCurrency( $this->company_id, 10 );
 		$dd->createUserWageGroups( $this->company_id );
 
-		$this->user_id = $dd->createUser( $this->company_id, 100 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
 		$user_obj = $this->getUserObject( $this->user_id );
 		//Use a consistent hire date, otherwise its difficult to get things correct due to the hire date being in different parts or different pay periods.
 		//Make sure it is not on a pay period start date though.
@@ -1120,7 +1121,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$apf = TTnew( 'AccrualPolicyFactory' );
 		$aplf = TTnew( 'AccrualPolicyListFactory' );
 
-		$aplf->getByIdAndCompanyId( (int)$accrual_policy_id, $company_id );
+		$aplf->getByIdAndCompanyId( $accrual_policy_id, $company_id );
 		if ( $aplf->getRecordCount() > 0 ) {
 			foreach( $aplf as $ap_obj ) {
 				$aplf->StartTransaction();

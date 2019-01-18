@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,6 +46,11 @@ class StationFactory extends Factory {
 
 	protected $company_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
@@ -220,8 +225,8 @@ class StationFactory extends Factory {
 												4096	=> TTi18n::gettext('Enable: Punch Images'),
 												8192	=> TTi18n::gettext('Disable: Screensaver'),
 												16384	=> TTi18n::gettext('Disable: Default Transfer On'), //This is not synchronized with mobile app, its handled server side currently.
-												//32768		=> TTi18n::gettext('Enable: WIFI Detection - Punch'),
-												//65536		=> TTi18n::gettext('Enable: WIFI Detection - Alert'),
+												32768	=> TTi18n::gettext('Disable: Punch Confirmation'), //This could be converted to two settings to determine the timeout on the punch confirm/punch success screens instead.
+												//65536
 
 												131072	=> TTi18n::gettext('QRCodes: Allow Multiple'),
 												262144	=> TTi18n::gettext('QRCodes: Allow MACROs'),
@@ -321,6 +326,10 @@ class StationFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -375,87 +384,81 @@ class StationFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getCompany() {
-		return (int)$this->data['company_id'];
+		return $this->getGenericDataValue( 'company_id' );
 	}
-	function setCompany($id) {
-		$id = trim($id);
 
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status_id',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getType() {
-		if ( isset($this->data['type_id']) ) {
-			return (int)$this->data['type_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'type_id' );
 	}
-	function setType($type) {
-		$type = trim($type);
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value) {
+		$value = trim($value); //Don't cast to (int) above the Option::getByValue() call, otherwise string types will fail on the TimeTrex Client Application.
 
 		//This needs to be stay as TimeTrex Client application still uses names rather than IDs.
-		$key = Option::getByValue($type, $this->getOptions('type') );
+		$key = Option::getByValue($value, $this->getOptions('type') );
 		if ($key !== FALSE) {
-			$type = $key;
+			$value = $key;
 		}
+		$value = (int)$value;
 
-		if ( $this->Validator->inArrayKey(	'type_id',
-											$type,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
-
-			$this->data['type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'type_id', $value );
 	}
 
-	function isUniqueStation($station) {
+	/**
+	 * @param $station
+	 * @return bool
+	 */
+	function isUniqueStation( $station) {
 		$ph = array(
 					'company_id' => $this->getCompany(),
-					'station' => $station,
+					'station' => (string)$station,
 					);
 
 		$query = 'select id from '. $this->table .' where company_id = ? AND station_id = ? AND deleted=0';
@@ -473,271 +476,176 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getStation() {
-		if ( isset($this->data['station_id']) ) {
-			return (string)$this->data['station_id']; //Should not be cast to INT!
-		}
-
-		return FALSE;
-	}
-	function setStation($station_id = NULL) {
-		$station_id = trim($station_id);
-
-		if ( empty($station_id) ) {
-			$station_id = $this->genStationID();
-		}
-
-		if (	in_array(strtolower($station_id), $this->getOptions('station_reserved_word'))
-				OR
-				(
-				$this->Validator->isLength(	'station_id',
-											$station_id,
-											TTi18n::gettext('Incorrect Station ID length'),
-											2, 250 )
-				AND
-				$this->Validator->isTrue(	'station_id',
-											$this->isUniqueStation($station_id),
-											TTi18n::gettext('Station ID already exists'))
-				)
-			) {
-
-			$this->data['station_id'] = $station_id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (string)$this->getGenericDataValue( 'station_id' ); //Should not be cast to INT!
 	}
 
-	function getSource() {
-		if ( isset($this->data['source']) ) {
-			return $this->data['source'];
-		}
-
-		return FALSE;
-	}
-	function setSource($source) {
-		$source = trim($source);
-
-		if (	in_array(strtolower($source), $this->getOptions('source_reserved_word') )
-				OR
-				(
-				$source != NULL
-				AND
-				$this->Validator->isLength(	'source',
-											$source,
-											TTi18n::gettext('Incorrect Source ID length'),
-											2, 250 )
-				)
-			) {
-
-			$this->data['source'] = $source;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
-	}
-	function setDescription($description) {
-		$description = trim($description);
-
-		if ( $this->Validator->isLength(	'description',
-											$description,
-											TTi18n::gettext('Incorrect Description length'),
-											0, 255 ) ) {
-
-			$this->data['description'] = $description;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getDefaultBranch() {
-		if ( isset($this->data['branch_id']) ) {
-			return (int)$this->data['branch_id'];
-		}
-
-		return FALSE;
-	}
-	function setDefaultBranch($id) {
-		$id = trim($id);
-
-		$blf = TTnew( 'BranchListFactory' );
-
-		if (
-				$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'branch_id',
-														$blf->getByID($id),
-														TTi18n::gettext('Invalid Branch')
-													) ) {
-
-			$this->data['branch_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getDefaultDepartment() {
-		if ( isset($this->data['department_id']) ) {
-			return (int)$this->data['department_id'];
-		}
-
-		return FALSE;
-	}
-	function setDefaultDepartment($id) {
-		$id = trim($id);
-
-		$dlf = TTnew( 'DepartmentListFactory' );
-
-		if (
-				$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'department_id',
-														$dlf->getByID($id),
-														TTi18n::gettext('Invalid Department')
-													) ) {
-
-			$this->data['department_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getDefaultJob() {
-		if ( isset($this->data['job_id']) ) {
-			return (int)$this->data['job_id'];
-		}
-
-		return FALSE;
-	}
-	function setDefaultJob($id) {
-		$id = trim($id);
-
-		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
-			$id = 0;
-		}
-
-		Debug::Text('Job ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$jlf = TTnew( 'JobListFactory' );
-		}
-
-		if (
-				$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'job_id',
-														$jlf->getByID($id),
-														TTi18n::gettext('Invalid Job')
-													) ) {
-
-			$this->data['job_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getDefaultJobItem() {
-		if ( isset($this->data['job_item_id']) ) {
-			return (int)$this->data['job_item_id'];
-		}
-
-		return FALSE;
-	}
-	function setDefaultJobItem($id) {
-		$id = trim($id);
-
-		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
-			$id = 0;
-		}
-
-		Debug::Text('Job Item ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$jilf = TTnew( 'JobItemListFactory' );
-		}
-
-		if (
-				$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'job_item_id',
-														$jilf->getByID($id),
-														TTi18n::gettext('Invalid Task')
-													) ) {
-
-			$this->data['job_item_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getTimeZone() {
-		if ( isset($this->data['time_zone']) ) {
-			return $this->data['time_zone'];
-		}
-
-		return FALSE;
-	}
-	function setTimeZone($time_zone) {
-		$time_zone = Misc::trimSortPrefix( trim($time_zone) );
-
-		$upf = TTnew( 'UserPreferenceFactory' );
-
-		if ( $time_zone == 0
-				OR
-				$this->Validator->inArrayKey(	'time_zone',
-											$time_zone,
-											TTi18n::gettext('Incorrect Time Zone'),
-											Misc::trimSortPrefix( $upf->getOptions('time_zone') ) ) ) {
-
-			$this->data['time_zone'] = $time_zone;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getGroupSelectionType() {
-		if ( isset($this->data['user_group_selection_type_id']) ) {
-			return (int)$this->data['user_group_selection_type_id'];
-		}
-
-		return FALSE;
-	}
-	function setGroupSelectionType($value) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setStation( $value = NULL) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'user_group_selection_type',
-											$value,
-											TTi18n::gettext('Incorrect Group Selection Type'),
-											$this->getOptions('group_selection_type')) ) {
-
-			$this->data['user_group_selection_type_id'] = $value;
-
-			return TRUE;
+		if ( empty($value) ) {
+			$value = $this->genStationID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'station_id', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
+	function getSource() {
+		return $this->getGenericDataValue( 'source' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSource( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'source', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getDescription() {
+		return $this->getGenericDataValue( 'description' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getDefaultBranch() {
+		return $this->getGenericDataValue( 'branch_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setDefaultBranch( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'branch_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getDefaultDepartment() {
+		return $this->getGenericDataValue( 'department_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setDefaultDepartment( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'department_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getDefaultJob() {
+		return $this->getGenericDataValue( 'job_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setDefaultJob( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('Default Job ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'job_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getDefaultJobItem() {
+		return $this->getGenericDataValue( 'job_item_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setDefaultJobItem( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		Debug::Text('Default Job Item ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'job_item_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getTimeZone() {
+		return $this->getGenericDataValue( 'time_zone' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeZone( $value) {
+		$value = Misc::trimSortPrefix( trim($value) );
+		return $this->setGenericDataValue( 'time_zone', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
+	function getGroupSelectionType() {
+		return $this->getGenericDataValue( 'user_group_selection_type_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setGroupSelectionType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'user_group_selection_type_id', $value );
+	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getGroup() {
 		$lf = TTnew( 'StationUserGroupListFactory' );
 		$lf->getByStationId( $this->getId() );
@@ -752,7 +660,12 @@ class StationFactory extends Factory {
 
 		return FALSE;
 	}
-	function setGroup($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setGroup( $ids) {
 		if ( $ids == '' ) {
 			$ids = array(); //This is for the API, it sends FALSE when no branches are selected, so this will delete all branches.
 		}
@@ -787,7 +700,9 @@ class StationFactory extends Factory {
 			$lf_b = TTnew( 'UserGroupListFactory' );
 
 			foreach ($ids as $id) {
-				if ( isset($ids) AND $id > 0 AND !in_array($id, $tmp_ids) ) {
+				if ( isset($ids)
+						AND TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID()
+						AND !in_array($id, $tmp_ids) ) {
 					$f = TTnew( 'StationUserGroupFactory' );
 					$f->setStation( $this->getId() );
 					$f->setGroup( $id );
@@ -809,29 +724,25 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getBranchSelectionType() {
-		if ( isset($this->data['branch_selection_type_id']) ) {
-			return (int)$this->data['branch_selection_type_id'];
-		}
-
-		return FALSE;
-	}
-	function setBranchSelectionType($value) {
-		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'branch_selection_type',
-											$value,
-											TTi18n::gettext('Incorrect Branch Selection Type'),
-											$this->getOptions('branch_selection_type')) ) {
-
-			$this->data['branch_selection_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'branch_selection_type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setBranchSelectionType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'branch_selection_type_id', $value );
+	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getBranch() {
 		$lf = TTnew( 'StationBranchListFactory' );
 		$lf->getByStationId( $this->getId() );
@@ -846,7 +757,12 @@ class StationFactory extends Factory {
 
 		return FALSE;
 	}
-	function setBranch($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setBranch( $ids) {
 		if ( $ids == '' ) {
 			$ids = array(); //This is for the API, it sends FALSE when no branches are selected, so this will delete all branches.
 		}
@@ -889,7 +805,7 @@ class StationFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'branch',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected Branch is invalid').' ('. $obj->getName() .')' )) {
 						$f->save();
 					}
@@ -903,29 +819,25 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getDepartmentSelectionType() {
-		if ( isset($this->data['department_selection_type_id']) ) {
-			return (int)$this->data['department_selection_type_id'];
-		}
-
-		return FALSE;
-	}
-	function setDepartmentSelectionType($value) {
-		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'department_selection_type',
-											$value,
-											TTi18n::gettext('Incorrect Department Selection Type'),
-											$this->getOptions('department_selection_type')) ) {
-
-			$this->data['department_selection_type_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'department_selection_type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDepartmentSelectionType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'department_selection_type_id', $value );
+	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getDepartment() {
 		$lf = TTnew( 'StationDepartmentListFactory' );
 		$lf->getByStationId( $this->getId() );
@@ -940,7 +852,12 @@ class StationFactory extends Factory {
 
 		return FALSE;
 	}
-	function setDepartment($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setDepartment( $ids) {
 		if ( $ids == '' ) {
 			$ids = array(); //This is for the API, it sends FALSE when no branches are selected, so this will delete all branches.
 		}
@@ -983,7 +900,7 @@ class StationFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'department',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected Department is invalid').' ('. $obj->getName() .')' )) {
 						$f->save();
 					}
@@ -997,6 +914,9 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getIncludeUser() {
 		$lf = TTnew( 'StationIncludeUserListFactory' );
 		$lf->getByStationId( $this->getId() );
@@ -1011,7 +931,12 @@ class StationFactory extends Factory {
 
 		return FALSE;
 	}
-	function setIncludeUser($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setIncludeUser( $ids) {
 		if ( $ids == '' ) {
 			$ids = array(); //This is for the API, it sends FALSE when no branches are selected, so this will delete all branches.
 		}
@@ -1054,7 +979,7 @@ class StationFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'include_user',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected Employee is invalid').' ('. $obj->getFullName() .')' )) {
 						$f->save();
 					}
@@ -1067,6 +992,10 @@ class StationFactory extends Factory {
 		Debug::text('No IDs to set.', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getExcludeUser() {
 		$lf = TTnew( 'StationExcludeUserListFactory' );
 		$lf->getByStationId( $this->getId() );
@@ -1081,7 +1010,12 @@ class StationFactory extends Factory {
 
 		return FALSE;
 	}
-	function setExcludeUser($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setExcludeUser( $ids) {
 		if ( $ids == '' ) {
 			$ids = array(); //This is for the API, it sends FALSE when no branches are selected, so this will delete all branches.
 		}
@@ -1124,7 +1058,7 @@ class StationFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'exclude_user',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected Employee is invalid').' ('. $obj->getFullName() .')' )) {
 						$f->save();
 					}
@@ -1145,184 +1079,142 @@ class StationFactory extends Factory {
 		TimeClock specific fields
 
 	*/
+	/**
+	 * @return bool|mixed
+	 */
 	function getPort() {
-		if ( isset($this->data['port']) ) {
-		return $this->data['port'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'port' );
 	}
-	function setPort($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPort( $value) {
 		$value = trim($value);
-
-		if ( $value == ''
-				OR
-				$this->Validator->isNumeric(	'port',
-											$value,
-											TTi18n::gettext('Incorrect port')
-											) ) {
-
-			$this->data['port'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'port', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUserName() {
-		if ( isset($this->data['user_name']) ) {
-			return $this->data['user_name'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_name' );
 	}
-	function setUserName($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserName( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->isLength(	'user_name',
-											$value,
-											TTi18n::gettext('Incorrect User Name length'),
-											0, 255 ) ) {
-
-			$this->data['user_name'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_name', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPassword() {
-		if ( isset($this->data['password']) ) {
-			return $this->data['password'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'password' );
 	}
-	function setPassword($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPassword( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->isLength(	'password',
-											$value,
-											TTi18n::gettext('Incorrect Password length'),
-											0, 255 ) ) {
-
-			$this->data['password'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'password', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPollFrequency() {
-		if ( isset($this->data['poll_frequency']) ) {
-			return $this->data['poll_frequency'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'poll_frequency' );
 	}
-	function setPollFrequency($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPollFrequency( $value) {
 		$value = trim($value);
-
-		if (	$value == 0
-				OR
-				$this->Validator->inArrayKey(	'poll_frequency',
-											$value,
-											TTi18n::gettext('Incorrect Download Frequency'),
-											$this->getOptions('poll_frequency')) ) {
-
-			$this->data['poll_frequency'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'poll_frequency', $value );
 	}
 
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPushFrequency() {
-		if ( isset($this->data['push_frequency']) ) {
-			return $this->data['push_frequency'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'push_frequency' );
 	}
-	function setPushFrequency($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPushFrequency( $value) {
 		$value = trim($value);
-
-		if (	$value == 0
-				OR
-				$this->Validator->inArrayKey(	'push_frequency',
-												$value,
-												TTi18n::gettext('Incorrect Upload Frequency'),
-												$this->getOptions('push_frequency')) ) {
-
-			$this->data['push_frequency'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'push_frequency', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPartialPushFrequency() {
-		if ( isset($this->data['partial_push_frequency']) ) {
-			return $this->data['partial_push_frequency'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'partial_push_frequency' );
 	}
-	function setPartialPushFrequency($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPartialPushFrequency( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-			OR
-			$this->Validator->inArrayKey(	'partial_push_frequency',
-											$value,
-											TTi18n::gettext('Incorrect Partial Upload Frequency'),
-											$this->getOptions('push_frequency')) ) {
-
-			$this->data['partial_push_frequency'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'partial_push_frequency', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableAutoPunchStatus() {
-		return $this->fromBool( $this->data['enable_auto_punch_status'] );
-	}
-	function setEnableAutoPunchStatus($bool) {
-		$this->data['enable_auto_punch_status'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_auto_punch_status' ) );
 	}
 
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableAutoPunchStatus( $value) {
+		return $this->setGenericDataValue( 'enable_auto_punch_status', $this->toBool($value) );
+	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getModeFlag() {
-		if ( isset($this->data['mode_flag']) ) {
-			return Option::getArrayByBitMask( $this->data['mode_flag'], $this->getOptions('mode_flag', $this->getType() ));
+		$value = $this->getGenericDataValue( 'mode_flag' );
+		if ( $value !== FALSE ) {
+			return Option::getArrayByBitMask( $value, $this->getOptions('mode_flag', $this->getType() ));
 		}
-
-		return FALSE;
-	}
-	function setModeFlag($arr) {
-		$bitmask = Option::getBitMaskByArray( $arr, $this->getOptions('mode_flag', $this->getType() ) );
-
-		if ( $this->Validator->isNumeric(	'mode_flag',
-											$bitmask,
-											TTi18n::gettext('Incorrect Mode') ) ) {
-
-			$this->data['mode_flag'] = $bitmask;
-
-			return TRUE;
-		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @param $arr
+	 * @return bool
+	 */
+	function setModeFlag( $arr) {
+		$value = Option::getBitMaskByArray( $arr, $this->getOptions('mode_flag', $this->getType() ) );
+		return $this->setGenericDataValue( 'mode_flag', $value );
+	}
+
+	/**
+	 * @param $work_code
+	 * @return array
+	 */
 	function parseWorkCode( $work_code ) {
 		$definition = $this->getWorkCodeDefinition();
 
@@ -1331,24 +1223,24 @@ class StationFactory extends Factory {
 		$retarr = array( 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 );
 
 		$start_digit = 0;
-		if ( isset($definition['branch']) AND $definition['branch'] > 0 ) {
+		if ( isset($definition['branch']) AND TTUUID::isUUID( $definition['branch'] ) AND $definition['branch'] != TTUUID::getZeroID() AND $definition['branch'] != TTUUID::getNotExistID() ) {
 			$retarr['branch_id'] = (int)substr( $work_code, $start_digit, $definition['branch']);
 			$start_digit += $definition['branch'];
 		}
 
-		if ( isset($definition['department']) AND $definition['department'] > 0 ) {
+		if ( isset($definition['department']) AND TTUUID::isUUID( $definition['department'] ) AND $definition['department'] != TTUUID::getZeroID() AND $definition['department'] != TTUUID::getNotExistID() ) {
 			$retarr['department_id'] = (int)substr( $work_code, $start_digit, $definition['department']);
 			$start_digit += $definition['department'];
 		}
 
-		if ( isset($definition['job']) AND $definition['job'] > 0 ) {
+		if ( isset($definition['job']) AND TTUUID::isUUID( $definition['job'] ) AND $definition['job'] != TTUUID::getZeroID() AND $definition['job'] != TTUUID::getNotExistID() ) {
 			$retarr['job_id'] = (int)substr( $work_code, $start_digit, $definition['job']);
 			$start_digit += $definition['job'];
 		}
 
-		if ( isset($definition['job_item']) AND $definition['job_item'] > 0 ) {
+		if ( isset($definition['job_item']) AND TTUUID::isUUID( $definition['job_item'] ) AND $definition['job_item'] != TTUUID::getZeroID() AND $definition['job_item'] != TTUUID::getNotExistID() ) {
 			$retarr['job_item_id'] = (int)substr( $work_code, $start_digit, $definition['job_item']);
-			$start_digit += $definition['job_item'];
+			//$start_digit += $definition['job_item'];
 		}
 
 		Debug::Arr($retarr, 'Parsed Work Code: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1357,6 +1249,13 @@ class StationFactory extends Factory {
 	}
 
 	//Update JUST station last_poll_date AND last_punch_time_stamp without affecting updated_date, and without creating an EDIT entry in the system_log.
+
+	/**
+	 * @param string $id UUID
+	 * @param int $last_poll_date
+	 * @param int $last_punch_date
+	 * @return bool
+	 */
 	function updateLastPollDateAndLastPunchTimeStamp( $id, $last_poll_date = 0, $last_punch_date = 0 ) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -1380,6 +1279,12 @@ class StationFactory extends Factory {
 	}
 
 	//Update JUST station last_poll_date without affecting updated_date, and without creating an EDIT entry in the system_log.
+
+	/**
+	 * @param string $id UUID
+	 * @param int $last_poll_date
+	 * @return bool
+	 */
 	function updateLastPollDate( $id, $last_poll_date = 0 ) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -1402,6 +1307,12 @@ class StationFactory extends Factory {
 	}
 
 	//Update JUST station last_push_date without affecting updated_date, and without creating an EDIT entry in the system_log.
+
+	/**
+	 * @param string $id UUID
+	 * @param int $last_push_date
+	 * @return bool
+	 */
 	function updateLastPushDate( $id, $last_push_date = 0 ) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -1425,6 +1336,12 @@ class StationFactory extends Factory {
 	}
 
 	//Update JUST station last_partial_push_date without affecting updated_date, and without creating an EDIT entry in the system_log.
+
+	/**
+	 * @param string $id UUID
+	 * @param int $last_partial_push_date
+	 * @return bool
+	 */
 	function updateLastPartialPushDate( $id, $last_partial_push_date = 0 ) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -1447,318 +1364,234 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getLastPunchTimeStamp( $raw = FALSE) {
-		if ( isset($this->data['last_punch_time_stamp']) ) {
+		$value = $this->getGenericDataValue( 'last_punch_time_stamp' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['last_punch_time_stamp'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['last_punch_time_stamp'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setLastPunchTimeStamp($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setLastPunchTimeStamp( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ($value == NULL) {
+			$value = TTDate::getTime();
 		}
-
-		if	(	$this->Validator->isDate(		'last_punch_time_stamp',
-												$epoch,
-												TTi18n::gettext('Incorrect last punch date')) ) {
-
-			$this->data['last_punch_time_stamp'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'last_punch_time_stamp', $value );
 
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLastPollDate() {
-		if ( isset($this->data['last_poll_date']) ) {
-			return $this->data['last_poll_date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'last_poll_date' );
 	}
-	function setLastPollDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setLastPollDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ($value == NULL) {
+			$value = TTDate::getTime();
 		}
-
-		if	(	$this->Validator->isDate(		'last_poll_date',
-												$epoch,
-												TTi18n::gettext('Incorrect last poll date')) ) {
-
-			$this->data['last_poll_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'last_poll_date', $value );
 
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLastPollStatusMessage() {
-		if ( isset($this->data['last_poll_status_message']) ) {
-			return $this->data['last_poll_status_message'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'last_poll_status_message' );
 	}
-	function setLastPollStatusMessage($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLastPollStatusMessage( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->isLength(	'last_poll_status_message',
-											$value,
-											TTi18n::gettext('Incorrect Status Message length'),
-											0, 255 ) ) {
-
-			$this->data['last_poll_status_message'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'last_poll_status_message', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLastPushDate() {
-		if ( isset($this->data['last_push_date']) ) {
-			return $this->data['last_push_date'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'last_push_date' );
 	}
-	function setLastPushDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setLastPushDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ($value == NULL) {
+			$value = TTDate::getTime();
 		}
-
-		if	(	$this->Validator->isDate(		'last_push_date',
-												$epoch,
-												TTi18n::gettext('Incorrect last push date')) ) {
-
-			$this->data['last_push_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'last_push_date', $value );
 
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLastPushStatusMessage() {
-		if ( isset($this->data['last_push_status_message']) ) {
-			return $this->data['last_push_status_message'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'last_push_status_message' );
 	}
-	function setLastPushStatusMessage($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLastPushStatusMessage( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->isLength(	'last_push_status_message',
-											$value,
-											TTi18n::gettext('Incorrect Status Message length'),
-											0, 255 ) ) {
-
-			$this->data['last_push_status_message'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'last_push_status_message', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getLastPartialPushDate() {
-		if ( isset($this->data['last_partial_push_date']) ) {
-			return $this->data['last_partial_push_date'];
-		}
-
-		return FALSE;
-	}
-	function setLastPartialPushDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
-		}
-
-		if	(	$this->Validator->isDate(		'last_partial_push_date',
-												$epoch,
-												TTi18n::gettext('Incorrect last partial push date')) ) {
-
-			$this->data['last_partial_push_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
-
+		return $this->getGenericDataValue( 'last_partial_push_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setLastPartialPushDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ($value == NULL) {
+			$value = TTDate::getTime();
+		}
+		return $this->setGenericDataValue( 'last_partial_push_date', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getLastPartialPushStatusMessage() {
-		if ( isset($this->data['last_partial_push_status_message']) ) {
-			return $this->data['last_partial_push_status_message'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'last_partial_push_status_message' );
 	}
-	function setLastPartialPushStatusMessage($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLastPartialPushStatusMessage( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->isLength(	'last_partial_push_status_message',
-											$value,
-											TTi18n::gettext('Incorrect Status Message length'),
-											0, 255 ) ) {
-
-			$this->data['last_partial_push_status_message'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'last_partial_push_status_message', $value );
 	}
 
+	/**
+	 * @return string
+	 */
 	function getUserValue1() {
-		if ( isset($this->data['user_value_1']) ) {
-			return $this->data['user_value_1'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value_1' );
 	}
-	function setUserValue1($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue1( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'user_value_1',
-											$value,
-											TTi18n::gettext('User Value 1 is invalid'),
-											1, 255) ) {
-
-			$this->data['user_value_1'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value_1', $value );
 	}
 
+	/**
+	 * @return string
+	 */
 	function getUserValue2() {
-		if ( isset($this->data['user_value_2']) ) {
-			return $this->data['user_value_2'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value_2' );
 	}
-	function setUserValue2($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue2( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'user_value_2',
-											$value,
-											TTi28n::gettext('User Value 2 is invalid'),
-											2, 255) ) {
-
-			$this->data['user_value_2'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value_2', $value );
 	}
 
+	/**
+	 * @return string
+	 */
 	function getUserValue3() {
-		if ( isset($this->data['user_value_3']) ) {
-			return $this->data['user_value_3'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value_3' );
 	}
-	function setUserValue3($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue3( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'user_value_3',
-											$value,
-											TTi38n::gettext('User Value 3 is invalid'),
-											3, 255) ) {
-
-			$this->data['user_value_3'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value_3', $value );
 	}
 
+	/**
+	 * @return string
+	 */
 	function getUserValue4() {
-		if ( isset($this->data['user_value_4']) ) {
-			return $this->data['user_value_4'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value_4' );
 	}
-	function setUserValue4($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue4( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'user_value_4',
-											$value,
-											TTi48n::gettext('User Value 4 is invalid'),
-											4, 255) ) {
-
-			$this->data['user_value_4'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value_4', $value );
 	}
 
+	/**
+	 * @return string
+	 */
 	function getUserValue5() {
-		if ( isset($this->data['user_value_5']) ) {
-			return $this->data['user_value_5'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_value_5' );
 	}
-	function setUserValue5($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setUserValue5( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'user_value_5',
-											$value,
-											TTi58n::gettext('User Value 5 is invalid'),
-											5, 255) ) {
-
-			$this->data['user_value_5'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'user_value_5', $value );
 	}
 
 
-
+	/**
+	 * @return string
+	 */
 	private function genStationID() {
 		return md5( uniqid( dechex( mt_rand() ), TRUE ) );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function setCookie() {
 		if ( $this->getStation() ) {
 
@@ -1770,6 +1603,9 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function destroyCookie() {
 		setcookie('StationID', NULL, (time() + 9999999), Environment::getCookieBaseURL() );
 
@@ -1777,6 +1613,12 @@ class StationFactory extends Factory {
 	}
 
 	//Update JUST station allowed_date without affecting updated_date, and without creating an EDIT entry in the system_log.
+
+	/**
+	 * @param string $id UUID
+	 * @param string $user_id UUID
+	 * @return bool
+	 */
 	function updateAllowedDate( $id, $user_id ) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -1804,32 +1646,30 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getAllowedDate() {
-		if ( isset($this->data['allowed_date']) ) {
-			return $this->data['allowed_date'];
-		}
-
-		return FALSE;
-	}
-	function setAllowedDate($epoch = NULL) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
-
-		if ($epoch == NULL) {
-			$epoch = TTDate::getTime();
-		}
-
-		if	(	$this->Validator->isDate(		'allowed_date',
-												$epoch,
-												TTi18n::gettext('Incorrect allowed date')) ) {
-
-			$this->data['allowed_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'allowed_date' );
 	}
 
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setAllowedDate( $value = NULL) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		if ($value == NULL) {
+			$value = TTDate::getTime();
+		}
+		return $this->setGenericDataValue( 'allowed_date', $value );
+	}
+
+	/**
+	 * @param $source
+	 * @param string $current_station_id UUID
+	 * @return bool
+	 */
 	function checkSource( $source, $current_station_id ) {
 		$source = trim($source);
 
@@ -1896,7 +1736,13 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
-	function isAllowed($user_id = NULL, $current_station_id = NULL, $id = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param string $current_station_id UUID
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function isAllowed( $user_id = NULL, $current_station_id = NULL, $id = NULL) {
 		if ($user_id == NULL OR $user_id == '') {
 			global $current_user;
 			$user_id = $current_user->getId();
@@ -1965,7 +1811,14 @@ class StationFactory extends Factory {
 	}
 
 	//A fast way to check many stations if the user is allowed. 10 = PC
-	function checkAllowed($user_id = NULL, $station_id = NULL, $type = 10 ) {
+
+	/**
+	 * @param string $user_id UUID
+	 * @param string $station_id UUID
+	 * @param int $type
+	 * @return bool
+	 */
+	function checkAllowed( $user_id = NULL, $station_id = NULL, $type = 10 ) {
 		if ($user_id == NULL OR $user_id == '') {
 			global $current_user;
 			$user_id = $current_user->getId();
@@ -1985,7 +1838,7 @@ class StationFactory extends Factory {
 		}
 
 		$slf = TTnew( 'StationListFactory' );
-		$slf->getByUserIdAndStatusAndType($user_id, 20, $type);
+		$slf->getByUserIdAndStatusAndType($user_id, 20, $type, $station_id ); //Station ID just helps order more specific stations to the top of the list.
 		Debug::text('Station ID: '. $station_id .' Type: '. $type .' Found Stations: '. $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		foreach($slf as $station) {
 			Debug::text('Checking Station ID: '. $station->getId(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1999,6 +1852,14 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $station_id UUID
+	 * @param string $company_id UUID
+	 * @param int $type_id
+	 * @param object $permission_obj
+	 * @param object $user_obj
+	 * @return StationListFactory
+	 */
 	static function getOrCreateStation( $station_id, $company_id, $type_id = 10, $permission_obj = NULL, $user_obj = NULL ) {
 		Debug::text('Checking for Station ID: '. $station_id .' Company ID: '. $company_id .' Type: '. $type_id, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -2047,68 +1908,33 @@ class StationFactory extends Factory {
 					break;
 				case 28: //Mobile App (iOS/Android)
 				case 60: //Desktop App
-					$flex_app = FALSE;
-					if ( stripos( $_SERVER['HTTP_USER_AGENT'], 'AdobeAIR' ) !== FALSE ) {
-						Debug::Text('Flex App Detected...', __FILE__, __LINE__, __METHOD__, 10);
-						$flex_app = TRUE;
-					}
+					$status_id = 20; //Enabled
+					if ( $station_id != '' ) {
+						$station_id = str_replace( ':', '', $station_id); //Some iOS6 devices return a MAC address looking ID. This conflicts with BASIC Authentication FCGI workaround as it uses ':' for the separator, see Global.inc.php for more details.
 
-					if ( $flex_app == TRUE ) {
-						$status_id = 20; //Enabled
-						$station = NULL; //Can't get UDID on iOS5, but we can on Android. Using NULL means we generate our own.
-						$description = TTi18n::getText('Mobile Application').': '.substr( $_SERVER['HTTP_USER_AGENT'], 0, 250);
-						$source = Misc::getRemoteIPAddress();
+						//Prevent stations from having the type_id appended to the end several times.
+						if ( substr( $station_id, ( strlen($type_id) * -1 ) ) != $type_id ) {
+							$station = $station_id.$type_id;
+						} else {
+							$station = $station_id;
+						}
 					} else {
-						$status_id = 20; //Enabled
-						if ( $station_id != '' ) {
-							$station_id = str_replace( ':', '', $station_id); //Some iOS6 devices return a MAC address looking ID. This conflicts with BASIC Authentication FCGI workaround as it uses ':' for the separator, see Global.inc.php for more details.
-
-							//Prevent stations from having the type_id appended to the end several times.
-							if ( substr( $station_id, ( strlen($type_id) * -1 ) ) != $type_id ) {
-								$station = $station_id.$type_id;
-							} else {
-								$station = $station_id;
-							}
-						} else {
-							$station = NULL; //Can't get UDID on iOS5, but we can on Android. Using NULL means we generate our own.
-						}
-						$description = TTi18n::getText('Mobile Application').': '.substr( $_SERVER['HTTP_USER_AGENT'], 0, 250);
-						$source = Misc::getRemoteIPAddress();
-						//$source = 'ANY';
-
-						$sf->setPollFrequency( 600 );
-						$sf->setEnableAutoPunchStatus(TRUE);
-
-						/*
-						//If the currently logged in user is higher than regular employee permissions, allow all records.
-						//Otherwise just allow the users own records to be synced.
-						//FIXME: Now that non-kiosk stations are logged in to download data, I don't think this is needed anymore.
-						//		 But we will need to allow at least one user so the station isn't automatically disabled in isActiveForAnyEmployee()
-						//FIXME: Maybe check for a wildcard station of the same type, and if it exists allow new stations to work for the same user selection?
-						if ( is_object( $permission_obj ) AND ( $permission_obj->Check('user', 'view') OR $permission_obj->Check('user', 'view_child') ) ) {
-							Debug::Text('Supervisor or higher, allowing all employees for potential team punch...', __FILE__, __LINE__, __METHOD__, 10);
-							$sf->setGroupSelectionType( 10 ); //All allowed
-							$sf->setBranchSelectionType( 10 ); //All allowed
-							$sf->setDepartmentSelectionType( 10 ); //All allowed
-						} else {
-							Debug::Text('Regular employee, defaulting to single-user mode...', __FILE__, __LINE__, __METHOD__, 10);
-							//The station must be active for the app to allow punches.
-							$sf->setGroupSelectionType( 20 ); //Only selected
-							$sf->setBranchSelectionType( 20 ); //Only selected
-							$sf->setDepartmentSelectionType( 20 ); //Only selected
-							$sf->setIncludeUser( array( $user_obj->getID() ) );
-						}
-						*/
-						$sf->setModeFlag( array( 1 ) ); //Default
-
+						$station = NULL; //Can't get UDID on iOS5, but we can on Android. Using NULL means we generate our own.
 					}
+					$description = TTi18n::getText('Mobile Application').': '.substr( $_SERVER['HTTP_USER_AGENT'], 0, 250);
+					$source = Misc::getRemoteIPAddress();
+
+					$sf->setPollFrequency( 600 );
+					$sf->setEnableAutoPunchStatus(TRUE);
+
+					$sf->setModeFlag( array( 1 ) ); //Default
 					break;
 				case 61: //Kiosk: Desktop
 				case 65: //Kiosk: Mobile App (iOS/Android)
 					Debug::Text('KIOSK station...', __FILE__, __LINE__, __METHOD__, 10);
 
-					if ( DEMO_MODE == TRUE ) {
-						$status_id = 20; //Always activate immediately when using demo.
+					if ( DEMO_MODE == TRUE OR ( is_object($user_obj) AND $user_obj->getPermissionLevel() >= 15 ) ) {
+						$status_id = 20; //Always activate immediately when using demo, or its a supervisor.
 					} else {
 						$status_id = 10; //Initially create as disabled and admin must manually enable it.
 					}
@@ -2124,11 +1950,13 @@ class StationFactory extends Factory {
 						$station = $station_id;
 					}
 
-					if ( DEPLOYMENT_ON_DEMAND == TRUE ) {
-						$description = TTi18n::getText('PENDING ACTIVATION [ADDITIONAL FEE REQUIRED] - Automatic KIOSK Setup');
+					if ( $status_id == 10 ) { //Disabled
+						$description = TTi18n::getText('PENDING ACTIVATION') .' - ';
 					} else {
-						$description = TTi18n::getText('PENDING ACTIVATION - Automatic KIOSK Setup');
+						$description = '';
 					}
+					$description .= TTi18n::getText('Automatic KIOSK Setup [Add name/location of device here]');
+
 					$source = 'ANY';
 
 					$sf->setPollFrequency( 600 );
@@ -2178,19 +2006,318 @@ class StationFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		// Status
+		if ( $this->getStatus() !== FALSE ) {
+			$this->Validator->inArrayKey(	'status_id',
+													$this->getStatus(),
+													TTi18n::gettext('Incorrect Status'),
+													$this->getOptions('status')
+												);
+		}
+		// Type
+		if ( $this->getType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'type_id',
+													$this->getType(),
+													TTi18n::gettext('Incorrect Type'),
+													$this->getOptions('type')
+												);
+		}
+		// Station ID
+		if ( $this->getStation() != '' ) {
+			if ( in_array(strtolower($this->getStation()), $this->getOptions('station_reserved_word')) === FALSE ) {
+				$this->Validator->isLength(	'station_id',
+													$this->getStation(),
+													TTi18n::gettext('Incorrect Station ID length'),
+													2, 250
+												);
+				if ( $this->Validator->isError('station_id') == FALSE ) {
+					$this->Validator->isTrue(	'station_id',
+														$this->isUniqueStation($this->getStation()),
+														TTi18n::gettext('Station ID already exists')
+													);
+				}
+			}
+		}
+		// Source ID
+		if ( in_array(strtolower($this->getSource()), $this->getOptions('source_reserved_word') ) === FALSE ) {
+			if ( $this->getSource() != NULL ) {
+				$this->Validator->isLength(	'source',
+													$this->getSource(),
+													TTi18n::gettext('Incorrect Source ID length'),
+													2, 250
+												);
+			}
+		}
+		// Description
+		if ( $this->Validator->getValidateOnly() == FALSE ) {
+			if ( $this->getDescription() == '' ) {
+				$this->Validator->isTrue(		'description',
+												FALSE,
+													TTi18n::gettext('Description must be specified')
+											);
+			}
+		}
+		if ( $this->getDescription() != '' AND $this->Validator->isError('description') == FALSE ) {
+			$this->Validator->isLength(	'description',
+												$this->getDescription(),
+												TTi18n::gettext('Incorrect Description length'),
+												0, 255
+											);
+		}
+		// Default Branch
+		if ( $this->getDefaultBranch() !== FALSE AND $this->getDefaultBranch() != TTUUID::getZeroID() ) {
+			$blf = TTnew( 'BranchListFactory' );
+			$this->Validator->isResultSetWithRows(	'branch_id',
+															$blf->getByID($this->getDefaultBranch()),
+															TTi18n::gettext('Invalid Branch')
+														);
+		}
+		// Default Department
+		if ( $this->getDefaultDepartment() !== FALSE AND $this->getDefaultDepartment() != TTUUID::getZeroID() ) {
+			$dlf = TTnew( 'DepartmentListFactory' );
+			$this->Validator->isResultSetWithRows(	'department_id',
+															$dlf->getByID($this->getDefaultDepartment()),
+															TTi18n::gettext('Invalid Department')
+														);
+		}
+		// Default Job
+		if ( $this->getDefaultJob() !== FALSE AND $this->getDefaultJob() != TTUUID::getZeroID() ) {
+			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+				$jlf = TTnew( 'JobListFactory' );
+				$this->Validator->isResultSetWithRows(	'job_id',
+																$jlf->getByID($this->getDefaultJob()),
+																TTi18n::gettext('Invalid Job')
+															);
+			}
+
+		}
+		// Default Task
+		if ( $this->getDefaultJobItem() !== FALSE AND $this->getDefaultJobItem() != TTUUID::getZeroID() ) {
+			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+				$jilf = TTnew( 'JobItemListFactory' );
+				$this->Validator->isResultSetWithRows(	'job_item_id',
+																$jilf->getByID($this->getDefaultJobItem()),
+																TTi18n::gettext('Invalid Task')
+															);
+			}
+
+		}
+		// Time Zone
+		if ( $this->getTimeZone() !== FALSE AND $this->getTimeZone() != TTUUID::getZeroID() ) {
+			$upf = TTnew( 'UserPreferenceFactory' );
+			$this->Validator->inArrayKey(	'time_zone',
+													$this->getTimeZone(),
+													TTi18n::gettext('Incorrect Time Zone'),
+													Misc::trimSortPrefix( $upf->getOptions('time_zone') )
+												);
+		}
+		// Group Selection Type
+		if ( $this->getGroupSelectionType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'user_group_selection_type',
+													$this->getGroupSelectionType(),
+													TTi18n::gettext('Incorrect Group Selection Type'),
+													$this->getOptions('group_selection_type')
+												);
+		}
+
+		// Branch Selection Type
+		if ( $this->getBranchSelectionType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'branch_selection_type',
+													$this->getBranchSelectionType(),
+													TTi18n::gettext('Incorrect Branch Selection Type'),
+													$this->getOptions('branch_selection_type')
+												);
+		}
+
+		// Department Selection Type
+		if ( $this->getDepartmentSelectionType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'department_selection_type',
+											$this->getDepartmentSelectionType(),
+											TTi18n::gettext('Incorrect Department Selection Type'),
+											$this->getOptions('department_selection_type')
+										);
+		}
+
+		// Port
+		if ( $this->getPort() != '' ) {
+			$this->Validator->isNumeric(	'port',
+													$this->getPort(),
+													TTi18n::gettext('Incorrect port')
+												);
+		}
+
+		if ( $this->getUserName() != '' ) {
+			// User Name
+			$this->Validator->isLength( 'user_name',
+										$this->getUserName(),
+										TTi18n::gettext( 'Incorrect User Name length' ),
+										0, 255
+			);
+		}
+		if ( $this->getPassword() != '' ) {
+			// Password
+			$this->Validator->isLength( 'password',
+										$this->getPassword(),
+										TTi18n::gettext( 'Incorrect Password length' ),
+										0, 255
+			);
+		}
+		// Download Frequency
+		if ( $this->getPollFrequency() !== FALSE ) {
+			$this->Validator->inArrayKey(	'poll_frequency',
+													$this->getPollFrequency(),
+													TTi18n::gettext('Incorrect Download Frequency'),
+													$this->getOptions('poll_frequency')
+												);
+		}
+		// Upload Frequency
+		if ( $this->getPushFrequency() !== FALSE ) {
+			$this->Validator->inArrayKey(	'push_frequency',
+													$this->getPushFrequency(),
+													TTi18n::gettext('Incorrect Upload Frequency'),
+													$this->getOptions('push_frequency')
+												);
+		}
+		// Partial Upload Frequency
+		if ( $this->getPartialPushFrequency() !== FALSE ) {
+			$this->Validator->inArrayKey(	'partial_push_frequency',
+													$this->getPartialPushFrequency(),
+													TTi18n::gettext('Incorrect Partial Upload Frequency'),
+													$this->getOptions('push_frequency')
+												);
+		}
+		if ( $this->getGenericDataValue( 'mode_flag' ) != '' ) { //Need to check on the raw bitmask value.
+			// Mode
+			$this->Validator->isNumeric( 'mode_flag',
+				$this->getGenericDataValue( 'mode_flag' ),
+				TTi18n::gettext( 'Incorrect Mode' )
+			);
+		}
+		if ( $this->getLastPunchTimeStamp() != '' ) {
+			// last punch date
+			$this->Validator->isDate( 'last_punch_time_stamp',
+				$this->getLastPunchTimeStamp(),
+				TTi18n::gettext( 'Incorrect last punch date' )
+			);
+		}
+
+		if ( $this->getLastPollDate() != '' ) {
+			// last poll date
+			$this->Validator->isDate( 'last_poll_date',
+				$this->getLastPollDate(),
+				TTi18n::gettext( 'Incorrect last poll date' )
+			);
+		}
+		if ( $this->getLastPollStatusMessage() != '' ) {
+			// Status Message
+			$this->Validator->isLength( 'last_poll_status_message',
+				$this->getLastPollStatusMessage(),
+				TTi18n::gettext( 'Incorrect Status Message length' ),
+				0, 255
+			);
+		}
+		if ( $this->getLastPushDate() != '' ) {
+			// Last Push Date
+			$this->Validator->isDate( 'last_push_date',
+				$this->getLastPushDate(),
+				TTi18n::gettext( 'Incorrect last push date' )
+			);
+		}
+		if ( $this->getLastPushStatusMessage() != '' ) {
+			// Status Message
+			$this->Validator->isLength( 'last_push_status_message',
+				$this->getLastPushStatusMessage(),
+				TTi18n::gettext( 'Incorrect Status Message length' ),
+				0, 255
+			);
+		}
+		if ( $this->getLastPartialPushDate() != '' ) {
+			// Last partial push date
+			$this->Validator->isDate( 'last_partial_push_date',
+				$this->getLastPartialPushDate(),
+				TTi18n::gettext( 'Incorrect last partial push date' )
+			);
+		}
+		if ( $this->getLastPartialPushStatusMessage() != '' ) {
+			// Status Message
+			$this->Validator->isLength( 'last_partial_push_status_message',
+				$this->getLastPartialPushStatusMessage(),
+				TTi18n::gettext( 'Incorrect Status Message length' ),
+				0, 255
+			);
+		}
+		// User Value 1
+		if ( $this->getUserValue1() != '' ) {
+			$this->Validator->isLength(	'user_value_1',
+												$this->getUserValue1(),
+												TTi18n::gettext('User Value 1 is invalid'),
+												1, 255
+											);
+		}
+		// User Value 2
+		if ( $this->getUserValue2() != '' ) {
+			$this->Validator->isLength(	'user_value_2',
+												$this->getUserValue2(),
+												TTi28n::gettext('User Value 2 is invalid'),
+												2, 255
+											);
+		}
+		// User Value 3
+		if ( $this->getUserValue3() != '' ) {
+			$this->Validator->isLength(	'user_value_3',
+												$this->getUserValue3(),
+												TTi38n::gettext('User Value 3 is invalid'),
+												3, 255
+											);
+		}
+		// User Value 4
+		if ( $this->getUserValue4() != '' ) {
+			$this->Validator->isLength(	'user_value_4',
+												$this->getUserValue4(),
+												TTi48n::gettext('User Value 4 is invalid'),
+												4, 255
+											);
+		}
+		// User Value 5
+		if ( $this->getUserValue5() != '' ) {
+			$this->Validator->isLength(	'user_value_5',
+												$this->getUserValue5(),
+												TTi58n::gettext('User Value 5 is invalid'),
+												5, 255
+											);
+		}
+		if ( $this->getAllowedDate() != '' ) {
+			// Allowed date
+			$this->Validator->isDate( 'allowed_date',
+											$this->getAllowedDate(),
+											TTi18n::gettext( 'Incorrect allowed date' )
+										);
+		}
+		//
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
 		if ( is_object($this->getCompanyObject() ) AND $this->getCompanyObject()->getProductEdition() == 10 AND $this->getType() > 10 ) {
 			$this->Validator->isTrue(		'type_id',
 											FALSE,
 											TTi18n::gettext('Type is not available in %1 Community Edition, please contact our sales department for more information', APPLICATION_NAME ));
 		}
-
-		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getDescription() == '' ) {
-			$this->Validator->isTrue(		'description',
-											FALSE,
-											TTi18n::gettext('Description must be specified'));
-		}
-
 		if ( $ignore_warning == FALSE ) {
 			if ( $this->getStatus() == 20 AND $this->isActiveForAnyEmployee() == FALSE ) {
 				$this->Validator->Warning( 'group', TTi18n::gettext('Employee Criteria denies access to all employees, if you save this record it will be marked as DISABLED') );
@@ -2201,6 +2328,10 @@ class StationFactory extends Factory {
 	}
 
 	//Check to see if this station is active for any employees, if not, we may as well mark it as disabled to speed up queries.
+
+	/**
+	 * @return bool
+	 */
 	function isActiveForAnyEmployee() {
 		if (
 				( $this->getGroupSelectionType() == 20 AND $this->getGroup() === FALSE )
@@ -2219,6 +2350,9 @@ class StationFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		//New stations are deny all by default, so if they haven't
 		//set the selection types, default them to only selected, so
@@ -2240,6 +2374,9 @@ class StationFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getStation() );
 /*
@@ -2251,6 +2388,10 @@ class StationFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -2299,6 +2440,11 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @param bool $permission_children_ids
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -2352,6 +2498,10 @@ class StationFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		if ( !( $log_action == 10 AND $this->getType() == 10 ) ) {
 			return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Station'), NULL, $this->getTable(), $this );

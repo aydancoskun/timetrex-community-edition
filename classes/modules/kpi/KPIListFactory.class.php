@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class KPIListFactory extends KPIFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|KPIListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id, 
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -75,7 +88,14 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|KPIListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -85,8 +105,8 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => (int)$id, 
-					'company_id' => (int)$company_id,
+					'id' => TTUUID::castUUID($id),
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -104,7 +124,13 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 	}
 
 
-	function getByCompanyId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|KPIListFactory
+	 */
+	function getByCompanyId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -117,7 +143,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => (int)$id, 
+					'company_id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -133,7 +159,14 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyIDAndGroupID($company_id, $id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|KPIListFactory
+	 */
+	function getByCompanyIDAndGroupID( $company_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -145,8 +178,8 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id, 
-					'map_id' => (int)$id, 
+					'company_id' => TTUUID::castUUID($company_id),
+					'map_id' => TTUUID::castUUID($id),
 					);
 
 		$query = '
@@ -163,6 +196,15 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|KPIListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -191,8 +233,8 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$additional_order_fields = array('type_id', 'status_id');
 
 		$sort_column_aliases = array(
-										'type' => 'type_id', 
-										'status' => 'status_id', 
+										'type' => 'type_id',
+										'status' => 'status_id',
 									);
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
@@ -211,7 +253,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$cgmf = new CompanyGenericMapFactory();
 		//$kgf = new KPIGroupFactory();
 		$ph = array(
-					'company_id' => (int)$company_id, 
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -228,8 +270,8 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where a.company_id = ?
 					';
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['minimum_rate']) ) ? $this->getWhereClauseSQL( 'a.minimum_rate', $filter_data['minimum_rate'], 'numeric', $ph ) : NULL;
@@ -246,8 +288,8 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 
 		//This is special in that there is an "--ALL--" group that KPIs must actually be assigned to (in addition to any other group if needed), in order to appear when a review is created using the "--ALL--" group.
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.map_id', $filter_data['group_id'], 'numeric_list_with_all', $ph ) : NULL;
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 310, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.map_id', $filter_data['group_id'], 'uuid_list_with_all', $ph ) : NULL;
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 310, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );
@@ -262,8 +304,8 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 				$query	.=	' AND '. $date_filter;
 			}
 			unset($date_filter);
-		}		 
-		
+		}
+
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 
@@ -273,19 +315,24 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL($query, $ph, $limit, $page);
-		
+
 		return $this;
 	}
 
 
-	function getByCompanyIdArray($company_id, $include_blank = TRUE) {
+	/**
+	 * @param string $company_id UUID
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getByCompanyIdArray( $company_id, $include_blank = TRUE) {
 
 		$klf = new KPIListFactory();
 		$klf->getByCompanyId($company_id);
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($klf as $kpi_obj) {
@@ -299,14 +346,19 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		return FALSE;
 	}
 
-	function getArrayByListFactory($lf, $include_blank = TRUE) {
+	/**
+	 * @param $lf
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getArrayByListFactory( $lf, $include_blank = TRUE) {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($lf as $obj) {

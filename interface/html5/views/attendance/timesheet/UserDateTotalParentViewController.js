@@ -2,8 +2,10 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 	el: '#user_date_total_parent_view_container',
 	sub_user_date_total_view_controller: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	_required_files: ['APIUserDateTotal'],
+
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserDateTotalParentEditView.html';
 		this.permission_id = 'punch';
 		this.script_name = 'UserDateTotalParentView';
@@ -196,7 +198,9 @@ UserDateTotalParentViewController.loadSubView = function( container, beforeViewL
 		if ( Global.isSet( container ) ) {
 			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				afterViewLoadedFun( sub_user_date_total_parent_view_controller );
+				TTPromise.wait('BaseViewController', 'initialize', function() {
+					afterViewLoadedFun(sub_user_date_total_parent_view_controller);
+				});
 			}
 		}
 

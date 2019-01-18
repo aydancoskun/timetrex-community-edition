@@ -3,8 +3,8 @@ PermissionWizardController = BaseWizardController.extend( {
 	el: '.wizard',
 	api_permission: null,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Permission Wizard' );
 		this.steps = 3;
@@ -157,6 +157,16 @@ PermissionWizardController = BaseWizardController.extend( {
 
 					if ( current_step_data ) {
 						current_step_ui.role.setValue( current_step_data.role );
+					}
+
+					if ( LocalCacheData.current_open_primary_controller.current_edit_record && LocalCacheData.current_open_primary_controller.current_edit_record.name ) {
+						var selected_control_name = LocalCacheData.current_open_primary_controller.current_edit_record.name.toLowerCase();
+						for ( var n in data ) {
+							if ( data[n].label.toLowerCase() == selected_control_name ) {
+								current_step_ui.role.setSelectedIndex( n );
+								break;
+							}
+						}
 					}
 
 				}} );

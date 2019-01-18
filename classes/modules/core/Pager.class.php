@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,7 +42,11 @@ class Pager {
 	protected $rs = NULL;
 	protected $count_rows = TRUE; //Specify if we count the total rows or not.
 
-	function __construct($arr) {
+	/**
+	 * Pager constructor.
+	 * @param $arr
+	 */
+	function __construct( $arr) {
 		if ( isset($arr->rs) ) {
 			//If there is no RS to return, something is seriously wrong. Check interface.inc.php?
 			//Make sure the ListFactory function is doing a pageselect
@@ -56,6 +60,9 @@ class Pager {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getPreviousPage() {
 		if ( is_object($this->rs) ) {
 			return (int)( $this->rs->absolutepage() - 1 );
@@ -64,6 +71,9 @@ class Pager {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getCurrentPage() {
 		if ( is_object($this->rs) ) {
 			return (int)$this->rs->absolutepage();
@@ -72,6 +82,9 @@ class Pager {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getNextPage() {
 		if ( is_object($this->rs) ) {
 			return (int)( $this->rs->absolutepage() + 1 );
@@ -80,6 +93,9 @@ class Pager {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isFirstPage() {
 		if ( is_object($this->rs) ) {
 			return (bool)$this->rs->atfirstpage();
@@ -88,6 +104,9 @@ class Pager {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isLastPage() {
 		//If the first page is also the last, return true.
 		if ( $this->isFirstPage() AND $this->LastPageNumber() == 1) {
@@ -101,6 +120,9 @@ class Pager {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function LastPageNumber() {
 		if ( is_object($this->rs) ) {
 			if ( $this->count_rows === FALSE ) {
@@ -126,6 +148,10 @@ class Pager {
 	}
 
 	//Return maximum rows per page
+
+	/**
+	 * @return bool|int
+	 */
 	function getRowsPerPage() {
 		if ( is_object($this->rs) ) {
 			if ( isset($this->rs->rowsPerPage) ) {
@@ -138,6 +164,9 @@ class Pager {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getTotalRows() {
 		if ( is_object($this->rs) ) {
 			if ( $this->count_rows === FALSE ) {
@@ -154,6 +183,9 @@ class Pager {
 		return FALSE;
 	}
 
+	/**
+	 * @return array
+	 */
 	function getPageVariables() {
 		//Make sure the ListFactory function is doing a pageselect
 		$paging_data = array(

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,9 @@
  */
 class KPIReport extends Report {
 
+	/**
+	 * KPIReport constructor.
+	 */
 	function __construct() {
 		$this->title = TTi18n::getText('Review Summary Report');
 		$this->file_name = 'review_summary_report';
@@ -49,6 +52,11 @@ class KPIReport extends Report {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return bool
+	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
 		if ( $this->getPermissionObject()->Check('hr_report', 'enabled', $user_id, $company_id )
 				AND $this->getPermissionObject()->Check('hr_report', 'user_review', $user_id, $company_id ) ) {
@@ -58,6 +66,11 @@ class KPIReport extends Report {
 		return FALSE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $params
+	 * @return array|bool|mixed|null
+	 */
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -76,7 +89,7 @@ class KPIReport extends Report {
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
 										'-1010-time_period' => TTi18n::gettext('Time Period'),
-
+										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -449,6 +462,11 @@ class KPIReport extends Report {
 	}
 
 	//Get raw data for report
+
+	/**
+	 * @param null $format
+	 * @return bool
+	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array('user' => array(), 'kpi' => array(), 'user_review_control' => array(), 'user_review' => array() );
 
@@ -503,6 +521,10 @@ class KPIReport extends Report {
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
+
+	/**
+	 * @return bool
+	 */
 	function _preProcess() {
 
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['user_review_control']), NULL, TTi18n::getText('Pre-Processing Data...') );

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,93 +48,180 @@ CREATE TABLE department_branch (
 class DepartmentBranchUserFactory extends Factory {
 	protected $table = 'department_branch_user';
 	protected $pk_sequence_name = 'department_branch_user_id_seq'; //PK Sequence name
+
+	/**
+	 * @return mixed
+	 */
 	function getDepartmentBranch() {
-		return (int)$this->data['department_branch_id'];
+		return $this->getGenericDataValue( 'department_branch_id' );
 	}
-	function setDepartmentBranch($id) {
-		$id = trim($id);
-		
-		$dblf = TTnew( 'DepartmentBranchListFactory' );
-		
-		if ( $id != 0
-				OR $this->Validator->isResultSetWithRows(	'department_branch',
-															$dblf->getByID($id),
-															TTi18n::gettext('Department Branch is invalid')
-															) ) {
-			$this->data['department_branch_id'] = $id;
-		
-			return TRUE;
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setDepartmentBranch( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'department_branch_id', $value );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getUser() {
-		return (int)$this->data['user_id'];
+		return $this->getGenericDataValue( 'user_id' );
 	}
-	function setUser($id) {
-		$id = trim($id);
-		
-		$ulf = TTnew( 'UserListFactory' );
-		
-		if ( $id != 0
-				OR $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('User is invalid')
-															) ) {
-			$this->data['user_id'] = $id;
-		
-			return TRUE;
-		}
 
-		return FALSE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
 	}
-	
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Department Branch
+		if ( $this->getDepartmentBranch() == TTUUID::getZeroID() ) {
+			$dblf = TTnew( 'DepartmentBranchListFactory' );
+			$this->Validator->isResultSetWithRows(	'department_branch',
+															$dblf->getByID($this->getDepartmentBranch()),
+															TTi18n::gettext('Department Branch is invalid')
+														);
+		}
+		// User
+		if ( $this->getUser() == TTUUID::getZeroID() ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+															$ulf->getByID($this->getUser()),
+															TTi18n::gettext('User is invalid')
+														);
+		}
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
+	}
+
 	//This table doesn't have any of these columns, so overload the functions.
+
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
 		return FALSE;
 	}
-	function setDeleted($bool) {		
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		return FALSE;
 	}
-	
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedDate() {
 		return FALSE;
 	}
-	function setCreatedDate($epoch = NULL) {
-		return FALSE;		
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
+		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
-		return FALSE;		
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
+		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
-		return FALSE;		
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
+		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getUpdatedBy() {
 		return FALSE;
 	}
-	function setUpdatedBy($id = NULL) {
-		return FALSE;	
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
+		return FALSE;
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {		
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getDeletedBy() {
 		return FALSE;
 	}
-	function setDeletedBy($id = NULL) {		
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
 		return FALSE;
 	}
 }

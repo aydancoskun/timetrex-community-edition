@@ -1,5 +1,8 @@
 UserPreferenceViewController = BaseViewController.extend( {
 	el: '#user_preference_view_container',
+
+	_required_files: ['APIUserPreference', 'APIUserGroup', 'APIBranch', 'APIDepartment', 'APIUserTitle'],
+
 	date_format_array: null,
 	other_date_format_array: null,
 	js_date_format_array: null,
@@ -29,9 +32,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 	api_date: null,
 
-	initialize: function( options ) {
+	init: function( options ) {
 
-		this._super( 'initialize', options );
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserPreferenceEditView.html';
 		this.permission_id = 'user_preference';
 		this.viewId = 'UserPreference';
@@ -625,7 +628,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 	onStatusChange: function() {
 
-		if ( this.current_edit_record.schedule_icalendar_type_id === 0 ) {
+		if ( this.current_edit_record.schedule_icalendar_type_id == 0 ) {
 			//this.edit_view_form_item_dic['calendar_url'].css( 'display', 'none' );
 			this.detachElement( 'schedule_icalendar_alarm1_working' );
 			this.detachElement( 'schedule_icalendar_alarm2_working' );

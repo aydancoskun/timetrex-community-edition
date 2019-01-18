@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class ImportPayStubAmendment extends Import {
 
 	public $pay_stub_account_options = FALSE;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|bool|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -81,12 +86,22 @@ class ImportPayStubAmendment extends Import {
 	}
 
 
+	/**
+	 * @param $row_number
+	 * @param $raw_row
+	 * @return mixed
+	 */
 	function _preParseRow( $row_number, $raw_row ) {
 		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getPayStubAmendmentDefaultData() );
 
 		return $retval;
 	}
 
+	/**
+	 * @param $row_number
+	 * @param $raw_row
+	 * @return mixed
+	 */
 	function _postParseRow( $row_number, $raw_row ) {
 		$raw_row['user_id'] = $this->getUserIdByRowData( $raw_row );
 		if ( $raw_row['user_id'] == FALSE ) {
@@ -96,6 +111,10 @@ class ImportPayStubAmendment extends Import {
 		return $raw_row;
 	}
 
+	/**
+	 * @param int $validate_only EPOCH
+	 * @return mixed
+	 */
 	function _import( $validate_only ) {
 		return $this->getObject()->setPayStubAmendment( $this->getParsedData(), $validate_only );
 	}
@@ -103,6 +122,9 @@ class ImportPayStubAmendment extends Import {
 	//
 	// Generic parser functions.
 	//
+	/**
+	 * @return bool
+	 */
 	function getPayStubAccountOptions() {
 		//Get accrual policies
 		$psealf = TTNew('PayStubEntryAccountListFactory');
@@ -117,6 +139,13 @@ class ImportPayStubAmendment extends Import {
 
 		return TRUE;
 	}
+
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|int|mixed
+	 */
 	function parse_pay_stub_entry_name( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return 0; //Default Wage Group
@@ -139,10 +168,22 @@ class ImportPayStubAmendment extends Import {
 		return $retval;
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return false|int
+	 */
 	function parse_effective_date( $input, $default_value = NULL, $parse_hint = NULL ) {
 		return $this->parse_date( $input, $default_value, $parse_hint );
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|mixed
+	 */
 	function parse_status( $input, $default_value = NULL, $parse_hint = NULL ) {
 		$psaf = TTnew('PayStubAmendmentFactory');
 		$options = Misc::trimSortPrefix( $psaf->getOptions( 'status' ) );
@@ -158,6 +199,12 @@ class ImportPayStubAmendment extends Import {
 		}
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|mixed
+	 */
 	function parse_type( $input, $default_value = NULL, $parse_hint = NULL ) {
 		$psaf = TTnew('PayStubAmendmentFactory');
 		$options = Misc::trimSortPrefix( $psaf->getOptions( 'type' ) );
@@ -173,6 +220,13 @@ class ImportPayStubAmendment extends Import {
 		}
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed
+	 */
 	function parse_amount( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		$val = new Validator();
 		$retval = $val->stripNonFloat($input);
@@ -180,12 +234,27 @@ class ImportPayStubAmendment extends Import {
 		return $retval;
 	}
 
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed
+	 */
 	function parse_rate( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		$val = new Validator();
 		$retval = $val->stripNonFloat($input);
 
 		return $retval;
 	}
+
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @param null $raw_row
+	 * @return mixed
+	 */
 	function parse_units( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		$val = new Validator();
 		$retval = $val->stripNonFloat($input);

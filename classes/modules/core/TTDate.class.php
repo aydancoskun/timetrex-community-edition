@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -75,10 +75,16 @@ class TTDate {
 	static $long_month_of_year_arr = NULL;
 	static $short_month_of_year_arr = NULL;
 
+	/**
+	 * TTDate constructor.
+	 */
 	function __construct() {
 		self::setTimeZone();
 	}
 
+	/**
+	 * @return array
+	 */
 	private	 static function _get_month_short_names() {
 		// i18n: This private method is not called anywhere in the class. (it is now)
 		//		 It's purpose is simply to ensure that the short (3 letter)
@@ -100,6 +106,9 @@ class TTDate {
 				);
 	}
 
+	/**
+	 * @return array
+	 */
 	private static function _get_month_long_names() {
 		// i18n: It's purpose is simply to ensure that the short (3 letter)
 		//		 month forms are included in getText() calls so that they
@@ -120,6 +129,10 @@ class TTDate {
 				);
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
 	public static function isDST( $epoch = NULL ) {
 		if ( $epoch == NULL ) {
 			$epoch = TTDate::getTime();
@@ -130,6 +143,9 @@ class TTDate {
 		return (bool)$dst;
 	}
 
+	/**
+	 * @return string
+	 */
 	public static function getTimeZone() {
 		if ( self::$time_zone == '' ) {
 			Debug::text('ERROR: Timezone was not set prior to getting it!', __FILE__, __LINE__, __METHOD__, 10);
@@ -138,13 +154,21 @@ class TTDate {
 			return self::$time_zone;
 		}
 	}
-	public static function setTimeZone($time_zone = NULL, $force = FALSE, $execute_sql_now = TRUE ) {
+
+	/**
+	 * @param null $time_zone
+	 * @param bool $force
+	 * @param bool $execute_sql_now
+	 * @return bool
+	 */
+	public static function setTimeZone( $time_zone = NULL, $force = FALSE, $execute_sql_now = TRUE ) {
 		global $config_vars, $current_user_prefs;
 
 		$time_zone = Misc::trimSortPrefix( trim($time_zone) );
 
 		//Default to system local timezone if no timezone is specified.
-		if ( $time_zone == '' OR strtolower($time_zone) == 'system/localtime' ) { //System/Localtime is an invalid timezone, so default to GMT instead.
+		//Zero UUIDs might come from Station timezone field.
+		if ( $time_zone == '' OR $time_zone == TTUUID::getZeroID() OR strtolower($time_zone) == 'system/localtime' ) { //System/Localtime is an invalid timezone, so default to GMT instead.
 			if ( isset($current_user_prefs) AND is_object($current_user_prefs) ) {
 				//When TTDate is called from the API directly, its not called statically, so
 				//this forces __construct() to call setTimeZone and for the timezone to be set back to the system defined timezone after
@@ -212,7 +236,11 @@ class TTDate {
 		return FALSE;
 	}
 
-	public static function setDateFormat($date_format) {
+	/**
+	 * @param int $date_format EPOCH
+	 * @return bool
+	 */
+	public static function setDateFormat( $date_format) {
 		$date_format = trim($date_format);
 
 		Debug::text('Setting Default Date Format: '. $date_format, __FILE__, __LINE__, __METHOD__, 10);
@@ -226,7 +254,11 @@ class TTDate {
 		return FALSE;
 	}
 
-	public static function setTimeFormat($time_format) {
+	/**
+	 * @param $time_format
+	 * @return bool
+	 */
+	public static function setTimeFormat( $time_format) {
 		$time_format = trim($time_format);
 
 		Debug::text('Setting Default Time Format: '. $time_format, __FILE__, __LINE__, __METHOD__, 10);
@@ -240,7 +272,11 @@ class TTDate {
 		return FALSE;
 	}
 
-	public static function setTimeUnitFormat($time_unit_format) {
+	/**
+	 * @param $time_unit_format
+	 * @return bool
+	 */
+	public static function setTimeUnitFormat( $time_unit_format) {
 		$time_unit_format = trim($time_unit_format);
 
 		Debug::text('Setting Default Time Unit Format: '. $time_unit_format, __FILE__, __LINE__, __METHOD__, 10);
@@ -254,10 +290,18 @@ class TTDate {
 		return FALSE;
 	}
 
+	/**
+	 * @return false|string
+	 */
 	public static function getTimeZoneOffset() {
 		return date('Z');
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @param $timezone
+	 * @return mixed
+	 */
 	public static function convertTimeZone( $epoch, $timezone ) {
 		if ( $timezone == '' ) {
 			return $epoch;
@@ -284,6 +328,11 @@ class TTDate {
 		return $epoch;
 	}
 
+	/**
+	 * @param $seconds
+	 * @param bool $include_seconds
+	 * @return string
+	 */
 	public static function convertSecondsToHMS( $seconds, $include_seconds = FALSE ) {
 		if ( $seconds < 0 ) {
 			$negative_number = TRUE;
@@ -354,7 +403,12 @@ class TTDate {
 		return $negative.$retval;
 	}
 
-	public static function parseTimeUnit($time_unit, $format = NULL ) {
+	/**
+	 * @param $time_unit
+	 * @param null $format
+	 * @return bool|float|int|number|string
+	 */
+	public static function parseTimeUnit( $time_unit, $format = NULL ) {
 		/*
 			10	=> 'hh:mm (2:15)',
 			12	=> 'hh:mm:ss (2:15:59)',
@@ -453,7 +507,12 @@ class TTDate {
 		return FALSE;
 	}
 
-	public static function getTimeUnit($seconds, $time_unit_format = NULL ) {
+	/**
+	 * @param $seconds
+	 * @param null $time_unit_format
+	 * @return bool|int|string
+	 */
+	public static function getTimeUnit( $seconds, $time_unit_format = NULL ) {
 		if ( $time_unit_format == '' ) {
 			$time_unit_format = self::$time_unit_format;
 		}
@@ -515,7 +574,11 @@ class TTDate {
 		return FALSE;
 	}
 
-	public static function parseDateTime($str) {
+	/**
+	 * @param $str
+	 * @return bool|false|int|null
+	 */
+	public static function parseDateTime( $str) {
 		if ( is_array($str) OR is_object($str) ) {
 			Debug::Arr($str, 'Date is array or object, unable to parse...', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
@@ -667,32 +730,73 @@ class TTDate {
 		return $epoch;
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
 	public static function getISODateStamp( $epoch ) {
 		$format = 'Ymd';
 
 		return date( $format, $epoch);
 	}
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
 	public static function getISOTimeStamp( $epoch ) {
 		return date( 'r', $epoch);
 	}
 
+	/**
+	 * @param string $format
+	 * @param int $epoch EPOCH
+	 * @return bool|false|null|string
+	 */
 	public static function getAPIDate( $format = 'DATE+TIME', $epoch ) {
 		return self::getDate( $format, $epoch );
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @param bool $include_time_zone
+	 * @return false|string
+	 */
 	public static function getDBTimeStamp( $epoch, $include_time_zone = TRUE ) {
-		$format = 'Y-m-d H:i:s';
-		if ( $include_time_zone == TRUE ) {
-			$format .= ' T';
+		if ( $epoch != '' ) {
+			$format = 'Y-m-d H:i:s';
+			if ( $include_time_zone == TRUE ) {
+				$format .= ' T';
+			}
+
+			return date( $format, $epoch );
 		}
 
-		return date( $format, $epoch);
+		return NULL;
 	}
 
-	public static function getDate($format = NULL, $epoch = NULL ) {
+	/**
+	 * @param null $format
+	 * @param int $epoch EPOCH
+	 * @return bool|false|null|string
+	 */
+	public static function getDate( $format = NULL, $epoch = NULL ) {
+		if ( $epoch == '' OR $epoch == '-1' OR $epoch == 0 ) {
+			//$epoch = TTDate::getTime();
+			//Don't return anything if EPOCH isn't set.
+			//return FALSE;
+			return NULL;
+		}
+
 		if ( !is_numeric($epoch) OR $epoch == 0 ) {
-			//Debug::text('Epoch is not numeric: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+			//This can happen from LogDetailFactory when using DB date/time stamps. Since
+			if ( is_string($epoch) AND strlen($epoch) > 14 ) {
+				//Epoch is a DB timestamp string.
+				$epoch = self::strtotime( $epoch );
+			} else {
+				Debug::Arr($epoch, 'Epoch is not numeric: ', __FILE__, __LINE__, __METHOD__, 10);
+				return FALSE;
+			}
 		}
 
 		if ( empty($format) ) {
@@ -716,14 +820,6 @@ class TTDate {
 		}
 		//Debug::text('Format Name: '. $format .' Epoch: '. $epoch .' Format: '. $php_format, __FILE__, __LINE__, __METHOD__, 10);
 
-
-		if ($epoch == '' OR $epoch == '-1') {
-			//$epoch = TTDate::getTime();
-			//Don't return anything if EPOCH isn't set.
-			//return FALSE;
-			return NULL;
-		}
-
 		//Debug::text('Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 		//This seems to support pre 1970 dates..
 		return date($php_format, $epoch);
@@ -732,6 +828,9 @@ class TTDate {
 		//return adodb_date($format, $epoch);
 	}
 
+	/**
+	 * @return array
+	 */
 	public static function getDayOfMonthArray() {
 		$retarr = array();
 		for( $i = 1; $i <= 31; $i++ ) {
@@ -740,6 +839,10 @@ class TTDate {
 		return $retarr;
 	}
 
+	/**
+	 * @param bool $short_name
+	 * @return array|null
+	 */
 	public static function getMonthOfYearArray( $short_name = FALSE) {
 		if ( $short_name == TRUE ) {
 			if ( is_array(self::$short_month_of_year_arr) == FALSE ) {
@@ -754,6 +857,10 @@ class TTDate {
 		}
 	}
 
+	/**
+	 * @param bool $translation
+	 * @return array|null
+	 */
 	public static function getDayOfWeekArray( $translation = TRUE ) {
 		if ( $translation == TRUE AND is_array(self::$day_of_week_arr) == FALSE ) {
 			self::$day_of_week_arr = array(
@@ -780,7 +887,12 @@ class TTDate {
 		return self::$day_of_week_arr;
 	}
 
-	public static function getDayOfWeek($epoch, $start_week_day = 0) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $start_week_day
+	 * @return false|string
+	 */
+	public static function getDayOfWeek( $epoch, $start_week_day = 0) {
 		$dow = date('w', (int)$epoch);
 
 		if ( $start_week_day == 0 ) {
@@ -794,15 +906,28 @@ class TTDate {
 		}
 	}
 
+	/**
+	 * @param $dow
+	 * @return bool
+	 */
 	public static function getDayOfWeekName( $dow ) {
 		return self::getDayOfWeekByInt( $dow );
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
 	public static function getDayOfYear( $epoch ) {
 		return date('z', $epoch);
 	}
 
-	public static function getDayOfWeekByInt($int, $translation = TRUE ) {
+	/**
+	 * @param $int
+	 * @param bool $translation
+	 * @return bool
+	 */
+	public static function getDayOfWeekByInt( $int, $translation = TRUE ) {
 		self::getDayOfWeekArray( $translation );
 
 		if ( isset(self::$day_of_week_arr[$int]) ) {
@@ -812,6 +937,10 @@ class TTDate {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $start_week_day
+	 * @return array
+	 */
 	public static function getDayOfWeekArrayByStartWeekDay( $start_week_day = 0 ) {
 		$retarr = array();
 		$arr = self::getDayOfWeekArray();
@@ -835,6 +964,10 @@ class TTDate {
 
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
 	public static function isMidnight( $epoch ) {
 		if ( TTDate::getHour( $epoch ) == 0 AND TTDate::getMinute( $epoch ) == 0 AND TTDate::getSecond( $epoch ) == 0 ) {
 			return TRUE;
@@ -843,6 +976,12 @@ class TTDate {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @param bool $match_midnight
+	 * @return bool
+	 */
 	public static function doesRangeSpanMidnight( $start_epoch, $end_epoch, $match_midnight = FALSE ) {
 		if ( $start_epoch > $end_epoch ) { //If start_epoch is after end_epoch, just swap the two values.
 			$tmp = $start_epoch;
@@ -865,6 +1004,11 @@ class TTDate {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @return bool
+	 */
 	public static function doesRangeSpanDST( $start_epoch, $end_epoch ) {
 		if ( date('I', $start_epoch) != date('I', $end_epoch) ) {
 			$retval = TRUE;
@@ -875,6 +1019,12 @@ class TTDate {
 		//Debug::text('Start Epoch: '. TTDate::getDate('DATE+TIME', $start_epoch) .'  End Epoch: '. TTDate::getDate('DATE+TIME', $end_epoch) .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
+
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @return int
+	 */
 	public static function getDSTOffset( $start_epoch, $end_epoch ) {
 		if ( date('I', $start_epoch) == 0 AND date('I', $end_epoch) == 1 ) {
 			$retval = 3600; //DST==TRUE: Spring - Spring ahead an hour, which means we lose an hour, so we add one hour from the offset.
@@ -888,31 +1038,58 @@ class TTDate {
 		return $retval;
 	}
 
+	/**
+	 * @return int
+	 */
 	public static function getTime() {
 		return time();
 	}
 
-	public static function getSeconds($hours) {
+	/**
+	 * @param $hours
+	 * @return string
+	 */
+	public static function getSeconds( $hours) {
 		return bcmul( $hours, 3600 );
 	}
 
-	public static function getHours($seconds) {
+	/**
+	 * @param $seconds
+	 * @return string
+	 */
+	public static function getHours( $seconds) {
 		return bcdiv( $seconds, 3600 );
 	}
 
-	public static function getDays($seconds) {
+	/**
+	 * @param $seconds
+	 * @return string
+	 */
+	public static function getDays( $seconds) {
 		return bcdiv( $seconds, 86400);
 	}
 
-	public static function getWeeks($seconds) {
+	/**
+	 * @param $seconds
+	 * @return string
+	 */
+	public static function getWeeks( $seconds) {
 		return bcdiv( $seconds, ( 86400 * 7 ) );
 	}
 
+	/**
+	 * @param $seconds
+	 * @return string
+	 */
 	public static function getYears( $seconds ) {
 		return bcdiv( bcdiv( $seconds, 86400 ), 365 );
 	}
 
-	public static function getDaysInMonth($epoch = NULL ) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
+	public static function getDaysInMonth( $epoch = NULL ) {
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
 		}
@@ -920,7 +1097,11 @@ class TTDate {
 		return date('t', $epoch);
 	}
 
-	public static function getDaysInYear($epoch = NULL ) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
+	public static function getDaysInYear( $epoch = NULL ) {
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
 		}
@@ -928,9 +1109,17 @@ class TTDate {
 		return date('z', TTDate::getEndYearEpoch( $epoch ) );
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @param $amount
+	 * @param $unit
+	 * @return false|int
+	 */
 	public static function incrementDate( $epoch, $amount, $unit ) {
-		$date_arr = getdate($epoch);
+		//Debug::text('Epoch: '. $epoch .' ('.TTDate::getDate('DATE+TIME', $epoch).') Amount: '. $amount .' unit: '. $unit, __FILE__, __LINE__, __METHOD__, 10);
 
+		$date_arr = getdate($epoch);
+		$retval = NULL;
 		//Unit: minute, hour, day
 		switch ( $unit ) {
 			case 'minute':
@@ -948,6 +1137,9 @@ class TTDate {
 			case 'month':
 				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, ($date_arr['mon'] + $amount), $date_arr['mday'], $date_arr['year'] );
 				break;
+			case 'quarter':
+				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, ($date_arr['mon'] + ( $amount * 3 ) ), $date_arr['mday'], $date_arr['year'] );
+				break;
 			case 'year':
 				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, $date_arr['mon'], $date_arr['mday'], ($date_arr['year'] + $amount) );
 				break;
@@ -957,7 +1149,13 @@ class TTDate {
 
 	}
 
-	public static function snapTime($epoch, $snap_to_epoch, $snap_type) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $snap_to_epoch EPOCH
+	 * @param $snap_type
+	 * @return mixed
+	 */
+	public static function snapTime( $epoch, $snap_to_epoch, $snap_type) {
 		Debug::text('Epoch: '. $epoch .' ('.TTDate::getDate('DATE+TIME', $epoch).') Snap Epoch: '. $snap_to_epoch .' ('.TTDate::getDate('DATE+TIME', $snap_to_epoch).') Snap Type: '. $snap_type, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( empty($epoch) OR empty($snap_to_epoch) ) {
@@ -983,7 +1181,14 @@ class TTDate {
 		return $epoch;
 	}
 
-	public static function roundTime($epoch, $round_value, $round_type = 20, $grace_time = 0 ) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @param $round_value
+	 * @param int $round_type
+	 * @param int $grace_time
+	 * @return int
+	 */
+	public static function roundTime( $epoch, $round_value, $round_type = 20, $grace_time = 0 ) {
 
 		//Debug::text('In Epoch: '. $epoch .' ('.TTDate::getDate('DATE+TIME', $epoch).') Round Value: '. $round_value .' Round Type: '. $round_type, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1033,7 +1238,13 @@ class TTDate {
 		return $epoch;
 	}
 
-	public static function graceTime($current_epoch, $grace_time, $schedule_epoch) {
+	/**
+	 * @param int $current_epoch EPOCH
+	 * @param $grace_time
+	 * @param int $schedule_epoch EPOCH
+	 * @return mixed
+	 */
+	public static function graceTime( $current_epoch, $grace_time, $schedule_epoch) {
 		//Debug::text('Current Epoch: '. $current_epoch .' Grace Time: '. $grace_time .' Schedule Epoch: '. $schedule_epoch, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $current_epoch <= ($schedule_epoch + $grace_time)
 				AND $current_epoch >= ($schedule_epoch - $grace_time) ) {
@@ -1044,6 +1255,64 @@ class TTDate {
 		return $current_epoch;
 	}
 
+	/**
+	 * @param $prefix
+	 * @param $array
+	 * @return int|mixed
+	 */
+	public static function getTimeStampFromSmarty( $prefix, $array) {
+		Debug::text('Prefix: '. $prefix, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($array, 'getTimeStampFromSmarty Array:', __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( isset($array[$prefix.'Year']) ) {
+			$year = $array[$prefix.'Year'];
+		} else {
+			$year = strftime("%Y");
+		}
+		if ( isset($array[$prefix.'Month']) ) {
+			$month = $array[$prefix.'Month'];
+		} else {
+			//$month = strftime("%m");
+			$month = 1;
+		}
+		if ( isset($array[$prefix.'Day']) ) {
+			$day = $array[$prefix.'Day'];
+		} else {
+			//If day isn't specified it uses the current day, but then if its the 30th, and they
+			//select February, it goes to March!
+			//$day = strftime("%d");
+			$day = 1;
+		}
+		if ( isset($array[$prefix.'Hour']) ) {
+			$hour = $array[$prefix.'Hour'];
+		} else {
+			$hour = 0;
+		}
+		if ( isset($array[$prefix.'Minute']) ) {
+			$min = $array[$prefix.'Minute'];
+		} else {
+			$min = 0;
+		}
+		if ( isset($array[$prefix.'Second']) ) {
+			$sec = $array[$prefix.'Second'];
+		} else {
+			$sec = 0;
+		}
+
+		Debug::text('Year: '. $year .' Month: '. $month .' Day: '. $day .' Hour: '. $hour .' Min: '. $min .' Sec: '. $sec, __FILE__, __LINE__, __METHOD__, 10);
+
+		return self::getTimeStamp($year, $month, $day, $hour, $min, $sec);
+	}
+
+	/**
+	 * @param string $year
+	 * @param string $month
+	 * @param string $day
+	 * @param int $hour
+	 * @param int $min
+	 * @param int $sec
+	 * @return int|mixed
+	 */
 	public static function getTimeStamp($year="", $month="", $day="", $hour = 0, $min = 0, $sec = 0) {
 		if ( empty($year) ) {
 			$year = strftime("%Y");
@@ -1078,6 +1347,11 @@ class TTDate {
 		return $epoch;
 	}
 
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @return mixed
+	 */
 	public static function getDayWithMostTime( $start_epoch, $end_epoch ) {
 		$time_on_start_date = ( TTDate::getEndDayEpoch( $start_epoch ) - $start_epoch );
 		$time_on_end_date = ( $end_epoch - TTDate::getBeginDayEpoch( $end_epoch ) );
@@ -1090,7 +1364,13 @@ class TTDate {
 		return $day_with_most_time;
 	}
 
-	public static function getDayDifference($start_epoch, $end_epoch, $round = TRUE) {
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @param bool $round
+	 * @return bool|float|int
+	 */
+	public static function getDayDifference( $start_epoch, $end_epoch, $round = TRUE) {
 		if ( $start_epoch == '' OR $end_epoch == '' ) {
 			return FALSE;
 		}
@@ -1106,7 +1386,12 @@ class TTDate {
 		return $days;
 	}
 
-	public static function getWeekDifference($start_epoch, $end_epoch) {
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @return bool|float|int
+	 */
+	public static function getWeekDifference( $start_epoch, $end_epoch) {
 		if ( $start_epoch == '' OR $end_epoch == '' ) {
 			return FALSE;
 		}
@@ -1118,7 +1403,12 @@ class TTDate {
 		return $weeks;
 	}
 
-	public static function getMonthDifference($start_epoch, $end_epoch) {
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @return bool|float|int
+	 */
+	public static function getMonthDifference( $start_epoch, $end_epoch) {
 		if ( $start_epoch == '' OR $end_epoch == '' ) {
 			return FALSE;
 		}
@@ -1139,7 +1429,12 @@ class TTDate {
 		return $x;
 	}
 
-	public static function getYearDifference($start_epoch, $end_epoch) {
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @return bool|float|int
+	 */
+	public static function getYearDifference( $start_epoch, $end_epoch) {
 		if ( $start_epoch == '' OR $end_epoch == '' ) {
 			return FALSE;
 		}
@@ -1156,12 +1451,21 @@ class TTDate {
 		return $years;
 	}
 
-	public static function getDateByMonthOffset($epoch, $month_offset) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @param $month_offset
+	 * @return false|int
+	 */
+	public static function getDateByMonthOffset( $epoch, $month_offset) {
 		//return mktime(0, 0, 0, date('n', $epoch) + $month_offset, date('j', $epoch), date('Y', $epoch) );
 		return mktime(date('G', $epoch), date('i', $epoch), date('s', $epoch), ( date('n', $epoch) + $month_offset ), date('j', $epoch), date('Y', $epoch) );
 	}
 
-	public static function getBeginMinuteEpoch($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|int
+	 */
+	public static function getBeginMinuteEpoch( $epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch)) {
 			$epoch = self::getTime();
 		}
@@ -1171,7 +1475,11 @@ class TTDate {
 		return $retval;
 	}
 
-	public static function getBeginDayEpoch($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|int
+	 */
+	public static function getBeginDayEpoch( $epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch)) {
 			$epoch = self::getTime();
 		}
@@ -1185,7 +1493,11 @@ class TTDate {
 		//return $retval;
 	}
 
-	public static function getMiddleDayEpoch($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|int
+	 */
+	public static function getMiddleDayEpoch( $epoch = NULL) {
 		if ( $epoch == '' OR !is_numeric($epoch) ) { //Optimize out the $epoch == NULL check as its done by == ''.
 		//if ( $epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
@@ -1200,7 +1512,11 @@ class TTDate {
 		//return $retval;
 	}
 
-	public static function getEndDayEpoch($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|int
+	 */
+	public static function getEndDayEpoch( $epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch)) {
 			$epoch = self::getTime();
 		}
@@ -1210,7 +1526,11 @@ class TTDate {
 		return $retval;
 	}
 
-	public static function getBeginMonthEpoch($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|int
+	 */
+	public static function getBeginMonthEpoch( $epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
 		}
@@ -1220,7 +1540,11 @@ class TTDate {
 		return $retval;
 	}
 
-	public static function getEndMonthEpoch($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|int
+	 */
+	public static function getEndMonthEpoch( $epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch)) {
 			$epoch = self::getTime();
 		}
@@ -1230,7 +1554,11 @@ class TTDate {
 		return $retval;
 	}
 
-	public static function getBeginQuarterEpoch($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return mixed
+	 */
+	public static function getBeginQuarterEpoch( $epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
 		}
@@ -1242,7 +1570,12 @@ class TTDate {
 
 		return $retval;
 	}
-	public static function getEndQuarterEpoch($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return mixed
+	 */
+	public static function getEndQuarterEpoch( $epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
 		}
@@ -1255,6 +1588,11 @@ class TTDate {
 		return $retval;
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $offset
+	 * @return false|string
+	 */
 	static function getFiscalYearFromEpoch( $epoch, $offset = 3 ) {
 		switch ( strtolower($offset) ) {
 			case 'us':
@@ -1283,7 +1621,11 @@ class TTDate {
 		return $retval;
 	}
 
-	public static function getBeginYearEpoch($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|int
+	 */
+	public static function getBeginYearEpoch( $epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
 		}
@@ -1293,7 +1635,11 @@ class TTDate {
 		return $retval;
 	}
 
-	public static function getEndYearEpoch($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|int
+	 */
+	public static function getEndYearEpoch( $epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
 		}
@@ -1308,6 +1654,10 @@ class TTDate {
 
 	//Returns the month of the quarter that the date falls in.
 	//Used for government forms that require a break down for each month in the quarter.
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool|mixed
+	 */
 	public static function getYearQuarterMonth( $epoch = NULL ) {
 		$year_quarter_months = array(
 									1 => 1,
@@ -1335,6 +1685,10 @@ class TTDate {
 
 	//Regardless of the quarter, this returns if its the 1st, 2nd or 3rd month in the quarter.
 	//Primary used for government forms.
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool|mixed
+	 */
 	public static function getYearQuarterMonthNumber( $epoch = NULL ) {
 		$year_quarter_months = array(
 									1 => 1,
@@ -1360,6 +1714,10 @@ class TTDate {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return float
+	 */
 	public static function getYearQuarter( $epoch = NULL ) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
@@ -1370,6 +1728,13 @@ class TTDate {
 		//Debug::text('Date: '. TTDate::getDate('DATE+TIME', $epoch ) .' is in quarter: '. $quarter, __FILE__, __LINE__, __METHOD__, 10);
 		return $quarter;
 	}
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @param null $quarter
+	 * @param int $day_of_month
+	 * @return array|bool|mixed
+	 */
 	public static function getYearQuarters( $epoch = NULL, $quarter = NULL, $day_of_month = 1 ) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
@@ -1394,7 +1759,12 @@ class TTDate {
 		return $quarter_dates;
 	}
 
-	public static function getDateOfNextDayOfWeek($anchor_epoch, $day_of_week_epoch) {
+	/**
+	 * @param int $anchor_epoch EPOCH
+	 * @param int $day_of_week_epoch EPOCH
+	 * @return bool|false|int
+	 */
+	public static function getDateOfNextDayOfWeek( $anchor_epoch, $day_of_week_epoch) {
 		//Anchor Epoch is the anchor date to start searching from.
 		//Day of week epoch is the epoch we use to extract the day of the week from.
 		Debug::text('-------- ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1435,7 +1805,13 @@ class TTDate {
 
 	}
 
-	public static function getDateOfNextDayOfMonth($anchor_epoch, $day_of_month_epoch, $day_of_month = NULL ) {
+	/**
+	 * @param int $anchor_epoch EPOCH
+	 * @param int $day_of_month_epoch EPOCH
+	 * @param null $day_of_month
+	 * @return bool|false|int
+	 */
+	public static function getDateOfNextDayOfMonth( $anchor_epoch, $day_of_month_epoch, $day_of_month = NULL ) {
 		//Anchor Epoch is the anchor date to start searching from.
 		//Day of month epoch is the epoch we use to extract the day of the month from.
 		Debug::text('-------- ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1500,11 +1876,46 @@ class TTDate {
 		return TTDate::getBeginDayEpoch( $retval );
 	}
 
+	/**
+	 * @param $anchor_epoch
+	 * @param int $day_of_month
+	 * @param int $month_of_quarter
+	 * @return false|int|mixed
+	 */
+	public static function getDateOfNextQuarter( $anchor_epoch, $day_of_month = 1, $month_of_quarter = 1  ) {
+		$quarter_date = self::getBeginQuarterEpoch($anchor_epoch);
+		$month_of_quarter--;
+
+		$month = ((int)date('m', $quarter_date)) + $month_of_quarter;
+
+
+		$first_day_of_select_month = mktime(12,0,0, $month, 1, date('Y', $quarter_date));
+		$days_in_month = TTDate::getDaysInMonth( $first_day_of_select_month );
+		if ( $day_of_month> $days_in_month ) {
+			$day_of_month = $days_in_month;
+		}
+		$quarter_date = mktime(12,0,0, $month, $day_of_month, date('Y', $quarter_date));
+
+		$attempts = 0; //sane attempts < 5.
+		while ( $quarter_date <= $anchor_epoch AND $attempts < 10) {
+			$quarter_date = self::incrementDate( $quarter_date, 3, 'month' );
+			$attempts++;
+		}
+		//Debug::text('next quarter: '. date('r', $quarter_date), __FILE__, __LINE__, __METHOD__, 10);
+		return $quarter_date;
+	}
+
+	/**
+	 * @param int $anchor_epoch EPOCH
+	 * @param int $year_epoch EPOCH
+	 * @return bool|false|int
+	 */
 	public static function getDateOfNextYear( $anchor_epoch, $year_epoch ) {
 		//Anchor Epoch is the anchor date to start searching from.
-		//Day of year epoch is the epoch we use to extract the day of the year from.
+		//Year Epoch is the epoch we use to extract the year from.
 		Debug::text('-------- ', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::text('Anchor Epoch: '. TTDate::getDate('DATE+TIME', $anchor_epoch), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Year Epoch: '. TTDate::getDate('DATE+TIME', $year_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $anchor_epoch == '' ) {
 			return FALSE;
@@ -1523,7 +1934,11 @@ class TTDate {
 
 	}
 
-	public static function getLastHireDateAnniversary($hire_date) {
+	/**
+	 * @param int $hire_date EPOCH
+	 * @return false|int
+	 */
+	public static function getLastHireDateAnniversary( $hire_date) {
 		Debug::Text('Hire Date: '. $hire_date .' - '. TTDate::getDate('DATE+TIME', $hire_date), __FILE__, __LINE__, __METHOD__, 10);
 
 		//Find last hire date anniversery.
@@ -1537,7 +1952,12 @@ class TTDate {
 		return $last_hire_date_anniversary;
 	}
 
-	public static function getBeginWeekEpoch($epoch = NULL, $start_day_of_week = 0 ) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $start_day_of_week
+	 * @return false|int
+	 */
+	public static function getBeginWeekEpoch( $epoch = NULL, $start_day_of_week = 0 ) {
 		if ($epoch == NULL OR $epoch == '') {
 			$epoch = self::getTime();
 		}
@@ -1567,7 +1987,12 @@ class TTDate {
 		return $retval;
 	}
 
-	public static function getEndWeekEpoch($epoch = NULL, $start_day_of_week = 0 ) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $start_day_of_week
+	 * @return false|int
+	 */
+	public static function getEndWeekEpoch( $epoch = NULL, $start_day_of_week = 0 ) {
 		if ( $epoch == NULL OR $epoch == '' ) {
 			$epoch = self::getTime();
 		}
@@ -1580,6 +2005,12 @@ class TTDate {
 	}
 
 	//This could also be called: getWeekOfYear
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $start_week_day
+	 * @return int
+	 */
 	public static function getWeek( $epoch = NULL, $start_week_day = 0 ) {
 		//Default start_day_of_week to 1 (Monday) as that is what PHP defaults to.
 		if ($epoch == NULL OR $epoch == '') {
@@ -1597,7 +2028,11 @@ class TTDate {
 		return (int)$retval;
 	}
 
-	public static function getYear($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
+	public static function getYear( $epoch = NULL) {
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
 		}
@@ -1605,6 +2040,10 @@ class TTDate {
 		return date('Y', $epoch);
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
 	public static function getMonth( $epoch = NULL ) {
 		if ($epoch == NULL OR $epoch == '') {
 			$epoch = self::getTime();
@@ -1612,6 +2051,12 @@ class TTDate {
 
 		return date('n', $epoch);
 	}
+
+	/**
+	 * @param $month
+	 * @param bool $short_name
+	 * @return bool|mixed
+	 */
 	public static function getMonthName( $month, $short_name = FALSE ) {
 		$month = (int)$month;
 		$month_names = self::getMonthOfYearArray( $short_name );
@@ -1622,6 +2067,10 @@ class TTDate {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
 	public static function getDayOfMonth( $epoch = NULL ) {
 		if ($epoch == NULL OR $epoch == '') {
 			$epoch = self::getTime();
@@ -1630,6 +2079,10 @@ class TTDate {
 		return date('j', $epoch);
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
 	public static function getHour( $epoch = NULL ) {
 		if ($epoch == NULL OR $epoch == '') {
 			$epoch = self::getTime();
@@ -1638,6 +2091,10 @@ class TTDate {
 		return date('G', $epoch);
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
 	public static function getMinute( $epoch = NULL ) {
 		if ($epoch == NULL OR $epoch == '') {
 			$epoch = self::getTime();
@@ -1646,6 +2103,10 @@ class TTDate {
 		return date('i', $epoch);
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
 	public static function getSecond( $epoch = NULL ) {
 		if ($epoch == NULL OR $epoch == '') {
 			$epoch = self::getTime();
@@ -1654,7 +2115,11 @@ class TTDate {
 		return date('s', $epoch);
 	}
 
-	public static function isWeekDay($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	public static function isWeekDay( $epoch = NULL) {
 		if ($epoch == NULL OR empty($epoch)) {
 			$epoch = TTDate::getTime();
 		}
@@ -1669,7 +2134,11 @@ class TTDate {
 		return FALSE;
 	}
 
-	public static function getAnnualWeekDays($epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @return int
+	 */
+	public static function getAnnualWeekDays( $epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '') {
 			$epoch = self::getTime();
 		}
@@ -1714,6 +2183,12 @@ class TTDate {
 		return $start_days;
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $type
+	 * @param array $exclude_epochs
+	 * @return int
+	 */
 	public static function getNearestWeekDay( $epoch, $type = 0, $exclude_epochs = array() ) {
 		Debug::Text('Epoch: '. TTDate::getDate('DATE+TIME', $epoch ) .' Type: '. $type, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1756,6 +2231,13 @@ class TTDate {
 	}
 
 	//Returns an array of dates within the range.
+
+	/**
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param bool $day_of_week
+	 * @return array
+	 */
 	public static function getDateArray( $start_date, $end_date, $day_of_week = FALSE ) {
 		$start_date = TTDate::getMiddleDayEpoch( $start_date );
 		$end_date = TTDate::getMiddleDayEpoch( $end_date );
@@ -1773,7 +2255,15 @@ class TTDate {
 	}
 
 	//Loop from filter start date to end date. Creating an array entry for each day.
-	public static function getCalendarArray($start_date, $end_date, $start_day_of_week = 0, $force_weeks = TRUE) {
+
+	/**
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param int $start_day_of_week
+	 * @param bool $force_weeks
+	 * @return array|bool
+	 */
+	public static function getCalendarArray( $start_date, $end_date, $start_day_of_week = 0, $force_weeks = TRUE) {
 		if ( $start_date == '' OR $end_date == '' ) {
 			return FALSE;
 		}
@@ -1851,6 +2341,12 @@ class TTDate {
 		return $retarr;
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $window_epoch EPOCH
+	 * @param $window
+	 * @return bool
+	 */
 	public static function inWindow( $epoch, $window_epoch, $window ) {
 		Debug::text(' Epoch: '. TTDate::getDate('DATE+TIME', $epoch ) .' Window Epoch: '. TTDate::getDate('DATE+TIME', $window_epoch ) .' Window: '. $window, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1866,7 +2362,15 @@ class TTDate {
 	}
 
 	//Date pair1
-	public static function getTimeOverLapDifference($start_date1, $end_date1, $start_date2, $end_date2) {
+
+	/**
+	 * @param int $start_date1 EPOCH
+	 * @param int $end_date1 EPOCH
+	 * @param int $start_date2 EPOCH
+	 * @param int $end_date2 EPOCH
+	 * @return bool|mixed
+	 */
+	public static function getTimeOverLapDifference( $start_date1, $end_date1, $start_date2, $end_date2) {
 		$overlap_result = self::getTimeOverlap( $start_date1, $end_date1, $start_date2, $end_date2 );
 		if ( is_array($overlap_result) ) {
 			$retval = ( $overlap_result['end_date'] - $overlap_result['start_date'] );
@@ -1877,7 +2381,14 @@ class TTDate {
 		return FALSE;
 	}
 
-	public static function getTimeOverLap($start_date1, $end_date1, $start_date2, $end_date2) {
+	/**
+	 * @param int $start_date1 EPOCH
+	 * @param int $end_date1 EPOCH
+	 * @param int $start_date2 EPOCH
+	 * @param int $end_date2 EPOCH
+	 * @return array|bool
+	 */
+	public static function getTimeOverLap( $start_date1, $end_date1, $start_date2, $end_date2) {
 		//Find out if Date1 overlaps with Date2
 
 		//Allow 0 as one of the dates.
@@ -1923,7 +2434,14 @@ class TTDate {
 		return FALSE;
 	}
 
-	public static function isTimeOverLap($start_date1, $end_date1, $start_date2, $end_date2) {
+	/**
+	 * @param int $start_date1 EPOCH
+	 * @param int $end_date1 EPOCH
+	 * @param int $start_date2 EPOCH
+	 * @param int $end_date2 EPOCH
+	 * @return bool
+	 */
+	public static function isTimeOverLap( $start_date1, $end_date1, $start_date2, $end_date2) {
 		//Find out if Date1 overlaps with Date2
 
 		//Allow 0 as one of the dates.
@@ -1983,6 +2501,11 @@ class TTDate {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @return array
+	 */
 	public static function calculateTimeOnEachDayBetweenRange( $start_epoch, $end_epoch ) {
 	    $retval = array();
 		if ( TTDate::doesRangeSpanMidnight( $start_epoch, $end_epoch ) == TRUE ) {
@@ -2014,8 +2537,8 @@ class TTDate {
 	 *
 	 * @param time $start_time_stamp
 	 * @param time $end_time_stamp
-	 * @param time $filter_start_time_stamp
-	 * @param time $filter_end_time_stamp
+	 * @param time|bool $filter_start_time_stamp
+	 * @param time|bool $filter_end_time_stamp
 	 * @return array
 	 */
 	static function splitDateRangeAtMidnight( $start_time_stamp, $end_time_stamp, $filter_start_time_stamp = FALSE, $filter_end_time_stamp = FALSE ) {
@@ -2106,6 +2629,10 @@ class TTDate {
 		}
 	}
 
+	/**
+	 * @param int $date_array EPOCH
+	 * @return bool
+	 */
 	public static function isConsecutiveDays( $date_array ) {
 		if ( is_array($date_array) AND count($date_array) > 1 ) {
 			$retval = FALSE;
@@ -2116,7 +2643,7 @@ class TTDate {
 			foreach( $date_array as $date ) {
 				if ( $prev_date != FALSE ) {
 					$date_diff = ( TTDate::getMiddleDayEpoch( TTDate::strtotime( $date ) ) - TTDate::getMiddleDayEpoch( TTDate::strtotime( $prev_date ) ) );
-					if ( $date_diff <= 86400 ) {
+					if ( $date_diff <= 90000 ) { //Use 90000 so it handles the 86400 +/- 3600 of DST switch over.
 						$retval = TRUE;
 					} else {
 						$retval = FALSE;
@@ -2134,6 +2661,11 @@ class TTDate {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $birth_date EPOCH
+	 * @param $age
+	 * @return false|int
+	 */
 	public static function getBirthDateAtAge( $birth_date, $age ) {
 		if ( $age > 0 ) {
 			$age = '+'.$age;
@@ -2142,7 +2674,12 @@ class TTDate {
 		return strtotime( $age.' years', $birth_date );
 	}
 
-	public static function getTimeLockedDate($time_epoch, $date_epoch) {
+	/**
+	 * @param int $time_epoch EPOCH
+	 * @param int $date_epoch EPOCH
+	 * @return false|int
+	 */
+	public static function getTimeLockedDate( $time_epoch, $date_epoch) {
 		//This check is needed because if the $time_epoch is FALSE or 0, it gets treated as Jan 1st 1969 @ 4:00PM in some cases due to time zone (PST) by getdate()
 		//so to prevent it from erroneously locking the date at 4PM, just return the original $date_epoch instead.
 		if ( $time_epoch == '' ) {
@@ -2164,7 +2701,11 @@ class TTDate {
 		return $epoch;
 	}
 
-	public static function getEasterDays($year) {
+	/**
+	 * @param $year
+	 * @return float
+	 */
+	public static function getEasterDays( $year) {
 		#First calculate the date of easter using Delambre's algorithm.
 		$a = ( $year % 19 );
 		$b = floor( ( $year / 100 ) );
@@ -2189,7 +2730,12 @@ class TTDate {
 	}
 
 	// Function to return "13 mins ago" text from a given time.
-	public static function getHumanTimeSince($epoch) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return string
+	 */
+	public static function getHumanTimeSince( $epoch) {
 		if ( time() >= $epoch ) {
 			$epoch_since = ( time() - $epoch );
 		} else {
@@ -2245,7 +2791,11 @@ class TTDate {
 
 	//Runs strtotime over a string, but if it happens to be an epoch, strtotime
 	//returns -1, so in this case, just return the epoch again.
-	public static function strtotime($str) {
+	/**
+	 * @param $str
+	 * @return int
+	 */
+	public static function strtotime( $str) {
 		if ( is_numeric($str) ) {
 			return (int)$str;
 		}
@@ -2261,6 +2811,10 @@ class TTDate {
 		return (int)$retval;
 	}
 
+	/**
+	 * @param $str
+	 * @return bool
+	 */
 	public static function isBindTimeStamp( $str ) {
 		if ( strpos( $str, '-') === FALSE ) {
 			return FALSE;
@@ -2269,6 +2823,10 @@ class TTDate {
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $include_pay_period
+	 * @return array
+	 */
 	public static function getTimePeriodOptions( $include_pay_period = TRUE ) {
 		$retarr = array(
 						'-1000-custom_date' => TTi18n::getText('Custom Dates'), // Select Start/End dates from calendar.
@@ -2398,6 +2956,14 @@ class TTDate {
 
 		return $retarr;
 	}
+
+	/**
+	 * @param $time_period
+	 * @param int $epoch EPOCH
+	 * @param object $user_obj
+	 * @param null $params
+	 * @return array|bool
+	 */
 	public static function getTimePeriodDates( $time_period, $epoch = NULL, $user_obj = NULL, $params = NULL ) {
 		$time_period = Misc::trimSortPrefix( $time_period );
 
@@ -2740,10 +3306,6 @@ class TTDate {
 				$start_date = TTDate::getBeginYearEpoch( $epoch );
 				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 90) ) ) - 1 );
 				break;
-			case 'this_year_90_days':
-				$start_date = TTDate::getBeginYearEpoch( $epoch );
-				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 90) ) ) - 1 );
-				break;
 			case 'this_year_last_quarter':
 				$start_date = TTDate::getBeginYearEpoch( $epoch );
 				$quarter = ( TTDate::getYearQuarter( $epoch ) - 1 );
@@ -3019,6 +3581,13 @@ class TTDate {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $column_name_prefix
+	 * @param null $column_name
+	 * @param null $sort_prefix
+	 * @param bool $include_pay_period
+	 * @return array
+	 */
 	public static function getReportDateOptions( $column_name_prefix = NULL, $column_name = NULL, $sort_prefix = NULL, $include_pay_period = TRUE ) {
 		if ( $sort_prefix == '' ) {
 			$sort_prefix = 19;
@@ -3084,6 +3653,14 @@ class TTDate {
 		return $retarr;
 	}
 
+	/**
+	 * @param $column
+	 * @param int $epoch EPOCH
+	 * @param bool $post_processing
+	 * @param object $user_obj
+	 * @param null $params
+	 * @return array|bool|false|null|string
+	 */
 	public static function getReportDates( $column, $epoch = NULL, $post_processing = TRUE, $user_obj = NULL, $params = NULL ) {
 		//Make sure if epoch is actually NULL that we return a blank array and not todays date.
 		//This is import for things like termination dates that may be NULL when not set.
@@ -3263,7 +3840,11 @@ class TTDate {
 		return FALSE;
 	}
 
-	public static function getISO8601Duration($time) {
+	/**
+	 * @param $time
+	 * @return string
+	 */
+	public static function getISO8601Duration( $time) {
 		$units = array(
 			'Y' => ( 365 * 24 * 3600 ),
 			'D' => ( 24 * 3600 ),
@@ -3291,6 +3872,13 @@ class TTDate {
 		return $str;
 	}
 
+	/**
+	 * @param int $frequency_id
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @param array $frequency_criteria
+	 * @return bool
+	 */
 	static function inApplyFrequencyWindow( $frequency_id, $start_date, $end_date, $frequency_criteria = array() ) {
 		/*
 		Frequency IDs:

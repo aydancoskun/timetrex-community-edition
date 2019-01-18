@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,40 +45,45 @@ class UserDateFactory extends Factory {
 	var $user_obj = NULL;
 	var $pay_period_obj = NULL;
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getPayPeriodObject() {
 		return $this->getGenericObject( 'PayPeriodListFactory', $this->getPayPeriod(), 'pay_period_obj' );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-	}
-	function setUser($id) {
-		$id = trim($id);
-
-		$ulf = TTnew( 'UserListFactory' );
-
-		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
-															) ) {
-			$this->data['user_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function findPayPeriod() {
-		if ( $this->getDateStamp() > 0 AND $this->getUser() > 0 ) {
+		if ( $this->getDateStamp() > 0
+				AND TTUUID::isUUID( $this->getUser() ) AND $this->getUser() != TTUUID::getZeroID() AND $this->getUser() != TTUUID::getNotExistID() ) {
 			//FIXME: With MySQL since it doesn't handle timezones very well I think we need to
 			//get the timezone of the payperiod schedule for this user, and set the timezone to that
 			//before we go searching for a pay period, otherwise the wrong payperiod might be returned.
@@ -107,81 +112,69 @@ class UserDateFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPayPeriod() {
-		if ( isset($this->data['pay_period_id']) ) {
-			return (int)$this->data['pay_period_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayPeriod($id = NULL) {
-		$id = trim($id);
-
-		if ( $id == NULL ) {
-			$id = $this->findPayPeriod();
-		}
-
-		$pplf = TTnew( 'PayPeriodListFactory' );
-
-		//Allow NULL pay period, incase its an absence or something in the future.
-		//Cron will fill in the pay period later.
-		if (
-				$id == FALSE
-				OR
-				$this->Validator->isResultSetWithRows(	'pay_period',
-														$pplf->getByID($id),
-														TTi18n::gettext('Invalid Pay Period')
-														) ) {
-			$this->data['pay_period_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'pay_period_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayPeriod( $value = NULL) {
+		$value = trim($value);
+		if ( $value == NULL ) {
+			$value = $this->findPayPeriod();
+		}
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'pay_period_id', $value );
+	}
+
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getDateStamp( $raw = FALSE ) {
-		if ( isset($this->data['date_stamp']) ) {
+		$value = $this->getGenericDataValue( 'date_stamp' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['date_stamp'];
+				return $value;
 			} else {
 				//return $this->db->UnixTimeStamp( $this->data['start_date'] );
 				//strtotime is MUCH faster than UnixTimeStamp
 				//Must use ADODB for times pre-1970 though.
-				return TTDate::strtotime( $this->data['date_stamp'] );
+				return TTDate::strtotime( $value );
 			}
 		}
 
 		return FALSE;
 	}
-	function setDateStamp($epoch) {
-		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
-		if	(	$this->Validator->isDate(		'date_stamp',
-												$epoch,
-												TTi18n::gettext('Incorrect date'))
-			) {
-
-			if	( $epoch > 0 ) {
-				$this->data['date_stamp'] = $epoch;
-
-				return TRUE;
-			} else {
-				$this->Validator->isTRUE(		'date_stamp',
-												FALSE,
-												TTi18n::gettext('Incorrect date'));
-			}
-
-
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setDateStamp( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericDataValue( 'date_stamp', $value );
 	}
 
-	static function findOrInsertUserDate($user_id, $date, $timezone = NULL ) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date EPOCH
+	 * @param null $timezone
+	 * @return bool
+	 */
+	static function findOrInsertUserDate( $user_id, $date, $timezone = NULL ) {
 		//Allow	 user_id=0 for saving open schedule shifts.
-		$user_id = (int)$user_id;
-		if ( $user_id >= 0 AND $date > 0 ) {
+		$user_id = TTUUID::castUUID($user_id);
+		if ( $user_id != '' AND $date > 0 ) {
 			$date = TTDate::getMiddleDayEpoch( $date ); //Use mid day epoch so the timezone conversion across DST doesn't affect the date.
 
 			if ( $timezone == NULL ) {
@@ -229,7 +222,12 @@ class UserDateFactory extends Factory {
 		return FALSE;
 	}
 
-	static function getUserDateID($user_id, $date) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date EPOCH
+	 * @return bool
+	 */
+	static function getUserDateID( $user_id, $date) {
 		$user_date_id = UserDateFactory::findOrInsertUserDate( $user_id, $date);
 		Debug::text(' User Date ID: '. $user_date_id, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $user_date_id != '' ) {
@@ -245,6 +243,10 @@ class UserDateFactory extends Factory {
 	//actually deleting the user_date row. As we need to have a unique
 	//index on user_id, date_stamp so we never get duplicate rows, essentially making the deleted
 	//column useless.
+	/**
+	 * @param string $user_date_id UUID
+	 * @return bool
+	 */
 	static function deleteChildren( $user_date_id ) {
 		if (  $user_date_id == '' ) {
 			return FALSE;
@@ -252,6 +254,9 @@ class UserDateFactory extends Factory {
 
 	}
 
+	/**
+	 * @return bool
+	 */
 	function isUnique() {
 		//Allow user_id=0 for OPEN scheduled shifts.
 		if ( $this->getUser() === FALSE ) {
@@ -282,9 +287,49 @@ class UserDateFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		// User
+		if ( $this->getUser() != TTUUID::getZeroID() ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+															$ulf->getByID($this->getUser()),
+															TTi18n::gettext('Invalid Employee')
+														);
+		}
+		// Pay Period
+		if ( $this->getPayPeriod() != FALSE ) {
+			$pplf = TTnew( 'PayPeriodListFactory' );
+			$this->Validator->isResultSetWithRows(	'pay_period',
+															$pplf->getByID($this->getPayPeriod()),
+															TTi18n::gettext('Invalid Pay Period')
+														);
+		}
+		// Date
+		$this->Validator->isDate(		'date_stamp',
+												$this->getDateStamp(),
+												TTi18n::gettext('Incorrect date')
+											);
+		if ( $this->Validator->isError('date_stamp') == FALSE ) {
+			if ( $this->getDateStamp() <= 0 ) {
+				$this->Validator->isTRUE(		'date_stamp',
+												FALSE,
+												TTi18n::gettext('Incorrect date')
+											);
+			}
+ 		}
+
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		//Make sure pay period isn't locked!
-		if ( $this->getPayPeriod() > 0 ) {
+		if ( TTUUID::isUUID( $this->getPayPeriod() ) AND $this->getPayPeriod() != TTUUID::getZeroID() AND $this->getPayPeriod() != TTUUID::getNotExistID() ) {
 			if ( is_object( $this->getPayPeriodObject() ) AND $this->getPayPeriodObject()->getIsLocked() == TRUE ) {
 				$this->Validator->isTRUE(	'pay_period',
 											FALSE,
@@ -323,6 +368,9 @@ class UserDateFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getDeleted() == TRUE ) {
 			//Delete (for real) any already deleted rows in hopes to prevent a
@@ -334,6 +382,9 @@ class UserDateFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,9 @@ class InstallSchema_1014A extends InstallSchema_Base {
 	protected $permission_groups = NULL;
 	protected $permission_group_users = NULL;
 
+	/**
+	 * @return bool
+	 */
 	function preInstall() {
 		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
@@ -199,6 +202,9 @@ class InstallSchema_1014A extends InstallSchema_Base {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postInstall() {
 		// @codingStandardsIgnoreStart
 		global $cache;
@@ -233,7 +239,7 @@ class InstallSchema_1014A extends InstallSchema_Base {
 
 					if ( $pcf->isValid() ) {
 						$pcf->Save(FALSE);
-						
+
 						if ( strtolower($group_name) == 'default' ) {
 							//Assign all unassigned users to this permission group.
 							$tmp_user_ids = array_merge( (array)$this->permission_group_users[$company_id][$group_name], array_diff($all_user_ids, $assigned_user_ids) );

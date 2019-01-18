@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,20 +41,31 @@
 class APIPermission extends APIFactory {
 	protected $main_class = 'PermissionFactory';
 
+	/**
+	 * APIPermission constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
 		return TRUE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getUniqueCountry() {
 		global $current_company;
-		$company_id = (int)$current_company->getId();
+		$company_id = TTUUID::castUUID($current_company->getId());
 
 		$ulf = TTNew('UserListFactory');
 		return $ulf->getUniqueCountryByCompanyId( $company_id );
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $company_id UUID
+	 * @return array|bool
+	 */
 	function getPermissions( $user_id = NULL, $company_id = NULL ) {
 		if ( $user_id == NULL OR $user_id == '' ) {
 			global $current_user;
@@ -72,6 +83,10 @@ class APIPermission extends APIFactory {
 		return $this->returnHandler( $permission->getPermissions( $user_id, $company_id ) );
 	}
 
+	/**
+	 * @param $section_groups
+	 * @return array|bool
+	 */
 	function getSectionBySectionGroup( $section_groups ) {
 		if ( !is_array($section_groups) ) {
 			$section_groups = array( $section_groups );
@@ -84,7 +99,7 @@ class APIPermission extends APIFactory {
 
 		if ( in_array( 'all', $section_groups ) ) {
 			//Debug::Text('Returning ALL section Groups: ', __FILE__, __LINE__, __METHOD__, 10);
-			$section_groups = array_keys( $this->getOptions('section_group') );
+			$section_groups = array_keys( (array)$this->getOptions('section_group') );
 			unset($section_groups[0]);
 		}
 
@@ -98,7 +113,7 @@ class APIPermission extends APIFactory {
 				}
 			}
 		}
-		
+
 		if ( count($retarr) > 0 ) {
 			//Debug::Arr($retarr, 'Sections: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->returnHandler( Misc::trimSortPrefix( $retarr, 1000 ) );
@@ -107,6 +122,12 @@ class APIPermission extends APIFactory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $preset
+	 * @param bool $filter_sections
+	 * @param bool $filter_permissions
+	 * @return array|bool
+	 */
 	function filterPresetPermissions( $preset, $filter_sections = FALSE, $filter_permissions = FALSE ) {
 		$pf = TTNew('PermissionFactory');
 		return $this->returnHandler( $pf->filterPresetPermissions( $preset, $filter_sections, $filter_permissions ) );

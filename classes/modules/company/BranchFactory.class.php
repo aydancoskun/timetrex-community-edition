@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class BranchFactory extends Factory {
 	protected $address_validator_regex = '/^[a-zA-Z0-9-,_\/\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $city_validator_regex = '/^[a-zA-Z0-9-,_\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -107,6 +112,10 @@ class BranchFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -138,62 +147,53 @@ class BranchFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $id == 0
-				OR $this->Validator->isResultSetWithRows(	'company',
-															$clf->getByID($id),
-															TTi18n::gettext('Company is invalid')
-															) ) {
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = TTUUID::castUUID( $value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getStatus() {
-		if ( isset($this->data['status_id']) ) {
-			return (int)$this->data['status_id'];
-		}
-
-		return FALSE;
-	}
-	function setStatus($status) {
-		$status = trim($status);
-
-		if ( $this->Validator->inArrayKey(	'status',
-											$status,
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')) ) {
-
-			$this->data['status_id'] = $status;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'status_id' );
 	}
 
-	function isUniqueManualID($id) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStatus( $value) {
+		$value = (int)trim( $value);
+		return $this->setGenericDataValue( 'status_id', $value );
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function isUniqueManualID( $id) {
 		if ( $this->getCompany() == FALSE ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'manual_id' => $id,
-					'company_id' =>	$this->getCompany(),
+					'manual_id' => (int)$id,
+					'company_id' =>	TTUUID::castUUID( $this->getCompany() ),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where manual_id = ? AND company_id = ? AND deleted=0';
@@ -210,10 +210,15 @@ class BranchFactory extends Factory {
 
 		return FALSE;
 	}
-	static function getNextAvailableManualId( $company_id = NULL ) {
+
+	/**
+	 * @param string $company_id UUID
+	 * @return int
+	 */
+	function getNextAvailableManualId( $company_id = NULL ) {
 		global $current_company;
 
-		if ( $company_id == '' ANd is_object($current_company) ) {
+		if ( $company_id == '' AND is_object($current_company) ) {
 			$company_id = $current_company->getId();
 		} elseif ( $company_id == '' AND isset($this) AND is_object($this) ) {
 			$company_id = $this->getCompany();
@@ -230,44 +235,27 @@ class BranchFactory extends Factory {
 		return $next_available_manual_id;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getManualID() {
-		if ( isset($this->data['manual_id']) ) {
-			return (int)$this->data['manual_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'manual_id' );
 	}
-	function setManualID($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setManualID( $value) {
 		$value = $this->Validator->stripNonNumeric( trim($value) );
-
-		if (	$this->Validator->isNumeric(	'manual_id',
-												$value,
-												TTi18n::gettext('Code is invalid'))
-				AND
-				$this->Validator->isLength(	'manual_id',
-											$value,
-											TTi18n::gettext('Code has too many digits'),
-											0,
-											10)
-				AND
-				$this->Validator->isTrue(	'manual_id',
-											( $this->Validator->stripNon32bitInteger( $value ) === 0 ) ? FALSE : TRUE,
-											TTi18n::gettext('Code is invalid, maximum value exceeded') )
-				AND
-				$this->Validator->isTrue(		'manual_id',
-												$this->isUniqueManualID($value),
-												TTi18n::gettext('Code is already in use, please enter a different one'))
-												) {
-
-			$this->data['manual_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'manual_id', $value );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		Debug::Arr($this->getCompany(), 'Company: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->getCompany() == FALSE ) {
 			return FALSE;
@@ -279,7 +267,7 @@ class BranchFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -301,510 +289,561 @@ class BranchFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
-	function setName($name) {
-		$name = trim($name);
 
-		if	(	$this->Validator->isLength(		'name',
-												$name,
-												TTi18n::gettext('Name is too short or too long'),
-												2,
-												100)
-					AND
-						$this->Validator->isTrue(		'name',
-														$this->isUniqueName($name),
-														TTi18n::gettext('Branch name already exists'))
-
-												) {
-
-			$this->data['name'] = $name;
-			$this->setNameMetaphone( $name );
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim( $value);
+		$this->setNameMetaphone( $value );
+		return $this->setGenericDataValue( 'name', $value );
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getNameMetaphone() {
-		if ( isset($this->data['name_metaphone']) ) {
-			return $this->data['name_metaphone'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name_metaphone' );
 	}
-	function setNameMetaphone($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setNameMetaphone( $value) {
 		$value = metaphone( trim($value) );
-
-		if	( $value != '' ) {
-			$this->data['name_metaphone'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'name_metaphone', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getAddress1() {
-		if ( isset($this->data['address1']) ) {
-			return $this->data['address1'];
-		}
-
-		return FALSE;
-	}
-	function setAddress1($address1) {
-		$address1 = trim($address1);
-
-		if	(	$address1 != NULL
-				AND
-					( $this->Validator->isRegEx(		'address1',
-												$address1,
-												TTi18n::gettext('Address1 contains invalid characters'),
-												$this->address_validator_regex)
-				AND
-					$this->Validator->isLength(		'address1',
-													$address1,
-													TTi18n::gettext('Address1 is too short or too long'),
-													2,
-													250) ) ) {
-
-			$this->data['address1'] = $address1;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'address1' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAddress1( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'address1', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getAddress2() {
-		if ( isset($this->data['address2']) ) {
-			return $this->data['address2'];
-		}
-
-		return FALSE;
-	}
-	function setAddress2($address2) {
-		$address2 = trim($address2);
-
-		if	(	$address2 != NULL
-				AND (
-					$this->Validator->isRegEx(		'address2',
-													$address2,
-													TTi18n::gettext('Address2 contains invalid characters'),
-													$this->address_validator_regex)
-				AND
-					$this->Validator->isLength(		'address2',
-													$address2,
-													TTi18n::gettext('Address2 is too short or too long'),
-													2,
-													250) ) ) {
-
-			$this->data['address2'] = $address2;
-
-			return TRUE;
-		}
-
-		return FALSE;
-
+		return $this->getGenericDataValue( 'address2' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAddress2( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'address2', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCity() {
-		if ( isset($this->data['city']) ) {
-			return $this->data['city'];
-		}
-
-		return FALSE;
-	}
-	function setCity($city) {
-		$city = trim($city);
-
-		if	(	$this->Validator->isRegEx(		'city',
-												$city,
-												TTi18n::gettext('City contains invalid characters'),
-												$this->city_validator_regex)
-				AND
-					$this->Validator->isLength(		'city',
-													$city,
-													TTi18n::gettext('City name is too short or too long'),
-													2,
-													250) ) {
-
-			$this->data['city'] = $city;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'city' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCity( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'city', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getProvince() {
-		if ( isset($this->data['province']) ) {
-			return $this->data['province'];
-		}
-
-		return FALSE;
-	}
-	function setProvince($province) {
-		$province = trim($province);
-
-		Debug::Text('Country: '. $this->getCountry() .' Province: '. $province, __FILE__, __LINE__, __METHOD__, 10);
-
-		$cf = TTnew( 'CompanyFactory' );
-
-		$options_arr = $cf->getOptions('province');
-		if ( isset($options_arr[$this->getCountry()]) ) {
-			$options = $options_arr[$this->getCountry()];
-		} else {
-			$options = array();
-		}
-
-		//If country isn't set yet, accept the value and re-validate on save.
-		if ( $this->getCountry() == FALSE
-				OR
-				$this->Validator->inArrayKey(	'province',
-												$province,
-												TTi18n::gettext('Invalid Province/State'),
-												$options ) ) {
-
-			$this->data['province'] = $province;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'province' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setProvince( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'province', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getCountry() {
-		if ( isset($this->data['country']) ) {
-			return $this->data['country'];
-		}
-
-		return FALSE;
-	}
-	function setCountry($country) {
-		$country = trim($country);
-
-		$cf = TTnew( 'CompanyFactory' );
-
-		if ( $this->Validator->inArrayKey(		'country',
-												$country,
-												TTi18n::gettext('Invalid Country'),
-												$cf->getOptions('country') ) ) {
-
-			$this->data['country'] = $country;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'country' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCountry( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'country', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPostalCode() {
-		if ( isset($this->data['postal_code']) ) {
-			return $this->data['postal_code'];
-		}
-
-		return FALSE;
-	}
-	function setPostalCode($postal_code) {
-		$postal_code = strtoupper( $this->Validator->stripSpaces($postal_code) );
-
-		if	(
-				$postal_code == ''
-				OR
-				(
-				$this->Validator->isPostalCode(		'postal_code',
-													$postal_code,
-													TTi18n::gettext('Postal/ZIP Code contains invalid characters, invalid format, or does not match Province/State'),
-													$this->getCountry(), $this->getProvince() )
-				AND
-					$this->Validator->isLength(		'postal_code',
-													$postal_code,
-													TTi18n::gettext('Postal/ZIP Code is too short or too long'),
-													1,
-													10)
-				)
-				) {
-
-			$this->data['postal_code'] = $postal_code;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'postal_code' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPostalCode( $value) {
+		$value = strtoupper( $this->Validator->stripSpaces( $value ) );
+		return $this->setGenericDataValue( 'postal_code', $value );
+	}
+
+	/**
+	 * @return bool|float
+	 */
 	function getLongitude() {
-		if ( isset($this->data['longitude']) ) {
-			return (float)$this->data['longitude'];
-		}
-
-		return FALSE;
-	}
-	function setLongitude($value) {
-		$value = TTi18n::parseFloat( $value );
-
-		if (	$value == 0
-				OR
-				$this->Validator->isFloat(	'longitude',
-											$value,
-											TTi18n::gettext('Longitude is invalid')
-											) ) {
-			$this->data['longitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'longitude' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLongitude( $value ) {
+		if ( is_numeric($value) ) {
+			$value = number_format( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+		} else {
+			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
+		}
+
+		return $this->setGenericDataValue( 'longitude', $value );
+	}
+
+	/**
+	 * @return bool|float
+	 */
 	function getLatitude() {
-		if ( isset($this->data['latitude']) ) {
-			return (float)$this->data['latitude'];
-		}
-
-		return FALSE;
-	}
-	function setLatitude($value) {
-		$value = TTi18n::parseFloat( $value );
-
-		if (	$value == 0
-				OR
-				$this->Validator->isFloat(	'latitude',
-											$value,
-											TTi18n::gettext('Latitude is invalid')
-											) ) {
-			$this->data['latitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'latitude' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLatitude( $value ) {
+		if ( is_numeric($value) ) {
+			$value = number_format( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+		} else {
+			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
+		}
+
+		return $this->setGenericDataValue( 'latitude', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getWorkPhone() {
-		if ( isset($this->data['work_phone']) ) {
-			return $this->data['work_phone'];
-		}
-
-		return FALSE;
-	}
-	function setWorkPhone($work_phone) {
-		$work_phone = trim($work_phone);
-
-		if	(	$work_phone != NULL
-				AND $this->Validator->isPhoneNumber(	'work_phone',
-														$work_phone,
-														TTi18n::gettext('Work phone number is invalid')) ) {
-
-			$this->data['work_phone'] = $work_phone;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'work_phone' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setWorkPhone( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'work_phone', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getFaxPhone() {
-		if ( isset($this->data['fax_phone']) ) {
-			return $this->data['fax_phone'];
-		}
-
-		return FALSE;
-	}
-	function setFaxPhone($fax_phone) {
-		$fax_phone = trim($fax_phone);
-
-		if	(	$fax_phone != NULL
-				AND $this->Validator->isPhoneNumber(	'fax_phone',
-														$fax_phone,
-														TTi18n::gettext('Fax phone number is invalid')) ) {
-
-			$this->data['fax_phone'] = $fax_phone;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'fax_phone' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setFaxPhone( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'fax_phone', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID1() {
-		if ( isset($this->data['other_id1']) ) {
-			return $this->data['other_id1'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id1' );
 	}
-	function setOtherID1($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID1( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id1',
-											$value,
-											TTi18n::gettext('Other ID 1 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id1'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id1', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID2() {
-		if ( isset($this->data['other_id2']) ) {
-			return $this->data['other_id2'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id2' );
 	}
-	function setOtherID2($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID2( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id2',
-											$value,
-											TTi18n::gettext('Other ID 2 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id2'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id2', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID3() {
-		if ( isset($this->data['other_id3']) ) {
-			return $this->data['other_id3'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id3' );
 	}
-	function setOtherID3($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID3( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id3',
-											$value,
-											TTi18n::gettext('Other ID 3 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id3'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id3', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID4() {
-		if ( isset($this->data['other_id4']) ) {
-			return $this->data['other_id4'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id4' );
 	}
-	function setOtherID4($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID4( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id4',
-											$value,
-											TTi18n::gettext('Other ID 4 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id4'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id4', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getOtherID5() {
-		if ( isset($this->data['other_id5']) ) {
-			return $this->data['other_id5'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'other_id5' );
 	}
-	function setOtherID5($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setOtherID5( $value) {
 		$value = trim($value);
-
-		if (	$value == ''
-				OR
-				$this->Validator->isLength(	'other_id5',
-											$value,
-											TTi18n::gettext('Other ID 5 is invalid'),
-											1, 255) ) {
-
-			$this->data['other_id5'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'other_id5', $value );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getGEOFenceIds() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 4000, $this->getID() );
 	}
 
-	function setGEOFenceIds($ids) {
-		Debug::text('Setting GEO Fence IDs : ', __FILE__, __LINE__, __METHOD__, 10);
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setGEOFenceIds( $ids) {
+		Debug::text('Setting GEO Fence IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 4000, $this->getID(), (array)$ids );
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getTag() {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
-		if ( isset($this->tmp_data['tags']) ) {
-			return $this->tmp_data['tags'];
-		} elseif ( $this->getCompany() > 0 AND $this->getID() > 0 ) {
+		$value = $this->getGenericTempDataValue( 'tags' );
+		if ( $value !== FALSE ) {
+			return $value;
+		} elseif ( TTUUID::isUUID( $this->getCompany() ) AND $this->getCompany() != TTUUID::getZeroID() AND $this->getCompany() != TTUUID::getNotExistID()
+				AND TTUUID::isUUID($this->getID()) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
 			return CompanyGenericTagMapListFactory::getStringByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 110, $this->getID() );
 		}
 
 		return FALSE;
 	}
-	function setTag( $tags ) {
-		$tags = trim($tags);
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTag( $value ) {
+		$value = trim($value);
 		//Save the tags in temporary memory to be committed in postSave()
-		$this->tmp_data['tags'] = $tags;
-
-		return TRUE;
+		return $this->setGenericTempDataValue( 'tags', $value );
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
-		//$this->setProvince( $this->getProvince() ); //Not sure why this was there, but it causes duplicate errors if the province is incorrect.
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+
+		//Status
+		if ( $this->getStatus() !== FALSE ) {
+			$this->Validator->inArrayKey( 'status',
+													$this->getStatus(),
+													TTi18n::gettext( 'Incorrect Status' ),
+													$this->getOptions( 'status' )
+												);
+		}
+
+		//Manual ID
+		if ( $this->getManualID() !== FALSE ) {
+			$this->Validator->isNumeric( 'manual_id',
+												$this->getManualID(),
+												TTi18n::gettext( 'Code is invalid' )
+											);
+			if ( $this->Validator->isError('manual_id') == FALSE ) {
+				$this->Validator->isLength( 'manual_id',
+													$this->getManualID(),
+													TTi18n::gettext( 'Code has too many digits' ),
+													0,
+													10 );
+			}
+			if ( $this->Validator->isError('manual_id') == FALSE ) {
+				$this->Validator->isTrue( 'manual_id',
+											( $this->Validator->stripNon32bitInteger( $this->getManualID() ) === 0 ) ? FALSE : TRUE,
+											TTi18n::gettext( 'Code is invalid, maximum value exceeded' ) );
+			}
+			if ( $this->Validator->isError('manual_id') == FALSE ) {
+				$this->Validator->isTrue( 'manual_id',
+											$this->isUniqueManualID( $this->getManualID() ),
+											TTi18n::gettext( 'Code is already in use, please enter a different one' ) );
+			}
+		}
+
+		//Name
+		if ( $this->getName() !== FALSE ) {
+			$this->Validator->isLength( 'name',
+											$this->getName(),
+											TTi18n::gettext( 'Name is too short or too long' ),
+											2,
+											100 );
+			if ( $this->Validator->isError('name') == FALSE ) {
+				$this->Validator->isTrue( 'name',
+												$this->isUniqueName( $this->getName() ),
+												TTi18n::gettext( 'Branch name already exists' ) );
+			}
+		}
+
+		//Address1
+		if ( $this->getAddress1() != '' ) {
+			$this->Validator->isRegEx( 'address1',
+									   $this->getAddress1(),
+									   TTi18n::gettext( 'Address1 contains invalid characters' ),
+									   $this->address_validator_regex );
+			if ( $this->Validator->isError('address1') == FALSE ) {
+				$this->Validator->isLength( 'address1',
+											$this->getAddress1(),
+											TTi18n::gettext( 'Address1 is too short or too long' ),
+											2,
+											250 );
+			}
+		}
+
+		//Address2
+		if ( $this->getAddress2() != '' ) {
+			$this->Validator->isRegEx( 'address2',
+									   $this->getAddress2(),
+									   TTi18n::gettext( 'Address2 contains invalid characters' ),
+									   $this->address_validator_regex );
+			if ( $this->Validator->isError('address2') == FALSE ) {
+				$this->Validator->isLength( 'address2',
+											$this->getAddress2(),
+											TTi18n::gettext( 'Address2 is too short or too long' ),
+											2,
+											250 );
+			}
+		}
+
+		//City
+		if ( $this->getCity() !== FALSE ) {
+			$this->Validator->isRegEx( 'city',
+											$this->getCity(),
+											TTi18n::gettext( 'City contains invalid characters' ),
+											$this->city_validator_regex );
+			if ( $this->Validator->isError('city') == FALSE ) {
+				$this->Validator->isLength( 'city',
+												$this->getCity(),
+												TTi18n::gettext( 'City name is too short or too long' ),
+												2,
+												250 );
+			}
+		}
+
+		//Province
+		if ( $this->getProvince() !== FALSE ) {
+			$cf = TTnew( 'CompanyFactory' );
+			$options_arr = $cf->getOptions( 'province' );
+			if ( isset( $options_arr[$this->getCountry()] ) ) {
+				$options = $options_arr[$this->getCountry()];
+			} else {
+				$options = array();
+			}
+			$this->Validator->inArrayKey( 'province',
+												$this->getProvince(),
+												TTi18n::gettext( 'Invalid Province/State' ),
+												$options );
+			unset( $options, $options_arr );
+		}
+
+		//Country
+		if ( $this->getCountry() !== FALSE ) {
+			$this->Validator->inArrayKey( 'country',
+											$this->getCountry(),
+											TTi18n::gettext( 'Invalid Country' ),
+											$cf->getOptions( 'country' ) );
+		}
+
+		//Postal Code
+		if ( $this->getPostalCode() != '' ) {
+			$this->Validator->isPostalCode( 'postal_code',
+											$this->getPostalCode(),
+											TTi18n::gettext( 'Postal/ZIP Code contains invalid characters, invalid format, or does not match Province/State' ),
+											$this->getCountry(), $this->getProvince() );
+			if ( $this->Validator->isError('postal_code') == FALSE ) {
+				$this->Validator->isLength( 'postal_code',
+											$this->getPostalCode(),
+											TTi18n::gettext( 'Postal/ZIP Code is too short or too long' ),
+											1,
+											10 );
+			}
+		}
+
+		//Longitude
+		if ( $this->getLongitude() != 0 ) {
+			$this->Validator->isFloat( 'longitude',
+									   $this->getLongitude(),
+									   TTi18n::gettext( 'Longitude is invalid' ) );
+		}
+
+		//Latitude
+		if ( $this->getLongitude() != 0 ) {
+			$this->Validator->isFloat( 'latitude',
+									   $this->getLatitude(),
+									   TTi18n::gettext( 'Latitude is invalid' ) );
+		}
+
+		//Work Phone
+		if ( $this->getWorkPhone() != '' ) {
+			$this->Validator->isPhoneNumber( 'work_phone',
+											 $this->getWorkPhone(),
+											 TTi18n::gettext( 'Work phone number is invalid' ) );
+		}
+
+		//Fax Phone
+		if ( $this->getFaxPhone() != '' ) {
+			$this->Validator->isPhoneNumber( 'fax_phone',
+											 $this->getFaxPhone(),
+											 TTi18n::gettext( 'Fax phone number is invalid' ) );
+		}
+
+		//OtherIDs 1-5
+		if ( $this->getOtherID1() != '' ) {
+			$this->Validator->isLength( 'other_id1',
+										$this->getOtherID1(),
+										TTi18n::gettext( 'Other ID 1 is invalid' ),
+										1, 255 );
+		}
+		if ( $this->getOtherID2() != '' ) {
+			$this->Validator->isLength( 'other_id2',
+										$this->getOtherID2(),
+										TTi18n::gettext( 'Other ID 2 is invalid' ),
+										1, 255 );
+		}
+		if ( $this->getOtherID3() != '' ) {
+			$this->Validator->isLength( 'other_id3',
+										$this->getOtherID3(),
+										TTi18n::gettext( 'Other ID 3 is invalid' ),
+										1, 255 );
+		}
+		if ( $this->getOtherID4() != '' ) {
+			$this->Validator->isLength( 'other_id4',
+										$this->getOtherID4(),
+										TTi18n::gettext( 'Other ID 4 is invalid' ),
+										1, 255 );
+		}
+		if ( $this->getOtherID5() != '' ) {
+			$this->Validator->isLength( 'other_id5',
+										$this->getOtherID5(),
+										TTi18n::gettext( 'Other ID 5 is invalid' ),
+										1, 255 );
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		if ( $this->getStatus() == FALSE ) {
 			$this->setStatus(10);
 		}
 
 		if ( $this->getManualID() == FALSE ) {
-			$this->setManualID( BranchListFactory::getNextAvailableManualId( $this->getCompany() ) );
+			$this->setManualID( $this->getNextAvailableManualId( $this->getCompany() ) );
 		}
 
 		return TRUE;
 	}
-	function postSave( $data_diff = NULL ) {
+
+	/**
+	 * @return bool
+	 */
+	function postSave() {
+		$data_diff = $this->getDataDifferences();
 		$this->removeCache( $this->getId() );
 
 		if ( $this->getDeleted() == FALSE ) {
@@ -824,34 +863,38 @@ class BranchFactory extends Factory {
 			$sf_b = TTnew( 'ScheduleFactory' );
 			$udf = TTnew( 'UserDefaultFactory' );
 			$rstf = TTnew( 'RecurringScheduleTemplateFactory' );
+			$rsf = TTnew( 'RecurringScheduleFactory' );
 
-			$query = 'update '. $pcf->getTable() .' set branch_id = 0 where branch_id = '. (int)$this->getId();
+			$query = 'update '. $pcf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $udtf->getTable() .' set branch_id = 0 where branch_id = '. (int)$this->getId();
+			$query = 'update '. $udtf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $sf_b->getTable() .' set branch_id = 0 where branch_id = '. (int)$this->getId();
+			$query = 'update '. $sf_b->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $uf->getTable() .' set default_branch_id = 0 where company_id = '. (int)$this->getCompany() .' AND default_branch_id = '. (int)$this->getId();
+			$query = 'update '. $uf->getTable() .' set default_branch_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND default_branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $udf->getTable() .' set default_branch_id = 0 where company_id = '. (int)$this->getCompany() .' AND default_branch_id = '. (int)$this->getId();
+			$query = 'update '. $udf->getTable() .' set default_branch_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND default_branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $sf->getTable() .' set branch_id = 0 where company_id = '. (int)$this->getCompany() .' AND branch_id = '. (int)$this->getId();
+			$query = 'update '. $sf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'delete from '. $sbf->getTable() .' where branch_id = '. (int)$this->getId();
+			$query = 'delete from '. $sbf->getTable() .' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
-			$query = 'update '. $rstf->getTable() .' set branch_id = 0 where branch_id = '. (int)$this->getId();
+			$query = 'update '. $rstf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
+			$this->db->Execute($query);
+
+			$query = 'update '. $rsf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 				$jf = TTNew( 'JobFactory' );
-				$query = 'update '. $jf->getTable() .' set branch_id = 0 where branch_id = '. (int)$this->getId();
+				$query = 'update '. $jf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 				$this->db->Execute($query);
 
 				//Job employee criteria
@@ -870,10 +913,17 @@ class BranchFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getMapURL() {
 		return Misc::getMapURL( $this->getAddress1(), $this->getAddress2(), $this->getCity(), $this->getProvince(), $this->getPostalCode(), $this->getCountry() );
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -899,6 +949,10 @@ class BranchFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -931,6 +985,10 @@ class BranchFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Branch') .': '. $this->getName(), NULL, $this->getTable(), $this );
 	}

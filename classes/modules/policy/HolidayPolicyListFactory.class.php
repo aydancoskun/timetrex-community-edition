@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayPolicyListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,7 +89,14 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayPolicyListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -86,8 +106,8 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-					'id' => (int)$id,
-					'company_id' => (int)$company_id,
+					'id' => TTUUID::castUUID($id),
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -104,7 +124,13 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyId($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayPolicyListFactory
+	 */
+	function getByCompanyId( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -119,7 +145,7 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -138,7 +164,14 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByCompanyIdAndContributingShiftPolicyId($id, $contributing_shift_policy_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param string $contributing_shift_policy_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayPolicyListFactory
+	 */
+	function getByCompanyIdAndContributingShiftPolicyId( $id, $contributing_shift_policy_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -155,7 +188,7 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-				'id' => (int)$id,
+				'id' => TTUUID::castUUID($id),
 		);
 
 
@@ -163,8 +196,8 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 					select	*
 					from	'. $this->getTable() .' as a
 					where	company_id = ?
-						AND ( 	contributing_shift_policy_id in ('. $this->getListSQL( $contributing_shift_policy_id, $ph, 'int' ) .')
-								OR eligible_contributing_shift_policy_id in ('. $this->getListSQL( $contributing_shift_policy_id, $ph, 'int' ) .')
+						AND ( 	contributing_shift_policy_id in ('. $this->getListSQL( $contributing_shift_policy_id, $ph, 'uuid' ) .')
+								OR eligible_contributing_shift_policy_id in ('. $this->getListSQL( $contributing_shift_policy_id, $ph, 'uuid' ) .')
 							)
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -175,7 +208,13 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		return $this;
 	}
 
-	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayPolicyListFactory
+	 */
+	function getByPolicyGroupUserId( $user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -192,7 +231,7 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -215,6 +254,13 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayPolicyListFactory
+	 */
 	function getByPolicyGroupCompanyIdAndUserIdOrAssignedToContributingShiftPolicy( $company_id, $user_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -237,8 +283,8 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		$cspf = new ContributingShiftPolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'user_id' => (int)$user_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		//ContributingShiftPolicy holidays must come first as policy group ones overwrite them.
@@ -275,6 +321,15 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		return $this;
 	}
 
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayPolicyListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -315,16 +370,22 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		$uf = new UserFactory();
 		$pgf = new PolicyGroupFactory();
 		$cgmf = new CompanyGenericMapFactory();
+		$cspf = new ContributingShiftPolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
 					select	a.*,
 							_ADODB_COUNT
 							(
-								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 180 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 ) THEN 1 ELSE 0 END
+								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 180 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 ) 
+								THEN 1
+								ELSE
+									CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $cspf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 690 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
+									THEN 1 ELSE 0 END
+								END
 							) as in_use,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
@@ -339,18 +400,18 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 					where	a.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['contributing_shift_policy_id']) ) ? $this->getWhereClauseSQL( 'a.contributing_shift_policy_id', $filter_data['contributing_shift_policy_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['eligible_contributing_shift_policy_id']) ) ? $this->getWhereClauseSQL( 'a.eligible_contributing_shift_policy_id', $filter_data['eligible_contributing_shift_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['contributing_shift_policy_id']) ) ? $this->getWhereClauseSQL( 'a.contributing_shift_policy_id', $filter_data['contributing_shift_policy_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['eligible_contributing_shift_policy_id']) ) ? $this->getWhereClauseSQL( 'a.eligible_contributing_shift_policy_id', $filter_data['eligible_contributing_shift_policy_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['absence_policy']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['absence_policy']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
@@ -359,19 +420,25 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
 
-	function getByCompanyIdArray($company_id, $include_blank = TRUE) {
+	/**
+	 * @param string $company_id UUID
+	 * @param bool $include_blank
+	 * @return array|bool
+	 */
+	function getByCompanyIdArray( $company_id, $include_blank = TRUE) {
 
 		$hplf = new HolidayPolicyListFactory();
 		$hplf->getByCompanyId($company_id);
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = '--';
+			$list[TTUUID::getZeroID()] = '--';
 		}
 
 		foreach ($hplf as $hp_obj) {

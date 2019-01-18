@@ -1,6 +1,9 @@
+
 HomeViewController = Backbone.View.extend( {
 
 	el: '.home-view',
+	
+	_required_files: ['jquery.masonry', 'jquery-bridget', 'interact', 'APIDashboard', 'APIRequest', 'APITimesheetSummaryReport', 'APIMessageControl', 'APIException', 'APISchedule', 'APIActiveShiftReport', ],
 	user_generic_data_api: null,
 	context_menu_array: null,
 	viewId: null,
@@ -10,21 +13,57 @@ HomeViewController = Backbone.View.extend( {
 	order_data: false,
 	current_scroll_position: false,
 
+	/**
+	 * When changing this function, you need to look for all occurences of this function because it was needed in several bases
+	 * BaseViewController, HomeViewController, BaseWizardController
+	 *
+	 * @returns {Array}
+	 */
+	filterRequiredFiles: function() {
+		var retval = [];
+		var required_files = this._required_files;
+
+		//do not load interact on mobile.
+		if ( Global.detectMobileBrowser() == true ) {
+			required_files.splice( required_files.indexOf('interact'), 1);
+		}
+
+		if ( required_files && required_files[0] ) {
+			retval = required_files;
+		} else {
+			for ( var edition_id in required_files ) {
+				if ( LocalCacheData.getCurrentCompany().product_edition_id >= edition_id ) {
+					retval = retval.concat(required_files[edition_id])
+				}
+			}
+		}
+
+		Debug.Arr(retval,'RETVAL','BaseViewController.js','BaseViewController','filterRequiredFiles',10)
+		return retval;
+	},
+
 	initialize: function( options ) {
 		Global.setUINotready();
 		TTPromise.add('init','init');
 		TTPromise.wait();
+		var $this = this;
+		require( this.filterRequiredFiles() , function( Masonry, jQueryBridget, interact ) {
 
-		this.viewId = 'Home';
-		LocalCacheData.current_open_primary_controller = this;
-		this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
-		this.api_dashboard = new (APIFactory.getAPIClass( 'APIDashboard' ))();
-		this.dashboard_container = $( this.el ).find( '.dashboard-container' );
-		this.initMasonryDone = false;
-		this.initContextMenu();
-		this.initDashBoard();
-		this.setViewHeight();
-		this.autoOpenEditOnlyViewIfNecessary();
+			$this.viewId = 'Home';
+			LocalCacheData.current_open_primary_controller = $this;
+			$this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+			$this.api_dashboard = new (APIFactory.getAPIClass( 'APIDashboard' ))();
+
+			window.interact = interact;
+			jQueryBridget( 'masonry', Masonry, $ );
+			$this.dashboard_container = $( $this.el ).find( '.dashboard-container' );
+			$this.initMasonryDone = false;
+			$this.initContextMenu();
+			$this.initDashBoard();
+			$this.setViewHeight();
+			$this.autoOpenEditOnlyViewIfNecessary();
+			TTPromise.resolve('BaseViewController', 'initialize');
+		});
 	},
 
 	autoOpenEditOnlyViewIfNecessary: function() {
@@ -644,7 +683,7 @@ HomeViewController = Backbone.View.extend( {
 		this.user_generic_data_api.setUserGenericData( arg, {
 			onResult: function( result ) {
 				var result_data = result.getResult();
-				if ( result_data != true && result_data > 0 ) {
+				if ( result_data != true && TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 					$this.order_data = {id: result_data};
 					$this.order_data.data = new_order;
 					if ( callBack ) {

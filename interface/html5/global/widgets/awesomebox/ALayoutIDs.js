@@ -14,6 +14,10 @@ ALayoutIDs.CUSTOM_COLUMN = 'global_custom_column';
 
 ALayoutIDs.JOB_APPLICANT_SKILL = 'global_jobApplicantSkill';
 
+ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT = 'global_remittance_source_account';
+
+ALayoutIDs.REMITTANCE_DESTINATION_ACCOUNT = 'global_remittance_destination_account';
+
 ALayoutIDs.ROE = 'global_roe';
 
 ALayoutIDs.EXPENSE_POLICY = 'global_expense_policy';
@@ -49,6 +53,8 @@ ALayoutIDs.PAY_CODE = 'global_pay_code';
 ALayoutIDs.PAY_FORMULA_POLICY = 'global_pay_formula_policy';
 
 ALayoutIDs.AREA_POLICY = 'global_area_policy';
+
+ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT = 'global_remittance_source_account';
 
 ALayoutIDs.BRANCH = 'global_branch';
 
@@ -127,6 +133,8 @@ ALayoutIDs.PAY_PERIOD = 'global_Pay_period';
 ALayoutIDs.PAY_PERIOD_SCHEDULE = 'global_pay_period_schedule';
 
 ALayoutIDs.PAY_STUB = 'global_pay_stub';
+
+ALayoutIDs.PAY_STUB_TRANSACTION = 'global_pay_stub_transaction';
 
 ALayoutIDs.PAY_STUB_ACCOUNT = 'global_PayStubAccount';
 
@@ -212,6 +220,8 @@ ALayoutIDs.SAVED_REPORT = 'global_user_report_data';
 
 ALayoutIDs.CUSTOM_COLUMN = 'global_custom_column';
 
+ALayoutIDs.PAYROLL_REMITTANCE_AGENCY = 'global_payroll_remittance_agency';
+
 ALayoutIDs.JOB_APPLICANT_EMPLOYMENT = 'global_job_applicant_employment';
 
 ALayoutIDs.JOB_APPLICANT_REFERENCE = 'global_job_applicant_reference';
@@ -221,6 +231,7 @@ ALayoutIDs.JOB_APPLICANT_EDUCATION = 'global_job_applicant_education';
 ALayoutIDs.JOB_APPLICANT_MEMBERSHIP = 'global_job_applicant_membership';
 ALayoutIDs.JOB_APPLICANT_LICENSE = 'global_job_applicant_license';
 ALayoutIDs.JOB_APPLICANT_LANGUAGE = 'global_job_applicant_language';
+ALayoutIDs.LEGAL_ENTITY = 'global_legal_entity';
 ALayoutIDs.MESSAGE_USER = 'global_message_user';
 
 ALayoutIDs.PAYMENT_GATEWAY = 'global_payment_gateway';

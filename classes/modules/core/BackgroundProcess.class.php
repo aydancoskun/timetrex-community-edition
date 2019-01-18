@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -49,14 +49,25 @@ class BackgroundProcess {
 	var $lock_file_postfix = '.lock';
 	var $max_lock_file_age = 86400;
 
+	/**
+	 * BackgroundProcess constructor.
+	 */
 	function __construct() {
 		return TRUE;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getLockFilePrefix( ) {
 		return $this->lock_file_prefix;
 	}
-	function setLockFilePrefix($prefix) {
+
+	/**
+	 * @param $prefix
+	 * @return bool
+	 */
+	function setLockFilePrefix( $prefix) {
 		if ( $prefix != '' ) {
 			$this->lock_file_prefix = $prefix;
 
@@ -66,10 +77,18 @@ class BackgroundProcess {
 		return FALSE;
 	}
 
+	/**
+	 * @return string
+	 */
 	function getLockFileDirectory( ) {
 		return $this->lock_file_dir;
 	}
-	function setLockFileDirectory($dir) {
+
+	/**
+	 * @param $dir
+	 * @return bool
+	 */
+	function setLockFileDirectory( $dir) {
 		if ( $dir != '' AND file_exists($dir) AND is_writable( $dir ) ) {
 			$this->lock_file_dir = $dir;
 
@@ -79,9 +98,17 @@ class BackgroundProcess {
 		return FALSE;
 	}
 
+	/**
+	 * @return int
+	 */
 	function getMaxProcesses() {
 		return $this->max_processes;
 	}
+
+	/**
+	 * @param $int
+	 * @return bool
+	 */
 	function setMaxProcesses( $int ) {
 		$int = (int)$int;
 
@@ -93,6 +120,10 @@ class BackgroundProcess {
 		return TRUE;
 	}
 
+	/**
+	 * @param $lock_files
+	 * @return int
+	 */
 	function getCurrentProcesses( $lock_files ) {
 		if ( is_array( $lock_files ) ) {
 
@@ -106,6 +137,10 @@ class BackgroundProcess {
 		return $retval;
 	}
 
+	/**
+	 * @param bool $include_dir
+	 * @return string
+	 */
 	function getBaseLockFileName( $include_dir = FALSE ) {
 		if ( $include_dir == TRUE ) {
 			$retval = $this->getLockFileDirectory() . DIRECTORY_SEPARATOR;
@@ -120,6 +155,10 @@ class BackgroundProcess {
 		return $retval;
 	}
 
+	/**
+	 * @param $lock_files
+	 * @return string
+	 */
 	function getNextLockFileName( $lock_files ) {
 		//Lock file name example: <prefix>.lock.<process_number>
 		//ie: timeclocksync.lock.2
@@ -152,6 +191,11 @@ class BackgroundProcess {
 	}
 
 	//Delete any lock files older then max age, incase they are stale.
+
+	/**
+	 * @param $lock_files
+	 * @return bool
+	 */
 	function purgeLockFiles( $lock_files ) {
 		if ( is_array($lock_files ) ) {
 			foreach( $lock_files as $lock_file ) {
@@ -166,6 +210,9 @@ class BackgroundProcess {
 		return TRUE;
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getLockFiles() {
 		$start_dir = $this->getLockFileDirectory();
 		$regex_filter = $this->getLockFilePrefix().'\.lock.*';
@@ -179,7 +226,11 @@ class BackgroundProcess {
 		return $retarr;
 	}
 
-	function BackgroundExec($cmd) {
+	/**
+	 * @param $cmd
+	 * @return bool
+	 */
+	function BackgroundExec( $cmd) {
 		if ( PHP_OS == 'WINNT' ) {
 			//Windows
 			global $config_vars;
@@ -206,6 +257,11 @@ class BackgroundProcess {
 		return TRUE;
 	}
 
+	/**
+	 * @param $cmd
+	 * @param $next_lock_file_name
+	 * @return mixed
+	 */
 	function ReplaceCommandVariables( $cmd, $next_lock_file_name ) {
 		$search_array = array(
 							'#lock_file#'
@@ -221,6 +277,10 @@ class BackgroundProcess {
 		return $retval;
 	}
 
+	/**
+	 * @param $cmd
+	 * @return bool
+	 */
 	function run( $cmd ) {
 		//Check to see how many lock files with the prefix exist already.
 

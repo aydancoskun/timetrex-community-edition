@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,39 +45,48 @@ class PayPeriodScheduleUserFactory extends Factory {
 	protected $user_obj = NULL;
 	protected $pay_period_schedule_obj = NULL;
 
+	/**
+	 * @return bool
+	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getPayPeriodScheduleObject() {
 		return $this->getGenericObject( 'PayPeriodScheduleListFactory', $this->getPayPeriodSchedule(), 'pay_period_schedule_obj' );
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function getPayPeriodSchedule() {
-		return (int)$this->data['pay_period_schedule_id'];
+		return $this->getGenericDataValue( 'pay_period_schedule_id' );
 	}
-	function setPayPeriodSchedule($id) {
-		$id = trim($id);
 
-		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
-
-		if ( $id != 0
-				OR $this->Validator->isResultSetWithRows(	'pay_period_schedule',
-															$ppslf->getByID($id),
-															TTi18n::gettext('Pay Period Schedule is invalid')
-															) ) {
-			$this->data['pay_period_schedule_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setPayPeriodSchedule( $value) {
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'pay_period_schedule_id', $value );
 	}
 
-	function isUniqueUser($id) {
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function isUniqueUser( $id) {
 		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 		$query = 'select a.id from '. $this->getTable() .' as a, '. $ppslf->getTable() .' as b where a.pay_period_schedule_id = b.id AND a.user_id = ? AND b.deleted=0';
@@ -90,85 +99,174 @@ class PayPeriodScheduleUserFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
-	function setUser($id) {
-		$id = trim($id);
 
-		$ulf = TTnew( 'UserListFactory' );
-
-		if ( $id != 0
-				AND $this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($id),
-															TTi18n::gettext('Selected Employee is invalid')
-															)
-				AND	$this->Validator->isTrue(		'user',
-													$this->isUniqueUser($id),
-													TTi18n::gettext('Selected Employee is already assigned to another Pay Period Schedule')
-													)
-			) {
-
-			$this->data['user_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setUser( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'user_id', $value );
+	}
+	/**
+	 * @return bool
+	 */
+	function Validate() {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Pay Period Schedule
+		if ( $this->getPayPeriodSchedule() == TTUUID::getZeroID() ) {
+			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+			$this->Validator->isResultSetWithRows(	'pay_period_schedule',
+															$ppslf->getByID($this->getPayPeriodSchedule()),
+															TTi18n::gettext('Pay Period Schedule is invalid')
+														);
+		}
+		// Selected Employee
+		if ( $this->getUser() != TTUUID::getZeroID() ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows(	'user',
+														$ulf->getByID($this->getUser()),
+														TTi18n::gettext('Selected Employee is invalid')
+													);
+			if ( $this->Validator->isError('user') == FALSE ) {
+				$this->Validator->isTrue(		'user',
+														$this->isUniqueUser($this->getUser()),
+														TTi18n::gettext('Selected Employee is already assigned to another Pay Period Schedule')
+													);
+			}
 		}
 
-		return FALSE;
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		return TRUE;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
+
+	/**
+	 * @return bool
+	 */
 	function getDeleted() {
 		return FALSE;
 	}
-	function setDeleted($bool) {
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setDeleted( $bool) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCreatedDate() {
 		return FALSE;
 	}
-	function setCreatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setCreatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getCreatedBy() {
 		return FALSE;
 	}
-	function setCreatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setCreatedBy( $id = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getUpdatedDate() {
 		return FALSE;
 	}
-	function setUpdatedDate($epoch = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setUpdatedDate( $epoch = NULL) {
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function getUpdatedBy() {
 		return FALSE;
 	}
-	function setUpdatedBy($id = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUpdatedBy( $id = NULL) {
 		return FALSE;
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function getDeletedDate() {
 		return FALSE;
 	}
-	function setDeletedDate($epoch = NULL) {
-		return FALSE;
-	}
-	function getDeletedBy() {
-		return FALSE;
-	}
-	function setDeletedBy($id = NULL) {
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return bool
+	 */
+	function setDeletedDate( $epoch = NULL) {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function getDeletedBy() {
+		return FALSE;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setDeletedBy( $id = NULL) {
+		return FALSE;
+	}
+
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {

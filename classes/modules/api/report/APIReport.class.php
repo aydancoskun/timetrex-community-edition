@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIReport extends APIFactory {
 	public $report_obj = NULL;
 
+	/**
+	 * APIReport constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -53,28 +56,54 @@ class APIReport extends APIFactory {
 		return TRUE;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getReportObject() {
 		return $this->getMainClassObject();
 	}
 
+	/**
+	 * @param bool $name
+	 * @return array|bool
+	 */
 	function getTemplate( $name = FALSE ) {
 		return $this->returnHandler( $this->getReportObject()->getTemplate( $name ) );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getConfig() {
 		return $this->returnHandler( $this->getReportObject()->getConfig() );
 	}
+
+	/**
+	 * @param bool $data
+	 * @return array|bool
+	 */
 	function setConfig( $data = FALSE ) {
 		return $this->returnHandler( $this->getReportObject()->setConfig( $data ) );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getOtherConfig() {
 		return $this->returnHandler( $this->getReportObject()->getOtherConfig() );
 	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getChartConfig() {
 		return $this->returnHandler( $this->getReportObject()->getChartConfig() );
 	}
 
+	/**
+	 * @param bool $data
+	 * @return array|bool
+	 */
 	function setCompanyFormConfig( $data = FALSE ) {
 		if ( $this->getReportObject()->checkPermissions() == TRUE ) {
 			return $this->returnHandler( $this->getReportObject()->setCompanyFormConfig( $data ) );
@@ -82,6 +111,10 @@ class APIReport extends APIFactory {
 
 		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('PERMISSION DENIED') );
 	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getCompanyFormConfig() {
 		if ( $this->getReportObject()->checkPermissions() == TRUE ) {
 			return $this->returnHandler( $this->getReportObject()->getCompanyFormConfig() );
@@ -90,6 +123,11 @@ class APIReport extends APIFactory {
 		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('PERMISSION DENIED') );
 	}
 
+	/**
+	 * @param bool $config
+	 * @param string $format
+	 * @return array|bool
+	 */
 	function validateReport( $config = FALSE, $format = 'pdf' ) {
 		$this->getReportObject()->setConfig( $config ); //Set config first, so checkPermissions can check/modify data in the config for Printing timesheets for regular employees.
 		if ( $this->getReportObject()->checkPermissions() == TRUE ) {
@@ -103,6 +141,12 @@ class APIReport extends APIFactory {
 	}
 
 	//Use JSON API to download PDF files.
+
+	/**
+	 * @param bool $config
+	 * @param string $format
+	 * @return array|bool
+	 */
 	function getReport( $config = FALSE, $format = 'pdf' ) {
 		if ( Misc::isSystemLoadValid() == FALSE ) {
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Please try again later...') );

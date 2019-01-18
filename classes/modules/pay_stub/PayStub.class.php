@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class PayStub extends PayStubFactory {
 	protected $tmp_data = NULL;
 
+	/**
+	 * @return bool
+	 */
 	function childConstruct() {
 		$this->StartTransaction();
 
@@ -48,6 +51,9 @@ class PayStub extends PayStubFactory {
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function Done() {
 		Debug::Arr($this->tmp_data, 'Pay Stub TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Call pre-save() first, so calculates the totals.

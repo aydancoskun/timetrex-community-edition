@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -53,6 +53,11 @@ class AccrualPolicyMilestoneFactory extends Factory {
 										50 => 0.04166666666666666667, // 1/24th of a day.
 									);
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -104,6 +109,10 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 			$variable_function_map = array(
 											'id' => 'ID',
@@ -121,6 +130,9 @@ class AccrualPolicyMilestoneFactory extends Factory {
 			return $variable_function_map;
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getAccrualPolicyObject() {
 		if ( is_object($this->accrual_policy_obj) ) {
 			return $this->accrual_policy_obj;
@@ -136,33 +148,32 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getAccrualPolicy() {
-		if ( isset($this->data['accrual_policy_id']) ) {
-			return (int)$this->data['accrual_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setAccrualPolicy($id) {
-		$id = trim($id);
-
-		$aplf = TTnew( 'AccrualPolicyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'accrual_policy',
-													$aplf->getByID($id),
-													TTi18n::gettext('Accrual Policy is invalid')
-													) ) {
-
-			$this->data['accrual_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'accrual_policy_id' );
 	}
 
-	//If we just base LengthOfService on days, leap years and such can cause off-by-one errors.
-	//So we need to determine the exact dates when the milestones rollover and base it on that instead.
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setAccrualPolicy( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'accrual_policy_id', $value );
+	}
+
+	/**
+	 * If we just base LengthOfService on days, leap years and such can cause off-by-one errors.
+	 * So we need to determine the exact dates when the milestones rollover and base it on that instead.
+	 * @param int $milestone_rollover_date EPOCH
+	 * @return bool|false|int
+	 */
 	function getLengthOfServiceDate( $milestone_rollover_date ) {
 		switch ( $this->getLengthOfServiceUnit() ) {
 			case 10: //Days
@@ -180,7 +191,9 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		}
 
 		if ( isset($unit_str) ) {
-			$retval = TTDate::getBeginDayEpoch( strtotime( '+'. $this->getLengthOfService() .' '. $unit_str, $milestone_rollover_date ) );
+			//There appears to be a bug in PHP strtotime() where '+10.00 years' does not work, but '+10 years' or '+10.01 years' does.
+			//Therefore to work around this issue always cast the length of service to a float.
+			$retval = TTDate::getBeginDayEpoch( strtotime( '+'. (float)$this->getLengthOfService() .' '. $unit_str, $milestone_rollover_date ) );
 			Debug::text('MileStone Rollover Days based on Length Of Service: '. TTDate::getDate('DATE+TIME', $retval), __FILE__, __LINE__, __METHOD__, 10);
 			return $retval;
 		}
@@ -188,175 +201,208 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getLengthOfServiceDays() {
-		if ( isset($this->data['length_of_service_days']) ) {
-			return (int)$this->data['length_of_service_days'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'length_of_service_days' );
 	}
-	function setLengthOfServiceDays($int) {
-		$int = (int)trim($int);
 
-		Debug::text('aLength of Service Days: '. $int, __FILE__, __LINE__, __METHOD__, 10);
-
-		if	(	$int >= 0
-				AND
-				$this->Validator->isFloat(			'length_of_service'.$this->getLabelID(),
-													$int,
-													TTi18n::gettext('Length of service is invalid')) ) {
-
-			$this->data['length_of_service_days'] = bcmul( $int, $this->length_of_service_multiplier[$this->getLengthOfServiceUnit()], 4);
-
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLengthOfServiceDays( $value) {
+		$value = (int)trim($value);
+		Debug::text('aLength of Service Days: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		if ( $value >= 0 ) {
+			$this->setGenericDataValue( 'length_of_service_days', bcmul( $value, $this->length_of_service_multiplier[$this->getLengthOfServiceUnit()], 4) );
 			return TRUE;
 		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getLengthOfService() {
-		if ( isset($this->data['length_of_service']) ) {
-			return (int)$this->data['length_of_service'];
+		$value = $this->getGenericDataValue( 'length_of_service' );
+		if ( $value !== FALSE ) {
+			return Misc::removeTrailingZeros( (float)$value, 0 );
 		}
 
 		return FALSE;
 	}
-	function setLengthOfService($int) {
-		$int = (int)trim($int);
 
-		Debug::text('bLength of Service: '. $int, __FILE__, __LINE__, __METHOD__, 10);
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLengthOfService( $value) {
+		$value = (float)trim($value);
 
-		if	(	$int >= 0
-				AND
-				$this->Validator->isFloat(			'length_of_service'.$this->getLabelID(),
-													$int,
-													TTi18n::gettext('Length of service is invalid')) ) {
-
-			$this->data['length_of_service'] = $int;
-
+		Debug::text('bLength of Service: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		if ( $value >= 0 ) {
+			$this->setGenericDataValue( 'length_of_service', $value );
 			return TRUE;
 		}
 
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getLengthOfServiceUnit() {
-		if ( isset($this->data['length_of_service_unit_id']) ) {
-			return (int)$this->data['length_of_service_unit_id'];
-		}
-
-		return FALSE;
-	}
-	function setLengthOfServiceUnit($value) {
-		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'length_of_service_unit_id'.$this->getLabelID(),
-											$value,
-											TTi18n::gettext('Incorrect Length of service unit'),
-											$this->getOptions('length_of_service_unit')) ) {
-
-			$this->data['length_of_service_unit_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'length_of_service_unit_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLengthOfServiceUnit( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'length_of_service_unit_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getAccrualRate() {
-		if ( isset($this->data['accrual_rate']) ) {
-			return $this->data['accrual_rate'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'accrual_rate' );
 	}
-	function setAccrualRate($int) {
-		$int = trim($int);
 
-		if	(	$int > 0
-				AND
-				$this->Validator->isNumeric(		'accrual_rate'.$this->getLabelID(),
-													$int,
-													TTi18n::gettext('Incorrect Accrual Rate')) ) {
-			$this->data['accrual_rate'] = $int;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAccrualRate( $value) {
+		$value = trim($value);
+		if ( $value > 0 ) {
+			$this->setGenericDataValue( 'accrual_rate', $value );
 
 			return TRUE;
 		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getAnnualMaximumTime() {
-		if ( isset($this->data['annual_maximum_time']) ) {
-			return (int)$this->data['annual_maximum_time'];
-		}
-
-		return FALSE;
-	}
-	function setAnnualMaximumTime($int) {
-		$int = trim($int);
-
-		if	(	$int == 0
-				OR
-				$this->Validator->isNumeric(		'annual_maximum_time'.$this->getLabelID(),
-													$int,
-													TTi18n::gettext('Incorrect Accrual Annual Maximum')) ) {
-			$this->data['annual_maximum_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'annual_maximum_time' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAnnualMaximumTime( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'annual_maximum_time', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getMaximumTime() {
-		if ( isset($this->data['maximum_time']) ) {
-			return (int)$this->data['maximum_time'];
-		}
-
-		return FALSE;
-	}
-	function setMaximumTime($int) {
-		$int = trim($int);
-
-		if	(	$int == 0
-				OR
-				$this->Validator->isNumeric(		'maximum_time'.$this->getLabelID(),
-													$int,
-													TTi18n::gettext('Incorrect Maximum Balance')) ) {
-			$this->data['maximum_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'maximum_time' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMaximumTime( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'maximum_time', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getRolloverTime() {
-		if ( isset($this->data['rollover_time']) ) {
-			return (int)$this->data['rollover_time'];
-		}
-
-		return FALSE;
-	}
-	function setRolloverTime($int) {
-		$int = trim($int);
-
-		if	(	$int == 0
-				OR
-				$this->Validator->isNumeric(		'rollover_time'.$this->getLabelID(),
-													$int,
-													TTi18n::gettext('Incorrect Rollover Time')) ) {
-			$this->data['rollover_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'rollover_time' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setRolloverTime( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'rollover_time', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function Validate() {
-		if ( $this->validate_only == FALSE AND $this->getAccrualPolicy() == FALSE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Accrual Policy
+		if ( $this->getAccrualPolicy() !== FALSE ) {
+			$aplf = TTnew( 'AccrualPolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'accrual_policy',
+															$aplf->getByID($this->getAccrualPolicy()),
+															TTi18n::gettext('Accrual Policy is invalid')
+														);
+		}
+		// Length of service
+		if ( $this->getLengthOfServiceDays() !== FALSE AND $this->getLengthOfServiceDays() >= 0 ) {
+			$this->Validator->isFloat(			'length_of_service'.$this->getLabelID(),
+														$this->getLengthOfServiceDays(),
+														TTi18n::gettext('Length of service is invalid')
+													);
+		}
+		// Length of service
+		if ( $this->getLengthOfService() !== FALSE AND $this->getLengthOfService() >= 0 ) {
+			$this->Validator->isFloat(			'length_of_service'.$this->getLabelID(),
+														$this->getLengthOfService(),
+														TTi18n::gettext('Length of service is invalid')
+													);
+		}
+		// Length of service unit
+		$this->Validator->inArrayKey(	'length_of_service_unit_id'.$this->getLabelID(),
+												$this->getLengthOfServiceUnit(),
+												TTi18n::gettext('Incorrect Length of service unit'),
+												$this->getOptions('length_of_service_unit')
+											);
+		// Accrual Rate
+		if ( $this->getAccrualRate() !== FALSE  ) {
+			$this->Validator->isNumeric(		'accrual_rate'.$this->getLabelID(),
+														$this->getAccrualRate(),
+														TTi18n::gettext('Incorrect Accrual Rate')
+													);
+		}
+		// Accrual Annual Maximum
+		if ( $this->getAnnualMaximumTime() != '' ) {
+			$this->Validator->isNumeric(		'annual_maximum_time'.$this->getLabelID(),
+														$this->getAnnualMaximumTime(),
+														TTi18n::gettext('Incorrect Accrual Annual Maximum')
+													);
+		}
+		// Maximum Balance
+		if ( $this->getMaximumTime() != '' ) {
+			$this->Validator->isNumeric(		'maximum_time'.$this->getLabelID(),
+														$this->getMaximumTime(),
+														TTi18n::gettext('Incorrect Maximum Balance')
+													);
+		}
+		//  Rollover Time
+		if ( $this->getRolloverTime() != '' ) {
+			$this->Validator->isNumeric(		'rollover_time'.$this->getLabelID(),
+														$this->getRolloverTime(),
+														TTi18n::gettext('Incorrect Rollover Time')
+													);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getAccrualPolicy() == FALSE ) {
 			$this->Validator->isTRUE(	'accrual_policy_id'.$this->getLabelID(),
 										FALSE,
 										TTi18n::gettext('Accrual Policy is invalid') );
@@ -365,6 +411,9 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		//Set Length of service in days.
 		$this->setLengthOfServiceDays( $this->getLengthOfService() );
@@ -372,6 +421,10 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -397,6 +450,10 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -430,6 +487,10 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getAccrualPolicy(), $log_action, TTi18n::getText('Accrual Policy Milestone') .' (ID: '. $this->getID() .')', NULL, $this->getTable(), $this );
 	}

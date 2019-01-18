@@ -1,9 +1,11 @@
 require.config( {
 
 	waitSeconds: 500,
-	urlArgs: 'v=' + APIGlobal.pre_login_data.application_build,
+	urlArgs: 'v=' + APPLICATION_BUILD,
 
 	paths: {
+		'CookieSetting': 'global/CookieSetting',
+		'APIGlobal': 'global/APIGlobal.js.php?disable_db='+ DISABLE_DB,
 		'async': 'framework/require_async_plugin',
 		'jquery_cookie': 'framework/jquery.cookie',
 		'jquery_json': 'framework/jquery.json',
@@ -18,6 +20,8 @@ require.config( {
 		'grid_locale': 'framework/widgets/jqgrid/grid.locale-en',
 		'jqGrid': 'framework/widgets/jqgrid/jquery.jqGrid.src',
 		'ImageAreaSelect': 'framework/jquery.imgareaselect',
+
+		'live-chat': 'global/widgets/live-chat/live-chat',
 
 		'jqGrid_extend': 'framework/widgets/jqgrid/jquery.jqGrid.extend',
 		'SearchPanel': 'global/widgets/search_panel/SearchPanel',
@@ -50,6 +54,8 @@ require.config( {
 		'TImageAdvBrowser': 'global/widgets/filebrowser/TImageAdvBrowser',
 		'TImage': 'global/widgets/filebrowser/TImage',
 		'TImageCutArea': 'global/widgets/filebrowser/TImageCutArea',
+		'colors': 'framework/widgets/color-picker/colors',
+		'colorpicker': 'framework/widgets/color-picker/color-picker',
 		'TColorPicker': 'global/widgets/color-picker/TColorPicker',
 		'CameraBrowser': 'global/widgets/filebrowser/CameraBrowser',
 		'InsideEditor': 'global/widgets/inside_editor/InsideEditor',
@@ -88,15 +94,15 @@ require.config( {
 		'rightclickmenu': 'framework/rightclickmenu/rightclickmenu',
 		'jquery.ui.position': 'framework/rightclickmenu/jquery.ui.position',
 
-		'jquery.min': 'framework/jquery.min',
-		'jquery.form.min': 'framework/jquery.form.min',
-		'jquery-ui.custom.min': 'framework/jqueryui/js/jquery-ui.custom.min',
+		'jquery': 'framework/jquery.min',
+		'jquery.form': 'framework/jquery.form.min',
+		'jquery-ui': 'framework/jqueryui/js/jquery-ui.custom.min',
 		'jquery.i18n': 'framework/jquery.i18n',
-		'underscore-min': 'framework/backbone/underscore-min',
-		'backbone-min': 'framework/backbone/backbone-min',
-		'jquery.masonry.min': 'framework/jquery.masonry.min',
+		'underscore': 'framework/backbone/underscore-min',
+		'backbone': 'framework/backbone/backbone-min',
+		'jquery.masonry': 'framework/jquery.masonry.min',
 		'interact': 'framework/interact.min',
-		'tinymce.min': 'framework/tinymce.min',
+		'tinymce': 'framework/tinymce/tinymce.min',
 		'jquery.sortable': 'framework/jquery.sortable',
 		'Global': 'global/Global',
 		'RateLimiter': 'global/RateLimiter',
@@ -111,9 +117,352 @@ require.config( {
 		'pdfjs': 'framework/pdfjs',
 		'autolinker': 'framework/autolinker',
 		'measurement': 'framework/measurement',
-		'ttpromise': 'global/TTPromise',
+		'TTPromise': 'global/TTPromise',
+		'TTUUID': 'global/TTUUID',
+
+		'Wizard': 'global/widgets/wizard/Wizard',
+		'WizardStep': 'global/widgets/wizard/WizardStep',
+
+		'RateLimit': 'global/RateLimit',
+		'jquery-bridget': 'framework/jquery.bridget',
+
+
+		/**
+		 * API paths
+		 */
+
+		'APICurrency': 'services/core/APICurrency',
+		'APICurrencyRate': 'services/core/APICurrencyRate',
+		'APIUserPreference': 'services/users/APIUserPreference',
+		'APIDate': 'services/APIDate',
+		'APIPermission': 'services/core/APIPermission',
+		'APIUserGenericData': 'services/users/APIUserGenericData',
+		'APIUser': 'services/users/APIUser',
+		'APIUserGroup': 'services/users/APIUserGroup',
+		'APIBranch': 'services/company/APIBranch',
+		'APILegalEntity': 'services/company/APILegalEntity',
+		'APIRemittanceSourceAccount': 'services/company/APIRemittanceSourceAccount',
+		'APIRemittanceDestinationAccount': 'services/users/APIRemittanceDestinationAccount',
+		'APIPayrollRemittanceAgency': 'services/company/APIPayrollRemittanceAgency',
+		'APIGEOFence': 'services/company/APIGEOFence',
+		'APIDepartment': 'services/department/APIDepartment',
+		'APICompany': 'services/company/APICompany',
+		'APIPayrollRemittanceAgencyEvent': 'services/company/APIPayrollRemittanceAgencyEvent',
+		'APIHierarchyLevel': 'services/company/APIHierarchyLevel',
+		'APIUserTitle': 'services/users/APIUserTitle',
+		'APIAbout': 'services/help/APIAbout',
+		'APIRoundingIntervalPolicy': 'services/policy/APIRoundingIntervalPolicy',
+		'APIPermissionControl': 'services/core/APIPermissionControl',
+		'APIPayPeriodSchedule': 'services/payperiod/APIPayPeriodSchedule',
+		'APIPolicyGroup': 'services/policy/APIPolicyGroup',
+		'APIExceptionPolicy': 'services/policy/APIExceptionPolicy',
+		'APIExceptionPolicyControl': 'services/policy/APIExceptionPolicyControl',
+		'APILog': 'services/core/APILog',
+		'APIHierarchyControl': 'services/hierarchy/APIHierarchyControl',
+		'APIUserWage': 'services/users/APIUserWage',
+		'APIUserDeduction': 'services/users/APIUserDeduction',
+		'APIWageGroup': 'services/company/APIWageGroup',
+		'APIPunch': 'services/core/APIPunch',
+		'APITimeSheet': 'services/core/APITimeSheet',
+		'APIJob': 'services/job/APIJob',
+		'APIJobGroup': 'services/job/APIJobGroup',
+		'APIJobItem': 'services/job_item/APIJobItem',
+		'APIJobItemAmendment': 'services/job_item_amendment/APIJobItemAmendment',
+		'APIJobItemGroup': 'services/job_item/APIJobItemGroup',
+		'APIUserContact': 'services/users/APIUserContact',
+		'APIEthnicGroup': 'services/users/APIEthnicGroup',
+		'APIGovernmentDocument': 'services/payroll/APIGovernmentDocument',
+		'APIBankAccount': 'services/users/APIBankAccount',
+		'APIUserDefault': 'services/users/APIUserDefault',
+		'APICompanyDeduction': 'services/company/APICompanyDeduction',
+		'APIAbsencePolicy': 'services/policy/APIAbsencePolicy',
+		'APIExpensePolicy': 'services/policy/APIExpensePolicy',
+		'APIUserDateTotal': 'services/core/APIUserDateTotal',
+		'APIPunchControl': 'services/core/APIPunchControl',
+		'APIROE': 'services/users/APIROE',
+		'APIClient': 'services/invoice/APIClient',
+		'APIClientGroup': 'services/invoice/APIClientGroup',
+		'APIClientContact': 'services/invoice/APIClientContact',
+		'APIClientPayment': 'services/invoice/APIClientPayment',
+		'APITaxPolicy': 'services/invoice/APITaxPolicy',
+		'APIShippingPolicy': 'services/invoice/APIShippingPolicy',
+		'APIPaymentGateway': 'services/invoice/APIPaymentGateway',
+		'APIInvoiceConfig': 'services/invoice/APIInvoiceConfig',
+		'APIInvoiceDistrict': 'services/invoice/APIInvoiceDistrict',
+		'APIAreaPolicy': 'services/invoice/APIAreaPolicy',
+		'APIPayPeriod': 'services/payroll/APIPayPeriod',
+		'APISchedule': 'services/attendance/APISchedule',
+		'APIScheduleAdvanced': 'services/attendance/APIScheduleAdvanced',
+		'APIRecurringScheduleTemplate': 'services/attendance/APIRecurringScheduleTemplate',
+		'APIRecurringScheduleTemplateControl': 'services/attendance/APIRecurringScheduleTemplateControl',
+		'APIOtherField': 'services/core/APIOtherField',
+		'APIStation': 'services/company/APIStation',
+		'APIPayStub': 'services/payroll/APIPayStub',
+		'APIPayStubTransaction': 'services/payroll/APIPayStubTransaction',
+		'APIPayStubEntry': 'services/payroll/APIPayStubEntry',
+		'APIPayStubEntryAccountLink': 'services/payroll/APIPayStubEntryAccountLink',
+		'APIPayStubAmendment': 'services/payroll/APIPayStubAmendment',
+		'APIRecurringPayStubAmendment': 'services/payroll/APIRecurringPayStubAmendment',
+		'APIPayStubEntryAccount': 'services/payroll/APIPayStubEntryAccount',
+		'APISchedulePolicy': 'services/policy/APISchedulePolicy',
+		'APIUserExpense': 'services/payroll/APIUserExpense',
+		'APIMealPolicy': 'services/policy/APIMealPolicy',
+		'APIBreakPolicy': 'services/policy/APIBreakPolicy',
+		'APIPayCode': 'services/policy/APIPayCode',
+		'APIPayFormulaPolicy': 'services/policy/APIPayFormulaPolicy',
+		'APIContributingPayCodePolicy': 'services/policy/APIContributingPayCodePolicy',
+		'APIContributingShiftPolicy': 'services/policy/APIContributingShiftPolicy',
+		'APIRegularTimePolicy': 'services/policy/APIRegularTimePolicy',
+		'APIOvertimePolicy': 'services/policy/APIOvertimePolicy',
+		'APIAccrualPolicyAccount': 'services/policy/APIAccrualPolicyAccount',
+		'APIAccrualPolicy': 'services/policy/APIAccrualPolicy',
+		'APIAccrualPolicyUserModifier': 'services/policy/APIAccrualPolicyUserModifier',
+		'APIRecurringHoliday': 'services/policy/APIRecurringHoliday',
+		'APIHolidayPolicy': 'services/policy/APIHolidayPolicy',
+		'APIHoliday': 'services/policy/APIHoliday',
+		'APIDocument': 'services/document/APIDocument',
+		'APITransaction': 'services/invoice/APITransaction',
+		'APIProduct': 'services/invoice/APIProduct',
+		'APIProductPrice': 'services/invoice/APIProductPrice',
+		'APIDocumentRevision': 'services/document/APIDocumentRevision',
+		'APIDocumentGroup': 'services/document/APIDocumentGroup',
+		'APIPremiumPolicy': 'services/policy/APIPremiumPolicy',
+		'APIAccrualPolicyMilestone': 'services/policy/APIAccrualPolicyMilestone',
+		'APIUserGenericStatus': 'services/users/APIUserGenericStatus',
+		'APIRecurringScheduleControl': 'services/attendance/APIRecurringScheduleControl',
+
+		'APIActiveShiftReport': 'services/reports/APIActiveShiftReport',
+		'APIUserReportData': 'services/reports/APIUserReportData',
+		'APIReportSchedule': 'services/reports/APIReportSchedule',
+		'APIReportCustomColumn': 'services/reports/APIReportCustomColumn',
+		'APIUserSummaryReport': 'services/reports/APIUserSummaryReport',
+		'APIAuditTrailReport': 'services/reports/APIAuditTrailReport',
+		'APITimesheetDetailReport': 'services/reports/APITimesheetDetailReport',
+		'APIPunchSummaryReport': 'services/reports/APIPunchSummaryReport',
+		'APIAccrualBalanceSummaryReport': 'services/reports/APIAccrualBalanceSummaryReport',
+		'APIAccrual': 'services/attendance/APIAccrual',
+		'APIAccrualBalance': 'services/attendance/APIAccrualBalance',
+		'APIScheduleSummaryReport': 'services/reports/APIScheduleSummaryReport',
+		'APITimesheetSummaryReport': 'services/reports/APITimesheetSummaryReport',
+		'APITimeSheetVerify': 'services/reports/APITimeSheetVerify',
+		'APIExceptionSummaryReport': 'services/reports/APIExceptionSummaryReport',
+		'APIPayStubSummaryReport': 'services/reports/APIPayStubSummaryReport',
+		'APIPayStubTransactionSummaryReport': 'services/reports/APIPayStubTransactionSummaryReport',
+		'APIGeneralLedgerSummaryReport': 'services/reports/APIGeneralLedgerSummaryReport',
+		'APIUserExpenseReport': 'services/reports/APIUserExpenseReport',
+		'APIJobSummaryReport': 'services/reports/APIJobSummaryReport',
+		'APIJobDetailReport': 'services/reports/APIJobDetailReport',
+		'APIJobInformationReport': 'services/reports/APIJobInformationReport',
+		'APIJobItemInformationReport': 'services/reports/APIJobItemInformationReport',
+		'APIInvoiceTransactionSummaryReport': 'services/reports/APIInvoiceTransactionSummaryReport',
+		'APIInvoice': 'services/invoice/APIInvoice',
+		'APIProductGroup': 'services/invoice/APIProductGroup',
+		'APIRemittanceSummaryReport': 'services/reports/APIRemittanceSummaryReport',
+		'APIT4SummaryReport': 'services/reports/APIT4SummaryReport',
+		'APIT4ASummaryReport': 'services/reports/APIT4ASummaryReport',
+		'APITaxSummaryReport': 'services/reports/APITaxSummaryReport',
+		'APIForm940Report': 'services/reports/APIForm940Report',
+		'APIForm941Report': 'services/reports/APIForm941Report',
+		'APIForm1099MiscReport': 'services/reports/APIForm1099MiscReport',
+		'APIFormW2Report': 'services/reports/APIFormW2Report',
+		'APIAffordableCareReport': 'services/reports/APIAffordableCareReport',
+		'APIUserQualificationReport': 'services/reports/APIUserQualificationReport',
+		'APIQualificationGroup': 'services/hr/APIQualificationGroup',
+		'APIQualification': 'services/hr/APIQualification',
+		'APIQualificationPortal': 'services/hr/APIQualificationPortal',
+		'APIUserSkill': 'services/hr/APIUserSkill',
+		'APIRequest': 'services/my_account/APIRequest',
+		'APIRequestSchedule': 'services/my_account/APIRequestSchedule',
+		'APIMessageControl': 'services/my_account/APIMessageControl',
+		'APIPayPeriodTimeSheetVerify': 'services/my_account/APIPayPeriodTimeSheetVerify',
+		'APIJobApplicantEmployment': 'services/hr/APIJobApplicantEmployment',
+		'APIJobApplicantLanguage': 'services/hr/APIJobApplicantLanguage',
+		'APIJobApplicantLicense': 'services/hr/APIJobApplicantLicense',
+		'APIJobApplicantMembership': 'services/hr/APIJobApplicantMembership',
+		'APIJobApplicantEducation': 'services/hr/APIJobApplicantEducation',
+		'APIJobApplicantSkill': 'services/hr/APIJobApplicantSkill',
+		'APIJobApplicantReference': 'services/hr/APIJobApplicantReference',
+		'APIJobApplicantLocation': 'services/hr/APIJobApplicantLocation',
+		'APIUserLicense': 'services/hr/APIUserLicense',
+		'APIUserEducation': 'services/hr/APIUserEducation',
+		'APIUserLanguage': 'services/hr/APIUserLanguage',
+		'APIUserMembership': 'services/hr/APIUserMembership',
+		'APIKPIReport': 'services/reports/APIKPIReport',
+		'APIKPIGroup': 'services/hr/APIKPIGroup',
+		'APIKPI': 'services/hr/APIKPI',
+		'APIUserReview': 'services/hr/APIUserReview',
+		'APIRecruitmentPortalConfig': 'services/hr/APIRecruitmentPortalConfig',
+		'APIUserReviewControl': 'services/hr/APIUserReviewControl',
+		'APIUserRecruitmentSummaryReport': 'services/reports/APIUserRecruitmentSummaryReport',
+		'APIJobApplicant': 'services/hr/APIJobApplicant',
+		'APIJobApplication': 'services/hr/APIJobApplication',
+		'APIJobVacancy': 'services/hr/APIJobVacancy',
+		'APIUserRecruitmentDetailReport': 'services/reports/APIUserRecruitmentDetailReport',
+		'APIPayrollExportReport': 'services/reports/APIPayrollExportReport',
+		'APIImport': 'services/core/APIImport',
+		'APIAuthorization': 'services/core/APIAuthorization',
+		'APIAuthentication': 'services/unauthenticated/APIAuthentication',
+		'APICurrentUser': 'services/APICurrentUser',
+		'APIRoundIntervalPolicy': 'services/policy/APIRoundIntervalPolicy',
+		'APIException': 'services/attendance/APIException',
+		'APIDocumentAttachment': 'services/document/APIDocumentAttachment',
+		'APINotification': 'services/core/APINotification',
+		'APIMisc': 'services/core/APIMisc',
+		'APICompanyGenericTag': 'services/company/APICompanyGenericTag',
+		'APIDashboard': 'services/core/APIDashboard',
+		'APIInstall': 'services/install/APIInstall',
+		'APIJobVacancyPortal': 'services/hr/APIJobVacancyPortal',
+		'APIJobApplicantPortal': 'services/hr/APIJobApplicantPortal',
+		'APIRecruitmentAuthentication': 'services/core/APIRecruitmentAuthentication',
+		'APICompanyPortal': 'services/company/APICompanyPortal',
+		'APIEthnicGroupPortal': 'services/users/APIEthnicGroupPortal',
+		'APIUserDefaultPortal': 'services/users/APIUserDefaultPortal',
+		'APICurrencyPortal': 'services/core/APICurrencyPortal',
+		'APIDocumentPortal': 'services/document/APIDocumentPortal',
+
+		'RequestViewCommonController':'views/common/RequestViewCommonController',
+		'EmbeddedMessageCommon':'views/common/EmbeddedMessageCommon',
+		'AuthorizationHistoryCommon':'views/common/AuthorizationHistoryCommon',
 	},
 	shim: {
+		'APIGlobal': {
+			deps: ['CookieSetting'],
+		},
+		'LocalCacheData': {
+			deps: ['APIGlobal'],
+			exports: 'LocalCacheData',
+		},
+		'Global': {
+			exports: 'Global',
+			deps: [
+				'backbone',
+				'LocalCacheData',
+				'jquery.masonry',
+				'APIGlobal',
+				]
+		},
+		'underscore': {
+			exports: '_'
+		},
+		'interact': {
+			exports: 'interact',
+		},
+		'backbone': {
+			deps: [
+				'underscore',
+				'jquery'
+			],
+			exports: 'Backbone'
+		},
+		'Base': {
+			deps: ['backbone']
+		},
+
+		'BaseViewController': {
+			deps: [
+				'backbone',
+				'ContextMenuConstant',
+				'ServiceCaller',
+				'APIGlobal'
+				]
+		},
+		'jquery.i18n': {
+			deps: ['jquery']
+		},
+		'jquery-ui': {
+			deps: ['jquery']
+		},
+		'jquery_ba_resize': {
+			deps: ['jquery']
+		},
+		'jquery_tablednd': {
+			deps: ['jquery']
+		},
+		'jquery_json': {
+			deps: ['jquery']
+		},
+		'jquery_cookie': {
+			deps: ['jquery']
+		},
+		'jquery.ui.position': {
+			deps: ['jquery']
+		},
+		'jquery.form': {
+			deps: ['jquery']
+		},
+		'jquery.masonry': {
+			deps: ['jquery', 'jquery-ui', 'jquery-bridget'],
+			exports: 'jQuery.masonry'
+		},
+		'jquery.sortable': {
+			deps: ['jquery']
+		},
+		//long dep chain
+		'colors': {
+			deps: ['jquery'],
+		},
+		'colorpicker': {
+			deps: ['colors'],
+		},
+		'TColorPicker': {
+			deps: ['colorpicker'],
+			exports: 'jQuery.fn.TColorPicker',
+		},
+
+		'TImageCutArea': {
+			deps: ['jquery']
+		},
+		'TImage': {
+			deps: ['jquery']
+		},
+		'TImageAdvBrowser': {
+			deps: ['jquery']
+		},
+		'TImageBrowser': {
+			deps: ['jquery']
+		},
+		'TRangePicker': {
+			deps: ['jquery']
+		},
+		'TDatePicker': {
+			deps: ['jquery']
+		},
+		'TTimePicker': {
+			deps: ['jquery']
+		},
+		'TTextArea': {
+			deps: ['jquery']
+		},
+		'TText': {
+			deps: ['jquery']
+		},
+		'TList': {
+			deps: ['jquery']
+		},
+		'TCheckbox': {
+			deps: ['jquery']
+		},
+		'TTagInput': {
+			deps: ['jquery']
+		},
+		'TRangePicker': {
+			deps: ['jquery']
+		},
+		'TTextInput': {
+			deps: ['jquery']
+		},
+		'TPasswordInput': {
+			deps: ['jquery']
+		},
+		'TComboBox': {
+			deps: ['jquery']
+		},
+		'jquery.sortable': {
+			deps: ['jquery']
+		},
+		'jquery.sortable': {
+			deps: ['jquery']
+		},
 
 		//Make sure jqGrid_extend load after jgGrid
 		'jqGrid_extend': {
@@ -129,7 +478,10 @@ require.config( {
 			deps: ['APIReturnHandler', 'Base', 'ResponseObject']
 		},
 		'BaseViewController': {
-			deps: ['ContextMenuConstant', 'ServiceCaller']
+			deps: ['backbone', 'ContextMenuConstant', 'ServiceCaller']
+		},
+		'BaseWindowController': {
+			deps: ['backbone']
 		},
 		'APIProgressBar': {
 			deps: ['ServiceCaller']
@@ -150,14 +502,42 @@ require.config( {
 			deps: ['leaflet']
 		},
 		'leaflet-timetrex': {
-			deps: ['leaflet','leaflet-draw','leaflet-routing','leaflet-providers']
+			deps: ['leaflet','leaflet-draw','leaflet-routing','leaflet-providers','measurement'],
+			exports: 'L',
+			init: function() {
+				window.L = L;
+			}
+		},
+		'tinymce': {
+            exports: 'tinyMCE',
+            init: function () {
+                this.tinyMCE.DOM.events.domLoaded = true;
+                return this.tinyMCE;
+            }
+        },
+
+		'APIAuthentication': {
+			deps:[ 'ServiceCaller', 'APIFactory' ]
+		},
+
+
+		'WizardStep': {
+			deps: ['Wizard', 'backbone']
+		},
+
+		'Wizard': {
+			deps: ['backbone']
 		},
 	}
 } );
 
 require( [
+	'RateLimit',
+	'LocalCacheData',
+	'backbone',
+	'Global',
 	'async',
-	'jquery-ui.custom.min',
+	'jquery-ui',
 	'jquery.i18n',
 	'jquery_ba_resize',
 	'jquery_cookie',
@@ -174,8 +554,56 @@ require( [
 	'ProgressBarManager',
 	'TAlertManager',
 	'sonic',
-	'ttpromise',
+	'TTPromise',
+	'TTUUID',
+	'APIAuthentication',
+	'Wizard',
+	'WizardStep',
 ], function() {
+
+	//Hide elements that show hidden link for search friendly
+	hideElements();
+
+	//Don't not show loading bar if refresh
+	if ( Global.isSet( LocalCacheData.getLoginUser() ) ) {
+		$( ".loading-view" ).hide();
+	} else {
+		setProgress()
+	}
+
+	function setProgress() {
+		loading_bar_time = setInterval( function() {
+			var progress_bar = $( ".progress-bar" );
+			var c_value = progress_bar.attr( "value" );
+
+			if ( c_value < 90 ) {
+				progress_bar.attr( "value", c_value + 10 );
+			}
+		}, 1000 );
+	}
+
+	function cleanProgress() {
+		if ( $( ".loading-view" ).is( ":visible" ) ) {
+
+			var progress_bar = $( ".progress-bar" );
+			progress_bar.attr( "value", 100 );
+			clearInterval( loading_bar_time );
+
+			loading_bar_time = setInterval( function() {
+				$( ".progress-bar-div" ).hide();
+				clearInterval( loading_bar_time );
+			}, 50 );
+		}
+	}
+
+	function hideElements() {
+		var elements = document.getElementsByClassName( 'need-hidden-element' );
+
+		for ( var i = 0; i < elements.length; i++ ) {
+			elements[i].style.display = 'none';
+		}
+	}
+
 	if ( window.sessionStorage ) {
 		LocalCacheData.isSupportHTML5LocalCache = true;
 	} else {
@@ -201,6 +629,7 @@ require( [
 	}());
 
 	$( function() {
+		Global.styleSandbox();
 
 		$.support.cors = true; // For IE
 		cleanProgress();
@@ -441,8 +870,13 @@ require( [
 			LocalCacheData.appType = loginData.deployment_on_demand;
 			LocalCacheData.productEditionId = loginData.product_edition;
 			var controller = new IndexViewController();
-			if ( $.cookie( 'PreviousSessionID' ) ) {
-				TAlertManager.showPreSessionAlert();
+
+			var alternate_session_data = $.cookie( 'AlternateSessionData' );
+			if ( alternate_session_data ) {
+				alternate_session_data = JSON.parse( alternate_session_data )
+				if ( alternate_session_data.previous_session_id ) {
+					TAlertManager.showPreSessionAlert();
+				}
 			}
 		}
 
@@ -525,8 +959,11 @@ require( [
 
 	function loadViewRequiredJS() {
 		LocalCacheData.loadViewRequiredJSReady = false;
-		require( [
-			'nanobar',
+
+		var require_array = [
+			'backbone',
+			'Global',
+			'nanobar', //only in timesheet
 			'jquery_json',
 			'stacktrace',
 			'html2canvas',
@@ -543,11 +980,6 @@ require( [
 			'TTimePicker',
 			'TRangePicker',
 			'TTextArea',
-			'TImageBrowser',
-			'CameraBrowser',
-			'TImageAdvBrowser',
-			'TImage',
-			'TImageCutArea',
 			'InsideEditor',
 			'ErrorTipBox',
 			'TFeedback',
@@ -586,11 +1018,39 @@ require( [
 			'UserGenericStatusWindowController',
 			'ReportBaseViewController',
 			'Paging2',
-            'TColorPicker',
-		], function( Nanobar ) {
-			window.Nanobar = Nanobar;
-			LocalCacheData.loadViewRequiredJSReady = true;
-		} )
+			'jquery-ui',
+			//'live-chat',
+
+			//API's required to loads views. This is a preemtive move before removing loadScript() from Global
+			'APILog',
+			'APINotification',
+			'APIPermissionControl',
+			'APIUserGenericData',
+			'APIMisc',
+			'APIOtherField',
+			'APIDate',
+			'APIUser',
+			'APICompany',
+			'AuthorizationHistoryCommon',
+			'RequestViewCommonController',
+			'EmbeddedMessageCommon',
+
+		];
+
+		//do not load interact on mobile.
+		if ( Global.detectMobileBrowser() == true ) {
+			require_array.splice( require_array.indexOf('interact'), 1);
+			require(require_array, function (Backbone, Global, Nanobar) {
+				window.Nanobar = Nanobar;
+				LocalCacheData.loadViewRequiredJSReady = true;
+			})
+		} else {
+			require(require_array, function (Backbone, Global, Nanobar, interact) {
+				window.interact = interact;
+				window.Nanobar = Nanobar;
+				LocalCacheData.loadViewRequiredJSReady = true;
+			})
+		}
 	}
 
 	function stripDuplicateSlashes( url ) {
@@ -651,13 +1111,14 @@ require( [
  * 	that requirejs has been loaded and is loading other scripts.
  */
 require.onError = function( err ) {
+	console.error(err);
 	if ( err.message.indexOf( 'Script error for' ) != -1 ) {
 		if ( require.script_error_shown == undefined ) {
 			require.script_error_shown = 1;
 			//There is no pretty errorbox at this time. You may only have basic javascript.
 			if ( confirm( "Unable to download required data. Your internet connection may have failed press Ok to reload." ) ) {
 				//For testing, so that there's time to turn internet back on after confirm is clicked.
-				//window.setTimeout(function(){window.location.reload()},5000);
+				//window.setTimeout(function() {window.location.reload()},5000);
 				window.location.reload();
 			}
 		}

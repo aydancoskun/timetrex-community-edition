@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APICompany extends APIFactory {
 	protected $main_class = 'CompanyFactory';
 
+	/**
+	 * APICompany constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APICompany extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -85,6 +88,7 @@ class APICompany extends APIFactory {
 	/**
 	 * Get company data for one or more companyes.
 	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function getCompany( $data = NULL, $disable_paging = FALSE ) {
@@ -131,7 +135,7 @@ class APICompany extends APIFactory {
 	}
 	/**
 	 * @param string $format
-	 * @param null $data
+	 * @param array $data
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
@@ -161,7 +165,9 @@ class APICompany extends APIFactory {
 	/**
 	 * Set company data for one or more companyes.
 	 * @param array $data company data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setCompany( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		global $config_vars;
@@ -182,12 +188,12 @@ class APICompany extends APIFactory {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 		Debug::Text('Received data for: '. $total_records .' Companys', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -195,7 +201,7 @@ class APICompany extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'CompanyListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get company object, so we can only modify just changed data for specific records if needed.
 					//$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -215,7 +221,7 @@ class APICompany extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('company', 'edit_own') AND $this->getCurrentCompanyObject()->getId() == $lf->getCurrent()->getID() )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -250,7 +256,8 @@ class APICompany extends APIFactory {
 						$lf->setID( $this->getCurrentCompanyObject()->getId() );
 					}
 
-					if ( $lf->isNew() == TRUE ) {
+					if ( $lf->isNew( TRUE ) == TRUE ) {
+						$lf->setEnableAddLegalEntity( TRUE );
 						$lf->setEnableAddCurrency( TRUE );
 						$lf->setEnableAddPermissionGroupPreset( TRUE );
 						$lf->setEnableAddStation( TRUE );
@@ -298,12 +305,12 @@ class APICompany extends APIFactory {
 	/**
 	 * Delete one or more companys.
 	 * @param array $data company data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteCompany( $data ) {
 		global $config_vars;
 
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -320,7 +327,7 @@ class APICompany extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
@@ -329,7 +336,7 @@ class APICompany extends APIFactory {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'CompanyListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get company object, so we can only modify just changed data for specific records if needed.
 					if ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] )	{
@@ -341,7 +348,7 @@ class APICompany extends APIFactory {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('company', 'delete')
 								OR ( $this->getPermissionObject()->Check('company', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -423,7 +430,8 @@ class APICompany extends APIFactory {
 	/**
 	 * Get user counts for a single company. We should be able to support multiple companies as well, or getting data for all companies by not specifying the company filter.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getCompanyMinAvgMaxUserCounts( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
@@ -493,7 +501,8 @@ class APICompany extends APIFactory {
 	/**
 	 * Get user email addresses for a single company. We should be able to support multiple companies as well, or getting data for all companies by not specifying the company filter.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getCompanyEmailAddresses( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
@@ -547,7 +556,8 @@ class APICompany extends APIFactory {
 	/**
 	 * Get phone minutes for a single company. We should be able to support multiple companies as well, or getting data for all companies by not specifying the company filter.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getCompanyPhonePunchData( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
@@ -608,7 +618,8 @@ class APICompany extends APIFactory {
 	/**
 	 * Get station counts for a single company. We should be able to support multiple companies as well, or getting data for all companies by not specifying the company filter.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getCompanyStationCounts( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
@@ -665,7 +676,8 @@ class APICompany extends APIFactory {
 	/**
 	 * Get timeclock stations associated with each company.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @return array|bool
 	 */
 	function getCompanyTimeClockStations( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')

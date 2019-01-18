@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,40 +41,53 @@
 class APISetupPresets extends APIFactory {
 	protected $main_class = 'SetupPresets';
 
+	/**
+	 * APISetupPresets constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
 		return TRUE;
 	}
 
-	function createPresets( $data ) {
+	/**
+	 * @param $location_data
+	 * @param $legal_entity_id
+	 * @return bool
+	 */
+	function createPresets( $location_data, $legal_entity_id ) {
 		if ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
 				OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_own') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_child') OR $this->getPermissionObject()->Check('pay_period_schedule', 'add') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
-		if ( is_array($data) ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( count($data) + 1 ), NULL, TTi18n::getText('Creating policies...') );
+		if ( is_array( $location_data) ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( count( $location_data) + 1 ), NULL, TTi18n::getText( 'Creating policies...') );
 
-			$this->getMainClassObject()->setCompany( $this->getCurrentCompanyObject()->getId() );
-			$this->getMainClassObject()->setUser( $this->getCurrentUserObject()->getId() );
+			$sp = $this->getMainClassObject();
+			$sp->setCompany( $this->getCurrentCompanyObject()->getId() );
+			$sp->setUser( $this->getCurrentUserObject()->getId() );
 
-			$this->getMainClassObject()->createPresets();
+			$sp->createPresets();
 
 			$already_processed_country = array();
 			$i = 1;
-			foreach( $data as $location ) {
-				if ( isset($location['country']) AND isset($location['province']) ) {
+			if ( $legal_entity_id == TTUUID::getZeroID() ) {
+				$legal_entity_id = NULL;
+			}
+
+			foreach ( $location_data as $location ) {
+				if ( isset( $location['country'] ) AND isset( $location['province'] ) ) {
 					if ( $location['province'] == '00' ) {
 						$location['province'] = NULL;
 					}
 
-					if ( !in_array($location['country'], $already_processed_country)) {
-						$this->getMainClassObject()->createPresets( $location['country'] );
+					if ( !in_array( $location['country'], $already_processed_country ) ) {
+						$sp->createPresets( $location['country'], NULL, NULL, NULL, NULL, $legal_entity_id );
 					}
 
-					$this->getMainClassObject()->createPresets( $location['country'], $location['province'] );
-					Debug::text('Creating presets for Country: '. $location['country'] .' Province: '. $location['province'], __FILE__, __LINE__, __METHOD__, 9);
+					$sp->createPresets( $location['country'], $location['province'], NULL, NULL, NULL, $legal_entity_id );
+					Debug::text( 'Creating presets for Country: ' . $location['country'] . ' Province: ' . $location['province'], __FILE__, __LINE__, __METHOD__, 9 );
 
 					$already_processed_country[] = $location['country'];
 				}
@@ -84,8 +97,8 @@ class APISetupPresets extends APIFactory {
 			}
 
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i++, TTi18n::getText('Creating Permissions...') );
-			$this->getMainClassObject()->Permissions();
-			$this->getMainClassObject()->UserDefaults();
+			$sp->Permissions();
+			$sp->UserDefaults( $this->getCurrentUserObject()->getLegalEntity() );
 
 			//Assign the current user to the only existing pay period schedule.
 			$ppslf = TTnew('PayPeriodScheduleListFactory');

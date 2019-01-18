@@ -1,6 +1,11 @@
 RequestAuthorizationViewController = RequestViewCommonController.extend( {
 	el: '#request_authorization_view_container',
 
+	_required_files: {
+		10: ['APIRequest', 'APIAuthorization', 'APIAbsencePolicy', 'APIMessageControl', 'APISchedulePolicy', 'APISchedule', 'APIBranch', 'APIDepartment'],
+		20: ['APIJob', 'APIJobItem']
+	},
+
 	type_array: null,
 	hierarchy_level_array: null,
 
@@ -19,8 +24,8 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 	authorization_history_grid: null,
 	pre_request_schedule: true,
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'RequestAuthorizationEditView.html';
 		this.permission_id = 'request';
 		this.viewId = 'RequestAuthorization';
@@ -707,7 +712,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 			if ( !this.edit_only_mode ) {
 				if ( result_data === true ) {
 					$this.refresh_id = $this.current_edit_record.id;
-				} else if ( result_data > 0 ) {
+				} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 					$this.refresh_id = result_data;
 				}
 
@@ -916,7 +921,6 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				break;
 			case 'request_schedule_status_id':
 				this.onWorkingStatusChanged();
-				this.onAvailableBalanceChange();
 				break;
 			case 'start_date':
 				$this.getScheduleTotalTime()
@@ -1079,7 +1083,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 	},
 
 	search: function( set_default_menu, page_action, page_number, callBack ) {
-		this.refresh_id = 0;
+		this.refresh_id = null;
 		this._super( 'search', set_default_menu, page_action, page_number, callBack );
 	},
 

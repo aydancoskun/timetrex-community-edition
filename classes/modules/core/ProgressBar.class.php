@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -50,6 +50,9 @@ class ProgressBar {
 
 	var $update_iteration = 1; //This is how often we actually update the progress bar, even if the function is called more often.
 
+	/**
+	 * ProgressBar constructor.
+	 */
 	function __construct() {
 		try {
 			$this->obj = new SharedMemory();
@@ -61,13 +64,26 @@ class ProgressBar {
 	}
 
 	//Allow setting a default key so we don't have to pass the key around outside of this object.
+
+	/**
+	 * @param $key
+	 */
 	function setDefaultKey( $key ) {
 		$this->default_key = $key;
 	}
+
+	/**
+	 * @return null
+	 */
 	function getDefaultKey() {
 		return $this->default_key;
 	}
-	
+
+	/**
+	 * @param $key
+	 * @param null $msg
+	 * @return bool
+	 */
 	function error( $key, $msg = NULL ) {
 		Debug::text('error: \''. $key .' Key: '. $key .'('.microtime(TRUE).') Message: '. $msg, __FILE__, __LINE__, __METHOD__, 9);
 
@@ -99,6 +115,13 @@ class ProgressBar {
 		}
 	}
 
+	/**
+	 * @param $key
+	 * @param int $total_iterations
+	 * @param int $update_iteration EPOCH
+	 * @param null $msg
+	 * @return bool
+	 */
 	function start( $key, $total_iterations = 100, $update_iteration = NULL, $msg = NULL ) {
 		Debug::text('start: \''. $key .'\' Iterations: '. $total_iterations .' Update Iterations: '. $update_iteration .' Key: '. $key .'('.microtime(TRUE).') Message: '. $msg, __FILE__, __LINE__, __METHOD__, 9);
 
@@ -116,7 +139,7 @@ class ProgressBar {
 		if ( !is_object($this->obj) ) { //If there is an error getting the shared memory object, cancel out early.
 			return FALSE;
 		}
-		
+
 		if ( $update_iteration == '' ) {
 			$this->update_iteration = ceil($total_iterations / 20); //Update every 5%.
 		} else {
@@ -146,9 +169,18 @@ class ProgressBar {
 		}
 	}
 
+	/**
+	 * @param $key
+	 * @return bool
+	 */
 	function delete( $key ) {
 		return $this->stop( $this->key_prefix.$key );
 	}
+
+	/**
+	 * @param $key
+	 * @return bool
+	 */
 	function stop( $key ) {
 		if ( $key == '' ) {
 			$key = $this->getDefaultKey();
@@ -169,6 +201,12 @@ class ProgressBar {
 		}
 	}
 
+	/**
+	 * @param $key
+	 * @param $current_iteration
+	 * @param null $msg
+	 * @return bool
+	 */
 	function set( $key, $current_iteration, $msg = NULL ) {
 		if ( $key == '' ) {
 			$key = $this->getDefaultKey();
@@ -193,7 +231,7 @@ class ProgressBar {
 						AND is_array( $progress_bar_arr )
 						AND $current_iteration >= 0
 						AND $current_iteration <= $progress_bar_arr['total_iterations']) {
-	
+
 					/*
 					if ( PRODUCTION == FALSE AND isset($progress_bar_arr['total_iterations']) AND $progress_bar_arr['total_iterations'] >= 1 ) {
 						//Add a delay based on the total iterations so we can test the progressbar more often
@@ -201,11 +239,11 @@ class ProgressBar {
 						usleep( ( ($total_delay / $progress_bar_arr['total_iterations']) * $this->update_iteration));
 					}
 					*/
-	
+
 					$progress_bar_arr['current_iteration'] = $current_iteration;
 					$progress_bar_arr['last_update_time'] = microtime(TRUE);
 				}
-	
+
 				if ( $msg != '' ) {
 					$progress_bar_arr['message'] = $msg;
 				}
@@ -215,13 +253,17 @@ class ProgressBar {
 				Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
 				return FALSE;
 			}
-		
+
 		}
 
 		return TRUE;
 	}
 
-	function get($key) {
+	/**
+	 * @param $key
+	 * @return bool
+	 */
+	function get( $key) {
 		if ( $key == '' ) {
 			$key = $this->getDefaultKey();
 			if ( $key == '' ) {
@@ -232,15 +274,20 @@ class ProgressBar {
 		if ( !is_object($this->obj) ) { //If there is an error getting the shared memory object, cancel out early.
 			return FALSE;
 		}
-		
+
 		try {
 			return $this->obj->get( $this->key_prefix.$key );
 		} catch ( Exception $e ) {
 			Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
 			return FALSE;
-		}		
+		}
 	}
 
+	/**
+	 * @param $key
+	 * @param int $total_iterations
+	 * @return bool
+	 */
 	function test( $key, $total_iterations = 10 ) {
 		Debug::text('testProgressBar: '. $key .' Iterations: '. $total_iterations, __FILE__, __LINE__, __METHOD__, 9);
 

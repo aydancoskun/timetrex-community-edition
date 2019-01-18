@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +40,14 @@
  */
 class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate {
 
-	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
@@ -53,13 +60,19 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getById($id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ExceptionListFactory
+	 */
+	function getById( $id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => (int)$id,
+					'id' => TTUUID::castUUID($id),
 					);
 
 
@@ -76,7 +89,14 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByUserIdAndDateStamp($user_id, $date_stamp, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $user_id UUID
+	 * @param int $date_stamp EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ExceptionListFactory
+	 */
+	function getByUserIdAndDateStamp( $user_id, $date_stamp, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -86,7 +106,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		}
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
 					);
 
@@ -103,8 +123,15 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 
 		return $this;
 	}
-	
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+
+	/**
+	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ExceptionListFactory
+	 */
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -124,7 +151,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$epcf = new ExceptionPolicyControlFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -134,7 +161,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					LEFT JOIN '. $epcf->getTable() .' as epcf ON epf.exception_policy_control_id = epcf.id
 					where
 						epcf.company_id = ?
-						AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+						AND a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 						AND ( a.deleted = 0 AND epf.deleted = 0 AND epcf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -144,7 +171,13 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ExceptionListFactory
+	 */
+	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -153,7 +186,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$epcf = new ExceptionPolicyControlFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -172,7 +205,14 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIDAndUserIdAndStartDateAndEndDate($company_id, $user_id, $start_date, $end_date) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @return bool|ExceptionListFactory
+	 */
+	function getByCompanyIDAndUserIdAndStartDateAndEndDate( $company_id, $user_id, $start_date, $end_date) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -193,8 +233,8 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$epf = new ExceptionPolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'user_id' => (int)$user_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'user_id' => TTUUID::castUUID($user_id),
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date )
 					);
@@ -221,7 +261,15 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIDAndUserIdAndPayPeriodIdAndSeverityAndNotTypeID($company_id, $user_id, $pay_period_id, $severity_id, $exception_type_id = NULL ) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param string $pay_period_id UUID
+	 * @param string $severity_id UUID
+	 * @param int $exception_type_id ID
+	 * @return bool|ExceptionListFactory
+	 */
+	function getByCompanyIDAndUserIdAndPayPeriodIdAndSeverityAndNotTypeID( $company_id, $user_id, $pay_period_id, $severity_id, $exception_type_id = NULL ) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -238,9 +286,9 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$epf = new ExceptionPolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'user_id' => (int)$user_id,
-					'pay_period_id' => (int)$pay_period_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'user_id' => TTUUID::castUUID($user_id),
+					'pay_period_id' => TTUUID::castUUID($pay_period_id),
 					);
 
 		$query = '
@@ -266,7 +314,12 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getFlaggedExceptionsByUserIdAndPayPeriodStatus($user_id, $pay_period_status) {
+	/**
+	 * @param string $user_id UUID
+	 * @param $pay_period_status
+	 * @return bool|ExceptionListFactory
+	 */
+	function getFlaggedExceptionsByUserIdAndPayPeriodStatus( $user_id, $pay_period_status) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -280,7 +333,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$rf = new RequestFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'user_id' => TTUUID::castUUID($user_id),
 					'date_stamp1' => $this->db->BindDate( TTDate::getBeginDayEpoch( ( TTDate::getTime() - (32 * 86400) ) ) ), //Narrow down the date range as a performance optimizaiton.
 					'date_stamp2' => $this->db->BindDate( TTDate::getBeginDayEpoch( TTDate::getTime() ) ), //Exclude any exceptions after today, but we must include todays exceptions because missing IN punches could exist.
 					'status_id' => $pay_period_status,
@@ -308,7 +361,12 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getSumExceptionsByPayPeriodIdAndBeforeDate($pay_period_id, $before_epoch) {
+	/**
+	 * @param string $pay_period_id UUID
+	 * @param int $before_epoch EPOCH
+	 * @return bool|ExceptionListFactory
+	 */
+	function getSumExceptionsByPayPeriodIdAndBeforeDate( $pay_period_id, $before_epoch) {
 		if ( $pay_period_id == '' ) {
 			return FALSE;
 		}
@@ -322,7 +380,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$ppf = new PayPeriodFactory();
 
 		$ph = array(
-					'pay_period_id' => (int)$pay_period_id,
+					'pay_period_id' => TTUUID::castUUID($pay_period_id),
 					'date_stamp' => $this->db->BindDate( TTDate::getBeginDayEpoch( $before_epoch  ) ),
 					);
 
@@ -348,7 +406,16 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIDAndPayPeriodStatus($company_id, $status, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param $status
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ExceptionListFactory
+	 */
+	function getByCompanyIDAndPayPeriodStatus( $company_id, $status, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -370,7 +437,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$epf = new ExceptionPolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -396,7 +463,18 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIDAndTypeAndPayPeriodStatusAndMinimumDateStamp($company_id, $type, $status, $min_date_stamp = NULL, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param $type
+	 * @param $status
+	 * @param int $min_date_stamp EPOCH
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ExceptionListFactory
+	 */
+	function getByCompanyIDAndTypeAndPayPeriodStatusAndMinimumDateStamp( $company_id, $type, $status, $min_date_stamp = NULL, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -422,7 +500,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$epf = new ExceptionPolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					'min_date_stamp' => $this->db->BindDate( $min_date_stamp ),
 					);
 
@@ -451,7 +529,17 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIDAndUserIDAndPayPeriodStatus($company_id, $user_id, $status, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param $status
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ExceptionListFactory
+	 */
+	function getByCompanyIDAndUserIDAndPayPeriodStatus( $company_id, $user_id, $status, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -477,8 +565,8 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$epf = new ExceptionPolicyFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
-					'user_id' => (int)$user_id,
+					'company_id' => TTUUID::castUUID($company_id),
+					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
@@ -505,186 +593,15 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getSearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		if ( !is_array($order) ) {
-			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
-			}
-		}
-
-		$additional_order_fields = array('d.name', 'e.name', 'f.name', 'g.name', 'h.status_id', 'i.severity_id', 'i.type_id', 'c.first_name', 'c.last_name', 'a.date_stamp');
-		if ( $order == NULL ) {
-			//$order = array( 'status_id' => 'asc', 'last_name' => 'asc', 'first_name' => 'asc', 'middle_name' => 'asc');
-			$order = array( 'i.severity_id' => 'desc', 'c.last_name' => 'asc', 'a.date_stamp' => 'asc', 'i.type_id' => 'asc' );
-
-			$strict = FALSE;
-		} else {
-			//Do order by column conversions, because if we include these columns in the SQL
-			//query, they contaminate the data array.
-			if ( isset($order['default_branch']) ) {
-				$order['d.name'] = $order['default_branch'];
-				unset($order['default_branch']);
-			}
-			if ( isset($order['default_department']) ) {
-				$order['e.name'] = $order['default_department'];
-				unset($order['default_department']);
-			}
-			if ( isset($order['user_group']) ) {
-				$order['f.name'] = $order['user_group'];
-				unset($order['user_group']);
-			}
-			if ( isset($order['title']) ) {
-				$order['g.name'] = $order['title'];
-				unset($order['title']);
-			}
-			if ( isset($order['exception_policy_type_id']) ) {
-				$order['i.type_id'] = $order['exception_policy_type_id'];
-				unset($order['exception_policy_type_id']);
-			}
-			if ( isset($order['severity_id']) ) {
-				$order['i.severity_id'] = $order['severity_id'];
-				unset($order['severity_id']);
-			}
-			if ( isset($order['severity']) ) {
-				$order['i.severity_id'] = $order['severity'];
-				unset($order['severity']);
-			}
-			if ( isset($order['exception_policy_type']) ) {
-				$order['i.type_id'] = $order['exception_policy_type'];
-				unset($order['exception_policy_type']);
-			}
-			if ( isset($order['exception_policy_type_id']) ) {
-				$order['i.type_id'] = $order['exception_policy_type_id'];
-				unset($order['exception_policy_type_id']);
-			}
-
-			if ( isset($order['first_name']) ) {
-				$order['c.first_name'] = $order['first_name'];
-				unset($order['first_name']);
-			}
-			if ( isset($order['last_name']) ) {
-				$order['c.last_name'] = $order['last_name'];
-				unset($order['last_name']);
-			}
-			if ( isset($order['date_stamp']) ) {
-				$order['a.date_stamp'] = $order['date_stamp'];
-				unset($order['date_stamp']);
-			}
-
-			//Always sort by last name, first name after other columns
-			if ( !isset($order['c.last_name']) ) {
-				$order['c.last_name'] = 'asc';
-			}
-			if ( !isset($order['c.first_name']) ) {
-				$order['c.first_name'] = 'asc';
-			}
-			if ( !isset($order['a.date_stamp']) ) {
-				$order['a.date_stamp'] = 'asc';
-			}
-			if ( !isset($order['i.severity_id']) ) {
-				$order['i.severity_id'] = 'desc';
-			}
-
-			$strict = TRUE;
-		}
-		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
-
-		$uf = new UserFactory();
-		$bf = new BranchFactory();
-		$df = new DepartmentFactory();
-		$ugf = new UserGroupFactory();
-		$utf = new UserTitleFactory();
-		$ppf = new PayPeriodFactory();
-		$epf = new ExceptionPolicyFactory();
-
-		$ph = array(
-					'company_id' => (int)$company_id,
-					);
-
-		$query = '
-					select	a.*,
-							a.date_stamp as user_date_stamp,
-							i.severity_id as severity_id,
-							i.type_id as exception_policy_type_id,
-							a.user_id as user_id
-					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as c ON a.user_id = c.id
-						LEFT JOIN '. $bf->getTable() .' as d ON c.default_branch_id = d.id
-						LEFT JOIN '. $df->getTable() .' as e ON c.default_department_id = e.id
-						LEFT JOIN '. $ugf->getTable() .' as f ON c.group_id = f.id
-						LEFT JOIN '. $utf->getTable() .' as g ON c.title_id = g.id
-						LEFT JOIN '. $ppf->getTable() .' as h ON a.pay_period_id = h.id
-						LEFT JOIN '. $epf->getTable() .' as i ON a.exception_policy_id = i.id
-					where	c.company_id = ?
-					';
-
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query	.=	' AND c.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query	.=	' AND c.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query	.=	' AND c.id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query	.=	' AND c.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['type_id']) AND isset($filter_data['type_id'][0]) AND !in_array(-1, (array)$filter_data['type_id']) ) {
-			$query	.=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['severity_id']) AND isset($filter_data['severity_id'][0]) AND !in_array(-1, (array)$filter_data['severity_id']) ) {
-			$query	.=	' AND i.severity_id in ('. $this->getListSQL($filter_data['severity_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exception_policy_type_id']) AND isset($filter_data['exception_policy_type_id'][0]) AND !in_array(-1, (array)$filter_data['exception_policy_type_id']) ) {
-			$query	.=	' AND i.type_id in ('. $this->getListSQL($filter_data['exception_policy_type_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['pay_period_id']) AND isset($filter_data['pay_period_id'][0]) AND !in_array(-1, (array)$filter_data['pay_period_id']) ) {
-			$query	.=	' AND a.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['pay_period_status_id']) AND isset($filter_data['pay_period_status_id'][0]) AND !in_array(-1, (array)$filter_data['pay_period_status_id']) ) {
-			$query	.=	' AND h.status_id in ('. $this->getListSQL($filter_data['pay_period_status_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
-			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
-				$uglf = new UserGroupListFactory();
-				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
-			}
-			$query	.=	' AND c.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query	.=	' AND c.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query	.=	' AND c.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query	.=	' AND c.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
-		}
-		/*
-		if ( isset($filter_data['sin']) AND !is_array($filter_data['sin']) AND trim($filter_data['sin']) != '' ) {
-			$ph[] = trim($filter_data['sin']);
-			$query	.=	' AND a.sin LIKE ?';
-		}
-		*/
-
-		$query .=	'
-						AND ( a.deleted = 0 AND c.deleted = 0 AND h.deleted = 0 )
-					';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
-
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		return $this;
-	}
-
+	/**
+	 * @param string $company_id UUID
+	 * @param $filter_data
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|ExceptionListFactory
+	 */
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -807,7 +724,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 				$order['c.first_name'] = 'asc';
 			}
 			if ( !isset($order['a.date_stamp']) ) {
-				$order['a.date_stamp'] = 'desc'; 
+				$order['a.date_stamp'] = 'desc';
 			}
 			if ( !isset($order['i.severity_id']) ) {
 				$order['i.severity_id'] = 'desc';
@@ -835,7 +752,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$puf = new PermissionUserFactory();
 
 		$ph = array(
-					'company_id' => (int)$company_id,
+					'company_id' => TTUUID::castUUID($company_id),
 					);
 
 		$query = '
@@ -899,29 +816,30 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	c.company_id = ? ';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'c.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'c.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['severity_id']) ) ? $this->getWhereClauseSQL( 'i.severity_id', $filter_data['severity_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['exception_policy_type_id']) ) ? $this->getWhereClauseSQL( 'i.type_id', $filter_data['exception_policy_type_id'], 'upper_text_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['pay_period_status_id']) ) ? $this->getWhereClauseSQL( 'h.status_id', $filter_data['pay_period_status_id'], 'numeric_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'c.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'c.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'c.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'c.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'c.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'c.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'c.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'c.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['branch_id']) ) ? $this->getWhereClauseSQL( 'pcf.branch_id', $filter_data['branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['department_id']) ) ? $this->getWhereClauseSQL( 'pcf.department_id', $filter_data['department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['branch_id']) ) ? $this->getWhereClauseSQL( 'pcf.branch_id', $filter_data['branch_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['department_id']) ) ? $this->getWhereClauseSQL( 'pcf.department_id', $filter_data['department_id'], 'uuid_list', $ph ) : NULL;
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 			$ph[] = $this->db->BindDate( (int)$filter_data['start_date'] );

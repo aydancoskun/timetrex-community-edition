@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,9 @@
 class APIKPIGroup extends APIFactory {
 	protected $main_class = 'KPIGroupFactory';
 
+	/**
+	 * APIKPIGroup constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -49,9 +52,9 @@ class APIKPIGroup extends APIFactory {
 
 	/**
 	 * Get options for dropdown boxes.
-	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
+	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
-	 * @return array
+	 * @return bool|array
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
@@ -62,7 +65,7 @@ class APIKPIGroup extends APIFactory {
 
 		return parent::getOptions( $name, $parent );
 	}
-	
+
 	/**
 	 * Get default KPIGroup data for creating new KPIGroupes.
 	 * @return array
@@ -84,9 +87,11 @@ class APIKPIGroup extends APIFactory {
 	/**
 	 * Get KPIGroup data for one or more KPIGroupes.
 	 * @param array $data filter data
-	 * @return array
+	 * @param bool $disable_paging
+	 * @param string $mode
+	 * @return array|bool
 	 */
-	function getKPIGroup( $data = NULL, $disable_paging = FALSE, $mode = 'flat' ) {	
+	function getKPIGroup( $data = NULL, $disable_paging = FALSE, $mode = 'flat' ) {
 		if ( !$this->getPermissionObject()->Check('kpi', 'enabled')
 				OR !( $this->getPermissionObject()->Check('kpi', 'view') OR $this->getPermissionObject()->Check('kpi', 'view_own') OR $this->getPermissionObject()->Check('kpi', 'view_child') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -98,7 +103,7 @@ class APIKPIGroup extends APIFactory {
 		$qglf = TTnew( 'KPIGroupListFactory' );
 
 		if ( $mode == 'flat' ) {
-		
+
 			$qglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 			Debug::Text('Record Count: '. $qglf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -123,17 +128,8 @@ class APIKPIGroup extends APIFactory {
 			//Debug::Arr($nodes, ' Nodes: ', __FILE__, __LINE__, __METHOD__, 10);
 			Debug::Text('Record Count: '. count($nodes), __FILE__, __LINE__, __METHOD__, 10);
 			if ( isset($nodes) ) {
-				//$retarr = $uglf->getArrayByNodes( FastTree::FormatArray( $nodes, 'PLAIN_TEXT', TRUE) );
-				$retarr = FastTree::FormatFlexArray( $nodes );
-				Debug::Arr($retarr, ' Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-				//There seems to be a bug with Flex here that if getKPI() and getKPIGroup() are called at the same time
-				//if this function returns an array with the keys out of order (1, 5, 10, rather then 0, 1, 3, 4, 5) Flex just sees
-				//some empty object.
-				//Not sure why this is happening with just this function, but the workaround for now is to call getKPIGroup()
-				//in a separate call to the server.
-				//This could have something to do with the array having 0 => ... as the first entry, which we ran into a issue
-				//in ExceptionPolicyFactory with getOptions('email_notification')
+				$retarr = TTTree::FormatArray( $nodes );
+				//Debug::Arr($retarr, ' Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				return $this->returnHandler( $retarr );
 			}
@@ -163,7 +159,9 @@ class APIKPIGroup extends APIFactory {
 	/**
 	 * Set KPIGroup data for one or more KPIGroupes.
 	 * @param array $data KPIGroup data
-	 * @return array
+	 * @param bool $validate_only
+	 * @param bool $ignore_warning
+	 * @return array|bool
 	 */
 	function setKPIGroup( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -186,20 +184,20 @@ class APIKPIGroup extends APIFactory {
 			$permission_children_ids = $this->getPermissionChildren();
 		}
 
-		extract( $this->convertToMultipleRecords($data) );
+		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
 
 		Debug::Text('Received data for: '. $total_records .' KPIGroups', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'KPIGroupListFactory' );
 				$lf->StartTransaction();
 
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get KPIGroup object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -215,7 +213,7 @@ class APIKPIGroup extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('kpi', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getCreatedBy(), $permission_children_ids ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -274,10 +272,10 @@ class APIKPIGroup extends APIFactory {
 	/**
 	 * Delete one or more KPIGroups.
 	 * @param array $data KPIGroup data
-	 * @return array
+	 * @return array|bool
 	 */
 	function deleteKPIGroup( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 
@@ -296,14 +294,14 @@ class APIKPIGroup extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-		$validator = $save_result = FALSE;
+		$validator = $save_result = $key = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'KPIGroupListFactory' );
 				$lf->StartTransaction();
-				if ( is_numeric($id) ) {
+				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get KPIGroup object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
@@ -313,7 +311,7 @@ class APIKPIGroup extends APIFactory {
 								OR ( $this->getPermissionObject()->Check('kpi', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy() ) === TRUE )
 								OR ( $this->getPermissionObject()->Check('kpi', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getCreatedBy(), $permission_children_ids ) === TRUE )
 								) {
-							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
@@ -364,7 +362,7 @@ class APIKPIGroup extends APIFactory {
 	 * @return array
 	 */
 	function copyKPIGroup( $data ) {
-		if ( is_numeric($data) ) {
+		if ( !is_array($data) ) {
 			$data = array($data);
 		}
 

@@ -1,6 +1,8 @@
 MessageControlViewController = BaseViewController.extend( {
 	el: '#message_control_view_container',
 
+	_required_files: ['APIMessageControl', 'APIRequest'],
+
 	object_type_array: null,
 
 	is_request: false,
@@ -17,8 +19,8 @@ MessageControlViewController = BaseViewController.extend( {
 
 	current_select_message_control_data: null, //current select message control data, set in onViewClick
 
-	initialize: function( options ) {
-		this._super( 'initialize', options );
+	init: function( options ) {
+		//this._super('initialize', options );
 		this.edit_view_tpl = 'MessageControlEditView.html';
 		this.permission_id = 'message';
 		this.viewId = 'MessageControl';
@@ -477,7 +479,7 @@ MessageControlViewController = BaseViewController.extend( {
 			if ( !this.edit_only_mode ) {
 				if ( result_data === true ) {
 					$this.refresh_id = $this.current_edit_record.id;
-				} else if ( result_data > 0 ) {
+				} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 					$this.refresh_id = result_data;
 				}
 
@@ -690,7 +692,7 @@ MessageControlViewController = BaseViewController.extend( {
 		for ( var i = 0; i < len; i++ ) {
 			var item = data[i];
 
-			if ( item.status_id === 10 ) {
+			if ( item.status_id == 10 ) {
 				$( "tr[id='" + item.id + "'] td" ).css( 'font-weight', 'bold' );
 			}
 		}
@@ -748,9 +750,9 @@ MessageControlViewController = BaseViewController.extend( {
 			$this.onTabIndexChange( e, ui );
 		} );
 
-		if ( this.folder_id === 10 ) {
+		if ( this.folder_id == 10 ) {
 			this.navigation_label = $.i18n._( 'From' ) + ':';
-		} else if ( this.folder_id === 20 ) {
+		} else if ( this.folder_id == 20 ) {
 			this.navigation_label = $.i18n._( 'To' ) + ':';
 		}
 
@@ -792,13 +794,13 @@ MessageControlViewController = BaseViewController.extend( {
 			selected_item = next_selected_item; // If the next_selected_item is defined, first to use this variable.
 
 		} else if ( grid_selected_length > 0 ) {
-			selected_item = this.getRecordFromGridById( parseInt( grid_selected_id_array[0] ) );
+			selected_item = this.getRecordFromGridById( grid_selected_id_array[0] );
 		} else {
 			TTPromise.reject('MessageControllViewController','onViewClick');
 			return;
 		}
 
-		if ( selected_item.object_type_id === 50 ) {
+		if ( selected_item.object_type_id == 50 ) {
 			selectedId = selected_item.object_id;
 			$this.is_request = true;
 			$this.is_message = false;
@@ -1113,7 +1115,7 @@ MessageControlViewController = BaseViewController.extend( {
 		if ( this.edit_view ) {
 			selected_item = this.current_select_message_control_data;
 		} else { // click Reply on list view.
-			selected_item = this.getRecordFromGridById( parseInt( grid_selected_id_array[0] ) );
+			selected_item = this.getRecordFromGridById( grid_selected_id_array[0] );
 		}
 
 		$this.openEditView();
@@ -1506,7 +1508,7 @@ MessageControlViewController = BaseViewController.extend( {
 			reply_data.body = records.body;
 
 			// message
-			if ( records.object_type_id !== 50 ) {
+			if ( records.object_type_id != 50 ) {
 				reply_data.to_user_id = records.from_user_id;
 				reply_data.object_type_id = 5;
 				reply_data.object_id = LocalCacheData.loginUser.id;
@@ -1714,7 +1716,7 @@ MessageControlViewController = BaseViewController.extend( {
 				continue;
 			}
 
-			if ( currentItem.status_id === 10 ) {
+			if ( currentItem.status_id == 10 ) {
 				read_ids.push( currentItem.id );
 			}
 
@@ -1809,7 +1811,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 	/* jshint ignore:start */
 	search: function( set_default_menu, page_action, page_number, callBack ) {
-		this.refresh_id = 0;
+		this.refresh_id = null;
 		this._super( 'search', set_default_menu, page_action, page_number, callBack )
 	}
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,9 @@ class APIImport extends APIFactory {
 
 	public $import_obj = NULL;
 
+	/**
+	 * APIImport constructor.
+	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -59,18 +62,24 @@ class APIImport extends APIFactory {
 		return TRUE;
 	}
 
+	/**
+	 * @return null
+	 */
 	function getImportObject() {
 		return $this->import_obj;
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getImportObjects() {
 		$retarr = array();
 
 		if ( $this->getPermissionObject()->Check('user', 'add') AND ($this->getPermissionObject()->Check('user', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_child') ) ) {
 			$retarr['-1010-user'] = TTi18n::getText('Employees');
 		}
-		if ( $this->getPermissionObject()->Check('user', 'edit_bank') OR $this->getPermissionObject()->Check('user', 'edit_child_bank')) {
-			$retarr['-1015-bank_account'] = TTi18n::getText('Employee Bank Accounts');
+		if ( $this->getPermissionObject()->Check('remittance_destination_account', 'edit') OR $this->getPermissionObject()->Check('remittance_destination_account', 'edit_child')) {
+			$retarr['-1015-remittance_destination_account'] = TTi18n::getText('Employee Payment Methods');
 		}
 		if ( $this->getPermissionObject()->Check('branch', 'add') AND $this->getPermissionObject()->Check('branch', 'edit') ) {
 			$retarr['-1020-branch'] = TTi18n::getText('Branches');
@@ -118,6 +127,9 @@ class APIImport extends APIFactory {
 		return $this->returnHandler( $retarr );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function returnFileValidationError() {
 		//Make sure we return a complete validation error to be displayed to the user.
 		$validator_obj = new Validator();
@@ -130,6 +142,9 @@ class APIImport extends APIFactory {
 		return $this->returnHandler( FALSE, 'IMPORT_FILE', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function generateColumnMap() {
 		if ( $this->getImportObject()->getRawDataFromFile() == FALSE ) {
 			$this->returnFileValidationError();
@@ -137,6 +152,11 @@ class APIImport extends APIFactory {
 
 		return $this->returnHandler( $this->getImportObject()->generateColumnMap() );
 	}
+
+	/**
+	 * @param $saved_column_map
+	 * @return array|bool
+	 */
 	function mergeColumnMap( $saved_column_map ) {
 		if ( $this->getImportObject()->getRawDataFromFile() == FALSE ) {
 			$this->returnFileValidationError();
@@ -145,6 +165,10 @@ class APIImport extends APIFactory {
 		return $this->returnHandler( $this->getImportObject()->mergeColumnMap( $saved_column_map ) );
 	}
 
+	/**
+	 * @param int $limit Limit the number of records returned
+	 * @return array|bool
+	 */
 	function getRawData( $limit = NULL ) {
 		if ( !is_object( $this->getImportObject() ) OR $this->getImportObject()->getRawDataFromFile() == FALSE ) {
 			$this->returnFileValidationError();
@@ -152,14 +176,28 @@ class APIImport extends APIFactory {
 
 		return $this->returnHandler( $this->getImportObject()->getRawData( $limit ) );
 	}
+
+	/**
+	 * @param $data
+	 * @return array|bool
+	 */
 	function setRawData( $data ) {
 		return $this->returnHandler( $this->getImportObject()->saveRawDataToFile( $data ) );
 	}
 
+	/**
+	 * @return array|bool
+	 */
 	function getParsedData() {
 		return $this->returnHandler( $this->getParsedData() );
 	}
 
+	/**
+	 * @param $column_map
+	 * @param array $import_options
+	 * @param bool $validate_only
+	 * @return array|bool
+	 */
 	function Import( $column_map, $import_options = array(), $validate_only = FALSE ) {
 		if ( $this->getImportObject()->getRawDataFromFile() == FALSE ) {
 			return $this->returnFileValidationError();

@@ -1,11 +1,12 @@
 FormW2ReportViewController = ReportBaseViewController.extend( {
 
+	_required_files: ['APIFormW2Report', 'APIPayStubEntryAccount', 'APICurrency'],
+
 	kind_of_employer_array: null,
 	efile_state_array: null,
 	state_field_array: null,
 
-	initialize: function( options ) {
-		this.__super( 'initialize', options );
+	initReport: function( options ) {
 		this.script_name = 'FormW2Report';
 		this.viewId = 'FormW2Report';
 		this.context_menu_name = $.i18n._( 'Form W2/W3' );
@@ -13,9 +14,6 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.view_file = 'FormW2ReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIFormW2Report' ))();
 		this.include_form_setup = true;
-
-		this.buildContextMenu();
-
 	},
 
 	buildContextMenuModels: function() {
@@ -132,24 +130,24 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 			});
 		}
 
-		var print_print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
-			id: ContextMenuIconName.print,
-			group: form_setup_group,
-			icon: 'print-35x35.png',
-			type: RibbonSubMenuType.NAVIGATION,
-			items: [],
-			permission_result: true,
-			permission: true} );
-
-		var pdf_form_print_government = new RibbonSubMenuNavItem( {label: $.i18n._( 'Government (Multiple Employees/Page)' ),
-			id: 'pdf_form_print_government',
-			nav: print_print
-		} );
-
-		var pdf_form_print = new RibbonSubMenuNavItem( {label: $.i18n._( 'Employee (One Employee/Page)' ),
-			id: 'pdf_form_print',
-			nav: print_print
-		} );
+		// var print_print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
+		// 	id: ContextMenuIconName.print,
+		// 	group: form_setup_group,
+		// 	icon: 'print-35x35.png',
+		// 	type: RibbonSubMenuType.NAVIGATION,
+		// 	items: [],
+		// 	permission_result: true,
+		// 	permission: true} );
+		//
+		// var pdf_form_print_government = new RibbonSubMenuNavItem( {label: $.i18n._( 'Government (Multiple Employees/Page)' ),
+		// 	id: 'pdf_form_print_government',
+		// 	nav: print_print
+		// } );
+		//
+		// var pdf_form_print = new RibbonSubMenuNavItem( {label: $.i18n._( 'Employee (One Employee/Page)' ),
+		// 	id: 'pdf_form_print',
+		// 	nav: print_print
+		// } );
 
 		var eFile = new RibbonSubMenu( {
 			label: $.i18n._( 'eFile' ),
@@ -221,13 +219,15 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		switch ( id ) {
 			case ContextMenuIconName.view:
+				ProgressBar.showOverlay();
 				this.onViewClick();
 				break;
 			case ContextMenuIconName.view_html:
-
+				ProgressBar.showOverlay();
 				this.onViewClick('html');
 				break;
 			case ContextMenuIconName.view_html_new_window:
+				ProgressBar.showOverlay();
 				this.onViewClick('html', true);
 				break;
 			case ContextMenuIconName.export_excel:
@@ -1074,74 +1074,6 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		custom_label_widget.append( label );
 
 		this.addEditFieldToColumn( $.i18n._( 'Box' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true, false, false, custom_label_widget );
-
-		//Name
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab3_column1 );
-		form_item_input.parent().width( '45%' );
-
-		//Company Name
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'company_name', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Company Name' ), form_item_input, tab3_column1 );
-
-		form_item_input.parent().width( '45%' );
-
-		//Address 1
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Address 1' ), form_item_input, tab3_column1 );
-		form_item_input.parent().width( '45%' );
-
-		//City
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'city'} );
-		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab3_column1 );
-
-		//Province
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'province', set_empty: true} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.province_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'State' ), form_item_input, tab3_column1 );
-
-		//Postal Code
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'postal_code'} );
-		this.addEditFieldToColumn( $.i18n._( 'ZIP Code' ), form_item_input, tab3_column1 );
-
-		//eFile Format
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'efile_state', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.efile_state_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'eFile Format' ), form_item_input, tab3_column1 );
-
-		//eFile User ID
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'efile_user_id'} );
-		this.addEditFieldToColumn( $.i18n._( 'eFile User ID' ), form_item_input, tab3_column1 );
-
-		//Employer State ID Numbers
-		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Employer State ID Numbers' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab3_column1 );
-
-		this.state_field_array = new (APIFactory.getAPIClass( 'APIUser' ))().getUniqueUserProvinces( {async: false} ).getResult();
-
-		for ( var key in this.state_field_array ) {
-			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			form_item_input.TTextInput( {field: key} );
-
-			this.addEditFieldToColumn( this.state_field_array[key], form_item_input, tab3_column1 );
-
-		}
-
 	},
 
 	getFormSetupData: function() {
@@ -1211,24 +1143,6 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		other.l14b_name = this.current_edit_record.l14b_name;
 		other.l14c_name = this.current_edit_record.l14c_name;
 		other.l14d_name = this.current_edit_record.l14d_name;
-
-		other.name = this.current_edit_record.name;
-		other.company_name = this.current_edit_record.company_name;
-		other.address1 = this.current_edit_record.address1;
-		other.city = this.current_edit_record.city;
-		other.province = this.current_edit_record.province;
-		other.postal_code = this.current_edit_record.postal_code;
-		other.efile_state = this.current_edit_record.efile_state;
-		other.efile_user_id = this.current_edit_record.efile_user_id;
-
-		other.state = {};
-
-		for ( var key in this.state_field_array ) {
-			other.state[key] = {};
-
-			other.state[key].state_id = this.current_edit_record[key];
-
-		}
 
 		return other;
 	},
@@ -1448,64 +1362,6 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 				this.edit_view_ui_dic.l14d_name.setValue( res_Data.l14d_name );
 
 				this.current_edit_record.l14d_name = res_Data.l14d_name;
-			}
-
-			if ( res_Data.name ) {
-				this.edit_view_ui_dic.name.setValue( res_Data.name );
-
-				this.current_edit_record.name = res_Data.name;
-			}
-
-			if ( res_Data.company_name ) {
-				this.edit_view_ui_dic.company_name.setValue( res_Data.company_name );
-
-				this.current_edit_record.company_name = res_Data.company_name;
-			}
-
-			if ( res_Data.address1 ) {
-				this.edit_view_ui_dic.address1.setValue( res_Data.address1 );
-
-				this.current_edit_record.address1 = res_Data.address1;
-			}
-
-			if ( res_Data.city ) {
-				this.edit_view_ui_dic.city.setValue( res_Data.city );
-
-				this.current_edit_record.city = res_Data.city;
-			}
-
-			if ( res_Data.province ) {
-				this.edit_view_ui_dic.province.setValue( res_Data.province );
-
-				this.current_edit_record.province = res_Data.province;
-			}
-
-			if ( res_Data.postal_code ) {
-				this.edit_view_ui_dic.postal_code.setValue( res_Data.postal_code );
-
-				this.current_edit_record.postal_code = res_Data.postal_code;
-			}
-
-			if ( res_Data.efile_state ) {
-				this.edit_view_ui_dic.efile_state.setValue( res_Data.efile_state );
-
-				this.current_edit_record.efile_state = res_Data.efile_state;
-			}
-
-			if ( res_Data.efile_user_id ) {
-				this.edit_view_ui_dic.efile_user_id.setValue( res_Data.efile_user_id );
-
-				this.current_edit_record.efile_user_id = res_Data.efile_user_id;
-			}
-
-			for ( var key in this.state_field_array ) {
-
-				if ( res_Data.state && res_Data.state[key] ) {
-					this.edit_view_ui_dic[key].setValue( res_Data.state[key].state_id );
-
-					this.current_edit_record[key] = res_Data.state[key].state_id
-				}
-
 			}
 
 		}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,6 +46,11 @@ class PayPeriodScheduleFactory extends Factory {
 	protected $enable_create_initial_pay_periods = TRUE;
 
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -154,6 +159,10 @@ class PayPeriodScheduleFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -195,109 +204,88 @@ class PayPeriodScheduleFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getType() {
 		//Have to return the KEY because it should always be a drop down box.
 		//return Option::getByKey($this->data['status_id'], $this->getOptions('status') );
-		if ( isset($this->data['type_id']) ) {
-			return (int)$this->data['type_id'];
-		}
-
-		return FALSE;
-	}
-	function setType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'type',
-											$type,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
-
-			$this->data['type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'type_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getStartWeekDay() {
-		if ( isset($this->data['start_week_day_id']) ) {
-			return (int)$this->data['start_week_day_id'];
-		}
-
-		return FALSE;
-	}
-	function setStartWeekDay($val) {
-		$val = trim($val);
-
-		if ( $this->Validator->inArrayKey(	'start_week_day',
-											$val,
-											TTi18n::gettext('Incorrect Start Week Day'),
-											$this->getOptions('start_week_day')) ) {
-
-			$this->data['start_week_day_id'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'start_week_day_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStartWeekDay( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'start_week_day_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getShiftAssignedDay() {
-		if ( isset($this->data['shift_assigned_day_id']) ) {
-			return (int)$this->data['shift_assigned_day_id'];
-		}
-
-		return FALSE;
-	}
-	function setShiftAssignedDay($val) {
-		$val = trim($val);
-
-		if ( $this->Validator->inArrayKey(	'shift_assigned_day_id',
-											$val,
-											TTi18n::gettext('Incorrect Shift Assigned Day'),
-											$this->getOptions('shift_assigned_day')) ) {
-
-			$this->data['shift_assigned_day_id'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'shift_assigned_day_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setShiftAssignedDay( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'shift_assigned_day_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -315,105 +303,76 @@ class PayPeriodScheduleFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim($name);
-
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is invalid'),
-											2, 50)
-				AND	$this->Validator->isTrue(	'name',
-												$this->isUniqueName($name),
-												TTi18n::gettext('Name is already in use')
-												)
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
-	}
-	function setDescription($description) {
-		$description = trim($description);
-
-		if (	$description == ''
-				OR
-				$this->Validator->isLength(	'description',
-											$description,
-											TTi18n::gettext('Description is invalid'),
-											2, 255) ) {
-
-			$this->data['description'] = $description;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'description' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @param bool $raw
+	 * @return bool
+	 */
 	function getStartDayOfWeek( $raw = FALSE) {
-		if ( isset($this->data['start_day_of_week']) ) {
-			return $this->data['start_day_of_week'];
-		}
-
-		return FALSE;
-	}
-	function setStartDayOfWeek($val) {
-		$val = trim($val);
-
-		if ( $this->Validator->inArrayKey(	'start_day_of_week',
-											$val,
-											TTi18n::gettext('Incorrect start day of week'),
-											TTDate::getDayOfWeekArray() ) ) {
-
-			$this->data['start_day_of_week'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'start_day_of_week' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setStartDayOfWeek( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'start_day_of_week', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTransactionDate() {
-		if ( isset($this->data['transaction_date']) ) {
-			return $this->data['transaction_date'];
-		}
-
-		return FALSE;
-	}
-	function setTransactionDate($val) {
-		$val = trim($val);
-
-		if ( $val == 0
-				OR $this->Validator->inArrayKey(	'transaction_date',
-											$val,
-											TTi18n::gettext('Incorrect transaction date'),
-											TTDate::getDayOfMonthArray() ) ) {
-
-			$this->data['transaction_date'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'transaction_date' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTransactionDate( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'transaction_date', $value );
+	}
+
+	/**
+	 * @param $val
+	 * @return int
+	 */
 	function convertLastDayOfMonth( $val ) {
 		if ( $val == -1 ) {
 			return 31;
@@ -422,122 +381,84 @@ class PayPeriodScheduleFactory extends Factory {
 		return $val;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getPrimaryDayOfMonth() {
-		if ( isset($this->data['primary_day_of_month']) ) {
-			return $this->data['primary_day_of_month'];
-		}
-
-		return FALSE;
-	}
-	function setPrimaryDayOfMonth($val) {
-		$val = trim($val);
-
-		if (	( $val == -1 OR $val == '' OR $val == 0 )
-				OR $this->Validator->inArrayKey(	'primary_day_of_month',
-											$val,
-											TTi18n::getText('Incorrect primary day of month'),
-											TTDate::getDayOfMonthArray() ) ) {
-
-			$this->data['primary_day_of_month'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'primary_day_of_month' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPrimaryDayOfMonth( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'primary_day_of_month', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getSecondaryDayOfMonth() {
-		if ( isset($this->data['secondary_day_of_month']) ) {
-			return $this->data['secondary_day_of_month'];
-		}
-
-		return FALSE;
-	}
-	function setSecondaryDayOfMonth($val) {
-		$val = trim($val);
-
-		if (	( $val == -1 OR $val == '' OR $val == 0 )
-				OR $this->Validator->inArrayKey(	'secondary_day_of_month',
-											$val,
-											TTi18n::gettext('Incorrect secondary day of month'),
-											TTDate::getDayOfMonthArray() ) ) {
-
-			$this->data['secondary_day_of_month'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'secondary_day_of_month' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSecondaryDayOfMonth( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'secondary_day_of_month', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getPrimaryTransactionDayOfMonth() {
-		if ( isset($this->data['primary_transaction_day_of_month']) ) {
-			return $this->data['primary_transaction_day_of_month'];
-		}
-
-		return FALSE;
-	}
-	function setPrimaryTransactionDayOfMonth($val) {
-		$val = trim($val);
-
-		if (	( $val == -1 OR $val == '' OR $val == 0 )
-				OR $this->Validator->inArrayKey(	'primary_transaction_day_of_month',
-											$val,
-											TTi18n::gettext('Incorrect primary transaction day of month'),
-											TTDate::getDayOfMonthArray() ) ) {
-
-			$this->data['primary_transaction_day_of_month'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'primary_transaction_day_of_month' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPrimaryTransactionDayOfMonth( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'primary_transaction_day_of_month', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getSecondaryTransactionDayOfMonth() {
-		if ( isset($this->data['secondary_transaction_day_of_month']) ) {
-			return $this->data['secondary_transaction_day_of_month'];
-		}
-
-		return FALSE;
-	}
-	function setSecondaryTransactionDayOfMonth($val) {
-		$val = trim($val);
-
-		if (	( $val == -1 OR $val == '' OR $val == 0 )
-				OR $this->Validator->inArrayKey(	'secondary_transaction_day_of_month',
-											$val,
-											TTi18n::gettext('Incorrect secondary transaction day of month'),
-											TTDate::getDayOfMonthArray() ) ) {
-
-			$this->data['secondary_transaction_day_of_month'] = $val;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'secondary_transaction_day_of_month' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setSecondaryTransactionDayOfMonth( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'secondary_transaction_day_of_month', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getTransactionDateBusinessDay() {
-		if ( isset($this->data['transaction_date_bd']) ) {
-			return (int)$this->data['transaction_date_bd'];
-		}
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'transaction_date_bd' );
 	}
-	function setTransactionDateBusinessDay($int) {
-		$int = (int)$int;
 
-		if ( $this->Validator->inArrayKey(	'transaction_date_bd',
-											$int,
-											TTi18n::gettext('Incorrect transaction date adjustment'),
-											$this->getOptions('transaction_date_business_day') ) ) {
-
-			$this->data['transaction_date_bd'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTransactionDateBusinessDay( $value) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'transaction_date_bd', $value );
 	}
 /*
 	function getTransactionDateBusinessDay() {
@@ -553,80 +474,76 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 */
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
 	function getAnchorDate( $raw = FALSE ) {
-		if ( isset($this->data['anchor_date']) ) {
+		$value = $this->getGenericDataValue( 'anchor_date' );
+		if ( $value !== FALSE ) {
 			if ( $raw === TRUE ) {
-				return $this->data['anchor_date'];
+				return $value;
 			} else {
-				return TTDate::strtotime( $this->data['anchor_date'] ); //Need to use TTDate::strtotime so it can return a saved epoch properly when its set and returned without saving inbetween.
+				return TTDate::strtotime( $value ); //Need to use TTDate::strtotime so it can return a saved epoch properly when its set and returned without saving inbetween.
 			}
 		}
 
 		return FALSE;
 	}
-	function setAnchorDate($epoch) {
-		$epoch = (int)$epoch;
 
-		if	(	$this->Validator->isDate(		'anchor_date',
-												$epoch,
-												TTi18n::gettext('Incorrect start date')) ) {
-
-			$this->data['anchor_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param int $value EPOCH
+	 * @return bool
+	 */
+	function setAnchorDate( $value) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'anchor_date', $value );
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getDayStartTime() {
-		if ( isset($this->data['day_start_time']) ) {
-			return (int)$this->data['day_start_time'];
-		}
-		return FALSE;
-	}
-	function setDayStartTime($int) {
-		$int = (int)$int;
-
-		if	(	$this->Validator->isNumeric(		'day_start_time',
-													$int,
-													TTi18n::gettext('Incorrect day start time')) ) {
-			$this->data['day_start_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'day_start_time' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDayStartTime( $value) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'day_start_time', $value );
+	}
+
+	/**
+	 * @return mixed
+	 */
 	function getTimeZoneOptions() {
 		$upf = TTnew( 'UserPreferenceFactory' );
 
 		return $upf->getOptions('time_zone');
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getTimeZone() {
-		if ( isset($this->data['time_zone']) ) {
-			return $this->data['time_zone'];
-		}
-
-		return FALSE;
-	}
-	function setTimeZone($time_zone) {
-		$time_zone = Misc::trimSortPrefix( trim($time_zone) );
-
-		if ( $this->Validator->inArrayKey(	'time_zone',
-											$time_zone,
-											TTi18n::gettext('Incorrect time zone'),
-											Misc::trimSortPrefix( $this->getTimeZoneOptions() ) ) ) {
-
-			$this->data['time_zone'] = $time_zone;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'time_zone' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeZone( $value) {
+		$value = Misc::trimSortPrefix( trim($value) );
+		return $this->setGenericDataValue( 'time_zone', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function setOriginalTimeZone() {
 		if ( isset($this->original_time_zone) ) {
 			return TTDate::setTimeZone( $this->original_time_zone );
@@ -634,6 +551,10 @@ class PayPeriodScheduleFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool
+	 */
 	function setPayPeriodTimeZone() {
 		$this->original_time_zone = TTDate::getTimeZone();
 
@@ -655,7 +576,7 @@ class PayPeriodScheduleFactory extends Factory {
 		if	(	$this->Validator->isNumeric(		'continuous_time',
 													$int,
 													TTi18n::gettext('Incorrect continuous time')) ) {
-			$this->data['day_continuous_time'] = $int;
+			$this->setGenericDataValue( 'day_continuous_time', $int );
 
 			return TRUE;
 		}
@@ -666,196 +587,146 @@ class PayPeriodScheduleFactory extends Factory {
 	//
 	// Instead of daily continuous time, use minimum time-off between shifts that triggers a new day to start.
 	//
+	/**
+	 * @return bool|int
+	 */
 	function getNewDayTriggerTime() {
-		if ( isset($this->data['new_day_trigger_time']) ) {
-			return (int)$this->data['new_day_trigger_time'];
-		}
-		return FALSE;
-	}
-	function setNewDayTriggerTime($int) {
-		$int = (int)$int;
-
-		if	(	$this->Validator->isNumeric(		'new_day_trigger_time',
-													$int,
-													TTi18n::gettext('Incorrect Minimum Time-Off Between Shifts')) ) {
-			$this->data['new_day_trigger_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'new_day_trigger_time' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setNewDayTriggerTime( $value) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'new_day_trigger_time', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getMaximumShiftTime() {
-		if ( isset($this->data['maximum_shift_time']) ) {
-			return (int)$this->data['maximum_shift_time'];
-		}
-		return FALSE;
-	}
-	function setMaximumShiftTime($int) {
-		$int = (int)$int;
-
-		if	(	$this->Validator->isNumeric(		'maximum_shift_time',
-													$int,
-													TTi18n::gettext('Incorrect Maximum Shift Time'))
-				AND
-				$this->Validator->isLessThan(		'maximum_shift_time',
-													$int,
-													TTi18n::gettext('Maximum Shift Time is too long'),
-													691200 )
-				AND
-				$this->Validator->isGreaterThan(	'maximum_shift_time',
-													$int,
-													TTi18n::gettext('Maximum Shift Time is too short'),
-													14400 )
-			) {
-			$this->data['maximum_shift_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'maximum_shift_time' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMaximumShiftTime( $value) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'maximum_shift_time', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getAnnualPayPeriods() {
-		if ( isset($this->data['annual_pay_periods']) ) {
-			return (int)$this->data['annual_pay_periods'];
-		}
-		return FALSE;
-	}
-	function setAnnualPayPeriods($int) {
-		$int = (int)$int;
-
-		if	(	$this->Validator->isNumeric(		'annual_pay_periods',
-													$int,
-													TTi18n::gettext('Incorrect Annual Pay Periods')) ) {
-			$this->data['annual_pay_periods'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'annual_pay_periods' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAnnualPayPeriods( $value) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'annual_pay_periods', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getTimeSheetVerifyType() {
-		if ( isset($this->data['timesheet_verify_type_id']) ) {
-			return (int)$this->data['timesheet_verify_type_id'];
-		}
-
-		return TRUE;
-	}
-	function setTimeSheetVerifyType($type) {
-		$type = trim($type);
-
-		if ( $this->Validator->inArrayKey(	'timesheet_verify_type_id',
-											$type,
-											TTi18n::gettext('Incorrect TimeSheet Verification Type'),
-											$this->getOptions('timesheet_verify_type')) ) {
-
-			$this->data['timesheet_verify_type_id'] = $type;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'timesheet_verify_type_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeSheetVerifyType( $value) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'timesheet_verify_type_id', $value );
+	}
+
+	/**
+	 * @return bool|string
+	 */
 	function getTimeSheetVerifyBeforeEndDate() {
-		if ( isset($this->data['timesheet_verify_before_end_date']) ) {
-			return Misc::removeTrailingZeros( round( TTDate::getDays( (int)$this->data['timesheet_verify_before_end_date'] ), 3 ), 0 );
+		$value = $this->getGenericDataValue( 'timesheet_verify_before_end_date' );
+		if ( $value !== FALSE ) {
+			return Misc::removeTrailingZeros( round( TTDate::getDays( (int)$value ), 3 ), 0 );
 		}
 		return FALSE;
 	}
-	function setTimeSheetVerifyBeforeEndDate($int) {
-		$int = (float)$int; // Do not cast to INT, need to support partial days.
 
-		if	(	$this->Validator->isNumeric(		'timesheet_verify_before_end_date',
-													$int,
-													TTi18n::gettext('Incorrect value for timesheet verification before/after end date'))
-				AND
-				$this->Validator->isLessThan(		'timesheet_verify_before_end_date',
-													$int,
-													TTi18n::gettext('Verification Window Starts is too large'),
-													999 )
-				AND
-				$this->Validator->isGreaterThan(	'timesheet_verify_before_end_date',
-													$int,
-													TTi18n::gettext('Verification Window Starts is too small'),
-													-999 )
-			 ) {
-			$this->data['timesheet_verify_before_end_date'] = ($int * 86400);
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeSheetVerifyBeforeEndDate( $value) {
+		$value = (float)$value; // Do not cast to INT, need to support partial days.
+		return $this->setGenericDataValue( 'timesheet_verify_before_end_date', ($value * 86400) );
 	}
 
+	/**
+	 * @return bool|string
+	 */
 	function getTimeSheetVerifyBeforeTransactionDate() {
-		if ( isset($this->data['timesheet_verify_before_transaction_date']) ) {
-			return Misc::removeTrailingZeros( round( TTDate::getDays( (int)$this->data['timesheet_verify_before_transaction_date'] ), 3 ), 0 );
+		$value = $this->getGenericDataValue( 'timesheet_verify_before_transaction_date' );
+		if ( $value !== FALSE ) {
+			return Misc::removeTrailingZeros( round( TTDate::getDays( (int)$value ), 3 ), 0 );
 		}
 		return FALSE;
 	}
-	function setTimeSheetVerifyBeforeTransactionDate($int) {
-		$int = (float)$int; // Do not cast to INT, need to support partial days.
 
-		if	(	$this->Validator->isNumeric(		'timesheet_verify_before_transaction_date',
-													$int,
-													TTi18n::gettext('Incorrect value for timesheet verification before/after transaction date'))
-				AND
-				$this->Validator->isLessThan(		'timesheet_verify_before_transaction_date',
-													$int,
-													TTi18n::gettext('Verification Window Ends is too large'),
-													999 )
-				AND
-				$this->Validator->isGreaterThan(	'timesheet_verify_before_transaction_date',
-													$int,
-													TTi18n::gettext('Verification Window Ends is too small'),
-													-999 )
-			 ) {
-			$this->data['timesheet_verify_before_transaction_date'] = ($int * 86400); //Convert to seconds to support partial days. Do not cast to INT!
-
-			return TRUE;
-		}
-
-		return FALSE;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeSheetVerifyBeforeTransactionDate( $value) {
+		$value = (float)$value; // Do not cast to INT, need to support partial days.
+		return $this->setGenericDataValue( 'timesheet_verify_before_transaction_date', ($value * 86400) );//Convert to seconds to support partial days. Do not cast to INT!
 	}
 
 	//Notices are no longer required with TimeSheet not verified exception.
+
+	/**
+	 * @return bool|int
+	 */
 	function getTimeSheetVerifyNoticeBeforeTransactionDate() {
-		if ( isset($this->data['timesheet_verify_notice_before_transaction_date']) ) {
-			return (int)$this->data['timesheet_verify_notice_before_transaction_date'];
-		}
-		return FALSE;
-	}
-	function setTimeSheetVerifyNoticeBeforeTransactionDate($int) {
-		$int = (int)$int;
-
-		if	(	$this->Validator->isNumeric(		'timesheet_verify_notice_before_transaction_date',
-													$int,
-													TTi18n::gettext('Incorrect value for timesheet verification notice before/after transaction date')) ) {
-			$this->data['timesheet_verify_notice_before_transaction_date'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'timesheet_verify_notice_before_transaction_date' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeSheetVerifyNoticeBeforeTransactionDate( $value) {
+		$value = (int)$value;
+		return $this->setGenericDataValue( 'timesheet_verify_notice_before_transaction_date', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getTimeSheetVerifyNoticeEmail() {
-		if ( isset($this->data['timesheet_verify_notice_email']) ) {
-			return $this->fromBool( $this->data['timesheet_verify_notice_email'] );
-		}
-
-		return FALSE;
-	}
-	function setTimeSheetVerifyNoticeEmail($bool) {
-		$this->data['timesheet_verify_notice_email'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'timesheet_verify_notice_email' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTimeSheetVerifyNoticeEmail( $value) {
+		return $this->setGenericDataValue( 'timesheet_verify_notice_email', $this->toBool($value) );
+	}
+
+	/**
+	 * @return array|bool
+	 */
 	function getUser() {
 		$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
 		$ppsulf->getByPayPeriodScheduleId( $this->getId() );
@@ -870,7 +741,12 @@ class PayPeriodScheduleFactory extends Factory {
 
 		return FALSE;
 	}
-	function setUser($ids) {
+
+	/**
+	 * @param string $ids UUID
+	 * @return bool
+	 */
+	function setUser( $ids) {
 		if ( !is_array($ids) ) {
 			$ids = array($ids);
 		}
@@ -907,12 +783,16 @@ class PayPeriodScheduleFactory extends Factory {
 					$ppsuf->setPayPeriodSchedule( $this->getId() );
 					$ppsuf->setUser( $id );
 
-					$user_obj = $ulf->getById( $id )->getCurrent();
+					$ulf->getById( $id );
+					if ( $ulf->getRecordCount() > 0 ) {
+						$obj = $ulf->getCurrent();
 
-					if ($this->Validator->isTrue(		'user',
-														$ppsuf->Validator->isValid(),
-														TTi18n::gettext('Selected Employee is already assigned to another Pay Period').' ('. $user_obj->getFullName() .')' )) {
-						$ppsuf->save();
+						if ($this->Validator->isTrue(		'user',
+															 $ppsuf->isValid(),
+															 TTi18n::gettext('Selected Employee is already assigned to another Pay Period').' ('. $obj->getFullName() .')' )
+							) {
+							$ppsuf->save();
+						}
 					}
 				}
 			}
@@ -923,6 +803,10 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @return int
+	 */
 	function getTransactionBusinessDay( $epoch ) {
 		Debug::Text('Epoch: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -948,7 +832,11 @@ class PayPeriodScheduleFactory extends Factory {
 		return $epoch;
 	}
 
-	function getNextPayPeriod($end_date = NULL) {
+	/**
+	 * @param int $end_date EPOCH
+	 * @return bool
+	 */
+	function getNextPayPeriod( $end_date = NULL) {
 		if ( !$this->Validator->isValid() ) {
 			return FALSE;
 		}
@@ -1184,7 +1072,13 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
-	function createNextPayPeriod($end_date = NULL, $offset = NULL, $enable_import_data = TRUE ) {
+	/**
+	 * @param int $end_date EPOCH
+	 * @param null $offset
+	 * @param bool $enable_import_data
+	 * @return bool
+	 */
+	function createNextPayPeriod( $end_date = NULL, $offset = NULL, $enable_import_data = TRUE ) {
 		if ( $end_date == NULL OR $end_date == '' ) {
 			$end_date = NULL;
 		}
@@ -1213,7 +1107,7 @@ class PayPeriodScheduleFactory extends Factory {
 		//If the start date is within 24hrs of now, insert the next pay period.
 		if ( $this->getNextStartDate() <= ( TTDate::getTime() + $offset ) ) {
 			Debug::text('Insert new pay period. Start Date: '. $this->getNextStartDate() .' End Date: '. $this->getNextEndDate(), __FILE__, __LINE__, __METHOD__, 10);
-
+			/** @var PayPeriodFactory $ppf */
 			$ppf = TTnew( 'PayPeriodFactory' );
 			$ppf->setCompany( $this->getCompany() );
 			$ppf->setPayPeriodSchedule( $this->getId() );
@@ -1249,6 +1143,9 @@ class PayPeriodScheduleFactory extends Factory {
 	}
 
 
+	/**
+	 * @return bool
+	 */
 	function getNextStartDate() {
 		if ( isset($this->next_start_date) ) {
 			return $this->next_start_date;
@@ -1257,6 +1154,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getNextEndDate() {
 		if ( isset($this->next_end_date) ) {
 			return $this->next_end_date;
@@ -1265,6 +1165,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getNextTransactionDate() {
 		if ( isset($this->next_transaction_date) ) {
 			return $this->next_transaction_date;
@@ -1273,6 +1176,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getNextAdvanceEndDate() {
 		if ( isset($this->next_advance_end_date) ) {
 			return $this->next_advance_end_date;
@@ -1281,6 +1187,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getNextAdvanceTransactionDate() {
 		if ( isset($this->next_advance_transaction_date) ) {
 			return $this->next_advance_transaction_date;
@@ -1289,6 +1198,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getNextPrimary() {
 		if ( isset($this->next_primary) ) {
 			return $this->next_primary;
@@ -1300,7 +1212,12 @@ class PayPeriodScheduleFactory extends Factory {
 	//Pay period number functionality is deprecated, it causes too many problems for little or no benefit.
 	//Its also impossible to properly handle in custom situations where pay periods may be adjusted.
 	//However its used in FormulaType=20 situations.
-	function getCurrentPayPeriodNumber($epoch = NULL, $end_date_epoch = NULL) {
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $end_date_epoch EPOCH
+	 * @return bool|float|int|mixed
+	 */
+	function getCurrentPayPeriodNumber( $epoch = NULL, $end_date_epoch = NULL) {
 		//EPOCH MUST BE TRANSACTION DATE!!!
 		//End Date Epoch must be END DATE of pay period
 
@@ -1354,6 +1271,10 @@ class PayPeriodScheduleFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param int $type_id ID
+	 * @return bool|float|int
+	 */
 	function calcAnnualPayPeriods( $type_id = NULL ) {
 		if ( $type_id == '' ) {
 			$type_id = $this->getType();
@@ -1368,7 +1289,7 @@ class PayPeriodScheduleFactory extends Factory {
 				//Alternatively have them manually specify the number, but this required adding a field to the table.
 				$retval = FALSE;
 
-				if ( $this->getId() > 0 ) {
+				if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID() ) {
 					$pplf = TTnew( 'PayPeriodListFactory' );
 					$retarr = $pplf->getFirstStartDateAndLastEndDateByPayPeriodScheduleId( $this->getId() );
 					if ( is_array($retarr) AND isset($retarr['first_start_date']) AND isset($retarr['last_end_date']) ) {
@@ -1419,6 +1340,12 @@ class PayPeriodScheduleFactory extends Factory {
 	}
 
 	//Given a single start date and the type of pay period schedule, try to determine all other dates.
+
+	/**
+	 * @param int $type_id
+	 * @param int $start_date EPOCH
+	 * @return array|bool
+	 */
 	function detectPayPeriodScheduleDates( $type_id, $start_date ) {
 		$retarr = FALSE;
 
@@ -1501,6 +1428,11 @@ class PayPeriodScheduleFactory extends Factory {
 	//This function given the pay period schedule type and example dates will attempt to determine the pay period schedule settings.
 	//This will automatically configure the current object to be saved.
 	//Base create initial pay period functionality on the first pay period date, otherwise we need additional data for bi-weekly pay periods.
+	/**
+	 * @param int $type_id
+	 * @param int $example_dates EPOCH
+	 * @return bool
+	 */
 	function detectPayPeriodScheduleSettings( $type_id, $example_dates ) {
 		Debug::Arr($example_dates, 'Pay Period Type: '. $type_id .' Example Dates: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1608,15 +1540,21 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
-	static function getShiftAssignedDate( $start_epoch, $end_epoch, $shift_assigned_day_id = FALSE ) {
-		if ( $shift_assigned_day_id == '' AND isset($this) ) {
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @param bool $shift_assigned_day_id
+	 * @return mixed
+	 */
+	function getShiftAssignedDate( $start_epoch, $end_epoch, $shift_assigned_day_id = FALSE ) {
+		if ( $shift_assigned_day_id == '' ) {
 			$shift_assigned_day_id = $this->getShiftAssignedDay();
 		}
 
 		//
 		//FIXME: During testing always force start_date which is existing behaivor.
 		//		 Once this is tested more it can be changed.
-		return $start_epoch;
+		//return $start_epoch;
 
 		switch ( $shift_assigned_day_id ) {
 			default:
@@ -1641,6 +1579,18 @@ class PayPeriodScheduleFactory extends Factory {
 
 	//Returns shift data according to the pay period schedule criteria for use
 	//in determining which day punches belong to.
+	/**
+	 * @param int $date_stamp EPOCH
+	 * @param string $user_id UUID
+	 * @param int $epoch EPOCH
+	 * @param null $filter
+	 * @param object $tmp_punch_control_obj
+	 * @param null $maximum_shift_time
+	 * @param null $new_shift_trigger_time
+	 * @param null $plf
+	 * @param bool $ignore_future_punches
+	 * @return array|bool
+	 */
 	function getShiftData( $date_stamp = NULL, $user_id = NULL, $epoch = NULL, $filter = NULL, $tmp_punch_control_obj = NULL, $maximum_shift_time = NULL, $new_shift_trigger_time = NULL, $plf = NULL, $ignore_future_punches = FALSE ) {
 		global $profiler;
 		$profiler->startTimer( 'PayPeriodScheduleFactory::getShiftData()' );
@@ -1668,7 +1618,7 @@ class PayPeriodScheduleFactory extends Factory {
 				$plf->getByUserIdAndDateStamp( $user_id, $date_stamp );
 			} else {
 				//Get punches by time stamp.
-				$punch_control_id = 0;
+				$punch_control_id = TTUUID::getZeroID();
 				if ( is_object( $tmp_punch_control_obj ) ) {
 					$punch_control_id = $tmp_punch_control_obj->getId();
 				}
@@ -1692,7 +1642,7 @@ class PayPeriodScheduleFactory extends Factory {
 			$shift = 0;
 			$i = 0;
 			$x = 0;
-			$nearest_shift_id = 0;
+			$nearest_shift = 0;
 			$nearest_punch_difference = FALSE;
 			$shift_data = array();
 			$prev_punch_arr = array();
@@ -1716,7 +1666,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 				//Determine if a non-saved PunchControl object was passed, and if so, match the IDs to use that instead.
 				if ( is_object($tmp_punch_control_obj) AND $p_obj->getPunchControlID() == $tmp_punch_control_obj->getId() ) {
-					Debug::text('Passed non-saved punch control object that matches, using that instead... Using ID: '. (int)$tmp_punch_control_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Passed non-saved punch control object that matches, using that instead... Using ID: \''. $tmp_punch_control_obj->getId() .'\'', __FILE__, __LINE__, __METHOD__, 10);
 					$punch_control_obj = $tmp_punch_control_obj;
 				} else {
 					$punch_control_obj = $p_obj->getPunchControlObject();
@@ -1803,7 +1753,7 @@ class PayPeriodScheduleFactory extends Factory {
 					if ( $punch_difference_from_epoch != $nearest_punch_difference
 							OR ( $punch_difference_from_epoch == $nearest_punch_difference AND ( is_object( $tmp_punch_control_obj ) AND $tmp_punch_control_obj->getId() == $p_obj->getPunchControlID() ) ) ) {
 						//Debug::text('Found two punches with the same timestamp... Tmp Punch Control: '.$tmp_punch_control_obj->getId() .' Punch Control: '. $p_obj->getPunchControlID(), __FILE__, __LINE__, __METHOD__, 10);
-						$nearest_shift_id = $shift;
+						$nearest_shift = $shift;
 						$nearest_punch_difference = $punch_difference_from_epoch;
 					}
 				}
@@ -1842,7 +1792,7 @@ class PayPeriodScheduleFactory extends Factory {
 					//Check to see if the previous punch was on a different day then the current punch.
 					if ( empty($prev_punch_arr) == FALSE
 							AND ( $p_obj->getStatus() == 20 AND $prev_punch_arr['status_id'] != 20 )
-							AND TTDate::doesRangeSpanMidnight( $prev_punch_arr['time_stamp'], $p_obj->getTimeStamp() ) == TRUE ) {
+							AND TTDate::doesRangeSpanMidnight( $prev_punch_arr['time_stamp'], $p_obj->getTimeStamp(), TRUE ) == TRUE ) {
 						Debug::text('Punch PAIR DOES span midnight', __FILE__, __LINE__, __METHOD__, 10);
 						$shift_data[$shift]['span_midnight'] = TRUE;
 
@@ -1894,7 +1844,7 @@ class PayPeriodScheduleFactory extends Factory {
 					//Only return last shift.
 					$shift_data = $shift_data[$shift];
 				} elseif ( $filter == 'nearest_shift' ) {
-					$shift_data = $shift_data[$nearest_shift_id];
+					$shift_data = $shift_data[$nearest_shift];
 					//Check to make sure the nearest shift is within the new shift trigger time of EPOCH.
 					if ( isset($shift_data['first_in']['time_stamp']) ) {
 						$first_in = $shift_data['first_in']['time_stamp'];
@@ -1945,6 +1895,10 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param bool $user_ids
+	 * @return bool
+	 */
 	function importData( $user_ids = FALSE ) {
 		$epoch = TTDate::getMiddleDayEpoch( time() );
 
@@ -1967,6 +1921,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEnableInitialPayPeriods() {
 		if ( isset($this->enable_create_initial_pay_periods) ) {
 			return $this->enable_create_initial_pay_periods;
@@ -1975,12 +1932,19 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $val
+	 * @return bool
+	 */
 	function setEnableInitialPayPeriods( $val ) {
 		$this->enable_create_initial_pay_periods = (bool)$val;
 
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCreateInitialPayPeriods() {
 		if ( isset($this->create_initial_pay_periods) ) {
 			return $this->create_initial_pay_periods;
@@ -1989,6 +1953,10 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $val
+	 * @return bool
+	 */
 	function setCreateInitialPayPeriods( $val ) {
 		$this->create_initial_pay_periods = (bool)$val;
 
@@ -2000,6 +1968,10 @@ class PayPeriodScheduleFactory extends Factory {
 	//Only close OPEN/Locked pay periods that have passed the transaction date by 5 days.
 	//Get OPEN pay periods with transaction dates at least 48hrs before the given date?
 	//Or should we just prevent customers from generating pay stubs in a pay period that has a previous pay period that is still open? Both.
+	/**
+	 * @param int $date EPOCH
+	 * @return bool
+	 */
 	function forceClosePreviousPayPeriods( $date = NULL ) {
 		if ( $date == '' ) {
 			$date = time();
@@ -2045,6 +2017,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getFirstPayPeriodStartDate() {
 		$pplf = TTnew('PayPeriodListFactory');
 		$retarr = $pplf->getFirstStartDateAndLastEndDateByPayPeriodScheduleId( $this->getId() );
@@ -2057,6 +2032,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		$this->StartTransaction();
 
@@ -2094,7 +2072,239 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		// Type
+		$this->Validator->inArrayKey(	'type',
+												$this->getType(),
+												TTi18n::gettext('Incorrect Type'),
+												$this->getOptions('type')
+											);
+
+		// Name
+		$this->Validator->isLength(	'name',
+									   $this->getName(),
+									   TTi18n::gettext('Name is invalid'),
+									   2, 50
+		);
+		if ( $this->Validator->isError('name') == FALSE ) {
+			$this->Validator->isTrue(	'name',
+										 $this->isUniqueName($this->getName()),
+										 TTi18n::gettext('Name is already in use')
+			);
+		}
+		// Description
+		if ( $this->getDescription() != '' ) {
+			$this->Validator->isLength(	'description',
+										   $this->getDescription(),
+										   TTi18n::gettext('Description is invalid'),
+										   2, 255
+			);
+		}
+
+		// Start Week Day
+		if ( $this->getStartWeekDay() !== FALSE ) {
+			$this->Validator->inArrayKey( 'start_week_day',
+										  $this->getStartWeekDay(),
+										  TTi18n::gettext( 'Incorrect Start Week Day' ),
+										  $this->getOptions( 'start_week_day' )
+			);
+		}
+
+		// Shift Assigned Day
+		if ( $this->getShiftAssignedDay() !== FALSE ) {
+			$this->Validator->inArrayKey( 'shift_assigned_day_id',
+										  $this->getShiftAssignedDay(),
+										  TTi18n::gettext( 'Incorrect Shift Assigned Day' ),
+										  $this->getOptions( 'shift_assigned_day' )
+			);
+		}
+
+		// Start day of week
+		if ( $this->getStartDayOfWeek() !== FALSE ) {
+			$this->Validator->inArrayKey( 'start_day_of_week',
+										  $this->getStartDayOfWeek(),
+										  TTi18n::gettext( 'Incorrect start day of week' ),
+										  TTDate::getDayOfWeekArray()
+			);
+		}
+
+		// Transaction date
+		if ( $this->getTransactionDate() != 0 ) {
+			$this->Validator->inArrayKey(	'transaction_date',
+													$this->getTransactionDate(),
+													TTi18n::gettext('Incorrect transaction date'),
+													TTDate::getDayOfMonthArray()
+												);
+		}
+		// Primary day of month
+		if ( $this->getPrimaryDayOfMonth() != -1 AND $this->getPrimaryDayOfMonth() != 0 AND $this->getPrimaryDayOfMonth() != '' ) {
+			$this->Validator->inArrayKey(	'primary_day_of_month',
+													$this->getPrimaryDayOfMonth(),
+													TTi18n::getText('Incorrect primary day of month'),
+													TTDate::getDayOfMonthArray()
+												);
+		}
+		// Secondary day of month
+		if ( $this->getSecondaryDayOfMonth() != -1 AND $this->getSecondaryDayOfMonth() != 0 AND $this->getSecondaryDayOfMonth() != '' ) {
+			$this->Validator->inArrayKey(	'secondary_day_of_month',
+													$this->getSecondaryDayOfMonth(),
+													TTi18n::gettext('Incorrect secondary day of month'),
+													TTDate::getDayOfMonthArray()
+												);
+		}
+		// Primary transaction day of month
+		if ( $this->getPrimaryTransactionDayOfMonth() != -1 AND $this->getPrimaryTransactionDayOfMonth() != 0 AND $this->getPrimaryTransactionDayOfMonth() != '' ) {
+			$this->Validator->inArrayKey(	'primary_transaction_day_of_month',
+													$this->getPrimaryTransactionDayOfMonth(),
+													TTi18n::gettext('Incorrect primary transaction day of month'),
+													TTDate::getDayOfMonthArray()
+												);
+		}
+		// Secondary transaction day of month
+		if ( $this->getSecondaryTransactionDayOfMonth() != -1 AND $this->getSecondaryTransactionDayOfMonth() != 0 AND $this->getSecondaryTransactionDayOfMonth() != '' ) {
+			$this->Validator->inArrayKey(	'secondary_transaction_day_of_month',
+													$this->getSecondaryTransactionDayOfMonth(),
+													TTi18n::gettext('Incorrect secondary transaction day of month'),
+													TTDate::getDayOfMonthArray()
+												);
+		}
+		// transaction date adjustment
+		$this->Validator->inArrayKey(	'transaction_date_bd',
+												$this->getTransactionDateBusinessDay(),
+												TTi18n::gettext('Incorrect transaction date adjustment'),
+												$this->getOptions('transaction_date_business_day')
+											);
+		// Anchor (start) date
+		if ( $this->getAnchorDate() !== FALSE ) {
+			$this->Validator->isDate( 'anchor_date',
+									  $this->getAnchorDate(),
+									  TTi18n::gettext( 'Incorrect start date' )
+			);
+		}
+
+		// Day start time
+		$this->Validator->isNumeric(		'day_start_time',
+													$this->getDayStartTime(),
+													TTi18n::gettext('Incorrect day start time')
+												);
+		// Time zone
+		$this->Validator->inArrayKey(	'time_zone',
+												$this->getTimeZone(),
+												TTi18n::gettext('Incorrect time zone'),
+												Misc::trimSortPrefix( $this->getTimeZoneOptions() )
+											);
+		// Minimum Time-Off Between Shifts
+		$this->Validator->isNumeric(		'new_day_trigger_time',
+													$this->getNewDayTriggerTime(),
+													TTi18n::gettext('Incorrect Minimum Time-Off Between Shifts')
+												);
+		// Maximum Shift Time
+		if ( $this->getMaximumShiftTime() !== FALSE ) {
+			$this->Validator->isNumeric( 'maximum_shift_time',
+										 $this->getMaximumShiftTime(),
+										 TTi18n::gettext( 'Incorrect Maximum Shift Time' )
+			);
+			if ( $this->Validator->isError( 'maximum_shift_time' ) == FALSE ) {
+				$this->Validator->isLessThan( 'maximum_shift_time',
+											  $this->getMaximumShiftTime(),
+											  TTi18n::gettext( 'Maximum Shift Time is too long' ),
+											  691200
+				);
+			}
+			if ( $this->Validator->isError( 'maximum_shift_time' ) == FALSE ) {
+				$this->Validator->isGreaterThan( 'maximum_shift_time',
+												 $this->getMaximumShiftTime(),
+												 TTi18n::gettext( 'Maximum Shift Time is too short' ),
+												 14400
+				);
+			}
+		}
+
+		if ( $this->getAnnualPayPeriods() !== FALSE ) {
+			// Annual Pay Periods
+			$this->Validator->isNumeric( 'annual_pay_periods',
+										 $this->getAnnualPayPeriods(),
+										 TTi18n::gettext( 'Incorrect Annual Pay Periods' )
+			);
+		}
+
+		if ( $this->getTimeSheetVerifyType() !== FALSE ) {
+			// TimeSheet Verification Type
+			$this->Validator->inArrayKey( 'timesheet_verify_type_id',
+										  $this->getTimeSheetVerifyType(),
+										  TTi18n::gettext( 'Incorrect TimeSheet Verification Type' ),
+										  $this->getOptions( 'timesheet_verify_type' )
+			);
+		}
+
+		// value for timesheet verification before/after end date
+		if ( $this->getTimeSheetVerifyType() != 10 AND $this->getTimeSheetVerifyBeforeEndDate() !== FALSE ) {
+			$timesheet_verify_before_end_date = ( $this->getTimeSheetVerifyBeforeEndDate() / 86400 );
+			$this->Validator->isNumeric( 'timesheet_verify_before_end_date',
+										 $timesheet_verify_before_end_date,
+										 TTi18n::gettext( 'Incorrect value for timesheet verification before/after end date' )
+			);
+
+			if ( $this->Validator->isError( 'timesheet_verify_before_end_date' ) == FALSE ) {
+				$this->Validator->isLessThan( 'timesheet_verify_before_end_date',
+											  $timesheet_verify_before_end_date,
+											  TTi18n::gettext( 'Verification Window Starts is too large' ),
+											  999
+				);
+			}
+			if ( $this->Validator->isError( 'timesheet_verify_before_end_date' ) == FALSE ) {
+				$this->Validator->isGreaterThan( 'timesheet_verify_before_end_date',
+												 $timesheet_verify_before_end_date,
+												 TTi18n::gettext( 'Verification Window Starts is too small' ),
+												 -999
+				);
+			}
+		}
+
+		// value for timesheet verification before/after transaction date
+		if ( $this->getTimeSheetVerifyType() != 10 AND $this->getTimeSheetVerifyBeforeTransactionDate() !== FALSE ) {
+			$timesheet_verify_before_transaction_date = $this->getTimeSheetVerifyBeforeTransactionDate() / 86400;
+			$this->Validator->isNumeric( 'timesheet_verify_before_transaction_date',
+										 $timesheet_verify_before_transaction_date,
+										 TTi18n::gettext( 'Incorrect value for timesheet verification before/after transaction date' )
+			);
+			if ( $this->Validator->isError( 'timesheet_verify_before_transaction_date' ) == FALSE ) {
+				$this->Validator->isLessThan( 'timesheet_verify_before_transaction_date',
+											  $timesheet_verify_before_transaction_date,
+											  TTi18n::gettext( 'Verification Window Ends is too large' ),
+											  999
+				);
+			}
+			if ( $this->Validator->isError( 'timesheet_verify_before_transaction_date' ) == FALSE ) {
+				$this->Validator->isGreaterThan( 'timesheet_verify_before_transaction_date',
+												 $timesheet_verify_before_transaction_date,
+												 TTi18n::gettext( 'Verification Window Ends is too small' ),
+												 -999
+				);
+			}
+			// value for timesheet verification notice before/after transaction date
+			$this->Validator->isNumeric( 'timesheet_verify_notice_before_transaction_date',
+										 $this->getTimeSheetVerifyNoticeBeforeTransactionDate(),
+										 TTi18n::gettext( 'Incorrect value for timesheet verification notice before/after transaction date' )
+			);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 		if ( $this->getDeleted() == TRUE ) {
 			return TRUE;
 		}
@@ -2102,6 +2312,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
@@ -2139,7 +2352,7 @@ class PayPeriodScheduleFactory extends Factory {
 			$udlf->getByCompanyId( $this->getCompany() );
 			if ( $udlf->getRecordCount() > 0 ) {
 				foreach( $udlf as $udf_obj ) {
-					$udf_obj->setPayPeriodSchedule( 0 );
+					$udf_obj->setPayPeriodSchedule( TTUUID::getZeroID() );
 					if ( $udf_obj->isValid() ) {
 						$udf_obj->Save();
 					}
@@ -2154,6 +2367,10 @@ class PayPeriodScheduleFactory extends Factory {
 
 	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -2195,6 +2412,10 @@ class PayPeriodScheduleFactory extends Factory {
 	}
 
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -2239,6 +2460,10 @@ class PayPeriodScheduleFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Period Schedule'), NULL, $this->getTable(), $this );
 	}

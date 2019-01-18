@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -54,7 +54,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 	ob_end_flush();
 
 	$clf = new CompanyListFactory();
-	if ( isset($company_id) AND $company_id > 0 ) {
+	if ( isset($company_id) AND $company_id != '' ) {
 		$clf->getByCompanyId( $company_id );
 	} else {
 		$clf->getAll();

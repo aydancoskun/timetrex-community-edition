@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,6 +48,11 @@ class AccrualPolicyFactory extends Factory {
 	protected $user_modifier_obj = NULL;
 	protected $length_of_service_contributing_pay_code_policy_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -108,6 +113,10 @@ class AccrualPolicyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 			$variable_function_map = array(
 											'id' => 'ID',
@@ -144,158 +153,140 @@ class AccrualPolicyFactory extends Factory {
 			return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getContributingShiftPolicyObject() {
 		return $this->getGenericObject( 'ContributingShiftPolicyListFactory', $this->getContributingShiftPolicy(), 'contributing_shift_policy_obj' );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getLengthOfServiceContributingPayCodePolicyObject() {
 		return $this->getGenericObject( 'ContributingPayCodePolicyListFactory', $this->getLengthOfServiceContributingPayCodePolicy(), 'length_of_service_contributing_pay_code_policy_obj' );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getCompany() {
-		if ( isset($this->data['company_id']) ) {
-			return (int)$this->data['company_id'];
-		}
-
-		return FALSE;
-	}
-	function setCompany($id) {
-		$id = trim($id);
-
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$clf = TTnew( 'CompanyListFactory' );
-
-		if ( $this->Validator->isResultSetWithRows(	'company',
-													$clf->getByID($id),
-													TTi18n::gettext('Company is invalid')
-													) ) {
-
-			$this->data['company_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'company_id' );
 	}
 
-	function getType() {
-		if ( isset($this->data['type_id']) ) {
-			return (int)$this->data['type_id'];
-		}
-
-		return FALSE;
-	}
-	function setType($value) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setCompany( $value) {
 		$value = trim($value);
-
-		if ( $this->Validator->inArrayKey(	'type',
-											$value,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
-
-			$this->data['type_id'] = $value;
-
-			return TRUE;
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
 
-		return FALSE;
+		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
+	function getType() {
+		return $this->getGenericDataValue( 'type_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setType( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'type_id', $value );
 	}
 
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getAccrualPolicyAccount() {
-		if ( isset($this->data['accrual_policy_account_id']) ) {
-			return (int)$this->data['accrual_policy_account_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'accrual_policy_account_id' );
 	}
-	function setAccrualPolicyAccount($id) {
-		$id = trim($id);
 
-		$apaplf = TTnew( 'AccrualPolicyAccountListFactory' );
-
-		if (
-				$this->Validator->isResultSetWithRows(	'accrual_policy_account_id',
-													$apaplf->getByID($id),
-													TTi18n::gettext('Accrual Account is invalid')
-													) ) {
-
-			$this->data['accrual_policy_account_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setAccrualPolicyAccount( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'accrual_policy_account_id', $value );
 	}
 
 	//This is the contributing shifts used for Hour Based accrual policies.
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getContributingShiftPolicy() {
-		if ( isset($this->data['contributing_shift_policy_id']) ) {
-			return (int)$this->data['contributing_shift_policy_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'contributing_shift_policy_id' );
 	}
-	function setContributingShiftPolicy($id) {
-		$id = trim($id);
 
-		$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
-
-		if (	$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'contributing_shift_policy_id',
-													$csplf->getByID($id),
-													TTi18n::gettext('Contributing Shift Policy is invalid')
-													) ) {
-
-			$this->data['contributing_shift_policy_id'] = $id;
-
-			return TRUE;
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setContributingShiftPolicy( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
 		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'contributing_shift_policy_id', $value );
 	}
 
 	//This is strictly used to determine milestones with active after X hours.
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getLengthOfServiceContributingPayCodePolicy() {
-		if ( isset($this->data['length_of_service_contributing_pay_code_policy_id']) ) {
-			return (int)$this->data['length_of_service_contributing_pay_code_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setLengthOfServiceContributingPayCodePolicy($id) {
-		$id = trim($id);
-
-		$csplf = TTnew( 'ContributingPayCodePolicyListFactory' );
-
-		if (	$id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'length_of_service_contributing_pay_code_policy_id',
-													$csplf->getByID($id),
-													TTi18n::gettext('Contributing Pay Code Policy is invalid')
-													) ) {
-
-			$this->data['length_of_service_contributing_pay_code_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'length_of_service_contributing_pay_code_policy_id' );
 	}
 
-	function isUniqueName($name) {
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setLengthOfServiceContributingPayCodePolicy( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
+		return $this->setGenericDataValue( 'length_of_service_contributing_pay_code_policy_id', $value );
+	}
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	function isUniqueName( $name) {
 		$name = trim($name);
 		if ( $name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'company_id' => (int)$this->getCompany(),
+					'company_id' => TTUUID::castUUID($this->getCompany()),
 					'name' => TTi18n::strtolower($name),
 					);
 
@@ -313,379 +304,290 @@ class AccrualPolicyFactory extends Factory {
 
 		return FALSE;
 	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getName() {
-		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
-
-		return FALSE;
-	}
-	function setName($name) {
-		$name = trim($name);
-		if (	$this->Validator->isLength(	'name',
-											$name,
-											TTi18n::gettext('Name is too short or too long'),
-											2, 50)
-				AND
-				$this->Validator->isTrue(	'name',
-											$this->isUniqueName($name),
-											TTi18n::gettext('Name is already in use') )
-						) {
-
-			$this->data['name'] = $name;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'name' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getDescription() {
-		if ( isset($this->data['description']) ) {
-			return $this->data['description'];
-		}
-
-		return FALSE;
-	}
-	function setDescription($description) {
-		$description = trim($description);
-
-		if (	$description == ''
-				OR $this->Validator->isLength(	'description',
-												$description,
-												TTi18n::gettext('Description is invalid'),
-												1, 250) ) {
-
-			$this->data['description'] = $description;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'description' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnablePayStubBalanceDisplay() {
-		return $this->fromBool( $this->data['enable_pay_stub_balance_display'] );
-	}
-	function setEnablePayStubBalanceDisplay($bool) {
-		$this->data['enable_pay_stub_balance_display'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_pay_stub_balance_display' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnablePayStubBalanceDisplay( $value) {
+		return $this->setGenericDataValue( 'enable_pay_stub_balance_display', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getMinimumTime() {
-		if ( isset($this->data['minimum_time']) ) {
-			return (int)$this->data['minimum_time'];
-		}
-
-		return FALSE;
-	}
-	function setMinimumTime($int) {
-		$int = trim($int);
-
-		if	( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isNumeric(		'minimum_time',
-													$int,
-													TTi18n::gettext('Incorrect Minimum Time')) ) {
-			$this->data['minimum_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'minimum_time' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMinimumTime( $value) {
+		$value = trim($value);
+
+		if	( empty($value) ) {
+			$value = 0;
+		}
+		return $this->setGenericDataValue( 'minimum_time', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getMaximumTime() {
-		if ( isset($this->data['maximum_time']) ) {
-			return (int)$this->data['maximum_time'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'maximum_time' );
 	}
-	function setMaximumTime($int) {
-		$int = trim($int);
 
-		if	( empty($int) ) {
-			$int = 0;
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMaximumTime( $value) {
+		$value = trim($value);
+
+		if	( empty($value) ) {
+			$value = 0;
 		}
-
-		if	(	$this->Validator->isNumeric(		'maximum_time',
-													$int,
-													TTi18n::gettext('Incorrect Maximum Time')) ) {
-			$this->data['maximum_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'maximum_time', $value );
 	}
 
 	//
 	// Calendar
 	//
+	/**
+	 * @return bool|int
+	 */
 	function getApplyFrequency() {
-		if ( isset($this->data['apply_frequency_id']) ) {
-			return (int)$this->data['apply_frequency_id'];
-		}
-
-		return FALSE;
-	}
-	function setApplyFrequency($value) {
-		$value = trim($value);
-
-		if (	$value == 0
-				OR
-				$this->Validator->inArrayKey(	'apply_frequency_id',
-												$value,
-												TTi18n::gettext('Incorrect frequency'),
-												$this->getOptions('apply_frequency')) ) {
-
-			$this->data['apply_frequency_id'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'apply_frequency_id' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequency( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'apply_frequency_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getApplyFrequencyMonth() {
-		if ( isset($this->data['apply_frequency_month']) ) {
-			return $this->data['apply_frequency_month'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'apply_frequency_month' );
 	}
-	function setApplyFrequencyMonth($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequencyMonth( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				$this->Validator->inArrayKey(	'apply_frequency_month',
-											$value,
-											TTi18n::gettext('Incorrect frequency month'),
-											TTDate::getMonthOfYearArray() ) ) {
-
-			$this->data['apply_frequency_month'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'apply_frequency_month', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getApplyFrequencyDayOfMonth() {
-		if ( isset($this->data['apply_frequency_day_of_month']) ) {
-			return $this->data['apply_frequency_day_of_month'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'apply_frequency_day_of_month' );
 	}
-	function setApplyFrequencyDayOfMonth($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequencyDayOfMonth( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				$this->Validator->inArrayKey(	'apply_frequency_day_of_month',
-											$value,
-											TTi18n::gettext('Incorrect frequency day of month'),
-											TTDate::getDayOfMonthArray() ) ) {
-
-			$this->data['apply_frequency_day_of_month'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'apply_frequency_day_of_month', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getApplyFrequencyDayOfWeek() {
-		if ( isset($this->data['apply_frequency_day_of_week']) ) {
-			return $this->data['apply_frequency_day_of_week'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'apply_frequency_day_of_week' );
 	}
-	function setApplyFrequencyDayOfWeek($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequencyDayOfWeek( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				$this->Validator->inArrayKey(	'apply_frequency_day_of_week',
-											$value,
-											TTi18n::gettext('Incorrect frequency day of week'),
-											TTDate::getDayOfWeekArray() ) ) {
-
-			$this->data['apply_frequency_day_of_week'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'apply_frequency_day_of_week', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getApplyFrequencyQuarterMonth() {
-		if ( isset($this->data['apply_frequency_quarter_month']) ) {
-			return $this->data['apply_frequency_quarter_month'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'apply_frequency_quarter_month' );
 	}
-	function setApplyFrequencyQuarterMonth($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequencyQuarterMonth( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				(
-					$this->Validator->isGreaterThan(	'apply_frequency_quarter_month',
-												$value,
-												TTi18n::gettext('Incorrect frequency quarter month'),
-												1 )
-					AND
-					$this->Validator->isLessThan(	'apply_frequency_quarter_month',
-												$value,
-												TTi18n::gettext('Incorrect frequency quarter month'),
-												3 )
-				)
-				) {
-
-			$this->data['apply_frequency_quarter_month'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'apply_frequency_quarter_month', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getApplyFrequencyHireDate() {
-		if ( isset($this->data['apply_frequency_hire_date']) ) {
-			return $this->fromBool( $this->data['apply_frequency_hire_date'] );
-		}
-
-		return FALSE;
-	}
-	function setApplyFrequencyHireDate($bool) {
-		$this->data['apply_frequency_hire_date'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'apply_frequency_hire_date' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setApplyFrequencyHireDate( $value) {
+		return $this->setGenericDataValue( 'apply_frequency_hire_date', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableProRateInitialPeriod() {
-		if ( isset( $this->data['enable_pro_rate_initial_period'] ) ) {
-			return $this->fromBool( $this->data['enable_pro_rate_initial_period'] );
-		}
-
-		return FALSE;
-	}
-	function setEnableProRateInitialPeriod($bool) {
-		$this->data['enable_pro_rate_initial_period'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_pro_rate_initial_period' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableProRateInitialPeriod( $value) {
+		return $this->setGenericDataValue('enable_pro_rate_initial_period', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableOpeningBalance() {
-		if ( isset($this->data['enable_opening_balance']) ) {
-			return $this->fromBool( $this->data['enable_opening_balance'] );
-		}
-
-		return FALSE;
-	}
-	function setEnableOpeningBalance($bool) {
-		$this->data['enable_opening_balance'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'enable_opening_balance' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setEnableOpeningBalance( $value) {
+		return $this->setGenericDataValue( 'enable_opening_balance', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getMilestoneRolloverHireDate() {
-		if ( isset($this->data['milestone_rollover_hire_date']) ) {
-			return $this->fromBool( $this->data['milestone_rollover_hire_date'] );
-		}
-
-		return FALSE;
-	}
-	function setMilestoneRolloverHireDate($bool) {
-		$this->data['milestone_rollover_hire_date'] = $this->toBool($bool);
-
-		return TRUE;
+		return $this->fromBool( $this->getGenericDataValue( 'milestone_rollover_hire_date' ) );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMilestoneRolloverHireDate( $value) {
+		return $this->setGenericDataValue( 'milestone_rollover_hire_date', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getMilestoneRolloverMonth() {
-		if ( isset($this->data['milestone_rollover_month']) ) {
-			return $this->data['milestone_rollover_month'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'milestone_rollover_month' );
 	}
-	function setMilestoneRolloverMonth($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMilestoneRolloverMonth( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				$this->Validator->inArrayKey(	'milestone_rollover_month',
-											$value,
-											TTi18n::gettext('Incorrect milestone rollover month'),
-											TTDate::getMonthOfYearArray() ) ) {
-
-			$this->data['milestone_rollover_month'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'milestone_rollover_month', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getMilestoneRolloverDayOfMonth() {
-		if ( isset($this->data['milestone_rollover_day_of_month']) ) {
-			return $this->data['milestone_rollover_day_of_month'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'milestone_rollover_day_of_month' );
 	}
-	function setMilestoneRolloverDayOfMonth($value) {
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMilestoneRolloverDayOfMonth( $value) {
 		$value = trim($value);
-
-		if ( $value == 0
-				OR
-				$this->Validator->inArrayKey(	'milestone_rollover_day_of_month',
-												$value,
-												TTi18n::gettext('Incorrect milestone rollover day of month'),
-												TTDate::getDayOfMonthArray() ) ) {
-
-			$this->data['milestone_rollover_day_of_month'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'milestone_rollover_day_of_month', $value );
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getMinimumEmployedDays() {
-		if ( isset($this->data['minimum_employed_days']) ) {
-			return (int)$this->data['minimum_employed_days'];
-		}
-
-		return FALSE;
-	}
-	function setMinimumEmployedDays($int) {
-		$int = trim($int);
-
-		if	( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isNumeric(		'minimum_employed_days',
-													$int,
-													TTi18n::gettext('Incorrect Minimum Employed days')) ) {
-			$this->data['minimum_employed_days'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'minimum_employed_days' );
 	}
 
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMinimumEmployedDays( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'minimum_employed_days', $value );
+	}
+
+	/**
+	 * @param object $u_obj
+	 * @param object $modifier_obj
+	 * @return bool
+	 */
 	function getModifiedHireDate( $u_obj, $modifier_obj = NULL ) {
 		if ( !is_object($u_obj) ) {
 			return FALSE;
@@ -706,6 +608,11 @@ class AccrualPolicyFactory extends Factory {
 		return $user_hire_date;
 	}
 
+	/**
+	 * @param object $u_obj
+	 * @param object $modifier_obj
+	 * @return bool|false|int
+	 */
 	function getMilestoneRolloverDate( $u_obj = NULL, $modifier_obj = NULL ) {
 		if ( !is_object($u_obj) ) {
 			return FALSE;
@@ -724,6 +631,12 @@ class AccrualPolicyFactory extends Factory {
 		return TTDate::getBeginDayEpoch( $retval ); //Some hire dates might be at noon, so make sure they are all at midnight.
 	}
 
+	/**
+	 * @param int $epoch EPOCH
+	 * @param object $u_obj
+	 * @param bool $use_previous_year_date
+	 * @return bool|false|int
+	 */
 	function getCurrentMilestoneRolloverDate( $epoch, $u_obj = NULL, $use_previous_year_date = FALSE ) {
 		if ( !is_object($u_obj) ) {
 			return FALSE;
@@ -747,6 +660,11 @@ class AccrualPolicyFactory extends Factory {
 		return $rollover_date;
 	}
 
+	/**
+	 * @param $accrual_rate
+	 * @param null $annual_pay_periods
+	 * @return bool|float|string
+	 */
 	function getAccrualRatePerTimeFrequency( $accrual_rate, $annual_pay_periods = NULL ) {
 		$retval = FALSE;
 		switch( $this->getApplyFrequency() ) {
@@ -781,6 +699,13 @@ class AccrualPolicyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param int $current_epoch EPOCH
+	 * @param $offset
+	 * @param object $u_obj
+	 * @param int $pay_period_start_date EPOCH
+	 * @return bool
+	 */
 	function inRolloverFrequencyWindow( $current_epoch, $offset, $u_obj, $pay_period_start_date = NULL ) {
 		//Use current_epoch mainly for Yearly cases where the rollover date is 01-Nov and the hire date is always right after it, 10-Nov in the next year.
 		$rollover_date = $this->getCurrentMilestoneRolloverDate( $current_epoch, $u_obj, FALSE );
@@ -795,6 +720,13 @@ class AccrualPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $current_epoch EPOCH
+	 * @param $offset
+	 * @param int $pay_period_dates EPOCH
+	 * @param object $u_obj
+	 * @return array|bool
+	 */
 	function getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates = NULL, $u_obj = NULL ) {
 		$hire_date = $this->getMilestoneRolloverDate( $u_obj );
 
@@ -877,6 +809,14 @@ class AccrualPolicyFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $input_amount
+	 * @param int $current_epoch EPOCH
+	 * @param $offset
+	 * @param int $pay_period_dates EPOCH
+	 * @param object $u_obj
+	 * @return float
+	 */
 	function getProRateInitialFrequencyWindow( $input_amount, $current_epoch, $offset, $pay_period_dates = NULL, $u_obj = NULL ) {
 		$apply_frequency_dates = $this->getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates, $u_obj );
 		if ( isset($apply_frequency_dates['start_date']) AND isset($apply_frequency_dates['end_date']) ) {
@@ -892,6 +832,14 @@ class AccrualPolicyFactory extends Factory {
 
 		return $input_amount;
 	}
+
+	/**
+	 * @param int $current_epoch EPOCH
+	 * @param $offset
+	 * @param int $pay_period_dates EPOCH
+	 * @param object $u_obj
+	 * @return bool
+	 */
 	function isInitialApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates = NULL, $u_obj = NULL ) {
 		$apply_frequency_dates = $this->getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates, $u_obj );
 		if ( isset($apply_frequency_dates['start_date']) AND isset($apply_frequency_dates['end_date']) ) {
@@ -905,6 +853,13 @@ class AccrualPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param int $current_epoch EPOCH
+	 * @param $offset
+	 * @param int $pay_period_dates EPOCH
+	 * @param object $u_obj
+	 * @return bool
+	 */
 	function inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates = NULL, $u_obj = NULL ) {
 		$apply_frequency_dates = $this->getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates, $u_obj );
 		if ( isset($apply_frequency_dates['start_date']) AND isset($apply_frequency_dates['end_date']) ) {
@@ -954,6 +909,12 @@ class AccrualPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $end_date EPOCH
+	 * @return bool|int
+	 */
 	function getWorkedTimeByUserIdAndEndDate( $user_id, $start_date = NULL, $end_date = NULL ) {
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -981,6 +942,10 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	//Determine if any milestones have an hour based length of service.
+
+	/**
+	 * @return bool
+	 */
 	function isHourBasedLengthOfService() {
 		//Cache milestones to speed up getting projected balances.
 		if ( !isset($this->milestone_objs[$this->getID()]) ) {
@@ -1001,6 +966,10 @@ class AccrualPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param object $u_obj
+	 * @return bool|null
+	 */
 	function getAccrualPolicyUserModifierObject( $u_obj ) {
 		if ( !is_object( $u_obj ) ) {
 			return FALSE;
@@ -1023,6 +992,13 @@ class AccrualPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param object $u_obj
+	 * @param int $epoch EPOCH
+	 * @param int $worked_time
+	 * @param bool $modifier_obj
+	 * @return bool
+	 */
 	function getActiveMilestoneObject( $u_obj, $epoch = NULL, $worked_time = 0, $modifier_obj = FALSE ) {
 		if ( !is_object( $u_obj ) ) {
 			return FALSE;
@@ -1094,6 +1070,11 @@ class AccrualPolicyFactory extends Factory {
 		return $milestone_obj;
 	}
 
+	/**
+	 * @param string $user_id UUID
+	 * @param string $accrual_policy_account_id UUID
+	 * @return bool|int
+	 */
 	function getCurrentAccrualBalance( $user_id, $accrual_policy_account_id = NULL ) {
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -1117,6 +1098,12 @@ class AccrualPolicyFactory extends Factory {
 		return $accrual_balance;
 	}
 
+	/**
+	 * @param object $milestone_obj
+	 * @param $total_time
+	 * @param $annual_pay_periods
+	 * @return bool|float|int|string
+	 */
 	function calcAccrualAmount( $milestone_obj, $total_time, $annual_pay_periods ) {
 		if ( !is_object( $milestone_obj ) ) {
 			return FALSE;
@@ -1135,6 +1122,14 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	//Returns an array of pay period start/end dates between a given start/end date.
+
+	/**
+	 * @param object $pps_obj
+	 * @param object $u_obj
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @return array
+	 */
 	function getPayPeriodArray( $pps_obj, $u_obj, $start_epoch, $end_epoch ) {
 		$retarr = array();
 
@@ -1166,6 +1161,12 @@ class AccrualPolicyFactory extends Factory {
 
 		return $retarr;
 	}
+
+	/**
+	 * @param $pay_period_arr
+	 * @param int $epoch EPOCH
+	 * @return bool|mixed
+	 */
 	function getPayPeriodDatesFromArray( $pay_period_arr, $epoch ) {
 		if ( is_array($pay_period_arr) ) {
 			foreach( $pay_period_arr as $pp_dates ) {
@@ -1180,6 +1181,14 @@ class AccrualPolicyFactory extends Factory {
 
 	//$current_amount is the amount of time currently being entered.
 	//$previous_amount is the old amount that is currently be edited.
+	/**
+	 * @param object $u_obj
+	 * @param int $epoch EPOCH
+	 * @param $current_time
+	 * @param int $previous_time
+	 * @param bool $other_policy_balance_arr
+	 * @return array
+	 */
 	function getAccrualBalanceWithProjection( $u_obj, $epoch, $current_time, $previous_time = 0, $other_policy_balance_arr = FALSE ) {
 		// Available Balance:			   10hrs
 		// Current Time:					8hrs
@@ -1219,6 +1228,12 @@ class AccrualPolicyFactory extends Factory {
 
 	}
 
+	/**
+	 * @param object $u_obj
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch EPOCH
+	 * @return bool|float|int|string
+	 */
 	function getProjectedAccrualAmount( $u_obj, $start_epoch, $end_epoch ) {
 		$start_epoch = TTDate::getMiddleDayEpoch( $start_epoch );
 		$end_epoch = TTDate::getMiddleDayEpoch( $end_epoch );
@@ -1256,6 +1271,17 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	//Calculate the accrual amount based on a given user/time.
+
+	/**
+	 * @param object $u_obj
+	 * @param int $epoch EPOCH
+	 * @param $offset
+	 * @param object $pps_obj
+	 * @param $pay_period_arr
+	 * @param $accrual_balance
+	 * @param bool $update_records
+	 * @return bool|float|int|string
+	 */
 	function calcAccrualPolicyTime( $u_obj, $epoch, $offset, $pps_obj, $pay_period_arr, $accrual_balance, $update_records = TRUE ) {
 		$retval = 0;
 
@@ -1452,6 +1478,13 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	//79200 = 22hr offset
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @param int $offset
+	 * @param bool $user_ids
+	 * @return bool
+	 */
 	function addAccrualPolicyTime( $epoch = NULL, $offset = 79200, $user_ids = FALSE ) {
 		if ( $epoch == '' ) {
 			$epoch = TTDate::getTime();
@@ -1463,7 +1496,7 @@ class AccrualPolicyFactory extends Factory {
 
 		$pglf->StartTransaction();
 
-		$pglf->getSearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'accrual_policy_id' => array( $this->getId() ) ) );
+		$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'accrual_policy_id' => array( $this->getId() ) ) );
 		if ( $pglf->getRecordCount() > 0 ) {
 			Debug::Text('Found Policy Group...', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $pglf as $pg_obj ) {
@@ -1538,14 +1571,171 @@ class AccrualPolicyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
 	function Validate( $ignore_warning = TRUE ) {
-		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Company
+		$clf = TTnew( 'CompanyListFactory' );
+		$this->Validator->isResultSetWithRows(	'company',
+														$clf->getByID($this->getCompany()),
+														TTi18n::gettext('Company is invalid')
+													);
+		// Type
+		if ( $this->getType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'type',
+													$this->getType(),
+													TTi18n::gettext('Incorrect Type'),
+													$this->getOptions('type')
+												);
+		}
+		// Accrual Account
+		if ( $this->getAccrualPolicyAccount() !== FALSE ) {
+			$apaplf = TTnew( 'AccrualPolicyAccountListFactory' );
+			$this->Validator->isResultSetWithRows(	'accrual_policy_account_id',
+															$apaplf->getByID($this->getAccrualPolicyAccount()),
+															TTi18n::gettext('Accrual Account is invalid')
+														);
+		}
+		// Contributing Shift Policy
+		if ( $this->getContributingShiftPolicy() !== FALSE AND $this->getContributingShiftPolicy() != TTUUID::getZeroID() ) {
+			$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'contributing_shift_policy_id',
+															$csplf->getByID($this->getContributingShiftPolicy()),
+															TTi18n::gettext('Contributing Shift Policy is invalid')
+														);
+		}
+		// Contributing Pay Code Policy
+		if ( $this->getLengthOfServiceContributingPayCodePolicy() !== FALSE AND $this->getLengthOfServiceContributingPayCodePolicy() != TTUUID::getZeroID() ) {
+			$csplf = TTnew( 'ContributingPayCodePolicyListFactory' );
+			$this->Validator->isResultSetWithRows(	'length_of_service_contributing_pay_code_policy_id',
+															$csplf->getByID($this->getLengthOfServiceContributingPayCodePolicy()),
+															TTi18n::gettext('Contributing Pay Code Policy is invalid')
+														);
+		}
+		// Name
+		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing, but must check when adding a new record..
 			if ( $this->getName() == '' ) {
-				$this->Validator->isTRUE(	'name',
-											FALSE,
-											TTi18n::gettext('Please specify a name') );
+				$this->Validator->isTRUE( 'name',
+										  FALSE,
+										  TTi18n::gettext( 'Please specify a name' ) );
 			}
 		}
+
+		if ( $this->getName() !== FALSE ) {
+			if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
+				$this->Validator->isLength( 'name',
+											$this->getName(),
+											TTi18n::gettext( 'Name is too short or too long' ),
+											2, 50
+				);
+			}
+			if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
+				$this->Validator->isTrue(	'name',
+											 $this->isUniqueName($this->getName()),
+											 TTi18n::gettext('Name is already in use')
+				);
+			}
+		}
+		// Description
+		if ( $this->getDescription() != '' ) {
+			$this->Validator->isLength(	'description',
+												$this->getDescription(),
+												TTi18n::gettext('Description is invalid'),
+												1, 250
+											);
+		}
+		// Minimum Time
+		$this->Validator->isNumeric(		'minimum_time',
+													$this->getMinimumTime(),
+													TTi18n::gettext('Incorrect Minimum Time')
+												);
+		// Maximum Time
+		$this->Validator->isNumeric(		'maximum_time',
+													$this->getMaximumTime(),
+													TTi18n::gettext('Incorrect Maximum Time')
+												);
+		// Frequency
+		if ( $this->getApplyFrequency() != '' ) {
+			$this->Validator->inArrayKey(	'apply_frequency_id',
+													$this->getApplyFrequency(),
+													TTi18n::gettext('Incorrect frequency'),
+													$this->getOptions('apply_frequency')
+												);
+		}
+
+		if ( $this->getDeleted() == FALSE ) {
+			// Frequency month
+			if ( $this->getApplyFrequencyMonth() != '' ) {
+				$this->Validator->inArrayKey( 'apply_frequency_month',
+											  $this->getApplyFrequencyMonth(),
+											  TTi18n::gettext( 'Incorrect frequency month' ),
+											  TTDate::getMonthOfYearArray()
+				);
+			}
+			// Frequency day of month
+			if ( $this->getApplyFrequencyDayOfMonth() != '' ) {
+				$this->Validator->inArrayKey( 'apply_frequency_day_of_month',
+											  $this->getApplyFrequencyDayOfMonth(),
+											  TTi18n::gettext( 'Incorrect frequency day of month' ),
+											  TTDate::getDayOfMonthArray()
+				);
+			}
+			// Frequency day of week
+			if ( $this->getApplyFrequencyDayOfWeek() != '' ) {
+				$this->Validator->inArrayKey( 'apply_frequency_day_of_week',
+											  $this->getApplyFrequencyDayOfWeek(),
+											  TTi18n::gettext( 'Incorrect frequency day of week' ),
+											  TTDate::getDayOfWeekArray()
+				);
+			}
+			// Frequency quarter month
+			if ( $this->getApplyFrequencyQuarterMonth() != '' ) {
+				$this->Validator->isGreaterThan( 'apply_frequency_quarter_month',
+												 $this->getApplyFrequencyQuarterMonth(),
+												 TTi18n::gettext( 'Incorrect frequency quarter month' ),
+												 1
+				);
+				if ( $this->Validator->isError( 'apply_frequency_quarter_month' ) == FALSE ) {
+					$this->Validator->isLessThan( 'apply_frequency_quarter_month',
+												  $this->getApplyFrequencyQuarterMonth(),
+												  TTi18n::gettext( 'Incorrect frequency quarter month' ),
+												  3
+					);
+				}
+			}
+			// Milestone rollover month
+			if ( $this->getMilestoneRolloverMonth() != '' ) {
+				$this->Validator->inArrayKey( 'milestone_rollover_month',
+											  $this->getMilestoneRolloverMonth(),
+											  TTi18n::gettext( 'Incorrect milestone rollover month' ),
+											  TTDate::getMonthOfYearArray()
+				);
+			}
+			// Milestone rollover day of month
+			if ( $this->getMilestoneRolloverDayOfMonth() != '' ) {
+				$this->Validator->inArrayKey( 'milestone_rollover_day_of_month',
+											  $this->getMilestoneRolloverDayOfMonth(),
+											  TTi18n::gettext( 'Incorrect milestone rollover day of month' ),
+											  TTDate::getDayOfMonthArray()
+				);
+			}
+		}
+		// Minimum Employed days
+		if ( $this->getMinimumEmployedDays() !== FALSE ) {
+			$this->Validator->isNumeric(		'minimum_employed_days',
+														$this->getMinimumEmployedDays(),
+														TTi18n::gettext('Incorrect Minimum Employed days')
+													);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
 
 		if ( $this->getEnableOpeningBalance() == TRUE AND $this->getMinimumEmployedDays() != 0 ) {
 			$this->Validator->isTRUE(	'minimum_employed_days',
@@ -1582,10 +1772,16 @@ class AccrualPolicyFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function preSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
@@ -1593,13 +1789,17 @@ class AccrualPolicyFactory extends Factory {
 			Debug::Text('UnAssign Accruals records from Policy: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			$af = TTnew( 'AccrualFactory' );
 
-			$query = 'update '. $af->getTable() .' set accrual_policy_id = 0 where accrual_policy_id = '. (int)$this->getId();
+			$query = 'update '. $af->getTable() .' set accrual_policy_id = \''. TTUUID::getZeroID() .'\' where accrual_policy_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
 		}
 
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -1625,6 +1825,10 @@ class AccrualPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -1664,6 +1868,10 @@ class AccrualPolicyFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Accrual Policy'), NULL, $this->getTable(), $this );
 	}

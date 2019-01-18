@@ -1,13 +1,13 @@
 Form940ReportViewController = ReportBaseViewController.extend( {
 
+	_required_files: ['APIForm940Report', 'APIPayStubEntryAccount'],
 
 	return_type_array: null,
 	exempt_payment_array: null,
 	state_array: null,
 	province_array: null,
 
-	initialize: function( options ) {
-		this.__super( 'initialize', options );
+	initReport: function( options ) {
 		this.script_name = 'Form940Report';
 		this.viewId = 'Form940Report';
 		this.context_menu_name = $.i18n._( 'Form 940' );
@@ -15,9 +15,6 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		this.view_file = 'Form940ReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIForm940Report' ))();
 		this.include_form_setup = true;
-
-		this.buildContextMenu();
-
 	},
 
 	initOptions: function( callBack ) {
@@ -144,14 +141,14 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 			permission: null
 		} );
 
-		var print_form = new RibbonSubMenu( {
-			label: $.i18n._( 'Print' ),
-			id: ContextMenuIconName.print_form,
-			group: form_setup_group,
-			icon: Icons.print,
-			permission_result: true,
-			permission: null
-		} );
+		// var print_form = new RibbonSubMenu( {
+		// 	label: $.i18n._( 'Print' ),
+		// 	id: ContextMenuIconName.print_form,
+		// 	group: form_setup_group,
+		// 	icon: Icons.print,
+		// 	permission_result: true,
+		// 	permission: null
+		// } );
 
 		var save_setup = new RibbonSubMenu( {
 			label: $.i18n._( 'Save Setup' ),
@@ -182,13 +179,15 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 		switch ( id ) {
 			case ContextMenuIconName.view:
+				ProgressBar.showOverlay();
 				this.onViewClick();
 				break;
 			case ContextMenuIconName.view_html:
-
+				ProgressBar.showOverlay();
 				this.onViewClick('html');
 				break;
 			case ContextMenuIconName.view_html_new_window:
+				ProgressBar.showOverlay();
 				this.onViewClick('html', true);
 				break;
 			case ContextMenuIconName.export_excel:
@@ -337,13 +336,6 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 		this.addEditFieldToColumn( $.i18n._( 'Exempt Payments (Line 4)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
-		//State Where You Pay Unemployment Tax
-
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'state_id', set_empty: false} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.state_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'State Where You Pay Unemployment Tax' ), form_item_input, tab3_column1 );
-
 		//Wages Excluded From State Unemployement Tax (Line 10)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
@@ -361,49 +353,6 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 		form_item_input.TTextInput( {field: 'tax_deposited'} );
 		this.addEditFieldToColumn( $.i18n._( 'FUTA Tax Deposited For The Year (Line 13)' ), form_item_input, tab3_column1 );
-
-		//Name
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab3_column1 );
-		form_item_input.parent().width( '45%' );
-
-		//Company Name
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'company_name', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Company Name' ), form_item_input, tab3_column1 );
-
-		form_item_input.parent().width( '45%' );
-
-		//Address
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Address' ), form_item_input, tab3_column1 );
-
-		form_item_input.parent().width( '45%' );
-
-		//City
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'city'} );
-		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab3_column1 );
-
-		//State
-
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'province', set_empty: true} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.province_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'State' ), form_item_input, tab3_column1 );
-
-		//ZIP Code
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'postal_code'} );
-		this.addEditFieldToColumn( $.i18n._( 'ZIP Code' ), form_item_input, tab3_column1, '' );
-
 	},
 
 	getFormSetupData: function() {
@@ -415,16 +364,9 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 		other.return_type = this.current_edit_record.return_type;
 		other.exempt_payment = this.current_edit_record.exempt_payment;
-		other.state_id = this.current_edit_record.state_id;
 		other.line_10 = this.current_edit_record.line_10;
 		other.line_11 = this.current_edit_record.line_11;
 		other.tax_deposited = this.current_edit_record.tax_deposited;
-		other.name = this.current_edit_record.name;
-		other.company_name = this.current_edit_record.company_name;
-		other.city = this.current_edit_record.city;
-		other.province = this.current_edit_record.province;
-		other.postal_code = this.current_edit_record.postal_code;
-		other.address1 = this.current_edit_record.address1;
 
 		return other;
 	},
@@ -465,12 +407,6 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 				this.current_edit_record.exempt_payment = res_Data.exempt_payment;
 			}
 
-			if ( res_Data.state_id ) {
-				this.edit_view_ui_dic.state_id.setValue( res_Data.state_id );
-
-				this.current_edit_record.state_id = res_Data.state_id;
-			}
-
 			if ( res_Data.line_10 ) {
 				this.edit_view_ui_dic.line_10.setValue( res_Data.line_10 );
 
@@ -488,43 +424,6 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 				this.current_edit_record.tax_deposited = res_Data.tax_deposited;
 			}
-
-			if ( res_Data.name ) {
-				this.edit_view_ui_dic.name.setValue( res_Data.name );
-
-				this.current_edit_record.name = res_Data.name;
-			}
-
-			if ( res_Data.company_name ) {
-				this.edit_view_ui_dic.company_name.setValue( res_Data.company_name );
-
-				this.current_edit_record.company_name = res_Data.company_name;
-			}
-
-			if ( res_Data.address1 ) {
-				this.edit_view_ui_dic.address1.setValue( res_Data.address1 );
-
-				this.current_edit_record.address1 = res_Data.address1;
-			}
-
-			if ( res_Data.city ) {
-				this.edit_view_ui_dic.city.setValue( res_Data.city );
-
-				this.current_edit_record.city = res_Data.city;
-			}
-
-			if ( res_Data.province ) {
-				this.edit_view_ui_dic.province.setValue( res_Data.province );
-
-				this.current_edit_record.province = res_Data.province;
-			}
-
-			if ( res_Data.postal_code ) {
-				this.edit_view_ui_dic.postal_code.setValue( res_Data.postal_code );
-
-				this.current_edit_record.postal_code = res_Data.postal_code;
-			}
-
 		}
 	}
 	/* jshint ignore:end */

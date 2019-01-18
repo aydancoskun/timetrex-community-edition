@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,6 +45,11 @@ class HierarchyLevelFactory extends Factory {
 	var $hierarchy_control_obj = NULL;
 	var $user_obj = NULL;
 
+	/**
+	 * @param $name
+	 * @param null $parent
+	 * @return array|null
+	 */
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
@@ -81,6 +86,10 @@ class HierarchyLevelFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
@@ -92,6 +101,9 @@ class HierarchyLevelFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool|null
+	 */
 	function getUserObject() {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
@@ -107,6 +119,9 @@ class HierarchyLevelFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return null
+	 */
 	function getHierarchyControlObject() {
 		if ( is_object($this->hierarchy_control_obj) ) {
 			return $this->hierarchy_control_obj;
@@ -118,69 +133,60 @@ class HierarchyLevelFactory extends Factory {
 		}
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getHierarchyControl() {
-		if ( isset($this->data['hierarchy_control_id']) ) {
-			return (int)$this->data['hierarchy_control_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'hierarchy_control_id' );
 	}
-	function setHierarchyControl($id) {
-		$id = trim($id);
 
-		$hclf = TTnew( 'HierarchyControlListFactory' );
-
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setHierarchyControl( $value) {
+		$value = TTUUID::castUUID($value);
+		if ( $value == '' ) {
+			$value = TTUUID::getZeroID();
+		}
 		//This is a sub-class, need to support setting HierachyControlID before its created.
-		if ( $id != 0
-				OR
-				$this->Validator->isResultSetWithRows(	'hierarchy_control_id',
-															$hclf->getByID($id),
-															TTi18n::gettext('Invalid Hierarchy Control')
-															)
-				) {
-			$this->data['hierarchy_control_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'hierarchy_control_id', $value );
 	}
 
+	/**
+	 * @return bool|int
+	 */
 	function getLevel() {
-		if ( isset($this->data['level']) ) {
-			return (int)$this->data['level'];
-		}
-
-		return FALSE;
+		return (int)$this->getGenericDataValue( 'level' );
 	}
-	function setLevel($int) {
-		$int = trim($int);
 
-		if ( $int <= 0 ) {
-			$int = 1; //1 is the lowest level
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLevel( $value) {
+		$value = trim($value);
+		if ( $value <= 0 ) {
+			$value = 1; //1 is the lowest level
 		}
-
-		if	(	$int > 0
-				AND
-				$this->Validator->isNumeric(		'level',
-													$int,
-													TTi18n::gettext('Level is invalid')) ) {
-			$this->data['level'] = $int;
-
-			return TRUE;
+		if	( $value > 0 ) {
+			return $this->setGenericDataValue( 'level', $value );
 		}
-
 		return FALSE;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	function getUser() {
-		if ( isset($this->data['user_id']) ) {
-			return (int)$this->data['user_id'];
-		}
-
-		return FALSE;
+		return $this->getGenericDataValue( 'user_id' );
 	}
-	function setUser($id) {
+
+	/**
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function setUser( $id) {
 		$id = trim($id);
 
 		$ulf = TTnew( 'UserListFactory' );
@@ -234,7 +240,7 @@ class HierarchyLevelFactory extends Factory {
 					)
 				)
 				) {
-			$this->data['user_id'] = $id;
+			$this->setGenericDataValue( 'user_id', $id );
 
 			return TRUE;
 		}
@@ -242,6 +248,10 @@ class HierarchyLevelFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $hierarchy_level_data
+	 * @return bool
+	 */
 	static function RemoveDuplicateHierarchyLevels( $hierarchy_level_data ) {
 		if ( !is_array($hierarchy_level_data) ) {
 			return FALSE;
@@ -274,6 +284,10 @@ class HierarchyLevelFactory extends Factory {
 
 	//Remaps raw hierarchy_levels so they always start from 1, and have no gaps in them.
 	//Also remove any duplicate superiors from the hierarchy.
+	/**
+	 * @param $hierarchy_level_data
+	 * @return bool
+	 */
 	static function ReMapHierarchyLevels( $hierarchy_level_data ) {
 		if ( !is_array($hierarchy_level_data) ) {
 			return FALSE;
@@ -302,6 +316,14 @@ class HierarchyLevelFactory extends Factory {
 	}
 
 	//Takes a hierarchy level map array and converts it to a SQL where clause.
+
+	/**
+	 * @param $hierarchy_level_map
+	 * @param string $object_table
+	 * @param string $hierarchy_user_table
+	 * @param int $type_id ID_column
+	 * @return bool|string
+	 */
 	static function convertHierarchyLevelMapToSQL( $hierarchy_level_map, $object_table = 'a.', $hierarchy_user_table = 'z.', $type_id_column = NULL ) {
 		/*
 				( z.hierarchy_control_id = 469 AND a.authorization_level = 1 )
@@ -322,7 +344,7 @@ class HierarchyLevelFactory extends Factory {
 				if ( !isset( $hierarchy_data['hierarchy_control_id'] ) OR !isset( $hierarchy_data['level'] ) ) {
 					continue;
 				}
-				
+
 				if ( isset($hierarchy_data['last_level']) AND $hierarchy_data['last_level'] == TRUE ) {
 					$operator = ' >= ';
 				} else {
@@ -334,7 +356,7 @@ class HierarchyLevelFactory extends Factory {
 					$hierarchy_data['object_type_id'] = $rf->getTypeIdFromHierarchyTypeId( $hierarchy_data['object_type_id'] );
 					$object_type_clause = ' AND '. $type_id_column .' in ('. implode(',', $hierarchy_data['object_type_id'] ) .')';
 				}
-				$clause_arr[] = '( '. $hierarchy_user_table.'hierarchy_control_id = '. (int)$hierarchy_data['hierarchy_control_id'] .' AND '.$object_table.'authorization_level '. $operator .' '. (int)$hierarchy_data['level'] . $object_type_clause .' )';
+				$clause_arr[] = '( '. $hierarchy_user_table.'hierarchy_control_id = \''. TTUUID::castUUID($hierarchy_data['hierarchy_control_id']) .'\' AND '.$object_table.'authorization_level '. $operator .' '. (int)$hierarchy_data['level'] . $object_type_clause .' )';
 			}
 			$retval = implode(' OR ', $clause_arr );
 			//Debug::Text(' Hierarchy Filter SQL: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
@@ -344,10 +366,17 @@ class HierarchyLevelFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postSave() {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @return bool
+	 */
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -373,6 +402,10 @@ class HierarchyLevelFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param null $include_columns
+	 * @return array
+	 */
 	function getObjectAsArray( $include_columns = NULL ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -397,6 +430,10 @@ class HierarchyLevelFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @param $log_action
+	 * @return bool
+	 */
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {
@@ -404,6 +441,47 @@ class HierarchyLevelFactory extends Factory {
 		}
 
 		return FALSE;
+	}
+
+	/**
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
+	function Validate( $ignore_warning = TRUE ) {
+		//
+		// BELOW: Validation code moved from set*() functions.
+		//
+		// Hierarchy Control
+		$hclf = TTnew( 'HierarchyControlListFactory' );
+		$this->Validator->isResultSetWithRows(	'hierarchy_control_id',
+														$hclf->getByID($this->getHierarchyControl()),
+														TTi18n::gettext('Invalid Hierarchy Control')
+													);
+		// Level
+		if ( $this->getLevel() !== FALSE AND $this->getLevel() > 0 ) {
+			$this->Validator->isNumeric(		'level',
+														$this->getLevel(),
+														TTi18n::gettext('Level is invalid')
+													);
+		}
+
+		//
+		// ABOVE: Validation code moved from set*() functions.
+		//
+
+
+		if ( $this->getUser() === FALSE or TTUUID::isUUID( $this->getUser() ) ==  FALSE ) {
+			$this->Validator->isTrue( 'user_id',
+									  FALSE,
+									  TTi18n::gettext('A superior must be specified')
+			);
+		}
+
+		if ( $this->getDeleted() == TRUE ) {
+			return TRUE;
+		}
+
+		return TRUE;
 	}
 
 }

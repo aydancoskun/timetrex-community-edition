@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,9 @@
  */
 class InstallSchema_1063A extends InstallSchema_Base {
 
+	/**
+	 * @return bool
+	 */
 	function preInstall() {
 		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
@@ -62,7 +65,7 @@ class InstallSchema_1063A extends InstallSchema_Base {
 					foreach( $plf as $p_obj ) {
 						if ( $prev_time_stamp !== FALSE AND $prev_time_stamp == $p_obj->getTimeStamp() ) {
 							Debug::text('    Found Duplicate TimeStamp: '. $p_obj->getTimeStamp() .'('. $p_obj->getID() .') Deleting...', __FILE__, __LINE__, __METHOD__, 9);
-							$plf->db->Execute('UPDATE punch SET deleted = 1 WHERE id = '. (int)$p_obj->getID() );
+							$plf->db->Execute('UPDATE punch SET deleted = 1 WHERE id = \''. TTUUID::castUUID($p_obj->getID()) .'\'' );
 							$i++;
 						}
 
@@ -76,7 +79,7 @@ class InstallSchema_1063A extends InstallSchema_Base {
 						foreach( $plf as $p_obj ) {
 							if ( $prev_status_id !== FALSE AND in_array( $p_obj->getStatus(), $prev_status_id ) ) {
 								Debug::text('    Found Duplicate Status: '. $p_obj->getStatus() .'('. $p_obj->getID() .') Deleting...', __FILE__, __LINE__, __METHOD__, 9);
-								$plf->db->Execute('UPDATE punch SET deleted = 1 WHERE id = '. (int)$p_obj->getID() );
+								$plf->db->Execute('UPDATE punch SET deleted = 1 WHERE id = \''. TTUUID::castUUID($p_obj->getID()).'\'' );
 								$i++;
 							}
 
@@ -93,10 +96,10 @@ class InstallSchema_1063A extends InstallSchema_Base {
 					foreach( $plf as $p_obj ) {
 						if ( $x == 0 AND $p_obj->getStatus() != 10 ) {
 							Debug::text('    Found Duplicate IN punches: '. $p_obj->getID() .' Correcting...', __FILE__, __LINE__, __METHOD__, 9);
-							$plf->db->Execute('UPDATE punch SET status_id = 10 WHERE id = '. (int)$p_obj->getID() );
+							$plf->db->Execute('UPDATE punch SET status_id = 10 WHERE id = \''. TTUUID::castUUID($p_obj->getID()).'\'' );
 						} elseif ( $x == 1 AND $p_obj->getStatus() != 20 ) {
 							Debug::text('    Found Duplicate OUT punches: '. $p_obj->getID() .' Correcting...', __FILE__, __LINE__, __METHOD__, 9);
-							$plf->db->Execute('UPDATE punch SET status_id = 20 WHERE id = '. (int)$p_obj->getID() );
+							$plf->db->Execute('UPDATE punch SET status_id = 20 WHERE id = \''. TTUUID::castUUID($p_obj->getID()).'\'' );
 						}
 						$x++;
 					}
@@ -110,6 +113,9 @@ class InstallSchema_1063A extends InstallSchema_Base {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function postInstall() {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
