@@ -44,7 +44,7 @@ class PayStubFactory extends Factory {
 	protected $table = 'pay_stub';
 	protected $pk_sequence_name = 'pay_stub_id_seq'; //PK Sequence name
 
-	protected $tmp_data = array('previous_pay_stub' => NULL, 'current_pay_stub' => NULL );
+	public $tmp_data = array('previous_pay_stub' => NULL, 'current_pay_stub' => NULL );
 	protected $is_unique_pay_stub = NULL;
 	protected $is_unique_pay_stub_type = NULL;
 
@@ -1546,7 +1546,7 @@ class PayStubFactory extends Factory {
 
 		//Loop through each entry in current pay stub, if they have
 		//a PS amendment ID assigned to them, change the status.
-		if ( is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
+		if ( isset($this->tmp_data['current_pay_stub']) AND is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
 			foreach( $this->tmp_data['current_pay_stub']['entries'] as $entry_arr ) {
 				if ( isset($entry_arr['pay_stub_amendment_id']) AND $entry_arr['pay_stub_amendment_id'] != '' ) {
 					Debug::Text('aFound PS Amendments to change status on...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1625,7 +1625,7 @@ class PayStubFactory extends Factory {
 
 		//Loop through each entry in current pay stub, if they have
 		//a User Expense ID assigned to them, change the status.
-		if ( is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
+		if ( isset($this->tmp_data['current_pay_stub']) AND is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
 			foreach( $this->tmp_data['current_pay_stub']['entries'] as $entry_arr ) {
 				if ( isset($entry_arr['user_expense_id']) AND TTUUID::isUUID( $entry_arr['user_expense_id'] ) AND $entry_arr['user_expense_id'] != TTUUID::getZeroID() ) {
 					Debug::Text('aFound User Expenses to change status on... ID: '. $entry_arr['user_expense_id'], __FILE__, __LINE__, __METHOD__, 10);

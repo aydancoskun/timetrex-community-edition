@@ -101,6 +101,7 @@ switch ($action) {
 		break;
 }
 $BASE_URL = './';
+$META_TITLE = TTi18n::getText('Confirm Email');
 require ('../../includes/Header.inc.php');
 ?>
 <div id="contentContainer" class="content-container">

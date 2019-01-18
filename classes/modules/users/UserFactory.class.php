@@ -42,7 +42,6 @@ class UserFactory extends Factory {
 	protected $table = 'users';
 	protected $pk_sequence_name = 'users_id_seq'; //PK Sequence name
 
-	protected $tmp_data = NULL;
 	protected $user_preference_obj = NULL;
 	protected $user_tax_obj = NULL;
 	protected $legal_entity_obj = NULL;
@@ -663,10 +662,14 @@ class UserFactory extends Factory {
 		//array passed in is hierarchy_object_type_id => hierarchy_control_id
 		if ( is_array($data) ) {
 			Debug::Arr($data, 'Hierarchy Control Data: ', __FILE__, __LINE__, __METHOD__, 10);
+			$tmp_ids = array();
 			foreach( $data as $hierarchy_object_type_id => $hierarchy_control_id ) {
-				$hierarchy_control_id = Misc::trimSortPrefix( $hierarchy_control_id );
-				$this->tmp_data['hierarchy_control'][$hierarchy_object_type_id] = $hierarchy_control_id;
+				//$hierarchy_control_id = Misc::trimSortPrefix( $hierarchy_control_id );
+				//$this->tmp_data['hierarchy_control'][$hierarchy_object_type_id] = $hierarchy_control_id;
+				$tmp_ids[$hierarchy_object_type_id] = Misc::trimSortPrefix( $hierarchy_control_id );
+
 			}
+			$this->setGenericTempDataValue( 'hierarchy_control', $tmp_ids );
 
 			return TRUE;
 		}

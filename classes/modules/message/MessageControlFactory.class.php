@@ -43,7 +43,6 @@ class MessageControlFactory extends Factory {
 	protected $pk_sequence_name = 'message_control_id_seq'; //PK Sequence name
 
 	protected $obj_handler = NULL;
-	protected $tmp_data = NULL;
 
 	/**
 	 * @param $name
@@ -239,12 +238,13 @@ class MessageControlFactory extends Factory {
 
 		$ids = array_unique($ids);
 		if ( count($ids) > 0 ) {
-			$this->tmp_data['to_user_id'] = array(); //Reset the TO array, so if this is called multiple times, we don't keep adding more and more users to it.
-			foreach($ids as $id ) {
+			$tmp_ids = array(); //Reset the TO array, so if this is called multiple times, we don't keep adding more and more users to it.
+			foreach( $ids as $id ) {
 				if ( TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() ) {
-					$this->tmp_data['to_user_id'][] = $id;
+					$tmp_ids[] = $id;
 				}
 			}
+			$this->setGenericTempDataValue( 'to_user_id', $tmp_ids );
 
 			return TRUE;
 		}

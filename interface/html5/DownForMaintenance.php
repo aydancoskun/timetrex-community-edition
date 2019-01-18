@@ -42,6 +42,7 @@ extract	(FormVariables::GetVariables(
 												'exception',
 												) ) );
 $BASE_URL = './';
+$META_TITLE = TTi18n::getText('Down For Maintenance');
 require ('../../includes/Header.inc.php');
 ?>
 

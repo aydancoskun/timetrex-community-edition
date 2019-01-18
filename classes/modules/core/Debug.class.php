@@ -620,6 +620,7 @@ class Debug {
 			}
 		}
 
+
 		return TRUE;
 	}
 
@@ -677,6 +678,13 @@ class Debug {
 			global $config_vars;
 
 			$eol = PHP_EOL;
+
+			if ( PRODUCTION == FALSE AND function_exists('xdebug_get_gc_run_count') == TRUE AND xdebug_get_gc_run_count() > 0 ) {
+				self::Text( 'Garbage Collector Runs: ' . xdebug_get_gc_run_count() .' Collected Roots: '. xdebug_get_gc_total_collected_roots(), __FILE__, __LINE__, __METHOD__, 0 );
+				if ( file_exists( xdebug_get_gcstats_filename() ) ) {
+					self::Arr( file_get_contents( xdebug_get_gcstats_filename() ), 'Garbage Collection Report:', __FILE__, __LINE__, __METHOD__, 0 );
+				}
+			}
 
 			if ( is_array( self::$debug_buffer ) ) {
 				$output = $eol.'---------------[ '. @date('d-M-Y G:i:s O') .' ['. $_SERVER['REQUEST_TIME_FLOAT'] .'] (PID: '. getmypid() .') ]---------------'.$eol;

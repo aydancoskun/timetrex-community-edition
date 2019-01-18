@@ -618,7 +618,7 @@ class APIUser extends APIFactory {
 							return $this->getPermissionObject()->PermissionDenied();
 						}
 
-						$log_description = TTi18n::getText('Password - Phone');
+						$log_description = TTi18n::getText('Password - Quick Punch');
 						if ( $current_password != '' ) {
 							if ( $uf->checkPhonePassword($current_password) !== TRUE ) {
 								Debug::text('Password check failed! Attempt: '. $authentication->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);

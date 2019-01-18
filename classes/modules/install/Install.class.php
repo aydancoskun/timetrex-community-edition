@@ -1418,6 +1418,7 @@ class Install {
 		} elseif ( OPERATING_SYSTEM == 'WIN' ) {
 			$system_root = getenv('SystemRoot');
 			if ( $system_root != '' ) {
+				//Example: schtasks /create /SC minute /TN timetrex_maintenance /TR "c:\timetrex\php\php-win.exe" "c:\timetrex\timetrex\maint\cron.php"
 				$command = $system_root . '\system32\schtasks /create /SC minute /TN timetrex_maintenance /TR ""'. Environment::getBasePath() . '..\php\php-win.exe" "' . Environment::getBasePath() . 'maint\cron.php""';
 			}
 		}

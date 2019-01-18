@@ -328,6 +328,7 @@ class TimesheetDetailReport extends Report {
 				break;
 			case 'columns':
 				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
+				ksort($retval);
 				break;
 			case 'column_format':
 				//Define formatting function for each column.
@@ -345,32 +346,82 @@ class TimesheetDetailReport extends Report {
 				$retval['min_punch_time_stamp'] = $retval['max_punch_time_stamp'] = 'time';
 				$retval['min_schedule_time_stamp'] = $retval['max_schedule_time_stamp'] = 'time';
 				$retval['worked_hour_of_day'] = 'time';
+				$retval['worked_hour_of_day_total'] = 'numeric';
 				$retval['worked_days'] = 'numeric';
 				break;
-			case 'aggregates':
-				$retval = array();
+			case 'sub_total_by_metadata':
+			case 'grand_total_metadata':
+				$retval['aggregate'] = array();
+				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
+				if ( is_array($dynamic_columns ) ) {
+					foreach( $dynamic_columns as $column ) {
+						switch ( $column ) {
+							default:
+								if ( strpos($column, '_hourly_rate') !== FALSE OR $column == 'worked_hour_of_day_total' ) {
+									$retval['aggregate'][$column] = 'avg';
+								} elseif ( strpos($column, 'min_punch_time_stamp') !== FALSE OR strpos($column, 'min_schedule_time_stamp') !== FALSE ) {
+									$retval['aggregate'][$column] = 'min_not_null'; //Need to use the min_not_null otherwise when auto-deduct meal policies exist the IN punch will always be blank.
+								} elseif ( strpos($column, 'max_punch_time_stamp') !== FALSE OR strpos($column, 'max_schedule_time_stamp') !== FALSE ) {
+									$retval['aggregate'][$column] = 'max_not_null';
+								} elseif ( strpos($column, '_note') !== FALSE ) {
+									$retval['aggregate'][$column] = 'concat';
+								} else {
+									$retval['aggregate'][$column] = 'sum';
+								}
+						}
+					}
+				}
+				$retval['aggregate']['verified_time_sheet'] = 'first';
+				$retval['aggregate']['verified_time_sheet_date'] = 'first';
+				break;
+			case 'group_by_metadata':
+				$retval['aggregate'] = array();
 				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
 				if ( is_array($dynamic_columns ) ) {
 					foreach( $dynamic_columns as $column ) {
 						switch ( $column ) {
 							default:
 								if ( strpos($column, '_hourly_rate') !== FALSE ) {
-									$retval[$column] = 'avg';
+									$retval['aggregate'][$column] = 'avg';
 								} elseif ( strpos($column, 'min_punch_time_stamp') !== FALSE OR strpos($column, 'min_schedule_time_stamp') !== FALSE ) {
-									$retval[$column] = 'min_not_null'; //Need to use the min_not_null otherwise when auto-deduct meal policies exist the IN punch will always be blank.
+									$retval['aggregate'][$column] = 'min_not_null'; //Need to use the min_not_null otherwise when auto-deduct meal policies exist the IN punch will always be blank.
 								} elseif ( strpos($column, 'max_punch_time_stamp') !== FALSE OR strpos($column, 'max_schedule_time_stamp') !== FALSE ) {
-									$retval[$column] = 'max_not_null';
+									$retval['aggregate'][$column] = 'max_not_null';
 								} elseif ( strpos($column, '_note') !== FALSE ) {
-									$retval[$column] = 'concat';
+									$retval['aggregate'][$column] = 'concat';
 								} else {
-									$retval[$column] = 'sum';
+									$retval['aggregate'][$column] = 'sum';
 								}
 						}
 					}
 				}
-				$retval['verified_time_sheet'] = 'first';
-				$retval['verified_time_sheet_date'] = 'first';
+				$retval['aggregate']['verified_time_sheet'] = 'first';
+				$retval['aggregate']['verified_time_sheet_date'] = 'first';
 				break;
+//			case 'aggregates':
+//				$retval = array();
+//				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
+//				if ( is_array($dynamic_columns ) ) {
+//					foreach( $dynamic_columns as $column ) {
+//						switch ( $column ) {
+//							default:
+//								if ( strpos($column, '_hourly_rate') !== FALSE ) {
+//									$retval[$column] = 'avg';
+//								} elseif ( strpos($column, 'min_punch_time_stamp') !== FALSE OR strpos($column, 'min_schedule_time_stamp') !== FALSE ) {
+//									$retval[$column] = 'min_not_null'; //Need to use the min_not_null otherwise when auto-deduct meal policies exist the IN punch will always be blank.
+//								} elseif ( strpos($column, 'max_punch_time_stamp') !== FALSE OR strpos($column, 'max_schedule_time_stamp') !== FALSE ) {
+//									$retval[$column] = 'max_not_null';
+//								} elseif ( strpos($column, '_note') !== FALSE ) {
+//									$retval[$column] = 'concat';
+//								} else {
+//									$retval[$column] = 'sum';
+//								}
+//						}
+//					}
+//				}
+//				$retval['verified_time_sheet'] = 'first';
+//				$retval['verified_time_sheet_date'] = 'first';
+//				break;
 			case 'templates':
 				$retval = array(
 										'-1050-by_employee+all_time' => TTi18n::gettext('All Time by Employee'),
@@ -681,6 +732,7 @@ class TimesheetDetailReport extends Report {
 											$retval['columns'][] = 'date_stamp';
 											$retval['columns'][] = 'worked_hour_of_day';
 											$retval['columns'][] = 'worked_hour_of_day_total';
+											$retval['columns'][] = 'worked_time';
 
 											$retval['group'][] = 'date_stamp';
 											$retval['group'][] = 'worked_hour_of_day';
@@ -694,6 +746,7 @@ class TimesheetDetailReport extends Report {
 											$retval['columns'][] = 'date_dow';
 											$retval['columns'][] = 'worked_hour_of_day';
 											$retval['columns'][] = 'worked_hour_of_day_total';
+											$retval['columns'][] = 'worked_time';
 
 											$retval['group'][] = 'date_dow';
 											$retval['group'][] = 'worked_hour_of_day';
@@ -747,9 +800,8 @@ class TimesheetDetailReport extends Report {
 		return $retval;
 	}
 
-	//This function takes worked time for a single day and multiplies it by each hour worked.
-
 	/**
+	 * This function takes worked time for a single day and multiplies it by each hour worked.
 	 * @param $row
 	 * @param $dynamic_columns
 	 * @return array
@@ -757,36 +809,49 @@ class TimesheetDetailReport extends Report {
 	function splitDataByHoursWorked( $row, $dynamic_columns ) {
 		$retval = array();
 		if ( isset($row['min_punch_time_stamp']) AND isset($row['max_punch_time_stamp']) AND $row['min_punch_time_stamp'] > 0 AND $row['max_punch_time_stamp'] > 0 ) {
-			$total_hours = ( ( $row['max_punch_time_stamp'] - $row['min_punch_time_stamp'] ) / 3600 );
-			if ( $total_hours == 0 ) {
-				$total_hours = 1;
+			$total_hour_rows = ceil( ( TTDate::roundTime( $row['max_punch_time_stamp'], 3600, 30) - TTDate::roundTime( $row['min_punch_time_stamp'], 3600, 10) ) / 3600 );
+			if ( $total_hour_rows == 0 ) {
+				$total_hour_rows = 1;
 			}
 
 			$start_time = TTDate::roundTime( $row['min_punch_time_stamp'], 3600, 10 );
 			//If the employee punches out exact at 5:00PM, minus 1 second from that time so its recorded as an hour for 4:00PM and not 5:00PM.
 			$end_time = TTDate::roundTime( ($row['max_punch_time_stamp'] - 1), 3600, 10 );
 
-			//Debug::Text('Total Hours: '. $total_hours .' Start Time: '. TTDate::getDATE('DATE+TIME', $start_time ) .' End Time: '. TTDate::getDATE('DATE+TIME', $end_time ), __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Text('Total Hours: '. $total_hour_rows .' Start Time: '. TTDate::getDATE('DATE+TIME', $start_time ) .' End Time: '. TTDate::getDATE('DATE+TIME', $end_time ), __FILE__, __LINE__, __METHOD__, 10);
 			$x = 0;
 			for( $i = $start_time; $i <= $end_time; $i += 3600 ) {
-				//Debug::Text('Hour: '. TTDate::getDate('DATE+TIME', $i ) .'('. $i .') Total Hours: '. $total_hours, __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::Text('Hour: '. TTDate::getDate('DATE+TIME', $i ) .'('. $i .') Total Hour Rows: '. $total_hour_rows, __FILE__, __LINE__, __METHOD__, 10);
 				$retval[$i]['worked_hour_of_day'] = $i;
 
-				/*
-				//Handle partial hours. Though we don't need to do this as we track the number of hours worked per hour as well, so that gives us man hours.
+
 				if ( $row['min_punch_time_stamp'] > $i AND ( $row['min_punch_time_stamp'] - $i ) < 3600 ) {
-					$retval[$i]['worked_hour_of_day_total'] = ( TTDate::roundTime( ( $row['min_punch_time_stamp'] - $i ), 900, 10 ) / 3600 );
+					$partial_hour = 3600 - ( $row['min_punch_time_stamp'] - $i );
 				} elseif( $row['max_punch_time_stamp'] > $i AND ( $row['max_punch_time_stamp'] - $i ) < 3600 ) {
-					$retval[$i]['worked_hour_of_day_total'] = ( TTDate::roundTime( ( $row['max_punch_time_stamp'] - $i ), 900, 10 ) / 3600 );
+					$partial_hour = ( $row['max_punch_time_stamp'] - $i );
 				} else {
-					$retval[$i]['worked_hour_of_day_total'] = 1;
+					$partial_hour = 3600;
 				}
-				*/
+
+				//Handle partial hours. Though we don't need to do this as we track the number of hours worked per hour as well, so that gives us man hours.
+//				if ( $row['min_punch_time_stamp'] > $i AND ( $row['min_punch_time_stamp'] - $i ) < 3600 ) {
+//					$retval[$i]['worked_hour_of_day_total'] = ( TTDate::roundTime( ( $row['min_punch_time_stamp'] - $i ), 900, 10 ) / 3600 );
+//				} elseif( $row['max_punch_time_stamp'] > $i AND ( $row['max_punch_time_stamp'] - $i ) < 3600 ) {
+//					$retval[$i]['worked_hour_of_day_total'] = ( TTDate::roundTime( ( $row['max_punch_time_stamp'] - $i ), 900, 10 ) / 3600 );
+//				} else {
+//					$retval[$i]['worked_hour_of_day_total'] = 1.00;
+//				}
+
 				$retval[$i]['worked_hour_of_day_total'] = 1.00;
 
 				foreach( $row as $column => $value ) {
 					if ( isset( $dynamic_columns[$column] ) AND is_numeric($value) AND !in_array( $column, array('min_punch_time_stamp', 'max_punch_time_stamp') ) ) {
-						$retval[$i][$column] = ( $value / $total_hours );
+						//$retval[$i][$column] = ( $value / $total_hour_rows );
+						if ( $column == 'worked_time' ) {
+							$retval[ $i ][ $column ] = $partial_hour;
+						} else {
+							$retval[ $i ][ $column ] = ( $value / $total_hour_rows ); //Since we aggreate the user_date_total rows to min/max punch time, for anything other than worked time we can just divide it up between the min/max punch time for that row.
+						}
 					} else {
 						$retval[$i][$column] = $value;
 					}
@@ -803,9 +868,8 @@ class TimesheetDetailReport extends Report {
 		return $retval;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */

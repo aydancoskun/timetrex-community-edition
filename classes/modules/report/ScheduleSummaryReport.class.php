@@ -244,10 +244,10 @@ class ScheduleSummaryReport extends Report {
 										'-1640-schedule_status' => TTi18n::gettext('Schedule Status'),
 										'-1650-absence_policy' => TTi18n::gettext('Absence Policy'),
 										//'-1660-date_stamp' => TTi18n::gettext('Date'),
-										'-1670-start_time' => TTi18n::gettext('Start Time'),
-										'-1680-end_time' => TTi18n::gettext('End Time'),
 
 										'-5000-schedule_note' => TTi18n::gettext('Note'),
+
+										'-2000-scheduled_hour_of_day' => TTi18n::gettext('Hour Of Day'),
 								);
 
 				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -278,6 +278,11 @@ class ScheduleSummaryReport extends Report {
 				$retval = array(
 										//Dynamic - Aggregate functions can be used
 
+										'-1670-start_time' => TTi18n::gettext('Start Time'),
+										'-1680-end_time' => TTi18n::gettext('End Time'),
+
+										'-2005-scheduled_hour_of_day_total' => TTi18n::gettext('Scheduled Employees/Hour'),
+
 										//Take into account wage groups. However hourly_rates for the same hour type, so we need to figure out an average hourly rate for each column?
 										'-2010-hourly_rate' => TTi18n::gettext('Hourly Rate'),
 
@@ -292,6 +297,7 @@ class ScheduleSummaryReport extends Report {
 				break;
 			case 'columns':
 				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
+				ksort($retval);
 				break;
 			case 'column_format':
 				//Define formatting function for each column.
@@ -312,23 +318,59 @@ class ScheduleSummaryReport extends Report {
 						}
 					}
 				}
+				$retval['scheduled_hour_of_day'] = 'time';
+				$retval['scheduled_hour_of_day_total'] = 'numeric';
+
 				break;
-			case 'aggregates':
-				$retval = array();
+			case 'sub_total_by_metadata':
+			case 'grand_total_metadata':
+				$retval['aggregate'] = array();
+				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
+				if ( is_array($dynamic_columns ) ) {
+					foreach( $dynamic_columns as $column ) {
+						switch ( $column ) {
+							default:
+								if ( strpos($column, '_hourly_rate') !== FALSE OR strpos($column, 'hourly_rate') !== FALSE OR $column == 'scheduled_hour_of_day_total' ) {
+									$retval['aggregate'][$column] = 'avg';
+								} else {
+									$retval['aggregate'][$column] = 'sum';
+								}
+						}
+					}
+				}
+				break;
+			case 'group_by_metadata':
+				$retval['aggregate'] = array();
 				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
 				if ( is_array($dynamic_columns ) ) {
 					foreach( $dynamic_columns as $column ) {
 						switch ( $column ) {
 							default:
 								if ( strpos($column, '_hourly_rate') !== FALSE OR strpos($column, 'hourly_rate') !== FALSE ) {
-									$retval[$column] = 'avg';
+									$retval['aggregate'][$column] = 'avg';
 								} else {
-									$retval[$column] = 'sum';
+									$retval['aggregate'][$column] = 'sum';
 								}
 						}
 					}
 				}
 				break;
+//			case 'aggregates':
+//				$retval = array();
+//				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
+//				if ( is_array($dynamic_columns ) ) {
+//					foreach( $dynamic_columns as $column ) {
+//						switch ( $column ) {
+//							default:
+//								if ( strpos($column, '_hourly_rate') !== FALSE OR strpos($column, 'hourly_rate') !== FALSE ) {
+//									$retval[$column] = 'avg';
+//								} else {
+//									$retval[$column] = 'sum';
+//								}
+//						}
+//					}
+//				}
+//				break;
 			case 'templates':
 				$retval = array(
 										'-1010-by_employee+work+total_time' => TTi18n::gettext('Work Time by Employee'),
@@ -380,6 +422,11 @@ class ScheduleSummaryReport extends Report {
 
 
 								);
+
+				if ( is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+					$retval['-5000-by_date_by_scheduled_hour_of_day'] = TTi18n::gettext('Total Employees Scheduled By Date/Hour of Day');
+					$retval['-5010-by_date_dow_by_scheduled_hour_of_day'] = TTi18n::gettext('Total Employees Scheduled By Day of Week/Hour of Day');
+				}
 
 				break;
 			case 'template_config':
@@ -630,6 +677,32 @@ class ScheduleSummaryReport extends Report {
 											$retval['sort'][] = array('start_time' => 'asc');
 											break;
 
+										case 'by_date_by_scheduled_hour_of_day':
+											$retval['columns'][] = 'date_stamp';
+											$retval['columns'][] = 'scheduled_hour_of_day';
+											$retval['columns'][] = 'scheduled_hour_of_day_total';
+
+											$retval['group'][] = 'date_stamp';
+											$retval['group'][] = 'scheduled_hour_of_day';
+
+											$retval['sub_total'][] = 'date_stamp';
+
+											$retval['sort'][] = array('date_stamp' => 'asc');
+											$retval['sort'][] = array('scheduled_hour_of_day' => 'asc');
+											break;
+										case 'by_date_dow_by_scheduled_hour_of_day':
+											$retval['columns'][] = 'date_dow';
+											$retval['columns'][] = 'scheduled_hour_of_day';
+											$retval['columns'][] = 'scheduled_hour_of_day_total';
+
+											$retval['group'][] = 'date_dow';
+											$retval['group'][] = 'scheduled_hour_of_day';
+
+											$retval['sub_total'][] = 'date_dow';
+
+											$retval['sort'][] = array('date_dow' => 'asc');
+											$retval['sort'][] = array('scheduled_hour_of_day' => 'asc');
+											break;
 									}
 
 								}
@@ -674,9 +747,76 @@ class ScheduleSummaryReport extends Report {
 		return $retval;
 	}
 
-	//Get raw data for report
+	/**
+	 * This function takes worked time for a single day and multiplies it by each hour worked.
+	 * @param $row
+	 * @param $dynamic_columns
+	 * @return array
+	 */
+	function splitDataByHoursWorked( $row, $dynamic_columns ) {
+		$retval = array();
+		if ( isset($row['start_time']) AND isset($row['end_time']) AND $row['start_time'] > 0 AND $row['end_time'] > 0 ) {
+			$total_hour_rows = ceil( ( TTDate::roundTime( $row['end_time'], 3600, 30) - TTDate::roundTime( $row['start_time'], 3600, 10) ) / 3600 );
+			if ( $total_hour_rows == 0 ) {
+				$total_hour_rows = 1;
+			}
+
+			$start_time = TTDate::roundTime( $row['start_time'], 3600, 10 );
+			//If the employee punches out exact at 5:00PM, minus 1 second from that time so its recorded as an hour for 4:00PM and not 5:00PM.
+			$end_time = TTDate::roundTime( ($row['end_time'] - 1), 3600, 10 );
+
+			//Debug::Text('Total Hours: '. $total_hour_rows .' Start Time: '. TTDate::getDATE('DATE+TIME', $start_time ) .' End Time: '. TTDate::getDATE('DATE+TIME', $end_time ), __FILE__, __LINE__, __METHOD__, 10);
+			$x = 0;
+			for( $i = $start_time; $i <= $end_time; $i += 3600 ) {
+				//Debug::Text('Hour: '. TTDate::getDate('DATE+TIME', $i ) .'('. $i .') Total Hour Rows: '. $total_hour_rows, __FILE__, __LINE__, __METHOD__, 10);
+				$retval[$i]['scheduled_hour_of_day'] = $i;
+
+				//FIXME: Since we don't know exactly when meals and breaks are taken, its makes almost impossible to properly break down the time scheduled per hour.
+				// If we do it like below (similar to TimeSheetDetailReport), it will show more hours than they are actually scheduled.
+				// The only real hope is to somehow add up all meal/break time and take it off in the middle of the day. Or wait until we can somehow schedule actual start/end times for meals/breaks.
+//				if ( $row['start_time'] > $i AND ( $row['start_time'] - $i ) < 3600 ) {
+//					$partial_hour = 3600 - ( $row['start_time'] - $i );
+//				} elseif( $row['end_time'] > $i AND ( $row['end_time'] - $i ) < 3600 ) {
+//					$partial_hour = ( $row['end_time'] - $i );
+//				} else {
+//					$partial_hour = 3600;
+//				}
+
+				$retval[$i]['scheduled_hour_of_day_total'] = 1.00;
+
+				foreach( $row as $column => $value ) {
+					if ( isset( $dynamic_columns[$column] ) AND is_numeric($value) AND !in_array( $column, array('start_time', 'end_time') ) ) {
+						$retval[$i][$column] = ( $value / $total_hour_rows );
+
+//						if ( $column == 'total_time' ) {
+//							$retval[ $i ][ $column ] = $partial_hour;
+//						} elseif ( $column == 'total_time_wage' ) {
+//							$retval[ $i ][ $column ] = Misc::MoneyFormat( bcmul( TTDate::getHours( $partial_hour ), $row['hourly_rate'] ), FALSE );
+//						} elseif ( $column == 'total_time_wage_burden' ) {
+//							$retval[ $i ][ $column ] = Misc::MoneyFormat( bcmul( TTDate::getHours( $partial_hour ), bcmul( $row['hourly_rate'], bcdiv( $row['labor_burden_percent'], 100 ) ) ), FALSE );
+//						} elseif ( $column == 'total_time_wage_with_burden' ) {
+//							$retval[ $i ][ $column ] = Misc::MoneyFormat( bcmul( TTDate::getHours( $partial_hour ), bcmul( $row['hourly_rate'], bcadd( bcdiv( $row['labor_burden_percent'], 100 ), 1) ) ), FALSE );
+//						} else {
+//							$retval[ $i ][ $column ] = ( $value / $total_hour_rows ); //Since we aggreate the user_date_total rows to min/max punch time, for anything other than worked time we can just divide it up between the min/max punch time for that row.
+//						}
+					} else {
+						$retval[$i][$column] = $value;
+					}
+				}
+
+				$x++;
+			}
+		}
+
+		if ( !isset($retval) ) {
+			$retval[0] = $row;
+		}
+
+		return $retval;
+	}
 
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -742,9 +882,9 @@ class ScheduleSummaryReport extends Report {
 						'bad_quantity' => $s_obj->getColumn('bad_quantity'),
 
 						'total_time' => $s_obj->getColumn('total_time'),
-						'total_time_wage' => Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn('total_time') ), $hourly_rate ), FALSE ),
-						'total_time_wage_burden' => Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn('total_time') ), bcmul( $hourly_rate, bcdiv( $s_obj->getColumn('user_labor_burden_percent'), 100 ) ) ), FALSE ),
-						'total_time_wage_with_burden' => Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn('total_time') ), bcmul( $hourly_rate, bcadd( bcdiv( $s_obj->getColumn('user_labor_burden_percent'), 100 ), 1) ) ), FALSE ),
+						'total_time_wage' => Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn('total_time') ), $hourly_rate ), FALSE ), //This is also calculated in: splitDataByHoursWorked()
+						'total_time_wage_burden' => Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn('total_time') ), bcmul( $hourly_rate, bcdiv( $s_obj->getColumn('user_labor_burden_percent'), 100 ) ) ), FALSE ), //This is also calculated in: splitDataByHoursWorked()
+						'total_time_wage_with_burden' => Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn('total_time') ), bcmul( $hourly_rate, bcadd( bcdiv( $s_obj->getColumn('user_labor_burden_percent'), 100 ), 1) ) ), FALSE ), //This is also calculated in: splitDataByHoursWorked()
 
 						'other_id1' => $s_obj->getColumn('other_id1'),
 						'other_id2' => $s_obj->getColumn('other_id2'),
@@ -760,11 +900,17 @@ class ScheduleSummaryReport extends Report {
 						//'schedule_type' => Option::getByKey( $s_obj->getType(), $s_obj->getOptions('type'), NULL ), //Recurring/Scheduled?
 						'schedule_status' => Option::getByKey( $s_obj->getStatus(), $s_obj->getOptions('status'), NULL ),
 
-						'start_time' => TTDate::strtotime( $s_obj->getColumn('start_time') ),
-						'end_time' => TTDate::strtotime( $s_obj->getColumn('end_time') ),
+						//Normalize the timestamps to the same day, otherwise min/max aggregates will always use what times are on the first/last days.
+//						'start_time' => TTDate::strtotime( $s_obj->getColumn('start_time') ),
+//						'end_time' => TTDate::strtotime( $s_obj->getColumn('end_time') ),
+						'start_time' => TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn('start_time') ), 86400),
+						'end_time' => TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn('end_time') ), 86400),
+
+
 
 						'user_wage_id' => $s_obj->getColumn('user_wage_id'),
-						'hourly_rate' => Misc::MoneyFormat( $hourly_rate, FALSE ),
+						'hourly_rate' => Misc::MoneyFormat( $hourly_rate, FALSE ), //This is required in: splitDataByHoursWorked()
+						'labor_burden_percent' => $s_obj->getColumn('user_labor_burden_percent'), //This is required in: splitDataByHoursWorked()
 
 						'pay_period_start_date' => strtotime( $s_obj->getColumn('pay_period_start_date') ),
 						'pay_period_end_date' => strtotime( $s_obj->getColumn('pay_period_end_date') ),
@@ -822,24 +968,40 @@ class ScheduleSummaryReport extends Report {
 	/**
 	 * @return bool
 	 */
-	function _preProcess() {
+	function _preProcess( $format = NULL ) {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['schedule']), NULL, TTi18n::getText('Pre-Processing Data...') );
+
+		$columns = $this->getColumnDataConfig();
+		$dynamic_columns = Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
+
+		$split_data_by_hours_worked = FALSE;
+		if ( strpos($format, 'pdf_') === FALSE AND isset($columns['scheduled_hour_of_day']) ) {
+			$split_data_by_hours_worked = TRUE;
+		}
+		unset($columns);
 
 		//Merge time data with user data
 		//$key = 0;
 		if ( isset($this->tmp_data['schedule']) ) {
 			foreach( $this->tmp_data['schedule'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
-					foreach( $level_1 as $key => $row ) {
-						$date_columns = TTDate::getReportDates( NULL, $row['date_stamp'], FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-						$processed_data	 = array(
-												//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
-												);
+					foreach( $level_1 as $key => $level_2 ) {
+						if ( $split_data_by_hours_worked == TRUE ) {
+							$level_3 = $this->splitDataByHoursWorked( $level_2, $dynamic_columns );
+						} else {
+							$level_3[0] = $level_2;
+						}
 
-						$this->data[] = array_merge( $row, $this->tmp_data['user'][$user_id], $date_columns, $processed_data );
+						foreach( $level_3 as $row ) {
+							$date_columns = TTDate::getReportDates( NULL, $row['date_stamp'], FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
+							$processed_data = array(//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
+							);
 
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-						//$key++;
+							$this->data[] = array_merge( $row, $this->tmp_data['user'][ $user_id ], $date_columns, $processed_data );
+
+							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+							//$key++;
+						}
 					}
 				}
 			}

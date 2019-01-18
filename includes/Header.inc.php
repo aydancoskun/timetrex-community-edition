@@ -4,10 +4,9 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title><?php echo APPLICATION_NAME .' - '. TTi18n::getText('Down For Maintenance');?></title>
+	<title><?php echo ( ( isset($META_TITLE) AND $META_TITLE != '' ) ? $META_TITLE . ' | ' : '' ) . APPLICATION_NAME?></title>
     <base href="<?php echo $BASE_URL; ?>">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-	<meta name="Keywords" content="workforce management, time and attendance, payroll software, online timesheet software, open source payroll, online employee scheduling software, employee time clock software, online job costing software, workforce management, flexible scheduling solutions, easy scheduling solutions, track employee attendance, monitor employee attendance, employee time clock, employee scheduling, true real-time time sheets, accruals and time banks, payroll system, time management system"/>
 	<meta name="Description" content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily."/>
 
 	<script async src="./framework/stacktrace.js"></script>

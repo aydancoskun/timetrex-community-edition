@@ -40,6 +40,7 @@
  */
 class FactoryListIterator implements Iterator {
 	private $template_obj;
+	private $template_validator_obj;
 	private $obj;
 	private $rs;
 	private $class_name;
@@ -53,7 +54,8 @@ class FactoryListIterator implements Iterator {
 
 		//Save a cleanly instantiated object in memory so we can simply clone it rather than instantiate a new one every loop iteration in current()
 		//  It appears this doesn't work for the sub-objects like Validator. If one iteration in a loop has a validation error, all the rest will too.
-		//$this->template_obj = new $this->class_name();
+		$this->template_obj = new $this->class_name();
+		$this->template_validator_obj = new Validator();
 
 		if ( isset($obj->rs) ) {
 			$this->rs = $obj->rs;
@@ -100,8 +102,13 @@ class FactoryListIterator implements Iterator {
 			//Without this, data can persist and cause undesirable results.
 
 			//  It appears this doesn't work for the sub-objects like Validator. If one iteration in a loop has a validation error, all the rest will too.
-			//$this->obj = clone $this->template_obj; //Copy the template object to avoid having to instantiate it each loop iteration. This is about 30% faster.
-			$this->obj = new $this->class_name();
+			//  Tested in: FactoryTest.php->testFactoryListIteratorA()
+			$this->obj = clone $this->template_obj; //Copy the template object to avoid having to instantiate it each loop iteration. This is about 30% faster.
+			$this->obj->tmp_data = array();
+			$this->obj->Validator = clone $this->template_validator_obj; //Clone sub-objects here, rather than in the __clone function, as it seems to be about 10% faster here.
+			$this->obj->is_valid = FALSE;
+//			$this->obj = new $this->class_name();
+
 			$this->obj->rs = $this->rs;
 
 			//Set old_data at the same time as data, so we can check to see what fields have changed by using getDataDifferences() in any other function (ie: Validate,preSave,postSave)

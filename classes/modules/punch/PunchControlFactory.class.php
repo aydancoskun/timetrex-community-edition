@@ -42,7 +42,6 @@ class PunchControlFactory extends Factory {
 	protected $table = 'punch_control';
 	protected $pk_sequence_name = 'punch_control_id_seq'; //PK Sequence name
 
-	protected $tmp_data = NULL;
 	public $old_date_stamps = array();
 	protected $shift_data = NULL;
 

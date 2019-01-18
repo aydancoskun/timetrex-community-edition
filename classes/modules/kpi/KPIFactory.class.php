@@ -38,11 +38,9 @@
 /**
  * @package Modules\KPI
  */
-class KPIFactory extends Factory
-{
+class KPIFactory extends Factory {
 	protected $table = 'kpi';
 	protected $pk_sequence_name = 'kpi_id_seq'; //PK Sequence name
-	protected $tmp_data = NULL;
 	protected $company_obj = NULL;
 
 	/**

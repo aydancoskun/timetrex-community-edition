@@ -39,8 +39,6 @@
  * @package Modules\PayStub
  */
 class PayStub extends PayStubFactory {
-	protected $tmp_data = NULL;
-
 	/**
 	 * @return bool
 	 */

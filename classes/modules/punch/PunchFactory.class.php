@@ -45,7 +45,6 @@ class PunchFactory extends Factory {
 	var $punch_control_obj = NULL;
 	var $previous_punch_obj = NULL;
 	protected $schedule_obj = NULL;
-	var $tmp_data = NULL;
 
 	/**
 	 * @param $name

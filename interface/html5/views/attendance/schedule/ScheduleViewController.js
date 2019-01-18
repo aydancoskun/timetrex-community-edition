@@ -665,42 +665,71 @@ ScheduleViewController = BaseViewController.extend( {
 	onDeleteClick: function() {
 		var $this = this;
 		LocalCacheData.current_doing_context_action = 'delete';
-		TAlertManager.showConfirmAlert( $.i18n._( 'You are about to delete data, once data is deleted it can not be recovered ' +
-		'Are you sure you wish to continue?' ), null, function( result ) {
 
-			var remove_ids = [];
-			//#2571 - $this.current_edit_record is null
-			if ( $this.edit_view && $this.current_edit_record ) {
-				remove_ids.push( $this.current_edit_record.id );
-			} else {
-				remove_ids = $this.getGridSelectIdArray();
-			}
+		TAlertManager.showConfirmAlert($.i18n._('You are about to delete data, once data is deleted it can not be recovered ' +
+			'Are you sure you wish to continue?'), null, function (result) {
 
-			if ( result ) {
+			if (result) {
+				var remove_ids = [];
+				//#2571 - $this.current_edit_record is null
+				if ( $this.edit_view && $this.current_edit_record ) {
+					remove_ids.push( $this.current_edit_record.id );
+				} else {
+					remove_ids = $this.getGridSelectIdArray();
+				}
 				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, {
-					onResult: function( result ) {
+				if ( remove_ids.length > 0 ) {
+					$this.api['delete' + $this.api.key_name](remove_ids, {
+						onResult: function (result) {
 
-						ProgressBar.closeOverlay();
+							ProgressBar.closeOverlay();
+							doNext(result);
+							if (result.isValid()) {
+								$this.onDeleteDone(result);
+								if ($this.edit_view) {
+									$this.removeEditView();
+								}
 
-						if ( result.isValid() ) {
-							$this.search();
-							$this.onDeleteDone( result );
-							if ( $this.edit_view ) {
-								$this.removeEditView();
+							} else {
+								TAlertManager.showErrorAlert(result);
 							}
 
-						} else {
-							TAlertManager.showErrorAlert( result );
 						}
-
-					}
-				} );
+					});
+				} else {
+					doNext({
+						isValid: function(){
+							return false;
+						}
+					});
+				}
 
 			} else {
 				ProgressBar.closeOverlay();
 			}
-		} );
+		});
+
+		function doNext( result ) {
+			var recurring_delete_shifts_array = [];
+			for ( var i = 0; i < $this.select_cells_Array.length; i++ ) {
+				if ( $this.select_cells_Array[i].shift ) {
+					$this.select_cells_Array[i].shift.status_id = '20';
+					recurring_delete_shifts_array.push($this.select_cells_Array[i].shift);
+				}
+			}
+
+			if ( recurring_delete_shifts_array.length > 0 ) {
+				$this.api.setSchedule( recurring_delete_shifts_array, {
+					onResult: function() {
+						$this.search();
+					}
+				} );
+			} else {
+				if ( result.isValid() ) {
+					$this.search();
+				}
+			}
+		}
 
 	},
 
@@ -1658,10 +1687,11 @@ ScheduleViewController = BaseViewController.extend( {
 					new_shift.date_stamp = target_data.date_stamp;
 					new_shift.start_date_stamp = target_data.start_date_stamp;
 					new_shift.user_id = target_data.user_id;
-					new_shift.branch_id = target_data.branch ? target_data.branch_id : '';
-					new_shift.department_id = target_data.department ? target_data.department_id : '';
-					new_shift.job_id = target_data.job_id ? target_data.job_id : '';
-					new_shift.job_item_id = target_data.job_item_id ? target_data.job_item_id : '';
+					// When dragging an open shift to an empty cell in a user row with no branch column visible, the branch id value now defaults to user default branch id
+					new_shift.branch_id = target_data.branch ? target_data.branch_id : TTUUID.not_exist_id;
+					new_shift.department_id = target_data.department ? target_data.department_id : TTUUID.not_exist_id;
+					new_shift.job_id = target_data.job_id ? target_data.job_id : TTUUID.not_exist_id;
+					new_shift.job_item_id = target_data.job_item_id ? target_data.job_item_id : TTUUID.not_exist_id;
 
 					if ( $this.is_override ) {
 						new_shift.overwrite = true;
@@ -1707,10 +1737,11 @@ ScheduleViewController = BaseViewController.extend( {
 						}
 					}
 
-					target_data.branch_id = target_data.branch ? target_data.branch_id : '';
-					target_data.department_id = target_data.department ? target_data.department_id : '';
-					target_data.job_id = target_data.job_id ? target_data.job_id : '';
-					target_data.job_item_id = target_data.job_item_id ? target_data.job_item_id : '';
+					// When dragging an open shift to an empty cell in a user row with no branch column visible, the branch id value now defaults to user default branch id
+					target_data.branch_id = target_data.branch ? target_data.branch_id : TTUUID.not_exist_id;
+					target_data.department_id = target_data.department ? target_data.department_id : TTUUID.not_exist_id;
+					target_data.job_id = target_data.job_id ? target_data.job_id : TTUUID.not_exist_id;
+					target_data.job_item_id = target_data.job_item_id ? target_data.job_item_id : TTUUID.not_exist_id;
 
 					new_shifts_array.push( target_data );
 					new_shifts_array.push( new_shift );

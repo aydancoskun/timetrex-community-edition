@@ -43,7 +43,6 @@ class QualificationFactory extends Factory {
 	protected $pk_sequence_name = 'qualification_id_seq'; //PK Sequence name
 
 	protected $company_obj = NULL;
-	protected $tmp_data = NULL;
 
 	/**
 	 * @param $name

@@ -43,7 +43,6 @@ class UserContactFactory extends Factory {
 	protected $table = 'user_contact';
 	protected $pk_sequence_name = 'user_contact_id_seq'; //PK Sequence name
 
-	protected $tmp_data = NULL;
 	protected $user_obj = NULL;
 	protected $name_validator_regex = '/^[a-zA-Z- \.\'|\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $address_validator_regex = '/^[a-zA-Z0-9-,_\/\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';

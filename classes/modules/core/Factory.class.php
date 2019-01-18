@@ -39,18 +39,20 @@
  * @package Core
  */
 abstract class Factory {
+	//**IMPORTANT** These must all be reset in FactoryListIterator->__construct()
 	public $data = array();
 	public $old_data = array(); //Used for detailed audit log.
+	public $tmp_data = array();
 
 	protected $enable_system_log_detail = TRUE;
 
-	protected $next_insert_id = NULL;
 	protected $progress_bar_obj = NULL;
 	protected $AMF_message_id = NULL;
 
-	protected $is_valid = FALSE; //Flag that determines if the data is valid since it was last changed or not.
-
+	public $Validator = NULL;
 	public $validate_only = FALSE; //Used by the API to ignore certain validation checks if we are doing validation only.
+	private $is_valid = FALSE; //Flag that determines if the data is valid since it was last changed or not.
+	//**IMPORTANT** These must all be reset in FactoryListIterator->__construct()
 
 	/**
 	 * Factory constructor.
@@ -70,10 +72,8 @@ abstract class Factory {
 		return TRUE;
 	}
 
-	/*
-	 * Used for updating progress bar for API calls.
-	 */
 	/**
+	 * Used for updating progress bar for API calls.
 	 * @return bool|null
 	 */
 	function getAMFMessageID() {
@@ -2812,7 +2812,6 @@ abstract class Factory {
 	 */
 	function clearData() {
 		$this->data = $this->tmp_data = array();
-		$this->next_insert_id = NULL;
 
 		$this->clearOldData();
 

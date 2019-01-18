@@ -275,6 +275,7 @@ class TimesheetSummaryReport extends Report {
 				break;
 			case 'columns':
 				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
+				ksort($retval);
 				break;
 			case 'column_format':
 				//Define formatting function for each column.

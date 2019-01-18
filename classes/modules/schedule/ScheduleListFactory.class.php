@@ -1015,7 +1015,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		if ( $order == NULL ) {
 			//$order = array( 'udf.pay_period_id' => 'asc', 'udf.user_id' => 'asc', 'a.start_time' => 'asc' );
 			//Sort by start_time first, then user, so when only showing 1st page, it has all employees working on the first day, not just some of the employees for multiple days.
-			$order = array( 'a.user_id' => '= \''. TTUUID::getZeroID() .'\' desc', 'a.start_time' => 'asc', 'uf.last_name' => 'asc' );
+			$order = array( 'a.user_id' => '= \''. TTUUID::getZeroID() .'\' desc', 'a.start_time' => 'asc', 'uf.last_name' => 'asc', 'a.recurring_schedule_id' => 'asc', 'a.id' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
