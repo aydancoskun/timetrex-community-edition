@@ -79,13 +79,11 @@ UserContactViewController = BaseViewController.extend( {
 	},
 
 	setSelectLayout: function() {
-
 		if ( this.sub_view_mode ) {
-			this._super( 'setSelectLayout', 6 );
+			this._super( 'setSelectLayout', [ 'employee_first_name', 'employee_last_name', 'title', 'user_group', 'default_branch', 'default_department' ] );
 		} else {
 			this._super( 'setSelectLayout' );
 		}
-
 	},
 
 	buildEditViewUI: function() {

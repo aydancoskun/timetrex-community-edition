@@ -216,21 +216,29 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			return FALSE;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$cache_id = md5( 'pay_stub_entry_account-getByCompanyIdAndStatusId'. serialize( $status_id ) );
+		$group_id = $this->getTable( TRUE ) . $company_id;
 
-		$query = '
+		$this->rs = $this->getCache( $cache_id, $group_id );
+		if ( $this->rs === FALSE ) {
+			$ph = array(
+					'company_id' => TTUUID::castUUID( $company_id ),
+			);
+
+			$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	company_id = ?
-						AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
+						AND status_id in (' . $this->getListSQL( $status_id, $ph, 'int' ) . ')
 						AND deleted = 0
 					ORDER BY ps_order ASC';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+			$query .= $this->getWhereSQL( $where );
+			$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+			$this->ExecuteSQL( $query, $ph );
+
+			$this->saveCache($this->rs, $cache_id, $group_id);
+		}
 
 		return $this;
 	}
@@ -404,22 +412,30 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			return FALSE;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$cache_id = md5( 'pay_stub_entry_account-getByCompanyIdAndStatusIdAndTypeId' . serialize( $status_id ) . serialize($type_id) );
+		$group_id = $this->getTable( TRUE ) . $company_id;
 
-		$query = '
+		$this->rs = $this->getCache( $cache_id, $group_id );
+		if ( $this->rs === FALSE ) {
+			$ph = array(
+					'company_id' => TTUUID::castUUID( $company_id ),
+			);
+
+			$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	company_id = ?
-						AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
-						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
+						AND status_id in (' . $this->getListSQL( $status_id, $ph, 'int' ) . ')
+						AND type_id in (' . $this->getListSQL( $type_id, $ph, 'int' ) . ')
 						AND deleted = 0
 					ORDER BY ps_order ASC';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+			$query .= $this->getWhereSQL( $where );
+			$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+			$this->ExecuteSQL( $query, $ph );
+
+			$this->saveCache($this->rs, $cache_id, $group_id);
+		}
 
 		return $this;
 	}

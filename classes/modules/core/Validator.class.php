@@ -785,7 +785,7 @@ class Validator {
 	 */
 	function isDate( $label, $value, $msg = NULL) {
 		//Because most epochs are stored as 4-byte integers, make sure we are within range.
-		if ( $value !== FALSE AND $value != '' AND is_numeric($value) AND $value >= -2147483648 AND $value <= 2147483647) {
+		if ( TTDate::isValidDate( $value ) ) {
 			$date = gmdate('U', $value);
 			//Debug::text('Raw Date: '. $value .' Converted Value: '. $date, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 

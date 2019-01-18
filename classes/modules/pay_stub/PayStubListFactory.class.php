@@ -688,6 +688,53 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	}
 
 	/**
+	 * @param string $company_id UUID
+	 * @param string $legal_entity_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayStubListFactory
+	 */
+	function getByCompanyIdAndLegalEntityId( $company_id, $legal_entity_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $legal_entity_id == '' ) {
+			return FALSE;
+		}
+
+		$strict_order = TRUE;
+		if ( $order == NULL ) {
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' );
+			$strict_order = FALSE;
+		}
+
+		$ulf = new UserListFactory();
+
+		$ph = array(
+				'company_id' => TTUUID::castUUID($company_id)
+		);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a,
+							'. $ulf->getTable() .' as b
+					where	a.user_id = b.id
+						AND b.company_id = ?
+						AND b.legal_entity_id in ('. $this->getListSQL( $legal_entity_id, $ph, 'uuid' ) .')
+						AND a.deleted = 0
+						';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict_order );
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
+	}
+
+	/**
 	 * @param string $user_id UUID
 	 * @param string $id UUID
 	 * @param int $limit Limit the number of records returned

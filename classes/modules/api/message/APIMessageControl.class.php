@@ -585,7 +585,7 @@ class APIMessageControl extends APIFactory {
 		//Make sure the columns being asked for are available.
 		$data['filter_columns'] = Misc::arrayIntersectByKey( array_merge( array('id'), array_keys( Misc::trimSortPrefix( $this->getOptions('user_columns') ) ) ), $data['filter_columns'] );
 
-		if ( count($data['filter_columns']) == 0 ) { //Make sure we always default to some columns.
+		if ( !is_array($data['filter_columns']) OR count($data['filter_columns']) == 0 ) { //Make sure we always default to some columns.
 			Debug::Text('Overriding Filter Columns...', __FILE__, __LINE__, __METHOD__, 10);
 			$data['filter_columns'] = array( 'id' => TRUE, 'first_name' => TRUE, 'last_name' => TRUE );
 		}

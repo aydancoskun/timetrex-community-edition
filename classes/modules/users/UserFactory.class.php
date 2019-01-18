@@ -1592,7 +1592,7 @@ class UserFactory extends Factory {
 	 */
 	function setLongitude( $value ) {
 		if ( is_numeric($value) ) {
-			$value = number_format( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+			$value = Misc::removeTrailingZeros( round( (float)TTi18n::parseFloat( $value ), 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
@@ -1613,7 +1613,7 @@ class UserFactory extends Factory {
 	 */
 	function setLatitude( $value ) {
 		if ( is_numeric($value) ) {
-			$value = number_format( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+			$value = Misc::removeTrailingZeros( round( (float)TTi18n::parseFloat( $value ), 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
@@ -1935,7 +1935,7 @@ class UserFactory extends Factory {
 			if ( $raw === TRUE ) {
 				return $value;
 			} else {
-				return TTDate::strtotime( $value );
+				return TTDate::getBeginDayEpoch( TTDate::strtotime( $value ) );
 			}
 		}
 
@@ -1962,7 +1962,7 @@ class UserFactory extends Factory {
 			if ( $raw === TRUE ) {
 				return $value;
 			} else {
-				return TTDate::strtotime( $value );
+				return TTDate::getEndDayEpoch( TTDate::strtotime( $value ) );
 			}
 		}
 
@@ -2597,6 +2597,7 @@ class UserFactory extends Factory {
 															TTi18n::gettext('Group is invalid')
 														);
 		}
+
 		// Permission Group
 		//Don't allow permissions to be modified if the currently logged in user has a lower permission level.
 		//As such if someone with a lower level is able to edit the user of higher level, they must not call this function at all, or use a blank value.
@@ -2609,21 +2610,17 @@ class UserFactory extends Factory {
 			if ( $current_user_permission_level >= $this->getPermissionLevel() ) {
 				$modify_permissions = TRUE;
 			}
+			if ( $this->Validator->isError('permission_control_id') == FALSE ) {
+				$this->Validator->isTrue(		'permission_control_id',
+												 $modify_permissions,
+												 TTi18n::gettext('Insufficient access to modify permissions for this employee')
+				);
+			}
 
 			if ( is_object($current_user) AND $current_user->getID() == $this->getID() AND $this->getPermissionControl() != $this->getPermissionControl( TRUE ) ) { //Acting on currently logged in user.
 				$logged_in_modify_permissions = FALSE; //Must be false for validation to fail.
 			} else {
 				$logged_in_modify_permissions = TRUE;
-			}
-			$this->Validator->isResultSetWithRows(		'permission_control_id',
-																$pclf->getByIDAndLevel($this->getPermissionControl(), $current_user_permission_level),
-																TTi18n::gettext('Permission Group is invalid')
-															);
-			if ( $this->Validator->isError('permission_control_id') == FALSE ) {
-				$this->Validator->isTrue(		'permission_control_id',
-														$modify_permissions,
-														TTi18n::gettext('Insufficient access to modify permissions for this employee')
-													);
 			}
 			if ( $this->Validator->isError('permission_control_id') == FALSE  ) {
 				$this->Validator->isTrue(		'permission_control_id',
@@ -2631,7 +2628,15 @@ class UserFactory extends Factory {
 														TTi18n::gettext('Unable to change permissions of your own record')
 													);
 			}
+
+			if ( $this->Validator->isError('permission_control_id') == FALSE ) { //Put this last, because if the user doesn't have access to modify permissions, they see the more specific error above.
+				$this->Validator->isResultSetWithRows(		'permission_control_id',
+															  $pclf->getByIDAndLevel($this->getPermissionControl(), $current_user_permission_level),
+															  TTi18n::gettext('Permission Group is invalid')
+				);
+			}
 		}
+
 		// Pay Period schedule
 		if ( $this->getPayPeriodSchedule() !== FALSE AND $this->getPayPeriodSchedule() != TTUUID::getZeroID() ) {
 			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
@@ -3037,7 +3042,7 @@ class UserFactory extends Factory {
 			}
 			$this->Validator->isEmailAdvanced(	'home_email',
 														$this->getHomeEmail(),
-														( ( DEPLOYMENT_ON_DEMAND == TRUE ) ? TTi18n::gettext('Home Email address is invalid') : array( 0 => TTi18n::gettext('Home Email address is invalid'), 5 => TTi18n::gettext('Home Email address does not have a valid DNS MX record'), 6 => TTi18n::gettext('Home Email address does not have a valid DNS record') ) ),
+														( ( DEPLOYMENT_ON_DEMAND == TRUE ) ? TTi18n::gettext('Home email address is invalid') : array( 0 => TTi18n::gettext('Home email address is invalid'), 5 => TTi18n::gettext('Home email address does not have a valid DNS MX record'), 6 => TTi18n::gettext('Home email address does not have a valid DNS record') ) ),
 														$error_threshold
 													);
 			if ( $this->Validator->isError('home_email') == FALSE ) {
@@ -3078,7 +3083,7 @@ class UserFactory extends Factory {
 
 			$this->Validator->isEmailAdvanced(	'work_email',
 														$this->getWorkEmail(),
-														( ( DEPLOYMENT_ON_DEMAND == TRUE ) ? TTi18n::gettext('Home Email address is invalid') : array( 0 => TTi18n::gettext('Home Email address is invalid'), 5 => TTi18n::gettext('Home Email address does not have a valid DNS MX record'), 6 => TTi18n::gettext('Home Email address does not have a valid DNS record') ) ),
+														( ( DEPLOYMENT_ON_DEMAND == TRUE ) ? TTi18n::gettext('Work email address is invalid') : array( 0 => TTi18n::gettext('Work email address is invalid'), 5 => TTi18n::gettext('Work email address does not have a valid DNS MX record'), 6 => TTi18n::gettext('Work email address does not have a valid DNS record') ) ),
 														$error_threshold
 													);
 			if ( $this->Validator->isError('work_email') == FALSE ) {
@@ -3115,7 +3120,15 @@ class UserFactory extends Factory {
 											TTi18n::gettext('Birth date can not be in the future')
 										);
 			}
+
+			if ( $this->Validator->isError('birth_date') == FALSE ) {
+				$this->Validator->isTRUE(	'birth_date',
+											 ( TTDate::getMiddleDayEpoch( $this->getBirthDate() ) < TTDate::getMiddleDayEpoch( $this->getHireDate() ) ) ? TRUE : FALSE,
+											 TTi18n::gettext('Birth date can not be after hire date')
+				);
+			}
 		}
+
 		// Hire date
 		if ( $this->getHireDate() != '' ) {
 			$this->Validator->isDate(		'hire_date',
@@ -3293,7 +3306,6 @@ class UserFactory extends Factory {
 		}
 
 		if ( $ignore_warning == FALSE ) {
-
 			if ( $this->isNew( TRUE ) == FALSE AND $this->getLegalEntity() != $this->getGenericOldDataValue('legal_entity_id') ) {
 				$pslf = TTnew( 'PayStubListFactory');
 				$pslf->getByUserId( $this->getId(), 1 ); //limit 1
@@ -3303,6 +3315,16 @@ class UserFactory extends Factory {
 					$this->Validator->Warning( 'legal_entity_id', TTi18n::gettext('Changing the legal entity will unassign this employee from all Tax/Deductions') );
 				}
 				unset($pslf);
+			}
+
+			//Check if birth date is not specified and payroll is being processed (some pay stubs do exist for this legal entity) to remind the user to specify a birth date.
+			//  This is critical especially in Canada for CPP eligibility.
+			if ( $this->getBirthDate() == ''  ) {
+				$pslf = TTnew( 'PayStubListFactory');
+				$pslf->getByCompanyIdAndLegalEntityId( $this->getCompany(), $this->getLegalEntity(), 1 ); //limit 1
+				if ( $pslf->getRecordCount() > 0 ) {
+					$this->Validator->Warning( 'birth_date', TTi18n::gettext( 'Birth Date is not specified, this may prevent some Tax/Deduction calculations from being performed accurately' ) );
+				}
 			}
 
 			if ( $this->getStatus() == 10 AND $this->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getTerminationDate() ) < TTDate::getMiddleDayEpoch( time() ) ) {
@@ -3621,7 +3643,11 @@ class UserFactory extends Factory {
 
 			$this->clearGeoCode( $data_diff ); //Clear Lon/Lat coordinates when address has changed.
 
-			if ( is_array($data_diff) AND ( isset($data_diff['hire_date']) OR isset($data_diff['termination_date']) ) ) {
+
+
+			//Because old_data hire_date is a date string from the DB and not actually parsed to a epoch yet, we need to parse it here to ensure it has actually changed.
+			if ( is_array($data_diff)
+					AND ( $this->isDataDifferent( 'hire_date', $data_diff, 'date' ) OR $this->isDataDifferent( 'termination_date', $data_diff, 'date' ) ) ) {
 				Debug::text('Hire Date or Termination date have changed!', __FILE__, __LINE__, __METHOD__, 10);
 				$rsf = TTnew('RecurringScheduleFactory');
 				$rsf->recalculateRecurringSchedules( $this->getID(), ( time() - ( 86400 * 28 ) ), ( time() + ( 86400 * 28 ) ) );
@@ -3828,7 +3854,7 @@ class UserFactory extends Factory {
 		}
 
 		//Legal entity has changed. Migrate UserDeduction/RemittanceDestinationAccount's to the new legal entity whenever possible.
-		if ( is_array($data_diff) AND isset($data_diff['legal_entity_id']) ) {
+		if ( is_array($data_diff) AND $this->isDataDifferent( 'legal_entity_id', $data_diff ) ) {
 			Debug::Text('Legal entity changed from: '. $data_diff['legal_entity_id'] .' to: '. $this->getLegalEntity() .'...', __FILE__, __LINE__, __METHOD__, 10);
 
 			UserDeductionFactory::MigrateLegalEntity( $this, $data_diff );

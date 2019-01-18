@@ -733,6 +733,19 @@ class TTDate {
 	}
 
 	/**
+	 * Check to ensure that the date is within a validate integer range.
+	 * @param $value
+	 * @return bool|false|int|null
+	 */
+	public static function isValidDate( $value ) {
+		if ( $value !== FALSE AND $value != '' AND is_numeric($value) AND $value >= -2147483648 AND $value <= 2147483647 ) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
 	 * @param $str
 	 * @return bool|false|int|null
 	 */

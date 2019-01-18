@@ -108,7 +108,7 @@ AuthorizationHistory = {
 		}
 		history_height_unit = this.authorization_history_grid.getData().length;
 		history_height_unit > 5 && (history_height_unit = 5);
-		this.authorization_history_grid.grid.setGridWidth( $( this.host_view_controller.edit_view.find( '#authorization_history' ) ).width() + 15 );
+		this.authorization_history_grid.grid.setGridWidth( $( this.host_view_controller.edit_view.find( '#authorization_history' ) ).width() );
 		this.authorization_history_grid.grid.setGridHeight( history_height_unit * 25 );
 	},
 

@@ -3,8 +3,10 @@ PunchesViewController = BaseViewController.extend( {
 
 	_required_files: {
 		10: ['APIPunch', 'APIUser', 'APIUserGroup', 'APIStation', 'APIBranch', 'APIDepartment', 'APIPayPeriod', 'APIUserTitle'],
+		15: ['leaflet-timetrex'],
 		20: ['APIJob', 'APIJobItem']
 	},
+	// TODO: breakdown leaflet-timetrex so only the convert functions are needed in ViewControllers.
 
 	user_api: null,
 	user_group_api: null,
@@ -334,10 +336,17 @@ PunchesViewController = BaseViewController.extend( {
 		var label = $( '<span class=\'widget-right-label\'>' + $.i18n._( 'Disable Rounding' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		widgetContainer.append( check_box );
 
-		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), [form_item_input, check_box], tab_punch_column1, '', widgetContainer, true );
+		// Check if view only mode. To prevent option appearing but disabled, as disabled checkboxes are not very clear - same in TimeSheetViewController
+		if( this.is_viewing ) {
+			// dev-note: not sure if we need to pass widgetContainer here, or if we can omit if its only one element now (due to the if is_viewing).
+			// to be safe, will continue to use widgetContainer for this case. We only want to affect viewing mode (hide rounding checkbox), less risk of regression to keep widget container in.
+			this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), form_item_input, tab_punch_column1, '', widgetContainer, true );
+		} else {
+			widgetContainer.append( label );
+			widgetContainer.append( check_box );
+			this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), [form_item_input, check_box], tab_punch_column1, '', widgetContainer, true );
+		}
 
 		// In/Out
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -803,8 +812,13 @@ PunchesViewController = BaseViewController.extend( {
 		this.isEditChange();
 
 	},
-	setLocationValue: function () {
+	setLocationValue: function ( location_data ) {
 		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			if( location_data ) {
+				this.current_edit_record.latitude = location_data.latitude;
+				this.current_edit_record.longitude = location_data.longitude;
+				this.current_edit_record.position_accuracy = location_data.position_accuracy; //If position is manually modified, it should always be set to 0m.
+			}
 			this.edit_view_ui_dic['latitude'].setValue( this.current_edit_record.latitude );
 			this.edit_view_ui_dic['longitude'].setValue( this.current_edit_record.longitude );
 			this.edit_view_ui_dic['position_accuracy'].setValue( this.current_edit_record.position_accuracy ? this.current_edit_record.position_accuracy : 0 );
@@ -1371,71 +1385,73 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onAddClick: function () {
-		var $this = this;
-		this.is_viewing = false;
-		this.is_edit = false;
-		LocalCacheData.current_doing_context_action = 'new';
-		$this.openEditView();
-
-		$this.api['get' + $this.api.key_name + 'DefaultData']( {
-			onResult: function ( result ) {
-				$this.onAddResult( result );
-
-			}
-		} );
-
-	},
-
 	onMapClick: function () {
-		ProgressBar.showProgressBar();
+		// only trigger map load in specific product editions.
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+			ProgressBar.showProgressBar();
 
-		var data = {
-			filter_columns: {
-				id: true,
-				latitude: true,
-				longitude: true,
-				punch_date: true,
-				punch_time: true,
-				position_accuracy: true,
-				user_id: true
-			}
-		};
-
-		var ids = [];
-		var cells = {};
-		var tmp_cells = {};
-		if ( this.is_edit ) {
-			//when editing, if the user reloads, the grid's selected id array become the whole grid.
-			//to avoid mapping every punch in that scenario we need to grab the current_edit_record.
-			//check for mass edit as well.
-
-			tmp_cells[this.current_edit_record.punch_date] = [];
-			tmp_cells[this.current_edit_record.punch_date].push( this.current_edit_record );
-			cells = tmp_cells;
-
-		} else {
-			ids = this.getGridSelectIdArray();
-			data.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
-			if ( ids.length > 0 ) {
-				data.filter_data.id = ids;
-			}
-			data.filter_columns = this.getFilterColumnsFromDisplayColumns();
-			data.filter_columns.user_id = true;
-			data.filter_columns.punch_date = true;
-			data.filter_columns.punch_time = true;
-			cells = this.api.getPunch( data, { async: false } ).getResult();
-			for ( var u in cells ) {
-				if ( tmp_cells[cells[u].punch_date + '-' + cells[u].user_id] == undefined ) {
-					tmp_cells[cells[u].punch_date + '-' + cells[u].user_id] = [];
+			// TODO: this is repeated below, perhaps in future now that getFilterColumnsFromDisplayColumns() is commented out, this can be consolidated?
+			var data = {
+				filter_columns: {
+					id: true,
+					latitude: true,
+					longitude: true,
+					punch_date: true,
+					punch_time: true,
+					position_accuracy: true,
+					user_id: true
 				}
-				tmp_cells[cells[u].punch_date + '-' + cells[u].user_id].push( cells[u] );
-			}
-			cells = tmp_cells;
-		}
+			};
 
-		if ( !this.is_mass_editing ) {
-			IndexViewController.openEditView( this, 'Map', cells );
+			var punches = [];
+			var map_options = {};
+
+			if ( this.is_edit ) {
+				//when editing, if the user reloads, the grid's selected id array become the whole grid.
+				//to avoid mapping every punch in that scenario we need to grab the current_edit_record, rather than pull data from getGridSelectIdArray()
+				//check for mass edit as well. <-- not sure what this refers to, assuming the same happens in mass edit, but maps are disabled on mass edit atm.
+				punches.push( this.current_edit_record );
+				// from the edit view we want to allow single markers to be draggable.
+				if( !this.is_viewing ) {
+					// make sure that when view only (so no save) marker is not draggable, and thus no new marker can be added either.
+					map_options.single_marker_draggable = true;
+				}
+			} else {
+				var ids = this.getGridSelectIdArray();
+				// from the map icon on the ribbon bar we want to PREVENT single markers being draggable. As this is intended as a read only view.
+				map_options.single_marker_draggable = false;
+
+				data.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
+				if ( ids.length > 0 ) {
+					data.filter_data.id = ids;
+				}
+				// data.filter_columns = this.getFilterColumnsFromDisplayColumns()
+				data.filter_columns.first_name = true;
+				data.filter_columns.last_name = true;
+				data.filter_columns.user_id = true;
+				data.filter_columns.punch_date = true;
+				data.filter_columns.punch_time = true;
+				data.filter_columns.time_stamp = true;
+				data.filter_columns.status = true;
+				data.filter_columns.punch_control_id = true;
+				data.filter_columns.branch = true;
+				data.filter_columns.department = true;
+				data.filter_columns.job_manual_id = true;
+				data.filter_columns.job = true;
+				data.filter_columns.job_item_manual_id = true;
+				data.filter_columns.job_item = true; // also known as Task
+				data.filter_columns.total_time = true;
+				data.filter_columns.latitude = true;
+				data.filter_columns.longitude = true;
+				data.filter_columns.position_accuracy = true;
+
+				punches = this.api.getPunch( data, { async: false } ).getResult();
+			}
+
+			if ( !this.is_mass_editing ) {
+				var processed_punches_for_map = TTMapLib.TTConvertMapData.processPunchesFromViewController( punches, map_options );
+				IndexViewController.openEditView( this, 'Map', processed_punches_for_map );
+			}
 		}
 	},
 
@@ -1621,6 +1637,9 @@ PunchesViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.edit_employee:
 					this.setEditMenuNavEditIcon( context_btn, 'user' );
+					break;
+				case ContextMenuIconName.map:
+					this.setDefaultMenuMapIcon( context_btn );
 					break;
 				case ContextMenuIconName.export_excel:
 					this.setDefaultMenuExportIcon( context_btn );
@@ -2073,6 +2092,50 @@ PunchesViewController = BaseViewController.extend( {
 
 			}
 		} );
+	},
+
+	onMapSaveClick: function(dataset, successCallback) {
+		this.savePunchPosition(dataset, successCallback);
+	},
+
+	savePunchPosition: function (moved_unsaved_markers, successCallback) {
+		if ( !moved_unsaved_markers || moved_unsaved_markers.length !== 1) {
+			Debug.Text( 'ERROR: Invalid params/data passed to function.', 'PunchesViewController.js', 'PunchesViewController', 'savePunchPosition', 1 );
+			return false;
+		}
+
+		// Regardless of record type, we want to just pass the value back, rather than a api save from map, then another save from parent view.
+		// Map info will only be saved if user clicks save on the parent edit view.
+		this.setLocationValue(moved_unsaved_markers[0]);
+		successCallback();
+		this.is_changed = true;
+		return true;
+
+		// check if this is a new record
+		// if (moved_unsaved_markers[0].id === undefined) {
+		// 	// 1. data is found in unconverted, with no id, but this has no start point.
+		// 	// 2. data ends up in tt_marker, with no id, but it does have a marker point.
+		// 	// Likely user route was -> New punch -> Open Map or -> New punch -> Open Map -> save map -> re-open map before new punch is saved
+		//
+		// 	this.setLocationValue(moved_unsaved_markers[0]);
+		// 	successCallback();
+		// 	return true;
+		// } else {
+		// 	// save the changes to the API if existing record
+		// 	var this_PunchesViewController = this; // Reference local scope for callbacks to reference further down in the function. Var name also identifies what 'this' is referring to.
+		// 	this.api.setPunch( moved_unsaved_markers[0], {
+		// 		onResult: function ( result ) {
+		// 			if ( result.isValid() ) {
+		// 				successCallback();
+		// 				this_PunchesViewController.search();
+		// 				if ( this_PunchesViewController.edit_view ) {
+		// 					this_PunchesViewController.onEditClick( this_PunchesViewController.current_edit_record.id );
+		// 				}
+		// 				return true;
+		// 			}
+		// 		}
+		// 	} );
+		// }
 	},
 
 	getSelectEmployee: function ( full_item ) {

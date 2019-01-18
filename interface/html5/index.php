@@ -67,7 +67,10 @@ header('Link: <theme/default/css/ui.jqgrid.css?v='. APPLICATION_BUILD .'>; rel=p
 if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 	header('Link: <framework/leaflet/leaflet.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
 	header('Link: <framework/leaflet/leaflet-draw/leaflet.draw.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+	header('Link: <framework/leaflet/leaflet-markercluster/MarkerCluster.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+	header('Link: <framework/leaflet/leaflet-markercluster/MarkerCluster.Default.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
 	header('Link: <framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+	header('Link: <framework/leaflet/leaflet-timetrex.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
 }
 
 //PreLoad JS
@@ -102,7 +105,6 @@ header('Link: <global/TTPromise.js?v='. APPLICATION_BUILD .'>; rel=preload; as=s
 //header('Link: <global/TTUUID.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
 //header('Link: <services/APIFactory.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
 //header('Link: <global/ContextMenuConstant.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
-//header('Link: <framework/fastclick.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
 //header('Link: <framework/sonic.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
 //header('Link: <framework/backbone/underscore-min.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
 //header('Link: <framework/backbone/backbone-min.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
@@ -285,7 +287,10 @@ unset($authentication);
 				<?php if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) { ?>
 					<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet.css?v=<?php echo APPLICATION_BUILD?>">
 					<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-draw/leaflet.draw.css?v=<?php echo APPLICATION_BUILD?>">
+                    <link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-markercluster/MarkerCluster.css?v=<?php echo APPLICATION_BUILD?>">
+                    <link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-markercluster/MarkerCluster.Default.css?v=<?php echo APPLICATION_BUILD?>">
 					<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.css?v=<?php echo APPLICATION_BUILD?>">
+                    <link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-timetrex.css?v=<?php echo APPLICATION_BUILD?>">
 				<?php } ?>
 				<link rel="stylesheet" type="text/css" href="theme/default/css/text_layer_builder.css?v=<?php echo APPLICATION_BUILD?>">
 				<link rel="stylesheet" type="text/css" href="theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">

@@ -12,12 +12,28 @@ TopMenuManager.menus_quick_map = {}; //Save map for subMenuID to menuID, use thi
 
 TopMenuManager.ribbon_view_controller = null;
 
+TopMenuManager.isCurrentView = function( subMenuId ) {
+	sub_menu_id_url = Global.getBaseURL() + '#!m=' + subMenuId;
+	Debug.Text( 'URL: Current: '+ window.location.href +' Switching To: '+ sub_menu_id_url, 'TopMenuManager.js', 'TopMenuManager', 'isCurrentView', 10 );
+
+	//window.location.href.indexOf( sub_menu_id_url ) == 0 doesn't work here, as .../html5/#!m=PayStub matches when on .../html5/#!m=PayStubTransaction view.
+	//So instead use a RegEx to match the end of the string, or a & in case there are more URL arguments.
+	regex_pattern = sub_menu_id_url.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') +'(&.*)?$'; //replace() escapes the URL chars.
+
+	if ( window.location.href.match( regex_pattern ) !== null ) {
+		return true;
+	}
+
+	return false;
+},
+
 TopMenuManager.goToView = function( subMenuId, force_refresh ) {
 	if ( !TopMenuManager.ribbon_menus ) {
 		TopMenuManager.initRibbonMenu();
 
 	}
-	if ( window.location.href === Global.getBaseURL() + '#!m=' + subMenuId && force_refresh ) {
+
+	if ( TopMenuManager.isCurrentView( subMenuId ) && force_refresh ) {
 		IndexViewController.instance.router.reloadView( subMenuId );
 	} else {
 		//#2157 - needed for selenium screenshot test to prevent hanging on
@@ -33,7 +49,7 @@ TopMenuManager.goToView = function( subMenuId, force_refresh ) {
 };
 
 TopMenuManager.goToPortalView = function( subMenuId, force_refresh ) {
-	if ( window.location.href === Global.getBaseURL() + '#!m=' + subMenuId && force_refresh ) {
+	if ( TopMenuManager.isCurrentView( subMenuId ) && force_refresh ) {
 		IndexViewController.instance.router.reloadView( subMenuId );
 	} else {
 		Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + subMenuId );

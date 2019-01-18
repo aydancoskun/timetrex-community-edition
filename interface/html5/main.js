@@ -10,7 +10,6 @@ require.config( {
 		'jquery_json': 'framework/jquery.json',
 		'jquery_tablednd': 'framework/jquery.tablednd',
 		'jquery_ba_resize': 'framework/jquery.ba-resize',
-		'fastclick': 'framework/fastclick',
 		'html2canvas': 'framework/html2canvas',
 		'moment': 'framework/moment',
 		'timepicker_addon': 'framework/widgets/datepicker/jquery-ui-timepicker-addon',
@@ -105,6 +104,7 @@ require.config( {
 		'leaflet-providers': 'framework/leaflet/leaflet-providers/leaflet-providers',
 		'leaflet-routing': 'framework/leaflet/leaflet-routing-machine/leaflet-routing-machine',
 		'leaflet-draw': 'framework/leaflet/leaflet-draw/leaflet.draw',
+		'leaflet-markercluster': 'framework/leaflet/leaflet-markercluster/leaflet.markercluster',
 		'pdfjs': 'framework/pdfjs', //Need to use pdfjs-dist/build below instead, as thats what defined in the pdf.js file.
 		'pdfjs-dist/build/pdf': 'framework/pdfjs/pdf',
 		'pdfjs-dist/build/pdf.worker': 'framework/pdfjs/pdf.worker',
@@ -485,11 +485,15 @@ require.config( {
 		'leaflet-draw': {
 			deps: ['leaflet']
 		},
+		'leaflet-markercluster': {
+			deps: ['leaflet']
+		},
 		'leaflet-timetrex': {
-			deps: ['leaflet', 'leaflet-draw', 'leaflet-routing', 'leaflet-providers', 'measurement'],
-			exports: 'L',
+			deps: ['leaflet', 'leaflet-draw', 'leaflet-routing', 'leaflet-providers', 'leaflet-markercluster', 'measurement'],
+			exports: 'exportFunctions',
 			init: function() {
-				window.L = L;
+				window.TTMapLib = exportFunctions.TTMapLib;
+				window.L = exportFunctions.L;
 			}
 		},
 		'tinymce': {
@@ -526,7 +530,6 @@ require( [
 	'jquery-ui',
 	'jquery.i18n',
 	'jquery_ba_resize',
-	'fastclick',
 	'IndexController',
 	'BaseViewController',
 	'APIFactory',
@@ -632,7 +635,6 @@ require( [
 
 		$( 'body' ).addClass( 'login-bg' );
 
-		FastClick.attach( $( 'body' )[0] );
 		//Load need API class
 
 		$( document ).on( 'keydown', function( e ) {

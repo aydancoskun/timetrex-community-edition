@@ -651,45 +651,10 @@ class APIAuthentication extends APIFactory {
 	function getPreLoginData( $api = NULL ) {
 		global $config_vars;
 
-		if ( (isset($_GET['disable_db']) AND $_GET['disable_db'] == 1 )
-				OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 )
-				OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == TRUE ) ) {
-			Debug::text('WARNING: Installer/Down For Maintenance is enabled... Normal logins are disabled!', __FILE__, __LINE__, __METHOD__, 10);
-			return array(
+		//Basic settings that *do not* require a DB connection.
+		$retarr = array(
 				'primary_company_id' => PRIMARY_COMPANY_ID, //Needed for some branded checks.
-				'primary_company_name' => 'N/A',
-				'application_version' => $this->getApplicationVersion(),
-				'application_version_date' => $this->getApplicationVersionDate(),
-				'application_build' => $this->getApplicationBuild(),
-				'deployment_on_demand' => $this->getDeploymentOnDemand(),
-				'analytics_enabled' => $this->isAnalyticsEnabled(),
-				'analytics_tracking_code' => $this->getAnalyticsTrackingCode(),
-				'product_edition' => $this->getTTProductEdition( FALSE ),
-				'product_edition_name' => $this->getTTProductEdition( TRUE ),
-				'registration_key' => 'INSTALLER',
-				'http_host' => $this->getHTTPHost(),
-				'production' => $this->getProduction(),
-				'demo_mode' => DEMO_MODE,
-				'base_url' => Environment::getBaseURL(),
-				'cookie_base_url' => Environment::getCookieBaseURL(),
-				'api_base_url' => Environment::getAPIBaseURL(),
-				'language_options' => Misc::addSortPrefix( TTi18n::getLanguageArray() ),
-				//Make sure locale is set properly before this function is called, either in api.php or APIGlobal.js.php for example.
-				'enable_default_language_translation' => ( isset($config_vars['other']['enable_default_language_translation']) ) ? $config_vars['other']['enable_default_language_translation'] : FALSE,
-
-				'language' => TTi18n::getLanguage(),
-				'locale' => TTi18n::getNormalizedLocale(), //Needed for HTML5 interface to load proper translation file.
-			);
-		}
-
-		$company_name = $this->getCompanyName();
-		if ( $company_name == '' ) {
-			$company_name = 'N/A';
-		}
-
-		return array(
-				'primary_company_id' => PRIMARY_COMPANY_ID, //Needed for some branded checks.
-				'primary_company_name' => $company_name,
+				'primary_company_name' => NULL, //Requires DB connection.
 				'base_url' => Environment::getBaseURL(),
 				'cookie_base_url' => Environment::getCookieBaseURL(),
 				'api_url' => Environment::getAPIURL( $api ),
@@ -706,7 +671,7 @@ class APIAuthentication extends APIFactory {
 				'web_session_expire' => ( isset($config_vars['other']['web_session_expire']) AND $config_vars['other']['web_session_expire'] != '' ) ? (bool)$config_vars['other']['web_session_expire'] : FALSE, //If TRUE then session expires when browser closes.
 				'analytics_enabled' => $this->isAnalyticsEnabled(),
 				'analytics_tracking_code' => $this->getAnalyticsTrackingCode(),
-				'registration_key' => $this->getRegistrationKey(),
+				'registration_key' => NULL, //Requires DB connection.
 				'http_host' => $this->getHTTPHost(),
 				'is_ssl' => Misc::isSSL(),
 				'production' => $this->getProduction(),
@@ -714,7 +679,7 @@ class APIAuthentication extends APIFactory {
 				'application_version' => $this->getApplicationVersion(),
 				'application_version_date' => $this->getApplicationVersionDate(),
 				'application_build' => $this->getApplicationBuild(),
-				'is_logged_in' => $this->isLoggedIn(),
+				'is_logged_in' => FALSE, //Requires DB connection.
 				'session_idle_timeout' => $this->getSessionIdle(),
 				'footer_left_html' => ( isset($config_vars['other']['footer_left_html']) AND $config_vars['other']['footer_left_html'] != '' ) ? $config_vars['other']['footer_left_html'] : FALSE,
 				'footer_right_html' => ( isset($config_vars['other']['footer_right_html']) AND $config_vars['other']['footer_right_html'] != '' ) ? $config_vars['other']['footer_right_html'] : FALSE,
@@ -736,6 +701,23 @@ class APIAuthentication extends APIFactory {
 				'sandbox' => isset($config_vars['other']['sandbox']) ? $config_vars['other']['sandbox'] : FALSE,
 				'uuid_seed' => TTUUID::getSeed(TRUE),
 		);
+
+		if ( (isset($_GET['disable_db']) AND $_GET['disable_db'] == 1 )
+				OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 )
+				OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == TRUE ) ) {
+			Debug::text( 'WARNING: Installer/Down For Maintenance is enabled... Normal logins are disabled!', __FILE__, __LINE__, __METHOD__, 10 );
+		} else {
+			//Only data that requires a DB connection to obtain here.
+			$retarr['company_name'] = $this->getCompanyName();
+			if ( $retarr['company_name'] == '' ) {
+				$retarr['company_name'] == 'N/A';
+			}
+
+			$retarr['registration_key'] = $this->getRegistrationKey();
+			$retarr['is_logged_in'] = $this->isLoggedIn();
+		}
+
+		return $retarr;
 	}
 
 	/**

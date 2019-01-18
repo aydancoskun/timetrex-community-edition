@@ -33,7 +33,6 @@ module.exports = function(grunt) {
                 '../../interface/html5/framework/jquery.json.js',
                 '../../interface/html5/framework/jquery.tablednd.js',
                 '../../interface/html5/framework/jquery.ba-resize.js',
-                '../../interface/html5/framework/fastclick.js',
                 '../../interface/html5/framework/html2canvas.js',
                 '../../interface/html5/model/Base.js',
                 '../../interface/html5/services/ServiceCaller.js',
@@ -87,7 +86,6 @@ module.exports = function(grunt) {
                 '../../interface/html5/**/*.js',
       
                 '!../../interface/html5/framework/require.js',
-                '!../../interface/html5/framework/fastclick.js',
       
                 //Below are already included in login.composite.js
                 '!../../interface/html5/framework/stacktrace.js',

@@ -547,8 +547,8 @@ class RecurringScheduleTemplateFactory extends Factory {
 		$recurring_schedule_control_start_date = TTDate::strtotime( $this->getColumn('recurring_schedule_control_start_date') );
 		//Debug::text('Recurring Schedule Control Start Date: '. TTDate::getDate('DATE+TIME', $recurring_schedule_control_start_date), __FILE__, __LINE__, __METHOD__, 10);
 
-		$current_template_week = $this->getColumn('remapped_week');
-		$max_week = $this->getColumn('max_week');
+		$current_template_week = (int)$this->getColumn('remapped_week');
+		$max_week = (int)$this->getColumn('max_week');
 		//Debug::text('Template Week: '. $current_template_week .' Max Week: '. $this->getColumn('max_week') .' ReMapped Week: '. $this->getColumn('remapped_week'), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $recurring_schedule_control_start_date == ''  ) {
@@ -673,7 +673,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 							unset($tmp_index_user_id, $tmp_index_arr);
 						}
 
-						//This check has to occurr after the committed schedule check, otherwise no committed schedules will appear.
+						//This check has to occur after the committed schedule check, otherwise no committed schedules will appear.
 						if ( ( $this->getColumn('recurring_schedule_control_start_date') != '' AND $i < TTDate::strtotime( $this->getColumn('recurring_schedule_control_start_date') ) )
 								OR ( $this->getColumn('recurring_schedule_control_end_date') != '' AND $i > TTDate::strtotime( $this->getColumn('recurring_schedule_control_end_date') ) ) ) {
 							//Debug::text('Skipping due to Recurring Schedule Start/End date: ID: '. $this->getColumn('id') .' User ID: '. $this->getColumn('user_id') .' I: '. $i .' Start Date: '. $this->getColumn('recurring_schedule_control_start_date') .' ('. TTDate::strtotime( $this->getColumn('recurring_schedule_control_start_date') ) .') End Date: '. $this->getColumn('recurring_schedule_control_end_date'), __FILE__, __LINE__, __METHOD__, 10);

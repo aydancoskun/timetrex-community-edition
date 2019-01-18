@@ -2535,10 +2535,10 @@ class CalculatePolicy {
 									Debug::text('        Queuing reduction of Absence UDT Key: '. $udt_key .'('.$this->user_date_total_insert_id.') from: '. $udt_obj->getTotalTime()  .' to: '. ( $udt_obj->getTotalTime() - $total_time ) .' Total: '. $udtf->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 
 									//Check to see if the source UDT record will already be calculating accruals, if so, skip calculating any accruals for this UDT record too.
-									if ( isset($this->accrual_time_exclusivity_map[$udt_key]) ) {
-										Debug::text('  Adding UDT Insert ID: '. $this->user_date_total_insert_id .' to Accrual Time Exclusivity Map...', __FILE__, __LINE__, __METHOD__, 10);
-										$this->accrual_time_exclusivity_map[$this->user_date_total_insert_id] = TRUE;
-									}
+//									if ( isset($this->accrual_time_exclusivity_map[$udt_key]) ) {
+//										Debug::text('  Adding UDT Insert ID: '. $this->user_date_total_insert_id .' to Accrual Time Exclusivity Map...', __FILE__, __LINE__, __METHOD__, 10);
+//										$this->accrual_time_exclusivity_map[$this->user_date_total_insert_id] = TRUE;
+//									}
 
 									$this->user_date_total_insert_id--;
 								}
@@ -2910,10 +2910,10 @@ class CalculatePolicy {
 											//$this->over_time_trigger_time_exclusivity_map[$current_trigger_time_arr_trigger_time][] = $udt_key;
 
 											//Check to see if the source UDT record will already be calculating accruals, if so, skip calculating any accruals for this UDT record too.
-											if ( isset($this->accrual_time_exclusivity_map[$udt_key]) ) {
-												Debug::text('  Adding UDT Insert ID: '. $this->user_date_total_insert_id .' to Accrual Time Exclusivity Map...', __FILE__, __LINE__, __METHOD__, 10);
-												$this->accrual_time_exclusivity_map[$this->user_date_total_insert_id] = TRUE;
-											}
+//											if ( isset($this->accrual_time_exclusivity_map[$udt_key]) ) {
+//												Debug::text('  Adding UDT Insert ID: '. $this->user_date_total_insert_id .' to Accrual Time Exclusivity Map...', __FILE__, __LINE__, __METHOD__, 10);
+//												$this->accrual_time_exclusivity_map[$this->user_date_total_insert_id] = TRUE;
+//											}
 
 											$this->user_date_total_insert_id--;
 
@@ -6017,9 +6017,9 @@ class CalculatePolicy {
 		return FALSE;
 	}
 
-	//Need to get all pay codes referenced by policies and all pay codes used by contributing shift policies too.
-	//So we may as well just get them all.
 	/**
+	 * Need to get all pay codes referenced by policies and all pay codes used by contributing shift policies too.
+	 * So we may as well just get them all.
 	 * @return bool
 	 */
 	function getPayCode() {
@@ -6213,7 +6213,16 @@ class CalculatePolicy {
 
 		Debug::text('Pay Code ID: '. $pay_code_id .' DateStamp: '. $date_stamp .' Contributing Pay Code Hourly Rate: '. $contributing_pay_code_hourly_rate, __FILE__, __LINE__, __METHOD__, 10);
 		$hourly_rate = 0;
-		$tmp_hourly_rate = 0;
+
+		if ( !isset($this->pay_codes[$pay_code_id]) ) {
+			Debug::text('  No Pay Code Policy found...', __FILE__, __LINE__, __METHOD__, 10);
+			return 0;
+		}
+
+		if ( isset($this->pay_codes[$pay_code_id]) AND $this->pay_codes[$pay_code_id]->getType() == 20 ) { //20=UNPAID
+			Debug::text('  Pay Code Policy is UNPAID, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+			return 0;
+		}
 
 		$pay_formula_policy_obj = $this->getPayFormulaPolicyObjectByPayFormulaIdOrPayCodeId( $pay_formula_policy_id, $pay_code_id );
 		if ( !is_object( $pay_formula_policy_obj ) ) {
@@ -6221,24 +6230,27 @@ class CalculatePolicy {
 			return 0;
 		}
 
-		switch ( $pay_formula_policy_obj->getWageSourceType()  ) {
-			case 10: //Wage Group
-				$uw_obj = $this->filterUserWage( $pay_formula_policy_obj->getWageGroup(), $date_stamp );
-				if ( is_object( $uw_obj) ) {
-					$tmp_hourly_rate = $uw_obj->getHourlyRate();
-				}
-				break;
-			case 20: //Contributing Pay Code
-				$tmp_hourly_rate = $contributing_pay_code_hourly_rate;
-				break;
-			case 30: //Average Contributing Pay Codes
-				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					Debug::text('  Average Contributing Pay Codes... Determine Average Hourly Rate...', __FILE__, __LINE__, __METHOD__, 10);
-					$tmp_hourly_rate = $this->getAverageHourlyRate( $date_stamp, $this->contributing_shift_policy[$pay_formula_policy_obj->getTimeSourceContributingShiftPolicy()], $object_type_ids, $this->contributing_shift_policy[$pay_formula_policy_obj->getWageSourceContributingShiftPolicy()] );
-				}
-				break;
+		if ( is_object( $pay_formula_policy_obj ) ) {
+			$tmp_hourly_rate = 0;
+			switch ( $pay_formula_policy_obj->getWageSourceType() ) {
+				case 10: //Wage Group
+					$uw_obj = $this->filterUserWage( $pay_formula_policy_obj->getWageGroup(), $date_stamp );
+					if ( is_object( $uw_obj ) ) {
+						$tmp_hourly_rate = $uw_obj->getHourlyRate();
+					}
+					break;
+				case 20: //Contributing Pay Code
+					$tmp_hourly_rate = $contributing_pay_code_hourly_rate;
+					break;
+				case 30: //Average Contributing Pay Codes
+					if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+						Debug::text( '  Average Contributing Pay Codes... Determine Average Hourly Rate...', __FILE__, __LINE__, __METHOD__, 10 );
+						$tmp_hourly_rate = $this->getAverageHourlyRate( $date_stamp, $this->contributing_shift_policy[ $pay_formula_policy_obj->getTimeSourceContributingShiftPolicy() ], $object_type_ids, $this->contributing_shift_policy[ $pay_formula_policy_obj->getWageSourceContributingShiftPolicy() ] );
+					}
+					break;
+			}
+			$hourly_rate = $tmp_hourly_rate;
 		}
-		$hourly_rate = $tmp_hourly_rate;
 
 		Debug::text('  Base Hourly Rate: '. $hourly_rate, __FILE__, __LINE__, __METHOD__, 10);
 		return $hourly_rate;
@@ -6257,6 +6269,16 @@ class CalculatePolicy {
 
 		Debug::text('Pay Formula ID: '. $pay_formula_policy_id .' Pay Code ID: '. $pay_code_id .' Base Hourly Rate: '. $base_hourly_rate, __FILE__, __LINE__, __METHOD__, 10);
 		$hourly_rate = 0;
+
+		if ( !isset($this->pay_codes[$pay_code_id]) ) {
+			Debug::text('  No Pay Code Policy found...', __FILE__, __LINE__, __METHOD__, 10);
+			return 0;
+		}
+
+		if ( isset($this->pay_codes[$pay_code_id]) AND $this->pay_codes[$pay_code_id]->getType() == 20 ) { //20=UNPAID
+			Debug::text('  Pay Code Policy is UNPAID, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+			return 0;
+		}
 
 		$pay_formula_policy_obj = $this->getPayFormulaPolicyObjectByPayFormulaIdOrPayCodeId( $pay_formula_policy_id, $pay_code_id );
 		if ( !is_object( $pay_formula_policy_obj ) ) {
@@ -6304,6 +6326,17 @@ class CalculatePolicy {
 		$pay_formula_policy_id = TTUUID::castUUID($pay_formula_policy_id);
 
 		$hourly_rate = 0;
+
+		if ( !isset($this->pay_codes[$pay_code_id]) ) {
+			Debug::text('  No Pay Code Policy found...', __FILE__, __LINE__, __METHOD__, 10);
+			return 0;
+		}
+
+		if ( isset($this->pay_codes[$pay_code_id]) AND $this->pay_codes[$pay_code_id]->getType() == 20 ) { //20=UNPAID
+			Debug::text('  Pay Code Policy is UNPAID, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+			return 0;
+		}
+
 		$pay_formula_policy_obj = $this->getPayFormulaPolicyObjectByPayFormulaIdOrPayCodeId( $pay_formula_policy_id, $pay_code_id );
 		if ( !is_object( $pay_formula_policy_obj ) ) {
 			Debug::text('  No Pay Formula Policy to use...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6496,13 +6529,14 @@ class CalculatePolicy {
 									}
 								}
 
+								$found_holiday_policy_to_apply = FALSE;
 								if ( is_array( $holiday_policies ) AND count( $holiday_policies ) > 0 ) {
 									foreach ( $holiday_policies as $holiday_obj ) {
 										Debug::text( ' Found Holiday: ' . $holiday_obj->getName() . ' Date: ' . TTDate::getDate( 'DATE', $holiday_obj->getDateStamp() ) . ' Current Date: ' . TTDate::getDate( 'DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10 );
-										if ( $this->holiday_policy[$holiday_obj->getHolidayPolicyID()]->getForceOverTimePolicy() == TRUE
-												OR $this->isEligibleForHoliday( $date_stamp, $this->holiday_policy[$holiday_obj->getHolidayPolicyID()] )
-										) {
+										if ( $this->holiday_policy[ $holiday_obj->getHolidayPolicyID() ]->getForceOverTimePolicy() == TRUE
+												OR $this->isEligibleForHoliday( $date_stamp, $this->holiday_policy[ $holiday_obj->getHolidayPolicyID() ] ) ) {
 											Debug::text( ' User is Eligible for Holiday: ' . $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
+											$found_holiday_policy_to_apply = TRUE;
 
 											//Modify the premium policy in memory to make it like a date/time policy
 											$pp_obj->setStartDate( $holiday_obj->getDateStamp() );
@@ -6526,7 +6560,15 @@ class CalculatePolicy {
 											break; //If they are eligible for the holiday, stop processing more days.
 										}
 									}
-								} else {
+								}
+								unset( $holiday_policies, $holiday_obj );
+
+								//We need to modify the in memory premium policy even if there are holiday policies but none of them are eligible to this UDT record.
+								//This avoids the case where it would apply the premium on the day before and day after the holiday when it shouldn't have.
+								//  Since we modify the premium policy in memory, if the first loop matches the holiday, then all subsequent loops would also match.
+								//  However if the first loop DID NOT match the holiday, then it would apply correctly. This could be triggered by editing hte punch on the day after the holiday.
+								//
+								if ( $found_holiday_policy_to_apply == FALSE ) {
 									//If a Date/Time premium was created first, with all days activated, then switched to a holiday type,
 									//its still calculated on all days, even when its not a holiday.
 									$pp_obj->setSun( FALSE );
@@ -6543,7 +6585,6 @@ class CalculatePolicy {
 									$pp_obj->setWeeklyTriggerTime( 0 );
 									$pp_obj->setMaximumWeeklyTriggerTime( 0 );
 								}
-								unset($holiday_policies, $holiday_obj);
 							}
 
 							//Make sure this is a valid day
@@ -7507,6 +7548,10 @@ class CalculatePolicy {
 
 					//Sort by ObjectTypeID so object_type_id=50 come before any other policy,
 					// that way we can handle accruals on them first and not duplicate accruals on other policies that are triggered by the result.
+					//
+					// Consider the case of a Vacation absence record for 8hrs which gets split into Vacation=4.00 and OT Bank=4.00.
+					//   Vacation accrual should be deducted by 8hrs (total absence time), then OT Bank should be deposited by 4hrs, and 4hrs of Vacation is paid.
+					//   So essentially 4hrs of accrual time is being transferred from Vacation to OT Bank, and the difference is paid.
 					$tmp_user_date_total = $this->sortUserDateTotalData( $tmp_user_date_total, 'sortUserDateTotalDataByObjectTypeDescAndID' );
 					foreach( $tmp_user_date_total as $udt_key => $udt_obj ) {
 						$date_stamp = TTDate::getMiddleDayEpoch( $udt_obj->getDateStamp() ); //Optimization - Move outside loop.
@@ -7537,6 +7582,7 @@ class CalculatePolicy {
 							$policy_object = $udt_obj->getPayCodeObject();
 						}
 						$pay_formula_policy_obj = $this->getPayFormulaPolicyObjectByPolicyObject( $policy_object );
+
 						if ( $this->isPayFormulaAccruing( $pay_formula_policy_obj ) == TRUE ) {
 							if ( isset($this->accrual_time_exclusivity_map[$udt_key]) ) {
 								Debug::text('  WARNING: Accrual already calculated on this ObjecType->PayCode->SourceObject combination, skipping...', __FILE__, __LINE__, __METHOD__, 10);

@@ -2010,5 +2010,26 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		);
 		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), TRUE );
 	}
+
+	function testLocationTimeZone() {
+		$upf = TTnew( 'UserPreferenceFactory' );
+
+		$this->assertEquals( $upf->getLocationTimeZone( 'CA', 'BC' ), 'PST8PDT' );
+
+		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'WA' ), 'PST8PDT' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'WA', '2065555555' ), 'PST8PDT' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'NY' ), 'EST5EDT' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'NY', '2065555555' ), 'EST5EDT' ); //Province doesn't match, so it uses that instead.
+
+		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'FL', '8135555555' ), 'EST5EDT' ); //Same state with different timezones based on phone number.
+		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'FL', '8505555555' ), 'CST6CDT' ); //Same state with different timezones based on phone number.
+
+		$this->assertEquals( $upf->getLocationTimeZone( 'AG', '' ), 'AST4ADT' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'AG', '00' ), 'AST4ADT' );
+
+		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '' ), 'EST5EDT' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '', '2525555555' ), 'EST5EDT' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '00', '2525555555' ), 'EST5EDT' );
+	}
 }
 ?>

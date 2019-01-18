@@ -945,7 +945,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 	function filterInsurableEarningsPayPeriods( $value ) {
 		$retval = (int)$value;
-		$total_pay_periods_with_earnings = count( $this->pay_period_earnings );
+		$total_pay_periods_with_earnings = ( is_array( $this->pay_period_earnings ) ) ? count( $this->pay_period_earnings ) : 0;
 		if ( $value > $total_pay_periods_with_earnings ) {
 			return NULL; //No need to display this msg as all PPs are included.
 		} else {

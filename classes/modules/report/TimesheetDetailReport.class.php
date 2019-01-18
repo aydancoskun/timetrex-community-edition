@@ -280,7 +280,7 @@ class TimesheetDetailReport extends Report {
 
 										'-2070-schedule_working' => TTi18n::gettext('Scheduled Time'),
 										'-2072-schedule_working_diff' => TTi18n::gettext('Scheduled Time Diff.'),
-										'-2080-schedule_absence' => TTi18n::gettext('Scheduled Absence'),
+										'-2080-schedule_absent' => TTi18n::gettext('Scheduled Absent'),
 
 										'-2085-worked_days' => TTi18n::gettext('Worked Days'),
 										'-2090-worked_hour_of_day_total' => TTi18n::gettext('Worked Employees/Hour'),
@@ -1107,7 +1107,7 @@ class TimesheetDetailReport extends Report {
 		}
 		//Debug::Arr($this->tmp_data['user_date_total'], 'User Date Total Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( strpos($format, 'pdf_') === FALSE AND count( array_intersect( array('schedule_working', 'schedule_working_diff', 'schedule_absence', 'min_schedule_time_stamp', 'max_schedule_time_stamp' ), array_keys( $columns ) ) ) > 0 ) {
+		if ( strpos($format, 'pdf_') === FALSE AND count( array_intersect( array('schedule_working', 'schedule_working_diff', 'schedule_absent', 'min_schedule_time_stamp', 'max_schedule_time_stamp' ), array_keys( $columns ) ) ) > 0 ) {
 			$slf = TTnew( 'ScheduleListFactory' );
 			$slf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			if ( $slf->getRecordCount() > 0 ) {

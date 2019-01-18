@@ -878,50 +878,79 @@ class UserPreferenceFactory extends Factory {
 														'WI' => 'CST6CDT',
 														'WY' => 'MST7MDT',
 													),
+										'AG' => 'AST4ADT',
+										'AI' => 'AST4ADT',
+										'AW' => 'AST4ADT',
+										'BB' => 'AST4ADT',
+										'BL' => 'AST4ADT',
+										'BM' => 'AST4ADT',
+										'BQ' => 'AST4ADT',
+										'BS' => 'EST5EDT',
+										'CU' => 'AST4ADT',
+										'CW' => 'AST4ADT',
+										'DM' => 'AST4ADT',
+										'DO' => 'AST4ADT',
+										'GD' => 'AST4ADT',
+										'GP' => 'AST4ADT',
+										'HT' => 'AST4ADT',
+										'JM' => 'EST5EDT',
+										'KN' => 'AST4ADT',
+										'KY' => 'EST5EDT',
+										'LC' => 'AST4ADT',
+										'MF' => 'AST4ADT',
+										'MQ' => 'AST4ADT',
+										'MS' => 'AST4ADT',
 										'MX' => 'CST6CDT',
+										'PR' => 'AST4ADT',
+										'SX' => 'AST4ADT',
+										'TC' => 'EST5EDT',
+										'TT' => 'AST4ADT',
+										'VC' => 'AST4ADT',
+										'VG' => 'AST4ADT',
+										'VI' => 'AST4ADT',
 								);
 				break;
 			case 'area_code_timezone':
 				//Area code to Country/Province/TimeZone map.
 				$retval = array(
 									211	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Local community info / referral services
-									242	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'EST5EDT'), //	 Bahamas
-									246	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Barbados
-									264	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Anguilla (split from 809)
-									268	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Antigua and Barbuda (split from 809)
-									284	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 British Virgin Islands (split from 809)
+									242	=> array('country' => 'BS', 'province' => NULL, 'time_zone' => 'EST5EDT'), //	 Bahamas
+									246	=> array('country' => 'BB', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Barbados
+									264	=> array('country' => 'AI', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Anguilla (split from 809)
+									268	=> array('country' => 'AG', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Antigua and Barbuda (split from 809)
+									284	=> array('country' => 'VG', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 British Virgin Islands (split from 809)
 									311	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Reserved for special applications
-									345	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'EST5EDT'), //	 Cayman Islands
+									345	=> array('country' => 'KY', 'province' => NULL, 'time_zone' => 'EST5EDT'), //	 Cayman Islands
 									411	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Reserved for special applications
-									441	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Bermuda (part of what used to be 809)
+									441	=> array('country' => 'BM', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Bermuda (part of what used to be 809)
 									456	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Inbound International
-									473	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Grenada ("new" -- split from 809)
+									473	=> array('country' => 'GD', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Grenada ("new" -- split from 809)
 									500	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Personal Communication Service
 									511	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Nationwide travel information
 									555	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), // Reserved for directory assistance applications
 									600	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Canadian Services
 									611	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Reserved for special applications
-									649	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'EST5EDT'), //	 Turks & Caicos Islands
-									664	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Montserrat (split from 809)
-									684	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //1	 American Samoa
+									649	=> array('country' => 'TC', 'province' => NULL, 'time_zone' => 'EST5EDT'), //	 Turks & Caicos Islands
+									664	=> array('country' => 'MS', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Montserrat (split from 809)
+									684	=> array('country' => 'AS', 'province' => NULL, 'time_zone' => NULL), //1	 American Samoa
 									700	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Interexchange Carrier Services
 									710	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), // US Government
 									711	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Telecommunications Relay Services
-									758	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 St. Lucia (split from 809)
-									767	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Dominica (split from 809)
-									784	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 St. Vincent & Grenadines (split from 809)
+									758	=> array('country' => 'LC', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 St. Lucia (split from 809)
+									767	=> array('country' => 'DM', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Dominica (split from 809)
+									784	=> array('country' => 'VC', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 St. Vincent & Grenadines (split from 809)
 									800	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL ), // US/Canada toll free (see 888, 877, 866, 855, 844, 833, 822)
-									809	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Dominican Republic (see splits 264, 268, 284, 340, 441, 473, 664, 758, 767, 784, 868, 876; overlay 829)
+									809	=> array('country' => 'DO', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Dominican Republic (see splits 264, 268, 284, 340, 441, 473, 664, 758, 767, 784, 868, 876; overlay 829)
 									811	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Reserved for special applications
 									822	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), // US/Canada toll free (proposed, may not be in use yet)
-									829	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Dominican Republic (perm 1/31/05; mand 8/1/05; overlaid on 809)
+									829	=> array('country' => 'DO', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Dominican Republic (perm 1/31/05; mand 8/1/05; overlaid on 809)
 									833	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), // US/Canada toll free (proposed, may not be in use yet)
 									844	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), // US/Canada toll free (proposed, may not be in use yet)
 									855	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), // US/Canada toll free (proposed, may not be in use yet)
 									866	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), // US/Canada toll free
-									868	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Trinidad and Tobago ("new" -- see 809)
-									869	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 St. Kitts & Nevis
-									876	=> array('country' => 'US', 'province' => NULL, 'time_zone' => 'EST5EDT'), //	 Jamaica (split from 809)
+									868	=> array('country' => 'TT', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 Trinidad and Tobago ("new" -- see 809)
+									869	=> array('country' => 'KN', 'province' => NULL, 'time_zone' => 'AST4ADT'), //	 St. Kitts & Nevis
+									876	=> array('country' => 'JM', 'province' => NULL, 'time_zone' => 'EST5EDT'), //	 Jamaica (split from 809)
 									877	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), // US/Canada toll free
 									880	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Paid Toll-Free Service
 									881	=> array('country' => 'US', 'province' => NULL, 'time_zone' => NULL), //	 Paid Toll-Free Service

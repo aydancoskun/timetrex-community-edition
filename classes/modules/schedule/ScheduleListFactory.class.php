@@ -467,18 +467,14 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			$id = TTUUID::getZeroId(); //Leaving this as NULL can cause the SQL query to not return rows when it should.
 		}
 
-		//MySQL is picky when it comes to timestamp filters on datestamp columns.
-		$start_datestamp = $this->db->BindDate( (int)$start_date );
-		$end_datestamp = $this->db->BindDate( (int)$end_date );
-
 		$start_timestamp = $this->db->BindTimeStamp( (int)$start_date );
 		$end_timestamp = $this->db->BindTimeStamp( (int)$end_date );
 
 		$ph = array(
 					'company_id' => TTUUID::castUUID($company_id),
 					'user_id' => TTUUID::castUUID($user_id),
-					'start_date_a' => $start_datestamp,
-					'end_date_b' => $end_datestamp,
+					'start_date_a' => $this->db->BindDate( ( $start_date - 86400 ) ), //Need to expand the date_stamp restriction by at least a day to cover shifts that span midnight.
+					'end_date_b' => $this->db->BindDate( ( $end_date + 86400 ) ), //Need to expand the date_stamp restriction by at least a day to cover shifts that span midnight.
 					'id' => TTUUID::castUUID($id),
 					'start_date1' => $start_timestamp,
 					'end_date1' => $end_timestamp,
@@ -572,68 +568,6 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		return FALSE;
-	}
-
-	/**
-	 * @param string $company_id UUID
-	 * @param string $user_id UUID
-	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
-	 * @return bool
-	 */
-	function getMostCommonScheduleDataByCompanyIdAndUserAndStartDateAndEndDate( $company_id, $user_id, $start_date, $end_date) {
-		if ( $company_id == '' ) {
-			return FALSE;
-		}
-
-		if ( $user_id == '' ) {
-			return FALSE;
-		}
-
-		if ( $start_date == '' ) {
-			return FALSE;
-		}
-
-		if ( $end_date == '' ) {
-			return FALSE;
-		}
-
-		$ph = array();
-
-		$query = 'SELECT
-							( 	SELECT	'. $this->getSQLToTimeFunction( 'a.start_time' ) .' as start_time
-								FROM	'. $this->getTable() .' as a
-								WHERE 	a.company_id = \''. TTUUID::castUUID($company_id) .'\'
-									AND a.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ).'
-									AND a.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .'
-									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'uuid' ) .' )
-									AND ( a.deleted = 0 )
-								GROUP BY '. $this->getSQLToTimeFunction( 'a.start_time' ) .'
-								ORDER BY count(*) DESC LIMIT 1 ) as start_time,
-							( 	SELECT	'. $this->getSQLToTimeFunction( 'a.end_time' ) .' as end_time
-								FROM	'. $this->getTable() .' as a
-								WHERE 	a.company_id = \''. TTUUID::castUUID($company_id) .'\'
-									AND a.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ).'
-									AND a.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .'
-									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'uuid' ) .' )
-									AND ( a.deleted = 0 )
-								GROUP BY '. $this->getSQLToTimeFunction( 'a.end_time' ) .'
-								ORDER BY count(*) DESC LIMIT 1 ) as end_time,
-							( 	SELECT	schedule_policy_id as schedule_policy_id
-								FROM	'. $this->getTable() .' as a
-								WHERE 	a.company_id = \''. TTUUID::castUUID($company_id) .'\'
-									AND a.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ).'
-									AND a.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .'
-									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'uuid' ) .' )
-									AND ( a.deleted = 0 )
-								GROUP BY schedule_policy_id
-								ORDER BY count(*) DESC LIMIT 1 ) as schedule_policy_id';
-
-		$result = $this->db->GetRow($query, $ph);
-
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-
-		return $result;
 	}
 
 	/**

@@ -56,8 +56,6 @@ class APISchedule extends APIFactory {
 	 * @return array
 	 */
 	function getScheduleDefaultData( $data = NULL ) {
-		$company_obj = $this->getCurrentCompanyObject();
-
 		Debug::Text('Getting schedule default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$retarr = array(
@@ -82,12 +80,7 @@ class APISchedule extends APIFactory {
 			foreach( $data as $row ) {
 				$user_ids[] = ( isset($row['user_id']) ) ? $row['user_id'] : $this->getCurrentUserObject()->getId();
 
-				//$retarr['branch_id'] = ( isset($row['branch_id']) ) ? $row['branch_id'] : 0;
-				//if ( $retarr['branch_id'] != FALSE AND $prev_branch_id != FALSE AND $retarr['branch_id'] != $prev_branch_id ) {
-				//	$retarr['branch_id'] = -1; //More than one item selected, so use defaults.
-				//}
-
-				$date_stamp = ( isset($row['date_stamp']) ) ? TTDate::parseDateTime( $row['date_stamp'] ) : time();
+				$date_stamp = ( isset($row['date']) ) ? TTDate::parseDateTime( $row['date'] ) : time();
 				if ( $date_stamp < $first_date_stamp OR $first_date_stamp == FALSE ) {
 					$first_date_stamp = $date_stamp;
 				}
@@ -110,23 +103,27 @@ class APISchedule extends APIFactory {
 		}
 
 		//Try to determine most common start/end times to use by default.
-		$slf = TTnew('ScheduleListFactory');
-		$most_common_data = $slf->getMostCommonScheduleDataByCompanyIdAndUserAndStartDateAndEndDate( $company_obj->getID(), $user_ids, TTDate::getBeginWeekEpoch( $first_date_stamp ), TTDate::getEndWeekEpoch( $last_date_stamp ) );
-		//Use array_key_exists() instead of isset() as the array keys are always returned as NULL if no data exists.
-		if ( array_key_exists('start_time', $most_common_data ) AND array_key_exists('end_time', $most_common_data ) AND $most_common_data['start_time'] == NULL AND $most_common_data['end_time'] == NULL ) { //Extend the date range to find some value.
-			Debug::Text('No schedules to get default default from, extend range back one more week...', __FILE__, __LINE__, __METHOD__, 10);
-			$most_common_data = $slf->getMostCommonScheduleDataByCompanyIdAndUserAndStartDateAndEndDate($company_obj->getId(), $user_ids, TTDate::getBeginWeekEpoch( ( TTDate::getMiddleDayEpoch($first_date_stamp) - (86400 * 7) ) ), TTDate::getEndWeekEpoch( $last_date_stamp ) );
+		//  Need to use getScheduleArray() for this so it includes both recurring and committed shifts.
+		$filter_data = array(
+				'id' => $user_ids,
+				'start_date' => $first_date_stamp,
+				'end_date' => $last_date_stamp,
+		);
+
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( $filter_data );
+		if ( !is_array( $schedule_arr ) OR count( $schedule_arr ) == 0 ) { //If no data was returned, try to look back further.
+			$filter_data['start_date'] = TTDate::getBeginWeekEpoch( ( TTDate::getMiddleDayEpoch($first_date_stamp) - (86400 * 7) ) );
+			$filter_data['end_date'] = TTDate::getEndWeekEpoch( $last_date_stamp );
+			$schedule_arr = $sf->getScheduleArray( $filter_data );
 		}
 
-		if ( isset($most_common_data['start_time']) AND isset($most_common_data['end_time']) ) {
-			$retarr['start_time'] = TTDate::getAPIDate( 'TIME', TTDate::getTimeLockedDate( TTDate::strtotime( $most_common_data['start_time'] ), $first_date_stamp ) );
-			$retarr['end_time'] = TTDate::getAPIDate( 'TIME', TTDate::getTimeLockedDate( TTDate::strtotime( $most_common_data['end_time'] ), $first_date_stamp ) );
-			$retarr['schedule_policy_id'] = $most_common_data['schedule_policy_id'];
-			Debug::Text('  Common Data... Start Time: '. TTDate::getDATE('DATE+TIME', $retarr['start_time'] ) .'('. $retarr['start_time'] .') End Time: '. TTDate::getDATE('DATE+TIME', $retarr['end_time'] ) .'('. $retarr['end_time'] .')', __FILE__, __LINE__, __METHOD__, 10);
+		if ( is_array( $schedule_arr ) AND count( $schedule_arr ) > 0 ) {
+			$schedule_arr = call_user_func_array( 'array_merge', (array)$schedule_arr ); //Flattens the array by one level, to remove the ISO date keys.
+			$retarr = Misc::arrayCommonValuesForEachKey( $schedule_arr, array( 'start_time', 'end_time', 'schedule_policy_id' ) );
 		}
 
 		Debug::Arr($retarr, 'Default data...', __FILE__, __LINE__, __METHOD__, 10);
-
 		return $this->returnHandler( $retarr );
 	}
 

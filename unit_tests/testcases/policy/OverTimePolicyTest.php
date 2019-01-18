@@ -75,6 +75,8 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		$this->policy_ids['accrual_policy_account'][10] = $dd->createAccrualPolicyAccount( $this->company_id, 10 ); //Bank
+		$this->policy_ids['accrual_policy_account'][20] = $dd->createAccrualPolicyAccount( $this->company_id, 20 ); //Vacation
+		$this->policy_ids['accrual_policy_account'][30] = $dd->createAccrualPolicyAccount( $this->company_id, 30 ); //Sick
 
 		$this->policy_ids['pay_formula_policy'][100] = $dd->createPayFormulaPolicy( $this->company_id, 100 ); //Reg 1.0x
 		$this->policy_ids['pay_formula_policy'][910] = $this->createPayFormulaPolicy( $this->company_id, 910, $this->policy_ids['accrual_policy_account'][10] ); //Bank
@@ -2667,6 +2669,111 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group OvertimePolicy_testDailyOverTimeWithAbsencePolicyC2
+	 */
+	function testDailyOverTimeWithAbsencePolicyC2() {
+		//Test handling daily OT with absences and the Start/End timestamps for each UDT record.
+		// **This is special in that the OT policies DEPOSIT to accrual accounts as well to minic
+		//   the case where 12hr vacation is used, which triggers OT policy that is banked rather than paid.
+		//   Essenially in this case the Vacation time is withdrawn part of it (regular time) is paid, and the rest is deposited (transferred) into the OT bank
+		global $dd;
+
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 200, $this->policy_ids['accrual_policy_account'][30] ); //OT1.5 -- Deposit to Accrual
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 210, $this->policy_ids['accrual_policy_account'][30] ); //OT2.0 -- Deposit to Accrual
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 220, $this->policy_ids['accrual_policy_account'][30] ); //OT2.5 -- Deposit to Accrual
+
+		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][0] );
+		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 110, $policy_ids['pay_formula_policy'][1] );
+		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 120, $policy_ids['pay_formula_policy'][2] );
+
+
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 100, $this->policy_ids['contributing_shift_policy'][14], $policy_ids['pay_code'][0] );
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 110, $this->policy_ids['contributing_shift_policy'][14], $policy_ids['pay_code'][1] );
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 120, $this->policy_ids['contributing_shift_policy'][14], $policy_ids['pay_code'][2] );
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   NULL, //Holiday
+								   $policy_ids['overtime'], //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->absence_policy_id), //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 ); //Start on Monday to avoid DST issues on Sunday morning.
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (0 * 3600) );
+		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][30] ), (0 * 3600) );
+
+		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, (12 * 3600), $this->absence_policy_id );
+		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (-12 * 3600) );
+		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][30] ), (4 * 3600) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (12 * 3600) );
+		//$this->assertEquals( $udt_arr[$date_epoch][0]['start_time_stamp'], 	strtotime($date_stamp.' 8:00AM') );
+		//$this->assertEquals( $udt_arr[$date_epoch][0]['end_time_stamp'], 	strtotime($date_stamp.' 8:00PM') );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['hourly_rate'], 0 );
+
+		//Absence Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Absence Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime($date_stamp.' 12:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime($date_stamp.' 8:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['hourly_rate'], (1 * 21.50) );
+
+		//Overtime 1
+		$this->assertEquals( $udt_arr[$date_epoch][4]['object_type_id'], 30 ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][4]['pay_code_id'], $policy_ids['pay_code'][0] );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (1 * 3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['start_time_stamp'], strtotime($date_stamp.' 8:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['end_time_stamp'], strtotime($date_stamp.' 9:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['hourly_rate'], (1.5 * 21.50) );
+		//Overtime 2
+		$this->assertEquals( $udt_arr[$date_epoch][3]['object_type_id'], 30 ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $policy_ids['pay_code'][1] );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (1 * 3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['start_time_stamp'], strtotime($date_stamp.' 9:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['end_time_stamp'], strtotime($date_stamp.' 10:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['hourly_rate'], (2.0 * 21.50) );
+		//Overtime 3
+		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 30 ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $policy_ids['pay_code'][2] );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (2 * 3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['start_time_stamp'], strtotime($date_stamp.' 10:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime($date_stamp.' 12:00PM') );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['hourly_rate'], (2.5 * 21.50) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 5 );
+
+		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (-12 * 3600) );
+		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][30] ), (4 * 3600) );
+
+		//Delete absence in the middle of the week and confirm balance is still correct.
+		$dd->deleteAbsence( $absence_id );
+		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (0 * 3600) );
+		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][30] ), (0 * 3600) );
+
+		return TRUE;
+	}
+
+	/**
 	 * @group OvertimePolicy_testDailyOverTimeWithAbsencePolicyD
 	 */
 	function testDailyOverTimeWithAbsencePolicyD() {
@@ -2843,7 +2950,6 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-
 
 	/**
 	 * @group OvertimePolicy_testNoOverTimePolicyWithAbsence

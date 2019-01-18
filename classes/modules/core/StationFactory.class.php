@@ -1997,7 +1997,7 @@ class StationFactory extends Factory {
 					$sf->setBranchSelectionType( 10 ); //All allowed
 					$sf->setDepartmentSelectionType( 10 ); //All allowed
 
-					$sf->setModeFlag( array( 2, 4, 16, 4096, 8192 ) ); //By default enable all punch modes, Capture Images in KIOSK mode, Disable Screensaver.
+					$sf->setModeFlag( array( 2, 4, 16, 2048, 4096, 8192 ) ); //By default enable all punch modes, Capture Punch Images in KIOSK mode, Disable Screensaver, Disable GPS
 					$sf->setDefaultModeFlag( 16 ); //Facial Recognition.
 
 					if ( is_object( $sf->getCompanyObject() ) AND is_object( $sf->getCompanyObject()->getUserDefaultObject() ) ) {

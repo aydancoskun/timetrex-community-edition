@@ -185,6 +185,7 @@ class PunchFactory extends Factory {
 											'date_stamp' => FALSE,
 											'user_date_id' => FALSE,
 											'pay_period_id' => FALSE,
+											'total_time' => FALSE, //Used for Map, Distance tab.
 
 											'branch_id' => FALSE,
 											'branch' => FALSE,
@@ -192,8 +193,10 @@ class PunchFactory extends Factory {
 											'department' => FALSE,
 											'job_id' => FALSE,
 											'job' => FALSE,
+											'job_manual_id' => FALSE,
 											'job_item_id' => FALSE,
 											'job_item' => FALSE,
+											'job_item_manual_id' => FALSE,
 											'quantity' => FALSE,
 											'bad_quantity' => FALSE,
 											'meal_policy_id' => FALSE,
@@ -1073,7 +1076,7 @@ class PunchFactory extends Factory {
 	 */
 	function setLongitude( $value ) {
 		if ( is_numeric($value) AND $value != 0 ) { //Since we don't obtain coordinates via GEO coding, its just passed from the device, ignore 0 values as some versions of the mobile app pass in 0 values.
-			$value = number_format( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+			$value = round( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
@@ -1094,7 +1097,7 @@ class PunchFactory extends Factory {
 	 */
 	function setLatitude( $value ) {
 		if ( is_numeric($value) AND $value != 0 ) { //Since we don't obtain coordinates via GEO coding, its just passed from the device, ignore 0 values as some versions of the mobile app pass in 0 values.
-			$value = number_format( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+			$value = round( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
@@ -1115,7 +1118,7 @@ class PunchFactory extends Factory {
 	 */
 	function setPositionAccuracy( $value ) {
 		if ( is_numeric($value) ) {
-			$value = number_format( (float)trim( $value ), 6 ); //This in meters.
+			$value = round( (float)trim( $value ) ); //This in whole meters.
 		} else {
 			$value = NULL; //If no position accuracy is sent, leave NULL.
 		}
@@ -2580,14 +2583,17 @@ class PunchFactory extends Factory {
 						case 'default_department_id':
 						case 'default_department':
 						case 'pay_period_id':
+						case 'total_time': //Used for Map, Distance tab.
 						case 'branch_id':
 						case 'branch':
 						case 'department_id':
 						case 'department':
 						case 'job_id':
 						case 'job':
+						case 'job_manual_id':
 						case 'job_item_id':
 						case 'job_item':
+						case 'job_item_manual_id':
 						case 'quantity':
 						case 'bad_quantity':
 						case 'user_date_id':

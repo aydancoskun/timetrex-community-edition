@@ -14,23 +14,6 @@ DashletController = Backbone.View.extend( {
 	initTimesheetGridComplete: null,
 	accumulated_total_grid_source_map: null,
 	accmulated_order_map: null,
-	report_apis: {
-		AccrualBalanceSummaryReport: 'APIAccrualBalanceSummaryReport',
-		AuditTrailReport: 'APIAuditTrailReport',
-		UserSummaryReport: 'APIUserSummaryReport',
-		ExceptionReport: 'APIExceptionSummaryReport',
-		UserExpenseReport: 'APIUserExpenseReport',
-		PayStubSummaryReport: 'APIPayStubSummaryReport',
-		PunchSummaryReport: 'APIPunchSummaryReport',
-		UserQualificationReport: 'APIUserQualificationReport',
-		UserRecruitmentDetailReport: 'APIUserRecruitmentDetailReport',
-		UserRecruitmentSummaryReport: 'APIUserRecruitmentSummaryReport',
-		KPIReport: 'APIKPIReport',
-		ScheduleSummaryReport: 'APIScheduleSummaryReport',
-		TimeSheetDetailReport: 'APITimesheetDetailReport',
-		TimeSheetSummaryReport: 'APITimesheetSummaryReport',
-		ActiveShiftReport: 'APIActiveShiftReport'
-	},
 
 	initialize: function( options ) {
 		this.api_dashboard = new (APIFactory.getAPIClass( 'APIDashboard' ))();
@@ -50,19 +33,20 @@ DashletController = Backbone.View.extend( {
 		var $this = this;
 		this.setTitle();
 		this.initComplete = false;
+
 		if ( Global.isScrolledIntoView( $( $this.el ) ) ) {
 			doInit();
 		}
 
-		//BUG#2070 - Break resizable for mobile because it negatively impacts usability
+		//BUG#2070 - Disable resizable for mobile because it negatively impacts usability
 		if ( Global.detectMobileBrowser() == false ) {
 			$( '#' + $( this.el ).attr( 'id' ) ).resizable( {
 				handles: 'all',
-				start: function(e, ui){},
-				resize: function(e, ui){
+				start: function(e, ui) {},
+				resize: function(e, ui) {
 					$this.setGridSize();
 				},
-				stop: function(e, ui){
+				stop: function(e, ui) {
 					$this.addIframeBack();
 					var height = Math.floor(ui.size.height);
 					var width = Math.floor(ui.size.width);
@@ -89,12 +73,12 @@ DashletController = Backbone.View.extend( {
 			} else if ( $this.data.data.dashlet_type == 'custom_report' ) {
 				$( $this.el ).addClass( 'custom-report' );
 				$this.initReportContent();
-				$( $this.el ).unbind( 'mousedown' ).bind( 'mousedown', function() {
+				//DO NOT call .unbind here, as it breaks resizing dashlets at the very bottom that have to be scrolled into view by overwriting jquery-ui mousedown events
+				$( $this.el ).bind( 'mousedown', function() {
 					$this.removeIframe();
 				} );
-				$( $this.el ).unbind( 'mouseup' ).bind( 'mouseup', function() {
+				$( $this.el ).bind( 'mouseup', function() {
 					$this.addIframeBack();
-
 				} );
 			} else if ( $this.data.data.dashlet_type == 'request_summary' ) {
 				$( $this.el ).addClass( 'request-summary' );
@@ -695,7 +679,7 @@ DashletController = Backbone.View.extend( {
 		var start_id = -2;
 		// Add a random id to make sure each row has different id when the item don't have id itself (Scheudle summary)
 		data = _.map( data, function( item ) {
-			if ( item.hasOwnProperty( 'id' ) && !item.id ) {
+			if ( item.hasOwnProperty( 'id' ) && ( !item.id || item.id == TTUUID.zero_id ) ) {
 				item.id = start_id;
 			}
 			start_id--;
@@ -760,7 +744,7 @@ DashletController = Backbone.View.extend( {
 	initReportData: function() {
 		var $this = this;
 		if ( $this.data.data.template !== 'saved_report' ) {
-			var report_api = new (APIFactory.getAPIClass( $this.report_apis[$this.data.data.report] ))();
+			var report_api = this.getAPIByViewName( this.data.data.report );
 			report_api.getTemplate( $this.data.data.template, {
 				onResult: function( result ) {
 					var config = result.getResult();

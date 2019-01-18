@@ -1222,6 +1222,7 @@ class CurrencyFactory extends Factory {
 	function postSave() {
 		$this->removeCache( $this->getId() );
 		$this->removeCache( $this->getCompany().$this->getBase() );
+		$this->removeCache( $this->getCompany().$this->getISOCode() ); //PayrollDeduction_Base calls into currency to get exchange rates if needed.
 
 		//CompanyFactory->getEncoding() is used to determine report encodings based on data saved here.
 		$this->removeCache( 'encoding_'.$this->getCompany(), 'company' );

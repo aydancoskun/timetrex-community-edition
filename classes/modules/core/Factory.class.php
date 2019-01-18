@@ -133,9 +133,9 @@ abstract class Factory {
 		return TRUE;
 	}
 
-	//Generic function to return and cache class objects
-	//ListFactory, ListFactoryMethod, Variable, ID, IDMethod
 	/**
+	 * Generic function to return and cache class objects
+	 * ListFactory, ListFactoryMethod, Variable, ID, IDMethod
 	 * @param string $list_factory
 	 * @param string|int $id UUID
 	 * @param string $variable
@@ -185,6 +185,9 @@ abstract class Factory {
 	 * @return bool|mixed
 	 */
 	function getGenericDataValue( $name, $cast = NULL ) {
+
+		//FIXME: This won't pass through NULL values from the DB, because isset() checks for NULL.
+		//Use array_key_exists(), instead, then return whatever it has, including NULL. Be sure to update getGenericTempDataValue() too.
 		if ( isset($this->data[$name]) ) {
 //			if ( $cast != '' ) {
 //				$this->castGenericDataValue( $this->data[$name], $cast );
@@ -1246,7 +1249,7 @@ abstract class Factory {
 				$date = (int)TTDate::parseDateTime( str_replace( $operators, '', $tmp_str ) );
 				//Debug::text(' Parsed Date: '. $tmp_str .' To: '. TTDate::getDate('DATE+TIME', $date) .' ('. $date .')', __FILE__, __LINE__, __METHOD__, 10);
 
-				if ( $date != 0 ) {
+				if ( $date != 0 AND TTDate::isValidDate( $date ) == TRUE ) {
 					preg_match('/^>=|>|<=|</i', $tmp_str, $operator );
 					//Debug::Arr($operator, ' Operator: ', __FILE__, __LINE__, __METHOD__, 10);
 					if ( isset($operator[0]) AND in_array( $operator[0], $operators ) ) {
@@ -1752,13 +1755,17 @@ abstract class Factory {
 				}
 				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args) ) {
 					foreach( $args as $tmp_arg ) {
-						$converted_args[] = $this->db->bindDate( (int)$tmp_arg );
+						if ( TTDate::isValidDate( $tmp_arg ) ) {
+							$converted_args[] = $this->db->bindDate( (int)$tmp_arg );
+						}
 					}
 
-					if ( $query_stub == '' AND !is_array($columns) ) {
-						$query_stub = $columns .' IN (?)';
+					if ( isset($converted_args) AND count( $converted_args ) > 0 ) {
+						if ( $query_stub == '' AND !is_array( $columns ) ) {
+							$query_stub = $columns . ' IN (?)';
+						}
+						$retval = str_replace( '?', $this->getListSQL( $converted_args, $ph ), $query_stub );
 					}
-					$retval = str_replace('?', $this->getListSQL($converted_args, $ph ), $query_stub );
 				}
 				break;
 			case 'start_datestamp': //Uses EPOCH values only, used for date/timestamp datatype columns
@@ -1766,7 +1773,7 @@ abstract class Factory {
 				if ( !is_array($args) ) { //Can't check isset() on a NULL value.
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$args = $this->castInteger( $this->Validator->stripNonFloat( $args ), 'int' ); //Make sure we allow decimals
-						if ( is_numeric( $args ) ) {
+						if ( is_numeric( $args ) AND TTDate::isValidDate( $args ) ) {
 							$ph[] = $this->db->bindDate( $args );
 							if ( strtolower($type) == 'start_datestamp' ) {
 								$query_stub = $columns .' >= ?';
@@ -1784,7 +1791,7 @@ abstract class Factory {
 				if ( !is_array($args) ) { //Can't check isset() on a NULL value.
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$args = $this->castInteger( $this->Validator->stripNonFloat( $args ), 'int' ); //Make sure we allow decimals
-						if ( is_numeric( $args ) ) {
+						if ( is_numeric( $args ) AND TTDate::isValidDate( $args ) ) {
 							$ph[] = $this->db->bindTimeStamp( $args );
 							if ( strtolower($type) == 'start_timestamp' ) {
 								$query_stub = $columns .' >= ?';
@@ -1802,7 +1809,7 @@ abstract class Factory {
 				if ( !is_array($args) ) { //Can't check isset() on a NULL value.
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$args = $this->castInteger( $this->Validator->stripNonFloat( $args ), 'int' ); //Make sure we allow decimals
-						if ( is_numeric( $args ) ) {
+						if ( is_numeric( $args ) AND TTDate::isValidDate( $args ) ) {
 							$ph[] = $args;
 							if ( strtolower($type) == 'start_date' ) {
 								$query_stub = $columns .' >= ?';
@@ -2220,16 +2227,16 @@ abstract class Factory {
 	 * @return mixed
 	 * @throws DBError
 	 */
-	public function getEmptyRecordSet( $id = NULL) {
+	public function getEmptyRecordSet( $id = NULL ) {
 		global $profiler, $config_vars;
 		$profiler->startTimer( 'getEmptyRecordSet()' );
 
-		if ($id == NULL) {
+		if ( $id == NULL ) {
 //			$id = -1;
 			$id = TTUUID::getNotExistID();
 		}
 
-		$id = TTUUID::castUUID($id);
+		$id = TTUUID::castUUID( $id );
 
 		//Possible errors can happen if $this->data[<invalid_column>] is passed, like what happens with APIPunch when attempting to delete a punch.
 		//Why are we not using '*' for all empty record set queries? Will using * cause more fields to be updated then necessary?
@@ -2246,6 +2253,7 @@ abstract class Factory {
 		} else {
 			$column_str = '*'; //Get empty RS with all columns.
 		}
+
 		try {
 			$query = 'SELECT '. $column_str .' FROM '. $this->table .' WHERE id = \''. $id .'\'';
 			if ( $id == TTUUID::getNotExistID() AND isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] == TRUE ) {
@@ -2343,21 +2351,25 @@ abstract class Factory {
 	private function getInsertQuery() {
 		Debug::text('Insert', __FILE__, __LINE__, __METHOD__, 9);
 
-		//Debug::arr($this->data, 'Data Arr', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->data, 'Data Arr', __FILE__, __LINE__, __METHOD__, 10);\
 
-//		$rs is a unused variable when we use $table instead of $rs in GetInsertSQL() below.
-//		try {
-//			$rs = $this->getEmptyRecordSet();
-//		} catch (Exception $e) {
-//			throw new DBError($e);
-//		}
+		//ignore_column_list
 
-		$table = $this->getTable(); //STRICT warning from v5.4
+		try {
+			//This prevents SQL errors (ie: NULL columns when they shouldn't be) caused by only certain columns being cached in the empty record set, and therefore being ignored in the INSERT query.
+			$this->ignore_column_list = TRUE;
+			$rs = $this->getEmptyRecordSet();
+			$this->ignore_column_list = FALSE;
+		} catch (Exception $e) {
+			throw new DBError($e);
+		}
 
-		//Use table name instead of recordset, especially when using CacheLite for caching empty recordsets.
-		//$query = $this->db->GetInsertSQL($rs, $this->data);
-		$query = $this->db->GetInsertSQL($table, $this->data);
+		if (!$rs) {
+			Debug::text('ERROR: Unable to get empty record set for insert!', __FILE__, __LINE__, __METHOD__, 9);
+			//Throw exception?
+		}
 
+		$query = $this->db->GetInsertSQL($rs, $this->data);
 		//Debug::text('Insert Query: '. $query, __FILE__, __LINE__, __METHOD__, 9);
 
 		return $query;
@@ -2566,6 +2578,44 @@ abstract class Factory {
 		$retarr = array_diff_assoc( (array)$this->old_data, (array)$this->data );
 		Debug::Arr( $retarr, 'Calling getDataDifferences()', __FILE__, __LINE__, __METHOD__, 10);
 		return $retarr;
+	}
+
+	/**
+	 * Used to check the differences between a single key in the $old_data vs. $data arrays.
+	 * This is especially important to use when trying to see if a date or timestamp field in the DB has changed, as they need to be handled in special ways.
+	 * @param $key string
+	 * @param $data_diff array
+	 * @param null $type_id string
+	 * @param null $new_data mixed
+	 * @return bool
+	 */
+	function isDataDifferent( $key, $data_diff, $type_id = NULL, $new_data = NULL ) {
+		// Must use array_key_exists as there could be a NULL value which is old value and is different of course.
+		if ( array_key_exists( $key, $data_diff ) == TRUE ) {
+			$retval = FALSE;
+
+			$old_data = $data_diff[$key];
+
+			if ( $new_data === NULL AND array_key_exists( $key, $this->data ) ) {
+				$new_data = $this->data[$key];
+			}
+
+			switch ( strtolower($type_id) ) {
+				case 'date':
+					//When comparing dates, the old_data is likely from the DB and a string date, while the new data is likely epoch.
+					if ( TTDate::getMiddleDayEpoch( strtotime( $old_data ) ) != TTDate::getMiddleDayEpoch( $new_data ) ) {
+						$retval = TRUE;
+					}
+					break;
+				default:
+					$retval = TRUE;
+					break;
+			}
+
+			return $retval;
+		}
+
+		return FALSE;
 	}
 
 	//Determines to insert or update, and does it.
@@ -2802,7 +2852,8 @@ abstract class Factory {
 	 * @return bool
 	 */
 	function clearGeoCode( $data_diff = NULL ) {
-		if ( is_array($data_diff) AND ( isset($data_diff['address1']) OR isset($data_diff['address2']) OR isset($data_diff['city']) OR isset($data_diff['province']) OR isset($data_diff['country']) OR isset($data_diff['postal_code']) ) ) {
+		if ( is_array($data_diff)
+				AND ( $this->isDataDifferent( 'address1', $data_diff ) OR $this->isDataDifferent( 'address2', $data_diff ) OR $this->isDataDifferent( 'city', $data_diff ) OR $this->isDataDifferent( 'province', $data_diff ) OR $this->isDataDifferent( 'country', $data_diff ) OR $this->isDataDifferent( 'postal_code', $data_diff ) ) ) {
 			//Run a separate custom query to clear the geocordinates. Do we really want to do this for so many objects though...
 			Debug::text('Address has changed, clear geocordinates!', __FILE__, __LINE__, __METHOD__, 10);
 			$query = 'UPDATE '. $this->getTable() .' SET longitude = NULL, latitude = NULL where id = ?';

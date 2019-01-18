@@ -391,130 +391,134 @@ class RequestFactory extends Factory {
 														$ulf->getByID($this->getUser()),
 														TTi18n::gettext('Invalid Employee')
 													);
-		// Pay Period
-		if ( $this->getPayPeriod() !== FALSE AND $this->getPayPeriod() != TTUUID::getZeroID() ) {
-			$pplf = TTnew( 'PayPeriodListFactory' );
-			$this->Validator->isResultSetWithRows(	'pay_period',
-															$pplf->getByID($this->getPayPeriod()),
-															TTi18n::gettext('Invalid Pay Period')
-														);
-		}
-		// Date
-		$this->Validator->isDate(		'date_stamp',
-												$this->getDateStamp(),
-												TTi18n::gettext('Incorrect date').' (a)'
-											);
-		if ( $this->Validator->isError('date_stamp') == FALSE ) {
-			if ( $this->getDateStamp() > 0 ) {
-				$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
-			} else {
-				$this->Validator->isTRUE(		'date_stamp',
-												FALSE,
-												TTi18n::gettext('Incorrect date').' (b)'
-											);
-			}
-		}
-
-		if ( $this->Validator->isError('date_stamp') == FALSE AND $this->getDateStamp() < ( time() - (86400 * 365 * 1 ) ) ) { //No more than 1 year in the past
-			$this->Validator->isTRUE(		'date_stamp',
-											 FALSE,
-											 TTi18n::gettext('Date cannot be more than 1 year in the past')
-			);
-		}
-
-		if ( $this->Validator->isError('date_stamp') == FALSE AND $this->getDateStamp() > ( time() + (86400 * 365 * 5 ) ) ) { //No more than 5 years in the future.
-			$this->Validator->isTRUE(		'date_stamp',
-											 FALSE,
-											 TTi18n::gettext('Date cannot be more than 5 years in the future')
-			);
-		}
-
-		//Make sure the user isn't entering requests before the employees hire or after termination date
-		if ( $this->Validator->isError('date_stamp') == FALSE AND $this->getDeleted() == FALSE AND $this->getDateStamp() != FALSE AND is_object( $this->getUserObject() ) ) {
-			if ( $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $this->getDateStamp() ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
-				$this->Validator->isTRUE(	'date_stamp',
-											 FALSE,
-											 TTi18n::gettext('Date cannot be before your hire date') );
-			}
-			//Don't bother checking termination date, as it leak sensitive information.
-		}
-
-		// Type
-		$this->Validator->inArrayKey(	'type',
-												$this->getType(),
-												TTi18n::gettext('Incorrect Type'),
-												$this->getOptions('type')
-											);
-		// Status
-		if ( $this->getStatus() != FALSE ) {
-			$this->Validator->inArrayKey( 'status',
-										  $this->getStatus(),
-										  TTi18n::gettext( 'Incorrect Status' ),
-										  $this->getOptions( 'status' )
-			);
-		}
-
-		// Authorization level
-		if ( $this->getAuthorizationLevel() !== FALSE ) {
-			$this->Validator->isNumeric(	'authorization_level',
-													$this->getAuthorizationLevel(),
-													TTi18n::gettext('Incorrect authorization level')
-												);
-		}
-
-		if ( $this->getMessage() !== FALSE ) {
-			// HTML interface validates the message too soon, make it skip a 0 length message when only validating.
-			if ( $this->Validator->getValidateOnly() == TRUE AND $this->getMessage() == '' ) {
-				$minimum_length = 0;
-			} else {
-				$minimum_length = 2;
-			}
-			$this->Validator->isLength( 'message',
-										$this->getMessage(),
-										TTi18n::gettext( 'Reason / Message is too short or too long' ),
-										$minimum_length,
-										10240
-			);
-		}
-
-		//
-		// ABOVE: Validation code moved from set*() functions.
-		//
-
-		if (	$this->isNew() == TRUE
-				AND $this->Validator->hasError('message') == FALSE
-				AND $this->getMessage() == FALSE
-				AND $this->Validator->getValidateOnly() == FALSE ) {
-			$this->Validator->isTRUE(		'message',
-											FALSE,
-											TTi18n::gettext('Reason / Message must be specified') );
-		}
-
-		if ( $this->getDateStamp() == FALSE
-			AND $this->Validator->hasError('date_stamp') == FALSE ) {
-			$this->Validator->isTRUE(		'date_stamp',
-											FALSE,
-											TTi18n::gettext('Incorrect Date').' (c)' );
-		}
 
 		if ( !is_object( $this->getUserObject() ) AND $this->Validator->hasError('user_id') == FALSE ) {
 			$this->Validator->isTRUE(		'user_id',
-											FALSE,
-											TTi18n::gettext('Invalid Employee') );
+											 FALSE,
+											 TTi18n::gettext('Invalid Employee') );
 		}
 
-		//Check to make sure this user has superiors to send a request too, otherwise we can't save the request.
-		if ( is_object( $this->getUserObject() ) ) {
-			$hlf = TTnew( 'HierarchyListFactory' );
-			$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUser(), $this->getHierarchyTypeId(), TRUE, FALSE ); //Request - Immediate parents only.
-			Debug::Arr($request_parent_level_user_ids, 'Check for Superiors: ', __FILE__, __LINE__, __METHOD__, 10);
+		if ( $this->getDeleted() == FALSE ) { //Relax validation checks when deleting record, specifically to allow deleting records more than 1 year old that aren't authorized.
+			// Pay Period
+			if ( $this->getPayPeriod() !== FALSE AND $this->getPayPeriod() != TTUUID::getZeroID() ) {
+				$pplf = TTnew( 'PayPeriodListFactory' );
+				$this->Validator->isResultSetWithRows( 'pay_period',
+													   $pplf->getByID( $this->getPayPeriod() ),
+													   TTi18n::gettext( 'Invalid Pay Period' )
+				);
+			}
+			// Date
+			$this->Validator->isDate( 'date_stamp',
+									  $this->getDateStamp(),
+									  TTi18n::gettext( 'Incorrect date' ) . ' (a)'
+			);
+			if ( $this->Validator->isError( 'date_stamp' ) == FALSE ) {
+				if ( $this->getDateStamp() > 0 ) {
+					$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
+				} else {
+					$this->Validator->isTRUE( 'date_stamp',
+											  FALSE,
+											  TTi18n::gettext( 'Incorrect date' ) . ' (b)'
+					);
+				}
+			}
 
-			if ( !is_array($request_parent_level_user_ids) OR count($request_parent_level_user_ids) == 0 ) {
-				$this->Validator->isTRUE(		'message',
-												FALSE,
-												TTi18n::gettext('No supervisors are assigned to you at this time, please try again later') );
+			if ( $this->getDateStamp() == FALSE
+					AND $this->Validator->hasError( 'date_stamp' ) == FALSE ) {
+				$this->Validator->isTRUE( 'date_stamp',
+										  FALSE,
+										  TTi18n::gettext( 'Incorrect Date' ) . ' (c)' );
+			}
+
+			if ( $this->Validator->isError( 'date_stamp' ) == FALSE AND $this->getDateStamp() < ( time() - ( 86400 * 365 * 1 ) ) ) { //No more than 1 year in the past
+				$this->Validator->isTRUE( 'date_stamp',
+										  FALSE,
+										  TTi18n::gettext( 'Date cannot be more than 1 year in the past' )
+				);
+			}
+
+			if ( $this->Validator->isError( 'date_stamp' ) == FALSE AND $this->getDateStamp() > ( time() + ( 86400 * 365 * 5 ) ) ) { //No more than 5 years in the future.
+				$this->Validator->isTRUE( 'date_stamp',
+										  FALSE,
+										  TTi18n::gettext( 'Date cannot be more than 5 years in the future' )
+				);
+			}
+
+			//Make sure the user isn't entering requests before the employees hire or after termination date
+			if ( $this->Validator->isError( 'date_stamp' ) == FALSE AND $this->getDateStamp() != FALSE AND is_object( $this->getUserObject() ) ) {
+				if ( $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $this->getDateStamp() ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
+					$this->Validator->isTRUE( 'date_stamp',
+											  FALSE,
+											  TTi18n::gettext( 'Date cannot be before your hire date' ) );
+				}
+				//Don't bother checking termination date, as it leak sensitive information.
+			}
+
+			// Type
+			$this->Validator->inArrayKey( 'type',
+										  $this->getType(),
+										  TTi18n::gettext( 'Incorrect Type' ),
+										  $this->getOptions( 'type' )
+			);
+			// Status
+			if ( $this->getStatus() != FALSE ) {
+				$this->Validator->inArrayKey( 'status',
+											  $this->getStatus(),
+											  TTi18n::gettext( 'Incorrect Status' ),
+											  $this->getOptions( 'status' )
+				);
+			}
+
+			// Authorization level
+			if ( $this->getAuthorizationLevel() !== FALSE ) {
+				$this->Validator->isNumeric( 'authorization_level',
+											 $this->getAuthorizationLevel(),
+											 TTi18n::gettext( 'Incorrect authorization level' )
+				);
+			}
+
+			if ( $this->getMessage() !== FALSE ) {
+				// HTML interface validates the message too soon, make it skip a 0 length message when only validating.
+				if ( $this->Validator->getValidateOnly() == TRUE AND $this->getMessage() == '' ) {
+					$minimum_length = 0;
+				} else {
+					$minimum_length = 2;
+				}
+				$this->Validator->isLength( 'message',
+											$this->getMessage(),
+											TTi18n::gettext( 'Reason / Message is too short or too long' ),
+											$minimum_length,
+											10240
+				);
+			}
+
+			//
+			// ABOVE: Validation code moved from set*() functions.
+			//
+
+			//Check to make sure this user has superiors to send a request too, otherwise we can't save the request.
+			if ( is_object( $this->getUserObject() ) ) {
+				$hlf = TTnew( 'HierarchyListFactory' );
+				$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUser(), $this->getHierarchyTypeId(), TRUE, FALSE ); //Request - Immediate parents only.
+				Debug::Arr( $request_parent_level_user_ids, 'Check for Superiors: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+				if ( !is_array( $request_parent_level_user_ids ) OR count( $request_parent_level_user_ids ) == 0 ) {
+					$this->Validator->isTRUE( 'message',
+											  FALSE,
+											  TTi18n::gettext( 'No supervisors are assigned to you at this time, please try again later' ) );
+				}
 			}
 		}
+
+		if ( $this->isNew() == TRUE
+				AND $this->Validator->hasError( 'message' ) == FALSE
+				AND $this->getMessage() == FALSE
+				AND $this->Validator->getValidateOnly() == FALSE ) {
+			$this->Validator->isTRUE( 'message',
+									  FALSE,
+									  TTi18n::gettext( 'Reason / Message must be specified' ) );
+		}
+
 
 		if ( $this->getDeleted() == TRUE AND in_array( $this->getStatus(), array(50, 55) ) ) {
 			$this->Validator->isTRUE(		'status_id',

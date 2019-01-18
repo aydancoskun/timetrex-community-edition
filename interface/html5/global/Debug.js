@@ -36,18 +36,18 @@ Debug.Text = function( text, file, class_name, function_name, verbosity ) {
 	}
 };
 
-// Used to temporarily highlight text and values during development
-Debug.Highlight = function( text, variable, verbosity ) {
-	verbosity = verbosity || 10;
+// Used to temporarily highlight text and values during development. Default can be level 1 as function use should be temporary, and not committed in code
+Debug.Highlight = function ( text, variable, verbosity ) {
+	verbosity = verbosity || 1;
 	if ( this.getEnable() && verbosity <= this.getVerbosity() ) {
-		var time = ('00000' + Debug.getExecutionTime()).slice( -5 );
-		var output = '%c %c HIGHLIGHT [' + time + 'ms] %c'+ text;
+		var time = ( '00000' + Debug.getExecutionTime() ).slice( -5 );
+		var output = '%c %c HIGHLIGHT [' + time + 'ms] %c' + text;
 		var style_boolean = [
 			'border: 1px solid black',
 			'border-right: none',
 			'margin: 15px 0',
 			'padding: 5px 1px'
-		].join(';');
+		].join( ';' );
 		var style_keyword = [
 			'color: #375b7d',
 			'font-weight: bold',
@@ -55,7 +55,7 @@ Debug.Highlight = function( text, variable, verbosity ) {
 			'border: 1px solid black',
 			'margin: 15px 0',
 			'padding: 5px'
-		].join(';');
+		].join( ';' );
 		var style_text = [
 			'color: #000',
 			'background: #c9def0',
@@ -63,12 +63,16 @@ Debug.Highlight = function( text, variable, verbosity ) {
 			'border-left: none',
 			'margin: 15px 0',
 			'padding: 5px'
-		].join(';');
+		].join( ';' );
 
-		if(variable == true) { style_boolean += ';background:green'; }
-		else if (variable == false) { style_boolean += ';background:red'; }
+		if ( variable == true ) {
+			style_boolean += ';background:green';
+		}
+		else if ( variable == false ) {
+			style_boolean += ';background:red';
+		}
 
-		console.info(output, style_boolean, style_keyword, style_text, variable);
+		console.info( output, style_boolean, style_keyword, style_text, variable );
 	}
 };
 

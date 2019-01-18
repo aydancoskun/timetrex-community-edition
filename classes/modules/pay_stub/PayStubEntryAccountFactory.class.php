@@ -739,8 +739,8 @@ class PayStubEntryAccountFactory extends Factory {
 	}
 
 	function postSave() {
-		$this->removeCache( 'company_id-'.$this->getCompany() );
 		$this->removeCache( $this->getId() );
+		$this->removeCache( NULL, $this->getTable( TRUE ).$this->getCompany() ); //PayStubEntryAccountListFactory has several functions that cache data in this group, so clear them all.
 	}
 
 	/**

@@ -1903,7 +1903,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	 * @return bool
 	 */
 	static function findPayPeriod( $user_id, $date_stamp ) {
-		if ( $date_stamp > 0 AND $user_id != '' ) {
+		if ( TTDate::isValidDate( $date_stamp ) == TRUE AND $user_id != '' ) {
 			//FIXME: With MySQL since it doesn't handle timezones very well I think we need to
 			//get the timezone of the payperiod schedule for this user, and set the timezone to that
 			//before we go searching for a pay period, otherwise the wrong payperiod might be returned.

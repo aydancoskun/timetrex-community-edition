@@ -9,7 +9,6 @@ require.config( {
 		'jquery_json': '../../framework/jquery.json',
 		'jquery_tablednd': '../../framework/jquery.tablednd',
 		'jquery_ba_resize': '../../framework/jquery.ba-resize',
-		'fastclick': '../../framework/fastclick',
 		'html2canvas': '../../framework/html2canvas',
 		'moment': '../../framework/moment',
 		'timepicker_addon': '../../framework/widgets/datepicker/jquery-ui-timepicker-addon',
@@ -549,7 +548,6 @@ require( [
 	'jquery-ui',
 	'jquery.i18n',
 	'jquery_ba_resize',
-	'fastclick',
 	'moment',
 	'IndexController',
 	'BaseViewController',
@@ -656,7 +654,6 @@ require( [
 
 		// $( 'body' ).addClass( 'login-bg' );
 
-		FastClick.attach( $( 'body' )[0] );
 		//Load need API class
 
 		$( document ).on( "keydown", function( e ) {

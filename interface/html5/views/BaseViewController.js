@@ -1104,6 +1104,8 @@ BaseViewController = Backbone.View.extend( {
 			this.removeContentMenuByName( needRemovedContextMenuName );
 		}
 
+		$( '#ribbon_view_container' ).tabs( 'refresh' ); //Required to prevent a tiny blue line (context menu background) from "flashing" immediately below the ribbon menu when changing views.
+
 		if ( setFocus ) {
 			this.need_switch_to_context_menu = true;
 
@@ -2392,7 +2394,7 @@ BaseViewController = Backbone.View.extend( {
 					this[tab_model[tab_name].init_callback]( tab_name ); //Call mapped function to initialize the tab.
 				} else {
 					//Assume primary tab and build context menu.
-					if ( this.current_edit_record.id ) {
+					if ( this.current_edit_record.id && this.current_edit_record.id != TTUUID.zero_id ) {
 						this.buildContextMenu( true );
 						this.setEditMenu();
 					} else {
@@ -2425,7 +2427,7 @@ BaseViewController = Backbone.View.extend( {
 			//Handle most cases that one tab and on audit tab
 			if ( key === 1 ) {
 
-				if ( this.current_edit_record.id ) {
+				if ( this.current_edit_record.id && this.current_edit_record.id != TTUUID.zero_id ) {
 					this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 					this.initSubLogView( 'tab_audit' );
 				} else {
@@ -3666,7 +3668,7 @@ BaseViewController = Backbone.View.extend( {
 			var current_tab_index = this.getEditViewTabIndex();
 			//Handle most case that one tab and one audit tab
 			if ( current_tab_index === 1 ) {
-				if ( this.current_edit_record.id ) {
+				if ( this.current_edit_record.id && this.current_edit_record.id != TTUUID.zero_id ) {
 					this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 					this.initSubLogView( 'tab_audit' );
 				} else {
@@ -4694,6 +4696,7 @@ BaseViewController = Backbone.View.extend( {
 					break;
 				case ContextMenuIconName.map:
 					this.setEditMenuMapIcon( context_btn );
+					break;
 				case ContextMenuIconName.export_excel:
 					this.setDefaultMenuExportIcon( context_btn );
 					break;
@@ -5599,7 +5602,7 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
-	setSelectLayout: function( column_start_from ) {
+	setSelectLayout: function( exclude_column ) {
 		var $this = this;
 		var grid;
 
@@ -5654,13 +5657,12 @@ BaseViewController = Backbone.View.extend( {
 		//Set Data Grid on List view
 		var len = display_columns.length;
 
-		var start_from = 0;
-
-		if ( Global.isSet( column_start_from ) && column_start_from > 0 ) {
-			start_from = column_start_from;
-		}
-		for ( var i = start_from; i < len; i++ ) {
+		for ( var i = 0; i < len; i++ ) {
 			var view_column_data = display_columns[i];
+
+			if ( $.inArray( view_column_data.value, exclude_column ) !== -1 ) {
+				continue;
+			}
 
 			var column_info = {
 				name: view_column_data.value,
@@ -6568,7 +6570,6 @@ BaseViewController = Backbone.View.extend( {
 		this.grid.grid.setGridHeight( ($( this.el ).height() - (this.search_panel && this.search_panel.is( ':visible' ) ? this.search_panel.height() : 0) - 43 - header_size) );
 	},
 	setEditViewTabSize: function() {
-
 		var $this = this;
 		var tab_bar_label = this.edit_view_tab.find( '.edit-view-tab-bar-label' );
 		var tab_width = this.edit_view_tab.width();
@@ -7337,7 +7338,7 @@ BaseViewController = Backbone.View.extend( {
 	initSubLogView: function( tab_id ) {
 		var $this = this;
 
-		if ( !this.current_edit_record.id ) {
+		if ( !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id ) {
 			return;
 		}
 
@@ -7623,11 +7624,11 @@ BaseViewController = Backbone.View.extend( {
 		var lat = 39.50;
 		var lng = -98.35;
 
-		if ( typeof(LocalCacheData.getCurrentCompany().latitude) == 'number' && typeof(LocalCacheData.getCurrentCompany().longitude) == 'number' && LocalCacheData.getCurrentCompany().latitude != 0 && LocalCacheData.getCurrentCompany().longitude != 0 ) {
+		if ( LocalCacheData.getCurrentCompany().latitude != 0 && LocalCacheData.getCurrentCompany().longitude != 0 ) {
 			lat = LocalCacheData.getCurrentCompany().latitude;
 			lng = LocalCacheData.getCurrentCompany().longitude;
 			Debug.Text( 'Using company coordinates.', 'BaseViewController.js', 'BaseViewController', 'startMapCoordinates', 10 );
-		} else if ( typeof(LocalCacheData.getLoginUser().latitude) == 'number' && typeof(LocalCacheData.getLoginUser().longitude) == 'number' && LocalCacheData.getLoginUser().latitude != 0 && LocalCacheData.getLoginUser().longitude != 0 ) {
+		} else if ( LocalCacheData.getLoginUser().latitude != 0 && LocalCacheData.getLoginUser().longitude != 0 ) {
 			lat = LocalCacheData.getLoginUser().latitude;
 			lng = LocalCacheData.getLoginUser().longitude;
 			Debug.Text( 'Using user coordinates.', 'BaseViewController.js', 'BaseViewController', 'startMapCoordinates', 10 );
@@ -7771,8 +7772,7 @@ BaseViewController = Backbone.View.extend( {
 				offset += this.getDefaultHeightOffset() - 90;
 			}
 
-			//If there needs to be paging (prev/next) buttons displayed, increase the offset, otherwise they will be below the red footer and off the screen.
-			if ( this.grid.getData().length >= LocalCacheData.getLoginUserPreference().items_per_page ) {
+			if ( this.paging_widget && this.paging_widget.getPagerData() && ( this.paging_widget.getPagerData().total_rows == false || this.paging_widget.getPagerData().total_rows >= LocalCacheData.getLoginUserPreference().items_per_page ) ) {
 				offset += 25;
 			}
 

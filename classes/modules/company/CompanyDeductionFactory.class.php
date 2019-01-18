@@ -1370,6 +1370,18 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	/**
+	 * Check to see if user length of service eligibility criteria are actually specified for this Tax/Deduction record.
+	 * @return bool
+	 */
+	function isUserLengthOfServiceEligibility() {
+		if ( $this->getMinimumLengthOfService() != 0 OR $this->getMaximumLengthOfService() != 0 ) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
 	 * @param object $ud_obj
 	 * @param int $epoch EPOCH
 	 * @param bool $pay_period_start_date
@@ -1494,14 +1506,31 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	/**
+	 * Check to see if user age eligibility criteria are actually specified for this Tax/Deduction record.
+	 * @return bool
+	 */
+	function isUserAgeEligibility() {
+		if ( $this->getMinimumUserAge() != 0 OR $this->getMaximumUserAge() != 0 ) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
 	 * @param int $birth_date EPOCH
 	 * @param int $pp_end_date EPOCH
 	 * @param int $pp_transaction_date EPOCH
 	 * @return bool
 	 */
 	function isActiveUserAge( $birth_date, $pp_end_date = NULL, $pp_transaction_date = NULL ) {
+		//If no user age elibibility criteria is defined, return TRUE as if they are eligible.
+		if ( $this->isUserAgeEligibility() == FALSE ) {
+			return TRUE;
+		}
+
 		$user_age = TTDate::getYearDifference( $birth_date, $pp_end_date );
-		Debug::Text('User Age: '. $user_age .' Min: '. $this->getMinimumUserAge() .' Max: '. $this->getMaximumUserAge(), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'User Age: ' . $user_age . ' Min: ' . $this->getMinimumUserAge() . ' Max: ' . $this->getMaximumUserAge(), __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( $this->getCalculation() == 90 ) { //CPP
 			return $this->isCPPAgeEligible( $birth_date, $pp_transaction_date );
@@ -2578,15 +2607,29 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	/**
+	 * Expands Total PS accounts (ie: Total Gross, Total Deduction, Total Employer Contributions, Net Pay) into their individual PS accounts.
 	 * @param string $ids UUID
+	 * @param bool $include_net_pay Check to see if Net Pay PS account is in $ids, and expand all earnings and deductions.
 	 * @return array
 	 */
-	function getExpandedPayStubEntryAccountIDs( $ids ) {
+	function getExpandedPayStubEntryAccountIDs( $ids, $include_net_pay = FALSE ) {
 		//Debug::Arr($ids, 'Total Gross ID: '. $this->getPayStubEntryAccountLinkObject()->getTotalGross() .' IDs:', __FILE__, __LINE__, __METHOD__, 10);
 		$ids = (array)$ids;
 		$type_ids = array();
 
-		$total_gross_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalGross(), $ids);
+		if ( $include_net_pay == TRUE ) {
+			//If Net Pay is included
+			$net_pay_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalNetPay(), $ids );
+			if ( $net_pay_key !== FALSE ) {
+				$type_ids[] = 10;
+				$type_ids[] = 20;
+				unset( $ids[ $net_pay_key ] );
+			}
+			unset( $net_pay_key );
+		}
+
+
+		$total_gross_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalGross(), $ids );
 		if ( $total_gross_key !== FALSE ) {
 			$type_ids[] = 10;
 			//$type_ids[] = 60; //Automatically inlcude Advance Earnings here?
@@ -2594,14 +2637,14 @@ class CompanyDeductionFactory extends Factory {
 		}
 		unset($total_gross_key);
 
-		$total_employee_deduction_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalEmployeeDeduction(), $ids);
+		$total_employee_deduction_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalEmployeeDeduction(), $ids );
 		if ( $total_employee_deduction_key !== FALSE ) {
 			$type_ids[] = 20;
 			unset($ids[$total_employee_deduction_key]);
 		}
 		unset($total_employee_deduction_key);
 
-		$total_employer_deduction_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalEmployerDeduction(), $ids);
+		$total_employer_deduction_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalEmployerDeduction(), $ids );
 		if ( $total_employer_deduction_key !== FALSE ) {
 			$type_ids[] = 30;
 			unset($ids[$total_employer_deduction_key]);
@@ -2609,7 +2652,7 @@ class CompanyDeductionFactory extends Factory {
 		unset($total_employer_deduction_key);
 
 		$psea_ids_from_type_ids = array();
-		if ( empty($type_ids) == FALSE) {
+		if ( empty($type_ids) == FALSE ) {
 			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 			$psea_ids_from_type_ids = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $this->getCompany(), array(10, 20), $type_ids, FALSE );
 			if ( is_array( $psea_ids_from_type_ids ) ) {
@@ -2641,9 +2684,7 @@ class CompanyDeductionFactory extends Factory {
 
 		$type_ids = array();
 
-		//Get Linked accounts so we know which IDs are totals.
 		$total_gross_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalGross(), $ids);
-
 		if ( $total_gross_key !== FALSE ) {
 			$type_ids[] = 10;
 			$type_ids[] = 60; //Automatically inlcude Advance Earnings here?

@@ -213,7 +213,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 
 		$additional_order_fields = array('name', 'description', 'last_name', 'start_date', 'user_id');
 		if ( $order == NULL ) {
-			$order = array( 'c.start_date' => 'asc', 'cb.user_id' => 'desc', 'a.week' => 'asc', 'a.start_time' => 'asc' );
+			$order = array( 'c.start_date' => 'asc', 'cb.user_id' => 'desc', 'a.week' => 'asc', 'a.sun' => 'desc', 'a.mon' => 'desc', 'a.tue' => 'desc', 'a.wed' => 'desc', 'a.thu' => 'desc', 'a.fri' => 'desc', 'a.sat' => 'desc', 'a.start_time' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -243,7 +243,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 							c.end_date as recurring_schedule_control_end_date,
 							c.start_week as recurring_schedule_control_start_week,
 							zz.max_week as max_week,
-							( (((a.week-1)+zz.max_week-(c.start_week-1))%zz.max_week) + 1) as remapped_week,
+							( ( ( ( a.week - 1 ) + zz.max_week - ( c.start_week - 1 ) ) % zz.max_week ) + 1 ) as remapped_week,
 
 							d.created_by as user_created_by,
 							d.hire_date as hire_date,
@@ -362,7 +362,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
-			$order = array( 'week' => 'asc', 'sun' => 'asc', 'mon' => 'asc', 'tue' => 'asc', 'wed' => 'asc', 'thu' => 'asc', 'fri' => 'asc', 'sat' => 'asc', 'start_time' => 'asc', 'end_time' => 'asc');
+			$order = array( 'week' => 'asc', 'sun' => 'desc', 'mon' => 'desc', 'tue' => 'desc', 'wed' => 'desc', 'thu' => 'desc', 'fri' => 'desc', 'sat' => 'desc', 'start_time' => 'asc', 'end_time' => 'asc');
 			$strict = FALSE;
 		} else {
 			//Always sort by last name, first name after other columns

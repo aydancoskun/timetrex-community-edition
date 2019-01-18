@@ -15,6 +15,10 @@
 		var left_buttons_enable;
 		var right_buttons_enable;
 
+		this.getPagerData = function() {
+			return pager_data;
+		},
+
 		this.setPagerData = function( value ) {
 
 			pager_data = value;

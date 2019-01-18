@@ -441,6 +441,38 @@ class Misc {
 
 		return $retval;
 	}
+
+	/**
+	 * Returns the most common values for each key (column) in the rows.
+	 * @param $rows
+	 * @param null $filter_columns Specific columns to get common data for.
+	 * @return array|bool
+	 */
+	static function arrayCommonValuesForEachKey( $rows, $filter_columns = NULL ) {
+		if ( !is_array($rows) ) {
+			return FALSE;
+		}
+
+		$retarr = array();
+
+		if ( is_array( $filter_columns ) ) {
+			$array_keys = $filter_columns;
+		} else {
+			$array_keys = array_keys( $rows[0] );
+		}
+
+		foreach( $array_keys as $array_key ) {
+			$counted_column_values = array_count_values( Misc::arrayColumn( $rows, $array_key ) );
+			arsort($counted_column_values);
+
+			$retarr[$array_key] = current( array_slice( array_keys($counted_column_values), 0, 1, TRUE ) );
+			unset( $counted_column_values );
+		}
+
+		Debug::Arr($retarr, 'Most common values for each key: ', __FILE__, __LINE__, __METHOD__, 10);
+		return $retarr;
+	}
+
 	/*
 		Returns all the output_key => output_value pairs where
 		the input_keys are not present in output array keys.

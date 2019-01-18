@@ -464,8 +464,22 @@ class Wage {
 						$amount = $udt_obj->getTotalTimeAmount();
 						Debug::text('bPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 					} else {
-						Debug::text('  NOT Paid Time Policy: ', __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('  NOT Paid Time Policy...', __FILE__, __LINE__, __METHOD__, 10);
 					}
+//				//We shouldn't do anything with UNPAID pay codes. If there needs to be Tax/Deduction calculations based on unpaid timesheet information, they should be marked as "PAID" but have a $0 hourly rate instead.
+//				//PayStubFactory will still accept $0 amount entries, allow calculations to be made on them, then remove them at the last second though.
+//				} elseif ( $udt_obj->getColumn('pay_code_type_id') == 20 ) { //UnPaid
+//					//Pass through even unpaid time to pay stubs, so Tax/Deduction records can base calculations on just units/hours if needed to create other earnings amounts.
+//					if ( is_object( $udt_obj->getPayCodeObject() ) ) {
+//						Debug::text('UnPaid Time... Total Time: '. $udt_obj->getTotalTime() .' Rate: '. $udt_obj->getColumn('hourly_rate'), __FILE__, __LINE__, __METHOD__, 10);
+//						$pay_stub_entry = $udt_obj->getPayCodeObject()->getPayStubEntryAccountId();
+//						$total_time = $udt_obj->getTotalTime();
+//						$rate = $udt_obj->getColumn('hourly_rate');
+//						$amount = $udt_obj->getTotalTimeAmount();
+//						Debug::text('cPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
+//					} else {
+//						Debug::text('  NOT UDT Object...', __FILE__, __LINE__, __METHOD__, 10);
+//					}
 				} elseif ( $udt_obj->getColumn('pay_code_type_id') == 30 ) { //Dock
 					$dock_absence_time = bcadd( $dock_absence_time, $udt_obj->getTotalTime() );
 					$rate = $udt_obj->getColumn('hourly_rate');

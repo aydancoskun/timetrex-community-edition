@@ -1611,7 +1611,7 @@ Global.setURLToBrowser = function( new_url ) {
 };
 
 Global.clone = function( obj ) {
-	return jQuery.extend( true, {}, obj );
+	return jQuery.extend( true, {}, obj ); // true means deep clone, omit for shallow, false is not an option
 };
 
 Global.getFirstKeyFromObject = function( obj ) {
@@ -3931,4 +3931,46 @@ Global.debounce = function ( func, wait, immediate ) {
 			Debug.Text( 'Skipping due to debounce: ' + func.name, 'Global.js', 'Global', 'debounce', 11 );
 		}
 	};
+};
+/**
+ * Filter output to prevent the user from seeing strings such as undefined, false or null.
+ * @param {string} entry the string that needs to be sanitized.
+ * @param {Array} [filters] optional array of filters. If none is supplied, defaults will be used.
+ * @returns {string} returns the sanitized string result
+ */
+Global.filterOutput = function ( entry, filters ) {
+	// default filters can be overridden by passing in a second param
+
+	if ( !filters ) {
+		filters = [false, undefined, null, 'false', 'undefined', 'null'];
+	}
+
+	// if filter matches, replace contents with empty string
+	if ( ( filters.indexOf( entry ) !== -1 ) ) {
+		return '';
+	} else {
+		return entry;
+	}
+};
+
+/**
+ * groupArrayDataByKey - This function is used to group data by object key - used (so far) for the geofence filters
+ * @param {Object[]} data - the array dataset
+ * @param {boolean} [makeUnique] - true will only output one occurance per key. false or ommiting will return all occurances
+ * @returns {*}
+ */
+Global.groupArrayDataByKey = function( data, makeUnique ) {
+
+	return data.reduce( function ( accumulator, currentValue ) {
+		// get a list of all object keys for data object, then iterate through each
+		Object.entries( currentValue ).forEach( function ( key ) {
+			accumulator[key[0]] = accumulator[key[0]] || [];
+
+			// check if value exists or add anyway if makeUnique is false
+			if ( accumulator[key[0]].indexOf( key[1] ) === -1 || !makeUnique ) {
+				accumulator[key[0]].push( key[1] );
+			}
+		} );
+		return accumulator;
+	}, {} );
 };

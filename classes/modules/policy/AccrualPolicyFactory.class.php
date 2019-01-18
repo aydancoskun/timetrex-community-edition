@@ -695,11 +695,20 @@ class AccrualPolicyFactory extends Factory {
 	function inRolloverFrequencyWindow( $current_epoch, $offset, $u_obj, $pay_period_start_date = NULL ) {
 		//Use current_epoch mainly for Yearly cases where the rollover date is 01-Nov and the hire date is always right after it, 10-Nov in the next year.
 		$rollover_date = $this->getCurrentMilestoneRolloverDate( $current_epoch, $u_obj, FALSE );
-		Debug::Text('Rollover Date: '. TTDate::getDate('DATE+TIME', $rollover_date ) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $current_epoch ), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Rollover Date: '. TTDate::getDate('DATE+TIME', $rollover_date ) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $current_epoch ) .' Hire Date: '. TTDate::getDate( 'DATE+TIME', $u_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rollover_date >= ($current_epoch - $offset) AND $rollover_date <= $current_epoch ) {
-			Debug::Text('In rollover frequency window...', __FILE__, __LINE__, __METHOD__, 10);
-			return TRUE;
+			//Don't consider the employees (first) hire date to be in the rollover frequency window
+			// This should avoid cases where the employee is hired, accrues time on their hire date by working and being assigned to a hour-based accrual policy
+			// then the rollover occurs on their hire date and zeros out that time.
+			// We still need to calculate other accruals on hire dates though, just not rollover.
+			if ( TTDate::getBeginDayEpoch( $rollover_date ) > TTDate::getBeginDayEpoch( $u_obj->getHireDate() ) ) {
+				Debug::Text('In rollover frequency window...', __FILE__, __LINE__, __METHOD__, 10);
+
+				return TRUE;
+			} else {
+				Debug::Text('In rollover frequency window, but on user first hire date, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+			}
 		}
 
 		Debug::Text('NOT in rollover frequency window...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1484,8 +1493,8 @@ class AccrualPolicyFactory extends Factory {
 
 		$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'accrual_policy_id' => array( $this->getId() ) ) );
 		if ( $pglf->getRecordCount() > 0 ) {
-			Debug::Text('Found Policy Group...', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $pglf as $pg_obj ) {
+				Debug::Text('Found Policy Group: '. $pg_obj->getName() .' Company ID: '. $pg_obj->getCompany(), __FILE__, __LINE__, __METHOD__, 10);
 				//Get all users assigned to this policy group.
 				if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( TTUUID::getNotExistID(), $user_ids ) ) {
 					Debug::Text('Using users passed in by filter...', __FILE__, __LINE__, __METHOD__, 10);

@@ -1970,11 +1970,12 @@ class ScheduleFactory extends Factory {
 			$data_diff = $this->getDataDifferences();
 
 			//When comparing data_diff with timestamp columns in the DB, we need to convert them to epoch then compare again to make sure they are in fact different.
-			if ( isset($data_diff['date_stamp']) AND TTDate::getMiddleDayEpoch( $this->getDateStamp() ) != TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $data_diff['date_stamp'] ) ) ) {
+			if ( $this->isDataDifferent( 'date_stamp', $data_diff, 'date' ) == TRUE ) {
 				$data_diff['date_stamp'] = TTDate::parseDateTime( $data_diff['date_stamp'] );
 			} else {
 				$data_diff['date_stamp'] = NULL;
 			}
+
 
 			if ( !isset($data_diff['user_id']) ) {
 				$data_diff['user_id'] = NULL;

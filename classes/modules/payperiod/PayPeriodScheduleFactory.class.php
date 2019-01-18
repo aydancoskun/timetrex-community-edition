@@ -42,9 +42,10 @@ class PayPeriodScheduleFactory extends Factory {
 	protected $table = 'pay_period_schedule';
 	protected $pk_sequence_name = 'pay_period_schedule_id_seq'; //PK Sequence name
 
+	protected $holiday_epochs = array(); //Cached holiday epochs for getNextPayPeriod
+
 	protected $create_initial_pay_periods = FALSE;
 	protected $enable_create_initial_pay_periods = TRUE;
-
 
 	/**
 	 * @param $name
@@ -808,19 +809,29 @@ class PayPeriodScheduleFactory extends Factory {
 
 		$holiday_epochs = array();
 
-		$user_ids = $this->getUser();
+		//Need to normalize the date range so its not different for every $epoch value as we get the next pay periods in a loop.
+		$start_date = ( TTDate::getBeginYearEpoch( $epoch ) - ( 86400 * 14 ) );
+		$end_date = ( TTDate::getEndYearEpoch( ( TTDate::getEndYearEpoch( $epoch ) + 86400 ) ) + ( 86400 * 14 ) ); //Look through to the end of the NEXT year + 14 days in advance to make better use of caching, especially for calculating remaining pay periods in the year, which always extends a few days into the next year.
 
-		if ( is_array( $user_ids ) AND count( $user_ids ) > 0 ) {
-			$hlf = TTnew( 'HolidayListFactory' );
-			$hlf->getByPolicyGroupUserIdAndStartDateAndEndDate( $user_ids, ( $epoch - (86400 * 14) ), ( $epoch + (86400 * 2) ) );
-			if ( $hlf->getRecordCount() > 0 ) {
-				foreach( $hlf as $h_obj ) {
-					Debug::Text('Found Holiday Epoch: '. TTDate::getDate('DATE+TIME', $h_obj->getDateStamp() ) .' Name: '. $h_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
-					$holiday_epochs[] = $h_obj->getDateStamp();
+		$cache_id = md5( $this->getId() . $start_date . $end_date ); //Don't cache user_ids, as its only in memory caching for now and we use the current pay_period_schedule_id to prevent conflicts.
+		if ( !isset($this->holiday_epochs[$cache_id]) ) {
+			$user_ids = $this->getUser();
+			if ( is_array( $user_ids ) AND count( $user_ids ) > 0 ) {
+				$hlf = TTnew( 'HolidayListFactory' );
+				$hlf->getByPolicyGroupUserIdAndStartDateAndEndDate( $user_ids, $start_date, $end_date );
+				if ( $hlf->getRecordCount() > 0 ) {
+					foreach ( $hlf as $h_obj ) {
+						Debug::Text( 'Found Holiday Epoch: ' . TTDate::getDate( 'DATE+TIME', $h_obj->getDateStamp() ) . ' Name: ' . $h_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
+						$holiday_epochs[] = $h_obj->getDateStamp();
+					}
+
+					//Debug::Arr($holiday_epochs, 'Holiday Epochs: ', __FILE__, __LINE__, __METHOD__, 10);
 				}
 
-				//Debug::Arr($holiday_epochs, 'Holiday Epochs: ', __FILE__, __LINE__, __METHOD__, 10);
+				$this->holiday_epochs[$cache_id] = $holiday_epochs; //Save cache, just in memory as it would be pretty complicated to clear it in so many different places.
 			}
+		} else {
+			$holiday_epochs = $this->holiday_epochs[$cache_id];
 		}
 
 		$epoch = TTDate::getNearestWeekDay( $epoch, $this->getTransactionDateBusinessDay(), $holiday_epochs );
@@ -832,7 +843,7 @@ class PayPeriodScheduleFactory extends Factory {
 	 * @param int $end_date EPOCH
 	 * @return bool
 	 */
-	function getNextPayPeriod( $end_date = NULL) {
+	function getNextPayPeriod( $end_date = NULL ) {
 		if ( !$this->Validator->isValid() ) {
 			return FALSE;
 		}
@@ -1293,8 +1304,9 @@ class PayPeriodScheduleFactory extends Factory {
 		//FIXME: Perhaps some type of hybrid system like the above unless they have less then a years worth of
 		//pay periods, then use this method below?
 		$cache_id = $this->getId().$epoch.$end_date_epoch;
+		$group_id = $this->getTable( TRUE ) . $this->getCompany();
 
-		$retval = $this->getCache($cache_id);
+		$retval = $this->getCache($cache_id, $group_id );
 		if ( $retval === FALSE ) {
 			//FIXME: I'm sure there is a quicker way to do this.
 			$next_transaction_date = 0;
@@ -1320,7 +1332,7 @@ class PayPeriodScheduleFactory extends Factory {
 			Debug::text('Current Pay Period: '. $retval .' Annual PPs: '. $pp_schedule_obj->getAnnualPayPeriods() .' I: '. $i, __FILE__, __LINE__, __METHOD__, 10);
 
 			//Cache results
-			$this->saveCache($retval, $cache_id);
+			$this->saveCache($retval, $cache_id, $group_id );
 		}
 
 		return $retval;
@@ -2398,6 +2410,7 @@ class PayPeriodScheduleFactory extends Factory {
 	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
+		$this->removeCache( NULL, $this->getTable( TRUE ) . $this->getCompany() ); //Clear cached getCurrentPayPeriodNumber()
 
 		if ( $this->getEnableInitialPayPeriods() == TRUE AND $this->getCreateInitialPayPeriods() == TRUE ) {
 			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );

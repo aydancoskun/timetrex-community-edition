@@ -919,6 +919,7 @@ class UserDateTotalFactory extends Factory {
 
 				if ( $disable_rate_lookup == FALSE
 					AND $culf->getRecordCount() == 1
+					AND TTDate::isValidDate( $this->getDateStamp() ) == TRUE
 					AND ( $this->isNew() OR $old_currency_id != $id ) ) {
 					$crlf = TTnew( 'CurrencyRateListFactory' );
 					$crlf->getByCurrencyIdAndDateStamp( $id, $this->getDateStamp() );
@@ -1447,11 +1448,20 @@ class UserDateTotalFactory extends Factory {
 												   TTi18n::gettext( 'Invalid Pay Period' )
 			);
 		}
+
 		// Date
-		$this->Validator->isDate( 'date_stamp',
-								  $this->getDateStamp(),
-								  TTi18n::gettext( 'Incorrect date' )
+		$this->Validator->isDate(		'date_stamp',
+										 $this->getDateStamp(),
+										 TTi18n::gettext('Incorrect date').'(a)'
 		);
+		if ( $this->Validator->isError('date_stamp') == FALSE ) {
+			if ( $this->getDateStamp() == '' OR $this->getDateStamp() <= 0 ) {
+				$this->Validator->isTRUE(		'date_stamp',
+												 FALSE,
+												 TTi18n::gettext('Incorrect date').'(b)');
+			}
+		}
+
 		// Punch Control ID
 		if ( $this->getPunchControlID() !== FALSE AND $this->getPunchControlID() != TTUUID::getZeroID() ) {
 			$pclf = TTnew( 'PunchControlListFactory' );

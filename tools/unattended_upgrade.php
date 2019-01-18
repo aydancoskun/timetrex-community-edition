@@ -301,6 +301,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 				//Check to see if the DB schema is before the UUID upgrade (schema 1070 or older) and set the $PRIMARY_KEY_IS_UUID accordingly.
 				//  THIS IS in tools/unattended_install.php, tools/unattended_upgrade.php, includes/database.inc.php  as well.
 				if ( (int)SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_A' ) < 1100 ) {
+					Debug::Text( 'Setting PRIMARY_KEY_IS_UUID to FALSE due to pre-UUID schema version: '. SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_A' ), __FILE__, __LINE__, __METHOD__, 1);
 					$PRIMARY_KEY_IS_UUID = FALSE;
 				}
 

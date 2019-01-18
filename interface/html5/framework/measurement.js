@@ -69,6 +69,11 @@
 			}
 		},
 		Distance: {
+			'M': {
+				key: UNIT.Distance.MILE,
+				base: 'm',
+				factor: 1609.34
+			},
 			'km': {
 				key: UNIT.Distance.KILOMETRE,
 				base: 'm',

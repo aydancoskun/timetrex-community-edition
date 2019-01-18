@@ -206,20 +206,26 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'iso_code' => trim($iso_code),
-					);
+		$cache_id = $company_id . $iso_code;
+		$this->rs = $this->getCache( $cache_id );
+		if ( $this->rs === FALSE ) {
+			$ph = array(
+					'company_id' => TTUUID::castUUID( $company_id ),
+					'iso_code'   => trim( $iso_code ),
+			);
 
-		$query = '
+			$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	company_id = ?
 						AND	iso_code = ?
 						AND deleted = 0';
-		$query .= $this->getSortSQL( $order );
+			$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+			$this->ExecuteSQL( $query, $ph );
+
+			$this->saveCache($this->rs, $cache_id);
+		}
 
 		return $this;
 	}

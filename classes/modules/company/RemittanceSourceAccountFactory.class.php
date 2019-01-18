@@ -1595,7 +1595,7 @@ class RemittanceSourceAccountFactory extends Factory {
 				( ( stripos( $this->getDescription(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
 										 TTi18n::gettext('Account number must not be a part of the Description') );
 
-		if ( is_array($data_diff) AND isset($data_diff['legal_entity_id']) ) { //Legal entity has changed
+		if ( is_array($data_diff) AND $this->isDataDifferent( 'legal_entity_id', $data_diff ) ) { //Legal entity has changed
 			//Cases to handle:
 			//  Always allow going from a specific legal entity to ANY without any additional validation checks.
 			//  Switching from a specific legal entity to another specific legal entity should check that destination accounts aren't assigned.
@@ -1625,7 +1625,7 @@ class RemittanceSourceAccountFactory extends Factory {
 			unset( $rdalf );
 		}
 
-		if ( is_array($data_diff) AND isset($data_diff['country']) ) { //Legal entity has changed
+		if ( is_array($data_diff) AND $this->isDataDifferent( 'country', $data_diff ) ) { //Country has changed
 			//Cases to handle:
 			//  Don't allow changing the country if destination accounts are linked to it already, as that will change the bank account validations and such.
 			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' );

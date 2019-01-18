@@ -12,12 +12,12 @@ As Of Date      Name	                        Path	                              
 21-Sep-2018     leaflet-draw	                interface/html5/framework/leaflet/leaflet-draw	                            1.0.3	    1.0.3	        MIT	    https://github.com/Leaflet/Leaflet.draw     Notes: latest 'released' version tagged as v0.4.14 vs available 1.0.3
 12-Sep-2018     leaflet-providers	            interface/html5/framework/leaflet/leaflet-providers/leaflet-providers.js    1.4.0      1.4.0            BSD     https://github.com/leaflet-extras/leaflet-providers
 12-Sep-2018     leaflet-routing-machine	        interface/html5/framework/leaflet/leaflet-routing-machine	                3.2.11	    3.2.11	        ISC	    http://www.liedman.net/leaflet-routing-machine/ **We override leaflet and leaflet-routing-machine, so can't use minified code.
+17-Oct-2018     leaflet-markercluster           interface/html5/framework/leaflet/leaflet-markercluster                     1.4.1       1.4.1           MIT     https://github.com/Leaflet/Leaflet.markercluster
 
 12-Sep-2018     pdfjs	                        interface/html5/framework/pdfjs	                                            1.9.426     1.9.426	        Apache	https://mozilla.github.io/pdf.js/getting_started/#download
 12-Apr-2018     qunit	                        interface/html5/framework/qunit/qunit.js	                                2.6.0	    2.6.0           MIT	    https://qunitjs.com/
 15-Oct-2018     rightclickmenu	                interface/html5/framework/rightclickmenu/rightclickmenu.js	                2.7.1       2.7.1           MIT 	http://swisnl.github.io/jQuery-contextMenu/index.html
 12-Sep-2018     tinymce	                        interface/html5/framework/tinymce/tinymce.min.js	                        4.8.1	    4.8.1           LGPL    https://www.tinymce.com/download/
-12-Sep-2018     fastclick.js	                interface/html5/framework/fastclick.js	                                    1.0.6	    1.0.6	        MIT	    https://github.com/ftlabs/fastclick
 
 12-Sep-2018     html2canvas.js	                interface/html5/framework/html2canvas.js	                                1.00-alpha.12 1.00-alpha.12 MIT	    https://github.com/niklasvh/html2canvas/releases
 

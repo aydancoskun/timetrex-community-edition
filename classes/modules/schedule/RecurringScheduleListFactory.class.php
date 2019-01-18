@@ -509,18 +509,14 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 			$id = TTUUID::getZeroID(); //Leaving this as NULL can cause the SQL query to not return rows when it should.
 		}
 
-		//MySQL is picky when it comes to timestamp filters on datestamp columns.
-		$start_datestamp = $this->db->BindDate( $start_date );
-		$end_datestamp = $this->db->BindDate( $end_date );
-
 		$start_timestamp = $this->db->BindTimeStamp( $start_date );
 		$end_timestamp = $this->db->BindTimeStamp( $end_date );
 
 		$ph = array(
 					'company_id' => TTUUID::castUUID($company_id),
 					'user_id' => TTUUID::castUUID($user_id),
-					'start_date_a' => $start_datestamp,
-					'end_date_b' => $end_datestamp,
+					'start_date_a' => $this->db->BindDate( ( $start_date - 86400 ) ), //Need to expand the date_stamp restriction by at least a day to cover shifts that span midnight.
+					'end_date_b' => $this->db->BindDate( ( $end_date + 86400 ) ), //Need to expand the date_stamp restriction by at least a day to cover shifts that span midnight.
 					'id' => TTUUID::castUUID($id),
 					'start_date1' => $start_timestamp,
 					'end_date1' => $end_timestamp,
@@ -560,7 +556,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;

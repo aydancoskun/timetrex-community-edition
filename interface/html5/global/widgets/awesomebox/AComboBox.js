@@ -1052,14 +1052,18 @@
 					//Reload real data if columns have changed, so they display data for any new columns
 					// We can't just pass in the selected_items verbatim here, we need to parse off the 'id' fields and pass that in as an array instead.
 					if ( $.type( select_items ) === 'array' ) {
-						select_items.map( function ( obj ) {
+						select_items = select_items.map( function ( obj ) {
 							if ( obj.hasOwnProperty( 'id' ) ) {
 								return obj['id'];
 							}
 						} );
 					}
 
-					$this.getRealData( select_items );
+					//Don't try to load data from the API if there is no filter criteria, as everything is likely be returned and therefore will be selected.
+					// This would manifest itself by expanding a dropdown without anything selected in it, then changing the columns.
+					if ( select_items ) {
+						$this.getRealData( select_items );
+					}
 				}
 			} );
 

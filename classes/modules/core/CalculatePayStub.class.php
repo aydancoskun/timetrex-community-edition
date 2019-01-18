@@ -401,7 +401,8 @@ class CalculatePayStub extends PayStubFactory {
 			$arr['obj'] = $obj;
 			$arr['require_accounts'] = array();
 
-			$include_accounts = $obj->getCompanyDeductionObject()->getIncludePayStubEntryAccount();
+			//Make sure we expand all Total PS accounts to include their individual accounts so we can properly determine the order to calculate in. Especially important for Tax/Deductions that use Net Pay.
+			$include_accounts = $obj->getCompanyDeductionObject()->getExpandedPayStubEntryAccountIDs( $obj->getCompanyDeductionObject()->getIncludePayStubEntryAccount(), TRUE );
 			if ( !is_array( $include_accounts ) ) {
 				$include_accounts = array();
 			}
@@ -729,8 +730,9 @@ class CalculatePayStub extends PayStubFactory {
 			if ( isset($user_date_total_arr['entries']) AND is_array( $user_date_total_arr['entries'] ) ) {
 				foreach( $user_date_total_arr['entries'] as $udt_arr ) {
 					//Allow negative amounts so flat rate premium policies can reduce an employees wage if need be.
-					if ( $udt_arr['amount'] != 0 ) {
-						Debug::text('  Adding Pay Stub Entry: '. $udt_arr['pay_stub_entry'] .' Amount: '. $udt_arr['amount'], __FILE__, __LINE__, __METHOD__, 10);
+					//  Add entries even if amount = 0 if total_time != 0, so Tax/Deduction records that depend on just units can still be calculated.
+					if ( $udt_arr['amount'] != 0 OR $udt_arr['total_time'] != 0 ) {
+						Debug::text('  Adding Pay Stub Entry: '. $udt_arr['pay_stub_entry'] .' Amount: '. $udt_arr['amount'] .' Total Time: '. $udt_arr['total_time'], __FILE__, __LINE__, __METHOD__, 10);
 						$pay_stub->addEntry( $udt_arr['pay_stub_entry'], $udt_arr['amount'], TTDate::getHours( $udt_arr['total_time'] ), $udt_arr['rate'], $udt_arr['description'] );
 					} else {
 						Debug::text('  NOT Adding ($0 amount) Pay Stub Entry: '. $udt_arr['pay_stub_entry'] .' Amount: '. $udt_arr['amount'], __FILE__, __LINE__, __METHOD__, 10);
@@ -784,19 +786,35 @@ class CalculatePayStub extends PayStubFactory {
 					if ( $data_arr['type'] == 'UserDeductionListFactory' ) {
 						$ud_obj = $data_arr['obj'];
 
+						//Ensure that if a Tax/Deduction assigned to this user checks age eligibility that the employee has a birth date specified. Otherwise don't generate the pay stub.
+						if ( $this->getUserObject()->getBirthDate() == '' AND $ud_obj->getCompanyDeductionObject()->isUserAgeEligibility() == TRUE ) {
+							$pay_stub->Validator->isTRUE(	'birth_date',
+														 FALSE,
+														 TTi18n::gettext('Birth Date not specified, unable to determine age eligibility for %1', $ud_obj->getCompanyDeductionObject()->getName() )
+							);
+						}
+
+						//Hire Date is always defaulted, so this likely will never get triggered.
+						if ( $this->getUserObject()->getHireDate() == '' AND $ud_obj->getCompanyDeductionObject()->isUserLengthOfServiceEligibility() == TRUE ) {
+							$pay_stub->Validator->isTRUE(	'hire_date',
+															 FALSE,
+															 TTi18n::gettext('Hire Date not specified, unable to determine length of service eligibility for %1', $ud_obj->getCompanyDeductionObject()->getName() )
+							);
+						}
+
 						//Ensure that the employee was hired before the end day of the pay period. Especially important if they are using Tax/Deductions to affect earnings to prevent the employee from being paid before their hire date.
 						//Determine if this deduction is valid based on start/end dates.
 						//Determine if this deduction is valid based on min/max length of service.
 						//Determine if this deduction is valid based on min/max user age.
 						//Determine if the Payroll Run Type matches.
-						if ( $this->getUserObject()->getHireDate() == '' OR ( TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) <= TTDate::getMiddleDayEpoch( $pay_stub->getPayPeriodObject()->getEndDate() ) )
+						if ( ( $this->getUserObject()->getHireDate() == '' OR ( TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) <= TTDate::getMiddleDayEpoch( $pay_stub->getPayPeriodObject()->getEndDate() ) ) )
 								AND $ud_obj->getCompanyDeductionObject()->isActiveDate( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->isActiveLengthOfService( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getPayPeriodObject()->getStartDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->isActiveUserAge( $this->getUserObject()->getBirthDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->inApplyFrequencyWindow( $pay_stub->getPayPeriodObject()->getStartDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getHireDate(), $this->getUserObject()->getTerminationDate(), $this->getUserObject()->getBirthDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->inApplyPayrollRunType( $this->getType() ) ) {
 
-							$amount = $ud_obj->getDeductionAmount( $this->getUserObject()->getId(), $pay_stub, $this->getPayPeriodObject(), $this->getType(), $this->getRun() );
+							$amount = $ud_obj->getDeductionAmount( $this->getUserObject(), $pay_stub, $this->getPayPeriodObject(), $this->getType(), $this->getRun() );
 							Debug::text('User Deduction: '. $ud_obj->getCompanyDeductionObject()->getName() .' Amount: '. $amount .' Calculation Order: '. $ud_obj->getCompanyDeductionObject()->getCalculationOrder(), __FILE__, __LINE__, __METHOD__, 10);
 
 							//Allow negative amounts, so they can reduce previously calculated deductions or something.

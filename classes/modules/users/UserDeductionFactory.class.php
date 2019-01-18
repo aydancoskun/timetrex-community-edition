@@ -682,9 +682,9 @@ class UserDeductionFactory extends Factory {
 	 * @param int $payroll_run_id
 	 * @return int|string
 	 */
-	function getDeductionAmount( $user_id, $pay_stub_obj, $pay_period_obj, $formula_type_id = 10, $payroll_run_id = 1 ) {
-		if ( $user_id == '' ) {
-			Debug::Text('Missing User ID: ', __FILE__, __LINE__, __METHOD__, 10);
+	function getDeductionAmount( $user_obj, $pay_stub_obj, $pay_period_obj, $formula_type_id = 10, $payroll_run_id = 1 ) {
+		if ( !is_object($user_obj) ) {
+			Debug::Text('Missing User Object: ', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
@@ -697,6 +697,9 @@ class UserDeductionFactory extends Factory {
 			Debug::Text('Missing Pay Period Object: ', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
+
+		$this->user_obj = $user_obj;
+		$user_id = $user_obj->getId();
 
 		//Calculates the deduction.
 		$cd_obj = $this->getCompanyDeductionObject();

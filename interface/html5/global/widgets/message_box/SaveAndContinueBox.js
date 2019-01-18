@@ -18,7 +18,6 @@
 			var message = $( this ).find( '.message' );
 
 			var ribbon_button = $( this ).find( '.ribbon-button' );
-			;
 
 			message.text( Global.save_and_continue_message );
 			icon.attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/icons/' + Icons.save_and_continue ) );

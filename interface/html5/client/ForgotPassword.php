@@ -178,14 +178,14 @@ require ('../../../includes/Header.inc.php');
 <div id="contentContainer" class="content-container">
 	<div class="container">
 		<div class="row">
-			<div class="col-xs-12">
+			<div class="w-100">
 				<div id="contentBox-ForgotPassword">
 					<div class="textTitle2"><?php echo TTi18n::getText('Password Reset') ?></div>
 					<?php
 						if ( $action == 'password_reset' OR $action == 'change_password' ) {
 							?>
 							<?php if ( !$validator->isValid() ) { ?>
-                                <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                                <div class="alert alert-danger alert-dismissible" role="alert">
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
 									<?php echo TTi18n::getText('Incorrect Input!'); ?>
                                     <script	language=JavaScript>
@@ -196,19 +196,19 @@ require ('../../../includes/Header.inc.php');
                                 </div>
 							<?php } ?>
                             <form method="post" name="password_reset" class="form-horizontal" action="">
-                            <div class="form-group">
+                            <div class="form-group row">
                                 <label class="col-sm-3 col-xs-12 control-label"><?php echo TTi18n::getText('Email:') ?> </label>
                                 <div class="col-sm-9 col-xs-12">
                                     <p class="form-control-static"><?php echo $user_name; ?></p>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group row">
                                 <label for="password" class="col-xs-12 col-sm-3 control-label"><?php echo TTi18n::getText('New Password:') ?> </label>
                                 <div class="col-xs-12 col-sm-9">
                                     <input type="password" id="password" class="form-control" name="password">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group row">
                                 <label for="password2" class="col-xs-12 col-sm-3 control-label"><?php echo TTi18n::getText('New Password (confirm):') ?> </label>
                                 <div class="col-xs-12 col-sm-9">
                                     <input type="password" id="password2" class="form-control" name="password2">
@@ -228,7 +228,7 @@ require ('../../../includes/Header.inc.php');
 						} else {
 							?>
 								<?php if ( !$validator->isValid() ) { ?>
-                                    <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                                    <div class="alert alert-danger alert-dismissible" role="alert">
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
 										<?php echo TTi18n::getText('Incorrect Input!'); ?>
                                         <script	language=JavaScript>
@@ -239,7 +239,7 @@ require ('../../../includes/Header.inc.php');
                                     </div>
 								<?php } ?>
                                 <form method="post" name="password_reset" class="form-horizontal" action="">
-                                <div class="form-group">
+                                <div class="form-group row">
                                     <label for="email" class="col-xs-12 col-sm-3 control-label"><?php echo TTi18n::getText('Email Address:'); ?> </label>
                                     <div class="col-xs-12 col-sm-9">
                                         <input type="text" id="email" class="form-control" name="email" value="<?php echo $email; ?>">

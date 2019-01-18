@@ -356,7 +356,7 @@ class LogFactory extends Factory {
 											'document_revision'					=> array('document'),
 											'client'							=> array('client'),
 											'client_group'						=> array('client'),
-											'client_contact'					=> array('client_contact'),
+											'client_contact'					=> array('client'),
 											'client_payment'					=> array('client_payment'),
 											'invoice'							=> array('invoice'),
 											'invoice_config'					=> array('invoice_config'),

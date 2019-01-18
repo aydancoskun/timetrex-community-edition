@@ -1773,7 +1773,7 @@ ScheduleViewController = BaseViewController.extend( {
 				user.department_id = item.department_id;
 				user.job_id = item.job_id;
 				user.job_item_id = item.job_item_id;
-				user.date_stamp = item.date;
+				user.date = item.date;
 				result.push( user );
 			}
 		}
@@ -1786,7 +1786,7 @@ ScheduleViewController = BaseViewController.extend( {
 			user.department_id = login_user.department_id;
 			user.job_id = login_user.job_id;
 			user.job_item_id = login_user.job_item_id;
-			user.date_stamp = this.getSelectDate();
+			user.date = this.getSelectDate();
 			result.push( user );
 		}
 		return result;
@@ -1817,7 +1817,7 @@ ScheduleViewController = BaseViewController.extend( {
 					department_id: this.current_edit_record.department_id,
 					job_id: this.current_edit_record.job_id,
 					job_item_id: this.current_edit_record.job_item_id,
-					date_stamp: this.current_edit_record.date_stamp
+					date: this.current_edit_record.date_stamp
 				}
 			];
 		}

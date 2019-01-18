@@ -2431,7 +2431,8 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 						r.branch_id as job_branch_id,
 						r.department_id as job_department_id,
 						r.group_id as job_group_id,
-						s.name as job_item';
+						s.name as job_item,
+						s.manual_id as job_item_manual_id';
 		}
 
 		$query .= '

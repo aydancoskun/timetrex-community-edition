@@ -65,7 +65,7 @@ function handleResult( $result, $raw = FALSE ) {
 }
 
 //Post data (array of arguments) to URL
-function postToURL( $url, $data, $raw_result = FALSE ) {
+function postToURL( $url, $data = NULL, $raw_result = FALSE ) {
 	$curl_connection = curl_init( $url );
 	curl_setopt( $curl_connection, CURLOPT_CONNECTTIMEOUT, 600 );
 	curl_setopt( $curl_connection, CURLOPT_RETURNTRANSFER, TRUE );
@@ -81,13 +81,18 @@ function postToURL( $url, $data, $raw_result = FALSE ) {
 	//		 2 => <ARG3>,
 	//       ...
 	//      )
-	$post_data = 'json=' . urlencode( json_encode( $data ) );
-	curl_setopt( $curl_connection, CURLOPT_POSTFIELDS, $post_data );
 
 	echo "==============================================================\n";
 	echo "Posting data to URL: " . $url . "\n";
-	echo "  POST Data: " . $post_data . "\n";
+
+	if ( $data !== NULL ) {
+		$post_data = 'json=' . urlencode( json_encode( $data ) );
+		curl_setopt( $curl_connection, CURLOPT_POSTFIELDS, $post_data );
+
+		echo "  POST Data: " . $post_data . "\n";
+	}
 	echo "--------------------------------------------------------------\n";
+
 	$result = curl_exec( $curl_connection );
 	curl_close( $curl_connection );
 
@@ -593,4 +598,9 @@ $config = postToURL( buildURL( 'APITimesheetSummaryReport', 'getTemplate' ), arr
 $result = postToURL( buildURL( 'APITimesheetSummaryReport', 'getTimesheetSummaryReport' ), array($config, 'raw') );
 echo "Report Data: <br>\n";
 var_dump( $result );
+
+//Get data for the currently logged in user if needed:
+//$current_user_data = postToURL( buildURL( 'APIAuthentication', 'getCurrentUser' ) );
+//$current_user_preference = postToURL( buildURL( 'APIAuthentication', 'getCurrentUserPreference' ) );
+//$current_company_data = postToURL( buildURL( 'APIAuthentication', 'getCurrentCompany' ) );
 ?>

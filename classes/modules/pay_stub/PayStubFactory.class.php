@@ -1131,13 +1131,13 @@ class PayStubFactory extends Factory {
 															);
 			}
 			// Payroll Run
-			$this->Validator->isGreaterThan( 'run_id', //pay_period label isn't used when editing pay stubs.
+			$this->Validator->isGreaterThan( 'run_id',
 											 $this->getRun(),
 											 TTi18n::gettext( 'Payroll Run must be 1 or higher' ),
 											 1
 			);
 			if ( $this->Validator->isError( 'run_id' ) == FALSE ) {
-				$this->Validator->isLessThan( 'run_id', //pay_period label isn't used when editing pay stubs.
+				$this->Validator->isLessThan( 'run_id',
 											  $this->getRun(),
 											  TTi18n::gettext( 'Payroll Run must be less than 128' ),
 											  128
@@ -1480,6 +1480,7 @@ class PayStubFactory extends Factory {
 	 * @return bool
 	 */
 	function postSave() {
+		$data_diff = $this->getDataDifferences();
 		$this->removeCache( $this->getId() );
 
 		if ( $this->getEnableProcessEntries() == TRUE ) {
@@ -1515,9 +1516,11 @@ class PayStubFactory extends Factory {
 			}
 		}
 
-		//Make sure we only email pay stubs that are marked PAID.
+
+
+		//Make sure we only email pay stubs that are being switched to the "PAID" status.
 		//Do we want to avoid email pay stubs if they are making adjustments after the transaction date? Or maybe just in closed pay periods?
-		if ( $this->getStatus() == 40 AND $this->getEnableEmail() ) { //Paid
+		if ( $this->getEnableEmail() AND $this->getStatus() == 40 AND $this->isDataDifferent( 'status_id', $data_diff ) == TRUE ) { //Paid
 			$this->emailPayStub();
 		} else {
 			Debug::Text('Pay Stub is not marked paid or email is disabled, not emailing...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1784,7 +1787,7 @@ class PayStubFactory extends Factory {
 	 * @param string $ps_account_ids UUID
 	 * @return array|bool
 	 */
-	function getSumByEntriesArrayAndTypeIDAndPayStubAccountID( $ps_entries, $type_ids = NULL, $ps_account_ids = NULL) {
+	function getSumByEntriesArrayAndTypeIDAndPayStubAccountID( $ps_entries, $type_ids = NULL, $ps_account_ids = NULL ) {
 		$ps_entries = strtolower($ps_entries);
 		//Debug::text('PS Entries: '. $ps_entries .' Type ID: '. count($type_ids) .' PS Account ID: '. count($ps_account_ids), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1798,6 +1801,10 @@ class PayStubFactory extends Factory {
 
 		if ( $ps_entries == 'current' ) {
 			$entries = $this->tmp_data['current_pay_stub']['entries'];
+			//Only calculate temporary totals when specific ps_account_ids are specified, to avoid infinite recursion when calling get*Sum() functions that call this function with just type_ids.
+			if ( is_array( $ps_account_ids ) ) {
+				$entries = $this->calculateTemporaryTotals( $entries );
+			}
 		} elseif ( $ps_entries == 'previous' ) {
 			$entries = $this->tmp_data['previous_pay_stub']['entries'];
 		} elseif ( $ps_entries == 'previous+ytd_adjustment' ) {
@@ -1882,6 +1889,39 @@ class PayStubFactory extends Factory {
 
 		//Debug::Arr($retarr, 'SumByEntries RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $retarr;
+	}
+
+	/**
+	 * Calculate the real-time total accounts while the pay stub is being generated. This should allow Tax/Deductions records to calculate based on including/excluding Net Pay.
+	 * This only needs to work on 'current' PS entries, as previous entries should already have the net pay calculated.
+	 * @param $entries array
+	 */
+	function calculateTemporaryTotals( $entries ) {
+		$retarr = $entries;
+
+		$totals = array( 'total_gross', 'employee_deduction', 'employer_deduction', 'net_pay');
+		foreach( $totals as $total_name ) {
+			switch( $total_name ) {
+				case 'total_gross':
+					$sum_arr = $this->getEarningSum();
+					$entries[] = $this->prepareEntry( $this->getPayStubEntryAccountLinkObject()->getTotalGross(), $sum_arr['amount'], $sum_arr['units'], NULL, NULL, NULL, $sum_arr['ytd_amount'] );
+					break;
+				case 'employee_deduction':
+					$sum_arr = $this->getDeductionSum();
+					$entries[] = $this->prepareEntry( $this->getPayStubEntryAccountLinkObject()->getTotalEmployeeDeduction(), $sum_arr['amount'], $sum_arr['units'], NULL, NULL, NULL, $sum_arr['ytd_amount'] );
+					break;
+				case 'employer_deduction':
+					$sum_arr = $this->getEmployerDeductionSum();
+					$entries[] = $this->prepareEntry( $this->getPayStubEntryAccountLinkObject()->getTotalEmployerDeduction(), $sum_arr['amount'], $sum_arr['units'], NULL, NULL, NULL, $sum_arr['ytd_amount'] );
+					break;
+				case 'net_pay':
+					$sum_arr = $this->getNetPaySum();
+					$entries[] =  $this->prepareEntry( $this->getPayStubEntryAccountLinkObject()->getTotalNetPay(), $sum_arr['amount'], NULL, NULL, NULL, NULL, $sum_arr['ytd_amount'] );
+					break;
+			}
+		}
+
+		return $entries;
 	}
 
 	function loadCurrentPayStubTransactions() {
@@ -2056,6 +2096,7 @@ class PayStubFactory extends Factory {
 	}
 
 	/**
+	 * Prepares the Pay Stub entry for adding.
 	 * @param string $pay_stub_entry_account_id UUID
 	 * @param $amount
 	 * @param null $units
@@ -2068,8 +2109,8 @@ class PayStubFactory extends Factory {
 	 * @param string $user_expense_id UUID
 	 * @return bool
 	 */
-	function addEntry( $pay_stub_entry_account_id, $amount, $units = NULL, $rate = NULL, $description = NULL, $ps_amendment_id = NULL, $ytd_amount = NULL, $ytd_units = NULL, $ytd_adjustment = FALSE, $user_expense_id = NULL ) {
-		Debug::text('Add Entry: PSE Account ID: '. $pay_stub_entry_account_id .' Amount: '. $amount .' YTD Amount: '. $ytd_amount .' Pay Stub Amendment Id: '. $ps_amendment_id .' User Expense: '. $user_expense_id, __FILE__, __LINE__, __METHOD__, 10);
+	function prepareEntry( $pay_stub_entry_account_id, $amount, $units = NULL, $rate = NULL, $description = NULL, $ps_amendment_id = NULL, $ytd_amount = NULL, $ytd_units = NULL, $ytd_adjustment = FALSE, $user_expense_id = NULL ) {
+		Debug::text('Prepare Entry: PSE Account ID: '. $pay_stub_entry_account_id .' Amount: '. $amount .' YTD Amount: '. $ytd_amount .' Pay Stub Amendment Id: '. $ps_amendment_id .' User Expense: '. $user_expense_id, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $pay_stub_entry_account_id == '' OR TTUUID::isUUID( $pay_stub_entry_account_id ) == FALSE OR $pay_stub_entry_account_id == TTUUID::getZeroID() OR $pay_stub_entry_account_id == TTUUID::getNotExistID() ) {
 			return FALSE;
 		}
@@ -2088,19 +2129,45 @@ class PayStubFactory extends Factory {
 			}
 
 			$retarr = array(
-				'pay_stub_entry_type_id' => $type_id,
-				'pay_stub_entry_account_id' => $pay_stub_entry_account_id,
-				'pay_stub_amendment_id' => $ps_amendment_id,
-				'user_expense_id' => $user_expense_id,
-				'rate' => $rate,
-				'units' => $units,
-				'amount' => $amount, //PHP v5.3.5 has a bug that it converts large values with 0's on the end into scientific notation.
-				'ytd_units' => $ytd_units,
-				'ytd_amount' => $ytd_amount,
-				'description' => $description,
-				'ytd_adjustment' => $ytd_adjustment,
-				);
+					'pay_stub_entry_type_id' => $type_id,
+					'pay_stub_entry_account_id' => $pay_stub_entry_account_id,
+					'pay_stub_amendment_id' => $ps_amendment_id,
+					'user_expense_id' => $user_expense_id,
+					'rate' => $rate,
+					'units' => $units,
+					'amount' => $amount, //PHP v5.3.5 has a bug that it converts large values with 0's on the end into scientific notation.
+					'ytd_units' => $ytd_units,
+					'ytd_amount' => $ytd_amount,
+					'description' => $description,
+					'ytd_adjustment' => $ytd_adjustment,
+			);
 
+
+			return $retarr;
+		}
+
+		Debug::text('Returning FALSE', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
+	}
+
+	/**
+	 * @param string $pay_stub_entry_account_id UUID
+	 * @param $amount
+	 * @param null $units
+	 * @param null $rate
+	 * @param null $description
+	 * @param string $ps_amendment_id UUID
+	 * @param null $ytd_amount
+	 * @param null $ytd_units
+	 * @param bool $ytd_adjustment
+	 * @param string $user_expense_id UUID
+	 * @return bool
+	 */
+	function addEntry( $pay_stub_entry_account_id, $amount, $units = NULL, $rate = NULL, $description = NULL, $ps_amendment_id = NULL, $ytd_amount = NULL, $ytd_units = NULL, $ytd_adjustment = FALSE, $user_expense_id = NULL ) {
+		Debug::text('Add Entry: PSE Account ID: '. $pay_stub_entry_account_id .' Amount: '. $amount .' YTD Amount: '. $ytd_amount .' Pay Stub Amendment Id: '. $ps_amendment_id .' User Expense: '. $user_expense_id, __FILE__, __LINE__, __METHOD__, 10);
+
+		$retarr = $this->prepareEntry( $pay_stub_entry_account_id, $amount, $units, $rate, $description, $ps_amendment_id, $ytd_amount, $ytd_units, $ytd_adjustment, $user_expense_id );
+		if ( is_array($retarr ) ) {
 			$this->tmp_data['current_pay_stub']['entries'][] = $retarr;
 
 			//Check if this pay stub account is linked to an accrual account.
@@ -2108,6 +2175,13 @@ class PayStubFactory extends Factory {
 			//because we don't want to get in to an infinite loop.
 			//Also don't touch the accrual account if the amount is 0.
 			//This happens mostly when AddUnUsedEntries is called.
+			$psea_arr = $this->getPayStubEntryAccountArray( $pay_stub_entry_account_id );
+			if ( is_array( $psea_arr ) ) {
+				$type_id = $psea_arr['type_id'];
+			} else {
+				$type_id = NULL;
+			}
+
 			if ( $this->getEnableLinkedAccruals() == TRUE
 					AND $amount != 0
 					AND $psea_arr['accrual_pay_stub_entry_account_id'] != ''
@@ -2155,6 +2229,7 @@ class PayStubFactory extends Factory {
 		Debug::Text('Processing PayStub ('. count( (array)$this->tmp_data['current_pay_stub']['entries'] ) .') Entries...', __FILE__, __LINE__, __METHOD__, 10);
 		///Debug::Arr($this->tmp_data['current_pay_stub'], 'Current Entries...', __FILE__, __LINE__, __METHOD__, 10);
 
+		$this->deleteZeroAmountEntries(); //Must occur before any other processing function is called, so we can remove $0 entries.
 		$this->deleteEntries( FALSE ); //Delete only total entries
 		$this->addUnUsedYTDEntries();
 		$this->addEarningSum();
@@ -2316,6 +2391,24 @@ class PayStubFactory extends Factory {
 	}
 
 	/**
+	 * There may be cases where Tax/Deduction records need to do calculations on hours (ie: unpaid absences) when there is no pay, but they need to do other calculations to add pay.
+	 * So we need to make sure all paid and unpaid time ($0 amounts) from the timesheets still appears on the pay stubs initially, then gets deleted off after all Tax/Deductions are calculated.
+	 * @return bool
+	 */
+	function deleteZeroAmountEntries() {
+		if ( isset( $this->tmp_data['current_pay_stub']['entries'] ) AND is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
+			foreach ( $this->tmp_data['current_pay_stub']['entries'] as $key => $entry_arr ) {
+				if ( $entry_arr['amount'] == 0 AND $entry_arr['ytd_amount'] == 0 ) { //Check ytd_amount as well to handle YTD adjustment PS amendments.
+					Debug::Text( 'Deleting Pay Stub Entry: Key: ' . $key . ' Amount: ' . $entry_arr['amount'], __FILE__, __LINE__, __METHOD__, 10 );
+					unset( $this->tmp_data['current_pay_stub']['entries'][ $key ] );
+				}
+			}
+		}
+
+		return TRUE;
+	}
+
+	/**
 	 * @param bool $all_entries
 	 * @return bool
 	 */
@@ -2413,7 +2506,7 @@ class PayStubFactory extends Factory {
 		$earning_sum_arr = $this->getEarningSum();
 		$deduction_sum_arr = $this->getDeductionSum();
 
-		if ( $earning_sum_arr['amount'] > 0 ) {
+		if ( $earning_sum_arr['amount'] >= 0 ) {
 			$retarr = array(
 					'units' => 0,
 					'amount' => 0,
@@ -2442,7 +2535,6 @@ class PayStubFactory extends Factory {
 			$this->addEntry( $this->getPayStubEntryAccountLinkObject()->getTotalNetPay(), $net_pay_arr['amount'], NULL, NULL, NULL, NULL, $net_pay_arr['ytd_amount'] );
 		}
 
-		Debug::Text('Earning Sum is 0 or less. ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
 	}
 
@@ -3260,9 +3352,9 @@ class PayStubFactory extends Factory {
 						$description_subscript_counter++;
 					}
 
-					//If type if 40 (a total) and the amount is 0, skip it.
-					//This if the employee has no deductions at all, it won't be displayed
-					//on the pay stub.
+					//If type is 40 (a total) and the amount is 0, skip it.
+					//In cases where the employee has no deductions at all, it won't be displayed on the pay stub.
+					// The != 0 check is only for TOTAL line items. If we use >= 0 instead we need to rework how netpay is displayed when no deductions exist.
 					if ( $type != 40 OR ( $type == 40 AND $pay_stub_entry->getAmount() != 0 ) ) {
 						$pay_stub_entries[$type][] = array(
 													'id' => $pay_stub_entry->getId(),
@@ -4050,7 +4142,7 @@ class PayStubFactory extends Factory {
 				$pdf->Cell(60, 5, Misc::getCityAndProvinceAndPostalCode( $user_obj->getCity(), $user_obj->getProvince(), $user_obj->getPostalCode() ), $border, 1, 'C', FALSE, '', 1);
 
 				//Pay Period - Balance - ID
-				$net_pay_amount = 0;
+				$net_pay_amount = '0.00';
 				if ( isset($pay_stub_entries[40][0]) ) {
 					$net_pay_amount = TTi18n::formatNumber( $pay_stub_entries[40][0]['amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() );
 				}

@@ -1257,6 +1257,7 @@ class RecurringScheduleFactory extends Factory {
 
 					$this->getProgressBarObject()->stop( $amf_message_id );
 				}
+				ksort($schedule_shifts); //Sort the shifts so they are always created in chronological order.
 				//Debug::Arr($schedule_shifts, 'Recurring Schedule Shifts', __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( is_array($schedule_shifts) AND count($schedule_shifts) > 0 ) {

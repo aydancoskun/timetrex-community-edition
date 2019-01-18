@@ -34,17 +34,6 @@ CurrencyRateViewController = BaseViewController.extend( {
 
 	},
 
-	//Override for: Do not show first 2 columns in sub wage view
-//	setSelectLayout: function() {
-//
-//		if ( this.sub_view_mode ) {
-//			this._super( 'setSelectLayout', 2 );
-//		} else {
-//			this._super( 'setSelectLayout' );
-//		}
-//
-//	},
-
 	buildEditViewUI: function() {
 
 		this._super( 'buildEditViewUI' );

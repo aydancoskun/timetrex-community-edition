@@ -3,11 +3,12 @@ EmployeeViewController = BaseViewController.extend( {
 
 	_required_files: {
 		10: [
-			'APIUserGroup', 'APIHierarchyControl', 'APIBranch', 'APIDepartment', 'APIUserTitle', 'APICompanyGenericTag', 'TImage', 'APILegalEntity',
+			'leaflet', 'APIUserGroup', 'APIHierarchyControl', 'APIBranch', 'APIDepartment', 'APIUserTitle', 'APICompanyGenericTag', 'TImage', 'APILegalEntity',
 			'APIPayPeriodSchedule', 'APIPolicyGroup', 'APICurrency', 'APIEthnicGroup', 'APIUserSkill', 'APIQualification', 'APIQualificationGroup',
 			'APIUserEducation', 'APIUserMembership', 'APIUserLicense', 'APIUserLanguage', 'APIRemittanceDestinationAccount', 'APIUserDefault', 'APIRemittanceSourceAccount', 'APIAccrualPolicyUserModifier',
 			'APIUserReviewControl', 'APIKPIGroup', 'APIUserReview', 'APIKPI', 'TImageAdvBrowser'
 		],
+		15: ['leaflet-timetrex'],
 		20: ['APIJob', 'APIJobItem']
 	},
 
@@ -1884,32 +1885,45 @@ EmployeeViewController = BaseViewController.extend( {
 	},
 
 	onMapClick: function() {
-		this.is_viewing = false;
-		ProgressBar.showProgressBar();
-		var data = {
-			filter_columns: {
-				id: true,
-				first_name: true,
-				last_name: true,
-				address1: true,
-				address2: true,
-				city: true,
-				province: true,
-				country: true,
-				postal_code: true,
-				latitude: true,
-				longitude: true
-			}
-		};
-		var ids = this.getGridSelectIdArray();
+		// only trigger map load in specific product editions.
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+			this.is_viewing = false;
+			ProgressBar.showProgressBar();
+			var data = {
+				filter_columns: {
+					id: true,
+					first_name: true,
+					last_name: true,
+					address1: true,
+					address2: true,
+					city: true,
+					province: true,
+					country: true,
+					postal_code: true,
+					latitude: true,
+					longitude: true
+				}
+			};
 
-		data.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
-		if ( ids.length > 0 ) {
-			data.filter_data.id = ids;
-		}
-		var cells = this.api.getUser( data, { async: false } ).getResult();
-		if ( !this.is_mass_editing ) {
-			IndexViewController.openEditView( this, 'Map', cells );
+			var cells = [];
+			if ( this.is_edit ) {
+				//when editing, if the user reloads, the grid's selected id array become the whole grid.
+				//to avoid mapping every punch in that scenario we need to grab the current_edit_record, rather than pull data from getGridSelectIdArray()
+				//check for mass edit as well. <-- not sure what this refers to, assuming the same happens in mass edit, but maps are disabled on mass edit atm.
+				cells.push( this.current_edit_record );
+			} else {
+				var ids = this.getGridSelectIdArray();
+				data.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
+				if ( ids.length > 0 ) {
+					data.filter_data.id = ids;
+				}
+				cells = this.api.getUser( data, { async: false } ).getResult();
+			}
+
+			if ( !this.is_mass_editing ) {
+				var processed_data_for_map = TTMapLib.TTConvertMapData.processBasicFromGenericViewController( cells );
+				IndexViewController.openEditView( this, 'Map', processed_data_for_map );
+			}
 		}
 	},
 
