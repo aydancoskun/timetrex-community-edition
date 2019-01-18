@@ -47,6 +47,7 @@ class CompanyDeductionFactory extends Factory {
 	var $payroll_remittance_agency_obj = NULL;
 	var $pay_stub_entry_account_link_obj = NULL;
 	var $pay_stub_entry_account_obj = NULL;
+	var $users = NULL;
 
 	var $lookback_pay_stub_lf = NULL;
 
@@ -2483,19 +2484,24 @@ class CompanyDeductionFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getUser() {
-		$udlf = TTnew( 'UserDeductionListFactory' );
-		$udlf->getByCompanyIdAndCompanyDeductionId( $this->getCompany(), $this->getId() );
+		//Cache the user list to help performance in TaxSummaryReport
+		if ( $this->users === NULL ) {
+			$udlf = TTnew( 'UserDeductionListFactory' );
+			$udlf->getByCompanyIdAndCompanyDeductionId( $this->getCompany(), $this->getId() );
 
-		$list = array();
-		foreach ($udlf as $obj) {
-			$list[] = $obj->getUser();
+			$this->users = array();
+			foreach ( $udlf as $obj ) {
+				$this->users[] = $obj->getUser();
+			}
+
+			if ( empty( $this->users ) == FALSE ) {
+				return $this->users;
+			}
+
+			return FALSE;
+		} else {
+			return $this->users;
 		}
-
-		if ( empty($list) == FALSE ) {
-			return $list;
-		}
-
-		return FALSE;
 	}
 
 	/**
@@ -2550,6 +2556,8 @@ class CompanyDeductionFactory extends Factory {
 					}
 				}
 			}
+
+			$this->users = NULL; //Clear cache.
 
 			return TRUE;
 		}

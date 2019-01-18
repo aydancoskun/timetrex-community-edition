@@ -433,7 +433,8 @@ switch ($object_type) {
 	case 'import':
 		$max_upload_file_size = 128000000;
 
-		if ( DEMO_MODE == FALSE
+
+		if ( ( DEMO_MODE == FALSE OR ( isset($config_vars['other']['sandbox']) AND $config_vars['other']['sandbox'] == TRUE ) ) //Allow importing in sandbox mode, as its helpful to be able to test this.
 			AND (
 					$permission->Check('user', 'add')
 					OR $permission->Check('user', 'edit_bank')

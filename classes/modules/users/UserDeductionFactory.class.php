@@ -117,6 +117,10 @@ class UserDeductionFactory extends Factory {
 
 										'first_name' => FALSE,
 										'last_name' => FALSE,
+										'middle_name' => FALSE,
+										'user_status_id' => FALSE,
+										'user_status' => FALSE,
+										'full_name' => FALSE,
 
 										'length_of_service_date' => 'LengthOfServiceDate',
 										'start_date' => 'StartDate',
@@ -2363,7 +2367,16 @@ class UserDeductionFactory extends Factory {
 						//User columns.
 						case 'first_name':
 						case 'last_name':
+						case 'middle_name':
+						case 'user_status_id':
 							$data[$variable] = $this->getColumn( $variable );
+							break;
+						case 'user_status':
+							$uf = TTnew( 'UserFactory' );
+							$data[$variable] = Option::getByKey( $this->getColumn( $variable.'_id' ), $uf->getOptions( 'status' ) );
+							break;
+						case 'full_name':
+							$data[$variable] = Misc::getFullName(  $this->getColumn( 'first_name' ), $this->getColumn( 'middle_name' ), $this->getColumn( 'last_name' ), TRUE, TRUE );
 							break;
 						//CompanyDeduction columns.
 						case 'type':

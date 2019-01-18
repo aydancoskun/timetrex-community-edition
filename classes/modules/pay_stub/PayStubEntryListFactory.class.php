@@ -1605,7 +1605,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 											);
 
 		if ( $order == NULL ) {
-			$order = array( 'b.user_id' => 'asc');
+			$order = array( 'b.user_id' => 'asc', 'pseaf.ps_order' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -1621,6 +1621,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$psf = new PayStubFactory();
 		$uf = new UserFactory();
 		$psaf = new PayStubAmendmentFactory();
+		$pseaf = new PayStubEntryAccountFactory();
 
 		$ph = array(
 					'company_id' => TTUUID::castUUID($company_id),
@@ -1715,6 +1716,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 								AND (aa.deleted = 0 AND bb.deleted = 0 AND cc.deleted=0)
 							) a
 						LEFT JOIN '. $psf->getTable() .' as b ON a.pay_stub_id = b.id
+						LEFT JOIN '. $pseaf->getTable() .' as pseaf ON a.pay_stub_entry_name_id = pseaf.id
 						LEFT JOIN '. $uf->getTable() .' as c ON b.user_id = c.id
 						LEFT JOIN '. $ppf->getTable() .' as ppf ON b.pay_period_id = ppf.id
 					where	1=1
@@ -1724,7 +1726,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		//							group by aa.pay_stub_id, aa.pay_stub_entry_name_id
 
 		$query .=	'
-						AND (c.deleted=0)
+						AND ( c.deleted=0 AND pseaf.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );

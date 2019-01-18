@@ -1019,7 +1019,6 @@ require( [
 			'ReportBaseViewController',
 			'Paging2',
 			'jquery-ui',
-			//'live-chat',
 
 			//API's required to loads views. This is a preemtive move before removing loadScript() from Global
 			'APILog',
@@ -1036,6 +1035,10 @@ require( [
 			'EmbeddedMessageCommon',
 
 		];
+
+		if ( LocalCacheData.productEditionId > 10 ) {
+			require_array.push('live-chat');
+		}
 
 		//do not load interact on mobile.
 		if ( Global.detectMobileBrowser() == true ) {

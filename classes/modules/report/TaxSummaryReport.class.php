@@ -230,6 +230,7 @@ class TaxSummaryReport extends Report {
 				ksort($retval);
 
 				break;
+
 			case 'pay_stub_account_amount_columns':
 				//Get all pay stub accounts
 				$retval = array();
@@ -394,22 +395,26 @@ class TaxSummaryReport extends Report {
 										case 'by_employee':
 											$retval['columns'][] = 'first_name';
 											$retval['columns'][] = 'last_name';
+											$retval['columns'][] = 'middle_name';
 											$retval['columns'][] = 'sin';
 
 											$retval['-2000-company_deduction_id'][] = TTUUID::getZeroID();
 
 											$retval['group'][] = 'first_name';
 											$retval['group'][] = 'last_name';
+											$retval['group'][] = 'middle_name';
 											$retval['group'][] = 'sin';
 
 											$retval['sort'][] = array('last_name' => 'asc');
 											$retval['sort'][] = array('first_name' => 'asc');
+											$retval['sort'][] = array('middle_name' => 'asc');
 											$retval['sort'][] = array('sin' => 'asc');
 											break;
 										case 'by_company_deduction_by_employee':
 											$retval['columns'][] = 'company_deduction_name';
 											$retval['columns'][] = 'first_name';
 											$retval['columns'][] = 'last_name';
+											$retval['columns'][] = 'middle_name';
 											$retval['columns'][] = 'sin';
 
 											$retval['-2000-company_deduction_id'][] = TTUUID::getZeroID();
@@ -417,6 +422,7 @@ class TaxSummaryReport extends Report {
 											$retval['group'][] = 'company_deduction_name';
 											$retval['group'][] = 'first_name';
 											$retval['group'][] = 'last_name';
+											$retval['group'][] = 'middle_name';
 											$retval['group'][] = 'sin';
 
 											$retval['sub_total'][] = 'company_deduction_name';
@@ -424,6 +430,7 @@ class TaxSummaryReport extends Report {
 											$retval['sort'][] = array('company_deduction_name' => 'asc');
 											$retval['sort'][] = array('last_name' => 'asc');
 											$retval['sort'][] = array('first_name' => 'asc');
+											$retval['sort'][] = array('middle_name' => 'asc');
 											$retval['sort'][] = array('sin' => 'asc');
 											break;
 										case 'by_payroll_remittance_agency':
@@ -456,6 +463,7 @@ class TaxSummaryReport extends Report {
 											$retval['columns'][] = 'payroll_remittance_agency_name';
 											$retval['columns'][] = 'first_name';
 											$retval['columns'][] = 'last_name';
+											$retval['columns'][] = 'middle_name';
 											$retval['columns'][] = 'sin';
 
 											$retval['-2000-company_deduction_id'][] = TTUUID::getZeroID();
@@ -463,6 +471,7 @@ class TaxSummaryReport extends Report {
 											$retval['group'][] = 'payroll_remittance_agency_name';
 											$retval['group'][] = 'first_name';
 											$retval['group'][] = 'last_name';
+											$retval['group'][] = 'middle_name';
 											$retval['group'][] = 'sin';
 
 											$retval['sub_total'][] = 'payroll_remittance_agency_name';
@@ -470,6 +479,7 @@ class TaxSummaryReport extends Report {
 											$retval['sort'][] = array('payroll_remittance_agency_name' => 'asc');
 											$retval['sort'][] = array('last_name' => 'asc');
 											$retval['sort'][] = array('first_name' => 'asc');
+											$retval['sort'][] = array('middle_name' => 'asc');
 											$retval['sort'][] = array('sin' => 'asc');
 											break;
 										case 'by_payroll_remittance_agency_by_company_deduction_by_employee':
@@ -477,6 +487,7 @@ class TaxSummaryReport extends Report {
 											$retval['columns'][] = 'company_deduction_name';
 											$retval['columns'][] = 'first_name';
 											$retval['columns'][] = 'last_name';
+											$retval['columns'][] = 'middle_name';
 											$retval['columns'][] = 'sin';
 
 											$retval['-2000-company_deduction_id'][] = TTUUID::getZeroID();
@@ -485,6 +496,7 @@ class TaxSummaryReport extends Report {
 											$retval['group'][] = 'company_deduction_name';
 											$retval['group'][] = 'first_name';
 											$retval['group'][] = 'last_name';
+											$retval['group'][] = 'middle_name';
 											$retval['group'][] = 'sin';
 
 											$retval['sub_total'][] = 'payroll_remittance_agency_name';
@@ -494,6 +506,7 @@ class TaxSummaryReport extends Report {
 											$retval['sort'][] = array('company_deduction_name' => 'asc');
 											$retval['sort'][] = array('last_name' => 'asc');
 											$retval['sort'][] = array('first_name' => 'asc');
+											$retval['sort'][] = array('middle_name' => 'asc');
 											$retval['sort'][] = array('sin' => 'asc');
 											break;
 									}
@@ -539,8 +552,6 @@ class TaxSummaryReport extends Report {
 		return $retval;
 	}
 
-	//Get raw data for report
-
 	function getCompanyDeductionData( $company_id, $filter_data, $columns ) {
 		$company_deduction_data = array();
 
@@ -551,6 +562,8 @@ class TaxSummaryReport extends Report {
 		if ( $cdlf->getRecordCount() > 0 ) {
 			$duplicate_pay_stub_entry_account_map = array();
 
+			//Splitting or combining data across agency/company deductions is important to prevent a report from duplicating subject wages.
+			//  For example if two taxes are selected (ie: 2x Workers Comp) and the employee has both deducted, the subject wages might be doubled up.
 			if ( isset($columns['payroll_remittance_agency_name']) ) {
 				$enable_split_by_payroll_remittance_agency = TRUE;
 			} else {
@@ -567,16 +580,24 @@ class TaxSummaryReport extends Report {
 			foreach( $cdlf as $cd_obj ) {
 				Debug::Text('  Company Deduction: '. $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
 
-				if ( $enable_split_by_payroll_remittance_agency == FALSE ) {
+				//Check to see if its a Tax/Deduction that can be combined.
+				//Just State, District/Local taxes can't be combined, due to employees working in multiple jurisdictions and may or may not be taxable. So they could be assigned to multiple Tax/Deductions of the same State.
+				if ( in_array( $cd_obj->getCalculation(), array(200, 300) ) ) {
+					$can_be_combined = FALSE;
+				} else {
+					$can_be_combined = TRUE;
+				}
+
+				if ( $can_be_combined == TRUE AND $enable_split_by_payroll_remittance_agency == FALSE ) {
 					$tmp_payroll_remittance_agency_id = TTUUID::getZeroID();
 				} else {
 					$tmp_payroll_remittance_agency_id = $cd_obj->getPayrollRemittanceAgency();
 				}
 
-				if ( $enable_split_by_company_deduction == FALSE ) {
+				if ( $can_be_combined == TRUE AND $enable_split_by_company_deduction == FALSE ) {
 					$tmp_company_deduction_id = TTUUID::getZeroID();
 				} else {
-					if ( isset( $duplicate_pay_stub_entry_account_map[$tmp_payroll_remittance_agency_id][$cd_obj->getPayStubEntryAccount()] ) ) {
+					if ( $can_be_combined == TRUE AND isset( $duplicate_pay_stub_entry_account_map[$tmp_payroll_remittance_agency_id][$cd_obj->getPayStubEntryAccount()] ) ) {
 						$tmp_company_deduction_id = $duplicate_pay_stub_entry_account_map[$tmp_payroll_remittance_agency_id][$cd_obj->getPayStubEntryAccount()];
 						Debug::Text( 'Merging Company Deductions: Parent: ' . $company_deduction_data[$tmp_payroll_remittance_agency_id][ $tmp_company_deduction_id ]->getName() . ' (' . $tmp_company_deduction_id . ') Child: ' . $cd_obj->getName() . ' (' . $cd_obj->getId() . ')', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -605,21 +626,18 @@ class TaxSummaryReport extends Report {
 				}
 				$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->tax_withheld_psea_ids = array_merge( $company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->tax_withheld_psea_ids, array( $cd_obj->getPayStubEntryAccount() ) );
 
+				if ( !isset($company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->user_ids) ) {
+					$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->user_ids = array();
+				}
+				$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->user_ids = array_merge( $company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->user_ids, (array)$cd_obj->getUser() );
+
 				$duplicate_pay_stub_entry_account_map[$tmp_payroll_remittance_agency_id][$cd_obj->getPayStubEntryAccount()] = $tmp_company_deduction_id;
-
-				//This needs to go last, otherwise changing the ID can cause failures getting child data like Include/Exclude PSEAs.
-//				if ( $i == 0 AND $enable_split_by_company_deduction == FALSE ) {
-//					$cd_obj->setName( 'COMPOSITE' );
-//					$cd_obj->setId( TTUUID::getZeroID() );
-//				}
-
 
 				$i++;
 			}
 		}
 
 		//Debug::Arr( $company_deduction_data, 'Company Deductions Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
 		return $company_deduction_data;
 	}
 
@@ -639,7 +657,12 @@ class TaxSummaryReport extends Report {
 		return $user_deduction_data;
 	}
 
-	function addPayStubEntry( $cd_obj, $pse_obj ) {
+	function addPayStubEntry( $cd_obj, $pse_obj, $user_deduction_data ) {
+		//If the deduction amount has no where to go, just exit early as its essentially disabled.
+		if ( empty( $tax_withheld_psea_ids ) == FALSE ) {
+			return TRUE;
+		}
+
 		$company_deduction_id = $cd_obj->getId();
 		$remittance_agency_id = $cd_obj->getPayrollRemittanceAgency();
 
@@ -651,8 +674,17 @@ class TaxSummaryReport extends Report {
 		$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
 		$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
-		Debug::Text('    Processing PSE record: Agency ID: '. $remittance_agency_id .' Deduction ID: '. $company_deduction_id .' PSE Name ID: '. $pay_stub_entry_name_id .' Amount: '. $pse_obj->getColumn('amount'), __FILE__, __LINE__, __METHOD__, 10);
 
+		//If the CompanyDeduction pay stub account does not match this current PSE PayStubEntryAccount, then check if the user is assigned to the CompanyDeduction, and if not we can return early as it doesn't apply to them.
+		//  This helps in cases where employees work in multiple states and may have absence time in their resident state, preventing subject wages from being calculated on the absence earnings in foriegn states.
+		//  Important: If an employee was taxed part of the year in one state and moved to a different state, they still need to be assigned to both Tax/Deductions, with just start/end dates specified instead. Otherwise subject wages will not be calculated, but tax withheld will still be.
+		//             Also need to take into account Workers Comp and multiple rate groups, to ensure those
+		if ( in_array( $pay_stub_entry_name_id, $tax_withheld_psea_ids ) == FALSE AND in_array( $user_id, (array)$cd_obj->user_ids ) == FALSE ) { //Use user_ids rather than getUser() as they could be merged in getCompanyDeductionData()
+				//Debug::Text('    Skipping PSE record: Agency ID: '. $remittance_agency_id .' Deduction ID: '. $company_deduction_id .' PSE Name ID: '. $pay_stub_entry_name_id .' Amount: '. $pse_obj->getColumn('amount'), __FILE__, __LINE__, __METHOD__, 10);
+				return TRUE;
+		}
+
+		//Debug::Text('    Processing PSE record: Agency ID: '. $remittance_agency_id .' Deduction ID: '. $company_deduction_id .' PSE Name ID: '. $pay_stub_entry_name_id .' Amount: '. $pse_obj->getColumn('amount'), __FILE__, __LINE__, __METHOD__, 10);
 		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]) ) {
 			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id] = array(
 					'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
@@ -706,7 +738,7 @@ class TaxSummaryReport extends Report {
 		}
 		$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = bcadd( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('ytd_amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
 
-		if ( empty($tax_withheld_psea_ids) == FALSE AND in_array($pay_stub_entry_name_id, $tax_withheld_psea_ids ) ) {
+		if ( empty($tax_withheld_psea_ids) == FALSE AND in_array( $pay_stub_entry_name_id, $tax_withheld_psea_ids ) ) {
 			if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['tax_withheld']) ) {
 				$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] = 0;
 			}
@@ -767,16 +799,8 @@ class TaxSummaryReport extends Report {
 				$filter_data['company_deduction_id'] = '';
 			}
 
-			if ( ( is_array($filter_data['company_deduction_id']) AND count($filter_data['company_deduction_id']) > 0 AND isset($columns['company_deduction_name']) ) ) {
-				Debug::Text('Multiple Tax/Deductions selected along with Tax/Deduction name', __FILE__, __LINE__, __METHOD__, 10);
-				$enable_split_tax_deduction_data = TRUE;
-			} else {
-				$enable_split_tax_deduction_data = FALSE;
-			}
-
 			$company_deduction_data = $this->getCompanyDeductionData( $this->getUserObject()->getCompany(), $company_deduction_filter_data, $columns );
 			$user_deduction_data = $this->getUserDeductionData( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'] );
-
 			//Debug::Arr($user_deduction_data, 'User Deduction Maximum Amount Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( !isset($filter_data['exclude_ytd_adjustment']) ) {
@@ -789,9 +813,7 @@ class TaxSummaryReport extends Report {
 			//  For example, the same earnings records are likely to count towards many different Tax/Deduction records.
 			$pself = TTnew( 'PayStubEntryListFactory' );
 			$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-			if ( $enable_split_tax_deduction_data == FALSE ) {
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-			}
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 			if ( $pself->getRecordCount() > 0 ) {
 				if ( is_array( $company_deduction_data ) AND count( $company_deduction_data ) > 0 ) {
 					Debug::Text( 'Found Company Deductions...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -804,7 +826,8 @@ class TaxSummaryReport extends Report {
 							//Debug::Arr( $cd_obj->getPayStubEntryAccount(), '   Withheld PSEA IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 							foreach ( $pself as $key => $pse_obj ) {
-								$this->addPayStubEntry( $cd_obj, $pse_obj );
+								$this->addPayStubEntry( $cd_obj, $pse_obj, $user_deduction_data );
+								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 							}
 						}
 					}
@@ -882,7 +905,7 @@ class TaxSummaryReport extends Report {
 		}
 
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
 	}
 

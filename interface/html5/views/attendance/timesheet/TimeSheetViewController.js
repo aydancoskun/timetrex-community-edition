@@ -6681,15 +6681,24 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	getSelectEmployee: function( full_item ) {
-		var user;
+		var user = false;
 		if ( this.show_navigation_box && this.employee_nav && typeof this.employee_nav.getValue == 'function' ) {
-			user = this.employee_nav.getValue( full_item );
-		} else {
-			if ( full_item ) {
-				user = LocalCacheData.getLoginUser();
-			} else {
-				user = LocalCacheData.getLoginUser().id;
+			user = this.employee_nav.getValue( true ); //always get the object (not the id)
+		}
+
+		//default to currently logged in user
+		if ( ( user != null && typeof user != 'object' && TTUUID.isUUID(user) == false ) || ( typeof user == 'object' && TTUUID.isUUID(user.id) == false ) ) {
+			user = LocalCacheData.getLoginUser();
+
+			if ( user != null && typeof user != 'object' || ( typeof user == 'object' && TTUUID.isUUID(user.id) == false ) ) {
+				//currently logged in user object is corrupt.
+				var r = new RibbonViewController();
+				r.doLogout();
 			}
+		}
+
+		if ( full_item != true && ( typeof user == 'object' && TTUUID.isUUID(user.id) == true ) )  {
+			user = user.id;
 		}
 
 		return user;

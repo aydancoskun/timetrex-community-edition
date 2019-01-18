@@ -1216,7 +1216,7 @@ BaseViewController = Backbone.View.extend( {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
-			if ( result_data === true ) {
+			if ( result_data === true  && $this.current_edit_record && $this.current_edit_record.id ) {
 				$this.refresh_id = $this.current_edit_record.id;
 			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
@@ -1251,7 +1251,7 @@ BaseViewController = Backbone.View.extend( {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
-			if ( result_data === true ) {
+			if ( result_data === true  && $this.current_edit_record && $this.current_edit_record.id ) {
 				$this.refresh_id = $this.current_edit_record.id;
 
 			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
@@ -1288,7 +1288,7 @@ BaseViewController = Backbone.View.extend( {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
-			if ( result_data === true ) {
+			if ( result_data === true  && $this.current_edit_record && $this.current_edit_record.id ) {
 				$this.refresh_id = $this.current_edit_record.id;
 
 			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
@@ -1328,7 +1328,7 @@ BaseViewController = Backbone.View.extend( {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
-			if ( result_data === true ) {
+			if ( result_data === true  && $this.current_edit_record && $this.current_edit_record.id ) {
 				$this.refresh_id = $this.current_edit_record.id;
 			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
@@ -1395,10 +1395,12 @@ BaseViewController = Backbone.View.extend( {
 			$this.is_add = false;
 			var result_data = result.getResult();
 			if ( !this.edit_only_mode ) {
-				if ( result_data === true ) {
+				if ( result_data === true && $this.current_edit_record && $this.current_edit_record.id ) {
 					$this.refresh_id = $this.current_edit_record.id;
 				} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 					$this.refresh_id = result_data;
+				} else {
+					$this.refresh_id = null;
 				}
 
 				$this.search();
@@ -2163,10 +2165,11 @@ BaseViewController = Backbone.View.extend( {
 		var $this = this;
 		var widget;
 		// when do validation, only show warning no alert
-		if ( LocalCacheData.current_doing_context_action != 'validate' ) {
+		var $current_doing_context_action = LocalCacheData.current_doing_context_action; //#2474 - LocalCacheData.current_doing_context_action can change to "validate" while waiting for user to respond to warning box.
+		if ( $current_doing_context_action != 'validate' ) {
 			TAlertManager.showWarningAlert( result, function( flag ) {
 				if ( flag ) {
-					switch ( LocalCacheData.current_doing_context_action ) {
+					switch ( $current_doing_context_action ) {
 						case 'save':
 							$this.onSaveClick( true );
 							break;

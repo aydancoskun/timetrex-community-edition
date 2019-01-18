@@ -311,8 +311,9 @@ class PayFormulaPolicyListFactory extends PayFormulaPolicyFactory implements Ite
 					);
 
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN EXISTS
 									( select 1 from '. $pcf->getTable() .' as x where x.pay_formula_policy_id = a.id and x.deleted = 0)

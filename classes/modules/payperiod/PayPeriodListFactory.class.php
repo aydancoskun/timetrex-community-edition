@@ -1683,8 +1683,8 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	}
 
 	/**
-	 * @param $id
 	 * @param $company_id
+	 * @param $id
 	 * @param null $transaction_date
 	 * @param null $limit
 	 * @param null $page
@@ -1692,9 +1692,8 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	 * @param null $order
 	 * @return $this|bool
 	 */
-	function getByRemittanceAgencyIdAndCompanyIdAndTransactionDateAndPayPeriodSchedule( $id, $company_id, $transaction_date = NULL, $pay_period_schedule = NULL, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-
-		Debug::Text( 'Remittance Agency Id: '. $id .' Company Id: '. $company_id .' Transaction Date: '. $transaction_date, __FILE__, __LINE__, __METHOD__, 10);
+	function getByCompanyIdAndRemittanceAgencyIdAndTransactionDateAndPayPeriodSchedule( $company_id, $id, $transaction_date = NULL, $pay_period_schedule = NULL, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+		Debug::Text( 'Remittance Agency ID: '. $id .' Company ID: '. $company_id .' Transaction Date: '. $transaction_date, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id == '' ) {
 			return FALSE;
@@ -1741,8 +1740,8 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
-		//Debug::Arr($ph,'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 		return $this;
 	}
 

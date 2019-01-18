@@ -1185,6 +1185,10 @@ EmployeeViewController = BaseViewController.extend( {
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
 
+		if ( !this.current_edit_record ) {
+			return;
+		}
+
 		if ( parseInt( key ) > 0 ) {
 
 			if ( !this.current_edit_record.hierarchy_control ) {

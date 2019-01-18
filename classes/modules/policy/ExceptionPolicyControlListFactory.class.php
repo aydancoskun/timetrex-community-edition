@@ -212,8 +212,9 @@ class ExceptionPolicyControlListFactory extends ExceptionPolicyControlFactory im
 					);
 
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN EXISTS (select 1 from '. $pgf->getTable() .' as z where z.exception_policy_control_id = a.id and z.deleted = 0 ) THEN 1 ELSE 0 END
 							) as in_use,

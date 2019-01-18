@@ -47,6 +47,10 @@ var TAlertManager = (function() {
 		function backToPreSession() {
 			var host = Global.getHost();
 			var alternate_session_data = JSON.parse( $.cookie( 'AlternateSessionData' ) );
+			if ( !alternate_session_data ) {
+				Debug.Text( 'No alternate_session_data exists.' , 'TAlertManager.js', 'TAlertManager', 'backToPreSession', 10);
+				return;
+			}
 			var url = alternate_session_data.previous_session_url;
 			var previous_cookie_path = alternate_session_data.previous_cookie_path;
 

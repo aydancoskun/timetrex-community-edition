@@ -7973,29 +7973,15 @@ class CalculatePolicy {
 
 			$date_stamp = TTDate::getMiddleDayEpoch($date_stamp); //Optimization - Move outside loop.
 
-			//Make sure we get all UserDateTotal data going back to the number of days to average the time over.
-			$this->getUserDateTotalData( ( $date_stamp - ( 86400 * $this->holiday_before_days ) ), ( $date_stamp - 86400 ) );
-
 			if ( $holiday_policy_obj->getAverageTimeFrequencyType() == 20 ) { //Pay Periods
-				$pplf = TTNew('PayPeriodListFactory');
-				$pplf->getByPayPeriodScheduleIdAndEndDateBefore( $this->pay_period_schedule_obj->getId(), $date_stamp, $holiday_policy_obj->getAverageTimeDays() );
-				if ( $pplf->getRecordCount() > 0 ) {
-					$filter_start_date = FALSE;
-					$filter_end_date = FALSE;
-					foreach( $pplf as $pp_obj ) {
-						if ( $filter_start_date == FALSE OR $pp_obj->getStartDate() < $filter_start_date ) {
-							$filter_start_date = $pp_obj->getStartDate();
-						}
-						if ( $filter_end_date == FALSE OR $pp_obj->getEndDate() > $filter_end_date ) {
-							$filter_end_date = $pp_obj->getEndDate();
-						}
-					}
-					Debug::text('Total time over Pay Periods: '. $holiday_policy_obj->getAverageTimeDays() .' Found Pay Periods: '. $pplf->getRecordCount() .' Start Date: '. TTDate::getDate('DATE', $filter_start_date ) .' End Date: '. TTDate::getDate('DATE', $filter_end_date ), __FILE__, __LINE__, __METHOD__, 10);
+				$past_pay_period_dates = $this->pay_period_schedule_obj->getStartAndEndDateRangeFromPastPayPeriods( $date_stamp, $holiday_policy_obj->getAverageTimeDays() );
+				if ( is_array($past_pay_period_dates) ) {
+					$filter_start_date = $past_pay_period_dates['start_date'];
+					$filter_end_date = $past_pay_period_dates['end_date'];
 				} else {
 					Debug::text('ERROR: No pay period found, unable to calculate holiday time!', __FILE__, __LINE__, __METHOD__, 10);
 					return 0;
 				}
-				unset($pplf, $pp_obj);
 			} else { //Days
 				if ( $holiday_policy_obj->getAverageTimeDays() >= 0 ) {
 					$filter_start_date = ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400 ) );
@@ -8007,6 +7993,10 @@ class CalculatePolicy {
 				}
 			}
 
+			//Make sure we get all UserDateTotal data going back to the number of days to average the time over.
+			//$this->getUserDateTotalData( ( $date_stamp - ( 86400 * $this->holiday_before_days ) ), ( $date_stamp - 86400 ) );
+			$this->getUserDateTotalData( $filter_start_date, $filter_end_date );
+
 			//Debug::text('Start Date: '. TTDate::getDate('DATE', ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400) ) ) .' End: '. TTDate::getDate('DATE', ( $date_stamp - 86400 ) ), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $holiday_policy_obj->getAverageTimeWorkedDays() == TRUE ) {
 				//$last_days_worked_count = count( $this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400) ), ( $date_stamp - 86400 ), $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(20, 25, 30, 40, 100, 110 ) ) ) ); //Don't include Absence, Lunch, Break (Taken).
@@ -8014,7 +8004,6 @@ class CalculatePolicy {
 			} else {
 				$last_days_worked_count = abs( $holiday_policy_obj->getAverageDays() ); //Allow -1 for getting time worked on the current day.
 			}
-			Debug::text('Average time over days: '. $last_days_worked_count, __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( $holiday_policy_obj->getAverageTimeDays() >= 0 ) {
 				//$total_seconds_worked = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400 ) ), ( $date_stamp - 86400 ), $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(20, 25, 30, 40, 100, 110) ) );
@@ -8023,6 +8012,7 @@ class CalculatePolicy {
 				//$total_seconds_worked = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $date_stamp, ( $date_stamp + ( ( abs( $holiday_policy_obj->getAverageTimeDays() ) - 1 ) * 86400 ) ), $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(10, 20, 25, 30, 40, 100, 110) ) ); //Must include 10=Worked Time, as this happens before RegularTime/OverTime is calculated.
 				$total_seconds_worked = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $filter_start_date, $filter_end_date, $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(10, 20, 25, 30, 40, 100, 110) ) ); //Must include 10=Worked Time, as this happens before RegularTime/OverTime is calculated.
 			}
+			Debug::text(' Total Time: '. TTDate::getHours($total_seconds_worked) .' Averaged over days: '. $last_days_worked_count, __FILE__, __LINE__, __METHOD__, 10);
 
 			unset($filter_start_date, $filter_end_date);
 
@@ -8317,7 +8307,7 @@ class CalculatePolicy {
 	/**
 	 * @return bool
 	 */
-	function getHolidayPolicy() {
+	function getHolidayPolicy( $date_stamp ) {
 		//Get Holiday policies and determine how many days we need to look ahead/behind in order
 		//to recalculate the holiday eligilibility/time.
 		$this->holiday_before_days = 0;
@@ -8338,9 +8328,22 @@ class CalculatePolicy {
 				if ( $hp_obj->getMinimumWorkedPeriodDays() > $this->holiday_before_days ) {
 					$this->holiday_before_days = $hp_obj->getMinimumWorkedPeriodDays();
 				}
-				if ( $hp_obj->getAverageTimeDays() > $this->holiday_before_days ) {
-					$this->holiday_before_days = $hp_obj->getAverageTimeDays();
+
+				if ( $hp_obj->getAverageTimeFrequencyType() == 20 ) { //Pay Periods
+					$past_pay_period_dates = $this->pay_period_schedule_obj->getStartAndEndDateRangeFromPastPayPeriods( $date_stamp, $hp_obj->getAverageTimeDays() );
+					if ( is_array($past_pay_period_dates) ) {
+						$min_start_date = $past_pay_period_dates['start_date'];
+
+						if ( TTDate::getDayDifference( $min_start_date, $date_stamp) > $this->holiday_before_days  ) {
+							$this->holiday_before_days = TTDate::getDayDifference( $min_start_date, $date_stamp);
+						}
+					}
+				} else {
+					if ( $hp_obj->getAverageTimeDays() > $this->holiday_before_days ) {
+						$this->holiday_before_days = $hp_obj->getAverageTimeDays();
+					}
 				}
+
 				if ( $hp_obj->getMinimumWorkedAfterPeriodDays() > $this->holiday_after_days ) {
 					$this->holiday_after_days = $hp_obj->getMinimumWorkedAfterPeriodDays();
 				}
@@ -8350,6 +8353,7 @@ class CalculatePolicy {
 				}
 			}
 
+			Debug::text('Holiday Before Days: '. $this->holiday_before_days .' After Days: '. $this->holiday_after_days .' Date: '. TTDate::getDate('DATE', $date_stamp), __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		}
 
@@ -9235,7 +9239,7 @@ class CalculatePolicy {
 				$this->getPayCode(); //Needs to come before getContributingShiftPolicy, but after Reg/OT/Prem policies are obtained.
 				$this->getPayFormulaPolicy();
 
-				$this->getHolidayPolicy(); //Must come before getContributingShiftPolicy() as it adds additional contributing shift policies to the list.
+				$this->getHolidayPolicy( $date_stamp ); //Must come before getContributingShiftPolicy() as it adds additional contributing shift policies to the list.
 				$this->getHolidayData( $date_range['start_date'], $date_range['end_date'], $enable_recalculate_holiday ); //This uses date_stamp as we need to find holidays in the past/future. Must come after getHolidayPolicy()
 
 				$this->getContributingShiftPolicy(); //This adds additional HolidayPolicies to the list... But it can't come before getHolidayPolicy()

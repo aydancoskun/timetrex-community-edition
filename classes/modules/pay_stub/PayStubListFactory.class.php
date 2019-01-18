@@ -473,7 +473,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		$ph = array(
 					'start_date' => $this->db->BindTimeStamp( $start_date ),
-					'run_id' => (int)$run_id,
+					'run_id' => (int)$this->castInteger( (int)$run_id, 'smallint' ),
 					'start_date2' => $this->db->BindTimeStamp( $start_date ),
 					);
 
@@ -499,7 +499,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	/**
 	 * @param string $user_id UUID
 	 * @param int $transaction_date EPOCH
-	 * @param string $run_id UUID
+	 * @param string $run_id INT
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayStubListFactory
@@ -524,7 +524,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		$ph = array(
 					'transaction_date' => $this->db->BindTimeStamp( $transaction_date ),
-					'run_id' => (int)$run_id,
+					'run_id' => (int)$this->castInteger( (int)$run_id, 'smallint' ),
 					'transaction_date2' => $this->db->BindTimeStamp( TTDate::getEndDayEpoch( $transaction_date ) ),
 					);
 
@@ -848,14 +848,14 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	/**
 	 * @param string $company_id UUID
 	 * @param string $pay_period_id UUID
-	 * @param $run
+	 * @param $run_id INT
 	 * @param int $limit Limit the number of records returned
 	 * @param int $page Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayStubListFactory
 	 */
-	function getByCompanyIdAndPayPeriodIdAndRun( $company_id, $pay_period_id, $run, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getByCompanyIdAndPayPeriodIdAndRun( $company_id, $pay_period_id, $run_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -864,7 +864,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		if ( $run == '') {
+		if ( $run_id == '') {
 			return FALSE;
 		}
 
@@ -878,10 +878,10 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$pplf = new PayPeriodListFactory();
 
 		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'pay_period_id' => TTUUID::castUUID($pay_period_id),
-					'run' => (int)$run,
-					);
+				'company_id' => TTUUID::castUUID($company_id),
+				'pay_period_id' => TTUUID::castUUID($pay_period_id),
+				'run_id' => (int)$this->castInteger( (int)$run_id, 'smallint' ),
+		);
 
 		$query = '
 					select	a.*
@@ -1066,7 +1066,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		$ph = array(
 					'company_id' => TTUUID::castUUID($company_id),
-					'run_id' => (int)$run_id,
+					'run_id' => (int)$this->castInteger( (int)$run_id, 'smallint' ),
 					);
 
 		$query = '
@@ -1325,7 +1325,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		//Pay Stub Status.
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['run_id']) ) ? $this->getWhereClauseSQL( 'a.run_id', $filter_data['run_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['run_id']) ) ? $this->getWhereClauseSQL( 'a.run_id', $filter_data['run_id'], 'smallint_list', $ph ) : NULL;
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 			$ph[] = $this->db->BindTimeStamp( (int)$filter_data['start_date'] );

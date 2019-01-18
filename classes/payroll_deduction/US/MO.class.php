@@ -48,6 +48,60 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
 		//Constants are calculated strange from the Government, just use their values.
+		20180101 => array(
+				10 => array(
+						array('income' => 103, 'rate' => 0, 'constant' => 0),
+						array('income' => 1028, 'rate' => 1.5, 'constant' => 0.00),
+						array('income' => 2056, 'rate' => 2.0, 'constant' => 15.00),
+						array('income' => 3084, 'rate' => 2.5, 'constant' => 36.00),
+						array('income' => 4113, 'rate' => 3.0, 'constant' => 62.00),
+						array('income' => 5141, 'rate' => 3.5, 'constant' => 93.00),
+						array('income' => 6169, 'rate' => 4.0, 'constant' => 129.00),
+						array('income' => 7197, 'rate' => 4.5, 'constant' => 170.00),
+						array('income' => 8225, 'rate' => 5.0, 'constant' => 216.00),
+						array('income' => 9253, 'rate' => 5.5, 'constant' => 267.00),
+						array('income' => 9253, 'rate' => 5.9, 'constant' => 324.00),
+				),
+				20 => array(
+						array('income' => 103, 'rate' => 0, 'constant' => 0),
+						array('income' => 1028, 'rate' => 1.5, 'constant' => 0.00),
+						array('income' => 2056, 'rate' => 2.0, 'constant' => 15.00),
+						array('income' => 3084, 'rate' => 2.5, 'constant' => 36.00),
+						array('income' => 4113, 'rate' => 3.0, 'constant' => 62.00),
+						array('income' => 5141, 'rate' => 3.5, 'constant' => 93.00),
+						array('income' => 6169, 'rate' => 4.0, 'constant' => 129.00),
+						array('income' => 7197, 'rate' => 4.5, 'constant' => 170.00),
+						array('income' => 8225, 'rate' => 5.0, 'constant' => 216.00),
+						array('income' => 9253, 'rate' => 5.5, 'constant' => 267.00),
+						array('income' => 9253, 'rate' => 5.9, 'constant' => 324.00),
+				),
+				30 => array(
+						array('income' => 103, 'rate' => 0, 'constant' => 0),
+						array('income' => 1028, 'rate' => 1.5, 'constant' => 0.00),
+						array('income' => 2056, 'rate' => 2.0, 'constant' => 15.00),
+						array('income' => 3084, 'rate' => 2.5, 'constant' => 36.00),
+						array('income' => 4113, 'rate' => 3.0, 'constant' => 62.00),
+						array('income' => 5141, 'rate' => 3.5, 'constant' => 93.00),
+						array('income' => 6169, 'rate' => 4.0, 'constant' => 129.00),
+						array('income' => 7197, 'rate' => 4.5, 'constant' => 170.00),
+						array('income' => 8225, 'rate' => 5.0, 'constant' => 216.00),
+						array('income' => 9253, 'rate' => 5.5, 'constant' => 267.00),
+						array('income' => 9253, 'rate' => 5.9, 'constant' => 324.00),
+				),
+				40 => array(
+						array('income' => 103, 'rate' => 0, 'constant' => 0),
+						array('income' => 1028, 'rate' => 1.5, 'constant' => 0.00),
+						array('income' => 2056, 'rate' => 2.0, 'constant' => 15.00),
+						array('income' => 3084, 'rate' => 2.5, 'constant' => 36.00),
+						array('income' => 4113, 'rate' => 3.0, 'constant' => 62.00),
+						array('income' => 5141, 'rate' => 3.5, 'constant' => 93.00),
+						array('income' => 6169, 'rate' => 4.0, 'constant' => 129.00),
+						array('income' => 7197, 'rate' => 4.5, 'constant' => 170.00),
+						array('income' => 8225, 'rate' => 5.0, 'constant' => 216.00),
+						array('income' => 9253, 'rate' => 5.5, 'constant' => 267.00),
+						array('income' => 9253, 'rate' => 5.9, 'constant' => 324.00),
+				),
+		),
 		20170101 => array(
 				10 => array(
 						array('income' => 1008, 'rate' => 1.5, 'constant' => 0),
@@ -151,6 +205,26 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20180101 => array(
+					'standard_deduction'  => array(
+							'10' => 6500.00,
+							'20' => 6500.00,
+							'30' => 13000.00,
+							'40' => 9550.00,
+					),
+					'allowance'           => array(
+							'10' => array(2100.00, 1200.00, 1200.00),
+							'20' => array(2100.00, 1200.00, 1200.00),
+							'30' => array(2100.00, 2100.00, 1200.00),
+							'40' => array(3500.00, 1200.00, 1200.00),
+					),
+					'federal_tax_maximum' => array(
+							'10' => 5000.00,
+							'20' => 5000.00,
+							'30' => 10000.00,
+							'40' => 5000.00,
+					),
+			),
 			20170101 => array(
 					'standard_deduction'  => array(
 							'10' => 6350.00,

@@ -272,6 +272,7 @@ class T4ASummaryReport extends Report {
 							break;
 						default:
 							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__, 10);
+							$retval['columns'] = array();
 							$retval['-1010-time_period']['time_period'] = 'last_year';
 
 							//Parse template name, and use the keywords separated by '+' to determine settings.
@@ -803,8 +804,7 @@ class T4ASummaryReport extends Report {
 					$t4a->company_name = $company_name;
 				}
 
-				$count_user_rows = 0;
-				foreach ( $user_rows as $row ) {
+				foreach ( $user_rows as $user_row_key => $row ) {
 
 					if ( !isset( $row['user_id'] ) ) {
 						Debug::Text( 'User ID not set!', __FILE__, __LINE__, __METHOD__, 10 );
@@ -857,6 +857,8 @@ class T4ASummaryReport extends Report {
 								'postal_code'         => $user_obj->getPostalCode(),
 								'sin'                 => $user_obj->getSIN(),
 								'employee_number'     => $user_obj->getEmployeeNumber(),
+
+								//If lines with dollar amounts change, update $amount_boxes below.
 								'l16'                 => $row['pension'],
 								'l18'                 => $row['lump_sum_payment'],
 								'l22'                 => $row['income_tax'],
@@ -876,6 +878,10 @@ class T4ASummaryReport extends Report {
 								'other_box_5_code'    => NULL,
 								'other_box_5'         => NULL,
 						);
+
+						//Boxes that contain dollar amounts, so we can determine if the T4 is "blank" or not.
+						$amount_boxes = array( 'l16', 'l18', 'l22', 'l20', 'l24', 'l48', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4', 'other_box_5' );
+
 
 						if ( isset( $row['other_box_0'] ) AND $row['other_box_0'] > 0 AND isset( $setup_data['other_box'][0]['box'] ) AND $setup_data['other_box'][0]['box'] != '' ) {
 							$ee_data['other_box_0_code'] = $setup_data['other_box'][0]['box'];
@@ -897,49 +903,61 @@ class T4ASummaryReport extends Report {
 							$ee_data['other_box_3'] = $row['other_box_3'];
 						}
 
-					if ( isset( $row['other_box_4'] ) AND $row['other_box_4'] > 0 AND isset($setup_data['other_box'][4]['box']) AND $setup_data['other_box'][4]['box'] != '') {
-						$ee_data['other_box_4_code'] = $setup_data['other_box'][4]['box'];
-						$ee_data['other_box_4'] = $row['other_box_4'];
-					}
-					$t4a->addRecord( $ee_data );
-					unset($ee_data);
+						if ( isset( $row['other_box_4'] ) AND $row['other_box_4'] > 0 AND isset($setup_data['other_box'][4]['box']) AND $setup_data['other_box'][4]['box'] != '') {
+							$ee_data['other_box_4_code'] = $setup_data['other_box'][4]['box'];
+							$ee_data['other_box_4'] = $row['other_box_4'];
+						}
 
-					if ( $format == 'pdf_form_publish_employee' ) {
-						// generate PDF for every employee and assign to each government document records
-						$this->getFormObject()->addForm( $t4a );
-						GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 102, TTDate::getEndYearEpoch( $filter_data['end_date'] ), $this->getFormObject()->output( 'PDF' ) );
-						$this->getFormObject()->clearForms();
-					}
+						//Make sure there is actually data on the T4, otherwise skip the employee.
+						$tmp_total_amount_boxes = 0;
+						foreach( $amount_boxes as $amount_box ) {
+							if ( isset($ee_data[$amount_box]) AND is_numeric($ee_data[$amount_box]) ) {
+								$tmp_total_amount_boxes += $ee_data[$amount_box];
+							}
+						}
 
-					$count_user_rows++;
+						if ( $tmp_total_amount_boxes != 0 ) {
+							$t4a->addRecord( $ee_data );
+						} else {
+							Debug::Text('  No amounts on T4A skipping: '. $user_obj->getFullName(), __FILE__, __LINE__, __METHOD__, 10);
+							unset($user_rows[$user_row_key]); //Remove user data from arrow does it doesn't get added to totals or counted as an employee.
+						}
+						unset($ee_data);
+
+						if ( $format == 'pdf_form_publish_employee' ) {
+							// generate PDF for every employee and assign to each government document records
+							$this->getFormObject()->addForm( $t4a );
+							GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 102, TTDate::getEndYearEpoch( $filter_data['end_date'] ), $this->getFormObject()->output( 'PDF' ) );
+							$this->getFormObject()->clearForms();
+						}
+					}
 				}
-			}
-			$this->getFormObject()->addForm( $t4a );
+				$this->getFormObject()->addForm( $t4a );
 
-			if ( $format == 'pdf_form_publish_employee' ) {
-				$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $this->getUserObject()->getId() );
-				return $user_generic_status_batch_id;
-			}
+				if ( $format == 'pdf_form_publish_employee' ) {
+					$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $this->getUserObject()->getId() );
+					return $user_generic_status_batch_id;
+				}
 
-			//Handle T4ASummary
-			$t4as = $this->getT4ASumObject();
-			$t4as->setStatus( $setup_data['status_id'] );
-			$t4as->year = $t4a->year;
-			$t4as->payroll_account_number = $t4a->payroll_account_number;
+				//Handle T4ASummary
+				$t4as = $this->getT4ASumObject();
+				$t4as->setStatus( $setup_data['status_id'] );
+				$t4as->year = $t4a->year;
+				$t4as->payroll_account_number = $t4a->payroll_account_number;
 
-			$t4as->company_name = $le_obj->getTradeName();
-			$t4as->company_address1 = $le_obj->getAddress1();
-			$t4as->company_address2 = $le_obj->getAddress2();
-			$t4as->company_city = $le_obj->getCity();
-			$t4as->company_province = $le_obj->getProvince();
-			$t4as->company_postal_code = $le_obj->getPostalCode();
+				$t4as->company_name = $le_obj->getTradeName();
+				$t4as->company_address1 = $le_obj->getAddress1();
+				$t4as->company_address2 = $le_obj->getAddress2();
+				$t4as->company_city = $le_obj->getCity();
+				$t4as->company_province = $le_obj->getProvince();
+				$t4as->company_postal_code = $le_obj->getPostalCode();
 
 				$t4as->l76 = $this->getUserObject()->getFullName(); //Contact name.
 				$t4as->l78 = $current_company->getWorkPhone();
 
 				$total_row = Misc::ArrayAssocSum( $this->form_data['user'][$legal_entity_id] );
 
-				$t4as->l88 = $count_user_rows;
+				$t4as->l88 = count( $user_rows );
 				$t4as->l16 = ( isset( $total_row['pension']) ) ? $total_row['pension'] : NULL;
 				$t4as->l22 = ( isset( $total_row['income_tax']) ) ? $total_row['income_tax'] : NULL;
 				$t4as->l18 = ( isset( $total_row['lump_sum_payment']) ) ? $total_row['lump_sum_payment'] : NULL;
@@ -991,12 +1009,9 @@ class T4ASummaryReport extends Report {
 				$this->clearT4AObject();
 				$this->clearT619SumObject();
 				$this->clearT4ASumObject();
-
+				unset($file_output);
 			}//outer foreach
-			unset($file_output);
-
 		}//if
-
 
 		$zip_filename = explode('.', $file_name);
 		if ( isset($zip_filename[(count($zip_filename) - 1)]) ) {
@@ -1008,9 +1023,8 @@ class T4ASummaryReport extends Report {
 		return Misc::zip($file_arr, $zip_filename, TRUE);
 	}
 
-	//Short circuit this function, as no postprocessing is required for exporting the data.
-
 	/**
+	 * Short circuit this function, as no postprocessing is required for exporting the data.
 	 * @param null $format
 	 * @return bool
 	 */

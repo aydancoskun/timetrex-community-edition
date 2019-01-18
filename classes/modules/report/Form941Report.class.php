@@ -79,6 +79,16 @@ class Form941Report extends Report {
 			$this->validator->isTrue( 'time_period', FALSE, TTi18n::gettext('No time period defined for this report') );
 		}
 
+		//Since we added social_security_tax_employer, and medicare_tax_employer form setup fields recently, make sure customers are aware if they aren't set the form isn't configured properly.
+		$form_data = $this->formatFormConfig();
+		if ( !( isset($form_data['social_security_tax_employer']['include_pay_stub_entry_account']) AND $form_data['social_security_tax_employer']['include_pay_stub_entry_account'] != TTUUID::getZeroID() ) ) {
+			$this->validator->isTrue( 'form_setup', FALSE, TTi18n::gettext('Form Setup incomplete for Social Security Employer') );
+		}
+
+		if ( !( isset($form_data['medicare_tax_employer']['include_pay_stub_entry_account']) AND $form_data['medicare_tax_employer']['include_pay_stub_entry_account'] != TTUUID::getZeroID() ) ) {
+			$this->validator->isTrue( 'form_setup', FALSE, TTi18n::gettext('Form Setup incomplete for Medicare Employer') );
+		}
+
 		return TRUE;
 	}
 
@@ -215,10 +225,18 @@ class Form941Report extends Report {
 										'-2010-wages' => TTi18n::gettext('Wages'), //Line 2
 										'-2020-income_tax' => TTi18n::gettext('Income Tax'), //Line 3
 										'-2030-social_security_wages' => TTi18n::gettext('Taxable Social Security Wages'), //Line 5a
-										'-2040-social_security_tips' => TTi18n::gettext('Taxable Social Security Tips'), //Line 5b
+										'-2032-social_security_tips' => TTi18n::gettext('Taxable Social Security Tips'), //Line 5b
+										'-2038-social_security_tax' => TTi18n::gettext('Social Security - Employee'),
+										'-2039-social_security_tax_employer' => TTi18n::gettext('Social Security - Employer'),
+										'-2039-social_security_tax_total' => TTi18n::gettext('Social Security'),
 										'-2050-medicare_wages' => TTi18n::gettext('Taxable Medicare Wages'), //Line 5c
 										'-2051-medicare_additional_wages' => TTi18n::gettext('Taxable Medicare Additional Wages'), //Line 5d
+										'-2055-additional_medicare_tax' => TTi18n::gettext('Medicare (Additional)'),
+										'-2058-medicare_tax' => TTi18n::gettext('Medicare - Employee'),
+										'-2059-medicare_tax_employer' => TTi18n::gettext('Medicare - Employer'),
+										'-2058-medicare_tax_total' => TTi18n::gettext('Medicare'),
 										'-2060-sick_wages' => TTi18n::gettext('Sick Pay'), //Line 7b
+										'-2100-total_tax' => TTi18n::gettext('Total Taxes'), //Line 7b
 							);
 				break;
 			case 'columns':
@@ -255,6 +273,7 @@ class Form941Report extends Report {
 			case 'templates':
 				$retval = array(
 										'-1010-by_month' => TTi18n::gettext('by Month'),
+										'-1015-by_pay_period' => TTi18n::gettext('By Pay Period'),
 										'-1020-by_employee' => TTi18n::gettext('by Employee'),
 										'-1030-by_branch' => TTi18n::gettext('by Branch'),
 										'-1040-by_department' => TTi18n::gettext('by Department'),
@@ -307,6 +326,13 @@ class Form941Report extends Report {
 											$retval['group'][] = 'date_month';
 
 											$retval['sort'][] = array('date_month' => 'asc');
+											break;
+										case 'by_pay_period':
+											$retval['columns'][] = 'pay_period_transaction_date';
+
+											$retval['group'][] = 'pay_period_transaction_date';
+
+											$retval['sort'][] = array('pay_period_transaction_date' => 'asc');
 											break;
 										case 'by_employee':
 											$retval['columns'][] = 'first_name';
@@ -404,7 +430,12 @@ class Form941Report extends Report {
 								}
 							}
 
-							$retval['columns'] = array_merge( $retval['columns'], array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) ) );
+							//$retval['columns'] = array_merge( $retval['columns'], array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) ) );
+							$retval['columns'][] = 'wages'; //Basically Total Gross.
+							$retval['columns'][] = 'income_tax';
+							$retval['columns'][] = 'social_security_tax_total';
+							$retval['columns'][] = 'medicare_tax_total';
+							$retval['columns'][] = 'total_tax';
 
 							break;
 					}
@@ -669,6 +700,7 @@ class Form941Report extends Report {
 
 						//Because employees can be excluded from Social Security/Medicare, only include wage amounts if the SS tax is not 0.
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax']	= ( isset($form_data['social_security_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax']['include_pay_stub_entry_account'], $form_data['social_security_tax']['exclude_pay_stub_entry_account'] ) : 0;
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer']	= ( isset($form_data['social_security_tax_employer']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax_employer']['include_pay_stub_entry_account'], $form_data['social_security_tax_employer']['exclude_pay_stub_entry_account'] ) : 0;
 						if ( ( isset($form_data['social_security_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['social_security_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] != 0 ) {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = ( isset($form_data['social_security_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] ) : 0;
 						} else {
@@ -701,6 +733,7 @@ class Form941Report extends Report {
 						}
 
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'] = ( isset($form_data['medicare_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax']['include_pay_stub_entry_account'], $form_data['medicare_tax']['exclude_pay_stub_entry_account'] ) : 0;
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer'] = ( isset($form_data['medicare_tax_employer']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax_employer']['include_pay_stub_entry_account'], $form_data['medicare_tax_employer']['exclude_pay_stub_entry_account'] ) : 0;
 						if ( ( isset($form_data['medicare_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['medicare_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'] != 0 ) {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] = ( isset($form_data['medicare_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_wages']['include_pay_stub_entry_account'], $form_data['medicare_wages']['exclude_pay_stub_entry_account'] ) : 0;
 						} else {
@@ -730,6 +763,10 @@ class Form941Report extends Report {
 
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['sick_wages']				= ( isset($form_data['sick_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['sick_wages']['include_pay_stub_entry_account'], $form_data['sick_wages']['exclude_pay_stub_entry_account'] ) : 0;
 
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_total'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_total'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer'] ); //This already includes the additional_medicare_tax.
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_tax'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'], bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_total'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_total'] ) );
+
 						//Separate data used for reporting, grouping, sorting, from data specific used for the Form.
 						if ( !isset($this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]) ) {
 							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'income_tax', 'medicare_tax', 'social_security_tax', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ), 0 );
@@ -756,7 +793,7 @@ class Form941Report extends Report {
 
 						//Total up Social Security / Medicare Taxes withheld from the employee only, then double them for the employer portion, this helps calculate l7 further down.
 						// We can't just double the medicare_tax as it includes the additional tax which is not paid by the employer. So we have to back out the additional medicare tax for the employer portion after its doubled.
-						// The form setup for Medicare Taxes Witheld should only ever be setup for whatever the employee had withheld, now employee and employer.
+						// The form setup for Medicare Taxes Witheld should only ever be setup for whatever the employee had withheld, not employee and employer.
 						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['income_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['income_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
 						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'], 2) );
 						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax'], bcsub( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'], 2 ), $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['additional_medicare_tax'] ) );
@@ -939,7 +976,7 @@ class Form941Report extends Report {
 				$f941->year = TTDate::getYear( $filter_data['end_date'] );
 
 				$f941->ein = $this->form_data['remittance_agency'][$legal_entity_id]['00']->getPrimaryIdentification(); //Always use EIN from Federal Agency.
-				$f941->name = $this->getUserObject()->getFullName();
+				$f941->name = $legal_entity_obj->getLegalName();
 				$f941->trade_name = $legal_entity_obj->getTradeName();
 				$f941->address = $legal_entity_obj->getAddress1() . ' ' . $legal_entity_obj->getAddress2();
 				$f941->city = $legal_entity_obj->getCity();

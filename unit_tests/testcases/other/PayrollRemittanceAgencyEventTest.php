@@ -712,12 +712,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	function testQuarterly() {
+	function testQuarterlyA() {
 		Debug::Text( 'testQuarterly', __FILE__, __LINE__, __METHOD__, 10 );
 
 		/** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 3000 );
 		$praef->setPrimaryDayOfMonth( 1 );
 		$praef->setQuarterMonth( 1 );
@@ -728,7 +728,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Oct-2015  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Dec-2015  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '01-Jan-2016 12:00PM' ) ) );
-		$result = $praef->calculateNextDate(  $result['due_date']  ); //01-Jan-2016 12:00PM
+		$result = $praef->calculateNextDate( $result['due_date'] ); //01-Jan-2016 12:00PM
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2016  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2016  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '01-Apr-2016 12:00PM' ) ) );
@@ -736,11 +736,11 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2016  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Jun-2016  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '01-Jul-2016 12:00PM' ) ) );
-		$result = $praef->calculateNextDate(  $result['due_date'] ); //01-Jul-2016 12:00PM
+		$result = $praef->calculateNextDate( $result['due_date'] ); //01-Jul-2016 12:00PM
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2016  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Sep-2016  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '01-Oct-2016 12:00PM' ) ) );
-		$result = $praef->calculateNextDate(  $result['due_date'] ); //01-Oct-2016 12:00PM
+		$result = $praef->calculateNextDate( $result['due_date'] ); //01-Oct-2016 12:00PM
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Oct-2016 12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Dec-2016  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '01-Jan-2017 12:00PM' ) ) );
@@ -748,7 +748,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		/** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 3000 );
 		$praef->setPrimaryDayOfMonth( 1 );
 		$praef->setQuarterMonth( 1 );
@@ -818,32 +818,50 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Oct-2015  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Dec-2015  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '29-Feb-2016 12:00PM' ) ) );
+	}
 
-		$epoch = time();
-		$praef->setPrimaryDayOfMonth( 3 );
-		$praef->setQuarterMonth( 1 );
-		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+	/**
+	 * @group PayrollRemittanceAgencyEventTest_testQuarterlyLoop
+	 */
+	function testQuarterlyLoop() {
+		$epoch = TTDate::getBeginDayEpoch( time() );
+		//$epoch = strtotime('05-Jan-2018 11:59PM'); //testing the bug where these tests don't work after 12:00PM because we weren't using getEffectiveDate to ensure that the date was a beginDayEpoch.
 
-		for ( $i = 0; $i < 365; $i++ ) {
-			$artificial_match_value = TTDate::getDateOfNextQuarter( $epoch, $praef->getPrimaryDayOfMonth(), $praef->getQuarterMonth() );
+		for ( $i = 0; $i < 1000; $i++ ) {
+			$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+			$praef->setPayrollRemittanceAgencyId($this->agency_id);
+			$praef->setFrequency( 3000 );
+			$praef->setPrimaryDayOfMonth( 1 );
+			$praef->setQuarterMonth( 1 );
+			$praef->setEffectiveDate( $epoch );
 
-			$prev_quarter_epoch = TTDate::incrementDate( $artificial_match_value, -3, 'month' );
-			$start_date = TTDate::getBeginDayEpoch( TTDate::getBeginMonthEpoch( TTDate::getBeginQuarterEpoch( $prev_quarter_epoch ) ) );
-			$end_date = TTDate::getEndDayEpoch( TTDate::getEndMonthEpoch( TTDate::getEndQuarterEpoch( $prev_quarter_epoch ) ) );
+			$artificial_match_value = TTDate::getDateOfNextQuarter( $praef->getEffectiveDate(), $praef->getPrimaryDayOfMonth(), $praef->getQuarterMonth() );
 
-			$result = $praef->calculateNextDate( $epoch );
+			//Don't jump back if on first day of quarter.
+			if ( $praef->getEffectiveDate() != TTDate::getBeginQuarterEpoch( $praef->getEffectiveDate() ) ) {
+				$artificial_match_value = TTDate::incrementDate( $artificial_match_value, -1, 'quarter' );
+			}
+			
+			$start_date = TTDate::getBeginDayEpoch( TTDate::getBeginQuarterEpoch( $artificial_match_value ) );
+			$end_date = TTDate::getEndDayEpoch( TTDate::getEndQuarterEpoch( $artificial_match_value ) );
+			$due_date = TTDate::getDateOfNextQuarter( $artificial_match_value, $praef->getPrimaryDayOfMonth(), $praef->getQuarterMonth() );
 
-//			Debug::Text( 'seed: ' . date( 'r', $epoch ), __FILE__, __LINE__, __METHOD__, 10 );
-//			Debug::Text( 'due_date: ' . date( 'r', $result['due_date'] ), __FILE__, __LINE__, __METHOD__, 10 );
-//			Debug::Text( 'match_due_date: ' . date( 'r', $artificial_match_value ), __FILE__, __LINE__, __METHOD__, 10 );
+			$result = $praef->calculateNextDate( $praef->getEffectiveDate() );
+
+//			Debug::Text( 'seed '. $i .': ' . date( 'r', $praef->getEffectiveDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 //			Debug::Text( 'start_date: ' . date( 'r', $result['start_date'] ), __FILE__, __LINE__, __METHOD__, 10 );
-//			Debug::Text( 'match start_date: ' . date( 'r', $start_date ), __FILE__, __LINE__, __METHOD__, 10 );
+//			Debug::Text( 'guess start_date: ' . date( 'r', $start_date ), __FILE__, __LINE__, __METHOD__, 10 );
 //			Debug::Text( 'end_date: ' . date( 'r', $result['end_date'] ), __FILE__, __LINE__, __METHOD__, 10 );
-//			Debug::Text( 'match end_date: ' . date( 'r', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
+//			Debug::Text( 'guess end_date: ' . date( 'r', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
+//			Debug::Text( 'due_date: ' . date( 'r', $result['due_date'] ), __FILE__, __LINE__, __METHOD__, 10 );
+//			Debug::Text( 'guess_due_date: ' . date( 'r', $due_date), __FILE__, __LINE__, __METHOD__, 10 );
 
 			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', $start_date ) );
 			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', $end_date ) );
-			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', $artificial_match_value ) );
+			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', $due_date ) );
+
+			$epoch = TTDate::incrementDate( $praef->getEffectiveDate(), 1, 'day' );
+			unset($praef, $start_date, $end_date, $due_date, $result);
 		}
 	}
 
@@ -3387,6 +3405,119 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '01-Mar-2017  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $praef->getEndDate() ), date( 'r', strtotime( '31-Mar-2017  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $praef->getDueDate() ), date( 'r', strtotime( '10-Apr-2017 12:00PM' ) ) );
+	}
+
+	function testReminderDays() {
+		/** @var PayrollRemittanceAgencyEventFactory $praef */
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
+		$praef->setFrequency( 4100 ); //monthly
+		$praef->setPrimaryDayOfMonth( 10 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+
+		$praef->setDueDateDelayDays( 0 );
+		$praef->setType( 'T4' );
+		$praef->setStatus( 10 ); //enabled
+
+		$praef->setReminderDays( 0 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+		$praef->setEnableRecalculateDates( TRUE );
+		if ( $praef->isValid() ) {
+			$praef->Save( FALSE, TRUE );
+		}
+		$this->assertEquals( date( 'r', $praef->getNextReminderDate() ), date( 'r', strtotime( '10-Jan-2016 12:00PM' ) ) );
+
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
+		$praef->setFrequency( 4100 ); //monthly
+		$praef->setPrimaryDayOfMonth( 10 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+
+		$praef->setDueDateDelayDays( 0 );
+		$praef->setType( 'T4' );
+		$praef->setStatus( 10 ); //enabled
+
+		$praef->setReminderDays( 3 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+		$praef->setEnableRecalculateDates( TRUE );
+		if ( $praef->isValid() ) {
+			$praef->Save( FALSE, TRUE );
+		}
+		$this->assertEquals( date( 'r', $praef->getNextReminderDate() ), date( 'r', strtotime( '07-Jan-2016 12:00PM' ) ) );
+
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
+		$praef->setFrequency( 4100 ); //monthly
+		$praef->setPrimaryDayOfMonth( 10 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+
+		$praef->setDueDateDelayDays( 0 );
+		$praef->setType( 'T4' );
+		$praef->setStatus( 10 ); //enabled
+
+		$praef->setReminderDays( 5 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+		$praef->setEnableRecalculateDates( TRUE );
+		if ( $praef->isValid() ) {
+			$praef->Save( FALSE, TRUE );
+		}
+		$this->assertEquals( date( 'r', $praef->getNextReminderDate() ), date( 'r', strtotime( '05-Jan-2016 12:00PM' ) ) );
+
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
+		$praef->setFrequency( 4100 ); //monthly
+		$praef->setPrimaryDayOfMonth( 10 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+
+		$praef->setDueDateDelayDays( 0 );
+		$praef->setType( 'T4' );
+		$praef->setStatus( 10 ); //enabled
+
+		$praef->setReminderDays( -5 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+		$praef->setEnableRecalculateDates( TRUE );
+		if ( $praef->isValid() ) {
+			$praef->Save( FALSE, TRUE );
+		}
+		$this->assertEquals( date( 'r', $praef->getNextReminderDate(TRUE) ), date( 'r', strtotime( '15-Jan-2016 12:00PM' ) ) );
+
+		//Make sure you test the case where this is no due date, and therefore no reminder date.
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
+		$praef->setFrequency( 4100 ); //monthly
+		$praef->setPrimaryDayOfMonth( 10 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+
+		$praef->setDueDateDelayDays( 0 );
+		$praef->setType( 'T4' );
+		$praef->setStatus( 10 ); //enabled
+
+		$praef->setReminderDays( -5 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+
+		//not saved. no due date means no reminder date.
+		$this->assertEquals( $praef->getNextReminderDate(TRUE), FALSE );
+
+
+		//Make sure you test the case where this is no due date, and therefore no reminder date.
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
+		$praef->setFrequency( 1000 ); //each pay period (with no pay period set)
+		$praef->setDueDateDelayDays( 0 );
+		$praef->setType( 'T4' );
+		$praef->setStatus( 10 ); //enabled
+		$praef->setReminderDays( -5 );
+		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
+
+		//not saved. no due date means no reminder date.
+		$this->assertEquals( $praef->getNextReminderDate(TRUE), FALSE );
+		$praef->setEnableRecalculateDates( TRUE );
+
+		if ( $praef->isValid() ) {
+			$praef->Save( FALSE, TRUE );
+		}
+		//saved. should not be able to calculate a due date because no payperiods exist.
+		$this->assertEquals( $praef->getNextReminderDate(TRUE), FALSE );
 	}
 }
 

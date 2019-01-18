@@ -1674,10 +1674,9 @@ class PunchControlFactory extends Factory {
 				//Add a row to the user date total table, as "worked" hours.
 				//Edit if it already exists and is not set as override.
 				if ( $udtlf->getRecordCount() > 0 ) {
-					Debug::text(' Found Conflicting User Date Total Records, removing them before re-calc', __FILE__, __LINE__, __METHOD__, 10);
 					foreach($udtlf as $udt_obj) {
 						if ( $udt_obj->getOverride() == FALSE ) {
-							Debug::text(' bFound Conflicting User Date Total Records, removing them before re-calc', __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text(' Found Conflicting User Date Total Record, removing it before re-calc: '. $udt_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 							$udt_obj->Delete();
 						}
 					}
@@ -1697,7 +1696,7 @@ class PunchControlFactory extends Factory {
 						}
 
 						if ( $udt_obj->getOverride() == FALSE ) {
-							Debug::text(' bFound Conflicting User Date Total Records, removing them before re-calc: Date: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text(' Found Conflicting User Date Total Records, removing it before re-calc: ID: '. $udt_obj->Delete() .' Date: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 							$udt_obj->Delete();
 						} else {
 							Debug::text(' Found overridden User Date Total Records, not removing...', __FILE__, __LINE__, __METHOD__, 10);

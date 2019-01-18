@@ -2207,6 +2207,13 @@ class SetupPresets extends Factory {
 															  ),
 															  'exclude_pay_stub_entry_account' => array(),
 							),
+							'social_security_tax_employer'   => array( //Social Security - Employer
+															  'include_pay_stub_entry_account' => array(
+																	  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Social Security (FICA)' ),
+															  ),
+															  'exclude_pay_stub_entry_account' => array(),
+							),
+
 							'social_security_tips'  => array( //Social Security Tips (Box 7)
 															  'include_pay_stub_entry_account' => array(
 																	  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ),
@@ -2228,6 +2235,12 @@ class SetupPresets extends Factory {
 							'medicare_tax'   => array( //Medicare Tax Withheld (Box 6)
 													   'include_pay_stub_entry_account' => array(
 															   $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Medicare' ),
+													   ),
+													   'exclude_pay_stub_entry_account' => array(),
+							),
+							'medicare_tax_employer'   => array( //Medicare - Employer
+													   'include_pay_stub_entry_account' => array(
+															   $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Medicare' ),
 													   ),
 													   'exclude_pay_stub_entry_account' => array(),
 							),
@@ -9760,6 +9773,8 @@ class SetupPresets extends Factory {
 								'minimum_worked_period_days'       => 1, //Of the last X days
 								'worked_scheduled_days'            => 1,
 
+								'shift_on_holiday_type_id'         => 30, //Must work on the holiday if scheduled.
+
 								//After the holiday
 								'minimum_worked_after_period_days' => 1,
 								'minimum_worked_after_days'        => 1,
@@ -9777,7 +9792,7 @@ class SetupPresets extends Factory {
 								'absence_policy_id'                     => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 								'recurring_holiday_id'                  => (array)$this->RecurringHolidaysByRegion( $country, $province ),
 								'contributing_shift_policy_id'          => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + Paid Absence' ), //Was: 'Regular Time + OT + Paid Absence'
-								'eligible_contributing_shift_policy_id' => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + Paid Absence' ),
+								'eligible_contributing_shift_policy_id' => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + OT + Paid Absence' ),
 						)
 				);
 			}
@@ -9884,8 +9899,8 @@ class SetupPresets extends Factory {
 								'include_paid_absence_time' => TRUE,
 								'absence_policy_id'         => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 								'recurring_holiday_id'      => (array)$this->RecurringHolidaysByRegion( $country, $province ),
-								'contributing_shift_policy_id'          => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + OT + Paid Absence' ),
-								'eligible_contributing_shift_policy_id' => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + OT + Paid Absence' ),
+								'contributing_shift_policy_id'          => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time' ),
+								'eligible_contributing_shift_policy_id' => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + OT' ),
 						)
 				);
 			}

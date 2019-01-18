@@ -96,6 +96,13 @@ class PayrollDeduction_US_GA extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			10 => 'Single',
+			20 => 'Married - Filing Separately',
+			30 => 'Married - Joint One Income',
+			40 => 'Married - Joint Two Incomes',
+			50 => 'Head of Household',
+
+
 			20060101 => array(
 					'standard_deduction'  => array(
 							'10' => 2300.00,
@@ -104,7 +111,13 @@ class PayrollDeduction_US_GA extends PayrollDeduction_US {
 							'40' => 1500.00,
 							'50' => 2300.00,
 					),
-					'employee_allowance'  => 2700,
+					'employee_allowance'  => array( //Personal Allowance
+							'10' => 2700.00,
+							'20' => 3700.00,
+							'30' => 7400.00,
+							'40' => 3700.00,
+							'50' => 2700.00,
+					),
 					'dependant_allowance' => 3000,
 			),
 	);
@@ -143,7 +156,7 @@ class PayrollDeduction_US_GA extends PayrollDeduction_US {
 
 		}
 
-		$allowance_arr = $retarr['employee_allowance'];
+		$allowance_arr = $retarr['employee_allowance'][ $this->getStateFilingStatus() ];
 
 		$retval = bcmul( $this->getUserValue2(), $allowance_arr );
 

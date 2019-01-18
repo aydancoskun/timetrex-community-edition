@@ -1218,14 +1218,24 @@ class PayPeriodFactory extends Factory {
 													$status_options
 												);
 		}
+
 		// Pay Period Schedule
-		if ( $this->getPayPeriodSchedule() !== FALSE AND $this->getPayPeriodSchedule() != TTUUID::getZeroID() ) {
-			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
-			$this->Validator->isResultSetWithRows(	'pay_period_schedule',
-															$ppslf->getByID($this->getPayPeriodSchedule()),
-															TTi18n::gettext('Incorrect Pay Period Schedule')
-														);
+		//When mass editing pay periods, we try to validate with no pay period schedule set because it could be editing across multiple pay period schedules. In this case ignore this check.
+		if ( $this->Validator->getValidateOnly() == FALSE ) {
+			if ( $this->getPayPeriodSchedule() == '' OR $this->getPayPeriodSchedule() == TTUUID::getZeroID() ) {
+				$this->Validator->isTrue(		'pay_period_schedule',
+												 FALSE,
+												 TTi18n::gettext('Pay Period Schedule is not specified') );
+
+			} else {
+				$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+				$this->Validator->isResultSetWithRows( 'pay_period_schedule',
+													   $ppslf->getByID( $this->getPayPeriodSchedule() ),
+													   TTi18n::gettext( 'Pay Period Schedule is invalid' )
+				);
+			}
 		}
+
 		// Start Date
 		if ( $this->getStartDate() !== FALSE ) {
 			$this->Validator->isDate(		'start_date',
@@ -1335,12 +1345,10 @@ class PayPeriodFactory extends Factory {
 		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
 		$ppslf->getById( $this->getPayPeriodSchedule() );
 		if ( $this->getStartDate() != '' AND $this->getPayPeriodSchedule() == TTUUID::getZeroID() ) {
-			//When mass editing pay periods, we try to validate with no pay period schedule set because it could be editing across multiple pay period schedules.
-			//In this case ignore this check.
 			Debug::text('Pay Period Schedule not found: '. $this->getPayPeriodSchedule(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->Validator->isTrue(		'pay_period_schedule_id',
 											FALSE,
-											TTi18n::gettext('Please choose a Pay Period Schedule') );
+											TTi18n::gettext('Pay Period Schedule is not specified') );
 		}
 
 		if ( $this->getStatus() == 20 ) { //Closed

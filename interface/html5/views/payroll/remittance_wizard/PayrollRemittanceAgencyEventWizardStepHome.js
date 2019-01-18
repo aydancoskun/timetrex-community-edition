@@ -11,7 +11,7 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 			filter_data: {
 				'status_id': 10, //Enabled
 				'payroll_remittance_agency_status_id': 10, //Enabled
-				'start_date': ( new Date() / 1000 ),
+				'start_date': ( ( new Date() / 1000 ) + ( 86400 * 2 ) ), //Move start date into the future by 2 days so per Pay Period frequencies will still appear a few days in advance.
 			},
 			filter_columns: {
 				'id': true,

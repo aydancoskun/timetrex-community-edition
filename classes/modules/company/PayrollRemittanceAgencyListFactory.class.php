@@ -344,8 +344,9 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 //
 		//in_use doesn't make sense here, as several agencies are for reporting only (ie: New Hires, Social Security Administration) and will not have Tax/Deduction records assigned to them.
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							uf.first_name,
 							uf.last_name,
 							lef.legal_name as legal_entity_legal_name,

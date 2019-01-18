@@ -45,7 +45,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			return;
 		}
 		this.grid.setGridWidth( $( this.el ).parent().width() - 2 );
-		this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 100 );
+		this.grid.setGridHeight( $( this.el ).parents('#tab_user_date_total_parent').height() -55 );
 	},
 
 	setGridCellBackGround: function() {

@@ -518,6 +518,8 @@ class PayStubTransactionFactory extends Factory {
 		return FALSE;
 	}
 
+
+
 	/**
 	 * @param bool $ignore_warning
 	 * @return bool
@@ -552,17 +554,6 @@ class PayStubTransactionFactory extends Factory {
 													  $lf->getByID($this->getRemittanceDestinationAccount()),
 													  TTi18n::gettext('Remittance destination account is invalid')
 			);
-			if ( $this->Validator->isError('remittance_destination_account_id') == FALSE ) {
-				$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' );
-				$rdalf->getById( $this->getRemittanceDestinationAccount() );
-				if ( $rdalf->getRecordCount() > 0 ) {
-					$rsalf = TTnew( 'RemittanceSourceAccountListFactory' );
-					$rsalf->getById( $rdalf->getCurrent()->getRemittanceSourceAccount() );
-					if ( $rsalf->getRecordCount() > 0 ) {
-						$this->setCurrency( $rsalf->getCurrent()->getCurrency() );
-					}
-				}
-			}
 		}
 
 		// Currency
@@ -601,10 +592,16 @@ class PayStubTransactionFactory extends Factory {
 
 		// Amount
 		if ( $this->getAmount() !== FALSE ) {
-			$this->Validator->isNumeric(		'amount',
-				$this->getAmount(),
-				TTi18n::gettext('Incorrect Amount')
+			$this->Validator->isNumeric( 'amount',
+										 $this->getAmount(),
+										 TTi18n::gettext( 'Incorrect Amount' )
 			);
+			if ( $this->getAmount() == 0 OR $this->getAmount() == '' ) {
+				$this->Validator->isTrue( 'amount',
+										  FALSE,
+										  TTi18n::gettext( 'Amount cannot be zero' )
+				);
+			}
 		}
 
 		// Currency Rate
@@ -664,6 +661,18 @@ class PayStubTransactionFactory extends Factory {
 		}
 
 		if ( $this->Validator->getValidateOnly() == FALSE ) {
+			//Make sure Source Account and Destination Account types match.
+			if ( $this->getRemittanceSourceAccount() !== FALSE AND $this->getRemittanceDestinationAccount() !== FALSE ) {
+				if ( is_object( $this->getRemittanceSourceAccountObject() ) AND is_object( $this->getRemittanceDestinationAccountObject() ) ) {
+					if ( $this->getRemittanceSourceAccountObject()->getType() != $this->getRemittanceDestinationAccountObject()->getType() ) {
+						$this->Validator->isTrue( 'remittance_destination_account_id',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid Payment Method, Source/Destination Account types mismatch' ) );
+
+					}
+				}
+			}
+
 			if ( $this->getTransactionDate() == FALSE ) {
 				$this->Validator->isDate( 'transaction_date',
 										  $this->getTransactionDate(),
@@ -671,11 +680,11 @@ class PayStubTransactionFactory extends Factory {
 			}
 
 			// Presave is called after validate so we can't assume source account is set.
-//			if ( $this->getRemittanceSourceAccount() == FALSE ) {
-//				$this->Validator->isTrue( 'remittance_source_account_id',
-//										  FALSE,
-//										  TTi18n::gettext( 'Source account not specified' ) );
-//			}
+			if ( $this->getRemittanceSourceAccount() == FALSE ) {
+				$this->Validator->isTrue( 'remittance_source_account_id',
+										  FALSE,
+										  TTi18n::gettext( 'Source account not specified' ) );
+			}
 
 			if ( $this->getCurrency() == FALSE ) {
 				$this->Validator->isTrue( 'currency_id',
@@ -689,6 +698,24 @@ class PayStubTransactionFactory extends Factory {
 										  FALSE,
 										  TTi18n::gettext( 'Pay Stub must be OPEN to modify transactions' ) );
 
+			}
+
+		}
+
+		//paystub is paid. ensure failure on edit amount
+		if ( $this->getStatus() == 20 ) {
+			$changed_fields = array_keys( $this->getDataDifferences() );
+			$deny_fields = array('remittance_source_account_id', 'transaction_date', 'amount');
+
+			if ( in_array('amount', $changed_fields ) ) {
+				if ( Misc::removeTrailingZeros($this->data['amount']) == Misc::removeTrailingZeros($this->old_data['amount']) ) {
+					unset( $changed_fields[array_search( 'amount', $changed_fields )] );
+				}
+			}
+			foreach ( $changed_fields as $field ) {
+				$this->Validator->isTrue( $field,
+										  !in_array( $field, $deny_fields ),
+										  TTi18n::gettext( 'Pay stub transaction is already paid unable to edit' ) );
 			}
 
 		}
@@ -708,15 +735,23 @@ class PayStubTransactionFactory extends Factory {
 			$this->setStatus( 10 ); //Pending
 		}
 
+		//Validation errors likely won't allow this to even execute, but leave it here just in case.
 		if ( $this->getRemittanceSourceAccount() == FALSE AND is_object($this->getRemittanceDestinationAccountObject()) ) {
 			$this->setRemittanceSourceAccount( $this->getRemittanceDestinationAccountObject()->getRemittanceSourceAccount() );
 		}
-		if ( $this->getCurrency() == FALSE AND is_object( $this->getPayStubObject()) ) {
-			$this->setCurrency( $this->getPayStubObject()->getCurrency() );
+
+		if ( $this->getCurrency() == FALSE AND is_object( $this->getPayStubObject() ) ) {
+			if ( is_object( $this->getRemittanceSourceAccountObject() ) ) {
+				$this->setCurrency( $this->getRemittanceSourceAccountObject()->getCurrency() );
+			} else {
+				$this->setCurrency( $this->getPayStubObject()->getCurrency() );
+			}
 		}
+
 		if ( $this->getCurrencyRate() == FALSE AND is_object( $this->getPayStubObject()) ) {
 			$this->setCurrencyRate( $this->getPayStubObject()->getCurrencyRate() );
 		}
+
 		return TRUE;
 	}
 
@@ -724,7 +759,6 @@ class PayStubTransactionFactory extends Factory {
 	 * @return bool
 	 */
 	function postSave() {
-
 		$this->removeCache( $this->getId() );
 		return TRUE;
 	}

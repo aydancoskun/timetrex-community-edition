@@ -292,11 +292,15 @@ class Import {
 			$matched_columns = array();
 			foreach( $raw_data_columns as $raw_data_key => $raw_data_column ) {
 				$matched_column_key = Misc::findClosestMatch( $raw_data_column, $columns, 60 );
-				if ( $matched_column_key !== FALSE AND isset($columns[$matched_column_key]) ) {
-					Debug::Text('Close match for: '. $raw_data_column .' Match: '. $matched_column_key, __FILE__, __LINE__, __METHOD__, 10);
-					$matched_columns[$raw_data_column] = $matched_column_key;
+				if ( $matched_column_key !== FALSE AND isset( $columns[ $matched_column_key ] ) ) {
+					if ( in_array( $matched_column_key, $matched_columns) !== FALSE ) { //Once a file column is matched to a TimeTrex field, don't match it again.
+						Debug::Text( 'Column already matched: ' . $raw_data_column, __FILE__, __LINE__, __METHOD__, 10 );
+					} else {
+						Debug::Text( 'Close match for: ' . $raw_data_column . ' Match: ' . $matched_column_key, __FILE__, __LINE__, __METHOD__, 10 );
+						$matched_columns[ $raw_data_column ] = $matched_column_key;
+					}
 				} else {
-					Debug::Text('No close match for: '. $raw_data_column, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( 'No close match for: ' . $raw_data_column, __FILE__, __LINE__, __METHOD__, 10 );
 				}
 			}
 			unset($raw_data_column, $raw_data_key, $matched_column_key);
@@ -494,17 +498,23 @@ class Import {
 			//Debug::Arr($import_data, 'Import Data: Column: '. $import_column .' File Column Name: '. $import_data['map_column_name'], __FILE__, __LINE__, __METHOD__, 10);
 			//Don't allow importing "id" columns.
 			if ( strtolower($import_column) != 'id' AND $import_column !== 0 ) {
-				if ( isset($column_map[$import_column]['map_column_name']) AND isset($raw_row[$column_map[$import_column]['map_column_name']]) ) { //Don't check for != '' here, as that will prevent blank fields from being imported, like blank termination dates that need to be blanked out: AND $raw_row[$column_map[$import_column]['map_column_name']] != ''
-					$input = '';
-					//Make sure we check for proper UTF8 encoding and if its not remove the data so we don't cause a PGSQL invalid byte sequence error.
-					if ( function_exists( 'mb_check_encoding' ) AND mb_check_encoding( $raw_row[$column_map[$import_column]['map_column_name']], 'UTF-8' ) === TRUE ) {
-						$input = $raw_row[$column_map[$import_column]['map_column_name']];
-					} else {
-						Debug::Text( 'Bad UTF8 encoding!: ' . $input, __FILE__, __LINE__, __METHOD__, 10 );
-					}
+				if ( isset($column_map[$import_column]['map_column_name']) ) {
+					if ( isset( $raw_row[ $column_map[$import_column]['map_column_name'] ] ) ) { //Don't check for != '' here, as that will prevent blank fields from being imported, like blank termination dates that need to be blanked out: AND $raw_row[$column_map[$import_column]['map_column_name']] != ''
+						$input = '';
+						//Make sure we check for proper UTF8 encoding and if its not remove the data so we don't cause a PGSQL invalid byte sequence error.
+						if ( function_exists( 'mb_check_encoding' ) AND mb_check_encoding( $raw_row[ $column_map[ $import_column ]['map_column_name'] ], 'UTF-8' ) === TRUE ) {
+							$input = $raw_row[ $column_map[ $import_column ]['map_column_name'] ];
+						} else {
+							Debug::Text( 'Bad UTF8 encoding!: ' . $input, __FILE__, __LINE__, __METHOD__, 10 );
+						}
 
-					$input = trim($input); //This can affect things like Country/Province matching.
-					$retarr[$import_column] = $input;
+						$input = trim( $input ); //This can affect things like Country/Province matching.
+						$retarr[ $import_column ] = $input;
+					} elseif( isset( $column_map[$import_column]['default_value'] ) AND $column_map[$import_column]['default_value'] != '' )  { //If a simulated/non-existent column is added just to the mapping, and doesn't exist in the file, make sure we still pass that through so default values can be used and such.
+						$retarr[ $import_column ] = '';
+					}
+				} else {
+					Debug::Text('  Column not mapped: '. $import_column, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 		}
@@ -1282,7 +1292,7 @@ class Import {
 		}
 
 		if ( $retval === FALSE ) {
-			$retval = -1; //Make sure this fails.
+			$retval = TTUUID::getNotExistID( 1 ); //Make sure this fails. ZeroID is allowed and NotExistID gets converted to default job.
 		}
 
 		return $retval;
@@ -1335,7 +1345,7 @@ class Import {
 		}
 
 		if ( $retval === FALSE ) {
-			$retval = -1; //Make sure this fails.
+			$retval = TTUUID::getNotExistID( 1 ); //Make sure this fails. ZeroID is allowed and NotExistID gets converted to default job.
 		}
 
 		return $retval;
@@ -1387,7 +1397,7 @@ class Import {
 		}
 
 		if ( $retval === FALSE ) {
-			$retval = -1; //Make sure this fails.
+			$retval = TTUUID::getNotExistID( 1 ); //Make sure this fails. ZeroID is allowed and NotExistID gets converted to default job.
 		}
 
 		return $retval;
@@ -1439,7 +1449,7 @@ class Import {
 		}
 
 		if ( $retval === FALSE ) {
-			$retval = -1; //Make sure this fails.
+			$retval = TTUUID::getNotExistID( 1 ); //Make sure this fails. ZeroID is allowed and NotExistID gets converted to default job.
 		}
 
 		return $retval;

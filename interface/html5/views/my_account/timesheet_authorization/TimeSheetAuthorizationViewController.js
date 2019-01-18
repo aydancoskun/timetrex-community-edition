@@ -1292,6 +1292,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	},
 
 	initExceptionSummary: function() {
+
 		var $this = this;
 		if ( !this.api_exception ) {
 			this.api_exception = new (APIFactory.getAPIClass( 'APIException' ))();
@@ -1303,6 +1304,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.api_exception.getOptions( 'columns', {
 			onResult: function( columns_result ) {
 				var columns_result_data = columns_result.getResult();
+				if ( Global.isSet( $this.current_edit_record ) == false ) {
+					return false;
+				}
 				var args = {
 					filter_data: {
 						user_id: $this.current_edit_record.user_id,
@@ -1481,6 +1485,10 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	initTimeSheetSummary: function() {
 		var $this = this;
 
+		if ( Global.isSet( this.current_edit_record ) == false ) {
+			return false;
+		}
+
 		this.accumulated_total_grid_source_map = {};
 		if ( !this.api_timesheet ) {
 			this.api_timesheet = new (APIFactory.getAPIClass( 'APITimeSheet' ))();
@@ -1489,6 +1497,11 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		$this.buildAccumulatedTotalGrid();
 		this.api_timesheet.getTimeSheetData( this.current_edit_record.user_id, this.current_edit_record.start_date, {
 			onResult: function( result ) {
+
+				if ( Global.isSet( $this.current_edit_record ) == false ) {
+					return false;
+				}
+
 				$this.full_timesheet_data = result.getResult();
 				$this.pay_period_data = $this.full_timesheet_data.pay_period_data;
 				$this.timesheet_verify_data = $this.full_timesheet_data.timesheet_verify_data;

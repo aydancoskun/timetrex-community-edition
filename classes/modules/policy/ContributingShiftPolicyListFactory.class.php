@@ -275,8 +275,9 @@ class ContributingShiftPolicyListFactory extends ContributingShiftPolicyFactory 
 					);
 
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN EXISTS
 									( select 1 from '. $rtpf->getTable() .' as x where x.contributing_shift_policy_id = a.id and x.deleted = 0)

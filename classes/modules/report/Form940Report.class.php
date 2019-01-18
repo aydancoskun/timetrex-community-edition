@@ -287,6 +287,7 @@ class Form940Report extends Report {
 							break;
 						default:
 							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__, 10);
+							$retval['columns'] = array();
 							$retval['-1010-time_period']['time_period'] = 'last_year';
 
 							//Parse template name, and use the keywords separated by '+' to determine settings.
@@ -851,7 +852,7 @@ class Form940Report extends Report {
 				$f940->year = TTDate::getYear( $filter_data['end_date'] );
 
 				$f940->ein = $this->form_data['remittance_agency'][$legal_entity_id]['00']->getPrimaryIdentification(); //Always use EIN from Federal Agency.
-				$f940->name = $this->getUserObject()->getFullName();
+				$f940->name = $legal_entity_obj->getLegalName();
 				$f940->trade_name = $legal_entity_obj->getTradeName();
 				$f940->address = $legal_entity_obj->getAddress1() . ' ' . $legal_entity_obj->getAddress2();
 				$f940->city = $legal_entity_obj->getCity();

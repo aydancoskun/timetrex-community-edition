@@ -102,10 +102,10 @@ if ( $clf->getRecordCount() > 0 ) {
 							$ulf = TTnew( 'UserListFactory' );
 							$ulf->getById( $rstc_obj->getUpdatedBy() );
 							if ( $ulf->getRecordCount() > 0 ) {
-									$ulf->getCurrent()->getUserPreferenceObject()->setTimeZonePreferences();
+								$ulf->getCurrent()->getUserPreferenceObject()->setTimeZonePreferences();
 							} else {
-									//Use system timezone.
-									TTDate::setTimeZone();
+								//Use system timezone.
+								TTDate::setTimeZone();
 							}
 						} else {
 							//Use system timezone.
@@ -122,10 +122,10 @@ if ( $clf->getRecordCount() > 0 ) {
 
 					$rsf = TTnew('RecurringScheduleFactory');
 					$rslf = TTNew('RecurringScheduleListFactory');
-					
+
 					//Clear out recurring schedules for anything older than 1 week.
 					$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getID(), ( $current_epoch - (86400 * 720) ), TTDate::getEndWeekEpoch( ( TTDate::getBeginWeekEpoch( $current_epoch ) - ( 86400 * 8 ) ) ) );
-					
+
 					//Grab the earliest last day of the recurring schedule, so we can start from there and add the next week.
 					//We actually want to get the last day of each recurring schedule, and just add to that. Rather then rebuilding the entire schedule.
 					//$minimum_start_date = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $rslf->getMinimumStartTimeByRecurringScheduleControlID( $rsc_obj->getID() ) + 86400 ) ) );
@@ -144,7 +144,7 @@ if ( $clf->getRecordCount() > 0 ) {
 					}
 					$new_week_end_date = TTDate::getEndWeekEpoch( $new_week_start_date );
 					Debug::text('  Start Date: '. TTDate::getDate('DATE+TIME', $new_week_start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $new_week_end_date ) .' Maximum End Date: '. TTDate::getDate('DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10);
-					
+
 					if ( $new_week_end_date <= $maximum_end_date ) {
 						//Add new schedules for the upcoming week.
 						//$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getID(), $new_week_start_date, $new_week_end_date );

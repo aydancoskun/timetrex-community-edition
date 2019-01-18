@@ -108,6 +108,7 @@ AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 
 		if ( this.current_saved_report && Global.isSet(this.current_saved_report.name) ) {
 			other.report_name = _.escape( this.current_saved_report.name );
+			other.report_description = this.current_saved_report.description;
 		}
 
 		return other;

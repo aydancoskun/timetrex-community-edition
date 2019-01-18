@@ -2343,7 +2343,7 @@ class PunchFactory extends Factory {
 			$plf->getByPunchControlId( $this->getPunchControlID() );
 			if ( $plf->getRecordCount() === 0 ) { //=== is needed here to ensure its not FALSE.
 				//Check to see if any other punches are assigned to this punch_control_id
-				Debug::text(' Deleted Last Punch for Punch Control Object.', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text(' Deleted Last Punch for Punch Control Object: '. $this->getPunchControlObject()->getId(), __FILE__, __LINE__, __METHOD__, 10);
 				$this->getPunchControlObject()->setDeleted( TRUE );
 			}
 
@@ -2360,6 +2360,7 @@ class PunchFactory extends Factory {
 				//Saving the punch control object clears it, so even if the punch was Save(FALSE) the punch control object will be cleared and not accessible.
 				//This can affect things like drag and drop.
 				$this->getPunchControlObject()->Save();
+				Debug::text(' Punch Control Object Saved...', __FILE__, __LINE__, __METHOD__, 10);
 			} else {
 				//Something went wrong, rollback the entire transaction.
 				$this->FailTransaction();

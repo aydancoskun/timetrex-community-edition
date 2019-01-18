@@ -198,6 +198,7 @@ class GeneralLedgerSummaryReport extends Report {
 										'-1820-pay_stub_run_id' => TTi18n::gettext('Payroll Run'),
 
 										'-2010-account' => TTi18n::gettext('Account'),
+										'-3000-pay_stub_account' => TTi18n::gettext('Pay Stub Account'),
 								);
 
 				$retval = array_merge( $retval, $this->getOptions('date_columns'), (array)$this->getOptions('report_static_custom_column') );
@@ -208,18 +209,48 @@ class GeneralLedgerSummaryReport extends Report {
 										//Dynamic - Aggregate functions can be used
 										'-2100-debit_amount' => TTi18n::gettext('Debit'),
 										'-2110-credit_amount' => TTi18n::gettext('Credit'),
+
+										'-3100-amount' => TTi18n::gettext('Amount'),
 							);
 
+				break;
+			case 'pay_stub_account_amount_columns':
+				//Get all pay stub accounts
+				$retval = array();
+
+				$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+				$psealf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), 10, array(10, 20, 30, 40, 50, 60, 65, 80) );
+				if ( $psealf->getRecordCount() > 0 ) {
+					$type_options  = $psealf->getOptions('type');
+					foreach( $type_options as $key => $val ) {
+						$type_options[$key] = str_replace( array('Employee', 'Employer', 'Deduction', 'Miscellaneous', 'Total'), array('EE', 'ER', 'Ded', 'Misc', ''), $val);
+					}
+
+					$i = 0;
+					foreach( $psealf as $psea_obj ) {
+						//Need to make the PSEA_ID a string so we can array_merge it properly later.
+						if ( $psea_obj->getType() == 40 ) { //Total accounts.
+							$prefix = NULL;
+						} else {
+							$prefix = $type_options[$psea_obj->getType()] .' - ';
+						}
+
+						//$retval['-3'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PA:'.$psea_obj->getID()] = $prefix.$psea_obj->getName();
+						$retval[$psea_obj->getID()] = $prefix.$psea_obj->getName();
+
+						$i++;
+					}
+				}
 				break;
 			case 'columns':
 				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
 				break;
 			case 'column_format':
 				//Define formatting function for each column.
-				$columns = array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_custom_column') );
+				$columns = Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_custom_column') ) );
 				if ( is_array($columns) ) {
 					foreach($columns as $column => $name ) {
-						if ( strpos($column, '_amount') !== FALSE ) {
+						if ( strpos($column, '_amount') !== FALSE OR $column == 'amount' ) {
 							$retval[$column] = 'currency';
 						}
 					}
@@ -254,7 +285,9 @@ class GeneralLedgerSummaryReport extends Report {
 										'-1130-by_branch' => TTi18n::gettext('by Branch'),
 										'-1140-by_department' => TTi18n::gettext('by Department'),
 										'-1150-by_branch_by_department' => TTi18n::gettext('by Branch/Department'),
-										'-1160-by_pay_period' => TTi18n::gettext('By Pay Period'),
+										'-1160-by_pay_period' => TTi18n::gettext('by Pay Period'),
+
+										'-3000-by_employee+pay_stub_account' => TTi18n::gettext('Template by Employee'),
 								);
 
 				break;
@@ -267,124 +300,128 @@ class GeneralLedgerSummaryReport extends Report {
 							$retval['-1010-time_period']['time_period'] = 'last_pay_period';
 
 							//Parse template name, and use the keywords separated by '+' to determine settings.
-							$template_keywords = explode('+', $template );
-							if ( is_array($template_keywords) ) {
-								foreach( $template_keywords as $template_keyword ) {
-									Debug::Text(' Keyword: '. $template_keyword, __FILE__, __LINE__, __METHOD__, 10);
 
-									switch( $template_keyword ) {
-										//Columns
-										//Filter
-										//Group By
-										//SubTotal
-										//Sort
-										case 'by_employee':
-											$retval['columns'][] = 'full_name';
-											$retval['columns'][] = 'account';
-											$retval['columns'][] = 'debit_amount';
-											$retval['columns'][] = 'credit_amount';
+							switch( $template ) {
+								//Columns
+								//Filter
+								//Group By
+								//SubTotal
+								//Sort
+								case 'by_employee+pay_stub_account':
+									$retval['columns'][] = 'full_name';
+									$retval['columns'][] = 'pay_stub_account';
+									$retval['columns'][] = 'amount';
+									$retval['columns'][] = 'account';
+									$retval['columns'][] = 'debit_amount';
+									$retval['columns'][] = 'credit_amount';
 
-											$retval['group'][] = 'full_name';
-											$retval['group'][] = 'account';
+									$retval['include_user_id'] = array(); //They will likely want to run this for just a few employees.
+									break;
+								case 'by_employee':
+									$retval['columns'][] = 'full_name';
+									$retval['columns'][] = 'account';
+									$retval['columns'][] = 'debit_amount';
+									$retval['columns'][] = 'credit_amount';
 
-											$retval['sub_total'][] = 'full_name';
+									$retval['group'][] = 'full_name';
+									$retval['group'][] = 'account';
 
-											$retval['sort'][] = array('full_name' => 'asc');
-											$retval['sort'][] = array('account' => 'asc');
-											break;
+									$retval['sub_total'][] = 'full_name';
 
-										case 'by_title':
-											$retval['columns'][] = 'title';
-											$retval['columns'][] = 'account';
-											$retval['columns'][] = 'debit_amount';
-											$retval['columns'][] = 'credit_amount';
+									$retval['sort'][] = array('full_name' => 'asc');
+									$retval['sort'][] = array('account' => 'asc');
+									break;
 
-											$retval['group'][] = 'title';
-											$retval['group'][] = 'account';
+								case 'by_title':
+									$retval['columns'][] = 'title';
+									$retval['columns'][] = 'account';
+									$retval['columns'][] = 'debit_amount';
+									$retval['columns'][] = 'credit_amount';
 
-											$retval['sub_total'][] = 'title';
+									$retval['group'][] = 'title';
+									$retval['group'][] = 'account';
 
-											$retval['sort'][] = array('title' => 'asc');
-											$retval['sort'][] = array('account' => 'asc');
-											break;
-										case 'by_group':
-											$retval['columns'][] = 'user_group';
-											$retval['columns'][] = 'account';
-											$retval['columns'][] = 'debit_amount';
-											$retval['columns'][] = 'credit_amount';
+									$retval['sub_total'][] = 'title';
 
-											$retval['group'][] = 'user_group';
-											$retval['group'][] = 'account';
+									$retval['sort'][] = array('title' => 'asc');
+									$retval['sort'][] = array('account' => 'asc');
+									break;
+								case 'by_group':
+									$retval['columns'][] = 'user_group';
+									$retval['columns'][] = 'account';
+									$retval['columns'][] = 'debit_amount';
+									$retval['columns'][] = 'credit_amount';
 
-											$retval['sub_total'][] = 'user_group';
+									$retval['group'][] = 'user_group';
+									$retval['group'][] = 'account';
 
-											$retval['sort'][] = array('user_group' => 'asc');
-											$retval['sort'][] = array('account' => 'asc');
-											break;
-										case 'by_branch':
-											$retval['columns'][] = 'default_branch';
-											$retval['columns'][] = 'account';
-											$retval['columns'][] = 'debit_amount';
-											$retval['columns'][] = 'credit_amount';
+									$retval['sub_total'][] = 'user_group';
 
-											$retval['group'][] = 'default_branch';
-											$retval['group'][] = 'account';
+									$retval['sort'][] = array('user_group' => 'asc');
+									$retval['sort'][] = array('account' => 'asc');
+									break;
+								case 'by_branch':
+									$retval['columns'][] = 'default_branch';
+									$retval['columns'][] = 'account';
+									$retval['columns'][] = 'debit_amount';
+									$retval['columns'][] = 'credit_amount';
 
-											$retval['sub_total'][] = 'default_branch';
+									$retval['group'][] = 'default_branch';
+									$retval['group'][] = 'account';
 
-											$retval['sort'][] = array('default_branch' => 'asc');
-											$retval['sort'][] = array('account' => 'asc');
-											break;
-										case 'by_department':
-											$retval['columns'][] = 'default_department';
-											$retval['columns'][] = 'account';
-											$retval['columns'][] = 'debit_amount';
-											$retval['columns'][] = 'credit_amount';
+									$retval['sub_total'][] = 'default_branch';
 
-											$retval['group'][] = 'default_department';
-											$retval['group'][] = 'account';
+									$retval['sort'][] = array('default_branch' => 'asc');
+									$retval['sort'][] = array('account' => 'asc');
+									break;
+								case 'by_department':
+									$retval['columns'][] = 'default_department';
+									$retval['columns'][] = 'account';
+									$retval['columns'][] = 'debit_amount';
+									$retval['columns'][] = 'credit_amount';
 
-											$retval['sub_total'][] = 'default_department';
+									$retval['group'][] = 'default_department';
+									$retval['group'][] = 'account';
 
-											$retval['sort'][] = array('default_department' => 'asc');
-											$retval['sort'][] = array('account' => 'asc');
-											break;
-										case 'by_branch_by_department':
-											$retval['columns'][] = 'default_branch';
-											$retval['columns'][] = 'default_department';
-											$retval['columns'][] = 'account';
-											$retval['columns'][] = 'debit_amount';
-											$retval['columns'][] = 'credit_amount';
+									$retval['sub_total'][] = 'default_department';
 
-											$retval['group'][] = 'default_branch';
-											$retval['group'][] = 'default_department';
-											$retval['group'][] = 'account';
+									$retval['sort'][] = array('default_department' => 'asc');
+									$retval['sort'][] = array('account' => 'asc');
+									break;
+								case 'by_branch_by_department':
+									$retval['columns'][] = 'default_branch';
+									$retval['columns'][] = 'default_department';
+									$retval['columns'][] = 'account';
+									$retval['columns'][] = 'debit_amount';
+									$retval['columns'][] = 'credit_amount';
 
-											$retval['sub_total'][] = 'default_branch';
-											$retval['sub_total'][] = 'default_department';
+									$retval['group'][] = 'default_branch';
+									$retval['group'][] = 'default_department';
+									$retval['group'][] = 'account';
 
-											$retval['sort'][] = array('default_branch' => 'asc');
-											$retval['sort'][] = array('default_department' => 'asc');
-											$retval['sort'][] = array('account' => 'asc');
-											break;
-										case 'by_pay_period':
-											$retval['columns'][] = 'transaction-pay_period';
-											$retval['columns'][] = 'account';
-											$retval['columns'][] = 'debit_amount';
-											$retval['columns'][] = 'credit_amount';
+									$retval['sub_total'][] = 'default_branch';
+									$retval['sub_total'][] = 'default_department';
 
-											$retval['group'][] = 'transaction-pay_period';
-											$retval['group'][] = 'account';
+									$retval['sort'][] = array('default_branch' => 'asc');
+									$retval['sort'][] = array('default_department' => 'asc');
+									$retval['sort'][] = array('account' => 'asc');
+									break;
+								case 'by_pay_period':
+									$retval['columns'][] = 'transaction-pay_period';
+									$retval['columns'][] = 'account';
+									$retval['columns'][] = 'debit_amount';
+									$retval['columns'][] = 'credit_amount';
 
-											$retval['sub_total'][] = 'transaction-pay_period';
+									$retval['group'][] = 'transaction-pay_period';
+									$retval['group'][] = 'account';
 
-											$retval['sort'][] = array('transaction-pay_period' => 'asc');
-											$retval['sort'][] = array('account' => 'asc');
-											break;
-									}
-								}
+									$retval['sub_total'][] = 'transaction-pay_period';
+
+									$retval['sort'][] = array('transaction-pay_period' => 'asc');
+									$retval['sort'][] = array('account' => 'asc');
+									break;
 							}
-							break;
+
 					}
 				}
 
@@ -566,6 +603,8 @@ class GeneralLedgerSummaryReport extends Report {
 			$this->tmp_data['pay_period_distribution'] = $this->calculatePercentDistribution( $this->tmp_data['user_date_total'], $this->tmp_data['pay_period_total'] );
 		}
 
+		$pay_stub_account_columns = Misc::trimSortPrefix( $this->getOptions('pay_stub_account_amount_columns') );
+
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$pself->getAPIGeneralLedgerReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -600,59 +639,67 @@ class GeneralLedgerSummaryReport extends Report {
 				if ( isset($psea_arr[$pse_obj->getPayStubEntryNameId()]) ) {
 					//Debug::Text('Pay Stub ID: '. $pse_obj->getPayStub() .' PSE ID: '. $pse_obj->getPayStubEntryNameId() .' Amount: '. $pse_obj->getAmount(), __FILE__, __LINE__, __METHOD__, 10);
 
-					if ( isset($psea_arr[$pse_obj->getPayStubEntryNameId()]['debit_account'])
-							AND $psea_arr[$pse_obj->getPayStubEntryNameId()]['debit_account'] != '' ) {
+					//Since Pay Stub Account/Amount don't play nice with GL Account/Debit/Credit columns, if both are displayed, only attach data to them, leave everything else blank.
+					if ( isset($columns['pay_stub_account']) AND $columns['pay_stub_account'] == TRUE AND isset($columns['amount']) AND $columns['amount'] == TRUE ) {
+						$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ][ $run_id ]['psen_ids'][] = array(
+																								'pay_stub_account' =>  ( isset( $pay_stub_account_columns[ $pse_obj->getPayStubEntryNameId() ] ) ) ? $pay_stub_account_columns[ $pse_obj->getPayStubEntryNameId() ] : '',
+																								'amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), FALSE )
+						);
+					} else {
 
-						$debit_accounts = explode(',', $psea_arr[$pse_obj->getPayStubEntryNameId()]['debit_account'] );
-						foreach( $debit_accounts as $debit_account ) {
-							//Debug::Text('Debit Entry: Account: '. $debit_account .' Amount: '. $pse_obj->getAmount(), __FILE__, __LINE__, __METHOD__, 10);
-							//Negative amounts should be switched to the opposite side of the ledger.
-							//We can't ignore them, and we can't include them as absolute (always positive) values, and we can't
-							//Allow negative amounts as not all accounting systems accept them, but skip any $0 entries
-							//This is especially important for handling vacation accruals.
-							if ( $pse_obj->getAmount() > 0 ) {
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][] = array(
-													'account' => trim($debit_account),
-													'debit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn('currency_rate'), $currency_convert_to_base ), FALSE ),
-													'credit_amount' => NULL,
-													);
-							} elseif ( $pse_obj->getAmount() < 0 )	{
-								Debug::Text('Negative debit amount, switching to credit: '. $pse_obj->getAmount() .' Debit Account: '. $debit_account .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][] = array(
-													'account' => trim($debit_account),
-													'debit_amount' => NULL,
-													'credit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( abs($pse_obj->getAmount()), $pse_obj->getColumn('currency_rate'), $currency_convert_to_base ), FALSE ),
-													);
+						if ( isset( $psea_arr[ $pse_obj->getPayStubEntryNameId() ]['debit_account'] )
+								AND $psea_arr[ $pse_obj->getPayStubEntryNameId() ]['debit_account'] != '' ) {
+
+							$debit_accounts = explode( ',', $psea_arr[ $pse_obj->getPayStubEntryNameId() ]['debit_account'] );
+							foreach ( $debit_accounts as $debit_account ) {
+								//Debug::Text('Debit Entry: Account: '. $debit_account .' Amount: '. $pse_obj->getAmount(), __FILE__, __LINE__, __METHOD__, 10);
+								//Negative amounts should be switched to the opposite side of the ledger.
+								//We can't ignore them, and we can't include them as absolute (always positive) values, and we can't
+								//Allow negative amounts as not all accounting systems accept them, but skip any $0 entries
+								//This is especially important for handling vacation accruals.
+								if ( $pse_obj->getAmount() > 0 ) {
+									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ][ $run_id ]['psen_ids'][] = array(
+											'account'       => trim( $debit_account ),
+											'debit_amount'  => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), FALSE ),
+											'credit_amount' => NULL,
+									);
+								} elseif ( $pse_obj->getAmount() < 0 ) {
+									Debug::Text( 'Negative debit amount, switching to credit: ' . $pse_obj->getAmount() . ' Debit Account: ' . $debit_account . ' User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
+									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ][ $run_id ]['psen_ids'][] = array(
+											'account'       => trim( $debit_account ),
+											'debit_amount'  => NULL,
+											'credit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( abs( $pse_obj->getAmount() ), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), FALSE ),
+									);
+								}
 							}
+							unset( $debit_accounts, $debit_account );
 						}
-						unset($debit_accounts, $debit_account);
-					}
 
-					if ( isset($psea_arr[$pse_obj->getPayStubEntryNameId()]['credit_account'])
-							AND $psea_arr[$pse_obj->getPayStubEntryNameId()]['credit_account'] != '' ) {
+						if ( isset( $psea_arr[ $pse_obj->getPayStubEntryNameId() ]['credit_account'] )
+								AND $psea_arr[ $pse_obj->getPayStubEntryNameId() ]['credit_account'] != '' ) {
 
-						//Debug::Text('Combined Credit Accounts: '. count($credit_accounts), __FILE__, __LINE__, __METHOD__, 10);
-						$credit_accounts = explode(',', $psea_arr[$pse_obj->getPayStubEntryNameId()]['credit_account'] );
-						foreach( $credit_accounts as $credit_account) {
-							//Allow negative amounts, but skip any $0 entries
-							if ( $pse_obj->getAmount() > 0 ) {
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][] = array(
-													'account' => trim($credit_account),
-													'debit_amount' => NULL,
-													'credit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn('currency_rate'), $currency_convert_to_base ), FALSE ),
-													);
-							} elseif ( $pse_obj->getAmount() < 0 )	{
-								Debug::Text('Negative credit amount, switching to debit: '. $pse_obj->getAmount() .' Credit Account: '. $credit_account .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][] = array(
-													'account' => trim($credit_account),
-													'debit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( abs($pse_obj->getAmount()), $pse_obj->getColumn('currency_rate'), $currency_convert_to_base ), FALSE ),
-													'credit_amount' => NULL,
-													);
+							//Debug::Text('Combined Credit Accounts: '. count($credit_accounts), __FILE__, __LINE__, __METHOD__, 10);
+							$credit_accounts = explode( ',', $psea_arr[ $pse_obj->getPayStubEntryNameId() ]['credit_account'] );
+							foreach ( $credit_accounts as $credit_account ) {
+								//Allow negative amounts, but skip any $0 entries
+								if ( $pse_obj->getAmount() > 0 ) {
+									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ][ $run_id ]['psen_ids'][] = array(
+											'account'       => trim( $credit_account ),
+											'debit_amount'  => NULL,
+											'credit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), FALSE ),
+									);
+								} elseif ( $pse_obj->getAmount() < 0 ) {
+									Debug::Text( 'Negative credit amount, switching to debit: ' . $pse_obj->getAmount() . ' Credit Account: ' . $credit_account . ' User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
+									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ][ $run_id ]['psen_ids'][] = array(
+											'account'       => trim( $credit_account ),
+											'debit_amount'  => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( abs( $pse_obj->getAmount() ), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), FALSE ),
+											'credit_amount' => NULL,
+									);
 
+								}
 							}
+							unset( $credit_accounts, $credit_account );
 						}
-						unset($credit_accounts, $credit_account);
-
 					}
 
 				} else {
@@ -859,7 +906,9 @@ class GeneralLedgerSummaryReport extends Report {
 									unset($expanded_gl_rows, $psen_data);
 								} else {
 									//Debug::Text('     NO TimeBased Distribution...', __FILE__, __LINE__, __METHOD__, 10);
-									$psen_data['account'] = $this->replaceGLAccountVariables( $psen_data['account'], $replace_arr );
+									if ( isset($psen_data['account']) ) {
+										$psen_data['account'] = $this->replaceGLAccountVariables( $psen_data['account'], $replace_arr );
+									}
 									//Need to make sure PSEA IDs are strings not numeric otherwise array_merge will re-key them.
 									$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $psen_data );
 								}

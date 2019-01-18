@@ -107,21 +107,21 @@ if ( !isset($config_vars['other']['disable_log_rotate'])
 								'recurse' => FALSE,
 								'file' => 'timetrex.log',
 								'frequency' => 'DAILY',
-								'history' => 7 );
+								'history' => 10 ); //Keep more than a weeks worth, so we can better diagnose maintenance jobs that just run once per week.
 
 	$log_rotate_config[] = array(
 								'directory' => $config_vars['path']['log'] . DIRECTORY_SEPARATOR . 'client',
 								'recurse' => TRUE,
 								'file' => '*',
 								'frequency' => 'DAILY',
-								'history' => 7 );
+								'history' => 10 );
 
 	$log_rotate_config[] = array(
 								'directory' => $config_vars['path']['log'] . DIRECTORY_SEPARATOR . 'time_clock',
 								'recurse' => TRUE,
 								'file' => '*',
 								'frequency' => 'DAILY',
-								'history' => 7 );
+								'history' => 10 );
 
 	$lr = new LogRotate( $log_rotate_config );
 	$lr->Rotate();

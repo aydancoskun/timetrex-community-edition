@@ -116,9 +116,11 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 				var warning = $( $this.el ).find( '.warning' );
 				var success = $( $this.el ).find( '.success' );
 
-				failed.text( result_data.status[10].total + '/' + result_data.total + '( ' + result_data.status[10].percent + '% )' );
-				warning.text( result_data.status[20].total + '/' + result_data.total + '( ' + result_data.status[20].percent + '% )' );
-				success.text( result_data.status[30].total + '/' + result_data.total + '( ' + result_data.status[30].percent + '% )' )
+				if ( result_data != true && result_data.status ) {
+					failed.text(result_data.status[10].total + '/' + result_data.total + '( ' + result_data.status[10].percent + '% )');
+					warning.text(result_data.status[20].total + '/' + result_data.total + '( ' + result_data.status[20].percent + '% )');
+					success.text(result_data.status[30].total + '/' + result_data.total + '( ' + result_data.status[30].percent + '% )')
+				}
 
 			}
 		} );

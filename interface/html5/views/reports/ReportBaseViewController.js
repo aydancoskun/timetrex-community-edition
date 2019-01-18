@@ -1227,7 +1227,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			html_item.remove();
 		}
 
-		//Error: TypeError: this.edit_view_tab is null in /interface/html5/views/reports/ReportBaseViewController.js?v=8.0.4-20150320-094021 line 1100 
+		//Error: TypeError: this.edit_view_tab is null in /interface/html5/views/reports/ReportBaseViewController.js?v=8.0.4-20150320-094021 line 1100
 		if ( this.edit_view_tab ) {
 			var tab_report = this.edit_view_tab.find( '#tab_report' );
 
@@ -2764,6 +2764,7 @@ ReportBaseViewController = BaseViewController.extend( {
 		if ( this.current_saved_report && Global.isSet( this.current_saved_report.name ) ) {
 
 			other.report_name = this.current_saved_report.name;
+			other.report_description = this.current_saved_report.description;
 		}
 
 		return other;
@@ -2842,6 +2843,10 @@ ReportBaseViewController = BaseViewController.extend( {
 		config['-' + 1000 + '-' + 'template'] = this.current_edit_record.template;
 		config.other = other;
 		config.chart = chart;
+
+		if ( this.include_form_setup ) {
+			config.form = this.getFormSetupData( true );
+		}
 
 		if ( report.sort ) {
 			report.sort = this.convertSortValues( report.sort );
@@ -3191,10 +3196,9 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	onSaveDoneCallback: function( result, current_edit_record ) {
-
 		var new_id = result.getResult();
 
-		if ( TTUUID.isUUID( new_id ) == false ) {
+		if ( TTUUID.isUUID( new_id ) == false && current_edit_record && current_edit_record.id ) {
 			new_id = current_edit_record.id;
 		}
 		this.refreshNav( new_id );

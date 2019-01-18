@@ -586,11 +586,11 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 		// Value1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value1_1', width: 149} );
+		form_item_input.TTextInput( {field: 'value1_1', validation_field: 'value1', width: 149} );
 		this.addEditFieldToColumn( $.i18n._( 'Value1' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'value1_2'} );
+		form_item_input.TComboBox( {field: 'value1_2', validation_field: 'value1'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.ach_transaction_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Account Type' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 

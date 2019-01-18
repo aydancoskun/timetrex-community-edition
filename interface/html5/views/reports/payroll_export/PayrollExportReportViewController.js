@@ -1847,19 +1847,21 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 		var columns = {};
 
-		var source = this.export_grid.getGridParam( 'data' );
+		if ( this.export_grid ) { //#2490 - can't return export columns if there's no export grid.
+			var source = this.export_grid.getGridParam('data');
 
-		var len = source.length;
+			var len = source.length;
 
-		for ( var i = 0; i < len; i++ ) {
-			var item = source[i];
-			columns[item.column_id_key] = {};
-			columns[item.column_id_key].hour_code = item.hour_code;
+			for (var i = 0; i < len; i++) {
+				var item = source[i];
+				columns[item.column_id_key] = {};
+				columns[item.column_id_key].hour_code = item.hour_code;
 
-			if ( type === 'adp' || type === 'adp_advanced' || type === 'adp_resource' || type === 'accero' || type === 'va_munis' || type === 'cms_pbj' ) {
-				columns[item.column_id_key].hour_column = item.hour_column;
+				if (type === 'adp' || type === 'adp_advanced' || type === 'adp_resource' || type === 'accero' || type === 'va_munis' || type === 'cms_pbj') {
+					columns[item.column_id_key].hour_column = item.hour_column;
+				}
+
 			}
-
 		}
 
 		return columns;

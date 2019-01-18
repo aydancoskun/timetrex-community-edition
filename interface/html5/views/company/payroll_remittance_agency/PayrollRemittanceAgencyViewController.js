@@ -1027,20 +1027,24 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 	},
 
 	uniformVariable: function(data) {
-		this._super('collectUIDataToCurrentEditRecord');
+		if  ( data ) {
+			this._super('collectUIDataToCurrentEditRecord');
 
-		if ( this.is_add ) {
-			data.id = false;
-		}
+			if (this.is_add) {
+				data.id = false;
+			}
 
-		data.payroll_remittance_agency_id = this.parent_value;
+			if (this.is_mass_editing != true) {
+				data.payroll_remittance_agency_id = this.parent_value;
 
-		if ( data.district == TTUUID.not_exist_id || data.district == TTUUID.zero_id || data.district == false || data.district == null ) {
-			data.district = '00';
-		}
+				if (data.district == TTUUID.not_exist_id || data.district == TTUUID.zero_id || data.district == false || data.district == null) {
+					data.district = '00';
+				}
 
-		if ( data.province == TTUUID.not_exist_id || data.province == TTUUID.zero_id || data.province == false || data.province == null ) {
-			data.province = false;
+				if (data.province == TTUUID.not_exist_id || data.province == TTUUID.zero_id || data.province == false || data.province == null) {
+					data.province = false;
+				}
+			}
 		}
 
 		return data

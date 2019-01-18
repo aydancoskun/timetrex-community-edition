@@ -604,6 +604,8 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 
 							uf.first_name as first_name,
 							uf.last_name as last_name,
+							uf.middle_name as middle_name,
+							uf.status_id as user_status_id,
 							uf.country as country,
 							uf.province as province,
 							

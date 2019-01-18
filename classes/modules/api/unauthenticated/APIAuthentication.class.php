@@ -293,10 +293,10 @@ class APIAuthentication extends APIFactory {
 
 					//Add entry in source *AND* destination user log describing who logged in.
 					//Source user log, showing that the source user logged in as someone else.
-					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.	TTi18n::getText('To Employee').': '. $new_session_user_obj->getFullName() .'('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
+					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSecureSessionID() .' '.	TTi18n::getText('To Employee').': '. $new_session_user_obj->getFullName() .' ('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
 
 					//Destination user log, showing the destination user was logged in *by* someone else.
-					TTLog::addEntry( $user_id, 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .'('.$user_id.')', $user_id, 'authentication');
+					TTLog::addEntry( $user_id, 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSecureSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .' ('.$user_id.')', $user_id, 'authentication');
 
 					return $this->returnHandler( $retarr );
 				}
@@ -338,10 +338,10 @@ class APIAuthentication extends APIFactory {
 
 					//Add entry in source *AND* destination user log describing who logged in.
 					//Source user log, showing that the source user logged in as someone else.
-					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.	TTi18n::getText('To Employee').': '. $authentication->getObject()->getFullName() .'('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
+					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSecureSessionID() .' '.	TTi18n::getText('To Employee').': '. $authentication->getObject()->getFullName() .' ('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
 
 					//Destination user log, showing the destination user was logged in *by* someone else.
-					TTLog::addEntry( $user_id, 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .'('.$user_id.')', $user_id, 'authentication');
+					TTLog::addEntry( $user_id, 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSecureSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .' ('.$user_id.')', $user_id, 'authentication');
 
 					return TRUE;
 				} else {

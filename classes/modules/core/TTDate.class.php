@@ -1118,6 +1118,14 @@ class TTDate {
 	public static function incrementDate( $epoch, $amount, $unit ) {
 		//Debug::text('Epoch: '. $epoch .' ('.TTDate::getDate('DATE+TIME', $epoch).') Amount: '. $amount .' unit: '. $unit, __FILE__, __LINE__, __METHOD__, 10);
 
+		if ( $epoch == '' ) {
+			return FALSE;
+		}
+
+		if ( $amount == '' ) {
+			$amount = 0;
+		}
+
 		$date_arr = getdate($epoch);
 		$retval = NULL;
 		//Unit: minute, hour, day
@@ -1146,7 +1154,6 @@ class TTDate {
 		}
 
 		return $retval;
-
 	}
 
 	/**

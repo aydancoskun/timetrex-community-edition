@@ -250,8 +250,9 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 		);
 
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN EXISTS
 									( select 1 from '. $uf->getTable() .' as y where y.legal_entity_id = a.id and y.deleted = 0)

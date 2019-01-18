@@ -545,6 +545,7 @@ require( [
 	'backbone',
 	'jquery',
 	'jquery-ui',
+	'TTUUID',
 	'RateLimit',
 	'LocalCacheData',
 	'Global',

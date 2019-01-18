@@ -121,7 +121,9 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 		this.stepsWidgetDic[1].new_password.clearErrorStyle();
 		this.stepsWidgetDic[1].confirm_password.clearErrorStyle();
 
-		if ( !new_password ) {
+		if ( typeof LocalCacheData.all_url_args.key == 'undefined'  ) {
+			this.stepsWidgetDic[1].confirm_password.setErrorStyle($.i18n._('Password reset key is invalid, please try resetting your password again (u)'), true);
+		} else if ( !new_password ) {
 			this.stepsWidgetDic[1].new_password.setErrorStyle( $.i18n._( 'New password can\'t be empty' ), true );
 		} else if ( new_password !== confirm_password ) {
 			this.stepsWidgetDic[1].confirm_password.setErrorStyle( $.i18n._( 'New password does not match' ), true );

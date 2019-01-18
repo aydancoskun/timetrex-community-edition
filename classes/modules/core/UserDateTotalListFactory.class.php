@@ -282,7 +282,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND ( a.deleted = 0 )
 					';
 
-		//Debug::Arr( $ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;

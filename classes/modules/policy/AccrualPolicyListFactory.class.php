@@ -564,8 +564,9 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 								( select count(*) from '. $apf->getTable() .' as z where z.accrual_policy_id = a.id and z.deleted = 0)
 */
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN EXISTS
 									( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 140 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0)

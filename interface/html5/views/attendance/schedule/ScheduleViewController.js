@@ -1593,7 +1593,7 @@ ScheduleViewController = BaseViewController.extend( {
 				target_data = $this.getDataByCellIndex( target_row_index, target_cell_index );
 				target_row = $this.schedule_source[target_row_index];
 
-				if ( !target_row.user_id ) {
+				if ( !target_row || !target_row.user_id ) {
 					target_empty_row = true;
 				}
 
@@ -4137,7 +4137,7 @@ ScheduleViewController = BaseViewController.extend( {
 		if ( this.schedule_source.length === 1 && this.schedule_source[0].user_id != '' ) {
 			//case where only one user has a schedule on the sheet
 			default_user_id = this.schedule_source[0].user_id;
-		} else if ( this.schedule_source.length === 1 && this.filter_data && this.filter_data.include_user_ids && this.filter_data.include_user_ids.value.length === 1 ) {
+		} else if ( this.schedule_source.length === 1 && this.filter_data && this.filter_data.include_user_ids && this.filter_data.include_user_id.value && this.filter_data.include_user_ids.value.length === 1 ) {
 			//case where one user is selected in include_users but does not have a schedule attributed to them (new users for example)
 			default_user_id = this.filter_data.include_user_ids.value[0];
 		} else {

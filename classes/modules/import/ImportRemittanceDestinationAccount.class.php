@@ -25,6 +25,8 @@ class ImportRemittanceDestinationAccount extends Import {
 				$baf = TTNew('RemittanceDestinationAccountFactory');
 				$retval = Misc::trimSortPrefix( $baf->getOptions('columns') );
 
+				unset($retval['display_amount']); //For display purposes only.
+
 				$retval = Misc::addSortPrefix( Misc::prependArray( $this->getUserIdentificationColumns(), Misc::trimSortPrefix($retval) ) );
 				ksort($retval);
 
@@ -98,9 +100,7 @@ class ImportRemittanceDestinationAccount extends Import {
 
 				/** @var RemittanceSourceAccountListFactory $rsalf */
 				$rsalf = TTnew( 'RemittanceSourceAccountListFactory' );
-
-				$rsalf->getByLegalEntityIdAndCompanyId( $u_obj->getLegalEntity(), $this->getCompanyObject()->getId() );
-
+				$rsalf->getByLegalEntityIdAndTypeIdAndCompanyId( $u_obj->getLegalEntity(), $raw_row['type'], $this->getCompanyObject()->getId() );
 				if ( $rsalf->getRecordCount() > 0 ) {
 					$raw_row['remittance_source_account_id'] = $rsalf->getCurrent()->getId();
 					unset( $rsalf );
@@ -192,47 +192,25 @@ class ImportRemittanceDestinationAccount extends Import {
 		return $retval;
 	}
 
-	//
-	// Generic parser functions.
-	//
-//	/**
-//	 * @param $input
-//	 * @param null $default_value
-//	 * @param null $parse_hint
-//	 * @return string
-//	 */
-//	function parse_institution( $input, $default_value = NULL, $parse_hint = NULL ) {
-//		$val = new Validator();
-//		$retval = str_pad( $val->stripNonNumeric($input), 3, 0, STR_PAD_LEFT );
-//
-//		return $retval;
-//	}
-//
-//	/**
-//	 * @param $input
-//	 * @param null $default_value
-//	 * @param null $parse_hint
-//	 * @return mixed
-//	 */
-//	function parse_transit( $input, $default_value = NULL, $parse_hint = NULL ) {
-//		$val = new Validator();
-//		$retval = $val->stripNonNumeric($input);
-//
-//		return $retval;
-//	}
-//
-//	/**
-//	 * @param $input
-//	 * @param null $default_value
-//	 * @param null $parse_hint
-//	 * @return mixed
-//	 */
-//	function parse_account( $input, $default_value = NULL, $parse_hint = NULL ) {
-//		$val = new Validator();
-//		$retval = $val->stripNonNumeric($input);
-//
-//		return $retval;
-//	}
+	/**
+	 * @param $input
+	 * @param null $default_value
+	 * @param null $parse_hint
+	 * @return array|bool|mixed
+	 */
+	function parse_ach_transaction_type( $input, $default_value = NULL, $parse_hint = NULL ) {
+		$rsaf = TTnew('RemittanceSourceAccountFactory');
+		$options = $rsaf->getOptions( 'ach_transaction_type' );
 
+		if ( isset($options[$input]) ) {
+			return $input;
+		} else {
+			if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
+				return $this->findClosestMatch( $input, $options, 50 );
+			} else {
+				return array_search( strtolower($input), array_map('strtolower', $options) );
+			}
+		}
+	}
 }
 ?>

@@ -235,8 +235,9 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 					);
 
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN EXISTS
 									( select 1 from '. $rscf->getTable() .' as w where w.company_id = a.company_id AND w.recurring_schedule_template_control_id = a.id AND w.deleted = 0 )

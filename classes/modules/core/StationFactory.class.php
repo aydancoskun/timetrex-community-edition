@@ -1248,9 +1248,8 @@ class StationFactory extends Factory {
 		return $retarr;
 	}
 
-	//Update JUST station last_poll_date AND last_punch_time_stamp without affecting updated_date, and without creating an EDIT entry in the system_log.
-
 	/**
+	 * Update JUST station last_poll_date AND last_punch_time_stamp without affecting updated_date, and without creating an EDIT entry in the system_log.
 	 * @param string $id UUID
 	 * @param int $last_poll_date
 	 * @param int $last_punch_date
@@ -1278,9 +1277,8 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
-	//Update JUST station last_poll_date without affecting updated_date, and without creating an EDIT entry in the system_log.
-
 	/**
+	 * Update JUST station last_poll_date without affecting updated_date, and without creating an EDIT entry in the system_log.
 	 * @param string $id UUID
 	 * @param int $last_poll_date
 	 * @return bool
@@ -1306,9 +1304,8 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
-	//Update JUST station last_push_date without affecting updated_date, and without creating an EDIT entry in the system_log.
-
 	/**
+	 * Update JUST station last_push_date without affecting updated_date, and without creating an EDIT entry in the system_log.
 	 * @param string $id UUID
 	 * @param int $last_push_date
 	 * @return bool
@@ -1335,9 +1332,8 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
-	//Update JUST station last_partial_push_date without affecting updated_date, and without creating an EDIT entry in the system_log.
-
 	/**
+	 * Update JUST station last_partial_push_date without affecting updated_date, and without creating an EDIT entry in the system_log.
 	 * @param string $id UUID
 	 * @param int $last_partial_push_date
 	 * @return bool

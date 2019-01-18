@@ -61,15 +61,14 @@
 //*CHECKAGAIN-* means document hasn't been updated and needs to be rechecked.
 
 //Change every year usually
-CHANGED:16-Dec-16				Federal          		- Google: Notice 1036 http://www.irs.gov/pub/irs-pdf/n1036.pdf
+CHANGED:13-Jan-18				Federal          		- Google: Notice 1036 http://www.irs.gov/pub/irs-pdf/n1036.pdf
 *CHECKAGAIN-*:22-Dec-17			'VT' => 'Vermont',		- http://tax.vermont.gov/business-and-corp/withholding-tax *Income Tax Withholding  Instructions, Tables, and Charts.
-*CHECKAGAIN-*:22-Dec-17			'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Click on Withholding Formula to see update for each year.
+CHANGED:19-Jan-18				'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Click on Withholding Formula to see update for each year.
 *CHECKAGAIN-*:22-Dec-17			'OR' => 'Oregon',		- http://www.oregon.gov/DOR/programs/businesses/Pages/payroll-updates.aspx *Search: Withholdings Tax Formulas 2013
 *CHECKAGAIN-*:22-Dec-17			'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
 *CHECKAGAIN-*:22-Dec-17			'AL' => 'Alabama' 		- https://revenue.alabama.gov/individual-corporate/taxes-administered-by-individual-corporate-income-tax/withholding-tax/ *Withholding Tax Tables and Instructions
 *CHECKAGAIN-*:22-Dec-17			'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
 *CHECKAGAIN-*:27-Dec-17			'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
-*CHECKAGAIN-*:27-Dec-17			'IL' => 'Illinois',		- http://www.revenue.state.il.us/Businesses/TaxInformation/Payroll/index.htm *Booklet IL-700-T
 NOCHANGE:22-Dec-17				'OK' => 'Oklahoma',		- http://ok.gov/tax/Forms_&_Publications/Publications/Withholding/ *OW-2, Oklahoma Income Tax Withholding Tables
 NOCHANGE:19-Dec-17				'NC' => 'North Carolina'- http://www.dornc.com/taxes/wh_tax/index.html *Income Tax Withholding Tables & Instructions for Employers, NC30
 CHANGED:16-Dec-17				'KY' => 'Kentucky', 	- http://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method)
@@ -79,6 +78,7 @@ CHANGED:09-Dec-17				'SC' => 'South Carolina'- https://dor.sc.gov/tax/withholdin
 CHANGED:16-Dec-17				'CA' => 'California' 	- http://www.edd.ca.gov/Payroll_Taxes/Rates_and_Withholding.htm *PIT Withholding schedules
 CHANGED:16-Dec-17				'MN' => 'Minnesota',	- http://www.revenue.state.mn.us/businesses/withholding/Pages/Forms.aspx *2013 Minnesota Withholding Computer Formula - Calculator: https://www.mndor.state.mn.us/tp/withholdingtaxcalc/_/
 CHANGED:16-Dec-17 				'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
+CHANGED:04-Jan-18				'IL' => 'Illinois',		- http://www.revenue.state.il.us/Businesses/TaxInformation/Payroll/index.htm *Booklet IL-700-T
 NOCHANGE:16-Dec-17				'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098
 NOCHANGE:16-Dec-17				'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
 NOCHANGE:09-Dec-17				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
@@ -87,12 +87,12 @@ NOCHANGE:04-Dec-17				'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm
 //Change less often
 *CHECKAGAIN-*:22-Dec-17			'MA' => 'Massachusetts' - http://www.mass.gov/dor/individuals/taxpayer-help-and-resources/tax-guides/withholding-tax-guide.html#calculate *Circular M
 *CHECKAGAIN-*:22-Dec-17			'DE' => 'Delaware',		- http://revenue.delaware.gov/services/WITBk.shtml *http://revenue.delaware.gov/services/wit_folder/section17.shtml
-*CHECKAGAIN-*:22-Dec-17			'GA' => 'Georgia',		- http://dor.georgia.gov/withholding-tax-information or http://dor.georgia.gov/documents/2016-employer-tax-guide *Employers Tax Guide
 *CHECKAGAIN-*:22-Dec-17			'HI' => 'Hawaii',		- http://tax.hawaii.gov/forms/a1_b1_5whhold/ *Employers Tax Guide (Booklet A)
 *CHECKAGAIN-*:22-Dec-17			'NE' => 'Nebraska',		- http://www.revenue.nebraska.gov/withhold.html *Nebraska  Circular EN, Income Tax Withholding on Wages
-*CHECKAGAIN-*:22-Dec-17			'WI' => 'Wisconsin',	- http://www.revenue.wi.gov/forms/with/index.html *Pub W-166, Method "B" calculation
+NOCHANGE:05-Jan-18				'WI' => 'Wisconsin',	- http://www.revenue.wi.gov/forms/with/index.html *Pub W-166, Method "B" calculation
 CHANGED:16-Dec-17				'DC' => 'D.C.', 		- http://otr.cfo.dc.gov/page/income-tax-withholding-instructions-and-tables *Form: FR-230
 NOCHANGE:16-Dec-17				'MD' => 'Maryland',		- http://taxes.marylandtaxes.gov/ *Maryland Withholding Guide* - Use 1.75% LOCAL INCOME TAX tables, *minus 1.75%*, manually calculate each bracket.  **PAY ATTENTION TO FILING STATUS AND WHICH SIDE ITS ON** Use tax_table_bracket_calculator.ods. See MD.class.php for more information.
+NOCHANGE:03-Jan-18				'GA' => 'Georgia',		- http://dor.georgia.gov/withholding-tax-information or https://dor.georgia.gov/documents/2018-employers-tax-guide *Employers Tax Guide
 
 //Rarely change
 *CHECKAGAIN-*:22-Dec-17			'AR' => 'Arkansas'		- https://www.dfa.arkansas.gov/income-tax/withholding-tax-branch/withholding-tax-forms-and-instructions/ *Witholding Tax Formula ***They use a minus calculation, so we have to manually calculate each bracket ourselves. Use tax_table_bracket_calculator.ods
@@ -103,7 +103,7 @@ NOCHANGE:20-Dec-17				'MS' => 'Mississippi',	- http://www.dor.ms.gov/Business/Pa
 *CHECKAGAIN-*:22-Dec-17			'VA' => 'Virginia',		- http://www.tax.virginia.gov/content/withholding-tax *Employer Withholding Instructions
 *CHECKAGAIN-*:22-Dec-17			'WV' => 'West Virginia',- http://tax.wv.gov/Business/Withholding/Pages/WithholdingTaxForms.aspx *IT-100.1A
 *CHECKAGAIN-*:22-Dec-17			'UT' => 'Utah',			- http://tax.utah.gov/withholding *PUB 14, Withholding Tax Guide
-*CHECKAGAIN-*:22-Dec-17			'MT' => 'Montana',		- https://revenue.mt.gov/home/businesses/wage_withholding#Filing-Payment-Information-723 *Montana Witholding Tax Guide
+NOCHANGE:05-Jan-18				'MT' => 'Montana',		- https://revenue.mt.gov/home/businesses/wage_withholding#Filing-Payment-Information-723 *Montana Witholding Tax Guide
 NOCHANGE:19-Dec-17				'IN' => 'Indiana',		- http://www.in.gov/dor/4006.htm#withholding *Departmental Notice #1 DN01
 NOCHANGE:16-Dec-17				'AZ' => 'Arizona',		- http://www.azdor.gov/Forms/Withholding.aspx *Form A4: Employees choose a straight percent to pick.
 NOCHANGE:16-Dec-17				'IA' => 'Iowa',			- https://tax.iowa.gov/withholding-tax-information-0 *Iowa Withholding Tax Guide
@@ -130,6 +130,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 	var $country_primary_currency = 'USD';
 
 	var $federal_allowance = array(
+		20180101 => 4150.00, //01-Jan-18
 		//01-Jan-17 - No Change.
 		20160101 => 4050.00, //01-Jan-16
 		20150101 => 4000.00, //01-Jan-15
@@ -326,6 +327,28 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 		Federal Income Tax Rates
 	*/
 	var $federal_income_tax_rate_options = array(
+			20180101 => array(
+					10 => array( //Single
+							array('income' => 3700, 'rate' => 0, 'constant' => 0),
+							array('income' => 13225, 'rate' => 10, 'constant' => 0),
+							array('income' => 42400, 'rate' => 12, 'constant' => 952.50),
+							array('income' => 86200, 'rate' => 22, 'constant' => 4453.50),
+							array('income' => 161200, 'rate' => 24, 'constant' => 14089.50),
+							array('income' => 203700, 'rate' => 32, 'constant' => 32089.50),
+							array('income' => 503700, 'rate' => 35, 'constant' => 45689.50),
+							array('income' => 503700, 'rate' => 37, 'constant' => 150689.50),
+					),
+					20 => array( //Married
+							array('income' => 11550, 'rate' => 0, 'constant' => 0),
+							array('income' => 30600, 'rate' => 10, 'constant' => 0),
+							array('income' => 88950, 'rate' => 12, 'constant' => 1905),
+							array('income' => 176550, 'rate' => 22, 'constant' => 8907),
+							array('income' => 326550, 'rate' => 24, 'constant' => 28179),
+							array('income' => 411550, 'rate' => 32, 'constant' => 64179),
+							array('income' => 611550, 'rate' => 35, 'constant' => 91379),
+							array('income' => 611550, 'rate' => 37, 'constant' => 161379),
+					),
+			),
 			20170101 => array(
 					10 => array(
 							array('income' => 2300, 'rate' => 0, 'constant' => 0),

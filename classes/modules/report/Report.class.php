@@ -1349,6 +1349,10 @@ class Report {
 			$group_diff = array_diff( $config['group'], array_keys( $config['columns'] ) );
 			if ( is_array($group_diff) AND count($group_diff) > 0 ) {
 				foreach( $group_diff as $group_bad_column ) {
+					if ( !isset($column_options[$group_bad_column]) ) { //Prevent PHP warning.
+						$column_options[$group_bad_column] = NULL;
+					}
+
 					$this->validator->isTrue( 'group', FALSE, TTi18n::gettext('Group by defines column that is not being displayed on the report').': '. $column_options[$group_bad_column] );
 				}
 			}
@@ -1358,6 +1362,10 @@ class Report {
 			$sub_total_diff = array_diff( $config['sub_total'], array_keys( $config['columns'] ) );
 			if ( is_array($sub_total_diff) AND count($sub_total_diff) > 0 ) {
 				foreach( $sub_total_diff as $sub_total_bad_column ) {
+					if ( !isset($column_options[$sub_total_bad_column]) ) {
+						$column_options[$sub_total_bad_column] = NULL; //Prevent PHP warning.
+					}
+
 					$this->validator->isTrue( 'sub_total', FALSE, TTi18n::gettext('Sub Total defines column that is not being displayed on the report').': '. $column_options[$sub_total_bad_column] );
 				}
 			}
@@ -1513,7 +1521,13 @@ class Report {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->form_data), NULL, TTi18n::getText('Sorting Form Data...') );
 
 			Debug::Arr($this->getSortConfig(), 'Sort Config: ', __FILE__, __LINE__, __METHOD__, 10);
-			$this->form_data = Sort::arrayMultiSort( $this->form_data, $this->getSortConfig() );
+			if ( isset( $this->form_data['user'] ) ) {
+				foreach( $this->form_data['user'] as $legal_entity_id => $legal_entity_users ) {
+					$this->form_data['user'][$legal_entity_id] = Sort::arrayMultiSort( $legal_entity_users, $this->getSortConfig() );
+				}
+			} else {
+				Debug::Text(' WARNING: Unable to sort form data due to user array element does not exist.', __FILE__, __LINE__, __METHOD__, 10);
+			}
 
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), count($this->form_data) );
 		}
@@ -1998,43 +2012,49 @@ class Report {
 		//Report Name
 		$report_name = $this->getDescription('report_name');
 		if ( $report_name != '' ) {
-			$body .= TTi18n::getText('Name').': '. $report_name."\n";
+			$body .= TTi18n::getText('Name').': '. $report_name ."\n";
+		}
+
+		//Report Description
+		$report_description = $this->getDescription('report_description');
+		if ( $report_name != '' ) {
+			$body .= TTi18n::getText('Description').': '. $report_description ."\n";
 		}
 
 		//Time Period: start/end date, or pay period.
 		$description = $this->getDescription('time_period', array( 'relative_time_period' => $relative_time_period ) );
 		if ( $description != '' ) {
-			$body .= TTi18n::getText('Time Period').': '. $description."\n";
+			$body .= TTi18n::getText('Time Period').': '. $description ."\n";
 		}
 
 		//Filter:
 		$description = $this->getDescription('filter');
 		if ( $description != '' ) {
-			$body .= TTi18n::getText('Filter').': '. $description."\n";
+			$body .= TTi18n::getText('Filter').': '. $description ."\n";
 		}
 
 		//Group:
 		$description = $this->getDescription('group');
 		if ( $description != '' ) {
-			$body .= TTi18n::getText('Group'). ': '. $description."\n";
+			$body .= TTi18n::getText('Group'). ': '. $description ."\n";
 		}
 
 		//SubTotal:
 		$description = $this->getDescription('sub_total');
 		if ( $description != '' ) {
-			$body .= TTi18n::getText('SubTotal').': '. $description."\n";
+			$body .= TTi18n::getText('SubTotal').': '. $description ."\n";
 		}
 
 		//Sort:
 		$description = $this->getDescription('sort');
 		if ( $description != '' ) {
-			$body .= TTi18n::getText('Sort').': ' . $description."\n";
+			$body .= TTi18n::getText('Sort').': ' . $description ."\n";
 		}
 
 		//Custom Filter:
 		$description = $this->getDescription('custom_filter');
 		if ( $description != '' ) {
-			$body .= TTi18n::getText('Custom Filter').': ' . $description."\n";
+			$body .= TTi18n::getText('Custom Filter').': ' . $description ."\n";
 		}
 
 		if ( $html == TRUE ) {
@@ -2108,6 +2128,12 @@ class Report {
 				$config = $this->getOtherConfig();
 				if ( isset($config['report_name']) AND $config['report_name'] != '' ) {
 					$retval = $config['report_name'];
+				}
+				break;
+			case 'report_description':
+				$config = $this->getOtherConfig();
+				if ( isset($config['report_description']) AND $config['report_description'] != '' ) {
+					$retval = $config['report_description'];
 				}
 				break;
 			case 'filter':
@@ -2999,6 +3025,7 @@ class Report {
 
 			//Report Name
 			$report_name = $this->getDescription('report_name');
+			$report_description = $this->getDescription('report_description');
 			if ( $report_name != '' ) {
 				//When a report name is specified, make that the large bold font, and just add in smaller font the report name itself.
 				$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(18) );
@@ -3008,6 +3035,26 @@ class Report {
 				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(6) );
 				$this->pdf->Cell( $this->_pdf_scaleSize(15), $this->_pdf_fontSize(3), TTi18n::getText('Report').':', 0, 0, 'L', 0, '', 0);
 				$this->pdf->Cell( $this->_pdf_scaleSize(150), $this->_pdf_fontSize(3), $this->title, 0, 0, 'L', 0, '', 1);
+				$this->pdf->Ln();
+
+				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(6) );
+				$this->pdf->Cell( $this->_pdf_scaleSize(15), $this->_pdf_fontSize(3), TTi18n::getText('Description').':', 0, 0, 'L', 0, '', 0);
+
+				$report_description_array = explode("\n", $report_description);
+				if ( count( $report_description_array ) != 1 ) {
+					$first = TRUE;
+					foreach( $report_description_array as $report_description ) {
+						if ( $first == TRUE ) {
+							$first = FALSE;
+						} else {
+							$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(6) );
+						}
+						$this->pdf->Cell( $this->_pdf_scaleSize( 150 ), $this->_pdf_fontSize( 3 ), $report_description, 0, 0, 'L', 0, '', 1 );
+						$this->pdf->Ln();
+					}
+				} else {
+					$this->pdf->Cell( $this->_pdf_scaleSize( 150 ), $this->_pdf_fontSize( 3 ), $report_description, 0, 0, 'L', 0, '', 1 );
+				}
 				$this->pdf->Ln();
 			} else {
 				//Report Title top left.
@@ -3858,6 +3905,15 @@ class Report {
 				$this->html .= '<td>' .htmlspecialchars($this->title, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 			}
+
+			$report_description = $this->getDescription('report_description');
+			if ( $report_description != '' ) {
+				$this->html .= '<tr>';
+				$this->html .= '<td style="vertical-align:top">' . TTi18n::getText( 'Description' ) . ':' . '</td>';
+				$this->html .= '<td>' . nl2br(htmlspecialchars( $report_description, ENT_QUOTES ) ) . '</td>';
+				$this->html .= '</tr>';
+			}
+
 			//Time Period: start/end date, or pay period.
 			$description = $this->getDescription('time_period');
 			if ( $description != '' ) {

@@ -223,7 +223,6 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		}
 
 		this.last_id = id;
-
 		select_data = this.setSampleRowBaseOnImportFile( select_data );
 
 		grid.clearGridData();
@@ -244,9 +243,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			for ( var j = 0; j < this.import_data.length; j++ ) {
 				var import_data = this.import_data[j];
 				//#2132 - match based on map_column_name
-				if ( item.map_column_name === import_data.map_column_name ) {
+				if ( item.map_column_name.trim() === import_data.map_column_name.trim() ) {
 					item.row_1 = import_data.row_1;
-					continue;
+					break;
 				}
 			}
 		}
@@ -365,33 +364,35 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	setSavedMappingOptions: function( array, select_layout_id ) {
 		var $this = this;
 
-		var selector = $this.stepsWidgetDic[$this.current_step]['saved_mapping'];
+		if ( Global.isSet( $this.stepsWidgetDic[$this.current_step]['saved_mapping'] ) == true ) {
+			var selector = $this.stepsWidgetDic[$this.current_step]['saved_mapping'];
 
-		selector.setSourceData( array );
+			selector.setSourceData( array );
 
-		if ( select_layout_id ) {
-			selector.setValue( select_layout_id );
+			if ( select_layout_id ) {
+				selector.setValue( select_layout_id );
+			}
+	//		selector.empty();
+	//		var len = array.length;
+	//		for ( var i = 0; i < len; i++ ) {
+	//			var item = array[i];
+	//			selector.append( '<option value="' + item.id + '">' + item.name + '</option>' );
+	//		}
+	//
+	//		if ( select_layout_id ) {
+	//			$( selector.find( 'option' ) ).filter(function() {
+	//
+	//				if ( !select_layout_id ) {
+	//					return false;
+	//				}
+	//
+	//				return $( this ).attr( 'value' ) === select_layout_id.toString();
+	//			} ).attr( 'selected', true );
+	//		} else {
+	//			$( selector.find( 'option' )[0] ).attr( 'selected', true );
+	//		}
+
 		}
-//		selector.empty();
-//		var len = array.length;
-//		for ( var i = 0; i < len; i++ ) {
-//			var item = array[i];
-//			selector.append( '<option value="' + item.id + '">' + item.name + '</option>' );
-//		}
-//
-//		if ( select_layout_id ) {
-//			$( selector.find( 'option' ) ).filter(function() {
-//
-//				if ( !select_layout_id ) {
-//					return false;
-//				}
-//
-//				return $( this ).attr( 'value' ) === select_layout_id.toString();
-//			} ).attr( 'selected', true );
-//		} else {
-//			$( selector.find( 'option' )[0] ).attr( 'selected', true );
-//		}
-
 		$this.saved_layout_array = array;
 	},
 

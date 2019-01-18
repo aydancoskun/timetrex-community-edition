@@ -224,6 +224,11 @@
 			// contextmenu show dispatcher
 			contextmenu: function( e ) {
 				var $this = $( this );
+				if( $(e.target).parents('.a-dropdown').length || $(e.target).parents('.a-combobox').length ) {
+					e.preventDefault();
+					document.elementFromPoint( e.pageX, e.pageY ).click();
+					return;
+				}
 
 				if ( e.target.nodeName.toLowerCase() === 'input' ||
 					e.target.nodeName.toLowerCase() === 'textarea' ) {

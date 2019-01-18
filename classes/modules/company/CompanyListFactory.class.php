@@ -460,8 +460,9 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		$ph = array();
 
 		$query = '
-					SELECT	a.*,
+					SELECT	
 							_ADODB_COUNT
+							a.*,
 							user_last_login.last_login_date as last_login_date,
 							user_last_login.total_active_days as total_active_days,
 							user_last_login.last_login_days as last_login_days,

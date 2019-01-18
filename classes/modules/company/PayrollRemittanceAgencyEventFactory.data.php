@@ -1440,6 +1440,13 @@ return array(
 												 'auto_pay'            => FALSE,
 										 ),
 										 'frequency'        => array( //Next Day,Semiweekly,Monthly,Quarterly
+																	  array( //Next Day
+																			  'status_id'           => 20, //Disabled
+																			  'frequency_id'        => 1000, //Per Pay Period
+																			  'due_date_delay_days' => 1,
+																			  'reminder_days'       => 1,
+																	  ),
+
 																	  array(
 																		  //Semi-Weekly
 																		  'status_id'     => 20, //Disabled
@@ -8363,6 +8370,14 @@ return array(
 												 'auto_pay'            => FALSE,
 										 ),
 										 'frequency'        => array(
+											 //Semi-Weekly
+											 array(
+												 //Semi-Weekly
+												 'status_id'     => 20, //Disabled
+												 'frequency_id'  => 64000, //Semi-Weekly
+												 'reminder_days' => 3,
+											 ),
+
 											 //Monthly
 											 array(
 													 'status_id'            => 10, //Enabled
@@ -8370,6 +8385,16 @@ return array(
 													 'primary_day_of_month' => 20,
 													 'reminder_days'        => 7,
 											 ),
+
+											 //Quarterly - Due the last day of the month following the end of the quarter. (April 30, July 31, October 31, and January 31)
+											 array(
+													 'status_id'            => 20, //Disabled
+													 'frequency_id'         => 3000, //Quarterly
+													 'quarter_month'        => 1,
+													 'primary_day_of_month' => 20,
+													 'reminder_days'        => 14,
+											 ),
+
 										 ),
 								 ),
 	),

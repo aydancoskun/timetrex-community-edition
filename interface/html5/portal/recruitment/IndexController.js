@@ -78,13 +78,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 				},4000);
 			}
 		}
-		var reg = new RegExp( '^[0-9]*$' );
 
-		if ( reg.test( args.id ) ) {
-			edit_id = TTUUID.castUUID( args.id );
-		} else {
-			edit_id = args.id; //Accrual balance go here, because it's id is combined. x_x
-		}
+		edit_id = args.id;
 
 		action = args.a;
 

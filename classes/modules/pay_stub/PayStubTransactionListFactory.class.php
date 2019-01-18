@@ -177,7 +177,8 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		}
 
 		if ( $order == NULL ) {
-			$order = array( 'b.amount_type_id' => 'desc', 'b.priority' => 'asc', 'b.id' => 'asc' );
+			//Similar sort order at RemittanceDestinationAccountListFactory::getByUserIdAndStatusId
+			$order = array( 'b.amount_type_id' => 'desc', 'b.priority' => 'asc', 'b.type_id'=>'desc', 'b.id' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;

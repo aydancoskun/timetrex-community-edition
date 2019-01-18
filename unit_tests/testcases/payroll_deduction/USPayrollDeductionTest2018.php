@@ -189,21 +189,22 @@ class USPayrollDeductionTest2018 extends PHPUnit_Framework_TestCase {
 				//var_dump($pd_obj->getArray());
 
 				$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), $this->mf( $row['gross_income'] ) );
-				if ( $row['federal_deduction'] != '' ) {
-					//$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), $this->MatchWithinMarginOfError( $this->mf( $row['federal_deduction'] ), $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), 0.01 ) );
-					$amount_diff = 0;
-					$amount_diff_percent = 0;
-					if ( $row['federal_deduction'] > 0 ) {
-						$amount_diff = abs( ( $pd_obj->getFederalPayPeriodDeductions() - $row['federal_deduction'] ) );
-						$amount_diff_percent = ( ( $amount_diff / $row['federal_deduction'] ) * 100 );
-					}
-
-					//Debug::text($i.'. Amount: This Year: '. $row['federal_deduction'] .' Last Year: '. $pd_obj->getFederalPayPeriodDeductions() .' Diff Amount: '. $amount_diff .' Percent: '. $amount_diff_percent .'%', __FILE__, __LINE__, __METHOD__, 10);
-					if ( $amount_diff > 1.5 ) {
-						$this->assertLessThan( 3, $amount_diff_percent ); //Should be slightly higher than inflation.
-						$this->assertGreaterThan( 0, $amount_diff_percent );
-					}
-				}
+				//2018 was the year of large tax reform, changes were quite substantial in some cases.
+//				if ( $row['federal_deduction'] != '' ) {
+//					//$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), $this->MatchWithinMarginOfError( $this->mf( $row['federal_deduction'] ), $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), 0.01 ) );
+//					$amount_diff = 0;
+//					$amount_diff_percent = 0;
+//					if ( $row['federal_deduction'] > 0 ) {
+//						$amount_diff = abs( ( $pd_obj->getFederalPayPeriodDeductions() - $row['federal_deduction'] ) );
+//						$amount_diff_percent = ( ( $amount_diff / $row['federal_deduction'] ) * 100 );
+//					}
+//
+//					//Debug::text($i.'. Amount: This Year: '. $row['federal_deduction'] .' Last Year: '. $pd_obj->getFederalPayPeriodDeductions() .' Diff Amount: '. $amount_diff .' Percent: '. $amount_diff_percent .'%', __FILE__, __LINE__, __METHOD__, 10);
+//					if ( $amount_diff > 1.5 ) {
+//						$this->assertLessThan( 3, $amount_diff_percent ); //Should be slightly higher than inflation.
+//						$this->assertGreaterThan( 0, $amount_diff_percent );
+//					}
+//				}
 				if ( $row['provincial_deduction'] != '' ) {
 					//$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), $this->mf( $row['provincial_deduction'] ) );
 					$amount_diff = 0;
@@ -215,7 +216,7 @@ class USPayrollDeductionTest2018 extends PHPUnit_Framework_TestCase {
 
 					Debug::text($i.'. Amount: This Year: '. $row['provincial_deduction'] .' Last Year: '. $pd_obj->getStatePayPeriodDeductions() .' Diff Amount: '. $amount_diff .' Percent: '. $amount_diff_percent .'%', __FILE__, __LINE__, __METHOD__, 10);
 					if ( $row['province'] != 'CA' AND $row['province'] != 'DC' AND $amount_diff > 5 ) { //Some states had significant changes.
-						$this->assertLessThan( 31, $amount_diff_percent ); //Reasonable margin of error.
+						$this->assertLessThan( 33, $amount_diff_percent ); //Reasonable margin of error.
 						$this->assertGreaterThan( 0, $amount_diff_percent );
 					}
 				}
@@ -249,8 +250,8 @@ class USPayrollDeductionTest2018 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 576.923 );
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '576.92' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '55.34' );
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '37.84' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '44.83' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '38.78' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeSocialSecurity() ), '35.77' );
 	}
 

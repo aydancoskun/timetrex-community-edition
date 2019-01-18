@@ -139,7 +139,8 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		}
 
 		if ( $order == NULL ) {
-			$order = array( 'amount_type_id' => 'desc', 'priority' => 'asc', 'id' => 'asc' ); //Fixed amounts first, then percent, always use ID as tie breaker so its consistent.
+			//Similar sort order at PayStubTransactionListFactory::getByPayStubId()
+			$order = array( 'amount_type_id' => 'desc', 'priority' => 'asc', 'type_id'=>'desc', 'id' => 'asc' ); //Fixed amounts first, then percent, always use ID as tie breaker so its consistent.
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;

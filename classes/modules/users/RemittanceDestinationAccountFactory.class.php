@@ -114,16 +114,17 @@ class RemittanceDestinationAccountFactory extends Factory {
 					'-1020-amount_type' => TTi18n::gettext('Amount Type'),
 					'-1021-name' => TTi18n::gettext('Name'),
 					'-1030-priority' => TTi18n::gettext('Priority'),
-					'-1140-display_amount' => TTi18n::gettext('Amount'),
-					'-1140-amount' => TTi18n::gettext('Payment Amount'),
+					'-1140-display_amount' => TTi18n::gettext('Amount'), //Needs to be excluded from importing.
 
-					//added to allow importing these columns
+					//Added to allow importing these columns
+					'-1140-amount' => TTi18n::gettext('Payment Amount'),
 					'-1150-percent_amount' => TTi18n::gettext('Payment Percent Amount'),
 					'-1160-remittance_source_account' => TTi18n::gettext('Remittance Source Account'),
 
 					'-1500-value1' => TTi18n::gettext('Institution'),
 					'-1510-value2' => TTi18n::gettext('Transit/Routing'),
 					'-1520-value3' => TTi18n::gettext('Account'),
+					'-1522-ach_transaction_type' => TTi18n::gettext('Account Type'),
 
 					'-2000-created_by' => TTi18n::gettext('Created By'),
 					'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -184,6 +185,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 			'amount' => 'Amount',
 			'percent_amount' => 'PercentAmount',
 			'display_amount' => FALSE, //must come after amount and percent_amount
+			'ach_transaction_type' => FALSE, //Account Type (Checking/Savings)
 			'value1' => 'Value1',
 			'value2' => 'Value2',
 			'value3' => 'Value3', //encrypted account
@@ -768,6 +770,8 @@ class RemittanceDestinationAccountFactory extends Factory {
 										  $this->getOptions( 'type', array('legal_entity_id' => $this->getLegalEntity()) )
 			);
 		}
+
+
 		// Name
 		if ( $this->Validator->getValidateOnly() == FALSE ) {
 			if ( $this->getName() == '' ) {
@@ -916,6 +920,19 @@ class RemittanceDestinationAccountFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
+
+		//Make sure Source Account and Destination Account types match.
+		if ( $this->getRemittanceSourceAccount() !== FALSE AND $this->getType() !== FALSE ) {
+			if ( is_object( $this->getRemittanceSourceAccountObject() ) ) {
+				if ( $this->getRemittanceSourceAccountObject()->getType() != $this->getType() ) {
+					$this->Validator->isTrue( 'remittance_source_account_id',
+											  FALSE,
+											  TTi18n::gettext( 'Source Account is invalid, type mismatch' ) );
+
+				}
+			}
+		}
+
 		$country = is_object( $this->getRemittanceSourceAccountObject() ) ? $this->getRemittanceSourceAccountObject()->getCountry() : FALSE;
 		if ( $this->getAmountType() == 20 ) {
 			if ( (int)$this->getAmount() == 0 ) {
@@ -942,76 +959,106 @@ class RemittanceDestinationAccountFactory extends Factory {
 			}
 		}
 
-		if ( $this->getType() == 2000 ) {
-			/**
-			 * Currently hiding these options from the UI because we aren't printing MICR codes yet so we don't want to validate them.
-			 */
+		if ( $this->Validator->getValidateOnly() == FALSE ) { //Make sure we can mass edit type/source account, so validating these has to be delayed.
+			if ( $this->getType() == 2000 ) {
+				/**
+				 * Currently hiding these options from the UI because we aren't printing MICR codes yet so we don't want to validate them.
+				 */
 
-			//			if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
-			//				$this->Validator->isTrue(		'value2',
-			//												FALSE,
-			//												TTi18n::gettext('Invalid routing number length'));
-			//			} else {
-			//				$this->Validator->isNumeric(	'value2',
-			//												$this->getValue2(),
-			//												TTi18n::gettext('Invalid routing number, must be digits only'));
-			//			}
-			//			if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
-			//				$this->Validator->isTrue(		'value3',
-			//												FALSE,
-			//												TTi18n::gettext('Invalid account number length'));
-			//			} else {
-			//				$this->Validator->isNumeric(	'value3',
-			//												$this->getValue3(),
-			//												TTi18n::gettext('Invalid account number, must be digits only'));
-			//			}
-		} else {
-			if ( $this->getType() == 3000 AND $country == 'US' AND is_object($this->getRemittanceSourceAccountObject()) ) {
-				// value2
-				if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
-					$this->Validator->isTrue( 'value2',
-											  FALSE,
-											  TTi18n::gettext( 'Invalid routing number length' ) );
-				} else {
-					$this->Validator->isNumeric( 'value2',
-												 $this->getValue2(),
-												 TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
-				}
+				//			if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
+				//				$this->Validator->isTrue(		'value2',
+				//												FALSE,
+				//												TTi18n::gettext('Invalid routing number length'));
+				//			} else {
+				//				$this->Validator->isNumeric(	'value2',
+				//												$this->getValue2(),
+				//												TTi18n::gettext('Invalid routing number, must be digits only'));
+				//			}
+				//			if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
+				//				$this->Validator->isTrue(		'value3',
+				//												FALSE,
+				//												TTi18n::gettext('Invalid account number length'));
+				//			} else {
+				//				$this->Validator->isNumeric(	'value3',
+				//												$this->getValue3(),
+				//												TTi18n::gettext('Invalid account number, must be digits only'));
+				//			}
+			} else {
+				if ( $this->getType() == 3000 AND $country == 'US' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
+					// value2
+					if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
+						$this->Validator->isTrue( 'value2',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid routing number length' ) );
+					} else {
+						$this->Validator->isNumeric( 'value2',
+													 $this->getValue2(),
+													 TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
+					}
 
-				if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
-					$this->Validator->isTrue( 'value3',
-											  FALSE,
-											  TTi18n::gettext( 'Invalid account number length' ) );
-				} else {
-					$this->Validator->isNumeric( 'value3',
-												 $this->getValue3(),
-												 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
-				}
-			} elseif ( $this->getType() == 3000 AND $country == 'CA' AND is_object($this->getRemittanceSourceAccountObject()) ) {
-				if ( strlen( $this->getValue1() ) < 2 OR strlen( $this->getValue1() ) > 3 ) {
-					$this->Validator->isTrue( 'value1',
-											  FALSE,
-											  TTi18n::gettext( 'Invalid institution number length' ) );
-				}
-				if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
-					$this->Validator->isTrue( 'value2',
-											  FALSE,
-											  TTi18n::gettext( 'Invalid transit number length' ) );
-				} else {
-					$this->Validator->isNumeric( 'value2',
-												 $this->getValue2(),
-												 TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
-				}
-				if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
-					$this->Validator->isTrue( 'value3',
-											  FALSE,
-											  TTi18n::gettext( 'Invalid account number length' ) );
-				} else {
-					$this->Validator->isNumeric( 'value3',
-												 $this->getValue3(),
-												 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+					if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
+						$this->Validator->isTrue( 'value3',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid account number length' ) );
+					} else {
+						$this->Validator->isNumeric( 'value3',
+													 $this->getValue3(),
+													 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+					}
+				} elseif ( $this->getType() == 3000 AND $country == 'CA' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
+					if ( strlen( $this->getValue1() ) < 2 OR strlen( $this->getValue1() ) > 3 ) {
+						$this->Validator->isTrue( 'value1',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid institution number length' ) );
+					}
+					if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
+						$this->Validator->isTrue( 'value2',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid transit number length' ) );
+					} else {
+						$this->Validator->isNumeric( 'value2',
+													 $this->getValue2(),
+													 TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
+					}
+					if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
+						$this->Validator->isTrue( 'value3',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid account number length' ) );
+					} else {
+						$this->Validator->isNumeric( 'value3',
+													 $this->getValue3(),
+													 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+					}
 				}
 			}
+		}
+
+		$pstlf = TTnew( 'PayStubTransactionListFactory' );
+		$pstlf->getByRemittanceDestinationAccountId($this->getId());
+		if ( $pstlf->getRecordCount() > 0 ) {
+
+			//Ensure that only account detail items trigger this validation
+			$disallowed_edit_fields = array ( 'value2', 'value3', 'type_id', 'remittance_source_account_id' );
+			if ( $country == 'CA' ) {
+				$disallowed_edit_fields[] = 'value1'; //US must be able to change account type.
+			}
+			$changed_fields = array_keys( $this->getDataDifferences() );
+			$edited_fields_valid = TRUE;
+			$first_invalid_key = NULL;
+
+			foreach( $changed_fields as $key ) {
+				if ( in_array( $key, $disallowed_edit_fields ) ) {
+					$first_invalid_key = $key;
+					$edited_fields_valid = FALSE;
+					break;
+				}
+			}
+
+			//Don't allow editing payment methods and changing the type or bank account details if transactions exist for it
+			$this->Validator->isTrue(		$first_invalid_key,
+											 $edited_fields_valid,
+											 TTi18n::gettext('Payment Method is currently in use by Transactions, may need to create a new Payment Method instead')
+			);
 		}
 
 		return TRUE;
@@ -1107,12 +1154,14 @@ class RemittanceDestinationAccountFactory extends Factory {
 							$type_options = $rsaf->getOptions('type');
 							$data[$variable] = $type_options[$this->getType()];
 							break;
-						case 'amount_type':
 						case 'status':
 							$function = 'get'.$variable;
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
+							break;
+						case 'amount_type':
+							$data[$variable] = Option::getByKey( $this->getAmountType(), $this->getOptions( $variable ) );
 							break;
 						case 'percent_amount':
 							$data[$variable] = $this->getDisplayPercentAmount();
@@ -1126,6 +1175,11 @@ class RemittanceDestinationAccountFactory extends Factory {
 							break;
 						case 'value3': //account number
 							$data[$variable] = $this->getSecureValue3();
+							break;
+						case 'ach_transaction_type':
+							if ( $this->getType() == 3000 AND $this->getValue3() != '' ) { //US ACH
+								$data[$variable] = Option::getByKey( $this->getValue1(), $this->getOptions( $variable ) );
+							}
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

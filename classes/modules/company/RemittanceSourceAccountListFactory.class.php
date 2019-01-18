@@ -172,6 +172,58 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 
 	/**
 	 * @param string $id UUID
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RemittanceSourceAccountListFactory
+	 */
+	function getByLegalEntityIdAndTypeIdAndCompanyId( $id, $type_id, $company_id, $where = NULL, $order = NULL) {
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		if ( $type_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'created_date' => 'asc');
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$lef = new LegalEntityFactory();
+
+		$ph = array(
+				'legal_entity_id' => TTUUID::castUUID($id),
+				'company_id' => TTUUID::castUUID($company_id),
+				'type_id' => (int)$type_id,
+		);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN	'. $lef->getTable() .' as b ON ( a.legal_entity_id = b.id )
+					where	a.legal_entity_id = ?
+						AND b.company_id = ?
+						AND a.type_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $id UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|RemittanceSourceAccountListFactory
@@ -256,8 +308,10 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 		);
 
 		$query = '
-					select	a.*,
-							_ADODB_COUNT (
+					select	
+							_ADODB_COUNT
+							a.*, 
+							(
 								CASE WHEN EXISTS 
 									( select 1 from '. $rdaf->getTable() .' as w where w.remittance_source_account_id = a.id and w.deleted = 0 )
 								THEN 1
@@ -280,6 +334,7 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
+							_ADODB_COUNT
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $lef->getTable() .' as lef ON ( a.legal_entity_id = lef.id AND lef.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )

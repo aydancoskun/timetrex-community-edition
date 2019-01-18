@@ -273,8 +273,9 @@ class ContributingPayCodePolicyListFactory extends ContributingPayCodePolicyFact
 					);
 
 		$query = '
-					select	DISTINCT a.*,
+					select	
 							_ADODB_COUNT
+							DISTINCT a.*,
 							(
 								CASE WHEN EXISTS ( select 1 from '. $cspf->getTable() .' as x where x.contributing_pay_code_policy_id = a.id and x.deleted = 0) 
 								THEN 1 

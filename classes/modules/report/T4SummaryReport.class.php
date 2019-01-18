@@ -287,6 +287,7 @@ class T4SummaryReport extends Report {
 							break;
 						default:
 							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__, 10);
+							$retval['columns'] = array();
 							$retval['-1010-time_period']['time_period'] = 'last_year';
 
 							//Parse template name, and use the keywords separated by '+' to determine settings.
@@ -903,7 +904,7 @@ class T4SummaryReport extends Report {
 					$t4->payroll_account_number = $this->form_data['remittance_agency'][ $legal_entity_id ]->getPrimaryIdentification();//( isset( $setup_data['payroll_account_number'] ) AND $setup_data['payroll_account_number'] != '' ) ? $setup_data['payroll_account_number'] : $current_company->getBusinessNumber();
 					$t4->company_name = $company_name;
 				}
-				foreach ( $user_rows as $row ) {
+				foreach ( $user_rows as $user_row_key => $row ) {
 					//if ( $i == $last_row ) {
 					//	continue;
 					//}
@@ -959,6 +960,8 @@ class T4SummaryReport extends Report {
 								'postal_code'         => $user_obj->getPostalCode(),
 								'sin'                 => $user_obj->getSIN(),
 								'employee_number'     => $user_obj->getEmployeeNumber(),
+
+								//If lines with dollar amounts change, update $amount_boxes below.
 								'l14'                 => $row['income'],
 								'l22'                 => $row['tax'],
 								'l16'                 => $row['employee_cpp'],
@@ -974,6 +977,7 @@ class T4SummaryReport extends Report {
 								//Employer data, needed for totals.
 								'l19'                 => $row['employer_ei'],
 								'l27'                 => $row['employer_cpp'],
+								//If lines with dollar amounts change, update $amount_boxes below.
 
 								'cpp_exempt'       => FALSE,
 								'ei_exempt'        => FALSE,
@@ -990,6 +994,10 @@ class T4SummaryReport extends Report {
 								'other_box_5_code' => NULL,
 								'other_box_5'      => NULL,
 						);
+
+						//Boxes that contain dollar amounts, so we can determine if the T4 is "blank" or not.
+						$amount_boxes = array( 'l14', 'l22', 'l16', 'l24', 'l26', 'l18', 'l44', 'l20', 'l46', 'l52', 'l19', 'l27', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4', 'other_box_5' );
+
 
 						//Get User Tax / Deductions by Pay Stub Account.
 						$udlf = TTnew( 'UserDeductionListFactory' );
@@ -1045,7 +1053,22 @@ class T4SummaryReport extends Report {
 							$ee_data['other_box_5_code'] = $setup_data['other_box'][5]['box'];
 							$ee_data['other_box_5'] = $row['other_box_5'];
 						}
-						$t4->addRecord( $ee_data );
+
+						//Make sure there is actually data on the T4, otherwise skip the employee.
+						$tmp_total_amount_boxes = 0;
+						foreach( $amount_boxes as $amount_box ) {
+							if ( isset($ee_data[$amount_box]) AND is_numeric($ee_data[$amount_box]) ) {
+								$tmp_total_amount_boxes += $ee_data[$amount_box];
+							}
+						}
+
+
+						if ( $tmp_total_amount_boxes != 0 ) {
+							$t4->addRecord( $ee_data );
+						} else {
+							Debug::Text('  No amounts on T4 skipping: '. $user_obj->getFullName(), __FILE__, __LINE__, __METHOD__, 10);
+							unset($user_rows[$user_row_key]); //Remove user data from arrow does it doesn't get added to totals or counted as an employee.
+						}
 						unset( $ee_data );
 
 						if ( $format == 'pdf_form_publish_employee' ) {
@@ -1085,7 +1108,7 @@ class T4SummaryReport extends Report {
 					$t4->sumRecords();
 					$total_row = $t4->getRecordsTotal();
 
-					$t4s->l88 = count( $this->form_data );
+					$t4s->l88 = count( $user_rows );
 					$t4s->l14 = ( isset( $total_row['l14'] ) ) ? $total_row['l14'] : NULL;
 					$t4s->l22 = ( isset( $total_row['l22'] ) ) ? $total_row['l22'] : NULL;
 					$t4s->l16 = ( isset( $total_row['l16'] ) ) ? $total_row['l16'] : NULL;
@@ -1139,9 +1162,8 @@ class T4SummaryReport extends Report {
 		return Misc::zip( $file_arr, $zip_filename, TRUE );
 	}
 
-	//Short circuit this function, as no postprocessing is required for exporting the data.
-
 	/**
+	 * Short circuit this function, as no postprocessing is required for exporting the data.
 	 * @param null $format
 	 * @return bool
 	 */

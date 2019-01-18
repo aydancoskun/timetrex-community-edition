@@ -791,7 +791,8 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 */
 	function getInTimePeriod() {
 		$current_epoch = time();
-		if ( $current_epoch > $this->getStartDate() AND $current_epoch < $this->getEndDate() ) {
+		//if ( $current_epoch > $this->getStartDate() AND $current_epoch < $this->getEndDate() ) {
+		if ( $current_epoch < $this->getEndDate()  ) { //per Pay Period frequencies should show a few days in advance, but not be highlighted (black font), so here we just need to check if we haven't passed the end date or not, and ignore the start date.
 			return TRUE;
 		}
 		return FALSE;
@@ -1134,7 +1135,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				if ( is_object( $this->getPayrollRemittanceAgencyObject() ) AND is_object( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject() ) ) {
 					$le_obj  = $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject();
 					if ( is_object( $le_obj ) ) {
-						$pplf->getByRemittanceAgencyIdAndCompanyIdAndTransactionDateAndPayPeriodSchedule( $this->getPayrollRemittanceAgencyId(), $le_obj->getCompany(), $last_due_date, $this->getPayPeriodSchedule() );
+						$pplf->getByCompanyIdAndRemittanceAgencyIdAndTransactionDateAndPayPeriodSchedule( $le_obj->getCompany(), $this->getPayrollRemittanceAgencyId(), $last_due_date, $this->getPayPeriodSchedule() );
 
 						if ( $pplf->getRecordCount() > 0 ) {
 							Debug::Text( 'Looping over Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -1143,7 +1144,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 								//The event starts at the beginning of the transaction date day and ends at the end of transaction date day
 								//The due date is the transaction date day plus the current event's due date delay days
 								if ( $pp_obj->getStartDate() <= $last_due_date AND $pp_obj->getEndDate() >= $last_due_date ) {
-									Debug::Text( 'Found: Pay Period: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ) , __FILE__, __LINE__, __METHOD__, 10 );
+									Debug::Text( 'Found: Pay Period: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 									$retval = array(
 											'start_date' => TTDate::getBeginDayEpoch( $pp_obj->getTransactionDate() ),
 											'end_date'   => TTDate::getEndDayEpoch( $pp_obj->getTransactionDate() ),
@@ -1229,9 +1230,8 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				);
 				break;
 			case 3000: //Quarterly
-				$last_due_date += 86400;
 				$due_date = TTDate::getDateOfNextQuarter( $last_due_date, $this->getPrimaryDayOfMonth(), $this->getQuarterMonth() );
-				$due_date_prev_quarter = TTDate::incrementDate($due_date, -3, 'month');
+				$due_date_prev_quarter = TTDate::incrementDate($due_date, -1, 'quarter');
 				$retval = array(
 						'due_date' => $due_date,
 						'start_date' => TTDate::getBeginMonthEpoch( TTDate::getBeginQuarterEpoch($due_date_prev_quarter) ),
@@ -1739,12 +1739,17 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param null $last_due_date
+	 * @param $last_due_date
 	 * @return bool|false|int|mixed
 	 */
-	function calculateNextReminderDate( $due_date = NULL ) {
-		Debug::Text( 'Last Run Date: '. TTDate::getDate('DATE+TIME', $due_date), __FILE__, __LINE__, __METHOD__, 10);
-		return ( $due_date - $this->getReminderDays() );
+	function calculateNextReminderDate( $due_date ) {
+		if ( $due_date != '' ) {
+			Debug::Text( 'Due Date: ' . TTDate::getDate( 'DATE+TIME', $due_date ), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return TTDATE::incrementDate( $due_date, ( $this->getReminderDays() * -1 ), 'day' );
+		}
+
+		return FALSE;
 	}
 
 	/**
@@ -1901,7 +1906,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		$email_body .= TTi18n::gettext('Due Date').': '.TTDate::getDate("DATE", $this->getDueDate() )."\n";
 		$email_body .= TTi18n::gettext('Legal Entity').': '.$replace_arr[6]."\n";
 		$email_body .= TTi18n::gettext('Company').': '.$replace_arr[5]."\n\n";
-		$email_body .= TTi18n::gettext('Email Sent').': '.TTDate::getDate( 'DATE', time() )."\n";
+		$email_body .= TTi18n::gettext('Email Sent').': '.TTDate::getDate( 'DATE+TIME', time() )."\n";
 
 		$subject = str_replace( $search_arr, $replace_arr, $email_subject );
 		Debug::Text('Subject: '. $subject, __FILE__, __LINE__, __METHOD__, 10);
@@ -1968,6 +1973,8 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		$tmp_config = array();
 
 		$agency_id = $this->getPayrollRemittanceAgencyObject()->getAgency();
+
+		$event_data = $this->getEventData();
 		$event_type_id = $this->getType();
 		Debug::Text( 'Report ID: ' . $report_id . ' Agency ID: ' . $agency_id . ' Event Type ID: ' . $event_type_id, __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -2067,8 +2074,16 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 							$template_name = 'by_quarter';
 							$report_obj_name = 'Form940Report';
 							break;
+						case 'P940':
+							$template_name = 'by_month';
+							$report_obj_name = 'Form940Report';
+							break;
 						case 'F941':
 							$template_name = 'by_month';
+							$report_obj_name = 'Form941Report';
+							break;
+						case 'P941':
+							$template_name = 'by_pay_period';
 							$report_obj_name = 'Form941Report';
 							break;
 						case 'F1099MISC':
@@ -2127,6 +2142,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 								case 'efile':
 								case 'pdf_form_publish_employee':
 									$report_obj_name = 'FormW2Report';
+
 									$report_data_override['config']['form']['efile_state'] = $this->getPayrollRemittanceAgencyObject()->getProvince();
 									break;
 							}
@@ -2135,16 +2151,16 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 							$template_name = 'by_employee+new_hire';
 							$report_obj_name = 'UserSummaryReport';
 
+							//Default start_date/end_date elements will not be added below due to !isset($report_data_override['config']['hire_time_period']) check.
 							$report_data_override['config']['hire_time_period']['time_period'] = 'custom_date';
 							$report_data_override['config']['hire_start_date'] = $this->getStartDate();
 							$report_data_override['config']['hire_end_date'] = $this->getEndDate();
-							$report_data_override['config']['time_period']['start_date'] = NULL;
-							$report_data_override['config']['time_period']['end_date'] = NULL;
+
+							$report_data_override['config']['other']['show_duplicate_values'] = TRUE; //Reduces confusion for the user and there is no grouping anyways.
 							break;
 					}
 					break;
 			}
-
 		}
 
 		//Handle default report here if one is not already specified. This was handled in a "default" case above, but it wouldn't work if there was an agency specified.
@@ -2156,6 +2172,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				default:
 					$report_obj_name = 'TaxSummaryReport';
 					$report_data['filter']['company_deduction_id'] = array();
+
 					/** @var CompanyDeductionListFactory $cdlf */
 					$cdlf = TTnew( 'CompanyDeductionListFactory' );
 					$cdlf->getByCompanyIdAndPayrollRemittanceAgencyId( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject()->getCompany(), $this->getPayrollRemittanceAgencyObject()->getId() );
@@ -2164,8 +2181,15 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 							$tmp_config['company_deduction_id'][] = $cd_obj->getId();
 						}
 					}
+
+					$report_data_override['config']['other']['show_duplicate_values'] = TRUE; //Reduces confusion for the user and there is no grouping anyways.
 					break;
 			}
+		}
+
+		//Try to use the event form name as the report name, rather than just "Tax Summary"
+		if ( isset($event_data['form_name']) AND ( !isset($report_data['config']['other']['report_name']) OR $report_data['config']['other']['report_name'] == '' ) ) {
+			$report_data['config']['other']['report_name'] = $event_data['form_name'];
 		}
 
 		if ( isset( $report_obj_name ) AND $report_obj_name != ''
@@ -2194,10 +2218,12 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 			//Force the start/end dates based on the event start/end dates.
 			//FIXME: Need to handle "Per Pay Period" frequencies by filtering on the pay_period_id instead of start/end dates.
-			$report_data['config']['time_period']['time_period'] = 'custom_date';
+			if ( !isset($report_data_override['config']['hire_time_period']) ) { //Make sure if new hire report filting based on hire_time_period is specified, we don't override other dates.
+				$report_data['config']['time_period']['time_period'] = 'custom_date';
 
-			$report_data['config']['time_period']['start_date'] = $this->getStartDate();
-			$report_data['config']['time_period']['end_date'] = $this->getEndDate();
+				$report_data['config']['time_period']['start_date'] = $this->getStartDate();
+				$report_data['config']['time_period']['end_date'] = $this->getEndDate();
+			}
 
 
 			$tmp_form_config = Misc::convertObjectToArray( $report_obj->getCompanyFormConfig() );
@@ -2207,14 +2233,13 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 			}
 
 			//Allow each agency/report to override specific report data at the very end as necessary.
-			$report_data = array_merge_recursive( $report_data, $report_data_override );
+			//$report_data = array_merge_recursive( $report_data, $report_data_override );
+			$report_data = Misc::arrayMergeRecursive( $report_data, $report_data_override ); //array_merge_recursive() will combine a FALSE and a STRING into an array, rather than have one overwrite the other.
 
 			//Set any remaining config.
 			$report_obj->setConfig( (array)$report_data['config'] );
 
 			Debug::Arr( $report_data, 'Report data: ', __FILE__, __LINE__, __METHOD__, 10 );
-
-
 		}
 
 		$validation_obj = $report_obj->validateConfig( $report_id );

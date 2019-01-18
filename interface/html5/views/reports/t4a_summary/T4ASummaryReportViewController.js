@@ -807,14 +807,6 @@ T4ASummaryReportViewController = ReportBaseViewController.extend( {
 		other.status_id = this.current_edit_record.status_id;
 
 		other.remittances_paid = this.current_edit_record.remittances_paid;
-		other.company_name = this.current_edit_record.company_name;
-		other.address1 = this.current_edit_record.address1;
-		other.address2 = this.current_edit_record.address2;
-		other.city = this.current_edit_record.city;
-		other.province = this.current_edit_record.province;
-		other.postal_code = this.current_edit_record.postal_code;
-		other.payroll_account_number = this.current_edit_record.payroll_account_number;
-		other.transmitter_number = this.current_edit_record.transmitter_number;
 
 		return other;
 	},
@@ -886,54 +878,6 @@ T4ASummaryReportViewController = ReportBaseViewController.extend( {
 				this.edit_view_ui_dic.remittances_paid.setValue( res_Data.remittances_paid );
 
 				this.current_edit_record.remittances_paid = res_Data.remittances_paid;
-			}
-
-			if ( res_Data.company_name ) {
-				this.edit_view_ui_dic.company_name.setValue( res_Data.company_name );
-
-				this.current_edit_record.company_name = res_Data.company_name;
-			}
-
-			if ( res_Data.address1 ) {
-				this.edit_view_ui_dic.address1.setValue( res_Data.address1 );
-
-				this.current_edit_record.address1 = res_Data.address1;
-			}
-
-			if ( res_Data.address2 ) {
-				this.edit_view_ui_dic.address2.setValue( res_Data.address2 );
-
-				this.current_edit_record.address2 = res_Data.address2;
-			}
-
-			if ( res_Data.city ) {
-				this.edit_view_ui_dic.city.setValue( res_Data.city );
-
-				this.current_edit_record.city = res_Data.city;
-			}
-
-			if ( res_Data.province ) {
-				this.edit_view_ui_dic.province.setValue( res_Data.province );
-
-				this.current_edit_record.province = res_Data.province;
-			}
-
-			if ( res_Data.postal_code ) {
-				this.edit_view_ui_dic.postal_code.setValue( res_Data.postal_code );
-
-				this.current_edit_record.postal_code = res_Data.postal_code;
-			}
-
-			if ( res_Data.payroll_account_number ) {
-				this.edit_view_ui_dic.payroll_account_number.setValue( res_Data.payroll_account_number );
-
-				this.current_edit_record.payroll_account_number = res_Data.payroll_account_number;
-			}
-
-			if ( res_Data.transmitter_number ) {
-				this.edit_view_ui_dic.transmitter_number.setValue( res_Data.transmitter_number );
-
-				this.current_edit_record.transmitter_number = res_Data.transmitter_number;
 			}
 
 			if ( res_Data.other_box ) {

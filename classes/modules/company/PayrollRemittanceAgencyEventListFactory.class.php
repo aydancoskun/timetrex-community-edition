@@ -281,8 +281,9 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		);
 
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN EXISTS ( select 1 from '. $cdf->getTable() .' as z where z.payroll_remittance_agency_id = a.id and z.deleted = 0 )
 										THEN 1 ELSE 0
@@ -298,6 +299,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
+							_ADODB_COUNT
 					from	'. $this->getTable() .' as a
 						LEFT JOIN	'. $praf->getTable() .' as praf ON ( a.payroll_remittance_agency_id = praf.id )
 						LEFT JOIN '. $lef->getTable() .' as lef ON ( praf.legal_entity_id = lef.id AND lef.deleted = 0 )
@@ -330,7 +332,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

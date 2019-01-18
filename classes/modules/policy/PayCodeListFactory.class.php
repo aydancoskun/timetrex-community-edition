@@ -389,8 +389,9 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN EXISTS
 									( select 1 from '. $rtpf->getTable() .' as x where x.pay_code_id = a.id and x.deleted = 0)

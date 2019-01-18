@@ -103,6 +103,7 @@ class PayStubFactory extends Factory {
 			case 'export_general_ledger':
 				$retval = array(
 										'-2010-export_csv' => TTi18n::gettext('Excel (CSV)'),
+										'-2011-export_csv_flat' => TTi18n::gettext('Excel (CSV) [Flat]'),
 										'-2020-quickbooks' => TTi18n::gettext('Quickbooks GL'),
 										'-2030-simply' => TTi18n::gettext('Sage 50 GL'), //Was Simply Accounting
 										'-2040-sage300' => TTi18n::gettext('Sage 300 (Accpac)'),
@@ -614,7 +615,7 @@ class PayStubFactory extends Factory {
 			$ph = array(
 						'pay_period_id' => TTUUID::castUUID($this->getPayPeriod()),
 						'user_id' => TTUUID::castUUID($this->getUser()),
-						'run_id' => (int)$this->getRun(),
+						'run_id' => (int)$this->castInteger( (int)$this->getRun(), 'smallint' ),
 						);
 
 			$query = 'select id from '. $this->getTable() .' where pay_period_id = ? AND user_id = ? AND run_id = ? AND deleted = 0';

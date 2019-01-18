@@ -1597,7 +1597,6 @@ class Misc {
 			if ( $first_column !== FALSE ) {
 				while ( ($header = fgetcsv($handle, $len, $delim) ) !== FALSE) {
 					if ( $header[0] == $first_column ) {
-						//echo "FOUND HEADER!<br>\n";
 						$found_header = TRUE;
 						break;
 					}
@@ -1611,12 +1610,17 @@ class Misc {
 			}
 		}
 
+		//Excel adds a Byte Order Mark (BOM) to the beginning of files with UTF-8 characters. That needs to be stripped off otherwise it looks like a space and columns don't match up.
+		if ( isset($header) AND isset($header[0]) ) {
+			$header[0] = str_replace( "\xEF\xBB\xBF", '', $header[0] );
+		}
+
 		$i = 1;
 		while ( ($data = fgetcsv($handle, $len, $delim) ) !== FALSE) {
-			if ( $data !== array( NULL ) ) { // ignore blank lines
-				if ( $head AND isset($header) ) {
+			if ( $data !== array( NULL ) ) { // Ignore blank lines
+				if ( $head == TRUE AND isset($header) ) {
 					$row = array();
-					foreach ($header as $key => $heading) {
+					foreach ( $header as $key => $heading ) {
 						$row[trim($heading)] = ( isset($data[$key]) ) ? $data[$key] : '';
 					}
 					$return[] = $row;
@@ -2403,10 +2407,14 @@ class Misc {
 			if ( $reverse === TRUE ) {
 				$retval = $last_name .', '. $first_name;
 				if ( $include_middle == TRUE AND $middle_name != '' ) {
-					$retval .= ' '.$middle_name[0].'.'; //Use just the middle initial.
+					$retval .= ' '. $middle_name[0] .'.'; //Use just the middle initial.
 				}
 			} else {
-				$retval = $first_name .' '. $last_name;
+				$retval = $first_name;
+				if ( $include_middle == TRUE AND $middle_name != '' ) {
+					$retval .= ' '. $middle_name[0] .'.'; //Use just the middle initial.
+				}
+				$retval .= ' '. $last_name;
 			}
 
 			return $retval;

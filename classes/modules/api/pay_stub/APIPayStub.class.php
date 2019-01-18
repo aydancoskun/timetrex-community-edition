@@ -373,9 +373,7 @@ class APIPayStub extends APIFactory {
 							if ( 	(
 											( isset( $pay_stub_entry['id'] ) AND TTUUID::isUUID( $pay_stub_entry['id'] ) AND $pay_stub_entry['id'] != TTUUID::getZeroID() AND $pay_stub_entry['id'] != TTUUID::getNotExistID() )
 										OR
-											( isset( $pay_stub_entry['pay_stub_entry_name_id'] )
-													AND TTUUID::isUUID( $pay_stub_entry['pay_stub_entry_name_id'] ) AND $pay_stub_entry['pay_stub_entry_name_id'] != TTUUID::getZeroID() AND $pay_stub_entry['pay_stub_entry_name_id'] != TTUUID::getNotExistID()
-											)
+											( isset( $pay_stub_entry['pay_stub_entry_name_id'] ) AND TTUUID::isUUID( $pay_stub_entry['pay_stub_entry_name_id'] ) )
 									)
 									AND
 									(
@@ -481,7 +479,7 @@ class APIPayStub extends APIFactory {
 						if ( count($row['transactions']) > 0 ) {
 							foreach ( $row['transactions'] as $pay_stub_transaction ) {
 								//Debug::Arr($pay_stub_transaction,'Paystub transaction row...', __FILE__, __LINE__, __METHOD__, 10);
-								if ( $pay_stub_transaction['amount'] == 0 ) { //Skip any transactions of $0.00
+								if ( $pay_stub_transaction['amount'] == 0 AND $pay_stub_transaction['remittance_destination_account_id'] == TTUUID::getZeroID() ) { //Skip any transactions of $0.00
 									continue;
 								}
 
@@ -522,11 +520,26 @@ class APIPayStub extends APIFactory {
 									}
 
 									if ( isset( $pay_stub_transaction['amount'] ) ) {
-										$pst_obj->setAmount($pay_stub_transaction['amount']);
+										$pst_obj->setAmount( $pay_stub_transaction['amount'] );
+									} else {
+										$pst_obj->setAmount( 0 );
 									}
 
 									if ( isset( $pay_stub_transaction['note'] ) ) {
 										$pst_obj->setNote($pay_stub_transaction['note']);
+									}
+
+									//Make sure remittance source account and currency is set so we don't have to rely on preSave(), which causes issues with validation.
+									if ( $pst_obj->getRemittanceSourceAccount() == FALSE AND is_object( $pst_obj->getRemittanceDestinationAccountObject() ) ) {
+										$pst_obj->setRemittanceSourceAccount( $pst_obj->getRemittanceDestinationAccountObject()->getRemittanceSourceAccount() );
+									}
+
+									if ( $pst_obj->getCurrency() == FALSE ) {
+										if ( is_object( $pst_obj->getRemittanceSourceAccountObject() ) ) {
+											$pst_obj->setCurrency( $pst_obj->getRemittanceSourceAccountObject()->getCurrency() );
+										} elseif ( is_object( $pst_obj->getPayStubObject() ) )  {
+											$pst_obj->setCurrency( $pst_obj->getPayStubObject()->getCurrency() );
+										}
 									}
 								}
 

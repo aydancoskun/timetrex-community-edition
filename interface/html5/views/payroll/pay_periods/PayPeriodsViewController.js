@@ -51,7 +51,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 		this._super( 'removeEditView' );
 
-		if ( this.parent_view_controller && this.parent_view_controller.viewId === 'TimeSheet' ) {
+		if ( this.parent_view_controller &&
+			( this.parent_view_controller.viewId === 'TimeSheet' || this.parent_view_controller.viewId === 'PayStub' ) ) {
+			debugger
 			this.parent_view_controller.onSubViewRemoved()
 		}
 	},

@@ -246,7 +246,9 @@ RequestViewCommonController = BaseViewController.extend( {
 	getScheduleTotalTime: function() {
 		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10
 			&& ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 )
-			&& ( this.viewId != 'Request' || this.is_viewing != true )) {
+			&& ( this.viewId != 'Request' || this.is_viewing != true )
+			&& ( this.edit_view_ui_dic && this.edit_view_ui_dic['total_time'] )
+		) {
 
 			var start_time = false;
 			if  ( this.current_edit_record['start_date']  && this.current_edit_record['start_time'] ) {
@@ -320,7 +322,7 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	getAvailableBalance: function() {
-		if ( this.is_viewing && this.viewId == 'Request' ) {
+		if ( ( this.is_viewing && this.viewId == 'Request' ) || Global.isSet( this.current_edit_record ) == false ) {
 			return;
 		}
 

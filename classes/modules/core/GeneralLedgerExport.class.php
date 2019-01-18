@@ -147,6 +147,11 @@ class GeneralLedgerExport {
 			case 'export_csv':
 				$file_format_obj = new GeneralLedgerExport_File_Format_CSV( $this->data );
 				break;
+			case 'csv_flat':
+			case 'export_csv_flat':
+				$file_format_obj = new GeneralLedgerExport_File_Format_CSVFlat( $this->data );
+				break;
+
 		}
 
 		Debug::Text('aData Lines: '. count($this->data), __FILE__, __LINE__, __METHOD__, 10);
@@ -672,7 +677,7 @@ class GeneralLedgerExport_File_Format_CSV Extends GeneralLedgerExport {
 					$line[] = NULL;
 				}
 
-				$line[] = $record->getAccount();
+				$line[] = '"'. $record->getAccount() .'"';
 				if ( $record->getType() == 'debit' ) {
 					$line[] = $record->getAmount();
 					$line[] = NULL;
@@ -688,6 +693,133 @@ class GeneralLedgerExport_File_Format_CSV Extends GeneralLedgerExport {
 				unset($line);
 			}
 			unset($line1);
+		}
+
+		if ( empty($retval) == FALSE ) {
+			Debug::Text('Returning Compiled Records: ', __FILE__, __LINE__, __METHOD__, 10);
+			return $retval;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @return bool|string
+	 */
+	function _compile() {
+		//Processes all the data, padding it, converting dates to julian, incrementing
+		//record numbers.
+
+		$compiled_data = @implode("\r\n", $this->compileRecords() );
+
+		//Make sure the length of at least 3 records exists.
+		if ( strlen( $compiled_data ) >= 10 ) {
+			return $compiled_data;
+		}
+
+		Debug::Text('Not enough compiled data!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+}
+
+/**
+ * @package Core\GeneralLedgerExport
+ */
+class GeneralLedgerExport_File_Format_CSVFlat Extends GeneralLedgerExport {
+	var $data = NULL;
+
+	/**
+	 * GeneralLedgerExport_File_Format_CSV constructor.
+	 * @param $data
+	 */
+	function __construct( $data ) {
+		Debug::Text(' General Ledger Format CSV Contruct... ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$this->data = $data;
+
+		return TRUE;
+	}
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
+	private function toDate( $epoch) {
+		return date('m-d-y', $epoch);
+	}
+
+
+	/**
+	 * @return array|bool
+	 */
+	private function compileRecords() {
+		//gets all Detail records.
+
+		if ( count($this->data) == 0 ) {
+			Debug::Text('No data records:', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		$retval = array();
+		$line = array();
+		//Column headers
+		$retval[] = 'Reference, Date, Source, Comment, Account, CostCenter1, CostCenter2, Debit, Credit';
+
+		$i = 1;
+		foreach ( $this->data as $journal_entry ) {
+			//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);
+
+			$records = $journal_entry->getRecords();
+			foreach ($records as $record) {
+				$line[] = $i;
+				$line[] = $this->toDate( $journal_entry->getDate() );
+				$line[] = '"'.$journal_entry->getSource().'"';
+				$line[] = '"'.$journal_entry->getComment().'"';
+
+				// To use Other1 or Other2, use '|' to separate them in the Account name, ie: Payroll Expenses|Customer Name|Job Name
+				if ( strpos( $record->getAccount(), '|'  ) !== FALSE ) {
+					$split_account = explode('|', trim( $record->getAccount() ) );
+					if ( isset($split_account[0]) ) {
+						$line[] = '"'. trim( $split_account[0] ).'"';
+					}
+
+					if ( isset($split_account[1]) ) {
+						$line[] = '"'.trim( $split_account[1] ).'"'; //CostCenter1
+					} else {
+						$line[] = NULL; //Name
+					}
+
+					if ( isset($split_account[2]) ) {
+						$line[] = '"'. trim( $split_account[2] ).'"'; //CostCenter2
+					} else {
+						$line[] = NULL; //Class
+					}
+					unset( $split_account );
+				} else {
+					$line[] = '"'. $record->getAccount() .'"';
+					$line[] = NULL; //CostCenter1
+					$line[] = NULL; //CostCenter2
+				}
+
+
+
+				if ( $record->getType() == 'debit' ) {
+					$line[] = $record->getAmount();
+					$line[] = NULL;
+				} else {
+					$line[] = NULL;
+					$line[] = $record->getAmount();
+				}
+
+				$line = implode(',', $line);
+				Debug::Text('Line: '. $line, __FILE__, __LINE__, __METHOD__, 10);
+				$retval[] = $line;
+
+				unset($line);
+			}
+
+			$i++;
 		}
 
 		if ( empty($retval) == FALSE ) {
@@ -758,17 +890,18 @@ class GeneralLedgerExport_File_Format_QuickBooks Extends GeneralLedgerExport {
 
 
 		/*
-		!TRNS	TRNSID	TRNSTYPE		DATE	ACCNT	CLASS	AMOUNT	DOCNUM	MEMO
-		!SPL	SPLID	TRNSTYPE		DATE	ACCNT	CLASS	AMOUNT	DOCNUM	MEMO
+		 * "NAME" column can be either: Customer, Vendor, Employee, Other
+		!TRNS	TRNSID	TRNSTYPE		DATE	ACCNT	NAME	CLASS	AMOUNT	DOCNUM	MEMO
+		!SPL	SPLID	TRNSTYPE		DATE	ACCNT	NAME	CLASS	AMOUNT	DOCNUM	MEMO
 		!ENDTRNS
-		TRNS			GENERAL JOURNAL 7/1/1998		Checking				650
-		SPL				GENERAL JOURNAL 7/1/1998		Expense Account			-650
+		TRNS			GENERAL JOURNAL 7/1/1998		Checking					650
+		SPL				GENERAL JOURNAL 7/1/1998		Expense Account				-650
 		ENDTRNS
 		*/
 		//Column headers
 		$retval = array();
-		$retval[] = "!TRNS\tTRNSID\tTRNSTYPE\tDATE\tACCNT\tCLASS\tAMOUNT\tDOCNUM\tMEMO";
-		$retval[] = "!SPL\tSPLID\tTRNSTYPE\tDATE\tACCNT\tCLASS\tAMOUNT\tDOCNUM\tMEMO";
+		$retval[] = "!TRNS\tTRNSID\tTRNSTYPE\tDATE\tACCNT\tNAME\tCLASS\tAMOUNT\tDOCNUM\tMEMO";
+		$retval[] = "!SPL\tSPLID\tTRNSTYPE\tDATE\tACCNT\tNAME\tCLASS\tAMOUNT\tDOCNUM\tMEMO";
 		$retval[] = '!ENDTRNS';
 
 		$line = array();
@@ -788,9 +921,34 @@ class GeneralLedgerExport_File_Format_QuickBooks Extends GeneralLedgerExport {
 				$line[] = 'GENERAL JOURNAL'; //TRNSTYPE
 				$line[] = $this->toDate( $journal_entry->getDate() );
 
-				$line[] = $record->getAccount();
+				//If you're trying to use a sub-accounts, include the account's full name in the ACCNT field on TRNS or SPL rows.
+				//For example, if you have a Travel account with a sub-account called Airfare, then include the account "Travel:Airfare" in the IIF file ACCNT fields.
+				//All sub-accounts also have unique account numbers, so using just account numbers may be the better appraoch.
+				//  Sub-Accounts may also be referred to as "Payroll Item" in the journal entry transactions.
+				// To use Name or Class, use '|' to separate them in the Account name, ie: Payroll Expenses|Customer Name|Class
+				if ( strpos( $record->getAccount(), '|'  ) !== FALSE ) {
+					$split_account = explode('|', trim( $record->getAccount() ) );
+					if ( isset($split_account[0]) ) {
+						$line[] = trim( $split_account[0] );
+					}
 
-				$line[] = NULL; //Class
+					if ( isset($split_account[1]) ) {
+						$line[] = trim( $split_account[1] ); //Name
+					} else {
+						$line[] = NULL; //Name
+					}
+
+					if ( isset($split_account[2]) ) {
+						$line[] = trim( $split_account[2] ); //Class
+					} else {
+						$line[] = NULL; //Class
+					}
+					unset( $split_account );
+				} else {
+					$line[] = $record->getAccount();
+					$line[] = NULL; //Name
+					$line[] = NULL; //Class
+				}
 
 				if ( $record->getType() == 'debit' ) {
 					$line[] = $record->getAmount();
@@ -828,7 +986,7 @@ class GeneralLedgerExport_File_Format_QuickBooks Extends GeneralLedgerExport {
 		//Processes all the data, padding it, converting dates to julian, incrementing
 		//record numbers.
 
-		$compiled_data = @implode("\r\n", $this->compileRecords() );
+		$compiled_data = @implode("\r\n", $this->compileRecords() )."\r\n"; //Grr!!! Quickbooks requires a blank line at the end of the file!
 
 		//Make sure the length of at least 3 records exists.
 		if ( strlen( $compiled_data ) >= 10 ) {

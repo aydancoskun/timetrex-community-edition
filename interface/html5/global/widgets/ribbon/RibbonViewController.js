@@ -11,8 +11,7 @@ RibbonViewController = Backbone.View.extend( {
 
 		TopMenuManager.ribbon_view_controller = this;
 		var $this = this;
-		require(['live-chat'],function(){
-			$this.render();});
+		$this.render();
 	},
 
 	onMenuSelect: function( e, ui ) {

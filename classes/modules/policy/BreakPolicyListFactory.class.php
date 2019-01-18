@@ -466,8 +466,9 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 					);
 
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 160 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
 									THEN 1

@@ -2814,8 +2814,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		var len = grid_source.length;
 		for ( var i = 0; i < len; i++ ) {
 			var item = grid_source[i];
-			item.user_name = item.first_name + ' ' + item.last_name;
-
+			item.user_name = ( (item.user_status_id != 10) ? '(' + item.user_status + ') ' : '' ) + item.full_name;
 			for ( var j = 1; j < column_info_array.length; j++ ) {
 
 				var column = column_info_array[j];

@@ -1577,9 +1577,35 @@ class PayPeriodScheduleFactory extends Factory {
 		return $retval;
 	}
 
-	//Returns shift data according to the pay period schedule criteria for use
-	//in determining which day punches belong to.
+	function getStartAndEndDateRangeFromPastPayPeriods( $date_stamp, $total_pay_periods = 1 ) {
+		$pplf = TTNew('PayPeriodListFactory');
+		$pplf->getByPayPeriodScheduleIdAndEndDateBefore( $this->getId(), $date_stamp, $total_pay_periods );
+		if ( $pplf->getRecordCount() > 0 ) {
+			$filter_start_date = FALSE;
+			$filter_end_date = FALSE;
+			foreach( $pplf as $pp_obj ) {
+				if ( $filter_start_date == FALSE OR $pp_obj->getStartDate() < $filter_start_date ) {
+					$filter_start_date = $pp_obj->getStartDate();
+				}
+				if ( $filter_end_date == FALSE OR $pp_obj->getEndDate() > $filter_end_date ) {
+					$filter_end_date = $pp_obj->getEndDate();
+				}
+			}
+			Debug::text('Total time over Pay Periods: '. $total_pay_periods .' Found Pay Periods: '. $pplf->getRecordCount() .' Start Date: '. TTDate::getDate('DATE', $filter_start_date ) .' End Date: '. TTDate::getDate('DATE', $filter_end_date ), __FILE__, __LINE__, __METHOD__, 10);
+
+			$retval = array( 'start_date' => $filter_start_date, 'end_date' => $filter_end_date );
+		} else {
+			Debug::text('WARNING: No pay period found...', __FILE__, __LINE__, __METHOD__, 10);
+			$retval = FALSE;
+		}
+		unset($pplf, $pp_obj);
+
+		return $retval;
+	}
+
 	/**
+	 * Returns shift data according to the pay period schedule criteria for use
+	 * in determining which day punches belong to.
 	 * @param int $date_stamp EPOCH
 	 * @param string $user_id UUID
 	 * @param int $epoch EPOCH

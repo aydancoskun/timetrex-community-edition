@@ -522,8 +522,9 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					);
 
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN a.type_id = 40 THEN 1
 								ELSE
@@ -566,6 +567,9 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		}
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 
+		$query .= ( isset($filter_data['debit_account']) ) ? $this->getWhereClauseSQL( 'a.debit_account', $filter_data['debit_account'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['credit_account']) ) ? $this->getWhereClauseSQL( 'a.credit_account', $filter_data['credit_account'], 'text', $ph ) : NULL;
+
 		if ( isset($filter_data['type']) AND !is_array($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
 			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );
 		}
@@ -582,7 +586,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 

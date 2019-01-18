@@ -268,8 +268,9 @@ class AccrualPolicyAccountListFactory extends AccrualPolicyAccountFactory implem
 					);
 
 		$query = '
-					select	a.*,
+					select	
 							_ADODB_COUNT
+							a.*,
 							(
 								CASE WHEN EXISTS
 									( select 1 from '. $pfpf->getTable() .' as y where y.accrual_policy_account_id = a.id and y.deleted = 0)

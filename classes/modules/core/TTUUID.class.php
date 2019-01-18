@@ -144,7 +144,7 @@ class TTUUID {
 	}
 
 	static function getRegex( $exact_string = TRUE ) {
-		$regex = '[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}';
+		$regex = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 		if ( $exact_string === TRUE ) {
 			return '/^'.$regex.'$/';
 		} else {

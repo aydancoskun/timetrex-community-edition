@@ -1206,6 +1206,7 @@ class DemoData {
 
 		$le_obj = $this->getLegalEntityObject( $legal_entity_id );
 
+		$sp->CompanyDeductions( NULL, NULL, NULL, NULL, $legal_entity_id ); //This creates non-country specific records like loan repayment.
 		$sp->CompanyDeductions( $le_obj->getCountry(), NULL, NULL, NULL, $legal_entity_id );
 		$retval = $sp->CompanyDeductions( $le_obj->getCountry(), $le_obj->getProvince(), NULL, NULL, $legal_entity_id );
 

@@ -148,27 +148,6 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 	}
 
 	/**
-	 * @param $data
-	 * @return array
-	 */
-	function calculateNextRunDate( $data ) {
-		$praef = new PayrollRemittanceAgencyEventFactory();
-		$praef->setObjectFromArray( $data );
-		$due_date_array = $praef->calculateNextDate();
-		$due_date = $due_date_array['due_date'];
-		if ( $due_date_array != FALSE ) {
-			$next_reminder_date = $praef->calculateNextReminderDate( $due_date );
-
-			return array(
-					'start_date'         => TTDate::getDate( 'DATE', $due_date_array['start_date'] ),
-					'end_date'           => TTDate::getDate( 'DATE', $due_date_array['end_date'] ),
-					'due_date'           => TTDate::getDate( 'DATE', $due_date ),
-					'next_reminder_date' => TTDate::getDate( 'DATE+TIME', $next_reminder_date ),
-			);
-		}
-	}
-
-	/**
 	 * Set payroll remittance agency data for one or more agencies.
 	 * @param array $data payroll remittance agency
 	 * @param bool $validate_only
@@ -459,6 +438,26 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @param $data
+	 * @return array
+	 */
+	function calculateNextRunDate( $data ) {
+		$praef = new PayrollRemittanceAgencyEventFactory();
+		$praef->setObjectFromArray( $data );
+		$due_date_array = $praef->calculateNextDate();
+		$due_date = $due_date_array['due_date'];
+		if ( $due_date_array != FALSE ) {
+			$next_reminder_date = $praef->calculateNextReminderDate( $due_date );
+
+			return array(
+					'start_date'         => TTDate::getDate( 'DATE', $due_date_array['start_date'] ),
+					'end_date'           => TTDate::getDate( 'DATE', $due_date_array['end_date'] ),
+					'due_date'           => TTDate::getDate( 'DATE', $due_date ),
+					'next_reminder_date' => TTDate::getDate( 'DATE+TIME', $next_reminder_date ),
+			);
+		}
+	}
 }
 
 ?>
