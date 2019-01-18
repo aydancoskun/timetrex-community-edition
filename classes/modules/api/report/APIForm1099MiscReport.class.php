@@ -55,7 +55,7 @@ class APIForm1099MiscReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getForm1099MiscReport( $config, $format = 'pdf' ) {
+	function getForm1099MiscReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

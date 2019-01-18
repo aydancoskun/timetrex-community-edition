@@ -659,7 +659,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		label = $( "<span class='widget-right-label'>" + $.i18n._( 'Day(s)' ) + ' (' + $.i18n._( 'Before Pay Period Transaction Date' ) + ' )' + "</span>" );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Verification Windows Ends' ), form_item_input, tab_advanced_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Verification Window Ends' ), form_item_input, tab_advanced_column1, '', widgetContainer, true );
 
 	},
 

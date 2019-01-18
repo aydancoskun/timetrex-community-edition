@@ -620,6 +620,7 @@ ScheduleViewController = BaseViewController.extend( {
 				select_shift = Global.clone( $this.select_all_shifts_array[0] );
 				select_shift = $this.resetSomeFields( select_shift );
 				$this.current_edit_record = select_shift;
+				$this.current_edit_record.user_ids = [ $this.current_edit_record.user_id ]; //#2610 - ensure that edit record is properly formed in respect to user_ids
 				this.is_viewing = false;
 				$this.initEditView();
 				return;
@@ -2890,24 +2891,6 @@ ScheduleViewController = BaseViewController.extend( {
 		} else {
 			this.detachElement( 'available_balance' );
 		}
-	},
-
-	parserDatesRange: function( date ) {
-		var dates = date.split( " - " );
-		var resultArray = [];
-		var beginDate = Global.strToDate( dates[0] );
-		var endDate = Global.strToDate( dates[1] );
-
-		var nextDate = beginDate;
-
-		while ( nextDate.getTime() < endDate.getTime() ) {
-			resultArray.push( nextDate.format() );
-			nextDate = new Date( new Date( nextDate.getTime() ).setDate( nextDate.getDate() + 1 ) );
-		}
-
-		resultArray.push( dates[1] );
-
-		return resultArray;
 	},
 
 	getSelectUsersArray: function() {

@@ -41,7 +41,7 @@
 class PayrollDeduction_US_MN extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
-			2018101 => array(
+			2018101  => array(
 					10 => array(
 							array('income' => 2350, 'rate' => 0, 'constant' => 0),
 							array('income' => 28240, 'rate' => 5.35, 'constant' => 0),
@@ -236,41 +236,41 @@ class PayrollDeduction_US_MN extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
-		20180101 => array( //01-Jan-18
-						   'allowance' => 4150,
-		),
-		//01-Jan-17 - No Change
-		20160101 => array( //01-Jan-16
-						   'allowance' => 4050,
-		),
-		20150101 => array( //01-Jan-15
-						   'allowance' => 4000,
-		),
-		20140101 => array( //01-Jan-14
-						   'allowance' => 3950,
-		),
-		20130101 => array( //01-Jan-13
-						   'allowance' => 3900,
-		),
-		20120101 => array( //01-Jan-12
-						   'allowance' => 3800,
-		),
-		20110101 => array( //01-Jan-11
-						   'allowance' => 3700,
-		),
-		//01-Jan-10: No Change
-		20090101 => array( //01-Jan-09
-						   'allowance' => 3650,
-		),
-		20080101 => array(
-				'allowance' => 3500,
-		),
-		20070101 => array(
-				'allowance' => 3400,
-		),
-		20060101 => array(
-				'allowance' => 3300,
-		),
+			20180101 => array( //01-Jan-18
+							   'allowance' => 4150,
+			),
+			//01-Jan-17 - No Change
+			20160101 => array( //01-Jan-16
+							   'allowance' => 4050,
+			),
+			20150101 => array( //01-Jan-15
+							   'allowance' => 4000,
+			),
+			20140101 => array( //01-Jan-14
+							   'allowance' => 3950,
+			),
+			20130101 => array( //01-Jan-13
+							   'allowance' => 3900,
+			),
+			20120101 => array( //01-Jan-12
+							   'allowance' => 3800,
+			),
+			20110101 => array( //01-Jan-11
+							   'allowance' => 3700,
+			),
+			//01-Jan-10: No Change
+			20090101 => array( //01-Jan-09
+							   'allowance' => 3650,
+			),
+			20080101 => array(
+					'allowance' => 3500,
+			),
+			20070101 => array(
+					'allowance' => 3400,
+			),
+			20060101 => array(
+					'allowance' => 3300,
+			),
 	);
 
 	function getStateAnnualTaxableIncome() {

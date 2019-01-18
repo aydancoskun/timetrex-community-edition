@@ -55,7 +55,7 @@ class APIAuditTrailReport extends APIReport {
 	 * @param string $format
 	 * @return array
 	 */
-	function getAuditTrailReport( $config, $format = 'pdf' ) {
+	function getAuditTrailReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

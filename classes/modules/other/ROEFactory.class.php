@@ -607,25 +607,26 @@ class ROEFactory extends Factory {
 		$ulf = TTnew( 'UserListFactory' );
 		$user_obj = $ulf->getById($user_id)->getCurrent();
 
-		$plf = TTnew( 'PunchListFactory' );
-
 		//Is there a previous ROE? If so, find first shift back since ROE was issued.
 		$rlf = TTnew( 'ROEListFactory' );
 		$rlf->getLastROEByUserId( $user_id );
 		if ( $rlf->getRecordCount() > 0 ) {
 			$roe_obj = $rlf->getCurrent();
 
-			Debug::Text('Previous ROE Last Date: '. TTDate::getDate('DATE+TIME', $roe_obj->getLastDate() ), __FILE__, __LINE__, __METHOD__, 10);
-			//$plf->getFirstPunchByUserIDAndEpoch( $user_id, $roe_obj->getLastDate() );
-			$plf->getNextPunchByUserIdAndEpoch( $user_id, $roe_obj->getLastDate() );
-			if ( $plf->getRecordCount() > 0 ) {
-				$first_date = $plf->getCurrent()->getTimeStamp();
-			}
+			$first_date = $roe_obj->getLastDate();
+			Debug::Text('Previous ROE Last Date: '. TTDate::getDate('DATE+TIME', $first_date ), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		if ( !isset($first_date) OR $first_date == '' ) {
 			$first_date = $user_obj->getHireDate();
 		}
+
+		$udlf = TTnew( 'UserDateTotalListFactory' );
+		$udlf->getNextByUserIdAndObjectTypeAndEpoch( $user_id, array( 10 ), $first_date ); //10=Worked time only. This needs to include punches and manual timesheet entries.
+		if ( $udlf->getRecordCount() > 0 ) {
+			$first_date = $udlf->getCurrent()->getDateStamp();
+		}
+
 		Debug::Text('First Date: '. TTDate::getDate('DATE+TIME', $first_date), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $first_date;
@@ -637,16 +638,17 @@ class ROEFactory extends Factory {
 	function calculateLastDate() {
 		$user_id = $this->getUser();
 
-		$plf = TTnew( 'PunchListFactory' );
-		$plf->getLastPunchByUserId( $user_id );
-		if ( $plf->getRecordCount() > 0 ) {
-			$punch_obj = $plf->getCurrent();
-			$last_date = $punch_obj->getPunchControlObject()->getDateStamp();
+		$udlf = TTnew( 'UserDateTotalListFactory' );
+		$udlf->getLastByUserIdAndObjectType( $user_id, array( 10 ) ); //10=Worked time only. This needs to include punches and manual timesheet entries.
+
+		if ( $udlf->getRecordCount() > 0 ) {
+			$ud_obj = $udlf->getCurrent();
+			$last_date = $ud_obj->getDateStamp();
 		} else {
 			$last_date = TTDate::getTime();
 		}
 
-		Debug::Text('Last Punch Date: '. TTDate::getDate('DATE+TIME', $last_date), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Last Worked Date: '. TTDate::getDate('DATE+TIME', $last_date), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $last_date;
 	}

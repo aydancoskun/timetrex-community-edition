@@ -541,9 +541,8 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 
-		$query .= ' AND parent_id = \''. TTUUID::getZeroID() .'\' 
-		AND ( lef.deleted = 0 AND rdaf.deleted = 0 AND a.deleted = 0 AND rsaf.deleted = 0 AND psf.deleted = 0 AND ppf.deleted = 0 )
-		GROUP BY ppf.id, a.currency_id, rsaf.name, rsaf.id, rsaf.last_transaction_number,  rsaf.type_id ';
+		$query .= ' AND ( lef.deleted = 0 AND rdaf.deleted = 0 AND a.deleted = 0 AND rsaf.deleted = 0 AND psf.deleted = 0 AND ppf.deleted = 0 )
+					GROUP BY ppf.id, a.currency_id, rsaf.name, rsaf.id, rsaf.last_transaction_number,  rsaf.type_id ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 

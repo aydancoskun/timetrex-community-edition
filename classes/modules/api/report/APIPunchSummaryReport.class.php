@@ -55,7 +55,7 @@ class APIPunchSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getPunchSummaryReport( $config, $format = 'pdf' ) {
+	function getPunchSummaryReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

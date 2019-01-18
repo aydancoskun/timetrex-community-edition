@@ -207,10 +207,10 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 	var $state_options = array(
 			20180101 => array(
 					'standard_deduction'  => array(
-							'10' => 6500.00,
-							'20' => 6500.00,
-							'30' => 13000.00,
-							'40' => 9550.00,
+							'10' => 12000.00,
+							'20' => 12000.00,
+							'30' => 24000.00,
+							'40' => 18000.00,
 					),
 					'allowance'           => array(
 							'10' => array(2100.00, 1200.00, 1200.00),
@@ -464,16 +464,20 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 
 		}
 
-		$allowance_arr = $retarr['allowance'][ $this->getStateFilingStatus() ];
+		if ( $this->getDate() < 20180101 ) { //Removed for 2018
+			$allowance_arr = $retarr['allowance'][ $this->getStateFilingStatus() ];
 
-		if ( $this->getStateAllowance() == 0 ) {
-			$retval = 0;
-		} elseif ( $this->getStateAllowance() == 1 ) {
-			$retval = $allowance_arr[0];
-		} elseif ( $this->getStateAllowance() == 2 ) {
-			$retval = bcadd( $allowance_arr[0], $allowance_arr[1] );
+			if ( $this->getStateAllowance() == 0 ) {
+				$retval = 0;
+			} elseif ( $this->getStateAllowance() == 1 ) {
+				$retval = $allowance_arr[0];
+			} elseif ( $this->getStateAllowance() == 2 ) {
+				$retval = bcadd( $allowance_arr[0], $allowance_arr[1] );
+			} else {
+				$retval = bcadd( $allowance_arr[0], bcadd( $allowance_arr[1], bcmul( bcsub( $this->getStateAllowance(), 2 ), $allowance_arr[2] ) ) );
+			}
 		} else {
-			$retval = bcadd( $allowance_arr[0], bcadd( $allowance_arr[1], bcmul( bcsub( $this->getStateAllowance(), 2 ), $allowance_arr[2] ) ) );
+			$retval = 0;
 		}
 
 		Debug::text( 'State Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );

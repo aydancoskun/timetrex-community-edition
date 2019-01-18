@@ -55,7 +55,7 @@ class APIPayrollExportReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getPayrollExportReport( $config, $format = 'pdf' ) {
+	function getPayrollExportReport( $config = FALSE, $format = 'pdf' ) {
 		$config = $this->getReportObject()->getExportTypeTemplate( $config, $format );
 		return $this->getReport( $config, $format );
 	}

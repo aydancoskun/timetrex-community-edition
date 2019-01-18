@@ -55,7 +55,7 @@ class APIGeneralLedgerSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getGeneralLedgerSummaryReport( $config, $format = 'pdf' ) {
+	function getGeneralLedgerSummaryReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

@@ -41,7 +41,22 @@
 class PayrollDeduction_US_NM extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
-			//2018 - No Change.
+			20180101 => array(
+					10 => array(
+							array('income' => 3700, 'rate' => 0, 'constant' => 0),
+							array('income' => 9200, 'rate' => 1.7, 'constant' => 0),
+							array('income' => 14700, 'rate' => 3.2, 'constant' => 93.50),
+							array('income' => 19700, 'rate' => 4.7, 'constant' => 269.50),
+							array('income' => 19700, 'rate' => 4.9, 'constant' => 504.50),
+					),
+					20 => array(
+							array('income' => 11550, 'rate' => 0, 'constant' => 0),
+							array('income' => 19550, 'rate' => 1.7, 'constant' => 0),
+							array('income' => 27550, 'rate' => 3.2, 'constant' => 136),
+							array('income' => 35550, 'rate' => 4.7, 'constant' => 392),
+							array('income' => 35550, 'rate' => 4.9, 'constant' => 768),
+					),
+			),
 			20170101 => array(
 					10 => array(
 							array('income' => 2300, 'rate' => 0, 'constant' => 0),
@@ -205,35 +220,37 @@ class PayrollDeduction_US_NM extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
-		//01-Jan-2018 - No Change
-		//01-Jan-2017 - No Change
-		20160101 => array( //01-Jan-2016
-						   'allowance' => 4050,
-		),
-		20150101 => array( //01-Jan-2015
-						   'allowance' => 4000,
-		),
-		20140101 => array( //01-Jan-2014
-						   'allowance' => 3950,
-		),
-		20130101 => array( //01-Jan-2013
-						   'allowance' => 3900,
-		),
-		20120101 => array( //01-Jan-2012
-						   'allowance' => 3800,
-		),
-		20090101 => array( //01-Jan-2009
-						   'allowance' => 3650,
-		),
-		20080101 => array(
-				'allowance' => 3450,
-		),
-		20070101 => array(
-				'allowance' => 3450,
-		),
-		20060101 => array(
-				'allowance' => 3250,
-		),
+			20180101 => array( //01-Jan-2018
+							   'allowance' => 4150,
+			),
+			//01-Jan-2017 - No Change
+			20160101 => array( //01-Jan-2016
+							   'allowance' => 4050,
+			),
+			20150101 => array( //01-Jan-2015
+							   'allowance' => 4000,
+			),
+			20140101 => array( //01-Jan-2014
+							   'allowance' => 3950,
+			),
+			20130101 => array( //01-Jan-2013
+							   'allowance' => 3900,
+			),
+			20120101 => array( //01-Jan-2012
+							   'allowance' => 3800,
+			),
+			20090101 => array( //01-Jan-2009
+							   'allowance' => 3650,
+			),
+			20080101 => array(
+					'allowance' => 3450,
+			),
+			20070101 => array(
+					'allowance' => 3450,
+			),
+			20060101 => array(
+					'allowance' => 3250,
+			),
 	);
 
 	function getStateAnnualTaxableIncome() {

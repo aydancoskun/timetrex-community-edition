@@ -1058,7 +1058,12 @@ class RemittanceDestinationAccountFactory extends Factory {
 					//			}
 				} else {
 					if ( $this->getType() == 3000 AND $country == 'US' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
-						// value2
+						if ( $this->getValue1() == FALSE ) {
+							$this->Validator->isTrue( 'value1_2', //JS uses value1_2 to reference this field.
+													  FALSE,
+													  TTi18n::gettext( 'Account Type must be specified' ) );
+						}
+
 						if ( strlen( $this->getValue2() ) != 9 ) {
 							$this->Validator->isTrue( 'value2',
 													  FALSE,

@@ -51,6 +51,7 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output .= "    -saved_report <name>		Name of saved report\n";
 	$help_output .= "    -template <template>		Name of template\n";
 	$help_output .= "    -time_period <name>		Time Period for report\n";
+	$help_output .= "    -filter <name>=<value>,<name>=<value>		Other filter options\n";
 
 	echo $help_output;
 } else {
@@ -105,6 +106,27 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		$time_period = FALSE;
 	}
 
+	if ( in_array('-filter', $argv) ) {
+		//Allow handling escapted deliminters so we can handle date ranges like: >=01-Jan-18 without the "=" being treated as a different name/value pair.
+		$other_filter = preg_split('~(?<!\\\)' . preg_quote(',', '~') . '~', trim($argv[array_search('-filter', $argv)+1]) );
+		if ( is_array($other_filter) ) {
+			foreach( $other_filter as $tmp_other_filter ) {
+				//$split_other_filter = explode('=', $tmp_other_filter);
+				$split_other_filter = preg_split('~(?<!\\\)' . preg_quote('=', '~') . '~', $tmp_other_filter);
+				if ( isset($split_other_filter[0]) AND isset($split_other_filter[1]) ) {
+					$split_other_filter[1] = str_replace( '\=', '=', $split_other_filter[1] ); //Unescape deliminter
+					if ( isset($override_filter[ $split_other_filter[0] ]) ) { //Handle array of data.
+						$override_filter[ $split_other_filter[0] ][] = $split_other_filter[1];
+					} else {
+						$override_filter[ $split_other_filter[0] ] = $split_other_filter[1];
+					}
+				}
+			}
+		}
+	} else {
+		$override_filter = FALSE;
+	}
+
 	$output_file = NULL;
 	if ( isset($argv[$last_arg-1]) AND $argv[$last_arg-1] != '' ) {
 		$output_file = $argv[$last_arg-1];
@@ -151,6 +173,10 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 
 		if ( $time_period != '' AND isset($config['-1010-time_period']) ) {
 			$config['-1010-time_period']['time_period'] = $time_period;
+		}
+
+		if ( isset($override_filter) AND is_array( $override_filter ) ) {
+			$config = array_merge( $config, $override_filter );
 		}
 		//var_dump($config);
 

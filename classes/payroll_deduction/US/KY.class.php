@@ -41,23 +41,24 @@
 class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
-			20060101 => array(
-					0 => array(
-							array('income' => 3000, 'rate' => 2, 'constant' => 0),
-							array('income' => 4000, 'rate' => 3, 'constant' => 60),
-							array('income' => 5000, 'rate' => 4, 'constant' => 90),
-							array('income' => 8000, 'rate' => 5, 'constant' => 130),
-							array('income' => 75000, 'rate' => 5.8, 'constant' => 280),
-							array('income' => 75000, 'rate' => 6, 'constant' => 4166),
-					),
-			),
+		//20180101 - Switched to 5% flat rate, see getStateTaxPayable() below
+		20060101 => array(
+				0 => array(
+						array('income' => 3000, 'rate' => 2, 'constant' => 0),
+						array('income' => 4000, 'rate' => 3, 'constant' => 60),
+						array('income' => 5000, 'rate' => 4, 'constant' => 90),
+						array('income' => 8000, 'rate' => 5, 'constant' => 130),
+						array('income' => 75000, 'rate' => 5.8, 'constant' => 280),
+						array('income' => 75000, 'rate' => 6, 'constant' => 4166),
+				),
+		),
 	);
 
 
 	var $state_options = array(
 			20180101 => array( //01-Jan-2018
 							   'standard_deduction' => 2530,
-							   'allowance'          => 10,
+							   'allowance'          => 0, //Removed as of 2018
 			),
 			20170101 => array( //01-Jan-2017
 							   'standard_deduction' => 2480,
@@ -79,8 +80,7 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 							   'standard_deduction' => 2360,
 							   'allowance'          => 20,
 			),
-			//20120101
-			20090101 => array( //01-Jan-2012 **Had the wrong date before, was 2009.
+			20120101 => array( //01-Jan-2012
 							   'standard_deduction' => 2290,
 							   'allowance'          => 20,
 			),
@@ -135,7 +135,6 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 		}
 
 		$allowance_arr = $retarr['allowance'];
-
 		$retval = bcmul( $this->getStateAllowance(), $allowance_arr );
 
 		Debug::text( 'State Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
@@ -149,11 +148,15 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			$rate = $this->getData()->getStateRate( $annual_income );
-			$prev_income = $this->getData()->getStateRatePreviousIncome( $annual_income );
-			$state_constant = $this->getData()->getStateConstant( $annual_income );
+			if ( $this->getDate() >= 20180101 ) { //Switched to flat rate 5%
+				$retval = bcmul( $annual_income, bcdiv( 5.0, 100 ) );
+			} else {
+				$rate = $this->getData()->getStateRate( $annual_income );
+				$prev_income = $this->getData()->getStateRatePreviousIncome( $annual_income );
+				$state_constant = $this->getData()->getStateConstant( $annual_income );
 
-			$retval = bcadd( bcmul( bcsub( $annual_income, $prev_income ), $rate ), $state_constant );
+				$retval = bcadd( bcmul( bcsub( $annual_income, $prev_income ), $rate ), $state_constant );
+			}
 		}
 
 		$retval = bcsub( $retval, $this->getStateAllowanceAmount() );

@@ -1623,7 +1623,19 @@ class RemittanceSourceAccountFactory extends Factory {
 			}
 
 			unset( $rdalf );
+		}
 
+		if ( is_array($data_diff) AND isset($data_diff['country']) ) { //Legal entity has changed
+			//Cases to handle:
+			//  Don't allow changing the country if destination accounts are linked to it already, as that will change the bank account validations and such.
+			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' );
+			$rdalf->getByRemittanceSourceAccountId( $this->getId(), 1 ); //Limit 1.
+			if ( $rdalf->getRecordCount() > 0 ) {
+				$this->Validator->isTrue( 'country',
+										  FALSE,
+										  TTi18n::gettext( 'This remittance source account is currently in use by employee payment methods in a different country' ) );
+			}
+			unset( $rdalf );
 		}
 
 		//Make sure these fields are always specified, but don't break mass edit.

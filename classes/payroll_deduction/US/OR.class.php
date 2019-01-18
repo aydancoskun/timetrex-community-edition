@@ -175,7 +175,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
-			2010101 => array( //01-Jan-18
+			2010101  => array( //01-Jan-18
 							   'standard_deduction'  => array(
 									   '10' => 2215,
 									   '20' => 4435,

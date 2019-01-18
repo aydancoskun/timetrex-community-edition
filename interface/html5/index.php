@@ -112,6 +112,7 @@ unset($authentication);
 			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 			<meta name="Description" content="Employee Login | TimeTrex Workforce Management Software"/>
+			<meta name="google" content="notranslate">
 			<title><?php echo APPLICATION_NAME .' Workforce Management';?></title>
 			<link rel="shortcut icon" type="image/ico" href="<?php echo Environment::getBaseURL();?>../favicon.ico">
 			<?php if ( file_exists('theme/default/css/login.composite.css') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>

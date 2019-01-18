@@ -350,6 +350,10 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::parseDateTime('25-Feb-05 18:09:10'), 1109383750 );
 		$this->assertEquals( TTDate::parseDateTime('25-Feb-05 18:09:10 EST'), 1109372950 );
 
+		//MST7MDT has been deprecated and does not work. Most 3 letter timezones have too.
+		$this->assertEquals( TTDate::parseDateTime('25-Feb-05 18:09:10 MST'), 1109380150 );
+		$this->assertEquals( TTDate::parseDateTime('25-Feb-05 18:09:10 America/Edmonton'), 1109380150 );
+
 
 		//Fails on PHP 5.1.2 due to strtotime()
 		//TTDate::setDateFormat('d/M/y');

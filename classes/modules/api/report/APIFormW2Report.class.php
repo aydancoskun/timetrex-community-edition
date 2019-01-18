@@ -55,7 +55,7 @@ class APIFormW2Report extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getFormW2Report( $config, $format = 'pdf' ) {
+	function getFormW2Report( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

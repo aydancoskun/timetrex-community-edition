@@ -55,7 +55,7 @@ class APIUserQualificationReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getUserQualificationReport( $config, $format = 'pdf' ) {
+	function getUserQualificationReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

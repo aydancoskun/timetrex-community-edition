@@ -402,6 +402,11 @@ class CalculatePayStub extends PayStubFactory {
 			$arr['require_accounts'] = array();
 
 			$include_accounts = $obj->getCompanyDeductionObject()->getIncludePayStubEntryAccount();
+			if ( !is_array( $include_accounts ) ) {
+				$include_accounts = array();
+			}
+			$include_accounts = array_merge( $include_accounts, $obj->getAdditionalRequiredPayStubAccounts() );
+
 			if ( is_array($include_accounts) ) {
 				foreach( $include_accounts as $include_account ) {
 					if ( isset($type_map_arr[$include_account]) ) {

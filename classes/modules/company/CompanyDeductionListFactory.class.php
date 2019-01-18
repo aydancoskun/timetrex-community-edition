@@ -199,10 +199,6 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 			return FALSE;
 		}
 
-		if ( $calculation_id == '') {
-			return FALSE;
-		}
-
 		if ( $status_id == '') {
 			return FALSE;
 		}
@@ -217,7 +213,6 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$ph = array(
 				'company_id' => TTUUID::castUUID($company_id),
 				'legal_entity_id' => TTUUID::castUUID($legal_entity_id),
-				'calculation_id' => (int)$calculation_id,
 				'status_id' => (int)$status_id,
 		);
 
@@ -226,8 +221,8 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND legal_entity_id = ?
-						AND calculation_id = ?
 						AND status_id = ?
+						AND calculation_id in ('. $this->getListSQL( $calculation_id, $ph, 'int' ) .')
 						AND deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );

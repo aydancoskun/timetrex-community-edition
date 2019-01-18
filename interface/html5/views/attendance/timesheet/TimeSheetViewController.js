@@ -1238,24 +1238,6 @@ TimeSheetViewController = BaseViewController.extend( {
 
 	events: {},
 
-	parserDatesRange: function( date ) {
-		var dates = date.split( " - " );
-		var resultArray = [];
-		var beginDate = Global.strToDate( dates[0] );
-		var endDate = Global.strToDate( dates[1] );
-
-		var nextDate = beginDate;
-
-		while ( nextDate.getTime() < endDate.getTime() ) {
-			resultArray.push( nextDate.format() );
-			nextDate = new Date( new Date( nextDate.getTime() ).setDate( nextDate.getDate() + 1 ) );
-		}
-
-		resultArray.push( dates[1] );
-
-		return resultArray;
-	},
-
 	validate: function() {
 		var $this = this;
 		var record = this.current_edit_record;
@@ -3018,6 +3000,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			!manual_timesheet_data && (manual_timesheet_data = []);
 			for ( var i = 0, m = manual_timesheet_data.length; i < m; i++ ) {
 				var data = manual_timesheet_data[i];
+
 				var key = data.branch_id + '-' + data.department_id + '-' + data.job_id + '-' + data.job_item_id;
 				if ( !target_map[key] ) {
 					target_map[key] = {};
@@ -3059,6 +3042,7 @@ TimeSheetViewController = BaseViewController.extend( {
 					target_map[key][data.date_stamp] = data;
 				}
 			}
+
 		}
 
 	},
@@ -3433,8 +3417,46 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( data.hasOwnProperty( 'override' ) && !data.override ) {
 			row.children().eq( 1 ).children().hide();
 		}
+
+		var disable_plus = false;
+		var disable_minus = false;
+		var disable_dropdowns = false;
+
 		for ( var key in widgets ) {
 			var item = widgets[key];
+
+			//disable if all pay_periods visible are not open.
+			var invalid = 0;
+
+			for ( var n in this.parent_controller.full_timesheet_data.pay_period_data ) {
+				if ( this.parent_controller.full_timesheet_data.pay_period_data[n].status_id != 10 && this.parent_controller.full_timesheet_data.pay_period_data[n].status_id != 30 ) {
+					invalid++;
+				}
+			}
+
+			if( invalid > 0 && invalid == Object.keys( this.parent_controller.full_timesheet_data.pay_period_data ).length ) {
+				if (  this.parent_controller.full_timesheet_data.punch_data.length != 0 ) {
+					disable_plus = true;
+					disable_minus = true;
+					if ( Object.keys( data ).length == 0 ) {
+						return; //don't show a blank row if all pay periods are closed
+					}
+				}
+			}
+
+			//disable fields under closed pay periods
+			if ( this.parent_controller.full_timesheet_data.pay_period_data[this.parent_controller.full_timesheet_data.timesheet_dates.pay_period_date_map[item.getField()]] ) {
+				var field_pay_period_status = parseInt( this.parent_controller.full_timesheet_data.pay_period_data[this.parent_controller.full_timesheet_data.timesheet_dates.pay_period_date_map[item.getField()]].status_id );
+				if ( field_pay_period_status != 10 && field_pay_period_status != 30 ) {
+					item.setEnabled && item.setEnabled( false );
+					if ( item.getField() != 'branch_id' && item.getField() != 'department_id' && item.getField() != 'job_id' && item.getField() != 'job_item_id' && typeof data[item.getField()] != 'undefined' ) {
+						//only disable dropdowns if there is data in the disabled fields
+						disable_dropdowns = true;
+						disable_minus = true;
+					}
+				}
+			}
+
 			if ( data.hasOwnProperty( 'override' ) && !data.override ) {
 				item.setEnabled && item.setEnabled( false );
 				item.getValue() > 0 && item.hasClass( 't-text-input' ) >= 0 && item.css( 'color', 'red' );
@@ -3453,6 +3475,26 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 				$this.parent_controller.autoSaveManualPunch();
 			} )
+		}
+
+		if ( disable_dropdowns ) {
+			for ( var key in widgets ) {
+				var item = widgets[key];
+				if ( item.getField() == 'branch_id' || item.getField() == 'department_id' || item.getField() == 'job_id' || item.getField() == 'job_item_id' ) {
+					if ( item.getField() == 'job_id' || item.getField() == 'job_item_id' ) {
+						item.parents('td').find( 'input[type="text"]' ).hide(); //hide job and task lookup box
+					}
+					item.setEnabled && item.setEnabled( false );
+				}
+			}
+		}
+
+		if ( disable_plus == true ) {
+			row.find('.plus-icon').hide();
+		}
+
+		if ( disable_minus == true ) {
+			row.find('.minus-icon').hide();
 		}
 
 		if ( typeof index != 'undefined' ) {

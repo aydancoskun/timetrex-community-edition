@@ -237,7 +237,7 @@ class UserSkillFactory extends Factory {
 	 */
 	function setExperience( $value) {
 		//This should always be set as years.
-		$value = $this->Validator->stripNonFloat( trim($value) );
+		$value = (float)$this->Validator->stripNonFloat( trim($value) );
 		//Assume they passed in number of seconds, convert to years.
 		if ( $value >= 1000 ) {
 			$value = ( $value / 1000 );

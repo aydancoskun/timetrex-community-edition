@@ -55,7 +55,7 @@ class APIKPIReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getKPIReport( $config, $format = 'pdf' ) {
+	function getKPIReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

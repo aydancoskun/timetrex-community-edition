@@ -55,7 +55,7 @@ class APIForm940Report extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getForm940Report( $config, $format = 'pdf' ) {
+	function getForm940Report( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

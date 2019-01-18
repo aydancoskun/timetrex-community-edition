@@ -58,8 +58,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '11.2.2' );
-define('APPLICATION_VERSION_DATE', 1525244400 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("02-May-2018")."\n\n";'
+define('APPLICATION_VERSION', '11.2.3' );
+define('APPLICATION_VERSION_DATE', 1528441200 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("08-Jun-2018")."\n\n";'
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
 	define('OPERATING_SYSTEM', 'WIN' );
@@ -166,7 +166,7 @@ if ( isset($_SERVER['HTTP_AUTHORIZATION']) AND $_SERVER['HTTP_AUTHORIZATION'] !=
 
 
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR .'ClassMap.inc.php');
-function __autoload( $name ) {
+function TTAutoload( $name ) {
 	global $config_vars, $global_class_map, $profiler; //$config_vars needs to be here, otherwise TTPDF can't access the cache_dir.
 
 	if ( isset($profiler) ) {
@@ -203,7 +203,7 @@ function __autoload( $name ) {
 
 	return TRUE;
 }
-spl_autoload_register('__autoload'); //Registers the autoloader mainly for use with PHPUnit
+spl_autoload_register('TTAutoload'); //Registers the autoloader mainly for use with PHPUnit
 
 //The basis for the plugin system, instantiate all classes through this, allowing the class to be overloaded on the fly by a class in the plugin directory.
 //ie: $uf = TTNew( 'UserFactory' ); OR $uf = TTNew( 'UserFactory', $arg1, $arg2, $arg3 );

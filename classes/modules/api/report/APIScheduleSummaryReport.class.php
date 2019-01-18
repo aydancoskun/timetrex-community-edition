@@ -55,7 +55,7 @@ class APIScheduleSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getScheduleSummaryReport( $config, $format = 'pdf' ) {
+	function getScheduleSummaryReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

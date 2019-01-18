@@ -684,7 +684,8 @@ class TaxSummaryReport extends Report {
 		$tax_withheld_psea_ids = $cd_obj->tax_withheld_psea_ids;
 
 		$user_id = $pse_obj->getColumn('user_id');
-		$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
+		$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ); //Should match PayStubSummary, RemittanceSummary, TaxSummary, GeneralLedgerSummaryReport, etc... $date_stamp too.
+		$run_id = $pse_obj->getColumn('pay_stub_run_id');
 		$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
 
@@ -700,11 +701,16 @@ class TaxSummaryReport extends Report {
 		//Debug::Text('    Processing PSE record: Agency ID: '. $remittance_agency_id .' Deduction ID: '. $company_deduction_id .' PSE Name ID: '. $pay_stub_entry_name_id .' Amount: '. $pse_obj->getColumn('amount'), __FILE__, __LINE__, __METHOD__, 10);
 		if ( !isset($this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]) ) {
 			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id] = array(
-					'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
-					'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
-					'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
-					'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+					'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_period_start_date') ),
+					'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_period_end_date') ),
+					'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_period_transaction_date') ),
+					'pay_period' => strtotime( $pse_obj->getColumn('pay_period_transaction_date') ),
 					'pay_period_id' => $pse_obj->getColumn('pay_period_id'),
+
+					'pay_stub_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
+					'pay_stub_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
+					'pay_stub_transaction_date' => TTDate::getMiddleDayEpoch( strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ) ), //Some transaction dates could be throughout the day for terminated employees being paid early, so always forward them to the middle of the day to keep group_by working correctly.
+					'pay_stub_run_id' => $run_id,
 			);
 		}
 

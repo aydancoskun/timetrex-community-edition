@@ -55,7 +55,7 @@ class APITimesheetSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getTimesheetSummaryReport( $config, $format = 'pdf' ) {
+	function getTimesheetSummaryReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

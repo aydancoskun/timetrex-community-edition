@@ -237,6 +237,89 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 	/**
 	 * @param string $user_id UUID
+	 * @param int $object_type_id
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserDateTotalListFactory
+	 */
+	function getLastByUserIdAndObjectType( $user_id, $object_type_id, $order = NULL ) {
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.date_stamp' => 'desc', 'a.start_time_stamp' => 'desc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+				'user_id' => TTUUID::castUUID($user_id),
+		);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+					where a.user_id = ?
+						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+						AND a.total_time != 0
+						AND ( a.deleted = 0 )
+					';
+
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $user_id UUID
+	 * @param int $object_type_id
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserDateTotalListFactory
+	 */
+	function getNextByUserIdAndObjectTypeAndEpoch( $user_id, $object_type_id, $date_stamp, $order = NULL ) {
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $date_stamp == '' ) {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.date_stamp' => 'asc', 'a.start_time_stamp' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+				'user_id' => TTUUID::castUUID($user_id),
+				'date_stamp' => $this->db->BindDate( $date_stamp ),
+		);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+					where a.user_id = ?
+						AND a.date_stamp >= ?
+						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+						AND a.total_time != 0
+						AND ( a.deleted = 0 )
+					';
+
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $this;
+	}
+
+	/**
+	 * @param string $user_id UUID
 	 * @param int $date_stamp EPOCH
 	 * @param int $object_type_id
 	 * @param int $limit Limit the number of records returned
@@ -2067,6 +2150,10 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$filter_data['department_id'] = $filter_data['department_ids'];
 		}
 
+		if ( isset($filter_data['user_tag']) ) {
+			$filter_data['tag'] = $filter_data['user_tag'];
+		}
+
 		$uf = new UserFactory();
 		$bf = new BranchFactory();
 		$df = new DepartmentFactory();
@@ -2447,6 +2534,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= ( isset($filter_data['include_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['include_job_item_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['exclude_job_item_id'], 'not_uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['job_item_tag']) ) ? $this->getWhereClauseSQL( 'jif.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 610, 'tag' => $filter_data['job_item_tag'] ), 'tag', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 			$ph[] = $this->db->BindDate($filter_data['start_date']);

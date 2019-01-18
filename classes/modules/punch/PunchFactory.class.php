@@ -94,6 +94,8 @@ class PunchFactory extends Factory {
 										'-1202-status' => TTi18n::gettext('Status'),
 										'-1210-date_stamp' => TTi18n::gettext('Date'),
 										'-1220-time_stamp' => TTi18n::gettext('Time'),
+										'-1224-actual_time_stamp' => TTi18n::gettext('Time (Actual)'),
+										'-1225-actual_time_diff' => TTi18n::gettext('Actual Time Difference'),
 
 										'-1230-tainted' => TTi18n::gettext('Tainted'),
 
@@ -153,6 +155,7 @@ class PunchFactory extends Factory {
 											'punch_time' => FALSE,
 											'punch_control_id' => 'PunchControlID',
 											'actual_time_stamp' => 'ActualTimeStamp',
+											'actual_time_diff' => FALSE,
 											'original_time_stamp' => 'OriginalTimeStamp',
 											'schedule_id' => 'ScheduleID',
 
@@ -1062,7 +1065,7 @@ class PunchFactory extends Factory {
 	 * @return bool|float
 	 */
 	function getLongitude() {
-		return $this->getGenericDataValue( 'longitude' );
+		return Misc::removeTrailingZeros( $this->getGenericDataValue( 'longitude' ) );
 	}
 
 	/**
@@ -1070,7 +1073,7 @@ class PunchFactory extends Factory {
 	 * @return bool
 	 */
 	function setLongitude( $value ) {
-		if ( is_numeric($value) ) {
+		if ( is_numeric($value) AND $value != 0 ) { //Since we don't obtain coordinates via GEO coding, its just passed from the device, ignore 0 values as some versions of the mobile app pass in 0 values.
 			$value = number_format( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
@@ -1083,7 +1086,7 @@ class PunchFactory extends Factory {
 	 * @return bool|float
 	 */
 	function getLatitude() {
-		return $this->getGenericDataValue( 'latitude' );
+		return Misc::removeTrailingZeros( $this->getGenericDataValue( 'latitude' ) );
 	}
 
 	/**
@@ -1091,7 +1094,7 @@ class PunchFactory extends Factory {
 	 * @return bool
 	 */
 	function setLatitude( $value ) {
-		if ( is_numeric($value) ) {
+		if ( is_numeric($value) AND $value != 0 ) { //Since we don't obtain coordinates via GEO coding, its just passed from the device, ignore 0 values as some versions of the mobile app pass in 0 values.
 			$value = number_format( (float)TTi18n::parseFloat( $value ), 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
@@ -2631,6 +2634,9 @@ class PunchFactory extends Factory {
 							break;
 						case 'actual_time':
 							$data[$variable] = TTDate::getAPIDate( 'TIME', TTDate::strtotime( $this->getColumn( 'actual_time_stamp' ) ) );
+							break;
+						case 'actual_time_diff':
+							$data[$variable] = TTDate::getTimeUnit(  $this->getColumn( 'actual_time_diff' ) );
 							break;
 						case 'station_type':
 							$data[$variable] = Option::getByKey( $this->getColumn( 'station_type_id' ), $sf->getOptions( 'type' ) );

@@ -63,15 +63,15 @@
 //Change every year usually
 CHANGED:13-Jan-18				Federal          		- Google: Notice 1036 http://www.irs.gov/pub/irs-pdf/n1036.pdf
 *CHECKAGAIN-*:22-Dec-17			'VT' => 'Vermont',		- http://tax.vermont.gov/business-and-corp/withholding-tax *Income Tax Withholding  Instructions, Tables, and Charts.
-CHANGED:19-Jan-18				'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Click on Withholding Formula to see update for each year.
-*CHECKAGAIN-*:22-Dec-17			'OR' => 'Oregon',		- http://www.oregon.gov/DOR/programs/businesses/Pages/payroll-updates.aspx *Search: Withholdings Tax Formulas 2013
-*CHECKAGAIN-*:22-Dec-17			'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
+CHANGED:24-May-18				'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Click on Withholding Formula to see update for each year.
+CHANGED:25-Jan-18				'OR' => 'Oregon',		- http://www.oregon.gov/DOR/programs/businesses/Pages/payroll-updates.aspx *Search: Withholdings Tax Formulas 2013
+CHANGED:24-May-18				'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
 *CHECKAGAIN-*:22-Dec-17			'AL' => 'Alabama' 		- https://revenue.alabama.gov/individual-corporate/taxes-administered-by-individual-corporate-income-tax/withholding-tax/ *Withholding Tax Tables and Instructions
 *CHECKAGAIN-*:22-Dec-17			'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
 *CHECKAGAIN-*:27-Dec-17			'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
 NOCHANGE:22-Dec-17				'OK' => 'Oklahoma',		- http://ok.gov/tax/Forms_&_Publications/Publications/Withholding/ *OW-2, Oklahoma Income Tax Withholding Tables
 NOCHANGE:19-Dec-17				'NC' => 'North Carolina'- http://www.dornc.com/taxes/wh_tax/index.html *Income Tax Withholding Tables & Instructions for Employers, NC30
-CHANGED:16-Dec-17				'KY' => 'Kentucky', 	- http://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method)
+CHANGED:24-May-18				'KY' => 'Kentucky', 	- http://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method) - 2018 switched to flat rate 5%.
 CHANGED:09-Dec-17				'ME' => 'Maine',		- http://www.state.me.us/revenue/forms/with/2017.htm -- Check each year on the right of the page.
 CHANGED:16-Dec-17				'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/software_developers.php *Percentage Method Withholding Tables
 CHANGED:09-Dec-17				'SC' => 'South Carolina'- https://dor.sc.gov/tax/withholding/forms *Formula for Computing SC Withholding Tax WH-1603F
@@ -80,9 +80,9 @@ CHANGED:16-Dec-17				'MN' => 'Minnesota',	- http://www.revenue.state.mn.us/busin
 CHANGED:16-Dec-17 				'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
 CHANGED:04-Jan-18				'IL' => 'Illinois',		- http://www.revenue.state.il.us/Businesses/TaxInformation/Payroll/index.htm *Booklet IL-700-T
 NOCHANGE:16-Dec-17				'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098
-NOCHANGE:16-Dec-17				'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
+CHANGED:24-May-18				'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
 NOCHANGE:09-Dec-17				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
-NOCHANGE:04-Dec-17				'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
+CHANGED:24-May-18				'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
 
 //Change less often
 *CHECKAGAIN-*:22-Dec-17			'MA' => 'Massachusetts' - http://www.mass.gov/dor/individuals/taxpayer-help-and-resources/tax-guides/withholding-tax-guide.html#calculate *Circular M
@@ -96,18 +96,18 @@ NOCHANGE:03-Jan-18				'GA' => 'Georgia',		- http://dor.georgia.gov/withholding-t
 
 //Rarely change
 *CHECKAGAIN-*:22-Dec-17			'AR' => 'Arkansas'		- https://www.dfa.arkansas.gov/income-tax/withholding-tax-branch/withholding-tax-forms-and-instructions/ *Witholding Tax Formula ***They use a minus calculation, so we have to manually calculate each bracket ourselves. Use tax_table_bracket_calculator.ods
-*CHECKAGAIN-*:22-Dec-17			'LA' => 'Louisiana',	- http://revenue.louisiana.gov/WithholdingTax *R-1306
+NOCHANGE*:24-May-18				'LA' => 'Louisiana',	- http://revenue.louisiana.gov/WithholdingTax *R-1306
 NOCHANGE:20-Dec-17				'MS' => 'Mississippi',	- http://www.dor.ms.gov/Business/Pages/Withholding-Tax.aspx *Pub 89-700
 *CHECKAGAIN-*:22-Dec-17			'NJ' => 'New Jersey',	- http://www.state.nj.us/treasury/taxation/freqqite.shtml *Withholding Rate Tables
-*CHECKAGAIN-*:22-Dec-17			'PA' => 'Pennsylvania', - http://www.revenue.pa.gov/GeneralTaxInformation/Tax%20Types%20and%20Information/Pages/Employer-Withholding.aspx#.VJ3CWAuA *Rev 415 - Employer Withholding Information
+*CHECKAGAIN-*:22-Dec-17			'PA' => 'Pennsylvania', - http://www.revenue.pa.gov/GeneralTaxInformation/Tax%20Types%20and%20Information/EmployerWithholding/Pages/default.aspx *Rev 415 - Employer Withholding Information
 *CHECKAGAIN-*:22-Dec-17			'VA' => 'Virginia',		- http://www.tax.virginia.gov/content/withholding-tax *Employer Withholding Instructions
 *CHECKAGAIN-*:22-Dec-17			'WV' => 'West Virginia',- http://tax.wv.gov/Business/Withholding/Pages/WithholdingTaxForms.aspx *IT-100.1A
-*CHECKAGAIN-*:22-Dec-17			'UT' => 'Utah',			- http://tax.utah.gov/withholding *PUB 14, Withholding Tax Guide
+CHANGED:24-May-18				'UT' => 'Utah',			- http://tax.utah.gov/withholding *PUB 14, Withholding Tax Guide
 NOCHANGE:05-Jan-18				'MT' => 'Montana',		- https://revenue.mt.gov/home/businesses/wage_withholding#Filing-Payment-Information-723 *Montana Witholding Tax Guide
 NOCHANGE:19-Dec-17				'IN' => 'Indiana',		- http://www.in.gov/dor/4006.htm#withholding *Departmental Notice #1 DN01
 NOCHANGE:16-Dec-17				'AZ' => 'Arizona',		- http://www.azdor.gov/Forms/Withholding.aspx *Form A4: Employees choose a straight percent to pick.
 NOCHANGE:16-Dec-17				'IA' => 'Iowa',			- https://tax.iowa.gov/withholding-tax-information-0 *Iowa Withholding Tax Guide
-NOCHANGE:16-Dec-17				'MI' => 'Michigan',		- http://www.michigan.gov/taxes/0,4676,7-238-43519_43531---,00.html *Michigan Income Tax Withholding Guide 446-I
+CHANGED:24-May-18				'MI' => 'Michigan',		- http://www.michigan.gov/taxes/0,4676,7-238-43519_43531---,00.html *Michigan Income Tax Withholding Guide 446-I
 
 	'AK' => 'Alaska',		- NO STATE TAXES
 	'FL' => 'Florida',		- NO STATE TAXES
@@ -130,19 +130,19 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 	var $country_primary_currency = 'USD';
 
 	var $federal_allowance = array(
-		20180101 => 4150.00, //01-Jan-18
-		//01-Jan-17 - No Change.
-		20160101 => 4050.00, //01-Jan-16
-		20150101 => 4000.00, //01-Jan-15
-		20140101 => 3950.00, //01-Jan-14
-		20130101 => 3900.00, //01-Jan-13
-		20120101 => 3800.00, //01-Jan-12
-		20110101 => 3700.00, //01-Jan-11
-		//01-Jan-10 - No Change
-		20090101 => 3650.00, //01-Jan-09
-		20080101 => 3500.00, //01-Jan-08
-		20070101 => 3400.00, //01-Jan-07
-		20060101 => 3300.00  //01-Jan-06
+			20180101 => 4150.00, //01-Jan-18
+			//01-Jan-17 - No Change.
+			20160101 => 4050.00, //01-Jan-16
+			20150101 => 4000.00, //01-Jan-15
+			20140101 => 3950.00, //01-Jan-14
+			20130101 => 3900.00, //01-Jan-13
+			20120101 => 3800.00, //01-Jan-12
+			20110101 => 3700.00, //01-Jan-11
+			//01-Jan-10 - No Change
+			20090101 => 3650.00, //01-Jan-09
+			20080101 => 3500.00, //01-Jan-08
+			20070101 => 3400.00, //01-Jan-07
+			20060101 => 3300.00  //01-Jan-06
 	);
 
 	//http://www.ssa.gov/pressoffice/factsheets/colafacts2013.htm
@@ -329,24 +329,24 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 	var $federal_income_tax_rate_options = array(
 			20180101 => array(
 					10 => array( //Single
-							array('income' => 3700, 'rate' => 0, 'constant' => 0),
-							array('income' => 13225, 'rate' => 10, 'constant' => 0),
-							array('income' => 42400, 'rate' => 12, 'constant' => 952.50),
-							array('income' => 86200, 'rate' => 22, 'constant' => 4453.50),
-							array('income' => 161200, 'rate' => 24, 'constant' => 14089.50),
-							array('income' => 203700, 'rate' => 32, 'constant' => 32089.50),
-							array('income' => 503700, 'rate' => 35, 'constant' => 45689.50),
-							array('income' => 503700, 'rate' => 37, 'constant' => 150689.50),
+								 array('income' => 3700, 'rate' => 0, 'constant' => 0),
+								 array('income' => 13225, 'rate' => 10, 'constant' => 0),
+								 array('income' => 42400, 'rate' => 12, 'constant' => 952.50),
+								 array('income' => 86200, 'rate' => 22, 'constant' => 4453.50),
+								 array('income' => 161200, 'rate' => 24, 'constant' => 14089.50),
+								 array('income' => 203700, 'rate' => 32, 'constant' => 32089.50),
+								 array('income' => 503700, 'rate' => 35, 'constant' => 45689.50),
+								 array('income' => 503700, 'rate' => 37, 'constant' => 150689.50),
 					),
 					20 => array( //Married
-							array('income' => 11550, 'rate' => 0, 'constant' => 0),
-							array('income' => 30600, 'rate' => 10, 'constant' => 0),
-							array('income' => 88950, 'rate' => 12, 'constant' => 1905),
-							array('income' => 176550, 'rate' => 22, 'constant' => 8907),
-							array('income' => 326550, 'rate' => 24, 'constant' => 28179),
-							array('income' => 411550, 'rate' => 32, 'constant' => 64179),
-							array('income' => 611550, 'rate' => 35, 'constant' => 91379),
-							array('income' => 611550, 'rate' => 37, 'constant' => 161379),
+								 array('income' => 11550, 'rate' => 0, 'constant' => 0),
+								 array('income' => 30600, 'rate' => 10, 'constant' => 0),
+								 array('income' => 88950, 'rate' => 12, 'constant' => 1905),
+								 array('income' => 176550, 'rate' => 22, 'constant' => 8907),
+								 array('income' => 326550, 'rate' => 24, 'constant' => 28179),
+								 array('income' => 411550, 'rate' => 32, 'constant' => 64179),
+								 array('income' => 611550, 'rate' => 35, 'constant' => 91379),
+								 array('income' => 611550, 'rate' => 37, 'constant' => 161379),
 					),
 			),
 			20170101 => array(
@@ -865,6 +865,13 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 
 	}
 
+	function getFederalHighestRate() {
+		$arr = $this->getRateArray( 999999999, 'federal' );
+		Debug::text( 'Federal Highest Rate: ' . $arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
+
+		return $arr['rate'];
+	}
+
 	function getFederalRate( $income ) {
 		$arr = $this->getRateArray( $income, 'federal' );
 		Debug::text( 'Federal Rate: ' . $arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
@@ -910,6 +917,13 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 	}
 
 
+	function getStateHighestRate() {
+		$arr = $this->getRateArray( 999999999, 'state' );
+		Debug::text( 'State Highest Rate: ' . $arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
+
+		return $arr['rate'];
+	}
+
 	function getStateRate( $income ) {
 		$arr = $this->getRateArray( $income, 'state' );
 		Debug::text( 'State Rate: ' . $arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
@@ -950,6 +964,13 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 		Debug::text( 'State Previous Constant: ' . $arr['prev_constant'], __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $arr['prev_constant'];
+	}
+
+	function getDistrictHighestRate() {
+		$arr = $this->getRateArray( 999999999, 'district' );
+		Debug::text( 'District Highest Rate: ' . $arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
+
+		return $arr['rate'];
 	}
 
 	function getDistrictRate( $income ) {

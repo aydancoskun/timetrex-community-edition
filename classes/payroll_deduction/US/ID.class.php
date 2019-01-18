@@ -41,6 +41,28 @@
 class PayrollDeduction_US_ID extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20180101 => array( //01-Jan-2018 (Guide updated Apr 2018, but it was retroactive.)
+							   10 => array(
+									   array('income' => 12000, 'rate' => 0, 'constant' => 0),
+									   array('income' => 13504, 'rate' => 1.125, 'constant' => 0),
+									   array('income' => 15008, 'rate' => 3.125, 'constant' => 17),
+									   array('income' => 16511, 'rate' => 3.625, 'constant' => 64),
+									   array('income' => 18015, 'rate' => 4.625, 'constant' => 118),
+									   array('income' => 19519, 'rate' => 5.625, 'constant' => 188),
+									   array('income' => 23279, 'rate' => 6.625, 'constant' => 273),
+									   array('income' => 23279, 'rate' => 6.925, 'constant' => 522),
+							   ),
+							   20 => array(
+									   array('income' => 24000, 'rate' => 0, 'constant' => 0),
+									   array('income' => 27008, 'rate' => 1.125, 'constant' => 0),
+									   array('income' => 30016, 'rate' => 3.125, 'constant' => 34),
+									   array('income' => 33022, 'rate' => 3.625, 'constant' => 128),
+									   array('income' => 36030, 'rate' => 4.625, 'constant' => 237),
+									   array('income' => 39038, 'rate' => 5.625, 'constant' => 376),
+									   array('income' => 46558, 'rate' => 6.625, 'constant' => 545),
+									   array('income' => 46558, 'rate' => 6.925, 'constant' => 1043),
+							   ),
+			),
 			20160101 => array( //01-Jan-2016 (Guide updated June 2016, but it was retroactive.)
 							   10 => array(
 									   array('income' => 2250, 'rate' => 0, 'constant' => 0),
@@ -204,6 +226,9 @@ class PayrollDeduction_US_ID extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20180101 => array( //01-Jan-2018 (Guide updated Apr 2018, but it was retroactive.)
+							   'allowance' => 2960,
+			),
 			20160101 => array( //01-Jan-2016 (Guide updated June 2016, but it was retroactive.)
 							   'allowance' => 4050,
 			),

@@ -484,11 +484,11 @@ class UserFactory extends Factory {
 	/**
 	 * @return bool
 	 */
-	function getPermissionControl() {
-		//Check to see if any temporary data is set for the hierarchy, if not, make a call to the database instead.
+	function getPermissionControl( $force = FALSE ) {
+		//Check to see if any temporary data is set for the permission_control_id, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
 		$value = $this->getGenericTempDataValue( 'permission_control_id' );
-		if ( $value !== FALSE ) {
+		if ( $force == FALSE AND $value !== FALSE ) {
 			return $value;
 		} elseif ( TTUUID::isUUID($this->getCompany()) AND $this->getCompany() != TTUUID::getZeroID() AND $this->getCompany() != TTUUID::getNotExistID()
 				AND TTUUID::isUUID($this->getID()) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
@@ -2595,7 +2595,7 @@ class UserFactory extends Factory {
 				$modify_permissions = TRUE;
 			}
 
-			if ( is_object($current_user) AND $current_user->getID() == $this->getID() AND $this->getPermissionControl() != $this->getPermissionControl() ) { //Acting on currently logged in user.
+			if ( is_object($current_user) AND $current_user->getID() == $this->getID() AND $this->getPermissionControl() != $this->getPermissionControl( TRUE ) ) { //Acting on currently logged in user.
 				$logged_in_modify_permissions = FALSE; //Must be false for validation to fail.
 			} else {
 				$logged_in_modify_permissions = TRUE;

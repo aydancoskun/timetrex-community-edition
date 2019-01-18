@@ -124,35 +124,31 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.context_menu_array = $context_menu_array;
 
 			$this.do_validate_after_create_ui = true;
-			$this.getReportData( function( result ) {
-				// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
-				var edit_item;
-				// Use default
-				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
-					for ( var i = 0; i < result.length; i++ ) {
-						if ( result[i].id === LocalCacheData.default_edit_id_for_next_open_edit_view ) {
-							edit_item = result[i];
+
+			if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
+				$this.navigation.setValue( LocalCacheData.default_edit_id_for_next_open_edit_view );
+				$this.api_user_report.getUserReportData( { filter_data: { id: LocalCacheData.default_edit_id_for_next_open_edit_view } }, {
+					onResult: function( result ) {
+						result = result.getResult();
+						$this.current_saved_report = result[0];
+						$this.current_edit_record = {};
+						$this.visible_report_values = {};
+						$this.initEditView();
+				}});
+
+			} else {
+				$this.api_user_report.getUserReportData( { filter_data: { script: $this.script_name, is_default: true  } }, {
+					onResult: function( result ) {
+						var data = result.getResult();
+						$this.current_saved_report = {};
+						if ( data && data.length > 0 ) {
+							$this.current_saved_report = data[0];
 						}
-					}
-					LocalCacheData.default_edit_id_for_next_open_edit_view = null;
-				} else {
-					edit_item = $this.getDefaultReport( result );
-				}
-
-				if ( result && result.length > 0 ) {
-					$this.current_saved_report = edit_item;
-					$this.saved_report_array = result;
-				} else {
-					$this.current_saved_report = null;
-					$this.saved_report_array = [];
-				}
-
-				$this.current_edit_record = {};
-				$this.visible_report_values = {};
-
-				$this.initEditView();
-
-			} );
+						$this.current_edit_record = {};
+						$this.visible_report_values = {};
+						$this.initEditView();
+				}});
+			}
 
 		} );
 
@@ -216,10 +212,6 @@ ReportBaseViewController = BaseViewController.extend( {
 	//Call this from setEditViewData
 	initTabData: function() {
 
-		//Handle most case that one tab and one audit tab
-//		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-//
-//		}
 	},
 
 	getReportData: function( callBack ) {
@@ -263,26 +255,7 @@ ReportBaseViewController = BaseViewController.extend( {
 		var $this = this;
 		var navigation_div = this.edit_view.find( '.navigation-div' );
 
-//		if ( this.saved_report_array.length > 0 ) {
-//
-//
-//		} else {
-//			navigation_div.css( 'display', 'none' );
-//		}
-
 		navigation_div.css( 'display', 'block' );
-		//Set Navigation Awesomebox
-
-		//init navigation only when open edit view
-		if ( !this.navigation.getSourceData() ) {
-			this.navigation.setSourceData( this.saved_report_array );
-			this.navigation.setRowPerPage( LocalCacheData.getLoginUserPreference().items_per_page );
-			this.navigation.setPagerData( this.pager_data );
-
-			var default_args = {};
-			default_args.filter_data = {script: this.script_name};
-			this.navigation.setDefaultArgs( default_args );
-		}
 
 		this.navigation.setValue( this.current_saved_report );
 		this.setUIWidgetFieldsToCurrentEditRecord();
@@ -519,6 +492,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER_REPORT_DATA,
+			default_args: { filter_data: { script: this.script_name } },
 			navigation_mode: true,
 			show_search_inputs: true,
 			set_empty: true,

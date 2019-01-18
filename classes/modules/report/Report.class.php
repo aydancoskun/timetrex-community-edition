@@ -97,6 +97,8 @@ class Report {
 												)
 							);
 
+	public $duplicate_value_ignored_columns = array('full_name' => TRUE, 'first_name' => TRUE, 'last_name' => TRUE, 'verified_time_sheet_date' => TRUE, 'date_stamp' => TRUE, 'start_date' => TRUE, 'end_date' => TRUE, 'start_time' => TRUE, 'end_time' => TRUE); //Columns that should never be considered "duplicate" and therefore have their data blanked out in subsequent rows.
+
 	protected $maximum_memory_limit = FALSE;
 
 	protected $tmp_data = NULL;
@@ -2509,8 +2511,8 @@ class Report {
 	 * @return bool
 	 */
 	function hasData() {
-		$total_rows = count($this->data);
-		$total_form_rows = count($this->form_data);
+		$total_rows = count( (array)$this->data );
+		$total_form_rows = count( (array)$this->form_data );
 
 		if ( ( is_array($this->data) AND $total_rows > 0 ) OR ( is_array($this->form_data) AND $total_form_rows > 0 ) ) {
 			//Check if the only row is the grand total.
@@ -3153,8 +3155,9 @@ class Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->data), NULL, TTi18n::getText('Generating HTML...') );
 
 		$static_column_options = (array)Misc::trimSortPrefix( $this->getOptions('static_columns') );
+
 		//Remove some columns from sort by that may be common but we don't want duplicate values to be removed. This could be moved to each report if the list gets too large.
-		$sort_by_columns = array_diff_key( (array)$this->getSortConfig(), array( 'full_name' => TRUE, 'first_name' => TRUE, 'last_name' => TRUE, 'verified_time_sheet_date' => TRUE, 'date_stamp' => TRUE, 'start_date' => TRUE, 'end_date' => TRUE, 'start_time' => TRUE, 'end_time' => TRUE ) );
+		$sort_by_columns = array_diff_key( (array)$this->getSortConfig(), $this->duplicate_value_ignored_columns );
 		$group_by_columns = $this->getGroupConfig();
 
 		//Make sure we ignore a group_by_columns that is an array( 0 => FALSE )
@@ -4063,7 +4066,7 @@ class Report {
 		$border = 0;
 
 		//Remove some columns from sort by that may be common but we don't want duplicate values to be removed. This could be moved to each report if the list gets too large.
-		$sort_by_columns = array_diff_key( (array)$this->getSortConfig(), array( 'full_name' => TRUE, 'first_name' => TRUE, 'last_name' => TRUE, 'verified_time_sheet_date' => TRUE, 'date_stamp' => TRUE, 'start_date' => TRUE, 'end_date' => TRUE, 'start_time' => TRUE, 'end_time' => TRUE ) );
+		$sort_by_columns = array_diff_key( (array)$this->getSortConfig(), $this->duplicate_value_ignored_columns );
 		$group_by_columns = $this->getGroupConfig();
 
 		//Make sure we ignore a group_by_columns that is an array( 0 => FALSE )

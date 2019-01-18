@@ -55,7 +55,7 @@ class APIUserSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getUserSummaryReport( $config, $format = 'pdf' ) {
+	function getUserSummaryReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

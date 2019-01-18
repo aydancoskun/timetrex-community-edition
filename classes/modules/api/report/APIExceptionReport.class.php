@@ -55,7 +55,7 @@ class APIExceptionReport extends APIReport {
 	 * @param string $format
 	 * @return array
 	 */
-	function getExceptionReport( $config, $format = 'pdf' ) {
+	function getExceptionReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

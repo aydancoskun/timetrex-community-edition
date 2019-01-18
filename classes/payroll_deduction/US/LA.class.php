@@ -52,18 +52,19 @@
 class PayrollDeduction_US_LA extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
-			20090701 => array(
-					10 => array(
-							array('income' => 12500, 'rate' => 2.1, 'constant' => 0),
-							array('income' => 50000, 'rate' => 3.7, 'constant' => 262.50),
-							array('income' => 50000, 'rate' => 5.05, 'constant' => 1650.00),
-					),
-					20 => array(
-							array('income' => 25000, 'rate' => 2.1, 'constant' => 0),
-							array('income' => 100000, 'rate' => 3.75, 'constant' => 525.00),
-							array('income' => 100000, 'rate' => 5.10, 'constant' => 3337.50),
-					),
-			),
+		//LA publication R-1306 doesn't give actual tax brackets, instead we had to calculate them based on the formula they provide. 0.21, +0.160 (3.7%) +0.135 (5.05%)
+		20090701 => array(
+				10 => array(
+						array('income' => 12500, 'rate' => 2.1, 'constant' => 0),
+						array('income' => 50000, 'rate' => 3.7, 'constant' => 262.50),
+						array('income' => 50000, 'rate' => 5.05, 'constant' => 1650.00),
+				),
+				20 => array(
+						array('income' => 25000, 'rate' => 2.1, 'constant' => 0),
+						array('income' => 100000, 'rate' => 3.75, 'constant' => 525.00),
+						array('income' => 100000, 'rate' => 5.10, 'constant' => 3337.50),
+				),
+		),
 	);
 
 
@@ -78,7 +79,7 @@ class PayrollDeduction_US_LA extends PayrollDeduction_US {
 													),
 													20 => array(
 															0 => array(25000, 2.1, 0),
-															1 => array(25000, 3.45, 525),
+															1 => array(25000, 3.75, 525),
 													),
 					),
 			),

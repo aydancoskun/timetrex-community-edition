@@ -150,7 +150,8 @@ class APIPayStub extends APIFactory {
 				unset($report_obj);
 			}
 
-			$data['filter_data']['transaction_status_id'] = array(10, 200); //10=Pending, 200=ReIssue
+			//These filters are also in APIPayStubTransaction->getPayPeriodTransactionSummary().
+			$data['filter_data']['transaction_status_id'] = array( 10, 200 ); //10=Pending, 200=ReIssue
 			$data['filter_data']['transaction_type_id'] = 10; //10=Valid (Enabled)
 			if ( isset($data['filter_data']['id']) ) {
 				$data['filter_data']['pay_stub_id'] = $data['filter_data']['id'];
@@ -158,7 +159,7 @@ class APIPayStub extends APIFactory {
 			unset($data['filter_data']['id']);
 
 			//Specific sort order to ensure consistent transaction order in the EFT files. Keep in mind exportPayStubTransaction() sorts the transactions again too, but this helps.
-			$data['filter_sort'] = array( 'lef.id' => 'asc', 'rsaf.id' => 'asc', 'psf.transaction_date' => 'asc', 'destination_user_last_name' => 'asc', 'destination_first_last_name' => 'asc', 'rdaf.id' => 'asc' );
+			$data['filter_sort'] = array( 'lef.id' => 'asc', 'rsaf.id' => 'asc', 'psf.transaction_date' => 'asc', 'destination_user_last_name' => 'asc', 'destination_user_first_name' => 'asc', 'rdaf.id' => 'asc' );
 
 			/** @var PayStubTransactionListFactory $pslf */
 			$pslf = TTnew( 'PayStubTransactionListFactory' );

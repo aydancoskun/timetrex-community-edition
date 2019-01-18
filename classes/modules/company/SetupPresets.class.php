@@ -3100,7 +3100,47 @@ class SetupPresets extends Factory {
 							break;
 					}
 
-					if ( !in_array( $province, array('yt') ) ) {
+					if ( $province == 'ab' ) {
+						//OT and Stat Holiday is excluded from vacation pay when its accrued: https://www.alberta.ca/vacation-pay.aspx
+						$vacation_accrual_exclude_pay_stub_accounts = array(
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Over Time 1' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Over Time 2' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Statutory Holiday' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ) );
+
+						//In No Accrual cases DO NOT exclude Stat Holiday as per: https://www.alberta.ca/general-holidays-pay.aspx#toc-3
+						$vacation_no_accrual_exclude_pay_stub_accounts = array(
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Over Time 1' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Over Time 2' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ) );
+
+					} else {
+						$vacation_accrual_exclude_pay_stub_accounts = array(
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ) );
+
+						$vacation_no_accrual_exclude_pay_stub_accounts = $vacation_accrual_exclude_pay_stub_accounts;
+					}
+
+					//if ( !in_array( $province, array('yt') ) ) {
+					if ( isset($vacation_data['secondary_length_of_service']) AND $vacation_data['secondary_length_of_service'] > 0 ) {
 						$this->createCompanyDeduction(
 								array(
 										'company_id'                        => $this->getCompany(),
@@ -3116,15 +3156,7 @@ class SetupPresets extends Factory {
 										'maximum_length_of_service'         => ( $vacation_data['secondary_length_of_service'] - 0.001 ),
 										'pay_stub_entry_account_id'         => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 50, 'Vacation Accrual' ),
 										'include_pay_stub_entry_account'    => array($psea_obj->getTotalGross()),
-										'exclude_pay_stub_entry_account'    => array(
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ),
-										),
+										'exclude_pay_stub_entry_account'    => $vacation_accrual_exclude_pay_stub_accounts,
 										'user_value1'                       => $vacation_data['primary_percent'],
 								)
 						);
@@ -3144,19 +3176,12 @@ class SetupPresets extends Factory {
 									'maximum_length_of_service'         => 0,
 									'pay_stub_entry_account_id'         => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 50, 'Vacation Accrual' ),
 									'include_pay_stub_entry_account'    => array($psea_obj->getTotalGross()),
-									'exclude_pay_stub_entry_account'    => array(
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ),
-									),
+									'exclude_pay_stub_entry_account'    => $vacation_accrual_exclude_pay_stub_accounts,
 									'user_value1'                       => $vacation_data['secondary_percent'],
 							)
 					);
-					if ( !in_array( $province, array('yt') ) ) {
+					//if ( !in_array( $province, array('yt') ) ) {
+					if ( isset($vacation_data['secondary_length_of_service']) AND $vacation_data['secondary_length_of_service'] > 0 ) {
 						$this->createCompanyDeduction(
 								array(
 										'company_id'                        => $this->getCompany(),
@@ -3172,15 +3197,7 @@ class SetupPresets extends Factory {
 										'maximum_length_of_service'         => ( $vacation_data['secondary_length_of_service'] - 0.001 ),
 										'pay_stub_entry_account_id'         => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
 										'include_pay_stub_entry_account'    => array($psea_obj->getTotalGross()),
-										'exclude_pay_stub_entry_account'    => array(
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ),
-										),
+										'exclude_pay_stub_entry_account'    => $vacation_no_accrual_exclude_pay_stub_accounts,
 										'user_value1'                       => $vacation_data['primary_percent'],
 								)
 						);
@@ -3200,18 +3217,11 @@ class SetupPresets extends Factory {
 									'maximum_length_of_service'         => 0,
 									'pay_stub_entry_account_id'         => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
 									'include_pay_stub_entry_account'    => array($psea_obj->getTotalGross()),
-									'exclude_pay_stub_entry_account'    => array(
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ),
-									),
+									'exclude_pay_stub_entry_account'    => $vacation_no_accrual_exclude_pay_stub_accounts,
 									'user_value1'                       => $vacation_data['secondary_percent'],
 							)
 					);
+
 
 					$this->createCompanyDeduction(
 							array(

@@ -1771,7 +1771,7 @@ class StationFactory extends Factory {
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function isAllowed( $user_id = NULL, $current_station_id = NULL, $id = NULL) {
+	function isAllowed( $user_id = NULL, $current_station_id = NULL, $id = NULL, $update_allowed_date = TRUE ) {
 		if ($user_id == NULL OR $user_id == '') {
 			global $current_user;
 			$user_id = $current_user->getId();
@@ -1827,7 +1827,7 @@ class StationFactory extends Factory {
 			Debug::text('Station IS allowed! ', __FILE__, __LINE__, __METHOD__, 10);
 
 			//Set last allowed date, so we can track active/inactive stations.
-			if ( $id != NULL AND $id != '' ) {
+			if ( $id != NULL AND $id != '' AND $update_allowed_date == TRUE ) {
 				$this->updateAllowedDate( $id, $user_id );
 			}
 
@@ -1839,15 +1839,17 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
-	//A fast way to check many stations if the user is allowed. 10 = PC
+
 
 	/**
+	 * A fast way to check many stations if the user is allowed. 10 = PC
 	 * @param string $user_id UUID
 	 * @param string $station_id UUID
 	 * @param int $type
+	 * @parem bool $update_allowed_date Updates the station allowed date, which should only be done when a punch is saved.
 	 * @return bool
 	 */
-	function checkAllowed( $user_id = NULL, $station_id = NULL, $type = 10 ) {
+	function checkAllowed( $user_id = NULL, $station_id = NULL, $type = 10, $update_allowed_date = TRUE ) {
 		if ($user_id == NULL OR $user_id == '') {
 			global $current_user;
 			$user_id = $current_user->getId();
@@ -1872,7 +1874,7 @@ class StationFactory extends Factory {
 		foreach($slf as $station) {
 			Debug::text('Checking Station ID: '. $station->getId(), __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( $station->isAllowed( $user_id, $station_id, $station->getId() ) === TRUE) {
+			if ( $station->isAllowed( $user_id, $station_id, $station->getId(), $update_allowed_date ) === TRUE) {
 				Debug::text('Station IS allowed! '. $station_id .' - ID: '. $station->getId(), __FILE__, __LINE__, __METHOD__, 10);
 				return TRUE;
 			}

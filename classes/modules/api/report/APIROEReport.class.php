@@ -55,7 +55,7 @@ class APIROEReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getROEReport( $config, $format = 'pdf' ) {
+	function getROEReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

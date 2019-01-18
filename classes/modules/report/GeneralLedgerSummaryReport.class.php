@@ -616,7 +616,7 @@ class GeneralLedgerSummaryReport extends Report {
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach( $pself as $key => $pse_obj ) {
 				$user_id = $pse_obj->getColumn('user_id');
-				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_period_transaction_date') );
+				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ); //Should match PayStubSummary, RemittanceSummary, TaxSummary, GeneralLedgerSummaryReport, etc... $date_stamp too.
 				$run_id = $pse_obj->getColumn('pay_stub_run_id');
 
 				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]) ) {
@@ -632,7 +632,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 																'pay_stub_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
 																'pay_stub_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
-																'pay_stub_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+																'pay_stub_transaction_date' => TTDate::getMiddleDayEpoch( strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ) ), //Some transaction dates could be throughout the day for terminated employees being paid early, so always forward them to the middle of the day to keep group_by working correctly.
 																'pay_stub_run_id' => $run_id,
 															);
 				}

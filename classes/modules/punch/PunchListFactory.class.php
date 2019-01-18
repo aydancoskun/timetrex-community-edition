@@ -1898,6 +1898,12 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			$query	.=	' AND pcf.date_stamp <= ?';
 		}
 
+		$query .= ( isset($filter_data['date_stamp']) ) ? $this->getWhereClauseSQL( 'pcf.date_stamp', $filter_data['date_stamp'], 'date_range_datestamp', $ph ) : NULL;
+		$query .= ( isset($filter_data['time_stamp']) ) ? $this->getWhereClauseSQL( 'a.time_stamp', $filter_data['time_stamp'], 'date_range_timestamp', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['created_date']) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_date']) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date'], 'date_range', $ph ) : NULL;
+
 		$query .= '
 						AND ( a.deleted = 0 AND pcf.deleted = 0 )
 					';
@@ -2246,7 +2252,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		}
 
 		//$additional_order_fields = array('b.name', 'c.name', 'd.name', 'e.name');
-		$additional_order_fields = array('first_name', 'last_name', 'date_stamp', 'time_stamp', 'type_id', 'status_id', 'branch', 'department', 'default_branch', 'default_department', 'group', 'title');
+		$additional_order_fields = array('first_name', 'last_name', 'date_stamp', 'time_stamp', 'type_id', 'status_id', 'branch', 'department', 'default_branch', 'default_department', 'group', 'title', 'actual_time_diff');
 
 		$sort_column_aliases = array(
 									'status' => 'a.status_id',
@@ -2350,6 +2356,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 							a.status_id as status_id,
 							a.time_stamp as time_stamp,
 							a.actual_time_stamp as actual_time_stamp,
+							EXTRACT(EPOCH FROM ( a.time_stamp - a.actual_time_stamp ) ) as actual_time_diff,
 							a.original_time_stamp as original_time_stamp,
 							a.longitude,
 							a.latitude,
@@ -2508,6 +2515,12 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			$ph[] = $this->db->BindDate( (int)$filter_data['end_date'] );
 			$query	.=	' AND b.date_stamp <= ?';
 		}
+
+		$query .= ( isset($filter_data['date_stamp']) ) ? $this->getWhereClauseSQL( 'b.date_stamp', $filter_data['date_stamp'], 'date_range_datestamp', $ph ) : NULL;
+		$query .= ( isset($filter_data['time_stamp']) ) ? $this->getWhereClauseSQL( 'a.time_stamp', $filter_data['time_stamp'], 'date_range_timestamp', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['created_date']) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_date']) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date'], 'date_range', $ph ) : NULL;
 
 		$query .=	' AND (a.deleted = 0 AND b.deleted = 0 AND d.deleted = 0) ';
 		$query .= $this->getWhereSQL( $where );

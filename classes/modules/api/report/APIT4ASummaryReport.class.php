@@ -55,7 +55,7 @@ class APIT4ASummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getT4ASummaryReport( $config, $format = 'pdf' ) {
+	function getT4ASummaryReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

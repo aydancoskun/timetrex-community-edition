@@ -88,10 +88,11 @@ class PayrollDeduction_CA_NS extends PayrollDeduction_CA {
 				$BPA = $low_claim_amount;
 			}
 
-			Debug::text('BPA: '. $BPA .' Claim Amount: High: '. $high_claim_amount .' Low: '. $low_claim_amount .' A: '. $A, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'BPA: ' . $BPA . ' Claim Amount: High: ' . $high_claim_amount . ' Low: ' . $low_claim_amount . ' A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		return $BPA;
 	}
 }
+
 ?>

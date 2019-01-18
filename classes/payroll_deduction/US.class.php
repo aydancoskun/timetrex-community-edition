@@ -224,6 +224,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		if ( $this->getFormulaType() == 20 ) {
 			Debug::text( 'Formula Type: ' . $this->getFormulaType() . ' YTD Payable: ' . $this->getStateTaxPayable() . ' YTD Paid: ' . $this->getYearToDateDeduction() . ' Current PP: ' . $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10 );
 			$retval = $this->calcNonPeriodicDeduction( $this->getStateTaxPayable(), $this->getYearToDateDeduction() );
+
+			//Ensure that the tax amount doesn't exceed the highest possible tax rate plus 25% for "catch-up" purposes.
+			$highest_taxable_amount = bcmul( $this->getGrossPayPeriodIncome(), bcmul( $this->getStateHighestRate(), 1.25 ) );
+			if ( $highest_taxable_amount > 0 AND $retval > $highest_taxable_amount ) {
+				$retval = $highest_taxable_amount;
+				Debug::text( 'State tax amount exceeds highest tax bracket rate, capping amount at: ' . $highest_taxable_amount, __FILE__, __LINE__, __METHOD__, 10 );
+			}
 		} else {
 			$retval = bcdiv( $this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
 		}
@@ -243,6 +250,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		if ( $this->getFormulaType() == 20 ) {
 			Debug::text( 'Formula Type: ' . $this->getFormulaType() . ' YTD Payable: ' . $this->getDistrictTaxPayable() . ' YTD Paid: ' . $this->getYearToDateDeduction() . ' Current PP: ' . $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10 );
 			$retval = $this->calcNonPeriodicDeduction( $this->getDistrictTaxPayable(), $this->getYearToDateDeduction() );
+
+			//Ensure that the tax amount doesn't exceed the highest possible tax rate plus 25% for "catch-up" purposes.
+			$highest_taxable_amount = bcmul( $this->getGrossPayPeriodIncome(), bcmul( $this->getDistrictHighestRate(), 1.25 ) );
+			if ( $highest_taxable_amount > 0 AND $retval > $highest_taxable_amount ) {
+				$retval = $highest_taxable_amount;
+				Debug::text( 'District tax amount exceeds highest tax bracket rate, capping amount at: ' . $highest_taxable_amount, __FILE__, __LINE__, __METHOD__, 10 );
+			}
 		} else {
 			$retval = bcdiv( $this->getDistrictTaxPayable(), $this->getAnnualPayPeriods() );
 		}
@@ -439,6 +453,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		if ( $this->getFormulaType() == 20 ) {
 			Debug::text( 'Formula Type: ' . $this->getFormulaType() . ' YTD Payable: ' . $this->getFederalTaxPayable() . ' YTD Paid: ' . $this->getYearToDateDeduction() . ' Current PP: ' . $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10 );
 			$retval = $this->calcNonPeriodicDeduction( $this->getFederalTaxPayable(), $this->getYearToDateDeduction() );
+
+			//Ensure that the tax amount doesn't exceed the highest possible tax rate plus 25% for "catch-up" purposes.
+			$highest_taxable_amount = bcmul( $this->getGrossPayPeriodIncome(), bcmul( $this->getFederalHighestRate(), 1.25 ) );
+			if ( $highest_taxable_amount > 0 AND $retval > $highest_taxable_amount ) {
+				$retval = $highest_taxable_amount;
+				Debug::text( 'Federal tax amount exceeds highest tax bracket rate, capping amount at: ' . $highest_taxable_amount, __FILE__, __LINE__, __METHOD__, 10 );
+			}
 		} else {
 			$retval = bcdiv( $this->getFederalTaxPayable(), $this->getAnnualPayPeriods() );
 		}

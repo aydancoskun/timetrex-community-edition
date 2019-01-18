@@ -324,6 +324,8 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				}
 			}
 
+			$this.onTypeChange();
+
 		}} );
 
 		$this.current_edit_record['remittance_source_account_id'] = $this.edit_view_ui_dic['remittance_source_account_id'].getValue();
@@ -336,14 +338,11 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		if ( this.edit_view_ui_dic && this.current_edit_record.remittance_source_account_id != TTUUID.zero_id ) { //Keep accountd data if UUID == zero_id
 			for ( var i = 1; i <= 10; i++ ) {
 				if ( i == 1 ) {
-					if (record['value1'] && ( typeof this.edit_view_ui_dic['value1_1'] == 'undefined' || ( this.edit_view_ui_dic['value1_1'] && this.edit_view_ui_dic['value1_1'].is(':visible') == false ) )) {
-						record['value1_1'] = false;
-					}
-					if (record['value1'] && ( typeof this.edit_view_ui_dic['value1_2'] == 'undefined' || ( this.edit_view_ui_dic['value1_2'] && this.edit_view_ui_dic['value1_2'].is(':visible') == false ) )) {
-						record['value1_2'] = false;
-					}
-
-					if ( record['value1_1'] === false && record['value1_2'] === false ) {
+					if ( this.edit_view_ui_dic['value1_1'].is(':visible') ) {
+						record['value1'] = record['value1_1'] ? record['value1_1'] : this.edit_view_ui_dic['value1_1'].getValue();
+					} else if ( this.edit_view_ui_dic['value1_2'].is(':visible') ) {
+						record['value1'] = record['value1_2'] ? record['value1_2'] : this.edit_view_ui_dic['value1_2'].getValue();
+					} else {
 						record['value1'] = false;
 					}
 

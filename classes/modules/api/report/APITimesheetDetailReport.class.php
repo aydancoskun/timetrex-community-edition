@@ -55,7 +55,7 @@ class APITimesheetDetailReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getTimesheetDetailReport( $config, $format = 'pdf' ) {
+	function getTimesheetDetailReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

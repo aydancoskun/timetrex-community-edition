@@ -55,8 +55,7 @@ class APITaxSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getTaxSummaryReport( $config, $format = 'pdf' ) {
-
+	function getTaxSummaryReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

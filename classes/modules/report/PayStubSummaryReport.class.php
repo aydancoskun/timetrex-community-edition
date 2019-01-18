@@ -544,6 +544,8 @@ class PayStubSummaryReport extends Report {
 											$retval['sort'][] = array('default_department' => 'asc');
 											break;
 										case 'by_pay_period':
+											$retval['-1010-time_period']['time_period'] = 'this_year';
+
 											$retval['columns'][] = 'transaction-pay_period';
 
 											$retval['group'][] = 'transaction-pay_period';
@@ -551,6 +553,8 @@ class PayStubSummaryReport extends Report {
 											$retval['sort'][] = array('transaction-pay_period' => 'asc');
 											break;
 										case 'by_pay_period_by_employee':
+											$retval['-1010-time_period']['time_period'] = 'this_year';
+
 											$retval['columns'][] = 'transaction-pay_period';
 											$retval['columns'][] = 'first_name';
 											$retval['columns'][] = 'last_name';
@@ -566,6 +570,8 @@ class PayStubSummaryReport extends Report {
 											$retval['sort'][] = array('first_name' => 'asc');
 											break;
 										case 'by_pay_period_by_branch':
+											$retval['-1010-time_period']['time_period'] = 'this_year';
+
 											$retval['columns'][] = 'transaction-pay_period';
 											$retval['columns'][] = 'default_branch';
 
@@ -578,6 +584,8 @@ class PayStubSummaryReport extends Report {
 											$retval['sort'][] = array('default_branch' => 'asc');
 											break;
 										case 'by_pay_period_by_department':
+											$retval['-1010-time_period']['time_period'] = 'this_year';
+
 											$retval['columns'][] = 'transaction-pay_period';
 											$retval['columns'][] = 'default_department';
 
@@ -590,6 +598,8 @@ class PayStubSummaryReport extends Report {
 											$retval['sort'][] = array('default_department' => 'asc');
 											break;
 										case 'by_pay_period_by_branch_by_department':
+											$retval['-1010-time_period']['time_period'] = 'this_year';
+
 											$retval['columns'][] = 'transaction-pay_period';
 											$retval['columns'][] = 'default_branch';
 											$retval['columns'][] = 'default_department';
@@ -606,6 +616,8 @@ class PayStubSummaryReport extends Report {
 											$retval['sort'][] = array('default_department' => 'asc');
 											break;
 										case 'by_employee_by_pay_period':
+											$retval['-1010-time_period']['time_period'] = 'this_year';
+
 											$retval['columns'][] = 'full_name';
 											$retval['columns'][] = 'transaction-pay_period';
 
@@ -618,6 +630,8 @@ class PayStubSummaryReport extends Report {
 											$retval['sort'][] = array('transaction-pay_period' => 'asc');
 											break;
 										case 'by_branch_by_pay_period':
+											$retval['-1010-time_period']['time_period'] = 'this_year';
+
 											$retval['columns'][] = 'default_branch';
 											$retval['columns'][] = 'transaction-pay_period';
 
@@ -630,6 +644,8 @@ class PayStubSummaryReport extends Report {
 											$retval['sort'][] = array('transaction-pay_period' => 'asc');
 											break;
 										case 'by_department_by_pay_period':
+											$retval['-1010-time_period']['time_period'] = 'this_year';
+
 											$retval['columns'][] = 'default_department';
 											$retval['columns'][] = 'transaction-pay_period';
 
@@ -642,6 +658,8 @@ class PayStubSummaryReport extends Report {
 											$retval['sort'][] = array('transaction-pay_period' => 'asc');
 											break;
 										case 'by_branch_by_department_by_pay_period':
+											$retval['-1010-time_period']['time_period'] = 'this_year';
+
 											$retval['columns'][] = 'default_branch';
 											$retval['columns'][] = 'default_department';
 											$retval['columns'][] = 'transaction-pay_period';
@@ -734,7 +752,7 @@ class PayStubSummaryReport extends Report {
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach( $pself as $key => $pse_obj ) {
 				$user_id = $pse_obj->getColumn('user_id');
-				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_period_transaction_date') );
+				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ); //Should match PayStubSummary, RemittanceSummary, TaxSummary, GeneralLedgerSummaryReport, etc... $date_stamp too.
 				$run_id = $pse_obj->getColumn('pay_stub_run_id');
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 				$currency_rate = $pse_obj->getColumn('currency_rate');
@@ -752,7 +770,7 @@ class PayStubSummaryReport extends Report {
 
 																'pay_stub_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
 																'pay_stub_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
-																'pay_stub_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+																'pay_stub_transaction_date' => TTDate::getMiddleDayEpoch( strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ) ), //Some transaction dates could be throughout the day for terminated employees being paid early, so always forward them to the middle of the day to keep group_by working correctly.
 																'pay_stub_run_id' => $run_id,
 															);
 				}

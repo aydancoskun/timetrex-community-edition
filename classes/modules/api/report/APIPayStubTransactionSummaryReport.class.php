@@ -59,7 +59,7 @@ class APIPayStubTransactionSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getPayStubTransactionSummaryReport( $config, $format = 'pdf' ) {
+	function getPayStubTransactionSummaryReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

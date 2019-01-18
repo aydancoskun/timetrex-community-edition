@@ -378,6 +378,10 @@ class APIPayStubTransaction extends APIFactory {
 			unset($report_obj);
 		}
 
+		//These filters are also in APIPayStub->getPayStub().
+		$filter_data['transaction_status_id'] = array( 10, 200 ); //10=Pending, 200=Stop Payment (ReIssue) -- Make sure we don't show stop payment or paid transactions in the list.
+		$filter_data['transaction_type_id'] = 10; //10=Valid
+
 		//SECURITY: Keep this line right before the API execution so nothing overwrites this filter by accident
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
 		$pstlf->getAPISummaryByCompanyIdAndArrayCriteria( $company_id, $filter_data );

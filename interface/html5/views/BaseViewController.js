@@ -7248,6 +7248,24 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 	},
+	
+    parserDatesRange: function( date ) {
+        var dates = date.split( " - " );
+        var resultArray = [];
+        var beginDate = Global.strToDate( dates[0] );
+        var endDate = Global.strToDate( dates[1] );
+
+        var nextDate = beginDate;
+
+        while ( nextDate.getTime() < endDate.getTime() ) {
+            resultArray.push( nextDate.format() );
+            nextDate = new Date( new Date( nextDate.getTime() ).setDate( nextDate.getDate() + 1 ) );
+        }
+
+        resultArray.push( dates[1] );
+
+        return resultArray;
+    },
 
 } );
 //Don't check the file for now. Too many issues

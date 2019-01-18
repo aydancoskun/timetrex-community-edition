@@ -40,6 +40,16 @@
  */
 class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
+			20180701 => array(
+					array('income' => 42960, 'rate' => 5.05, 'constant' => 0),
+					array('income' => 71500, 'rate' => 9.15, 'constant' => 1761),
+					array('income' => 82000, 'rate' => 12.85, 'constant' => 4407),
+					array('income' => 85923, 'rate' => 17.85, 'constant' => 8507),
+					array('income' => 92000, 'rate' => 15.84, 'constant' => 6780),
+					array('income' => 150000, 'rate' => 23.84, 'constant' => 14140),
+					array('income' => 220000, 'rate' => 25.84, 'constant' => 17140),
+					array('income' => 220000, 'rate' => 27.90, 'constant' => 21672),
+			),
 			20180101 => array(
 					array('income' => 42960, 'rate' => 5.05, 'constant' => 0),
 					array('income' => 85923, 'rate' => 9.15, 'constant' => 1761),
@@ -299,19 +309,22 @@ class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 
 		*/
 
-		$T4 = $this->getProvincialBasicTax();
 		$V1 = 0;
+		if ( $this->getDate() < 20180701 ) { //Repealed July 1st 2018.
+			$T4 = $this->getProvincialBasicTax();
 
-		$surtax_data = $this->getProvincialSurTaxData( $this->getDate() );
-		if ( is_array( $surtax_data ) ) {
-			if ( $T4 < $surtax_data['income1'] ) {
-				$V1 = 0;
-			} elseif ( $T4 > $surtax_data['income1'] AND $T4 <= $surtax_data['income2'] ) {
-				$V1 = bcmul( $surtax_data['rate1'], bcsub( $T4, $surtax_data['income1'] ) );
-			} elseif ( $T4 > $surtax_data['income2'] ) {
-				$V1 = bcadd( bcmul( $surtax_data['rate1'], bcsub( $T4, $surtax_data['income1'] ) ), bcmul( $surtax_data['rate2'], bcsub( $T4, $surtax_data['income2'] ) ) );
+			$surtax_data = $this->getProvincialSurTaxData( $this->getDate() );
+			if ( is_array( $surtax_data ) ) {
+				if ( $T4 < $surtax_data['income1'] ) {
+					$V1 = 0;
+				} elseif ( $T4 > $surtax_data['income1'] AND $T4 <= $surtax_data['income2'] ) {
+					$V1 = bcmul( $surtax_data['rate1'], bcsub( $T4, $surtax_data['income1'] ) );
+				} elseif ( $T4 > $surtax_data['income2'] ) {
+					$V1 = bcadd( bcmul( $surtax_data['rate1'], bcsub( $T4, $surtax_data['income1'] ) ), bcmul( $surtax_data['rate2'], bcsub( $T4, $surtax_data['income2'] ) ) );
+				}
 			}
 		}
+
 		Debug::text( 'V1: ' . $V1, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $V1;

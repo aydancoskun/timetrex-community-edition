@@ -55,7 +55,7 @@ class APIAccrualBalanceSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array
 	 */
-	function getAccrualBalanceSummaryReport( $config, $format = 'pdf' ) {
+	function getAccrualBalanceSummaryReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

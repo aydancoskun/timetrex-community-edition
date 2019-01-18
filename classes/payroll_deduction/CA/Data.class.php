@@ -50,6 +50,22 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 	*/
 	var $basic_claim_code_options = array(
 		//Make sure updateCompanyDeductionForTaxYear() is run in the installer so it updates the Tax/Deduction records properly.
+		20180701 => array( //01-Jul-2018:
+						   'CA' => 11809, //Federal
+						   'BC' => 10412,
+						   'AB' => 18915,
+						   'SK' => 16065,
+						   'MB' => 9382,
+						   'QC' => 0,
+						   'ON' => 10354,
+						   'NL' => 9247,
+						   'NB' => 10043,
+						   'NS' => 11481, //See NS.class.php, as there are a low and high basic claim amounts now.
+						   'PE' => 9160,
+						   'NT' => 14492,
+						   'YT' => 11809,
+						   'NU' => 13325,
+		),
 		20180101 => array( //01-Jan-2018:
 						   'CA' => 11809, //Federal
 						   'BC' => 10412,
@@ -946,6 +962,13 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		return $arr['rate'];
 	}
 
+	function getFederalHighestRate() {
+		$arr = $this->getRateArray( 999999999, 'federal' );
+		Debug::text( 'Federal Highest Rate: ' . $arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
+
+		return $arr['rate'];
+	}
+
 	function getFederalRate( $income ) {
 		$arr = $this->getRateArray( $income, 'federal' );
 		Debug::text( 'Federal Rate: ' . $arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
@@ -963,6 +986,13 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 	function getProvincialLowestRate() {
 		$arr = $this->getRateArray( 1, 'provincial' );
 		Debug::text( 'Provincial Lowest Rate: ' . $arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
+
+		return $arr['rate'];
+	}
+
+	function getProvincialHighestRate() {
+		$arr = $this->getRateArray( 999999999, 'provincial' );
+		Debug::text( 'Provincial Highest Rate: ' . $arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $arr['rate'];
 	}

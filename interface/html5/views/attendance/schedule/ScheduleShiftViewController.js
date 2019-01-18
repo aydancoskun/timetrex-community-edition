@@ -55,6 +55,42 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 	},
 
+    onSaveClick: function( ignoreWarning ) {
+        var $this = this;
+        var record = {};
+        if ( this.is_mass_editing ) {
+            var record = [];
+            for ( var i = 0; i < this.mass_edit_record_ids.length; i++ ) {
+                var mass_record = {};
+                mass_record['id'] = $this.mass_edit_record_ids[i];
+                for (var key in this.edit_view_ui_dic) {
+
+                    if (!this.edit_view_ui_dic.hasOwnProperty(key)) {
+                        continue;
+                    }
+                    var widget = this.edit_view_ui_dic[key];
+                    if (Global.isSet(widget.isChecked)) {
+                        if (widget.isChecked() && widget.getEnabled()) {
+                            mass_record[key] = widget.getValue();
+                        }
+                    }
+                }
+                record.push(mass_record);
+            }
+        } else {
+            this.collectUIDataToCurrentEditRecord();
+            record = this.uniformVariable( this.current_edit_record );
+        }
+
+        this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
+            onResult: function( result ) {
+
+                $this.onSaveResult( result );
+
+            }
+        } );
+    },
+
 	//Make sure this.current_edit_record is updated before validate
 	validate: function() {
 		var $this = this;
@@ -79,9 +115,10 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				record.push(mass_record);
 			}
 		} else {
-			record = this.current_edit_record;
-			record = this.uniformVariable( record );
+			this.collectUIDataToCurrentEditRecord();
+			record = this.uniformVariable( this.current_edit_record );
 		}
+
 		this.api['validate' + this.api.key_name]( record, {
 			onResult: function( result ) {
 				$this.validateResult( result );
@@ -286,9 +323,13 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
 		form_item_input.TDatePicker( {field: 'start_date_stamp', validation_field: 'date_stamp'} );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_schedule_column1, '', null );
+
+		//Mass Add Date
+		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+		form_item_input.TRangePicker( {field: 'start_date_stamps', validation_field: 'date_stamp'} );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_schedule_column1, '', null, true );
 
 		// In
 		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
@@ -458,6 +499,58 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		form_item_input.TTextArea( {field: 'note', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_schedule_column1, '', null, null, true );
 		form_item_input.parent().width( '45%' );
+
+		if ( this.is_mass_editing ) {
+			this.detachElement('total_time');
+		} else {
+			this.attachElement('total_time');
+		}
+
+	},
+
+	setEditViewWidgetsMode: function() {
+		var did_clean_dic = {};
+		for ( var key in this.edit_view_ui_dic ) {
+			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
+				continue;
+			}
+			var widget = this.edit_view_ui_dic[key];
+			var widgetContainer = this.edit_view_form_item_dic[key];
+			var column = widget.parent().parent().parent();
+			var tab_id = column.parent().attr( 'id' );
+			if ( !column.hasClass( 'v-box' ) ) {
+				if ( !did_clean_dic[tab_id] ) {
+					did_clean_dic[tab_id] = true;
+				}
+			}
+			switch ( key ) {
+				case 'start_date_stamps':
+					if ( ( !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id ) && !this.is_mass_editing && !this.is_edit ) {
+						this.attachElement(key);
+						widget.parents('.edit-view-form-item-div').show();
+						break;
+					} else {
+						this.detachElement(key);
+						widget.parents('.edit-view-form-item-div').hide();
+						break;
+					}
+					break;
+				case 'start_date_stamp':
+					if ( ( !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id ) && !this.is_mass_editing && !this.is_edit ) {
+						this.detachElement(key);
+						widget.parents('.edit-view-form-item-div').hide();
+						break;
+					} else {
+						this.attachElement(key);
+						widget.parents('.edit-view-form-item-div').show();
+						break;
+					}
+					break;
+				default:
+					widget.css( 'opacity', 1 );
+			}
+
+		}
 
 	},
 
@@ -784,6 +877,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 					this.onJobQuickSearch( key, c_value )
 				}
 				break;
+			case 'absence_policy_id':
 			case 'status_id':
 				this.onStatusChange();
 				break;
@@ -880,10 +974,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			p_str += "</table>";
 
 			container.html( p_str );
-			this.attachElement( 'available_balance' );
-		} else {
-			this.detachElement( 'available_balance' );
 		}
+		this.onStatusChange();
 	},
 
 	getAbsencePolicy: function( user_ids ) {
@@ -901,11 +993,49 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				tmp_records.user_id = user_ids[key];
 				new_records.push( tmp_records );
 			}
+		} else {
+			new_records.push(this.current_edit_record)
 		}
-		if ( new_records.length > 0 ) {
-			return new_records;
+
+		if (this.current_edit_record.start_date_stamps && new_records.length > 0) {
+			//Allowing multiple dates
+			var edit_record = [];
+			for (var ur in new_records) {
+				var dates = this.uniformDates( new_records[ur].start_date_stamps, new_records[ur] );
+
+				for (var d in dates) {
+					var new_record = {}
+					for (var er in new_records[ur]) {
+						if (er == 'start_date_stamps') {
+							continue;
+						}
+						new_record[er] = new_records[ur][er];
+					}
+					new_record.start_date_stamp = dates[d];
+					new_record.date_stamp = dates[d];
+					edit_record.push(new_record)
+				}
+			}
+		} else {
+			edit_record = this.current_edit_record;
+			if ($.isArray(edit_record.start_date_stamp) && edit_record.start_date_stamp.length == 1) {
+				edit_record.start_date_stamp = edit_record.start_date_stamp[0];
+			}
 		}
-		return records;
+
+		return edit_record;
+	},
+
+	uniformDates: function( date_range, record ) {
+		dates = [];
+		if ( !Array.isArray( date_range ) && date_range.indexOf(' - ') == -1 ) {
+			dates = [date_range];
+		} else if ( Array.isArray( date_range ) ) {
+			dates = date_range;
+		} else {
+			dates = this.parserDatesRange( date_range );
+		}
+		return dates;
 	},
 
 	setCurrentEditRecordData: function() {
@@ -925,6 +1055,22 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			var widget = this.edit_view_ui_dic[key];
 			if ( Global.isSet( widget ) || key === 'date_stamp' ) {
 				switch ( key ) {
+					case 'start_date_stamp':
+					case 'start_date_stamps':
+						if ( !this.current_edit_record[key] ) {
+							continue;
+						}
+						var date_array;
+						if( !this.current_edit_record.id ) {
+							date_array = this.current_edit_record.start_date_stamps;
+						} else {
+							if ( Array.isArray(this.current_edit_record.start_date_stamp) == false ) {
+								date_array = [this.current_edit_record.start_date_stamp];
+							}
+						}
+						this.current_edit_record.start_date_stamp = date_array;
+						widget.setValue( date_array );
+						break;
 					case 'total_time':
 						this.pre_total_time = ( this.is_add ) ? 0 : this.current_edit_record[key];
 						break;
@@ -948,10 +1094,9 @@ ScheduleShiftViewController = BaseViewController.extend( {
 						widget.setValue( this.current_edit_record[key] );
 						this.getAbsencePolicy( this.current_edit_record[key] );
 						break;
-					case 'start_date_stamp':
-						break;
 					case 'date_stamp':
-						this.edit_view_ui_dic['start_date_stamp'].setValue( this.current_edit_record[key] );
+						this.current_edit_record['start_date_stamp'] = this.current_edit_record[key];
+						this.current_edit_record['start_date_stamps'] = this.current_edit_record[key];
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
@@ -962,17 +1107,32 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		}
 
 		this.collectUIDataToCurrentEditRecord();
-		this.getScheduleTotalTime();
-		this.getProjectedAbsencePolicyBalance();
 		this.setEditViewDataDone();
 
 	},
 
 	getScheduleTotalTime: function() {
-		var startTime = ( this.current_edit_record['date_stamp'] ) ? this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['start_time'] : ( (this.current_edit_record['start_time']) ? this.current_edit_record['start_time'] : ''  );
-		var endTime = ( this.current_edit_record['date_stamp'] ) ? this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['end_time'] : ( (this.current_edit_record['end_time']) ? this.current_edit_record['end_time'] : '' );
+		if ( this.is_mass_editing ) {
+            return;
+        }
+
+		var startTime, endTime, date_stamp;
+		if ( this.current_edit_record['start_date_stamps'] ) {
+			date_stamp = this.uniformDates( this.current_edit_record['start_date_stamps'], this.current_edit_record )[0];
+		} else {
+			date_stamp =  this.current_edit_record['date_stamp'];
+		}
+
+		var startTime = date_stamp + ' ' + this.current_edit_record['start_time'];
+		var endTime = date_stamp + ' ' + this.current_edit_record['end_time'];
 		var schedulePolicyId = ( this.current_edit_record['schedule_policy_id'] ) ? this.current_edit_record['schedule_policy_id'] : '';
+
+		if ( !schedulePolicyId ) {
+			return;
+		}
+
 		var user_id = this.current_edit_record.user_id;
+
 		this.total_time = this.api.getScheduleTotalTime( startTime, endTime, schedulePolicyId, user_id, {async: false} ).getResult();
 		var total_time = Global.secondToHHMMSS( this.total_time );
 
@@ -982,17 +1142,24 @@ ScheduleShiftViewController = BaseViewController.extend( {
 	},
 
 	setEditViewDataDone: function() {
-
 		this._super( 'setEditViewDataDone' );
 		this.onStatusChange();
+		this.getScheduleTotalTime();
+		this.setEditViewWidgetsMode();
+		this.getProjectedAbsencePolicyBalance();
 	},
 
 	onStatusChange: function() {
-
-		if ( this.current_edit_record['status_id'] == 10 ) {
-			this.detachElement( 'absence_policy_id' )
-		} else if ( this.current_edit_record['status_id'] == 20 ) {
-			this.attachElement( 'absence_policy_id' )
+		if ( this.current_edit_record['status_id'] == 20 ) {
+			this.attachElement( 'absence_policy_id' );
+			if ( this.current_edit_record['absence_policy_id'] && this.current_edit_record['absence_policy_id'] != TTUUID.zero_id ) {
+				this.attachElement( 'available_balance' );
+			} else {
+				this.detachElement( 'available_balance' );
+			}
+		} else {
+			this.detachElement( 'absence_policy_id' );
+			this.detachElement( 'available_balance' );
 		}
 
 		this.editFieldResize();

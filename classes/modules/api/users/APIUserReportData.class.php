@@ -55,9 +55,9 @@ class APIUserReportData extends APIFactory {
 	 * @param array $data filter data
 	 * @return array
 	 */
-	function getUserReportData( $data = NULL ) {
+	function getUserReportData( $data = NULL, $disable_paging = FALSE ) {
 
-		$data = $this->initializeFilterAndPager( $data );
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//Only allow getting report data for currently logged in user.
 		$data['filter_data']['user_id'] = $this->getCurrentUserObject()->getId();

@@ -215,7 +215,7 @@ class USPayrollDeductionTest2018 extends PHPUnit_Framework_TestCase {
 					}
 
 					Debug::text($i.'. Amount: This Year: '. $row['provincial_deduction'] .' Last Year: '. $pd_obj->getStatePayPeriodDeductions() .' Diff Amount: '. $amount_diff .' Percent: '. $amount_diff_percent .'%', __FILE__, __LINE__, __METHOD__, 10);
-					if ( $row['province'] != 'CA' AND $row['province'] != 'DC' AND $row['province'] != 'OR' AND $amount_diff > 5 ) { //Some states had significant changes.
+					if ( !in_array( $row['province'], array('CA', 'DC', 'OR', 'ID', 'KY', 'MO', 'NM', 'UT' ) ) AND $amount_diff > 5 ) { //Some states had significant changes.
 						$this->assertLessThan( 33, $amount_diff_percent ); //Reasonable margin of error.
 						$this->assertGreaterThan( 0, $amount_diff_percent );
 					}
@@ -227,6 +227,108 @@ class USPayrollDeductionTest2018 extends PHPUnit_Framework_TestCase {
 
 		//Make sure all rows are tested.
 		$this->assertEquals( $total_rows, ($i - 1 ) );
+	}
+
+	function testUS_ID_2018a_Test1() {
+		//Example from employer guide.
+		Debug::text('US - SemiMonthly - Beginning of 2018 01-Jan-2018: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('US', 'ID');
+		$pd_obj->setDate(strtotime('01-Jan-2018'));
+		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
+
+		$pd_obj->setFederalFilingStatus( 10 ); //Single
+		$pd_obj->setFederalAllowance( 2 );
+
+		$pd_obj->setStateFilingStatus( 10 ); //Single
+		$pd_obj->setStateAllowance( 4 ); //2 + 2
+
+		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setGrossPayPeriodIncome( 1212 );
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1212' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '11' );
+	}
+
+	function testUS_ID_2018a_Test2() {
+		//Example from employer guide.
+		Debug::text('US - SemiMonthly - Beginning of 2018 01-Jan-2018: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('US', 'ID');
+		$pd_obj->setDate(strtotime('01-Jan-2018'));
+		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
+
+		$pd_obj->setFederalFilingStatus( 20 ); //Married
+		$pd_obj->setFederalAllowance( 2 );
+
+		$pd_obj->setStateFilingStatus( 20 ); //Married
+		$pd_obj->setStateAllowance( 4 ); //2 + 2
+
+		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setGrossPayPeriodIncome( 1000 );
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '12' );
+	}
+
+	function testUS_LA_2018a_Test1() {
+		//Example from employer guide.
+		Debug::text('US - SemiMonthly - Beginning of 2018 01-Jan-2018: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('US', 'LA');
+		$pd_obj->setDate(strtotime('01-Jan-2018'));
+		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
+
+		$pd_obj->setFederalFilingStatus( 10 ); //Single
+		$pd_obj->setFederalAllowance( 0 );
+
+		$pd_obj->setStateFilingStatus( 10 ); //Single
+		$pd_obj->setStateAllowance( 1 );
+		$pd_obj->setUserValue2( 2 );
+
+		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setGrossPayPeriodIncome( 700 );
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '700' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '19.43' );
+	}
+
+	function testUS_LA_2018a_Test2() {
+		//Example from employer guide.
+		Debug::text('US - SemiMonthly - Beginning of 2018 01-Jan-2018: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('US', 'LA');
+		$pd_obj->setDate(strtotime('01-Jan-2018'));
+		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
+
+		$pd_obj->setFederalFilingStatus( 20 ); //Married
+		$pd_obj->setFederalAllowance( 0 );
+
+		$pd_obj->setStateFilingStatus( 20 ); //Married
+		$pd_obj->setStateAllowance( 2 );
+		$pd_obj->setUserValue2( 3 );
+
+		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setGrossPayPeriodIncome( 4600 );
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4600' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '157.12' );
 	}
 
 	function testUS_2018a_Test1() {

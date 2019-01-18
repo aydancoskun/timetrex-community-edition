@@ -1418,7 +1418,7 @@ class PayStubFactory extends Factory {
 			if ( $this->Validator->isError('earnings') == FALSE AND $this->Validator->isError('deductions') == FALSE AND $this->Validator->isError('net_pay') == FALSE ) {
 				$this->Validator->isTrue( 'net_pay',
 										  $this->checkNegativeNetPay(),
-										  TTi18n::gettext( 'Net Pay is a negative amount, deductions exceed earnings' ) );
+										  TTi18n::gettext( 'Net Pay (%1) is a negative amount, deductions (%2) exceed earnings (%3)', array( Misc::MoneyFormat( $this->getNetPay(), FALSE ), Misc::MoneyFormat( $this->getDeductions(), FALSE ), Misc::MoneyFormat( $this->getGrossPay(), FALSE ) ) ) );
 			}
 
 			Debug::Text('Validate: checkNetPay...', __FILE__, __LINE__, __METHOD__, 10);

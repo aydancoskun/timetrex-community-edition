@@ -289,8 +289,15 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 	function getFederalPayPeriodDeductions() {
 		if ( $this->getFormulaType() == 20 ) {
-			Debug::text( 'Formula Type: ' . $this->getFormulaType() . ' YTD Payable: ' . $this->getFederalTaxPayable() . ' YTD Paid: ' . $this->getYearToDateDeduction() . ' Current PP: ' . $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::text( 'Formula Type: ' . $this->getFormulaType() . ' Annual Tax Payable: ' . $this->getFederalTaxPayable() . ' YTD Paid: ' . $this->getYearToDateDeduction() . ' Current PP: ' . $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10 );
 			$retval = $this->calcNonPeriodicDeduction( $this->getFederalTaxPayable(), $this->getYearToDateDeduction() );
+
+			//Ensure that the tax amount doesn't exceed the highest possible tax rate plus 25% for "catch-up" purposes.
+			$highest_taxable_amount = bcmul( $this->getGrossPayPeriodIncome(), bcmul( $this->getFederalHighestRate(), 1.25 ) );
+			if ( $highest_taxable_amount > 0 AND $retval > $highest_taxable_amount ) {
+				$retval = $highest_taxable_amount;
+				Debug::text( 'Federal tax amount exceeds highest tax bracket rate, capping amount at: ' . $highest_taxable_amount, __FILE__, __LINE__, __METHOD__, 10 );
+			}
 		} else {
 			$retval = bcdiv( $this->getFederalTaxPayable(), $this->getAnnualPayPeriods() );
 		}
@@ -300,8 +307,15 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 	function getProvincialPayPeriodDeductions() {
 		if ( $this->getFormulaType() == 20 ) {
-			Debug::text( 'Formula Type: ' . $this->getFormulaType() . ' YTD Payable: ' . $this->getProvincialTaxPayable() . ' YTD Paid: ' . $this->getYearToDateDeduction() . ' Current PP: ' . $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::text( 'Formula Type: ' . $this->getFormulaType() . ' Annual Tax Payable: ' . $this->getProvincialTaxPayable() . ' YTD Paid: ' . $this->getYearToDateDeduction() . ' Current PP: ' . $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10 );
 			$retval = $this->calcNonPeriodicDeduction( $this->getProvincialTaxPayable(), $this->getYearToDateDeduction() );
+
+			//Ensure that the tax amount doesn't exceed the highest possible tax rate plus 25% for "catch-up" purposes.
+			$highest_taxable_amount = bcmul( $this->getGrossPayPeriodIncome(), bcmul( $this->getProvincialHighestRate(), 1.25 ) );
+			if ( $highest_taxable_amount > 0 AND $retval > $highest_taxable_amount ) {
+				$retval = $highest_taxable_amount;
+				Debug::text( 'Provincial tax amount exceeds highest tax bracket rate, capping amount at: ' . $highest_taxable_amount, __FILE__, __LINE__, __METHOD__, 10 );
+			}
 		} else {
 			$retval = bcdiv( $this->getProvincialTaxPayable(), $this->getAnnualPayPeriods() );
 		}
@@ -473,21 +487,26 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		$P = $this->getAnnualPayPeriods();
 
 		if ( $this->getFormulaType() == 20 ) {
-			$PR = $this->getRemainingPayPeriods();
-			$P_times_C = bcadd( $this->getYearToDateCPPContribution(), bcmul( $PR, $C ) );
-			Debug::text( 'PR: ' . $PR . ' C: ' . $C . ' YTD ' . $this->getYearToDateCPPContribution(), __FILE__, __LINE__, __METHOD__, 10 );
+			//$PR = $this->getRemainingPayPeriods();
+			//$P_times_C = bcadd( $this->getYearToDateCPPContribution(), bcmul( $PR, $C ) );
+			//Debug::text( 'PR: ' . $PR . ' C: ' . $C . ' YTD CPP: ' . $this->getYearToDateCPPContribution(), __FILE__, __LINE__, __METHOD__, 10 );
+
+			//The official formula (above) doesn't estimate the CPP over the remaining pay periods very well, especially when small bonuses are given as the tax is calculated higher than it should be.
+			// Therefore use annualizing factor with the YTD CPP and current pay stub CPP to estimate it better, just like we do with annual income.
+			Debug::text( ' C: ' . $C . ' YTD CPP: ' . $this->getYearToDateCPPContribution(), __FILE__, __LINE__, __METHOD__, 10 );
+			$P_times_C = bcmul( bcadd( $this->getYearToDateCPPContribution(), $C ), $this->getAnnualizingFactor() );
 		} else {
 			$P_times_C = bcmul( $P, $C );
 		}
+
 		if ( $P_times_C > $this->getCPPEmployeeMaximumContribution() ) {
 			$P_times_C = $this->getCPPEmployeeMaximumContribution();
 		}
 		Debug::text( 'P_times_C: ' . $P_times_C, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$PP_CPP = $this->getEmployeeCPPForPayPeriod(); //Raw CPP amount for the pay period ignoring any YTD amounts.
-		if ( $P_times_C < ( $this->getYearToDateCPPContribution() - $PP_CPP ) ) {
+		if ( ( $this->getYearToDateCPPContribution() + $this->getEmployeeCPPForPayPeriod() ) >= $this->getCPPEmployeeMaximumContribution() ) {
+			Debug::text( 'P_times_C in or after PP where maximum contribution is reached: ' . ( $this->getYearToDateCPPContribution() + $this->getEmployeeCPPForPayPeriod() ), __FILE__, __LINE__, __METHOD__, 10 );
 			$P_times_C = $this->getCPPEmployeeMaximumContribution();
-			Debug::text( 'P_times_C in or after PP where maximum contribution is reached: ' . $P_times_C, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		$K2_CPP = bcmul( $rate, $P_times_C );
@@ -510,21 +529,26 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		$P = $this->getAnnualPayPeriods();
 
 		if ( $this->getFormulaType() == 20 ) {
-			$PR = $this->getRemainingPayPeriods();
-			$P_times_C = bcadd( $this->getYearToDateEIContribution(), bcmul( $PR, $C ) );
-			Debug::text( 'PR: ' . $PR . ' C: ' . $C . ' YTD ' . $this->getYearToDateEIContribution(), __FILE__, __LINE__, __METHOD__, 10 );
+			//$PR = $this->getRemainingPayPeriods();
+			//$P_times_C = bcadd( $this->getYearToDateEIContribution(), bcmul( $PR, $C ) );
+			//Debug::text( 'PR: ' . $PR . ' C: ' . $C . ' YTD EI: ' . $this->getYearToDateEIContribution(), __FILE__, __LINE__, __METHOD__, 10 );
+
+			//The official formula (above) doesn't estimate the EI over the remaining pay periods very well, especially when small bonuses are given as the tax is calculated higher than it should be.
+			// Therefore use annualizing factor with the YTD EI and current pay stub CPP to estimate it better, just like we do with annual income.
+			Debug::text( ' C: ' . $C . ' YTD EI: ' . $this->getYearToDateEIContribution(), __FILE__, __LINE__, __METHOD__, 10 );
+			$P_times_C = bcmul( bcadd( $this->getYearToDateEIContribution(), $C ), $this->getAnnualizingFactor() );
 		} else {
 			$P_times_C = bcmul( $P, $C );
 		}
+
 		if ( $P_times_C > $this->getEIEmployeeMaximumContribution() ) {
 			$P_times_C = $this->getEIEmployeeMaximumContribution();
 		}
 		Debug::text( 'P_times_C: ' . $P_times_C, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$PP_EI = $this->getEmployeeEIForPayPeriod(); //Raw CPP amount for the pay period ignoring any YTD amounts.
-		if ( $P_times_C < ( $this->getYearToDateEIContribution() - $PP_EI ) ) {
+		if ( ( $this->getYearToDateEIContribution() + $this->getEmployeeEIForPayPeriod() ) >= $this->getEIEmployeeMaximumContribution() ) {
+			Debug::text( 'P_times_C in or after PP where maximum contribution is reached: ' . ( $this->getYearToDateEIContribution() + $this->getEmployeeEIForPayPeriod() ), __FILE__, __LINE__, __METHOD__, 10 );
 			$P_times_C = $this->getEIEmployeeMaximumContribution();
-			Debug::text( 'P_times_C in or after PP where maximum contribution is reached: ' . $P_times_C, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		$K2_EI = bcmul( $rate, $P_times_C );
@@ -701,26 +725,27 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			return 0;
 		}
 
-		$P = $this->getAnnualPayPeriods();
-		$I = $this->getGrossPayPeriodIncome();
-		$exemption = bcdiv( $this->getCPPBasicExemption(), $P );
-
-		//We used to just check if its payroll_run_id > 1 and remove the exemption in that case, but that fails when the first in-cycle run is ID=4 or something.
-		//  So switch this to just checking the formula type, and only remove the exemption if its a out-of-cycle run.
-		//     That won't handle the case of the last pay stub being a out-of-cycle run and no in-cycle run is done for that employee though, but not sure we can do much about that.
-		//  NOTE: If they always use the out-of-cycle formula, then their tax deductions will always be off by the CPP exemption amount.
-		if ( $this->getFormulaType() == 20 ) {
-			Debug::text( 'Out-of-Cycle formula, ignoring CPP exemption...', __FILE__, __LINE__, __METHOD__, 10 );
-			$exemption = 0;
-		}
-
-		Debug::text( 'P: ' . $P, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'I: ' . $I, __FILE__, __LINE__, __METHOD__, 10 );
-
-		$tmp2_C = bcmul( $this->getCPPEmployeeRate(), bcsub( $I, $exemption ) );
 		if ( isset( $this->data['employee_cpp_for_pp'] ) AND $this->data['employee_cpp_for_pp'] != NULL ) {
 			Debug::text( 'Using manually passed in Employee CPP for PP: ' . $this->data['employee_cpp_for_pp'], __FILE__, __LINE__, __METHOD__, 10 );
 			$tmp2_C = $this->data['employee_cpp_for_pp'];
+		} else {
+			$P = $this->getAnnualPayPeriods();
+			$I = $this->getGrossPayPeriodIncome();
+			$exemption = bcdiv( $this->getCPPBasicExemption(), $P );
+
+			//We used to just check if its payroll_run_id > 1 and remove the exemption in that case, but that fails when the first in-cycle run is ID=4 or something.
+			//  So switch this to just checking the formula type, and only remove the exemption if its a out-of-cycle run.
+			//     That won't handle the case of the last pay stub being a out-of-cycle run and no in-cycle run is done for that employee though, but not sure we can do much about that.
+			//  NOTE: If they always use the out-of-cycle formula, then their tax deductions will always be off by the CPP exemption amount.
+			if ( $this->getFormulaType() == 20 ) {
+				Debug::text( 'Out-of-Cycle formula, ignoring CPP exemption...', __FILE__, __LINE__, __METHOD__, 10 );
+				$exemption = 0;
+			}
+
+			Debug::text( 'P: ' . $P, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::text( 'I: ' . $I, __FILE__, __LINE__, __METHOD__, 10 );
+
+			$tmp2_C = bcmul( $this->getCPPEmployeeRate(), bcsub( $I, $exemption ) );
 		}
 
 		if ( $tmp2_C > $this->getCPPEmployeeMaximumContribution() ) {

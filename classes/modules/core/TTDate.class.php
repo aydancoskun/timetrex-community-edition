@@ -1988,6 +1988,10 @@ class TTDate {
 			}
 		}
 
+		if (  !is_numeric( $start_day_of_week ) ) {
+			$start_day_of_week = 0;
+		}
+
 		//Get day of week
 		$day_of_week = date('w', $epoch);
 		//Debug::text('Current Day of week: '. $day_of_week, __FILE__, __LINE__, __METHOD__, 10);

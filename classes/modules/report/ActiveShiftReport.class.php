@@ -236,6 +236,7 @@ class ActiveShiftReport extends Report {
 										'-1420-fax_phone' => TTi18n::gettext('Fax Phone'),
 										'-1430-home_email' => TTi18n::gettext('Home Email'),
 										'-1440-work_email' => TTi18n::gettext('Work Email'),
+										//'-1450-note' => TTi18n::gettext('Note'), //Employee note.
 
 										'-1495-tag' => TTi18n::gettext('Tags'),
 
@@ -252,7 +253,7 @@ class ActiveShiftReport extends Report {
 
 										'-1900-time_stamp' => TTi18n::gettext('Punch Time'),
 										'-1910-actual_time_stamp' => TTi18n::gettext('Actual Punch Time'),
-										'-2010-note' => TTi18n::gettext('Note'),
+										'-2010-punch_note' => TTi18n::gettext('Punch Note'), //Punch note rather than employee note.
 								);
 
 				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -644,6 +645,7 @@ class ActiveShiftReport extends Report {
 			$this->tmp_data['punch'][$p_obj->getUser()] = (array)$p_obj->getObjectAsArray( $this->getColumnDataConfig() );
 			$this->tmp_data['punch'][$p_obj->getUser()]['time_stamp'] = $p_obj->getTimeStamp();
 			$this->tmp_data['punch'][$p_obj->getUser()]['_status_id'] = $p_obj->getStatus(); //Always pass status_id so we can base BG color on that, for example in the Whos In/Out dashlet.
+			$this->tmp_data['punch'][$p_obj->getUser()]['punch_note'] = $p_obj->getColumn('note'); //Always pass status_id so we can base BG color on that, for example in the Whos In/Out dashlet.
 			if ( $p_obj->getStatus() == 10 ) {
 				$this->tmp_data['punch'][$p_obj->getUser()]['_bgcolor'] = array(225, 255, 225);
 				//$this->tmp_data['punch'][$p_obj->getUser()]['_fontcolor'] = array(25, 225, 25); //Green

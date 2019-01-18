@@ -41,9 +41,9 @@
 class PayrollDeduction_CA_SK extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
 			20180101 => array( //Same as 20170701
-					array('income' => 45225, 'rate' => 10.5, 'constant' => 0),
-					array('income' => 129214, 'rate' => 12.5, 'constant' => 905),
-					array('income' => 129214, 'rate' => 14.5, 'constant' => 3489),
+							   array('income' => 45225, 'rate' => 10.5, 'constant' => 0),
+							   array('income' => 129214, 'rate' => 12.5, 'constant' => 905),
+							   array('income' => 129214, 'rate' => 14.5, 'constant' => 3489),
 			),
 			20170701 => array(
 					array('income' => 45225, 'rate' => 10.5, 'constant' => 0),

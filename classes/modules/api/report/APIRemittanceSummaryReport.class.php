@@ -55,7 +55,7 @@ class APIRemittanceSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getRemittanceSummaryReport( $config, $format = 'pdf' ) {
+	function getRemittanceSummaryReport( $config = FALSE, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }

@@ -1239,15 +1239,18 @@ abstract class Factory {
 					preg_match('/^>=|>|<=|</i', $tmp_str, $operator );
 					//Debug::Arr($operator, ' Operator: ', __FILE__, __LINE__, __METHOD__, 10);
 					if ( isset($operator[0]) AND in_array( $operator[0], $operators ) ) {
-						if ( $operator[0] == '<=' ) {
-							$date = TTDate::getEndDayEpoch( $date );
-						} elseif ( $operator[0] == '>' ) {
-							$date = TTDate::getEndDayEpoch( $date );
+						if ( TTDate::getHour( $date ) == 0 AND TTDate::getMinute( $date ) == 0 ) { //If the date isn't midnight, its likely a timestamp has been specifically passed in, so don't modify it by using getEndOfDayEpoch()
+							if ( $operator[0] == '<=' ) {
+								$date = TTDate::getEndDayEpoch( $date );
+							} elseif ( $operator[0] == '>' ) {
+								$date = TTDate::getEndDayEpoch( $date );
+							}
 						}
+
 						if ( $format == 'timestamp' )  {
 							$date = '\''.$this->db->bindTimeStamp( $date ).'\'';
 						} elseif ( $format == 'datestamp' ) {
-							$date = '\''.$this->db->bindDateStamp( $date ).'\'';
+							$date = '\''.$this->db->bindDate( $date ).'\'';
 						}
 
 						if ( $include_blank_dates == TRUE ) {

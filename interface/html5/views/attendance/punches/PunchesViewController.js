@@ -314,13 +314,11 @@ PunchesViewController = BaseViewController.extend( {
 		//Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'punch_date', validation_field: 'date_stamp'} );
-
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', null, true );
 
 		//Mass Add Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TRangePicker( {field: 'punch_dates', validation_field: 'date_stamp'} );
-
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', null, true );
 
 		// Punch
@@ -575,24 +573,24 @@ PunchesViewController = BaseViewController.extend( {
 			}
 			switch ( key ) {
 				case 'punch_dates':
-					if ( this.is_mass_adding ) {
+					if ( !this.is_mass_editing && (this.is_mass_adding || !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id) ) {
 						this.attachElement(key);
-						widget.css( 'opacity', 1 );
+						widget.css( 'opacity', 1 ); //show
 						break;
 					} else {
 						this.detachElement(key);
-						widget.css( 'opacity', 0 );
+						widget.css( 'opacity', 0 ); //hide
 						break;
 					}
 					break;
 				case 'punch_date':
-					if ( this.is_mass_adding ) {
+					if ( !this.is_mass_editing && (this.is_mass_adding || !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id) ) {
 						this.detachElement(key);
-						widget.css( 'opacity', 0 );
+						widget.css( 'opacity', 0 ); //hide - opposite from above
 						break;
 					} else {
 						this.attachElement(key);
-						widget.css( 'opacity', 1 );
+						widget.css( 'opacity', 1 ); //show
 						break;
 					}
 					break;
@@ -686,24 +684,6 @@ PunchesViewController = BaseViewController.extend( {
 		}
 
 		return record;
-	},
-
-	parserDatesRange: function( date ) {
-		var dates = date.split( " - " );
-		var resultArray = [];
-		var beginDate = Global.strToDate( dates[0] );
-		var endDate = Global.strToDate( dates[1] );
-
-		var nextDate = beginDate;
-
-		while ( nextDate.getTime() < endDate.getTime() ) {
-			resultArray.push( nextDate.format() );
-			nextDate = new Date( new Date( nextDate.getTime() ).setDate( nextDate.getDate() + 1 ) );
-		}
-
-		resultArray.push( dates[1] );
-
-		return resultArray;
 	},
 
 	setCurrentEditRecordData: function() {
@@ -2042,6 +2022,8 @@ PunchesViewController = BaseViewController.extend( {
 				}
 				this.setEditMenu();
 				break;
+			case 'punch_date':
+				this.current_edit_record.punch_dates = [c_value];
 			case 'punch_dates':
 				this.setEditMenu();
 				break;
