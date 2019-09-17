@@ -1551,41 +1551,6 @@ class UserDeductionFactory extends Factory {
 
 				Debug::Text( 'Formula Retval: '. $retval, __FILE__, __LINE__, __METHOD__, 10 );
 				break;
-			/*
-			case 80: //US Earning Income Credit (EIC). Repealed as of 31-Dec-2010.
-				if ( $this->getUserValue1() == '' ) {
-					$user_value1 = $cd_obj->getUserValue1();
-				} else {
-					$user_value1 = $this->getUserValue1();
-				}
-
-				Debug::Text('UserValue1: '. $user_value1, __FILE__, __LINE__, __METHOD__, 10);
-
-				$amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
-
-				Debug::Text('Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
-				Debug::Text('Annual Pay Periods: '. $annual_pay_periods, __FILE__, __LINE__, __METHOD__, 10);
-
-				$pd_obj = new PayrollDeduction( 'US', NULL );
-				$pd_obj->setCompany( $this->getUserObject()->getCompany() );
-				$pd_obj->setUser( $this->getUser() );
-				$pd_obj->setDate( $pay_period_obj->getTransactionDate() );
-				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
-
-				if ( is_object( $this->getUserObject() ) ) {
-					$currency_id = $this->getUserObject()->getCurrency();
-					$pd_obj->setUserCurrency( $currency_id );
-					Debug::Text('User Currency ID: '. $currency_id, __FILE__, __LINE__, __METHOD__, 10);
-				}
-
-				$pd_obj->setEICFilingStatus( $user_value1 );
-				$pd_obj->setGrossPayPeriodIncome( $amount );
-
-				//Allow negative value, infact it always should be.
-				$retval = $pd_obj->getEIC();
-
-				break;
-			*/
 			case 82: //US - Medicare - Employee
 			case 83: //US - Medicare - Employer
 			case 84: //US - Social Security - Employee
@@ -1624,7 +1589,6 @@ class UserDeductionFactory extends Factory {
 
 				switch ( $cd_obj->getCalculation() ) {
 					case 82: //US - Medicare - Employee
-						$pd_obj->setMedicareFilingStatus( $user_value1 );
 						$pd_obj->setYearToDateGrossIncome( $cd_obj->getCalculationYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.
 						$retval = $pd_obj->getEmployeeMedicare();
 						break;

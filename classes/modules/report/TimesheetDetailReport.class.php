@@ -133,6 +133,9 @@ class TimesheetDetailReport extends Report {
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
 										'-2080-punch_branch_id' => TTi18n::gettext('Punch Branch'),
 										'-2090-punch_department_id' => TTi18n::gettext('Punch Department'),
+										'-2092-schedule_branch_id' => TTi18n::gettext('Schedule Branch'), //Since punch_branch filter doesn't filter schedules, we need a separate way to do that.
+										'-2094-schedule_department_id' => TTi18n::gettext('Schedule Department'),
+
 										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
 										'-2200-currency_id' => TTi18n::gettext('Currency'),
 
@@ -151,6 +154,10 @@ class TimesheetDetailReport extends Report {
 
 										'-2095-punch_job_id' => TTi18n::gettext('Punch Job'),
 										'-2096-punch_job_item_id' => TTi18n::gettext('Punch Task'),
+
+//										'-2097-schedule_job_id' => TTi18n::gettext('Schedule Job'), //Since punch_branch filter doesn't filter schedules, we need a separate way to do that.
+//										'-2098-schedule_job_item_id' => TTi18n::gettext('Schedule Task'),
+
 									);
 					$retval = array_merge( $retval, $corporate_edition_setup_fields );
 				}
@@ -1988,7 +1995,7 @@ class TimesheetDetailReport extends Report {
 			}
 
 			//Need to handle pay periods switching in the middle of a string of blank rows.
-			$blank_row_time_stamp = TTDate::getBeginDayEpoch($d);
+			$blank_row_time_stamp = TTDate::getMiddleDayEpoch($d);
 			//Debug::Text('Blank row timestamp: '. TTDate::getDate('DATE+TIME', $blank_row_time_stamp ) .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $prev_data['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $blank_row_time_stamp >= $prev_data['pay_period_end_date'] ) {
 				//Debug::Text('aBlank row timestamp: '. TTDate::getDate('DATE+TIME', $blank_row_time_stamp ) .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $prev_data['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);

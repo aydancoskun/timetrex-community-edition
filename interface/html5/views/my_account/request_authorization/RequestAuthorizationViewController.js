@@ -578,15 +578,8 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 					onResult: function ( result ) {
 						var retval = result.getResult();
 						if ( retval != false ) {
-							$this.search( null, null, null, function ( return_value ) {
-								return_value = return_value.getResult();
-								if ( $.type( return_value ) !== 'array' || return_value.length < 1 ) {
-									$this.onCancelClick( true );
-								} else {
-									$this.is_changed = false;
-									$this.onRightArrowClick();
-								}
-							} );
+							$this.is_changed = false;
+							$this.onRightArrowClick( $this.search() );
 						} else {
 							$this.setErrorMenu();
 							$this.setErrorTips( result, true );
@@ -601,11 +594,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		var $this = this;
 
 		function doNext() {
-			if ( $this.grid.getGridParam( 'data' ).length === 1 ) {
-				$this.onCancelClick( true );
-			} else {
-				$this.onRightArrowClick();
-			}
+			$this.onRightArrowClick( function() { $this.search(); } );
 		}
 
 		if ( this.is_changed ) {
@@ -635,13 +624,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 
 			$this.authorization_api['setAuthorization']( [filter], {
 				onResult: function( res ) {
-					$this.search( null, null, null, function( result ) {
-						if ( $.type( result.getResult() ) !== 'array' || result.getResult().length < 1 ) {
-							$this.onCancelClick( true );
-						} else {
-							$this.onRightArrowClick();
-						}
-					} );
+					$this.onRightArrowClick( function() { $this.search(); } );
 				}
 			} );
 		}

@@ -1919,6 +1919,17 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '08-Nov-16 12:00 PM PST'); //normal operation
 	}
 
+	function testDateOfNextQuarter() {
+		$this->assertEquals( TTDate::getDate('DATE+TIME', TTDate::getDateOfNextQuarter( strtotime('01-Apr-19 12:00:00'), 1, 1 ) ), '01-Jul-19 12:00 PM -08');
+
+		$this->assertEquals( TTDate::getDate('DATE+TIME', TTDate::getDateOfNextQuarter( strtotime('11-Sep-1981 12:00:00'), 3, 1 ) ), '03-Oct-81 12:00 PM -08');
+
+		$this->assertEquals( TTDate::getDate('DATE+TIME', TTDate::getDateOfNextQuarter( strtotime('31-Jan-2019 12:00:00'), 31, 1 ) ), '30-Apr-19 12:00 PM -08');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', TTDate::getDateOfNextQuarter( strtotime('30-Apr-2019 12:00:00'), 31, 1 ) ), '31-Jul-19 12:00 PM -08');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', TTDate::getDateOfNextQuarter( strtotime('31-Jul-2019 12:00:00'), 31, 1 ) ), '31-Oct-19 12:00 PM -08');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', TTDate::getDateOfNextQuarter( strtotime('31-Oct-2019 12:00:00'), 31, 1 ) ), '31-Jan-20 12:00 PM -08');
+	}
+
 	function testGetDateArray() {
 		$date_arr = TTDate::getDateArray( strtotime('01-Dec-2016'), strtotime('31-Dec-2016') ); //No DayOfWeek filter.
 		$this->assertEquals( count($date_arr), 31 );

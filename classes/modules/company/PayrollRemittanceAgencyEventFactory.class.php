@@ -1177,7 +1177,12 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 		switch ($frequency_type_id) {
 			case 1000: //each pay period
+				//For pay periods, we need to start from the last end date if there is one specified, so there is never any gaps between the periods when using the tax wizard to complete an event and advance the dates.
+				if ( $this->getEndDate() != '' ) {
+					$last_due_date = TTDate::getMiddleDayEpoch( $this->getEndDate() );
+				}
 				$last_due_date -= 86400;
+
 				/** @var PayPeriodListFactory $pplf */
 				$pplf = TTnew('PayPeriodListFactory');
 				if ( is_object( $this->getPayrollRemittanceAgencyObject() ) AND is_object( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject() ) ) {
@@ -1192,7 +1197,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 								//  However we need to handle cases where terminated employees may be paid earlier in the pay period. Which can be handled two ways:
 								//     1. Remit to the agency immediately after an early payroll run.
 								//     2. Wait until the end of the pay period and remit everyone together.
-								//  We will opt of #2 by default. So the start date must be the day after the preivous transaction date (so we don't overlap and double report information)
+								//  We will opt of #2 by default. So the start date must be the day after the previous transaction date (so we don't overlap and double report information)
 								//  and end_date is the end day epoch of the current transaction date.
 								//
 								//The due date is the transaction date day plus the current event's due date delay days
@@ -2227,7 +2232,15 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 									$template_name = 'by_employee';
 									$report_obj_name = 'FormW2Report';
 
+									//This is required so FormW2Report knows what state we are trying to eFile for, so it can narrow down its choices.
 									$report_data_override['config']['form']['efile_state'] = $this->getPayrollRemittanceAgencyObject()->getProvince();
+
+									if ( $this->getPayrollRemittanceAgencyObject()->getType() == 30 ) {
+										$report_data_override['config']['form']['efile_district'] = TRUE;
+									}
+
+									$report_data_override['config']['form']['payroll_remittance_agency_id'] = $this->getPayrollRemittanceAgencyObject()->getId();
+
 									break;
 							}
 							break;

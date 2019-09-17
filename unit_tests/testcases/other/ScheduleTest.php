@@ -34,9 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-/**
- * @group Schedule
- */
 class ScheduleTest extends PHPUnit_Framework_TestCase {
 	protected $company_id = NULL;
 	protected $user_id = NULL;
@@ -497,6 +494,10 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		- Spanning DST.
 
 	*/
+
+	/**
+	 * @group Schedule_testScheduleA
+	 */
 	function testScheduleA() {
 		global $dd;
 
@@ -531,6 +532,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Schedule_testScheduleB
+	 */
 	function testScheduleB() {
 		global $dd;
 
@@ -567,8 +571,11 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
+	/**
+	 * @group Schedule_testScheduleDSTFall
+	 */
 	function testScheduleDSTFall() {
+		//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
@@ -601,8 +608,11 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
+	/**
+	 * @group Schedule_testScheduleDSTFallB
+	 */
 	function testScheduleDSTFallB() {
+		//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
@@ -639,8 +649,11 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//DST time should be recorded based on the time the employee actually works, therefore one hour less on this day.
+	/**
+	 * @group Schedule_testScheduleDSTSpring
+	 */
 	function testScheduleDSTSpring() {
+		//DST time should be recorded based on the time the employee actually works, therefore one hour less on this day.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
@@ -673,7 +686,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-
+	/**
+	 * @group Schedule_testScheduleUnderTimePolicyA
+	 */
 	function testScheduleUnderTimePolicyA() {
 		global $dd;
 
@@ -814,6 +829,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Schedule_testScheduleUnderTimePolicyB
+	 */
 	function testScheduleUnderTimePolicyB() {
 		global $dd;
 
@@ -911,6 +929,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Schedule_testScheduleUnderTimePolicyC
+	 */
 	function testScheduleUnderTimePolicyC() {
 		global $dd;
 
@@ -984,6 +1005,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Schedule_testScheduleConflictA
+	 */
 	function testScheduleConflictA() {
 		global $dd;
 
@@ -1102,6 +1126,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Schedule_testOpenScheduleConflictA
+	 */
 	function testOpenScheduleConflictA() {
 		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return TRUE;
@@ -1277,6 +1304,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Schedule_testOpenScheduleConflictB
+	 */
 	function testOpenScheduleConflictB() {
 		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return TRUE;

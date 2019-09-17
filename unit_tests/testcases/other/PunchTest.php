@@ -7799,6 +7799,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$pf->CommitTransaction();
 	}
 
+	/**
+	 * @group Punch_testStationCheckSource
+	 */
 	function testStationCheckSourceNetMask() {
 		global $dd;
 
@@ -7829,7 +7832,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4f::/112' ), FALSE );
 	}
 
-
+	/**
+	 * @group Punch_testStationCheckSource
+	 */
 	function testStationCheckSourceANY() {
 		global $dd;
 
@@ -7851,6 +7856,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
 	}
 
+	/**
+	 * @group Punch_testStationCheckSource
+	 */
 	function testStationCheckSourceIPv4() {
 		global $dd;
 
@@ -7872,6 +7880,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE );
 	}
 
+	/**
+	 * @group Punch_testStationCheckSource
+	 */
 	function testStationCheckSourceIPv4NetMaskA() {
 		global $dd;
 
@@ -7893,6 +7904,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE );
 	}
 
+	/**
+	 * @group Punch_testStationCheckSource
+	 */
 	function testStationCheckSourceIPv4NetMaskB() {
 		global $dd;
 
@@ -7920,6 +7934,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE );
 	}
 
+	/**
+	 * @group Punch_testStationCheckSource
+	 */
 	function testStationCheckSourceIPv6() {
 		global $dd;
 
@@ -7941,6 +7958,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
 	}
 
+	/**
+	 * @group Punch_testStationCheckSource
+	 */
 	function testStationCheckSourceIPv6NetMaskA() {
 		global $dd;
 
@@ -7966,6 +7986,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE);
 	}
 
+	/**
+	 * @group Punch_testStationCheckSource
+	 */
 	function testStationCheckSourceIPv6NetMaskB() {
 		global $dd;
 

@@ -11,7 +11,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	tax_formula_type_array: null,
 	calculation_array: null,
 	account_amount_type_array: null,
-	us_eic_filing_status_array: null,
 	federal_filing_status_array: null,
 	apply_frequency_array: null,
 	apply_payroll_run_type_array: null,
@@ -108,11 +107,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'length_of_service_unit' );
 		this.initDropDownOption( 'look_back_unit' );
 		this.initDropDownOption( 'country', 'country', this.company_api );
-		this.initDropDownOption( 'us_eic_filing_status' );
-		this.initDropDownOption( 'us_medicare_filing_status' );
 		this.initDropDownOption( 'apply_payroll_run_type' );
 
-		this.initDropDownOption( 'us_eic_filing_status' );
 		this.initDropDownOption( 'federal_filing_status' );
 		this.initDropDownOption( 'state_dc_filing_status' );
 		this.initDropDownOption( 'state_al_filing_status' );
@@ -174,6 +170,29 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		}
 
 		context_btn.addClass( 'disable-image' );
+	},
+
+	// The following functions are to disable various buttons on Employee Settings tab.
+	// This was due to users getting confused as to what they were deleting (employee entry in table vs tax/deduc record). See issue #2688
+	disableIconOnEmployeeSettingsTab: function ( context_btn ) {
+		if ( this.getEditViewActiveTabName() === 'tab_employee_setting' ) {
+			context_btn.addClass( 'disable-image' );
+		}
+	},
+	setEditMenuDeleteIcon: function ( context_btn ) {
+		this.disableIconOnEmployeeSettingsTab( context_btn );
+	},
+	setEditMenuDeleteAndNextIcon: function ( context_btn ) {
+		this.disableIconOnEmployeeSettingsTab( context_btn );
+	},
+	setEditMenuCopyIcon: function ( context_btn ) {
+		this.disableIconOnEmployeeSettingsTab( context_btn );
+	},
+	setEditMenuCopyAndAddIcon: function ( context_btn ) {
+		this.disableIconOnEmployeeSettingsTab( context_btn );
+	},
+	setEditMenuSaveAndCopyIcon: function ( context_btn ) {
+		this.disableIconOnEmployeeSettingsTab( context_btn );
 	},
 
 	saveInsideEditorData: function( callBack ) {
@@ -1058,6 +1077,10 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			return;
 		}
 
+		// Specify which menu to use for Employee Settings tab, and use disableIconOnEmployeeSettingsTab() to disable certain icons. Related to #2688
+		this.buildContextMenu( true );
+		this.setEditMenu();
+
 		var args = { filter_data: {} };
 
 		args.filter_data.company_deduction_id = this.current_edit_record.id;
@@ -1563,34 +1586,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					title: false,
 					editable: true,
 					edittype: 'text'
-				};
-				column_info_array.push( column_info );
-				break;
-			case '80':
-			case '82':
-				columnOptions = this.us_eic_filing_status_array;
-
-				for ( var i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
-				column_info = {
-					name: 'user_value1',
-					index: 'user_value1',
-					label: $.i18n._( 'Filing Status' ),
-					width: 100,
-					sortable: false,
-					formatter: 'select',
-					editable: true,
-					title: false,
-					edittype: 'select',
-					editoptions: { value: column_options_string }
 				};
 				column_info_array.push( column_info );
 				break;
@@ -3042,14 +3037,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 						$this.attachElement( 'df_100' );
 						$this.edit_view_ui_dic.df_100.html( Global.getUpgradeMessage() );
 					}
-					break;
-				case '80': //US - Advanced EIC Formula
-				case '82':
-					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.us_eic_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 					break;
 				case '100-US':
 				case '100-CR' :

@@ -14,61 +14,6 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIScheduleSummaryReport' ))();
 	},
 
-	openEditView: function() {
-
-		var $this = this;
-		$this.initOptions( function( result ) {
-
-			for ( var i = 0; i < $this.setup_fields_array.length; i++ ) {
-				var item = $this.setup_fields_array[i];
-				if ( item.value === 'status_id' ) {
-					item.value = 'filter';
-				}
-			}
-
-			if ( !$this.edit_view ) {
-				$this.initEditViewUI( $this.viewId, $this.view_file );
-			}
-
-			$this.do_validate_after_create_ui = true;
-
-			$this.getReportData( function( result ) {
-				// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
-				var edit_item;
-				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
-					for ( var i = 0; i < result.length; i++ ) {
-						if ( result[i].id === LocalCacheData.default_edit_id_for_next_open_edit_view ) {
-							edit_item = result[i];
-						}
-					}
-					LocalCacheData.default_edit_id_for_next_open_edit_view = null;
-				} else {
-					edit_item = $this.getDefaultReport( result );
-				}
-
-				if ( result && result.length > 0 ) {
-					$this.current_saved_report = edit_item;
-					$this.saved_report_array = result;
-				} else {
-					$this.current_saved_report = {};
-					$this.saved_report_array = [];
-				}
-
-				if ( !$.isEmptyObject( $this.current_saved_report ) && $this.current_saved_report.hasOwnProperty( 'data' ) && $this.current_saved_report.data.hasOwnProperty( 'config' ) && $this.current_saved_report.data.config.hasOwnProperty( 'filter_' ) ) {
-					$this.current_saved_report.data.config.filter = $this.current_saved_report.data.config.filter_;
-					delete $this.current_saved_report.data.config.filter_;
-				}
-				$this.current_edit_record = {};
-				$this.visible_report_values = {};
-
-				$this.initEditView();
-
-			} );
-
-		} );
-
-	},
-
 	buildContextMenuModels: function() {
 
 		//Context Menu
@@ -192,6 +137,16 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 		} );
 		return [menu];
 
+	},
+
+	// Overriding empty ReportBaseViewController.processFilterField() called from base.openEditView to provide view specific logic.
+	processFilterField: function() {
+		for ( var i = 0; i < this.setup_fields_array.length; i++ ) {
+			var item = this.setup_fields_array[i];
+			if ( item.value === 'status_id' ) {
+				item.value = 'filter';
+			}
+		}
 	},
 
 	onReportMenuClick: function( id ) {

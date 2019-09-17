@@ -137,6 +137,7 @@ ReportBaseViewController = BaseViewController.extend( {
 							$this.current_saved_report = result[0];
 							$this.current_edit_record = {};
 							$this.visible_report_values = {};
+							LocalCacheData.default_edit_id_for_next_open_edit_view = null;
 							$this.initEditView();
 					}});
 

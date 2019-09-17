@@ -3,8 +3,6 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 	_required_files: ['APIFormW2Report', 'APIPayStubEntryAccount', 'APICompanyDeduction', 'APICurrency'],
 
 	kind_of_employer_array: null,
-	efile_state_array: null,
-	state_field_array: null,
 
 	initReport: function( options ) {
 		this.script_name = 'FormW2Report';
@@ -189,23 +187,8 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		];
 
 		this.initDropDownOptions( options, function( result ) {
-			new (APIFactory.getAPIClass( 'APICompany' ))().getOptions( 'province', 'US', {
-				onResult: function( provinceResult ) {
-
-					$this.province_array = Global.buildRecordArray( provinceResult.getResult() );
-
-					var eFile_array = Global.buildRecordArray( provinceResult.getResult() );
-
-					eFile_array.unshift( { id: 999, label: $.i18n._( 'Federal' ), value: '0' } );
-
-					$this.efile_state_array = eFile_array;
-
-					callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
-				}
-			} );
-
+			callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
 		} );
-
 	},
 
 	onReportMenuClick: function( id ) {

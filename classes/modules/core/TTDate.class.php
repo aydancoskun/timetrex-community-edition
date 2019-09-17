@@ -2071,25 +2071,19 @@ class TTDate {
 	 * @param int $month_of_quarter
 	 * @return false|int|mixed
 	 */
-	public static function getDateOfNextQuarter( $anchor_epoch, $day_of_month = 1, $month_of_quarter = 1  ) {
-		$quarter_date = self::getBeginQuarterEpoch($anchor_epoch);
-		$month_of_quarter--;
+	public static function getDateOfNextQuarter( $anchor_epoch, $day_of_month = 1, $month_of_quarter = 1 ) {
+		$quarter_date = self::getBeginQuarterEpoch( $anchor_epoch );
 
-		$month = ((int)date('m', $quarter_date)) + $month_of_quarter;
+		$month = ( (int)date( 'm', $quarter_date ) + ( ( $month_of_quarter - 1 ) + 3 ) );
 
-
-		$first_day_of_select_month = mktime(12,0,0, $month, 1, date('Y', $quarter_date));
+		$first_day_of_select_month = mktime( 12, 0, 0, $month, 1, date( 'Y', $quarter_date ) );
 		$days_in_month = TTDate::getDaysInMonth( $first_day_of_select_month );
-		if ( $day_of_month> $days_in_month ) {
+		if ( $day_of_month > $days_in_month ) {
 			$day_of_month = $days_in_month;
 		}
-		$quarter_date = mktime(12,0,0, $month, $day_of_month, date('Y', $quarter_date));
 
-		$attempts = 0; //sane attempts < 5.
-		while ( $quarter_date <= $anchor_epoch AND $attempts < 10) {
-			$quarter_date = self::incrementDate( $quarter_date, 3, 'month' );
-			$attempts++;
-		}
+		$quarter_date = mktime( 12, 0, 0, $month, $day_of_month, date( 'Y', $quarter_date ) );
+
 		//Debug::text('next quarter: '. date('r', $quarter_date), __FILE__, __LINE__, __METHOD__, 10);
 		return $quarter_date;
 	}

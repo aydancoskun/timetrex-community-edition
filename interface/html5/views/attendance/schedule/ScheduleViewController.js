@@ -181,11 +181,13 @@ ScheduleViewController = BaseViewController.extend( {
 	initPermission: function() {
 		this._super( 'initPermission' );
 
-		if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
-			this.show_search_tab = true;
-		} else {
-			this.show_search_tab = false;
-		}
+		this.show_search_tab = true;
+		//See buildSearchFields() for additional permission checks.
+		// if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
+		// 	this.show_search_tab = true;
+		// } else {
+		// 	this.show_search_tab = false;
+		// }
 
 		if ( this.jobUIValidate() ) {
 			this.show_job_ui = true;
@@ -357,9 +359,13 @@ ScheduleViewController = BaseViewController.extend( {
 
 				res = Global.buildTreeRecord( res );
 				$this.user_group_array = res;
-				$this.basic_search_field_ui_dic['group_ids'].setSourceData( res );
-				$this.adv_search_field_ui_dic['group_ids'].setSourceData( res );
 
+				if ( $this.basic_search_field_ui_dic['group_ids'] ) {
+					$this.basic_search_field_ui_dic['group_ids'].setSourceData( res );
+				}
+				if ( $this.adv_search_field_ui_dic['group_ids'] ) {
+					$this.adv_search_field_ui_dic['group_ids'].setSourceData( res );
+				}
 			}
 		} );
 
@@ -7801,189 +7807,266 @@ ScheduleViewController = BaseViewController.extend( {
 				}
 				this.schedule_source.push( over_all_total_row );
 				break;
-
 			}
-
 		}
-
 	},
 
-	buildSearchFields: function() {
-
+	buildSearchFields: function () {
 		this._super( 'buildSearchFields' );
 		var $this = this;
 
 		var default_args = { permission_section: 'schedule' };
-		this.search_fields = [
 
-			new SearchField( {
-				label: $.i18n._( 'Status' ),
-				in_column: 1,
-				field: 'status_id',
-				multiple: true,
-				basic_search: true,
-				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+		if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
+			this.search_fields = [
+				new SearchField( {
+					label: $.i18n._( 'Status' ),
+					in_column: 1,
+					field: 'status_id',
+					multiple: true,
+					basic_search: true,
+					adv_search: true,
+					layout_name: ALayoutIDs.OPTION_COLUMN,
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Schedule Branch' ),
-				in_column: 1,
-				field: 'schedule_branch_ids',
-				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
-				multiple: true,
-				basic_search: true,
-				adv_search: true,
-				script_name: 'BranchView',
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Schedule Branch' ),
+					in_column: 1,
+					field: 'schedule_branch_ids',
+					layout_name: ALayoutIDs.BRANCH,
+					api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+					multiple: true,
+					basic_search: true,
+					adv_search: true,
+					script_name: 'BranchView',
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Schedule Department' ),
-				in_column: 1,
-				field: 'department_ids',
-				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
-				multiple: true,
-				basic_search: true,
-				adv_search: true,
-				script_name: 'DepartmentView',
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Schedule Department' ),
+					in_column: 1,
+					field: 'department_ids',
+					layout_name: ALayoutIDs.DEPARTMENT,
+					api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+					multiple: true,
+					basic_search: true,
+					adv_search: true,
+					script_name: 'DepartmentView',
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Default Branch' ),
-				in_column: 1,
-				field: 'default_branch_ids',
-				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
-				multiple: true,
-				basic_search: false,
-				adv_search: true,
-				script_name: 'BranchView',
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Default Branch' ),
+					in_column: 1,
+					field: 'default_branch_ids',
+					layout_name: ALayoutIDs.BRANCH,
+					api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+					multiple: true,
+					basic_search: false,
+					adv_search: true,
+					script_name: 'BranchView',
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Default Department' ),
-				in_column: 1,
-				field: 'default_department_ids',
-				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
-				multiple: true,
-				basic_search: false,
-				adv_search: true,
-				script_name: 'DepartmentView',
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Default Department' ),
+					in_column: 1,
+					field: 'default_department_ids',
+					layout_name: ALayoutIDs.DEPARTMENT,
+					api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+					multiple: true,
+					basic_search: false,
+					adv_search: true,
+					script_name: 'DepartmentView',
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Group' ),
-				in_column: 2,
-				multiple: true,
-				field: 'group_ids',
-				layout_name: ALayoutIDs.TREE_COLUMN,
-				tree_mode: true,
-				basic_search: true,
-				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Group' ),
+					in_column: 2,
+					multiple: true,
+					field: 'group_ids',
+					layout_name: ALayoutIDs.TREE_COLUMN,
+					tree_mode: true,
+					basic_search: true,
+					adv_search: true,
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Title' ),
-				field: 'title_id',
-				in_column: 2,
-				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
-				multiple: true,
-				basic_search: true,
-				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Title' ),
+					field: 'title_id',
+					in_column: 2,
+					layout_name: ALayoutIDs.JOB_TITLE,
+					api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
+					multiple: true,
+					basic_search: true,
+					adv_search: true,
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Job' ),
-				in_column: 2,
-				field: 'job_id',
-				layout_name: ALayoutIDs.JOB,
-				api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? (APIFactory.getAPIClass( 'APIJob' )) : null,
-				multiple: true,
-				basic_search: false,
-				adv_search: (this.show_job_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )),
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Job' ),
+					in_column: 2,
+					field: 'job_id',
+					layout_name: ALayoutIDs.JOB,
+					api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
+					multiple: true,
+					basic_search: false,
+					adv_search: ( this.show_job_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ),
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Task' ),
-				in_column: 2,
-				field: 'job_item_id',
-				layout_name: ALayoutIDs.JOB_ITEM,
-				api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? (APIFactory.getAPIClass( 'APIJobItem' )) : null,
-				multiple: true,
-				basic_search: false,
-				adv_search: (this.show_job_item_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )),
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Task' ),
+					in_column: 2,
+					field: 'job_item_id',
+					layout_name: ALayoutIDs.JOB_ITEM,
+					api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
+					multiple: true,
+					basic_search: false,
+					adv_search: ( this.show_job_item_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ),
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Recurring Template' ),
-				field: 'recurring_schedule_template_control_id',
-				in_column: 2,
-				layout_name: ALayoutIDs.RECURRING_SCHEDULE_CONTROL,
-				api_class: (APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' )),
-				multiple: true,
-				basic_search: false,
-				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Recurring Template' ),
+					field: 'recurring_schedule_template_control_id',
+					in_column: 2,
+					layout_name: ALayoutIDs.RECURRING_SCHEDULE_CONTROL,
+					api_class: ( APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' ) ),
+					multiple: true,
+					basic_search: false,
+					adv_search: true,
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Absence Policy' ),
-				field: 'absence_policy_id',
-				in_column: 3,
-				layout_name: ALayoutIDs.ABSENCES_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
-				multiple: true,
-				basic_search: false,
-				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Absence Policy' ),
+					field: 'absence_policy_id',
+					in_column: 3,
+					layout_name: ALayoutIDs.ABSENCES_POLICY,
+					api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
+					multiple: true,
+					basic_search: false,
+					adv_search: true,
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Include Employees' ),
-				in_column: 3,
-				field: 'include_user_ids',
-				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
-				multiple: true,
-				basic_search: false,
-				adv_search: true,
-				default_args: default_args,
-				addition_source_function: (function( target, source_data ) {
-					return $this.onEmployeeSourceCreate( target, source_data );
-				}),
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
+				new SearchField( {
+					label: $.i18n._( 'Include Employees' ),
+					in_column: 3,
+					field: 'include_user_ids',
+					layout_name: ALayoutIDs.USER,
+					api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+					multiple: true,
+					basic_search: false,
+					adv_search: true,
+					default_args: default_args,
+					addition_source_function: ( function ( target, source_data ) {
+						return $this.onEmployeeSourceCreate( target, source_data );
+					} ),
+					form_item_type: FormItemType.AWESOME_BOX
+				} ),
 
-			new SearchField( {
-				label: $.i18n._( 'Exclude Employees' ),
-				in_column: 3,
-				field: 'exclude_user_ids',
-				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
-				multiple: true,
-				basic_search: false,
-				adv_search: true,
-				default_args: default_args,
-				addition_source_function: (function( target, source_data ) {
-					return $this.onEmployeeSourceCreate( target, source_data );
-				}),
-				form_item_type: FormItemType.AWESOME_BOX
-			} )
+				new SearchField( {
+					label: $.i18n._( 'Exclude Employees' ),
+					in_column: 3,
+					field: 'exclude_user_ids',
+					layout_name: ALayoutIDs.USER,
+					api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+					multiple: true,
+					basic_search: false,
+					adv_search: true,
+					default_args: default_args,
+					addition_source_function: ( function ( target, source_data ) {
+						return $this.onEmployeeSourceCreate( target, source_data );
+					} ),
+					form_item_type: FormItemType.AWESOME_BOX
+				} )
+			];
+		} else {
+			//Allow regular employees to add job/task columns if needed, and do some other basic searches.
+			this.search_fields = [];
 
-		];
+			this.search_fields.push(
+				new SearchField( {
+					label: $.i18n._( 'Status' ),
+					in_column: 1,
+					field: 'status_id',
+					multiple: true,
+					basic_search: true,
+					adv_search: false,
+					layout_name: ALayoutIDs.OPTION_COLUMN,
+					form_item_type: FormItemType.AWESOME_BOX
+				} ) );
+
+			//Check punch permissions rather than schedule, since this is a regular employee who likely wouldn't have
+			if ( PermissionManager.validate( 'punch', 'edit_branch' ) || PermissionManager.validate( this.permission_id, 'edit_branch' ) ) {
+				this.search_fields.push(
+					new SearchField( {
+						label: $.i18n._( 'Schedule Branch' ),
+						in_column: 1,
+						field: 'schedule_branch_ids',
+						layout_name: ALayoutIDs.BRANCH,
+						api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+						multiple: true,
+						basic_search: true,
+						adv_search: false,
+						script_name: 'BranchView',
+						form_item_type: FormItemType.AWESOME_BOX
+					} ) );
+			}
+
+			if ( PermissionManager.validate( 'punch', 'edit_department' ) || PermissionManager.validate( this.permission_id, 'edit_department' ) ) {
+				this.search_fields.push(
+					new SearchField( {
+						label: $.i18n._( 'Schedule Department' ),
+						in_column: 1,
+						field: 'department_ids',
+						layout_name: ALayoutIDs.DEPARTMENT,
+						api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+						multiple: true,
+						basic_search: true,
+						adv_search: false,
+						script_name: 'DepartmentView',
+						form_item_type: FormItemType.AWESOME_BOX
+					} ) );
+			}
+
+			//Could be permission issues with this, so disable for now.
+			// if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 && ( PermissionManager.validate( 'punch', 'edit_job' ) || PermissionManager.validate( this.permission_id, 'edit_job' ) ) ) {
+			// 	this.search_fields.push(
+			// 		new SearchField( {
+			// 			label: $.i18n._( 'Job' ),
+			// 			in_column: 2,
+			// 			field: 'job_id',
+			// 			layout_name: ALayoutIDs.JOB,
+			// 			api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
+			// 			multiple: true,
+			// 			basic_search: true,
+			// 			adv_search: false,
+			// 			form_item_type: FormItemType.AWESOME_BOX
+			// 		} ) );
+			// }
+			//
+			// if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 && ( PermissionManager.validate( 'punch', 'edit_job_item' ) || PermissionManager.validate( this.permission_id, 'edit_job_item' ) ) ) {
+			// 	this.search_fields.push(
+			// 		new SearchField( {
+			// 			label: $.i18n._( 'Task' ),
+			// 			in_column: 2,
+			// 			field: 'job_item_id',
+			// 			layout_name: ALayoutIDs.JOB_ITEM,
+			// 			api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
+			// 			multiple: true,
+			// 			basic_search: true,
+			// 			adv_search: false,
+			// 			form_item_type: FormItemType.AWESOME_BOX
+			// 		} ) );
+			// }
+
+		}
 	},
 
 	onSourceDataCreate: function( target, source_data ) {

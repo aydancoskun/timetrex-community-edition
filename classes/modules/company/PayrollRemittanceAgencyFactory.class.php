@@ -654,14 +654,15 @@ class PayrollRemittanceAgencyFactory extends Factory {
 												   'NJ' => array(
 												   ),
 												   'NY' => array(
-														   'NYC' => array(TTi18n::gettext('New York City [City Income Tax]')),
-														   'YONKERS' => array(TTi18n::gettext('Yonkers [City Income Tax]')),
+														   'NYC' => array( '10' => TTi18n::gettext( 'New York City [City Income Tax]' ) ),
+														   'YONKERS' => array( '20' => TTi18n::gettext( 'Yonkers [City Income Tax]' ) ),
 												   ),
 												   'NC' => array(
 												   ),
 												   'ND' => array(
 												   ),
 												   'OH' => array(
+														   '00' => array( '10' => TTi18n::gettext( 'Regional Income Tax Agency (RITA) [Local Income Tax]' ) ),
 												   ),
 												   'OK' => array(
 												   ),
@@ -856,13 +857,13 @@ class PayrollRemittanceAgencyFactory extends Factory {
 								}
 
 							}
-						break;
+							break;
 						case 30:
 							if ( isset( $options[$params['type_id']][$params['country']][$params['province']][$params['district']] ) ) {
 								//$prefix = $params['type_id'].':'.$params['country'].':'.$params['province'].':'.$params['district'].':';
 								$tmp_retval = $options[$params['type_id']][$params['country']][$params['province']][$params['district']];
 							}
-						break;
+							break;
 					}
 				}
 
@@ -872,7 +873,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 				}
 
 				//Add prefix to each returned item.
-				if ( isset($tmp_retval) ) {
+				if ( isset($tmp_retval) AND is_array( $tmp_retval ) ) {
 					$retval = array();
 					foreach( $tmp_retval as $key => $value ) {
 						$key = str_pad( $key, 4, '0', STR_PAD_LEFT );
@@ -1160,7 +1161,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 		}
 
 		$split_agency_id = explode(':', $agency_id);
-		Debug::Arr( $split_agency_id, 'Split Agency: ' . $agency_id, __FILE__, __LINE__, __METHOD__, 10 );
+		//Debug::Arr( $split_agency_id, 'Split Agency: ' . $agency_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( is_array($split_agency_id) AND count($split_agency_id) > 1 ) {
 			$retarr = array();

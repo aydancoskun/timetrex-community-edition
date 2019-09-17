@@ -95,29 +95,24 @@ class TTUUID {
 			$time = microtime( TRUE ) * 10000000 + 0x01b21dd213814000;
 		}
 
-		// Convert to a string representation
-		$time = sprintf( '%F', $time );
-		//strip decimal point
-		$time = substr( $time, 0, strpos( $time, '.' ) ); //probably strips the string following the decimal faster and more clearly than preg_match.
+		// Convert time to a string representation without any decimal places, and not scientific notation. Using sprintf is slightly faster than substr( $time, 0, strpos( $time, '.' ) )
+		$time = sprintf( '%.0F', $time );
 
 		// And now to a 64-bit binary representation
-		$time = base_convert( $time, 10, 16 );
-		$time = pack( 'H*', str_pad( $time, 16, '0', STR_PAD_LEFT ) );
+		$time = pack( 'H*', str_pad( base_convert( $time, 10, 16 ), 16, '0', STR_PAD_LEFT ) );
 
-		// Reorder bytes to their proper locations in the UUID
-		$uuid = $time[4] . $time[5] . $time[6] . $time[7] . $time[2] . $time[3] . $time[0] . $time[1];
-		// Generate a random clock sequence
-		$uuid .= openssl_random_pseudo_bytes( 2 );
+		// Reorder bytes to their proper locations in the UUID. Append random clock sequence to end.
+		$uuid = $time[4] . $time[5] . $time[6] . $time[7] . $time[2] . $time[3] . $time[0] . $time[1] . openssl_random_pseudo_bytes( 2 );
 
 		// set variant
-		$uuid[8] = chr( ord($uuid[8] ) & 63 | 128 );
+		$uuid[8] = chr( ord( $uuid[8] ) & 63 | 128 );
 		// set version
-		$uuid[6] = chr( ord($uuid[6] ) & 63 | 16 );
+		$uuid[6] = chr( ord( $uuid[6] ) & 63 | 16 );
 
-		$uuid = bin2hex($uuid);
+		$uuid = bin2hex( $uuid );
 
 		//create an ORDERED UUID https://www.percona.com/blog/2014/12/19/store-uuid-optimized-way/
-		$uuid = substr( $uuid, 12, 4 ). substr( $uuid, 8, 4 ) . '-' . substr( $uuid, 0, 4 ) . '-' . substr( $uuid, 4, 4 ) . '-' . substr( $uuid, 16, 4 ) . '-' . $seed;
+		$uuid = substr( $uuid, 12, 4 ) . substr( $uuid, 8, 4 ) . '-' . substr( $uuid, 0, 4 ) . '-' . substr( $uuid, 4, 4 ) . '-' . substr( $uuid, 16, 4 ) . '-' . $seed;
 
 		return $uuid;
 	}

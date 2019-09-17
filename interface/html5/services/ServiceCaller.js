@@ -402,6 +402,7 @@ var ServiceCaller = Backbone.Model.extend( {
 						return;
 					}
 
+					Debug.Text( 'AJAX Request Error: '+ errorThrown +' Message: '+ textStatus +' HTTP Code: '+ jqXHR.status, 'ServiceCaller.js', 'ServiceCaller', 'call', 10);
 					if ( jqXHR.responseText && jqXHR.responseText.indexOf( 'User not authenticated' ) >= 0 ) {
 						ServiceCaller.cancelAllError = true;
 
@@ -430,17 +431,21 @@ var ServiceCaller = Backbone.Model.extend( {
 							responseObject.get( 'onResult' )( apiReturnHandler );
 						}
 						return apiReturnHandler;
-
-					} else if ( jqXHR.status === 0 ) {
-						TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
-						ProgressBar.cancelProgressBar();
-						return null;
 					} else {
+						if ( jqXHR.status === 0 || ( jqXHR.status >= 400 && jqXHR.status <= 599 ) ) {
+							//Status=0 (No response from server at all), 4xx/5xx is critical server failure.
+							//Server can't respond properly due to 4xx/5xx error code, so display a message to the user. Can't redirect to down_for_maintenance page as that could be a 404 as well.
+							TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
+							ProgressBar.cancelProgressBar();
+						}
+
+						if ( responseObject.get( 'onError' ) && typeof(responseObject.get( 'onError' )) == 'function' ) {
+							responseObject.get( 'onError' )( apiReturnHandler );
+						}
+
 						return null;
 					}
-
 				}
-
 			}
 		);
 

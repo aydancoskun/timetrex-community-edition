@@ -3570,7 +3570,9 @@ BaseViewController = Backbone.View.extend( {
 			} );
 
 			tab_column_div.each( function() {
-				$( this ).width( item_label_div_width[0] + 1 );
+				if ( item_label_div_width[0] >= 0 ) { // #2701 - Do not set width if value is negative. Happens when trying to calculate width of something on another tab not currently visible.
+					$( this ).width( item_label_div_width[0] + 1 );
+				}
 			} );
 		}
 	},
@@ -3679,6 +3681,10 @@ BaseViewController = Backbone.View.extend( {
 
 	getEditViewTabIndex: function() {
 		return this.edit_view.find( '.edit-view-tab-bar li.ui-tabs-active' ).index();
+	},
+
+	getEditViewActiveTabName: function() {
+		return this.edit_view.find( '.edit-view-tab-bar li.ui-tabs-active' ).attr('aria-controls');
 	},
 
 	needShowNavigation: function() {
@@ -3998,7 +4004,7 @@ BaseViewController = Backbone.View.extend( {
 
 	},
 
-	onLeftArrowClick: function() {
+	onLeftArrowClick: function( cancel_callback ) {
 		var $this = this;
 
 		if ( this.is_changed ) {
@@ -4027,7 +4033,7 @@ BaseViewController = Backbone.View.extend( {
 					$this.onRightOrLeftArrowClickCallBack( next_select_item );
 				} );
 			} else {
-				$this.onCancelClick();
+				$this.onCancelClick( null, null, cancel_callback );
 				return;
 			}
 		}
@@ -4050,7 +4056,7 @@ BaseViewController = Backbone.View.extend( {
 		return selected_index;
 	},
 
-	onRightArrowClick: function() {
+	onRightArrowClick: function( cancel_callback ) {
 		var $this = this;
 		if ( this.is_changed ) {
 			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
@@ -4086,7 +4092,7 @@ BaseViewController = Backbone.View.extend( {
 					$this.onRightOrLeftArrowClickCallBack( next_select_item );
 				} );
 			} else {
-				$this.onCancelClick();
+				$this.onCancelClick( null, null, cancel_callback );
 				return;
 			}
 		}

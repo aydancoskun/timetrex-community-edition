@@ -767,8 +767,9 @@ class Import {
 	 * @return string
 	 */
 	function getLocalFileName() {
-		$retval = md5( $this->company_id.$this->user_id );
-		Debug::Text('Local File Name: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		$retval = md5( $this->company_id . $this->user_id );
+		Debug::Text( 'Local File Name: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
+
 		return $retval;
 	}
 
@@ -788,11 +789,17 @@ class Import {
 		$dir = $this->getStoragePath( $company_id ) . DIRECTORY_SEPARATOR;
 
 		if ( $dir != '' ) {
-			//Delete tmp files.
-			foreach(glob($dir.'*') as $filename) {
-				unlink($filename);
-				Misc::deleteEmptyDirectory( dirname( $filename ), 0 ); //Recurse to $user_id parent level and remove empty directories.
+			$this->deleteLocalFile(); //Delete the file that we know was uploaded.
+
+			//Delete tmp files that are older than 1 hour. This allows for the case where multiple users are importing at the same time, so we don't delete files in the middle of the import process.
+			foreach ( glob( $dir . '*' ) as $filename ) {
+				if ( filemtime( $filename ) <= ( time() - 3600 ) ) {
+					Debug::Text( 'Deleting File Name: ' . $filename, __FILE__, __LINE__, __METHOD__, 10 );
+					unlink( $filename );
+				}
 			}
+
+			Misc::deleteEmptyDirectory( $dir, 0 ); //Recurse to $user_id parent level and remove empty directories.
 		}
 
 		return TRUE;

@@ -501,6 +501,19 @@ class UserReviewControlFactory extends Factory {
 	 * @return bool
 	 */
 	function preSave() {
+		//SQL schema has NOT NULL constraints on start_date, end_date and due_date, which causes problem when trying to copy these records. So force them to always be set here.
+		if ( $this->getStartDate() == '' ) {
+			$this->setStartDate( 0 );
+		}
+
+		if ( $this->getEndDate() == '' ) {
+			$this->setEndDate( 0 );
+		}
+
+		if ( $this->getDueDate() == '' ) {
+			$this->setDueDate( 0 );
+		}
+
 		return TRUE;
 	}
 

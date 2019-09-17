@@ -877,6 +877,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_status_id']) ) ? $this->getWhereClauseSQL( 'x.status_id', $filter_data['job_status_id'], 'numeric_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'x.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : NULL;
@@ -1322,6 +1323,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['job_status_id'], 'numeric_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : NULL;
@@ -1595,6 +1597,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$query .= ( isset($filter_data['job_status_id']) ) ? $this->getWhereClauseSQL( 'w.status_id', $filter_data['job_status_id'], 'numeric_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'w.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : NULL;

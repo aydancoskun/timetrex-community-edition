@@ -205,12 +205,11 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		Test full blown reports that contain wages, and test all possible permutations of permissions in regards to wages.
 
 
-		**** Don't run these in parallel as it seems to cause deadlocks/duplicate IDs on MySQL due to concurrency issues. ****
+		**** When run in parallel these used to cause deadlocks/duplicate IDs on MySQL due to concurrency issues. ****
 	*/
 
 	/**
-	 * @ORIGINAL: group Permission_testBasicPermissionFunctions
-	 * @group Permission_test
+	 * @group Permission_testBasicPermissionFunctions
 	 */
 	function testBasicPermissionFunctions() {
 		global $dd;
@@ -239,8 +238,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsA
-	 * @group Permission_test
+	 * @group Permission_testBasicHierarchyPermissionFunctionsA
 	 */
 	function testBasicHierarchyPermissionFunctionsA() {
 		global $dd;
@@ -311,8 +309,9 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsB
-	 * @group Permission_test
+	 * @OFFgroup Permission_testBasicHierarchyPermissionFunctionsB
+	 * Need to run these in serial, otherwise they can cause UUID conflicts.
+	 * @group PermissionTest
 	 */
 	function testBasicHierarchyPermissionFunctionsB() {
 		global $dd;
@@ -352,8 +351,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsC
-	 * @group Permission_test
+	 * @OFFgroup Permission_testBasicHierarchyPermissionFunctionsC
+	 * Need to run these in serial, otherwise they can cause UUID conflicts.
+	 * @group PermissionTest
+	 *
 	 */
 	function testBasicHierarchyPermissionFunctionsC() {
 		global $dd;
@@ -394,8 +395,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsD
-	 * @group Permission_test
+	 * @OFFgroup Permission_testBasicHierarchyPermissionFunctionsD
+	 * Need to run these in serial, otherwise they can cause UUID conflicts.
+	 * @group PermissionTest
+	 *
 	 */
 	function testBasicHierarchyPermissionFunctionsD() {
 		global $dd;
@@ -436,8 +439,9 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsE
-	 * @group Permission_test
+	 * @OFFgroup Permission_testBasicHierarchyPermissionFunctionsE
+	 * Need to run these in serial, otherwise they can cause UUID conflicts.
+	 * @group PermissionTest
 	 */
 	function testBasicHierarchyPermissionFunctionsE() {
 		global $dd;
@@ -478,8 +482,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsF
-	 * @group Permission_test
+	 * @OFFgroup Permission_testBasicHierarchyPermissionFunctionsF
+	 * Need to run these in serial, otherwise they can cause UUID conflicts.
+	 * @group PermissionTest
+	 *
 	 */
 	function testBasicHierarchyPermissionFunctionsF() {
 		global $dd;
@@ -521,8 +527,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testUserSummaryReportPermissionsA
-	 * @group Permission_test
+	 * @OFFgroup Permission_testUserSummaryReportPermissionsA
+	 * Need to run these in serial, otherwise they can cause UUID conflicts.
+	 * @group PermissionTest
+	 *
 	 */
 	function testUserSummaryReportPermissionsA() {
 		global $dd;
@@ -587,8 +595,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testUserSummaryReportPermissionsB
-	 * @group Permission_test
+	 * @OFFgroup Permission_testUserSummaryReportPermissionsB
+	 * Need to run these in serial, otherwise they can cause UUID conflicts.
+	 * @group PermissionTest
+	 *
 	 */
 	function testUserSummaryReportPermissionsB() {
 		global $dd;
@@ -655,8 +665,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testUserSummaryReportPermissionsC
-	 * @group Permission_test
+	 * @OFFgroup Permission_testUserSummaryReportPermissionsC
+	 * Need to run these in serial, otherwise they can cause UUID conflicts.
+	 * @group PermissionTest
+	 *
 	 */
 	function testUserSummaryReportPermissionsC() {
 		global $dd;
@@ -732,8 +744,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testUserSummaryReportPermissionsD
-	 * @group Permission_test
+	 * @OFFgroup Permission_testUserSummaryReportPermissionsD
+	 * Need to run these in serial, otherwise they can cause UUID conflicts.
+	 * @group PermissionTest
+	 *
 	 */
 	function testUserSummaryReportPermissionsD() {
 		global $dd;
@@ -810,8 +824,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @ORIGINAL: group Permission_testUserSummaryReportPermissionsE
-	 * @group Permission_test
+	 * @OFFgroup Permission_testUserSummaryReportPermissionsE
+	 * Need to run these in serial, otherwise they can cause UUID conflicts.
+	 * @group PermissionTest
+	 *
 	 */
 	function testUserSummaryReportPermissionsE() {
 		global $dd;

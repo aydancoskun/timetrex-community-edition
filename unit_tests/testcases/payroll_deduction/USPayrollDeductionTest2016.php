@@ -252,7 +252,7 @@ class USPayrollDeductionTest2016 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFederalTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
-		$pd_obj->setMedicareFilingStatus( 10 ); //Single
+
 		$pd_obj->setYearToDateGrossIncome( 199000.00 );
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
@@ -275,7 +275,7 @@ class USPayrollDeductionTest2016 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFederalTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
-		$pd_obj->setMedicareFilingStatus( 10 ); //Single
+
 		$pd_obj->setYearToDateGrossIncome( 199500.00 );
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
@@ -299,7 +299,7 @@ class USPayrollDeductionTest2016 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFederalTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
-		$pd_obj->setMedicareFilingStatus( 10 ); //Single
+
 		$pd_obj->setYearToDateGrossIncome( 500000.00 );
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
@@ -322,7 +322,7 @@ class USPayrollDeductionTest2016 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFederalTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
-		$pd_obj->setMedicareFilingStatus( 10 ); //Single
+
 		$pd_obj->setYearToDateGrossIncome( 0 );
 		$pd_obj->setGrossPayPeriodIncome( 500000.00 );
 

@@ -3831,6 +3831,19 @@ class Misc {
 	}
 
 	/**
+	 * Sanitize strings to be used in file names by converting spaces to underscore and removing non-alpha numeric characters
+	 * @param $file_name
+	 * @return mixed|string|string[]|null
+	 */
+	static function sanitizeFileName( $file_name ) {
+		$retval = str_replace( ' ', '_', strtolower( $file_name ) ); //Switch all spaces to underscores
+
+		$retval = preg_replace('/[^0-9a-z\-_]/', '', $retval ); //Strip all non-alpha numeric characters or underscores.
+
+		return $retval;
+	}
+
+	/**
 	 * zips an array of files and returns a file array for download
 	 * @param $file_array
 	 * @param bool $zip_file_name

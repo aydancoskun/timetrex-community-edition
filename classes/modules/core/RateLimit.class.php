@@ -151,7 +151,14 @@ class RateLimit {
 	function getRateData() {
 		if ( is_object($this->memory) ) {
 			try {
-				return $this->memory->get( $this->group.$this->getID() );
+				$retarr = $this->memory->get( $this->group.$this->getID() );
+
+				if ( is_object( $retarr ) ) { //Fail OPEN in cases where the user may have deleted the cache directory. This also prevents HTTP 500 errors on windows which are difficult to diagnose.
+					Debug::Text( 'ERROR: Shared Memory Failed: ' . $retarr->message .' Cache directory may not exist or has incorrect read/write permissions.', __FILE__, __LINE__, __METHOD__, 10 );
+					$retarr = FALSE;
+				}
+
+				return $retarr;
 			} catch ( Exception $e ) {
 				Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
 				return FALSE;

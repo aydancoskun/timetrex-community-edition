@@ -129,6 +129,7 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 
 			if ( columns == null || typeof columns == 'undefined' ) {
 				filter.filter_columns = {
+					'payroll_remittance_agency_id': true,
 					'legal_entity_legal_name': true,
 					'payroll_remittance_agency_name': true,
 					'user_report_data_id': true,
@@ -147,11 +148,21 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 			var $this = this;
 			var api_payroll_remittance_agency_event = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ))();
 			api_payroll_remittance_agency_event.getPayrollRemittanceAgencyEvent( filter, {
-				onResult: function( result ) {
-					var result = result.getResult()[0];
-					if ( typeof callback == 'function' ) {
-						callback( result );
-					}
+				onResult: function( event_result ) {
+					var event_result = event_result.getResult()[0];
+
+					var api_payroll_remittance_agency = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' ))();
+					api_payroll_remittance_agency.getPayrollRemittanceAgency( { filter_data: { id: event_result.payroll_remittance_agency_id } }, {
+							onResult: function ( agency_result ) {
+								event_result.payroll_remittance_agency_obj = agency_result.getResult()[0]; //Merge Event and Agency data together.
+
+								if ( typeof callback == 'function' ) {
+									callback( event_result );
+								}
+
+							}
+						}
+					);
 				}
 			} );
 		}

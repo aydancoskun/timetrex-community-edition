@@ -139,7 +139,12 @@ LoginViewController = BaseViewController.extend( {
 							}
 						}, 600 );
 					}
-				}, delegate: this
+				},
+				onError: function ( e ) {
+					Debug.Text( 'Login Error...', null, null, 'onLoginBtnClick', 10 );
+					$this.doing_login = false;
+				},
+				delegate: this
 			} );
 		}
 

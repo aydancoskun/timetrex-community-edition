@@ -98,16 +98,16 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						'value'         => ( $this->year + 1 ),
 						'on_background' => TRUE,
 						'coordinates'   => array(
-								'x'          => 533,
-								'y'          => 589,
+								'x'          => 528,
+								'y'          => 610,
 								'h'          => 10,
 								'w'          => 20,
 								'halign'     => 'C',
 								'fill_color' => array(255, 255, 255),
 						),
 						'font'          => array(
-								'size' => 8,
-								'type' => '',
+								'size' => 9,
+								'type' => 'B',
 						),
 				),
 

@@ -8325,6 +8325,33 @@ return array(
 										 ),
 								 ),
 	),
+	'30:US:OH:00:0010' => array( //Local Government [Local Income Tax] - RITA.
+								 'FW2'    => array(
+										 'form_code'        => 'W2', //Includes W3
+										 'form_name'        => TTi18n::getText( 'W2 Local Filing' ),
+										 'form_description' => TTi18n::getText( 'Wage and Tax Statement' ),
+										 'note'             => TTi18n::getText( '' ),
+										 'tax_codes'        => array('INCOME', 'SS', 'MEDICARE'),
+										 'filing_methods'   => array('EFILE'),
+										 'payment_methods'  => array(),
+										 'flags'            => array(
+												 'include_w2'          => FALSE,
+												 'file_zero_wage'      => FALSE,
+												 'file_zero_liability' => FALSE,
+												 'auto_file'           => FALSE,
+												 'auto_pay'            => FALSE,
+										 ),
+										 'frequency'        => array(  //Annual
+																	   array(
+																			   'status_id'            => 10, //Enabled
+																			   'frequency_id'         => 2000, //Annual
+																			   'primary_month'        => 2, //Feb
+																			   'primary_day_of_month' => 29,
+																			   'reminder_days'        => 14,
+																	   ),
+										 ),
+								 ),
+	),
 
 	//OK - Oklahoma
 	'20:US:OK:00:0010' => array( //State Government [State Income Tax]

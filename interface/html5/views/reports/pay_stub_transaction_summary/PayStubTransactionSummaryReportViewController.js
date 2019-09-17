@@ -148,51 +148,6 @@ PayStubTransactionSummaryReportViewController = ReportBaseViewController.extend(
 
 	},
 
-	openEditView: function() {
-
-		var $this = this;
-		$this.initOptions( function() {
-
-			if ( !$this.edit_view ) {
-				$this.initEditViewUI( $this.viewId, $this.view_file );
-			}
-
-			$this.do_validate_after_create_ui = true;
-
-			$this.getReportData( function( result ) {
-				// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
-
-				var edit_item;
-				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
-					for ( var i = 0; i < result.length; i++ ) {
-						if ( result[i].id == LocalCacheData.default_edit_id_for_next_open_edit_view ) {
-							edit_item = result[i];
-						}
-					}
-					LocalCacheData.default_edit_id_for_next_open_edit_view = null;
-				} else {
-					edit_item = $this.getDefaultReport( result );
-				}
-
-				if ( result && result.length > 0 ) {
-					$this.current_saved_report = edit_item;
-					$this.saved_report_array = result;
-				} else {
-					$this.current_saved_report = {};
-					$this.saved_report_array = [];
-				}
-
-				$this.current_edit_record = {};
-				$this.visible_report_values = {};
-
-				$this.initEditView();
-
-			} );
-
-		} );
-
-	},
-
 	onCustomContextClick: function( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.direct_deposit:

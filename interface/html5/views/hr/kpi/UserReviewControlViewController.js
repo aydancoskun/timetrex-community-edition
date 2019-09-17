@@ -73,7 +73,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				var all = {};
 				all.name = '-- ' + $.i18n._( 'All' ) + ' --';
 				all.level = 1;
-				all.id = -1;
+				all.id = TTUUID.not_exist_id;
 
 				if ( res.hasOwnProperty( '0' ) && res[0].hasOwnProperty( 'children' ) ) {
 					res[0].children.unshift( all );

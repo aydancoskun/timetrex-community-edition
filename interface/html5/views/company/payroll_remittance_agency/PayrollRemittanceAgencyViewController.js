@@ -385,14 +385,14 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		var id_field_array_api_params = { 'agency_id': this.edit_view_ui_dic.agency_id.getValue() };
 		var id_field_array = this.api.getOptions( 'agency_id_field_labels', id_field_array_api_params, { async: false } ).getResult();
 
-		this.edit_view_ui_dic.primary_identification.parent().parent().hide();
-		this.edit_view_ui_dic.secondary_identification.parent().parent().hide();
-		this.edit_view_ui_dic.tertiary_identification.parent().parent().hide();
+
+		this.detachElement( 'primary_identification' );
+		this.detachElement( 'secondary_identification' );
+		this.detachElement( 'tertiary_identification' );
 
 		for ( var key in id_field_array ) {
-			var span_tag = '<span class=\'edit-view-form-item-label\'>' + id_field_array[key] + ':</span>';
-			this.edit_view_ui_dic[key].parent().parent().find( '.edit-view-form-item-label-div' ).html( span_tag );
-			this.edit_view_ui_dic[key].parent().parent().show();
+			this.attachElement( key );
+			this.edit_view_form_item_dic[key].find( '.edit-view-form-item-label' ).text( id_field_array[key] + ': ' );
 		}
 		this.editFieldResize();
 	},
@@ -464,12 +464,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 
 	onTypeChange: function( arg ) {
 		if ( !Global.isSet( arg ) || Global.isFalseOrNull( arg ) ) {
-
 			if ( !Global.isSet( this.current_edit_record['type_id'] ) || Global.isFalseOrNull( this.current_edit_record['type_id'] ) ) {
 				this.current_edit_record['type_id'] = 10;
 			}
-
-			arg = this.current_edit_record['type_id'];
 		}
 
 		this.editFieldResize();
@@ -523,8 +520,8 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				}
 			} );
 		} else {
-			$this.current_edit_record['province'] = '00';
-			$this.edit_view_ui_dic['district'].setValue( '00 ' );
+			$this.current_edit_record['district'] = '00';
+			$this.edit_view_ui_dic['district'].setValue( '00' );
 		}
 	},
 
@@ -743,15 +740,20 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'primary_identification', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'Primary Identification' ), form_item_input, tab_payroll_remittance_agency_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Primary Identification' ), form_item_input, tab_payroll_remittance_agency_column1, '', null, true );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'secondary_identification', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'Secondary Identification' ), form_item_input, tab_payroll_remittance_agency_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Secondary Identification' ), form_item_input, tab_payroll_remittance_agency_column1, '', null, true );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'tertiary_identification', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'Tertiary Identification' ), form_item_input, tab_payroll_remittance_agency_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Tertiary Identification' ), form_item_input, tab_payroll_remittance_agency_column1, '', null, true );
+
+		//prevent flashing province and district on addclick.
+		this.detachElement( 'primary_identification' );
+		this.detachElement( 'secondary_identification' );
+		this.detachElement( 'tertiary_identification' );
 
 		// column2
 

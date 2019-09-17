@@ -20,12 +20,23 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
 
 	getNextStepName: function() {
 		switch ( this.getWizardObject().selected_remittance_agency_event.type_id ) {
-				//Canada
+			//Canada
 			case 'T4':
 			case 'T4A':
+				return 'publish';
+				break;
 
-				//US
+			//US
 			case 'FW2':
+				//Only have a publish step when its a federal W2, since it includes copies of the W2s for State/Local.
+				if ( this.getWizardObject().selected_remittance_agency_event.payroll_remittance_agency_obj.type_id == 10 ) { //10=Federal
+					return 'publish';
+				} else {
+					return false;
+				}
+
+				break;
+
 			case 'F1099MISC':
 				return 'publish';
 				break;

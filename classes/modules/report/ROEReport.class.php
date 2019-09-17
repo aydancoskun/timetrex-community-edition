@@ -718,11 +718,11 @@ class ROEReport extends Report {
 
 				if ( $format == 'efile_xml' ) {
 					$output_format = 'XML';
-					$file_name = 'roe_efile_' . date( 'Y_m_d' ) . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.xml';
+					$file_name = 'roe_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.xml';
 					$mime_type = 'applications/octet-stream'; //Force file to download.
 				} else {
 					$output_format = 'PDF';
-					$file_name = 'roe_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.pdf';
+					$file_name = 'roe_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.pdf';
 					$mime_type = $this->file_mime_type;
 				}
 				$file_output = $this->getFormObject()->output( $output_format );

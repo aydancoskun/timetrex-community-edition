@@ -491,9 +491,10 @@ SavedReportViewController = BaseViewController.extend( {
 
 	uniformVariable: function( records ) {
 
-		if ( records.hasOwnProperty( 'data' ) && records.data.hasOwnProperty( 'config' ) && records.data.config.hasOwnProperty( 'filter' ) ) {
-			records.data.config.filter_ = records.data.config.filter;
-		}
+		// Remove in next commit, related to #2698 fix, no longer needed but semi-big refactor to remove
+		// if ( records.hasOwnProperty( 'data' ) && records.data.hasOwnProperty( 'config' ) && records.data.config.hasOwnProperty( 'filter' ) ) {
+		// 	records.data.config.filter_ = records.data.config.filter;
+		// }
 
 		return records;
 	},

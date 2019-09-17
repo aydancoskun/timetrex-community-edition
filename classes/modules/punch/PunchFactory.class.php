@@ -150,6 +150,7 @@ class PunchFactory extends Factory {
 											'status_id' => 'Status',
 											'status' => FALSE,
 											'time_stamp' => 'TimeStamp',
+											'raw_time_stamp' => FALSE,
 											'punch_date' => FALSE,
 											'punch_time' => FALSE,
 											'punch_control_id' => 'PunchControlID',
@@ -2396,13 +2397,13 @@ class PunchFactory extends Factory {
 			foreach ( $data as $row ) {
 				if ( $row['type_id'] != 10 ) {
 					if ( $row['status_id'] == 20 ) {
-						$tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['prev'] = TTDate::parseDateTime($row['time_stamp']);
+						$tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['prev'] = $row['raw_time_stamp'];
 					} elseif ( isset($tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['prev']) ) {
 						if ( !isset($tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['total_time']) ) {
 							$tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['total_time'] = 0;
 						}
 
-						$tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['total_time'] = bcadd( $tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['total_time'], bcsub( TTDate::parseDateTime($row['time_stamp']), $tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['prev']) );
+						$tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['total_time'] = bcadd( $tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['total_time'], bcsub( $row['raw_time_stamp'], $tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['prev']) );
 						if ( !isset($tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['total_breaks']) ) {
 							$tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['total_breaks'] = 0;
 						}
@@ -2618,12 +2619,15 @@ class PunchFactory extends Factory {
 							}
 							break;
 						case 'date_stamp': //Date the punch falls on for timesheet generation. The punch itself may have a different date.
-							//$data[$variable] = TTDate::getAPIDate( 'DATE', $this->getColumn('date_stamp') );
 							$data[$variable] = TTDate::getAPIDate( 'DATE', TTDate::strtotime( $this->getColumn( 'date_stamp' ) ) );
 							break;
 						case 'time_stamp': //Full date/time of the punch itself.
-							//$data[$variable] = TTDate::getAPIDate( 'TIME', TTDate::strtotime( $this->getColumn( 'time_stamp' ) ) );
 							$data[$variable] = TTDate::getAPIDate( 'DATE+TIME', TTDate::strtotime( $this->getColumn( 'time_stamp' ) ) );
+							break;
+						case 'raw_time_stamp':
+							//Need a epoch value of the timestamp, so PunchFactory::calcMealAndBreakTotalTime() can use it for calculating Lunch/Break (Taken) when seconds are involved.
+							// Otherwise returning getAPIDate() excludes the seconds if the users time format doesn't include them, and they can mismatch.
+							$data[$variable] = TTDate::strtotime( $this->getColumn( 'time_stamp' ) );
 							break;
 						case 'punch_date': //Just date portion of the punch
 							$data[$variable] = TTDate::getAPIDate( 'DATE', TTDate::strtotime( $this->getColumn( 'time_stamp' ) ) );

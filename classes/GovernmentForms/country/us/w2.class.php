@@ -143,6 +143,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 					//						array( 'template_page' => 2, 'x'=> 0, 'y' => 0),
 					//						array( 'template_page' => 2, 'x'=> 0, 'y' => 350), //Place two templates on the same page.
 					//						),
+					'only_template_page' => array( 2, 3, 10, 4, 6, 8 ),
 					'value'         => $this->year,
 					'on_background' => TRUE,
 					'coordinates'   => array(
@@ -158,6 +159,93 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 							'type' => 'B',
 					),
 				),
+
+				array( //Instructions section
+					    'only_template_page' => 5,
+						'value'         => $this->year,
+						'on_background' => TRUE,
+						'coordinates'   => array(
+								'x'          => 69,
+								'y'          => 121,
+								'h'          => 10,
+								'w'          => 23,
+								'halign'     => 'C',
+								'fill_color' => array(255, 255, 255),
+						),
+						'font'          => array(
+								'size' => 9,
+								'type' => '',
+						),
+				),
+				array( //Instructions section
+					   'only_template_page' => 5,
+					   'value'         => $this->year,
+					   'on_background' => TRUE,
+					   'coordinates'   => array(
+							   'x'          => 169,
+							   'y'          => 186,
+							   'h'          => 10,
+							   'w'          => 23,
+							   'halign'     => 'C',
+							   'fill_color' => array(255, 255, 255),
+					   ),
+					   'font'          => array(
+							   'size' => 9,
+							   'type' => '',
+					   ),
+				),
+				array( //Instructions section
+					   'only_template_page' => 5,
+					   'value'         => $this->year,
+					   'on_background' => TRUE,
+					   'coordinates'   => array(
+							   'x'          => 102,
+							   'y'          => 207,
+							   'h'          => 10,
+							   'w'          => 23,
+							   'halign'     => 'C',
+							   'fill_color' => array(255, 255, 255),
+					   ),
+					   'font'          => array(
+							   'size' => 9,
+							   'type' => '',
+					   ),
+				),
+				array( //Instructions section
+					   'only_template_page' => 5,
+					   'value'         => $this->year,
+					   'on_background' => TRUE,
+					   'coordinates'   => array(
+							   'x'          => 371,
+							   'y'          => 242,
+							   'h'          => 10,
+							   'w'          => 23,
+							   'halign'     => 'C',
+							   'fill_color' => array(255, 255, 255),
+					   ),
+					   'font'          => array(
+							   'size' => 9,
+							   'type' => '',
+					   ),
+				),
+				array( //Instructions section
+					   'only_template_page' => 7,
+					   'value'         => $this->year,
+					   'on_background' => TRUE,
+					   'coordinates'   => array(
+							   'x'          => 464,
+							   'y'          => 148,
+							   'h'          => 6,
+							   'w'          => 19,
+							   'halign'     => 'C',
+							   'fill_color' => array(255, 255, 255),
+					   ),
+					   'font'          => array(
+							   'size' => 7,
+							   'type' => '',
+					   ),
+				),
+
 				//Finish initializing page 1.
 				'ssn'             => array(
 						'function'    => array('formatSSN', 'drawNormal'),
@@ -780,6 +868,68 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		return $value;
 	}
 
+	function _getStateName( $state ) {
+		$map = array(
+				'AL' => 'Alabama',
+				'AK' => 'Alaska',
+				'AZ' => 'Arizona',
+				'AR' => 'Arkansas',
+				'CA' => 'California',
+				'CO' => 'Colorado',
+				'CT' => 'Connecticut',
+				'DE' => 'Delaware',
+				'DC' => 'D.C.',
+				'FL' => 'Florida',
+				'GA' => 'Georgia',
+				'HI' => 'Hawaii',
+				'ID' => 'Idaho',
+				'IL' => 'Illinois',
+				'IN' => 'Indiana',
+				'IA' => 'Iowa',
+				'KS' => 'Kansas',
+				'KY' => 'Kentucky',
+				'LA' => 'Louisiana',
+				'ME' => 'Maine',
+				'MD' => 'Maryland',
+				'MA' => 'Massachusetts',
+				'MI' => 'Michigan',
+				'MN' => 'Minnesota',
+				'MS' => 'Mississippi',
+				'MO' => 'Missouri',
+				'MT' => 'Montana',
+				'NE' => 'Nebraska',
+				'NV' => 'Nevada',
+				'NH' => 'New Hampshire',
+				'NM' => 'New Mexico',
+				'NJ' => 'New Jersey',
+				'NY' => 'New York',
+				'NC' => 'North Carolina',
+				'ND' => 'North Dakota',
+				'OH' => 'Ohio',
+				'OK' => 'Oklahoma',
+				'OR' => 'Oregon',
+				'PA' => 'Pennsylvania',
+				'RI' => 'Rhode Island',
+				'SC' => 'South Carolina',
+				'SD' => 'South Dakota',
+				'TN' => 'Tennessee',
+				'TX' => 'Texas',
+				'UT' => 'Utah',
+				'VT' => 'Vermont',
+				'VA' => 'Virginia',
+				'WA' => 'Washington',
+				'WV' => 'West Virginia',
+				'WI' => 'Wisconsin',
+				'WY' => 'Wyoming',
+		);
+
+		if ( isset( $map[ strtoupper( $state ) ] ) ) {
+			return $map[ strtoupper( $state ) ];
+		}
+
+		return FALSE;
+	}
+
 	function _getStateNumericCode( $state ) {
 		$map = array(
 				'AL' => '01',
@@ -1067,26 +1217,31 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 
 				break;
 			case 'oh': //Ohio - They share with Federal SSA. This is for RITA/Local format instead. It does not include school district taxes.
-				//File format specifications: https://www.ritaohio.com/businesses/magnetic-reporting-of-w2s/
+				//File format specifications: https://www.tax.ohio.gov/Portals/0/employer_withholding/2019%20tax%20year/2018_W2_Specs_v3.pdf
+				//Ohio Regional for City reporting.
+				//File format specifications: https://cdn.ritaohio.com/Media/700682/2018%20W-2%20SPECS.pdf
 				$municipality_code = FALSE;
+				$municipality_name = NULL;
 				$tax_type = 'C';
 
-				//District/City Name must contain: [NNNA] ie: [123R] or [123C] -- Where R is tax based on residence location and C is tax based on work location.
-				$municipality_match = preg_match( '/\[([0-9]{3})([A-Z]{1})\]/i', $this->$l20, $matches );
+				//District/City Name must contain: [NNNA] or [NNNNA] ie: [123R] or [1234R] or [123C] -- Where R is tax based on residence location and C is tax based on work location.
+				$municipality_match = preg_match( '/\[([0-9]{3,4})([RCDEF]{1})\]/i', $this->$l20, $matches );
 				if ( isset( $matches[0] ) ) {
 					if ( isset( $matches[1] ) ) {
-						$municipality_code = $matches[1];
+						$municipality_code = str_pad( trim( $matches[1] ), 4, '0', STR_PAD_LEFT );
 					}
 					if ( isset( $matches[2] ) ) {
-						$tax_type = $matches[2];
+						$tax_type = trim( $matches[2] );
 					}
 				}
+
+				$municipality_name = strtoupper( trim( preg_replace('/\[.*\]/', '', $this->$l20 ) ) ); //Strip off the square brackets []
 
 				if ( $municipality_code != '' AND $tax_type != '' ) {
 					//Withholding Number for State format is the State ID number.
 					$line[] = 'RS'; //RS Record
 					$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' ); //State Code
-					$line[] = $this->padRecord( 'RO' . $municipality_code, 5, 'AN' ); //Tax Entity Code (Leave Blank) [5-9]
+					$line[] = $this->padRecord( 'R' . $municipality_code, 5, 'AN' ); //Tax Entity Code (Leave Blank) [5-9]
 					$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' ); //SSN [10-18]
 					$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' ); //First Name
 					$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' ); //Middle Name
@@ -1120,12 +1275,18 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 					$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' ); //State Taxable Wages [276-286]
 					$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' ); //State income tax [287-297]
 					$line[] = $this->padRecord( '', 10, 'N' ); //Other State Data [298-307]
-					$line[] = $this->padRecord( strtoupper( $tax_type ), 1, 'AN' ); //Tax Type Code [308] //C=Employment Municipality, R=Residence Municapility
+					$line[] = $this->padRecord( strtoupper( $tax_type ), 1, 'AN' ); //Tax Type Code [308] //C=City, D=County, E=School District, F=Other -- For City: R=Residence C=Company/Work Location
 					$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N' ); //Local Wages [309-319]
 					$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N' ); //Local Income Tax [320-330]
 					$line[] = $this->padRecord( '', 7, 'AN' ); //State Control Number
-					$line[] = $this->padRecord( '', 75, 'AN' ); //Supplemental Data 1
-					$line[] = $this->padRecord( '', 75, 'AN' ); //Supplemental Data 2
+
+					if ( isset($this->efile_agency_id) AND $this->efile_agency_id == '30:US:OH:00:0010' ) {
+						$line[] = $this->padRecord( $municipality_name, 75, 'AN' ); //Supplemental Data 1
+						$line[] = $this->padRecord( strtoupper( $this->_getStateName( $this->$l15_state ) ), 75, 'AN' ); //Supplemental Data 2
+					} else {
+						$line[] = $this->padRecord( '', 75, 'AN' ); //Supplemental Data 1
+						$line[] = $this->padRecord( '', 75, 'AN' ); //Supplemental Data 2
+					}
 					$line[] = $this->padRecord( '', 25, 'AN' ); //Blank
 				} else {
 					Debug::Text( 'Skipping RS Record due to incorrect Municipality Code: ' . $municipality_code . ' Tax Type: ' . $tax_type, __FILE__, __LINE__, __METHOD__, 10 );
@@ -1356,7 +1517,11 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		if ( $this->getType() == 'government' ) {
 			$employees_per_page = 2;
 			$n = 2; //Don't loop the same employee.
-			$form_template_pages = array(2, 3, 10); //Template pages to use.
+			if ( $this->efile_state != '' ) { //When doing state filing, only include the state copy of the W2.
+				$form_template_pages = array(3); //Template pages to use.
+			} else {
+				$form_template_pages = array(2, 3, 10); //Template pages to use.
+			}
 		} else {
 			$employees_per_page = 1;
 			$n = 1; //Loop the same employee twice.
@@ -1370,7 +1535,8 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 
 			$template_schema = $this->getTemplateSchema();
 
-			foreach ( $form_template_pages as $form_template_page ) {
+//			$total_templates = count( $form_template_pages );
+			foreach ( $form_template_pages as $key => $form_template_page ) {
 				//Set the template used.
 				$template_schema[0]['template_page'] = $form_template_page;
 
@@ -1378,6 +1544,11 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 					$template_schema[0]['combine_templates'] = array(
 							array('template_page' => $form_template_page, 'x' => 0, 'y' => 0),
 							array('template_page' => $form_template_page, 'x' => 0, 'y' => 400) //Place two templates on the same page.
+					);
+				} elseif ( $this->getShowInstructionPage() == TRUE AND $this->getType() == 'employee' ) {
+					$template_schema[0]['combine_templates'] = array(
+							array('template_page' => $form_template_page, 'x' => 0, 'y' => 0),
+							array('template_page' => ( $form_template_page + 1 ), 'x' => 0, 'y' => 400 ) //Place two templates on the same page.
 					);
 				}
 
@@ -1403,13 +1574,15 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 
 					if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND $e % $employees_per_page != 0 ) ) {
 						$this->resetTemplatePage();
-						//if ( $this->getShowInstructionPage() == TRUE ) {
-						//	$this->addPage( array('template_page' => 2) );
-						//}
 					}
 
 					$e++;
+
 				}
+
+//				if ( $this->getType() == 'employee' AND $key < ( $total_templates - 1 ) )  {
+//					$this->addPage(); //Add blank page separator between each type of form.
+//				}
 			}
 		}
 

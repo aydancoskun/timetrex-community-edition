@@ -608,8 +608,8 @@ class T4SummaryReport extends Report {
 						foreach( $udlf as $ud_obj ) {
 							//Debug::Text('  User Deduction: ID: '. $ud_obj->getID() .' User ID: '. $ud_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
 							$user_deduction_data[$ud_obj->getCompanyDeduction()][$ud_obj->getUser()] = $ud_obj;
-				}
-			}
+						}
+					}
 				}
 			}
 			//Debug::Arr($tax_deductions, 'Tax Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -976,6 +976,7 @@ class T4SummaryReport extends Report {
 								'l14'                 => $row['income'],
 								'l22'                 => $row['tax'],
 								'l16'                 => $row['employee_cpp'],
+								'l17'                 => NULL, //QPP
 								'l24'                 => $row['ei_earnings'],
 								'l26'                 => $row['cpp_earnings'],
 								'l18'                 => $row['employee_ei'],
@@ -1007,34 +1008,47 @@ class T4SummaryReport extends Report {
 						);
 
 						//Boxes that contain dollar amounts, so we can determine if the T4 is "blank" or not.
-						$amount_boxes = array( 'l14', 'l22', 'l16', 'l24', 'l26', 'l18', 'l44', 'l20', 'l46', 'l52', 'l19', 'l27', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4', 'other_box_5' );
+						$amount_boxes = array( 'l14', 'l22', 'l16', 'l17', 'l24', 'l26', 'l18', 'l44', 'l20', 'l46', 'l52', 'l19', 'l27', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4', 'other_box_5' );
 
 
-						//Get User Tax / Deductions by Pay Stub Account.
-						$udlf = TTnew( 'UserDeductionListFactory' );
-						if ( isset( $setup_data['employee_cpp']['include_pay_stub_entry_account'] ) ) {
+						//CPP Exempt:
+						// Leave this box blank if you:
+						//  reported a retiring allowance and no other type of income
+						//  reported an amount greater than "0" in boxes 16, 17, or 26
+						//  reported "0" in box 26 and the employee gave you a copy of a completed Form CPT30, Election to Stop Contributing to the Canada Pension Plan, or Revocation of a Prior Election
+						//  reported "0" in box 26 and the employee worked in one of the employment types listed as letters "C" to "O" on the back of Form CPT20, Election to Pay Canada Pension Plan Contributions
+						//  Otherwise, enter an "X" or a check mark if you did not have to withhold CPP contributions from the earnings for the entire reporting period.
+						//
+						//  Cases in TimeTrex are as follows:
+						//    Not assigned to the CPP Tax/Deduction record, and no CPP earnings/deductions = CPP Exempt
+						//    Assigned to CPP Tax/Deduction Record, but too young, or too old and no CPP earnings/deductions = CPP Exempt
+						if ( $ee_data['l16'] == 0 AND $ee_data['l17'] == 0 AND $ee_data['l26'] == 0 ) {
+							//Debug::Text('CPP Exempt!', __FILE__, __LINE__, __METHOD__, 10);
+							$ee_data['cpp_exempt'] = TRUE;
+						}
+
+						//Check to see if the user has a end date set on their deduction record, signifying that they elected to stop CPP contributions.
+						if ( $ee_data['l26'] == 0 AND isset( $setup_data['employee_cpp']['include_pay_stub_entry_account'] ) AND $setup_data['employee_cpp']['include_pay_stub_entry_account'] != TTUUID::getZeroID() ) {
+							//Get User Tax / Deductions by Pay Stub Account.
+							$udlf = TTnew( 'UserDeductionListFactory' );
 							$udlf->getByUserIdAndPayStubEntryAccountID( $user_obj->getId(), $setup_data['employee_cpp']['include_pay_stub_entry_account'] );
-							//FIXME: What if they were CPP exempt because of age, so no CPP was taken off, but they are assigned to the Tax/Deduction?
-							//Don't think there is much we can do about this for now.
-							if ( $setup_data['employee_cpp']['include_pay_stub_entry_account'] != 0
-									AND $udlf->getRecordCount() == 0
-									AND $row['employee_cpp'] == 0
-							) {
-								//Debug::Text('CPP Exempt!', __FILE__, __LINE__, __METHOD__, 10);
-								$ee_data['cpp_exempt'] = TRUE;
+							if ( $udlf->getRecordCount() > 0 ) {
+								$ud_obj = $udlf->getCurrent();
+								if ( $ud_obj->getEndDate() != '' AND $ud_obj->getEndDate() < $filter_data['end_date'] ) {
+									$ee_data['cpp_exempt'] = FALSE;
+									Debug::Text('CPP NOT Exempt!', __FILE__, __LINE__, __METHOD__, 10);
+								}
 							}
+							unset( $udlf, $ud_obj ); //Don't unset $udlf as its used below.
 						}
 
-						if ( isset( $setup_data['employee_ei']['include_pay_stub_entry_account'] ) ) {
-							$udlf->getByUserIdAndPayStubEntryAccountID( $user_obj->getId(), $setup_data['employee_ei']['include_pay_stub_entry_account'] );
-							if ( $setup_data['employee_ei']['include_pay_stub_entry_account'] != 0
-									AND $udlf->getRecordCount() == 0
-									AND $row['employee_ei'] == 0
-							) {
-								//Debug::Text('EI Exempt!', __FILE__, __LINE__, __METHOD__, 10);
-								$ee_data['ei_exempt'] = TRUE;
-							}
+						//EI Exempt:
+						//Leave this box blank if you reported an amount greater than "0" in box 18 or 24.
+						// Enter an "X" or a check mark in the "EI" box only if you did not have to withhold EI premiums from the earnings for the entire reporting period.
+						if ( $ee_data['l18'] == 0 AND $ee_data['l24'] == 0 ) {
+							$ee_data['ei_exempt'] = TRUE;
 						}
+
 
 						if ( isset( $row['other_box_0'] ) AND $row['other_box_0'] > 0 AND isset( $setup_data['other_box'][0]['box'] ) AND $setup_data['other_box'][0]['box'] != '' ) {
 							$ee_data['other_box_0_code'] = $setup_data['other_box'][0]['box'];
@@ -1119,7 +1133,7 @@ class T4SummaryReport extends Report {
 					$t4->sumRecords();
 					$total_row = $t4->getRecordsTotal();
 
-					$t4s->l88 = count( $user_rows );
+					$t4s->l88 = $t4->countRecords();
 					$t4s->l14 = ( isset( $total_row['l14'] ) ) ? $total_row['l14'] : NULL;
 					$t4s->l22 = ( isset( $total_row['l22'] ) ) ? $total_row['l22'] : NULL;
 					$t4s->l16 = ( isset( $total_row['l16'] ) ) ? $total_row['l16'] : NULL;
@@ -1140,11 +1154,11 @@ class T4SummaryReport extends Report {
 
 				if ( $format == 'efile_xml' ) {
 					$output_format = 'XML';
-					$file_name = 't4_efile_' . date( 'Y_m_d' ) . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.xml';
+					$file_name = 't4_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.xml';
 					$mime_type = 'applications/octet-stream'; //Force file to download.
 				} else {
 					$output_format = 'PDF';
-					$file_name = 't4_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.pdf';
+					$file_name = 't4_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.pdf';
 					$mime_type = $this->file_mime_type;
 				}
 				$file_output = $this->getFormObject()->output( $output_format );

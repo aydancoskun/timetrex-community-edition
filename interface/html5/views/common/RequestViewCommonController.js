@@ -67,6 +67,9 @@ RequestViewCommonController = BaseViewController.extend( {
 			if ( callback ) {
 				callback();
 			}
+
+			$this.search(); //Refresh the grid, as we don't do that during authorize/decline clicks anymore.
+
 			Global.setUIInitComplete();
 			ProgressBar.closeOverlay();
 

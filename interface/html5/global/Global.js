@@ -1182,6 +1182,24 @@ Global.addFirstItemToArray = function( array, firstItemType, customLabel ) {
 	return array;
 };
 
+//Add item on to the end of the array, but make sure its not already there and therefore never duplicated.
+Global.addLastItemToArray = function( array, key, label ) {
+	var label;
+	if ( array ) {
+		last_array_element = array[(array.length - 1)];
+		if ( last_array_element.value != key ) {
+			array.push( {
+				fullValue: key,
+				value: key,
+				label: label,
+				id: 2000
+			});
+		}
+	}
+
+	return array;
+};
+
 Global.convertRecordArrayToOptions = function( array ) {
 	var len = array.length;
 	var options = {};
@@ -1478,7 +1496,7 @@ Global.loadScript = function( scriptPath, onResult ) {
 		if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId ) {
 			calling_script = ' from ' + LocalCacheData.current_open_primary_controller.viewId + 'ViewController';
 		}
-		console.error( 'SYNC-LOADING: ' + scriptPath + calling_script );
+		Debug.Text( 'SYNC-LOADING: ' + scriptPath + calling_script );
 
 
 		var id = scriptPath.split( '/' );

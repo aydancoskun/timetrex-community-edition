@@ -9825,7 +9825,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	*/
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTA
 	 */
 	function testDSTA() {
 		global $dd;
@@ -9903,7 +9903,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTA2
 	 */
 	function testDSTA2() {
 		global $dd;
@@ -9978,7 +9978,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTA3
 	 */
 	function testDSTA3() {
 		global $dd;
@@ -10053,7 +10053,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTA4
 	 */
 	function testDSTA4() {
 		global $dd;
@@ -10131,7 +10131,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTA5
 	 */
 	function testDSTA5() {
 		global $dd;
@@ -10253,7 +10253,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTA6
 	 */
 	function testDSTA6() {
 		global $dd;
@@ -10375,7 +10375,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTB
 	 */
 	function testDSTB() {
 		global $dd;
@@ -10453,7 +10453,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTB2
 	 */
 	function testDSTB2() {
 		global $dd;
@@ -10531,7 +10531,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTB3
 	 */
 	function testDSTB3() {
 		global $dd;
@@ -10608,7 +10608,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTB4
 	 */
 	function testDSTB4() {
 		global $dd;
@@ -10686,7 +10686,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group PremiumPolicy_testDST
+	 * @group PremiumPolicy_testDSTZ1
 	 */
 	function testDSTZ1() {
 		global $dd;

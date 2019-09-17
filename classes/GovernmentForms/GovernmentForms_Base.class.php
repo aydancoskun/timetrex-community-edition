@@ -621,8 +621,12 @@ class GovernmentForms_Base {
 					$pdf->useTemplate( $this->template_index[$combine_template['template_page']], $combine_template['x']+$this->getTemplateOffsets('x'), $combine_template['y']+$this->getTemplateOffsets('y') );
 
 					$this->setPageOffsets( $combine_template['x'], $combine_template['y']);
-					$this->current_template_index = $schema['template_page'];
-					$this->initPage( $template_schema );
+					$this->current_template_index = $combine_template['template_page'];
+
+					//For things like W2 instruction templates at the bottom half of the page, allow the initPage() function to be disabled for the template.
+					if ( !isset($combine_template['init']) OR ( isset($combine_template['init']) AND $combine_template['init'] == TRUE ) ) {
+						$this->initPage( $template_schema );
+					}
 				}
 				unset($combine_templates);
 				$this->setPageOffsets( 0, 0 ); //Reset page offsets after each template is initialized.
@@ -690,6 +694,12 @@ class GovernmentForms_Base {
 			$this->addPage( $schema );
 		} else {
 			//Debug::text('Skipping template... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		//If only_template_page is set, then only draw when we are on that template.
+		if ( isset($schema['only_template_page']) AND ( ( is_array( $schema['only_template_page'] ) AND !in_array( $this->current_template_index, $schema['only_template_page'] ) ) OR ( !is_array( $schema['only_template_page'] ) AND $schema['only_template_page'] != $this->current_template_index ) ) ) {
+			//Debug::text('Skipping template based on filter... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
 		}
 
 		//on_background flag forces that item to only be shown if the background is as well.

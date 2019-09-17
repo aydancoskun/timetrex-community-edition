@@ -968,7 +968,7 @@ class T4ASummaryReport extends Report {
 
 				$total_row = Misc::ArrayAssocSum( $this->form_data['user'][$legal_entity_id] );
 
-				$t4as->l88 = count( $user_rows );
+				$t4as->l88 = $t4a->countRecords();
 				$t4as->l16 = ( isset( $total_row['pension']) ) ? $total_row['pension'] : NULL;
 				$t4as->l22 = ( isset( $total_row['income_tax']) ) ? $total_row['income_tax'] : NULL;
 				$t4as->l18 = ( isset( $total_row['lump_sum_payment']) ) ? $total_row['lump_sum_payment'] : NULL;
@@ -1000,11 +1000,11 @@ class T4ASummaryReport extends Report {
 				$this->getFormObject()->addForm( $t4as );
 				if ( $format == 'efile_xml' ) {
 					$output_format = 'XML';
-					$file_name = 't4a_efile_'.date('Y_m_d').'_'.strtolower(str_replace(' ', '_', $this->form_data['legal_entity'][$legal_entity_id]->getTradeName())).'.xml';
+					$file_name = 't4a_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.xml';
 					$mime_type = 'applications/octet-stream'; //Force file to download.
 				} else {
 					$output_format = 'PDF';
-					$file_name = 't4a_'.strtolower(str_replace(' ', '_', $this->form_data['legal_entity'][$legal_entity_id]->getTradeName())).'.pdf';
+					$file_name = 't4a_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.pdf';
 					$mime_type = $this->file_mime_type;
 				}
 

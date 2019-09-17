@@ -479,15 +479,8 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		// Day of the Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'primary_day_of_month' } );
-		var day_of_month_array = $this.day_of_month_array;
-		day_of_month_array.push( {
-					fullValue: -1,
-					value: -1,
-					label: $.i18n._( '- Last Day Of Month -' ),
-					id: 2000
-				}
-		);
-		form_item_input.setSourceData( Global.addFirstItemToArray( day_of_month_array ) );
+		var day_of_month_array = Global.addLastItemToArray( $this.day_of_month_array, -1, $.i18n._( '- Last Day Of Month -' ) );
+		form_item_input.setSourceData( day_of_month_array );
 		this.addEditFieldToColumn( $.i18n._( 'Primary Day of Month' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency Month

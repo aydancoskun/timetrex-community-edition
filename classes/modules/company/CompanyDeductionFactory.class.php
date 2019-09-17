@@ -261,7 +261,6 @@ class CompanyDeductionFactory extends Factory {
 										//US - Custom Formulas
 										69 => TTi18n::gettext('Custom Formula'),
 
-										//80 => TTi18n::gettext('US - Advance EIC Formula'), //Repealed as of 31-Dec-2010.
 										82 => TTi18n::gettext('US - Medicare Formula (Employee)'),
 										83 => TTi18n::gettext('US - Medicare Formula (Employer)'),
 										84 => TTi18n::gettext('US - Social Security Formula (Employee)'),
@@ -330,22 +329,6 @@ class CompanyDeductionFactory extends Factory {
 										0 => TTi18n::gettext('Based on Payroll Run Type'), //Best fit formula depending on payroll run type (Regular or Bonus/Correction)
 										10 => TTi18n::gettext('Always Regular (Non-Averaging)'),
 										20 => TTi18n::gettext('Always Special (Cummulative Averaging)'),
-									);
-				break;
-			case 'us_medicare_filing_status': //Medicare certificate
-				$retval = array(
-														10 => TTi18n::gettext('Single or Head of Household'),
-														20 => TTi18n::gettext('Married - Without Spouse Filing'),
-														30 => TTi18n::gettext('Married - With Spouse Filing'),
-
-									);
-				break;
-			case 'us_eic_filing_status': //EIC certificate
-				$retval = array(
-														10 => TTi18n::gettext('Single or Head of Household'),
-														20 => TTi18n::gettext('Married - Without Spouse Filing'),
-														30 => TTi18n::gettext('Married - With Spouse Filing'),
-
 									);
 				break;
 			case 'federal_filing_status': //US

@@ -177,6 +177,7 @@ class APITimeSheet extends APIFactory {
 					'status_id' => TRUE,
 					'status' => TRUE,
 					'time_stamp' => TRUE,
+					'raw_time_stamp' => TRUE,
 					'punch_date' => TRUE,
 					'punch_time' => TRUE,
 					'punch_control_id' => TRUE,

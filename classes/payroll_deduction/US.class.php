@@ -88,34 +88,6 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		return FALSE;
 	}
 
-	function setMedicareFilingStatus( $value ) {
-		$this->data['medicare_filing_status'] = $value;
-
-		return TRUE;
-	}
-
-	function getMedicareFilingStatus() {
-		if ( isset( $this->data['medicare_filing_status'] ) ) {
-			return $this->data['medicare_filing_status'];
-		}
-
-		return FALSE;
-	}
-
-	function setEICFilingStatus( $value ) {
-		$this->data['eic_filing_status'] = $value;
-
-		return TRUE;
-	}
-
-	function getEICFilingStatus() {
-		if ( isset( $this->data['eic_filing_status'] ) ) {
-			return $this->data['eic_filing_status'];
-		}
-
-		return FALSE;
-	}
-
 	function setYearToDateSocialSecurityContribution( $value ) {
 		if ( $value > 0 ) {
 			$this->data['social_security_ytd_contribution'] = $value;
@@ -616,7 +588,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		$amount = bcmul( $pay_period_income, $rate );
 		Debug::text( 'Amount: ' . $amount, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$threshold_income = ( isset( $rate_data['employee_threshold'][ $this->getMedicareFilingStatus() ] ) ) ? $rate_data['employee_threshold'][ $this->getMedicareFilingStatus() ] : $rate_data['employee_threshold'][10]; //Default to single.
+		$threshold_income = $this->getMedicareAdditionalEmployerThreshold();
 		Debug::text( 'Threshold Income: ' . $threshold_income, __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $threshold_income > 0 AND ( $this->getYearToDateGrossIncome() + $this->getGrossPayPeriodIncome() ) > $threshold_income ) {
 			if ( $this->getYearToDateGrossIncome() < $threshold_income ) {
@@ -704,52 +676,6 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 	function RoundNearestDollar( $amount ) {
 		return round( $amount, 0 );
-	}
-
-	//
-	// Earning Income Tax Credit (EIC, EITC). - Repealed as of 31-Dec-2010.
-	//
-	function getEIC() {
-		if ( $this->getDate() <= 20101231 ) { //Repealed as of 31-Dec-2010.
-			$eic_options = $this->getEICRateArray( $this->getAnnualTaxableIncome(), $this->getEICFilingStatus() );
-			//Debug::Arr($eic_options, ' EIC Options: ', __FILE__, __LINE__, __METHOD__, 10);
-
-			if ( is_array( $eic_options ) AND isset( $eic_options['calculation_type'] ) ) {
-				$retval = 0;
-				switch ( $eic_options['calculation_type'] ) {
-					case 10: //Percent
-						if ( isset( $eic_options['percent'] ) ) {
-							$retval = bcmul( bcdiv( $eic_options['percent'], 100 ), $this->getAnnualTaxableIncome() );
-						}
-						break;
-					case 20: //Amount
-						if ( isset( $eic_options['amount'] ) ) {
-							$retval = $eic_options['amount'];
-						}
-						break;
-					case 30: //Amount less percent
-						if ( isset( $eic_options['percent'] ) AND isset( $eic_options['amount'] ) AND isset( $eic_options['income'] ) ) {
-							$retval = bcsub( $eic_options['amount'], bcmul( bcdiv( $eic_options['percent'], 100 ), bcsub( $this->getAnnualTaxableIncome(), $eic_options['income'] ) ) );
-						}
-						break;
-				}
-				Debug::Text( ' Type: ' . $eic_options['calculation_type'] . ' Annual Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
-
-				if ( isset( $retval ) AND $retval > 0 ) {
-					$retval = bcdiv( $retval, $this->getAnnualPayPeriods() );
-
-					Debug::Text( 'EIC Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
-
-					return $retval * -1;
-				} else {
-					Debug::Text( 'Calculation didnt return valid amount...', __FILE__, __LINE__, __METHOD__, 10 );
-				}
-			}
-		} else {
-			Debug::Text( 'EIC has been repealed for dates after 31-Dec-2010: ' . $this->getDate(), __FILE__, __LINE__, __METHOD__, 10 );
-		}
-
-		return 0;
 	}
 
 	/*

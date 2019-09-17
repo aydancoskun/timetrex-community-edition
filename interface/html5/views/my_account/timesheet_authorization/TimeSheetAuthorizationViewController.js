@@ -664,13 +664,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		$this.authorization_api['setAuthorization']( [filter], {
 			onResult: function( res ) {
 				if ( res.isValid() ) {
-					$this.search( null, null, null, function( result ) {
-						if ( $.type( result.getResult() ) !== 'array' || result.getResult().length < 1 ) {
-							$this.onCancelClick();
-						} else {
-							$this.onRightArrowClick();
-						}
-					} );
+					$this.onRightArrowClick( function() { $this.search(); } );
 				} else {
 					TAlertManager.showErrorAlert( res );
 				}
@@ -680,11 +674,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	},
 
 	onPassClick: function() {
-		if ( this.grid.getGridParam( 'data' ).length === 1 ) {
-			this.onCancelClick();
-		} else {
-			this.onRightArrowClick();
-		}
+		this.onRightArrowClick( function() { $this.search(); } );
 	},
 
 	onAuthorizationRequestClick: function() {
@@ -751,14 +741,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		$this.authorization_api['setAuthorization']( [filter], {
 			onResult: function( res ) {
 				if ( res.isValid() ) {
-					$this.search( null, null, null, function( result ) {
-						if ( $.type( result.getResult() ) !== 'array' || result.getResult().length < 1 ) {
-							$this.onCancelClick();
-						} else {
-							$this.onRightArrowClick();
-						}
-
-					} );
+					$this.onRightArrowClick( function() { $this.search(); } );
 				} else {
 					TAlertManager.showErrorAlert( res );
 				}

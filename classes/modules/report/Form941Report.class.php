@@ -1081,11 +1081,11 @@ class Form941Report extends Report {
 
 				if ( $format == 'efile_xml' ) {
 					$output_format = 'XML';
-					$file_name = '940_efile_' . date( 'Y_m_d' ) . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.xml';
+					$file_name = '940_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.xml';
 					$mime_type = 'applications/octet-stream'; //Force file to download.
 				} else {
 					$output_format = 'PDF';
-					$file_name = $this->file_name . '_' . strtolower( str_replace( ' ', '_', $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) ) . '.pdf';
+					$file_name = $this->file_name . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.pdf';
 					$mime_type = $this->file_mime_type;
 				}
 

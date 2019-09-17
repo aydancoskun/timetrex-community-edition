@@ -156,6 +156,7 @@ class APIRequest extends APIFactory {
 			//Force other filter settings for authorization view.
 			$data['filter_data']['authorized'] = array(0);
 			$data['filter_data']['status_id'] = array(30);
+			$data['filter_sort'] = array( 'status_id' => 'asc', 'date_stamp' => 'asc', 'type_id' => 'asc', 'last_name' => 'asc' );
 		} else {
 			Debug::Text('Not using authorization criteria...', __FILE__, __LINE__, __METHOD__, 10);
 		}

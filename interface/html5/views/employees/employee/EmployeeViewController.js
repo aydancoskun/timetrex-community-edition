@@ -78,68 +78,61 @@ EmployeeViewController = BaseViewController.extend( {
 			this.invisible_context_menu_dic[ContextMenuIconName.pay_stub_amendment] = true; //Hide some context menus
 		}
 
-		var $this = this;
-		require( [
-			'TImageAdvBrowser',//only in the upload wizard
-			'TImage'//only in the upload wizard
-		], function() {
-			$this.render();
+		this.render();
 
-			var context_menu_model = {
-				'exclude': [ContextMenuIconName.copy],
-				'include': [
-					{
-						label: $.i18n._( 'TimeSheet' ),
-						id: ContextMenuIconName.timesheet,
-						group: 'navigation',
-						icon: Icons.timesheet,
-					},
+		var context_menu_model = {
+			'exclude': [ContextMenuIconName.copy],
+			'include': [
+				{
+					label: $.i18n._( 'TimeSheet' ),
+					id: ContextMenuIconName.timesheet,
+					group: 'navigation',
+					icon: Icons.timesheet
+				},
 
-					{
-						label: $.i18n._( 'Schedule' ),
-						id: ContextMenuIconName.schedule,
-						group: 'navigation',
-						icon: Icons.schedule,
-					},
+				{
+					label: $.i18n._( 'Schedule' ),
+					id: ContextMenuIconName.schedule,
+					group: 'navigation',
+					icon: Icons.schedule
+				},
 
-					{
-						label: $.i18n._( 'Pay<br>Stubs' ),
-						id: ContextMenuIconName.pay_stub,
-						group: 'navigation',
-						icon: Icons.pay_stubs,
-					},
+				{
+					label: $.i18n._( 'Pay<br>Stubs' ),
+					id: ContextMenuIconName.pay_stub,
+					group: 'navigation',
+					icon: Icons.pay_stubs
+				},
 
-					{
-						label: $.i18n._( 'Pay Stub<br>Amendments' ),
-						id: ContextMenuIconName.pay_stub_amendment,
-						group: 'navigation',
-						icon: Icons.pay_stub_amendment,
-					},
+				{
+					label: $.i18n._( 'Pay Stub<br>Amendments' ),
+					id: ContextMenuIconName.pay_stub_amendment,
+					group: 'navigation',
+					icon: Icons.pay_stub_amendment
+				},
 
-					{
-						label: $.i18n._( 'Map' ),
-						id: ContextMenuIconName.map,
-						group: 'other',
-						icon: Icons.map,
-					},
+				{
+					label: $.i18n._( 'Map' ),
+					id: ContextMenuIconName.map,
+					group: 'other',
+					icon: Icons.map
+				},
 
-					{
-						label: $.i18n._( 'Import' ),
-						id: ContextMenuIconName.import_icon,
-						group: 'other',
-						icon: Icons.import_icon,
-						permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVEmployee' ),
-						sort_order: 8000
-					},
+				{
+					label: $.i18n._( 'Import' ),
+					id: ContextMenuIconName.import_icon,
+					group: 'other',
+					icon: Icons.import_icon,
+					permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVEmployee' ),
+					sort_order: 8000
+				}
 
-				],
-			};
-			$this.setContextMenuModel( context_menu_model );
-			$this.buildContextMenu();
-			$this.initData();
-			$this.setSelectRibbonMenuIfNecessary();
-		} );
-
+			]
+		};
+		this.setContextMenuModel( context_menu_model );
+		this.buildContextMenu();
+		this.initData();
+		this.setSelectRibbonMenuIfNecessary();
 	},
 
 	jobUIValidate: function() {

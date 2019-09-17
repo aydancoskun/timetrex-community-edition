@@ -107,14 +107,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		];
 
 		this.initDropDownOptions( options, function( result ) {
-
-			$this.transaction_date_array.push( {
-						fullValue: -1,
-						value: -1,
-						label: $.i18n._( '- Last Day Of Month -' ),
-						id: 2000
-					}
-			);
+			$this.transaction_date_array = Global.addLastItemToArray( $this.transaction_date_array, -1, $.i18n._( '- Last Day Of Month -' ) );
 
 			$this.user_preference_api.getOptions( 'start_week_day', {
 				onResult: function( res ) {

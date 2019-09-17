@@ -229,106 +229,18 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 
 	var $medicare_options = array(
 		//No changes in 2015.
-		20140101 => array( //2014
-						   'employee_rate'           => 1.45,
-						   'employee_threshold_rate' => 0.90,
-						   'employee_threshold'      => array(
-								   10 => 200000, //Single
-								   20 => 125000, //Married - Without Spouse Filing
-								   30 => 250000, //Married - With Spouse Filing
-						   ),
-						   'employer_rate'           => 1.45,
-						   'employer_threshold'      => 200000, //Threshold for Form 941
-		),
 		20130101 => array( //2013
 						   'employee_rate'           => 1.45,
-						   'employee_threshold_rate' => 0.90,
-						   'employee_threshold'      => array(
-								   10 => 200000, //Single
-								   20 => 125000, //Married - Without Spouse Filing
-								   30 => 250000, //Married - With Spouse Filing
-						   ),
+						   'employee_threshold_rate' => 0.90, //Additional Medicare Rate
 						   'employer_rate'           => 1.45,
-						   'employer_threshold'      => 200000, //Threshold for Form 941
+						   'employer_threshold'      => 200000, //Additional Medicare Threshold for Form 941 - Actual rate varies from 125,000 to 250,000, but employers are only required to use and report based on 200,000
 		),
 		20060101 => array( //2006
 						   'employee_rate'           => 1.45,
 						   'employee_threshold_rate' => 0,
-						   'employee_threshold'      => array(
-								   10 => 0, //Single
-								   20 => 0, //Married - Without Spouse Filing
-								   30 => 0, //Married - With Spouse Filing
-						   ),
 						   'employer_rate'           => 1.45,
 						   'employer_threshold'      => 0, //Threshold for Form 941
 		),
-	);
-
-	/*
-		10 => 'Single or HOH',
-		20 => 'Married Without Spouse Filing',
-		30 => 'Married With Spouse Filing',
-
-		Calculation type is:
-			10 = Percent
-			20 = Amount
-			30 = Amount less Percent of wages in excess.
-
-		Wage Base is the maximum wage that is eligible for EIC.
-
-	*/
-	var $eic_options = array(
-			20100101 => array( //01-Jan-10
-							   10 => array(
-									   array('income' => 8970, 'calculation_type' => 10, 'percent' => 20.40),
-									   array('income' => 16450, 'calculation_type' => 20, 'amount' => 1830),
-									   array('income' => 16450, 'calculation_type' => 30, 'amount' => 1830, 'percent' => 9.588),
-							   ),
-							   20 => array(
-									   array('income' => 8970, 'calculation_type' => 10, 'percent' => 20.40),
-									   array('income' => 21460, 'calculation_type' => 20, 'amount' => 1830),
-									   array('income' => 21460, 'calculation_type' => 30, 'amount' => 1830, 'percent' => 9.588),
-							   ),
-							   30 => array(
-									   array('income' => 4485, 'calculation_type' => 10, 'percent' => 20.40),
-									   array('income' => 10730, 'calculation_type' => 20, 'amount' => 915),
-									   array('income' => 10730, 'calculation_type' => 30, 'amount' => 915, 'percent' => 9.588),
-							   ),
-			),
-			20090401 => array( //01-Apr-09
-							   10 => array(
-									   array('income' => 8950, 'calculation_type' => 10, 'percent' => 20.40),
-									   array('income' => 16420, 'calculation_type' => 20, 'amount' => 1826),
-									   array('income' => 16420, 'calculation_type' => 30, 'amount' => 1826, 'percent' => 9.588),
-							   ),
-							   20 => array(
-									   array('income' => 8950, 'calculation_type' => 10, 'percent' => 20.40),
-									   array('income' => 21420, 'calculation_type' => 20, 'amount' => 1826),
-									   array('income' => 21420, 'calculation_type' => 30, 'amount' => 1826, 'percent' => 9.588),
-							   ),
-							   30 => array(
-									   array('income' => 4475, 'calculation_type' => 10, 'percent' => 20.40),
-									   array('income' => 10710, 'calculation_type' => 20, 'amount' => 913),
-									   array('income' => 10710, 'calculation_type' => 30, 'amount' => 913, 'percent' => 9.588),
-							   ),
-			),
-			20080101 => array( //01-Jan-08
-							   10 => array(
-									   array('income' => 8580, 'calculation_type' => 10, 'percent' => 20.40),
-									   array('income' => 15740, 'calculation_type' => 20, 'amount' => 1750),
-									   array('income' => 15740, 'calculation_type' => 30, 'amount' => 1750, 'percent' => 9.588),
-							   ),
-							   20 => array(
-									   array('income' => 8580, 'calculation_type' => 10, 'percent' => 20.40),
-									   array('income' => 18740, 'calculation_type' => 20, 'amount' => 1750),
-									   array('income' => 18740, 'calculation_type' => 30, 'amount' => 1750, 'percent' => 9.588),
-							   ),
-							   30 => array(
-									   array('income' => 4290, 'calculation_type' => 10, 'percent' => 20.40),
-									   array('income' => 9370, 'calculation_type' => 20, 'amount' => 875),
-									   array('income' => 9370, 'calculation_type' => 30, 'amount' => 875, 'percent' => 9.588),
-							   ),
-			),
 	);
 
 	/*
@@ -844,54 +756,6 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 		return FALSE;
 	}
 
-	function getEICRateArray( $income, $type ) {
-		Debug::text( 'Calculating ' . $type . ' Taxes on: $' . $income, __FILE__, __LINE__, __METHOD__, 10 );
-
-		$eic_options = $this->getDataFromRateArray( $this->getDate(), $this->eic_options );
-		if ( $eic_options == FALSE ) {
-			Debug::text( 'aNO INCOME TAX RATES FOUND!!!!!! ' . $type . ' Taxes on: $' . $income, __FILE__, __LINE__, __METHOD__, 10 );
-
-			return FALSE;
-		}
-
-		if ( isset( $eic_options[ $type ] ) ) {
-			$rates = $eic_options[ $type ];
-		} else {
-			Debug::text( 'bNO INCOME TAX RATES FOUND!!!!!! ' . $type . ' Taxes on: $' . $income, __FILE__, __LINE__, __METHOD__, 10 );
-
-			return FALSE;
-		}
-
-		if ( count( $rates ) == 0 ) {
-			Debug::text( 'cNO INCOME TAX RATES FOUND!!!!!! ' . $type . ' Taxes on: $' . $income, __FILE__, __LINE__, __METHOD__, 10 );
-
-			return FALSE;
-		}
-
-		$prev_value = 0;
-		$total_rates = ( count( $rates ) - 1 );
-		$i = 0;
-		foreach ( $rates as $key => $values ) {
-			$value = $values['income'];
-
-			//Debug::text('Key: '. $key .' Income: '. $value , __FILE__, __LINE__, __METHOD__, 10);
-
-			if ( $income > $prev_value AND $income <= $value ) {
-				//Debug::text('Found Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
-				return $eic_options[ $type ][ $key ];
-			} elseif ( $i == $total_rates ) {
-				//Debug::text('Found Last Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
-				return $eic_options[ $type ][ $key ];
-			}
-
-			$prev_value = $value;
-			$i++;
-		}
-
-		return FALSE;
-
-	}
-
 	function getFederalHighestRate() {
 		$arr = $this->getRateArray( 999999999, 'federal' );
 		Debug::text( 'Federal Highest Rate: ' . $arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
@@ -1070,15 +934,6 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->medicare_options );
 		if ( isset( $retarr['employer_threshold'] ) ) {
 			return $retarr['employer_threshold'];
-		}
-
-		return FALSE;
-	}
-
-	function getMedicareAdditionalThresholdRate() {
-		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->medicare_options );
-		if ( isset( $retarr['employee_threshold_rate'] ) ) {
-			return $retarr['employee_threshold_rate'];
 		}
 
 		return FALSE;

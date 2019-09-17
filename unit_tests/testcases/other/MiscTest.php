@@ -93,7 +93,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerA
+	 * @group MiscTest_testDatabaseLoadBalancerA
 	 */
 	function testDatabaseLoadBalancerA() {
 		global $config_vars;
@@ -145,7 +145,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerB
+	 * @group MiscTest_testDatabaseLoadBalancerB
 	 */
 	function testDatabaseLoadBalancerB() {
 		global $config_vars;
@@ -196,7 +196,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerC
+	 * @group MiscTest_testDatabaseLoadBalancerC
 	 */
 	function testDatabaseLoadBalancerC() {
 		global $config_vars;
@@ -239,7 +239,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerD
+	 * @group MiscTest_testDatabaseLoadBalancerD
 	 */
 	function testDatabaseLoadBalancerD() {
 		global $config_vars;
@@ -283,7 +283,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerE
+	 * @group MiscTest_testDatabaseLoadBalancerE
 	 */
 	function testDatabaseLoadBalancerE() {
 		global $config_vars;
@@ -334,7 +334,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerF
+	 * @group MiscTest_testDatabaseLoadBalancerF
 	 */
 	function testDatabaseLoadBalancerF() {
 		global $config_vars;
@@ -386,7 +386,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerG
+	 * @group MiscTest_testDatabaseLoadBalancerG
 	 */
 	function testDatabaseLoadBalancerG() {
 		global $config_vars;
@@ -443,7 +443,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerH
+	 * @group MiscTest_testDatabaseLoadBalancerH
 	 */
 	function testDatabaseLoadBalancerH() {
 		global $config_vars;
@@ -502,7 +502,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerI
+	 * @group MiscTest_testDatabaseLoadBalancerI
 	 */
 	function testDatabaseLoadBalancerI() {
 		global $config_vars;
@@ -561,7 +561,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerSessionVarsA
+	 * @group MiscTest_testDatabaseLoadBalancerSessionVarsA
 	 */
 	function testDatabaseLoadBalancerSessionVarsA() {
 		global $config_vars;
@@ -633,7 +633,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testDatabaseLoadBalancerSessionVarsB
+	 * @group MiscTest_testDatabaseLoadBalancerSessionVarsB
 	 */
 	function testDatabaseLoadBalancerSessionVarsB() {
 		global $config_vars;
@@ -726,6 +726,9 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		}
 	}
 
+	/**
+	 * @group MiscTest_testBeforeAndAfterDecimal
+	 */
 	function testBeforeAndAfterDecimal() {
 		$this->assertEquals( Misc::getBeforeDecimal( 0 ), '0' );
 		$this->assertEquals( Misc::getBeforeDecimal( 1 ), '1' );
@@ -751,6 +754,9 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Misc::getAfterDecimal( '123456789.123456789', FALSE ), '123456789' );
 	}
 
+	/**
+	 * @group MiscTest_testFormatNumber
+	 */
 	function testFormatNumber() {
 		$this->assertSame( TTi18n::FormatNumber( '100.00', TRUE ), '100.00' );
 		$this->assertSame( TTi18n::FormatNumber( '100', TRUE ), '100.00' );
@@ -772,6 +778,9 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertSame( TTi18n::FormatNumber( '100.0000', TRUE, 0, 2 ), '100' ); //Make sure we don't get "100."
 	}
 
+	/**
+	 * @group MiscTest_testMoneyFormat
+	 */
 	function testMoneyFormat() {
 		//see the I18nTest that compares this function to the numberformat in i18n.
 		Debug::Text( 'Thousands Separator: '. TTi18n::getThousandsSymbol() .' Decimal Symbol: '. TTi18n::getDecimalSymbol(), __FILE__, __LINE__, __METHOD__, 1);
@@ -798,6 +807,9 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		}
 	}
 
+	/**
+	 * @group MiscTest_testUnitConvert
+	 */
 	function testUnitConvert() {
 		$this->assertEquals( UnitConvert::convert( 'mm', 'mm', 1 ), 1 );
 		$this->assertEquals( UnitConvert::convert( 'm', 'mm', 1 ), 1000 );
@@ -814,6 +826,9 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( UnitConvert::convert( 'm', 'mi', 1 ), 0.00062137119223733392 );
 	}
 
+	/**
+	 * @group MiscTest_testPasswordStrength
+	 */
 	function testPasswordStrength() {
 		//Numbers
 		$this->assertEquals( Misc::getPasswordStrength('1'), 1 );

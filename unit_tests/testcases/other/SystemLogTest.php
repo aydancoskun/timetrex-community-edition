@@ -1,8 +1,4 @@
 <?php
-/**
- * $License$
- */
-
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -39,7 +35,7 @@
  ********************************************************************************/
 
 /**
- * @group Schedule
+ * @group SystemLog
  */
 class SystemLogTest extends PHPUnit_Framework_TestCase {
 	protected $company_id = NULL;
