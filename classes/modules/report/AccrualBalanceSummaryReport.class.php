@@ -118,7 +118,7 @@ class AccrualBalanceSummaryReport extends Report {
 			case 'date_columns':
 				$retval = array_merge(
 									TTDate::getReportDateOptions( 'hire', TTi18n::getText('Hire Date'), 13, FALSE ),
-									TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 19, TRUE )
+									TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 19, FALSE )
 								);
 				break;
 			case 'custom_columns':
@@ -519,6 +519,8 @@ class AccrualBalanceSummaryReport extends Report {
 		foreach ( $uwlf as $key => $uw_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) {
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = (array)$uw_obj->getObjectAsArray( array('hourly_rate' => TRUE, 'current_currency' => TRUE, 'effective_date' => TRUE ) ); //Force specific columns, otherwise if hourly_rate is not included wage cant be calculated.
+				$this->tmp_data['user_wage'][$uw_obj->getUser()]['wage'] = $uw_obj->getWage(); //Get raw unformatted value as columnFormatter() will format it later on.
+				$this->tmp_data['user_wage'][$uw_obj->getUser()]['hourly_rate'] = $uw_obj->getHourlyRate(); //Get raw unformatted value as columnFormatter() will format it later on.
 
 				if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 					$this->tmp_data['user_wage'][$uw_obj->getUser()]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
@@ -571,6 +573,8 @@ class AccrualBalanceSummaryReport extends Report {
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['accrual']), NULL, TTi18n::getText('Pre-Processing Data...') );
 		if ( isset($this->tmp_data['user']) ) {
+			$column_keys = array_keys( $this->getColumnDataConfig() );
+
 			$key = 0;
 			if ( isset( $this->tmp_data['accrual'] ) ) {
 				foreach( $this->tmp_data['accrual'] as $user_id => $level_2 ) {
@@ -578,13 +582,13 @@ class AccrualBalanceSummaryReport extends Report {
 						foreach( $level_2 as $rows ) {
 							foreach( $rows as $row ) {
 								if ( isset( $row['date_stamp'] ) ) {
-									$date_columns = TTDate::getReportDates( NULL, TTDate::parseDateTime($row['date_stamp']), FALSE, $this->getUserObject() );
+									$date_columns = TTDate::getReportDates( NULL, TTDate::parseDateTime($row['date_stamp']), FALSE, $this->getUserObject(), NULL, array_keys( $this->getColumnDataConfig() ) );
 								} else {
 									$date_columns = array();
 								}
 
 								if ( isset($this->tmp_data['user'][$user_id]['hire_date']) ) {
-									$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), FALSE, $this->getUserObject() );
+									$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 								} else {
 									$hire_date_columns = array();
 								}

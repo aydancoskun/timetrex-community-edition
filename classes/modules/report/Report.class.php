@@ -1181,14 +1181,14 @@ class Report {
 		$urdlf = TTnew( 'UserReportDataListFactory' ); /** @var UserReportDataListFactory $urdlf */
 		$urdlf->getByCompanyIdAndScriptAndDefault( $this->getUserObject()->getCompany(), get_class($this) );
 		if ( $urdlf->getRecordCount() > 0 ) {
-			Debug::Text('Found Company Report Setup!', __FILE__, __LINE__, __METHOD__, 10);
 			$urd_obj = $urdlf->getCurrent();
+			Debug::Text('Found Company Report Setup! ID: '. $urd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			$data = $urd_obj->getData();
 
 			//Debug::Arr( $data, '  Company Report Setup!', __FILE__, __LINE__, __METHOD__, 10);
 			return $data;
 		}
-		unset($urd_obj);
+		unset($urdlf);
 
 		return FALSE;
 	}
@@ -1746,12 +1746,7 @@ class Report {
 						$retval = TTDate::getReportDates( $column, $value, TRUE, $this->getUserObject() );
 						break;
 					case 'currency':
-						if ( is_object( $this->getCurrencyObject() ) ) {
-							//Set MIN decimals to 2 and max to the currency rounding.
-							$retval = $this->getCurrencyObject()->round( $value ); //Make sure we don't format the number or add any thousands separators.
-						} else {
-							$retval = $value;
-						}
+						$retval = Misc::MoneyRound( $value, 2, $this->getCurrencyObject() ); //Set MIN decimals to 2 and max to the currency rounding.
 						break;
 					case 'percent':
 					case 'numeric':
@@ -1787,12 +1782,7 @@ class Report {
 						$retval = TTDate::getReportDates( $column, $value, TRUE, $this->getUserObject() );
 						break;
 					case 'currency':
-						if ( is_object( $this->getCurrencyObject() ) ) {
-							//Set MIN decimals to 2 and max to the currency rounding.
-							$retval = $this->getCurrencyObject()->round( $value ); //Make sure we don't format the number or add any thousands separators.
-						} else {
-							$retval = $value;
-						}
+						$retval = Misc::MoneyRound( $value, 2, $this->getCurrencyObject() ); //Set MIN decimals to 2 and max to the currency rounding.
 						break;
 					case 'percent':
 					case 'numeric':

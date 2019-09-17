@@ -186,7 +186,7 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 
 		$list = array();
 		if ( $include_blank == TRUE ) {
-			$list[0] = TTi18n::getText('-Default-');
+			$list[0] = TTi18n::getText('-- Default --');
 		}
 
 		foreach ($lf as $obj) {

@@ -67,11 +67,15 @@ class RemittanceDestinationAccountFactory extends Factory {
 								);
 				break;
 			case 'type':
-				if ( !isset($params['legal_entity_id']) ) {
+				$rsalf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $rsalf */
+				if ( isset($params['legal_entity_id']) ) {
+					$rsalf->getByLegalEntityId( $params['legal_entity_id'] );
+				} elseif ( isset($params['company_id']) ) {
+					$rsalf->getByCompanyId( $params['company_id'] );
+				} else {
 					return FALSE;
 				}
-				$rsalf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $rsalf */
-				$rsalf->getByLegalEntityId( $params['legal_entity_id'] );
+
 				$type_options = $rsalf->getOptions('type');
 
 				foreach( $rsalf as $obj ) {
@@ -152,7 +156,20 @@ class RemittanceDestinationAccountFactory extends Factory {
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
 				$retval = array(
+					'user_id',
 					'name',
+					'value1',
+					'value1_1',
+					'value1_2',
+					'value2',
+					'value3',
+					'value4',
+					'value5',
+					'value6',
+					'value7',
+					'value8',
+					'value9',
+					'value10',
 				);
 				break;
 		}
@@ -1105,6 +1122,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 															$this->getValue1(),
 															TTi18n::gettext( 'Invalid institution, must be digits only' ) );
 							}
+
 							if ( strlen( $this->getValue2() ) != 5 ) {
 								$this->Validator->isTrue( 'value2',
 														  FALSE,
@@ -1114,6 +1132,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 															 $this->getValue2(),
 															 TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
 							}
+
 							if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 12 ) {
 								$this->Validator->isTrue( 'value3',
 														  FALSE,
@@ -1137,14 +1156,37 @@ class RemittanceDestinationAccountFactory extends Factory {
 			$this->Validator->isTrue( 'description',
 					( ( stripos( $this->Validator->stripNonNumeric( $this->getDescription() ), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
 									  TTi18n::gettext( 'Account number must not be a part of the Description' ) );
+
+			if ( $ignore_warning == FALSE AND $this->getStatus() == 10 AND $this->getType() == 3000 AND is_object( $this->getRemittanceSourceAccountObject() ) == TRUE AND $this->getRemittanceSourceAccountObject()->getDataFormat() == 5 AND is_object( $this->getRemittanceSourceAccountObject()->getLegalEntityObject() ) ) { //3000=EFT/ACH, 5=TimeTrex EFT
+				$le_obj = $this->getRemittanceSourceAccountObject()->getLegalEntityObject();
+
+				if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+					try {
+						$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+						$retval = $tt_ps_api->validateBankAccount( $tt_ps_api->convertRemittanceDestinationAccountObjectToBankAccountArray( $this, $this->getRemittanceSourceAccountObject(), $this->getUserObject() ) );
+						if ( is_object($retval) AND $retval->isValid() === FALSE ) {
+							Debug::Text( 'ERROR! Unable to validate remittance destination account data through Payment Services API... (a)', __FILE__, __LINE__, __METHOD__, 10 );
+							$api_f = new APIRemittanceDestinationAccount();
+							$validation_arr = $api_f->convertAPIReturnHandlerToValidatorObject( $retval->getResultData() );
+
+							$this->Validator->merge( $validation_arr );
+						}
+					} catch ( Exception $e ) {
+						Debug::Text( 'ERROR! Unable to validate remittance destination account  data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+					}
+				} else {
+					Debug::Text( 'Payment Services not enabled in legal entity...', __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			}
 		}
 
 		$pstlf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pstlf */
 		$pstlf->getByRemittanceDestinationAccountId($this->getId());
 		if ( $pstlf->getRecordCount() > 0 ) {
-
 			//Ensure that only account detail items trigger this validation
-			$disallowed_edit_fields = array ( 'value2', 'value3', 'type_id', 'remittance_source_account_id' );
+			//  Allow remittance_source_account_id to be changed in case the employer changes bank accounts and needs to modify it on-mass for all employees.
+			//    If we don't allow this then the employer would need to go back to their employees to get new bank account information and it would be hugely disruptive.
+			$disallowed_edit_fields = array ( 'value2', 'value3', 'type_id' ); //'remittance_source_account_id'
 			if ( $country == 'CA' ) {
 				$disallowed_edit_fields[] = 'value1'; //US must be able to change account type.
 			}

@@ -2127,6 +2127,8 @@ abstract class Factory {
 	 */
 	protected function getSortSQL( $array, $strict = TRUE, $additional_fields = NULL) {
 		if ( is_array($array) ) {
+			$sql_reserved_words = array('group');
+
 			//Disabled in v10 to start migrating away from FlexArray formats.
 			//  This is still needed, as clicking on a column header to sort by that seems to use the wrong format.
 			$array = $this->convertFlexArray( $array );
@@ -2146,6 +2148,10 @@ abstract class Factory {
 					}
 
 					if ( $strict == FALSE OR in_array( $order, $order_options ) ) {
+						if ( in_array($orig_column, $sql_reserved_words ) ) { //Quote reserved words such as 'group'.
+							$orig_column = '"'. $orig_column .'"';
+						}
+
 						$sql_chunks[] = $orig_column .' '. $order;
 					} else {
 						Debug::text('Invalid Sort Order: '. $orig_column .' Order: '. $order, __FILE__, __LINE__, __METHOD__, 10);
@@ -2623,27 +2629,32 @@ abstract class Factory {
 					Debug::text( 'WARNING: Inner nested RetryTransaction failed, passing exception to outer block for retry there...', __FILE__, __LINE__, __METHOD__, 10 );
 					throw new NestedRetryTransaction( $e ); //'SQL exception in Nested RetryTransaction...'
 				} else {
-					//When we get here, fail transaction should already be called.
-					// But if it hasn't, call it again just in case.
-					if ( $this->db->_transOK == TRUE ) {
-						$this->FailTransaction();
+					if ( $this->isSQLExceptionRetryable( $e ) == TRUE ) {
+						//When we get here, fail transaction should already be called.
+						// But if it hasn't, call it again just in case.
+						if ( $this->db->_transOK == TRUE ) {
+							$this->FailTransaction();
+						}
+
+						$this->CommitTransaction( TRUE ); //Make sure we fully unnest all transactions so the retry is in a good state that can be fully restarted.
+
+						$random_sleep_interval = ( ceil( ( rand() / getrandmax() ) * ( ( $tmp_sleep * 0.33 ) * 2 ) - ( $tmp_sleep * 0.33 ) ) ); //+/- 33% of the sleep time.
+
+						Debug::text( 'WARNING: SQL query failed, likely due to transaction isolation: Retry Attempt: ' . $retry_attempts . ' Sleep: ' . ( $tmp_sleep + $random_sleep_interval ) . '(' . $tmp_sleep . ') Code: ' . $e->getCode() . ' Message: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+						Debug::text( '==================END: TRANSACTION BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10 );
+
+						if ( $retry_attempts < ( $retry_max_attempts - 1 ) ) { //Don't sleep on the last iteration as its serving no purpose.
+							usleep( $tmp_sleep + $random_sleep_interval );
+						}
+
+						$tmp_sleep = ( $tmp_sleep * 2 ); //Exponential back-off with 25% of retry sleep time as a random value.
+						$retry_attempts++;
+
+						continue;
+					} else {
+						Debug::text( 'ERROR: Non-Retryable SQL failure (syntax error?), aborting... Code: ' . $e->getCode() . ' Message: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+						break;
 					}
-
-					$this->CommitTransaction( TRUE ); //Make sure we fully unnest all transactions so the retry is in a good state that can be fully restarted.
-
-					$random_sleep_interval = ( ceil( ( rand() / getrandmax() ) * ( ( $tmp_sleep * 0.33 ) * 2 ) - ( $tmp_sleep * 0.33 ) ) ); //+/- 33% of the sleep time.
-
-					Debug::text( 'WARNING: SQL query failed, likely due to transaction isolation: Retry Attempt: ' . $retry_attempts . ' Sleep: ' . ( $tmp_sleep + $random_sleep_interval ) . '(' . $tmp_sleep . ') Code: ' . $e->getCode() . ' Message: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
-					Debug::text( '==================END: TRANSACTION BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10 );
-
-					if ( $retry_attempts < ( $retry_max_attempts - 1 ) ) { //Don't sleep on the last iteration as its serving no purpose.
-						usleep( $tmp_sleep + $random_sleep_interval );
-					}
-
-					$tmp_sleep = ( $tmp_sleep * 2 ); //Exponential back-off with 25% of retry sleep time as a random value.
-					$retry_attempts++;
-
-					continue;
 				}
 			}
 			break;

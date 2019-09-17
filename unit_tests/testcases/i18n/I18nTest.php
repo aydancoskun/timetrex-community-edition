@@ -226,7 +226,8 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		TTi18n::setLocale( 'en_US' );
 		$this->assertEquals( TTI18n::parseFloat('1,234.123'), '1234.123' );
 		$this->assertEquals( TTI18n::parseFloat('1, 234.123'), '1234.123' );
-		$this->assertEquals( TTI18n::parseFloat('12.123'), '12.123' );
+		$this->assertEquals( TTI18n::parseFloat('12.91'), '12.91' );
+		$this->assertEquals( TTI18n::parseFloat('-12.91'), '-12.91' );
 		$this->assertEquals( TTI18n::parseFloat( (float)12.123), '12.123' );
 		$this->assertEquals( TTI18n::parseFloat('0.00'), '0' );
 		$this->assertEquals( TTI18n::parseFloat('0'), '0' );
@@ -242,22 +243,277 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTI18n::parseFloat( +INF ), '0' );
 		$this->assertEquals( TTI18n::parseFloat( acos(8) ), '0' ); //acos(8) = NaN
 
+		//
+		//Test parsing both comma and decimal separated in a locale that uses just decimal separator
+		//
+		$this->assertEquals( TTI18n::parseFloat('1.234,123'), '1234.123' );
+		$this->assertEquals( TTI18n::parseFloat('1. 234,123'), '1234.123' );
+		$this->assertEquals( TTI18n::parseFloat('12,91'), '12.91' );
+
+		$this->assertEquals( TTI18n::parseFloat('.12'), '0.12' );
+		$this->assertEquals( TTI18n::parseFloat(',12'), '0.12' );
+		$this->assertEquals( TTI18n::parseFloat('-.12'), '-0.12' );
+		$this->assertEquals( TTI18n::parseFloat('-,12'), '-0.12' );
+
+		$this->assertEquals( TTI18n::parseFloat('0.12'), '0.12' );
+		$this->assertEquals( TTI18n::parseFloat('0,12'), '0.12' );
+		$this->assertEquals( TTI18n::parseFloat('-0.12'), '-0.12' );
+		$this->assertEquals( TTI18n::parseFloat('-0,12'), '-0.12' );
+
+		$this->assertEquals( TTI18n::parseFloat('12.9', 1), '12.9' ); //Ambiguous as it could be assumed to be 12.9, or 129
+		$this->assertEquals( TTI18n::parseFloat('12.91', 2), '12.91' ); //Ambiguous as it could be assumed to be 12.91, or 12, 91
+		$this->assertEquals( TTI18n::parseFloat('12.912', 3), '12.912' ); //Ambiguous as it could be assumed to be 12.912, or 12, 912
+		$this->assertEquals( TTI18n::parseFloat('12.9123', 4), '12.9123' ); //Ambiguous as it could be assumed to be 12.9123, or 12, 9123
+
+		$this->assertEquals( TTI18n::parseFloat('12,9', 1), '12.9' ); //Ambiguous as it could be assumed to be 12.9, or 129
+		$this->assertEquals( TTI18n::parseFloat('12,91', 2), '12.91' ); //Ambiguous as it could be assumed to be 12.91, or 12, 91
+		$this->assertEquals( TTI18n::parseFloat('12,912', 3), '12.912' ); //Ambiguous as it could be assumed to be 12.912, or 12, 912
+		$this->assertEquals( TTI18n::parseFloat('12,9123', 4), '12.9123' ); //Ambiguous as it could be assumed to be 12.9123, or 12, 9123
+
+		$this->assertEquals( TTI18n::parseFloat('12.9'), '12.9' ); //Ambiguous as it could be assumed to be 12.9, or 129 -- However since there is only one separator and it matches the decimal separator in the locale we can be certain.
+		$this->assertEquals( TTI18n::parseFloat('12.91'), '12.91' ); //Ambiguous as it could be assumed to be 12.91, or 12, 91 -- However since there is only one separator and it matches the decimal separator in the locale we can be certain.
+		$this->assertEquals( TTI18n::parseFloat('12.912'), '12.912' ); //Ambiguous as it could be assumed to be 12.912, or 12, 912 -- However since there is only one separator and it matches the decimal separator in the locale we can be certain.
+		$this->assertEquals( TTI18n::parseFloat('12.9123'), '12.9123' ); //Ambiguous as it could be assumed to be 12.9123, or 12, 9123 -- However since there is only one separator and it matches the decimal separator in the locale we can be certain.
+
+		$this->assertEquals( TTI18n::parseFloat('12,9'), '12.9' ); //Ambiguous as it could be assumed to be 12.9, or 129
+		$this->assertEquals( TTI18n::parseFloat('12,91'), '12.91' ); //Ambiguous as it could be assumed to be 12.91, or 12, 91
+		$this->assertEquals( TTI18n::parseFloat('12,912'), '12912' ); //Ambiguous as it could be assumed to be 12.912, or 12, 912
+		$this->assertEquals( TTI18n::parseFloat('12,9123'), '12.9123' ); //Ambiguous as it could be assumed to be 12.9123, or 12, 9123
+
+		$this->assertEquals( TTI18n::parseFloat('123'), '123.00' );
+		$this->assertEquals( TTI18n::parseFloat('1, 234'), '1234' ); //Ambiguous as it could be assumed to be 1,234, or 1.234.
+		$this->assertEquals( TTI18n::parseFloat('1. 234'), '1.234' ); //Ambiguous as it could be assumed to be 1,234, or 1.234 -- However since there is only one separator and it matches the decimal separator in the locale we can be certain.
+
+		$this->assertEquals( TTI18n::parseFloat('123.91'), '123.91' );
+		$this->assertEquals( TTI18n::parseFloat('123,91'), '123.91' );
+
+		$this->assertEquals( TTI18n::parseFloat('1, 234.91'), '1234.91' );
+		$this->assertEquals( TTI18n::parseFloat('1. 234,91'), '1234.91' );
+
+		$this->assertEquals( TTI18n::parseFloat('123 456 789.91'), '123456789.91' );
+		$this->assertEquals( TTI18n::parseFloat('123 456 789,91'), '123456789.91' );
+		$this->assertEquals( TTI18n::parseFloat('123, 456, 789.91'), '123456789.91' );
+		$this->assertEquals( TTI18n::parseFloat('123. 456. 789,91'), '123456789.91' );
+		$this->assertEquals( TTI18n::parseFloat('123. 456. 789,912'), '123456789.912' );
+		$this->assertEquals( TTI18n::parseFloat('123. 456. 789,912345678'), '123456789.912345678' );
+
+		$this->assertEquals( TTI18n::parseFloat('1,234,567,890,123,456,789,000.123'), '1234567890123456789000.123' );
+		$this->assertEquals( TTI18n::parseFloat('1,234,567,890,123,456,789,123.123'), '1234567890123456789123.123' );
+
+		$this->assertEquals( TTI18n::parseFloat('0,00'), '0' );
+		$this->assertEquals( TTI18n::parseFloat('0'), '0' );
+		$this->assertEquals( TTI18n::parseFloat(0), '0' );
+
+		//Test floats with other bogus characters.
+		$this->assertEquals( TTI18n::parseFloat('$123.91ABC%'), '123.91' );
+		$this->assertEquals( TTI18n::parseFloat('$123,91ABC%'), '123.91' );
+		$this->assertEquals( TTI18n::parseFloat( 'A123.91' ), '123.91' );
+		$this->assertEquals( TTI18n::parseFloat( 'A123.91B' ), '123.91' );
+		$this->assertEquals( TTI18n::parseFloat( '12A3.91' ), '123.91' );
+		$this->assertEquals( TTI18n::parseFloat( '123A.91' ), '123.91' );
+		$this->assertEquals( TTI18n::parseFloat( '123.A91' ), '123.91' );
+		$this->assertEquals( TTI18n::parseFloat( '*&#$#\'"123.JKLFDJFL91%' ), '123.91' );
+
+		$this->assertEquals( TTI18n::parseFloat('54333.12', 2), '54333.12' ); //Has only one separator, and input matches precision value.
+		$this->assertEquals( TTI18n::parseFloat('54333.12', 3), '54333.12' ); //Has only one separator, and input is 2 decimal places which DOES NOT match precision value.
+		$this->assertEquals( TTI18n::parseFloat('54333.123', 3), '54333.123' ); //Has only one separator, and input matches precision value.
+		$this->assertEquals( TTI18n::parseFloat('54333.1234', 4), '54333.1234' ); //Has only one separator, and input matches precision value.
+
+		//Make sure parseFloat() can handle output from formatNumber()
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatNumber( '54333.1234' ) ), '54333.12' ); //Auto formatting decimals.
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatNumber( '54333.12' ) ), '54333.12' );
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatNumber( '54333.123', TRUE, 3, 3 ), 3 ), '54333.123' );
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatNumber( '54333.1234', TRUE, 4, 4 ), 4 ), '54333.1234' );
+
+		//Make sure parseFloat() can handle output from formatCurrency()
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.1234' ) ), '54333.12' ); //Auto formatting decimals.
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.12' ) ), '54333.12' );
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.123' ) ), '54333.12' );
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.1234' ) ), '54333.12' );
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.1234', 'EUR', TRUE ) ), '54333.12' ); //Auto formatting decimals.
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.12', 'EUR', TRUE ) ), '54333.12' );
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.123', 'EUR', TRUE ) ), '54333.12' );
+		$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.1234', 'EUR', TRUE ) ), '54333.12' );
+
+
 		TTi18n::setLocale( 'fr_CA' );
-		$this->assertEquals( TTI18n::parseFloat('1 234,123'), '1234.123' );
-		$this->assertEquals( TTI18n::parseFloat('12,123'), '12.123' );
+		$this->assertEquals( TTI18n::parseFloat('54333.12', 2), '54333.12' ); //Has only one separator, and input matches precision value.
+		$this->assertEquals( TTI18n::parseFloat('54333.12', 3), '54333.12' ); //Has only one separator, and input is 2 decimal places which DOES NOT match precision value.
+		$this->assertEquals( TTI18n::parseFloat('54333.123', 3), '54333.123' ); //Has only one separator, and input matches precision value.
+		$this->assertEquals( TTI18n::parseFloat('54333.1234', 4), '54333.1234' ); //Has only one separator, and input matches precision value.
+		$this->assertEquals( TTI18n::parseFloat('1.234,123'), '1234.123' ); //Has both separators, so can be parsed properly.
+		$this->assertEquals( TTI18n::parseFloat('1. 234,123'), '1234.123' ); //Has both separators, so can be parsed properly.
+		$this->assertEquals( TTI18n::parseFloat('1 234,91'), '1234.91' );
+		$this->assertEquals( TTI18n::parseFloat('12,91'), '12.91' );
 		$this->assertEquals( TTI18n::parseFloat('0,00'), '0' );
 		$this->assertEquals( TTI18n::parseFloat( (float)12.123), '12.123' ); //If its input as an actual float value, it shouldn't be touched.
+
 
 		TTi18n::setLocale( 'es_ES' );
 		if ( TTi18n::getThousandsSymbol() == '.' AND TTi18n::getDecimalSymbol() == ',' ) {
 			$this->assertEquals( TTI18n::parseFloat('1.234,123'), '1234.123' );
 			$this->assertEquals( TTI18n::parseFloat('1. 234,123'), '1234.123' );
-			$this->assertEquals( TTI18n::parseFloat('12,123'), '12.123' );
+			$this->assertEquals( TTI18n::parseFloat('12,91'), '12.91' );
 			$this->assertEquals( TTI18n::parseFloat('0,00'), '0' );
 			$this->assertEquals( TTI18n::parseFloat( (float)12.123), '12.123' ); //If its input as an actual float value, it shouldn't be touched.
+
+			$this->assertEquals( TTI18n::parseFloat('12.9', 1), '12.9' ); //Ambiguous as it could be assumed to be 12.9, or 129
+			$this->assertEquals( TTI18n::parseFloat('12.91', 2), '12.91' ); //Ambiguous as it could be assumed to be 12.91, or 12, 91
+			$this->assertEquals( TTI18n::parseFloat('12.912', 3), '12.912' ); //Ambiguous as it could be assumed to be 12.912, or 12, 912
+			$this->assertEquals( TTI18n::parseFloat('12.9123', 4), '12.9123' ); //Ambiguous as it could be assumed to be 12.9123, or 12, 9123
+
+			$this->assertEquals( TTI18n::parseFloat('12,9', 1), '12.9' ); //Ambiguous as it could be assumed to be 12.9, or 129
+			$this->assertEquals( TTI18n::parseFloat('12,91', 2), '12.91' ); //Ambiguous as it could be assumed to be 12.91, or 12, 91
+			$this->assertEquals( TTI18n::parseFloat('12,912', 3), '12.912' ); //Ambiguous as it could be assumed to be 12.912, or 12, 912
+			$this->assertEquals( TTI18n::parseFloat('12,9123', 4), '12.9123' ); //Ambiguous as it could be assumed to be 12.9123, or 12, 9123
+
+			$this->assertEquals( TTI18n::parseFloat('12,9'), '12.9' ); //Ambiguous as it could be assumed to be 12.9, or 129 -- However since there is only one separator and it matches the decimal separator in the locale we can be certain.
+			$this->assertEquals( TTI18n::parseFloat('12,91'), '12.91' ); //Ambiguous as it could be assumed to be 12.91, or 12, 91 -- However since there is only one separator and it matches the decimal separator in the locale we can be certain.
+			$this->assertEquals( TTI18n::parseFloat('12,912'), '12.912' ); //Ambiguous as it could be assumed to be 12.912, or 12, 912 -- However since there is only one separator and it matches the decimal separator in the locale we can be certain.
+			$this->assertEquals( TTI18n::parseFloat('12,9123'), '12.9123' ); //Ambiguous as it could be assumed to be 12.9123, or 12, 9123 -- However since there is only one separator and it matches the decimal separator in the locale we can be certain.
+
+			$this->assertEquals( TTI18n::parseFloat('12.9'), '12.9' ); //Ambiguous as it could be assumed to be 12.9, or 129
+			$this->assertEquals( TTI18n::parseFloat('12.91'), '12.91' ); //Ambiguous as it could be assumed to be 12.91, or 12, 91
+			$this->assertEquals( TTI18n::parseFloat('12.912'), '12912' ); //Ambiguous as it could be assumed to be 12.912, or 12, 912
+			$this->assertEquals( TTI18n::parseFloat('12.9123'), '12.9123' ); //Ambiguous as it could be assumed to be 12.9123, or 12, 9123
+
+			//Make sure parseFloat() can handle output from formatNumber()
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatNumber( '54333.1234' ) ), '54333.12' ); //Auto formatting decimals.
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatNumber( '54333.12' ) ), '54333.12' );
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatNumber( '54333.123', TRUE, 3, 3 ), 3 ), '54333.123' );
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatNumber( '54333.1234', TRUE, 4, 4 ), 4 ), '54333.1234' );
+
+			//Make sure parseFloat() can handle output from formatCurrency()
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.1234' ) ), '54333.12' ); //Auto formatting decimals.
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.12' ) ), '54333.12' );
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.123' ) ), '54333.12' );
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.1234' ) ), '54333.12' );
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.1234', 'EUR', TRUE ) ), '54333.12' ); //Auto formatting decimals.
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.12', 'EUR', TRUE ) ), '54333.12' );
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.123', 'EUR', TRUE ) ), '54333.12' );
+			$this->assertEquals( TTI18n::parseFloat( TTi18n::formatCurrency( '54333.1234', 'EUR', TRUE ) ), '54333.12' );
 		} else {
 			Debug::Text( 'ERROR: Locale differs, skipping unit tests...', __FILE__, __LINE__, __METHOD__, 1);
 		}
+	}
+
+	function testUserWage() {
+		//
+		//Test end-to-end setting of user wage and viewing it in a report.
+		//
+		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+
+		$dd = new DemoData();
+		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$company_id = $dd->createCompany();
+		$legal_entity_id = $dd->createLegalEntity( $company_id, 10 );
+		Debug::text('Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+		$this->assertGreaterThan( 0, $company_id );
+
+		//Permissions are required so the user has permissions to run reports.
+		$dd->createPermissionGroups( $company_id, 40 ); //Administrator only.
+
+		$dd->createCurrency( $company_id, 10 );
+		$dd->createUserWageGroups( $company_id );
+
+		$user_id = $dd->createUser( $company_id, $legal_entity_id, 100 );
+		$user_idb = $dd->createUser( $company_id, $legal_entity_id, 10 );
+
+		//Get User Object.
+		$ulf = new UserListFactory();
+		$user_obj = $ulf->getById( $user_id )->getCurrent();
+
+		$this->assertGreaterThan( 0, $user_id );
+
+		TTi18n::setLocale( 'en_US' );
+		$uw = new UserWageFactory();
+		$data = array(
+				'user_id' => $user_id,
+				'type_id' => 20, //Salary Annual
+				'wage' => '54, 333.12',
+				'weekly_time' => (40 * 3600),
+				'hourly_rate' => '1, 123.98',
+				'labor_burden_percent' => '12.98%',
+				'effective_date' => strtotime('01-Jan-2019'),
+		);
+		$uw->setObjectFromArray( $data );
+		$insert_id = $uw->Save( FALSE );
+
+		$uwlf = new UserWageListFactory();
+		$uwlf->getById( $insert_id );
+		$retarr = $uwlf->getCurrent()->getObjectAsArray();
+		//var_dump($retarr);
+
+		$this->assertEquals( $retarr['wage'], '54333.12' );
+		$this->assertEquals( $retarr['hourly_rate'], '1123.98' );
+		$this->assertEquals( $retarr['labor_burden_percent'], '12.98' );
+
+		TTi18n::setLocale( 'fr_CA' );
+		$uw = new UserWageFactory();
+		$data = array(
+				'user_id' => $user_idb,
+				'type_id' => 20, //Salary Annual
+				'wage' => '54. 334,12',
+				'weekly_time' => (40 * 3600),
+				'hourly_rate' => '1. 124,98',
+				'labor_burden_percent' => '13,98%',
+				'effective_date' => strtotime('01-Jan-2019'),
+		);
+		$uw->setObjectFromArray( $data );
+		$insert_id = $uw->Save( FALSE );
+
+		$uwlf = new UserWageListFactory();
+		$uwlf->getById( $insert_id );
+		$retarr = $uwlf->getCurrent()->getObjectAsArray();
+		//var_dump($retarr);
+
+		$this->assertEquals( $retarr['wage'], '54334.12' );
+		$this->assertEquals( $retarr['hourly_rate'], '1124.98' );
+		$this->assertEquals( $retarr['labor_burden_percent'], '13.98' );
+
+
+		//Generate Report in en_US
+		TTi18n::setLocale( 'en_US' );
+		$report_obj = new UserSummaryReport();
+		$report_obj->setUserObject( $user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_employee+wage' ) );
+		$report_config['columns'][] = 'labor_burden_percent';
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_dump($report_output);
+
+		$this->assertEquals( $report_output[0]['wage'], 54333.12 );
+		$this->assertEquals( $report_output[0]['hourly_rate'], 1123.98 );
+		$this->assertEquals( $report_output[0]['labor_burden_percent'], 12.98 );
+
+		$this->assertEquals( $report_output[1]['wage'], 54334.12 );
+		$this->assertEquals( $report_output[1]['hourly_rate'], 1124.98 );
+		$this->assertEquals( $report_output[1]['labor_burden_percent'], 13.98 );
+
+		//Generate Report in fr_CA
+		TTi18n::setLocale( 'fr_CA' );
+		$report_obj = new UserSummaryReport();
+		$report_obj->setUserObject( $user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_employee+wage' ) );
+		$report_config['columns'][] = 'labor_burden_percent';
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_dump($report_output);
+
+		$this->assertEquals( $report_output[0]['wage'], 54333.12 );
+		$this->assertEquals( $report_output[0]['hourly_rate'], 1123.98 );
+		$this->assertEquals( $report_output[0]['labor_burden_percent'], 12.98 );
+
+		$this->assertEquals( $report_output[1]['wage'], 54334.12 );
+		$this->assertEquals( $report_output[1]['hourly_rate'], 1124.98 );
+		$this->assertEquals( $report_output[1]['labor_burden_percent'], 13.98 );
 	}
 
 	function testRemoveTrailingZeros() {
@@ -344,4 +600,53 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 //		echo "time: " . ($end_benchmark - $start_benchmark);
 //	}
 
+	function testBCMath() {
+		TTi18n::setLocale( 'en_US' );
+		$amount1 = 510.9;
+		$amount2 = 90.9;
+		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 601.80 );
+
+		$amount1 = '510.9';
+		$amount2 = '90.9';
+		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 601.80 );
+
+		//If we switch setLocale() back to setting LC_NUMERIC, need to make sure bcmath handles comma decimal separators correctly like in UserDateTotalFactory->calcTotalAmount()
+		TTi18n::setLocale( 'es_ES' );
+		$amount1 = 510.9;
+		$amount2 = 90.9;
+		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 601.80 ); //BCMath fails handling floating point values with comma separator.
+
+		$amount1 = '510.9';
+		$amount2 = '90.9';
+		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 601.80 ); //BCMath fails handling floating point values with comma separator.
+
+		$amount1 = '510,9';
+		$amount2 = '90,9';
+		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
+
+
+		//
+		//Test to show that bcmath() breaks when using LC_NUMERIC locales.
+		//
+		TTi18n::setLocale( 'es_ES' );
+		$valid_locale = setlocale( LC_ALL, TTi18n::generateLocale( 'es_ES' ) ); //Could return 'es_ES' or 'es_ES.utf8' or 'es_ES.UTF-8'
+		$normalized_locale = TTi18n::stripUTF8( $valid_locale );
+		$this->assertEquals( $normalized_locale, 'es_ES' );
+
+		$amount1 = 510.9;
+		$amount2 = 90.9;
+		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
+
+		$amount1 = '510,9';
+		$amount2 = '90,9';
+		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
+
+		$amount1 = '123456710,9';
+		$amount2 = '90,9';
+		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
+
+		//Set locale back to the default so it doesn't affect other tests.
+		setlocale( LC_ALL, TTi18n::generateLocale( 'en_US' ) );
+		TTi18n::setLocale( 'en_US' );
+	}
 }

@@ -1,5 +1,5 @@
-fr_FR|25|French <fr@li.org>
-de_DE|52|German <de@li.org>
+fr_FR|24|French <fr@li.org>
+de_DE|51|German <de@li.org>
 pt_PT|22|Portuguese <pt@li.org>
 zh_ZH|33|
 es_ES|34|Spanish <es@li.org>
@@ -9,7 +9,7 @@ en_US|0|
 pt_BR|22|Brazilian Portuguese <franciscoferreiraluz@yahoo.com.au>
 ar_EG|46|Arabic <ar@li.org>
 da_DK|26|Danish <da@li.org>
+hu_HU|97|Hungarian <hu@li.org>
 zh_CN|33|
 id_ID|51|Indonesian <id@li.org>
-fr_CA|84|CodyCode Team
-hu_HU|98|Hungarian <hu@li.org>
+fr_CA|83|CodyCode Team

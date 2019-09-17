@@ -10,7 +10,7 @@ var TAlertManager = (function() {
 
 	var showBrowserTopBanner = function() {
 		if ( ie && ie <= 11 ) {
-			var div = $( '<div class="browser-banner"><a href="https://www.timetrex.com/supported-web-browsers" target="_blank"><span id="browser-top-banner" class="label">' + $.i18n._( LocalCacheData.getLoginData().application_name + ' is announcing the removal of support for <strong>Internet Explorer 11</strong> effective <strong>January 14th, 2020</strong>.' ) + '<br>' + $.i18n._( 'Please upgrade to Microsoft Edge, FireFox or Chrome for a much improved experience.' ) + '</span></a></div>' );
+			var div = $( '<div class="browser-banner"><a href="https://www.timetrex.com/supported-web-browsers" target="_blank"><span id="browser-top-banner" class="label">' + LocalCacheData.getLoginData().application_name + ' ' + $.i18n._( 'is announcing the removal of support for <strong>Internet Explorer 11</strong> effective <strong>January 14th, 2020</strong>.' ) + '<br>' + $.i18n._( 'Please upgrade to Microsoft Edge, FireFox or Chrome for a much improved experience.' ) + '</span></a></div>' );
 			$( 'body' ).append( div );
 		}
 	};

@@ -780,6 +780,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		//AND a.type_id != 40
 		//
 		//Ignore records of 0hrs, as stat holiday time in the future, or some other time that was overridden to 0 may exist.
+		//*However if its a system total row of 0hrs and has a start_time_stamp and end_time_stamp, return that as it could be the result of a negative absence entry that matches the total worked time.
 		$query = '	select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $uf->getTable() .' as c ON a.user_id = c.id
@@ -790,12 +791,13 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
 						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
-						AND ( a.total_time != 0 OR a.override = 1 )
+						AND ( a.total_time != 0 OR a.override = 1 OR ( a.object_type_id = 5 AND a.total_time = 0 AND a.start_time_stamp IS NOT NULL AND a.end_time_stamp IS NOT NULL ) )
 						AND ( a.deleted = 0 )
 					ORDER BY a.date_stamp asc, a.object_type_id asc, d.type_id desc, a.src_object_id desc, a.total_time, a.id
 					';
 
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

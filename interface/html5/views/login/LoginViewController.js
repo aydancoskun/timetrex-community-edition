@@ -212,8 +212,6 @@ LoginViewController = BaseViewController.extend( {
 
 		TTPromise.add('login', 'init');
 
-		Global.setInternalIP(); //Try to obtain and set internal IP addresses as early as possible.
-
 		TTPromise.add('login', 'getCurrentUser');
 		$this.currentUser_api.getCurrentUser( { onResult: $this.onGetCurrentUser, delegate: $this } ); //Get more in result handler
 

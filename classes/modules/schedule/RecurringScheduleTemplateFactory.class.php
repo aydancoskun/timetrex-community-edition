@@ -1005,10 +1005,33 @@ class RecurringScheduleTemplateFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
+
 		if ( $this->getRecurringScheduleTemplateControl() == FALSE ) {
 			$this->Validator->isTRUE(		'recurring_schedule_template_control_id',
 											FALSE,
 											TTi18n::gettext('Invalid Recurring Schedule Template Control') );
+		}
+
+		//Get all pay period schedules and see if the total time exceeds the largest maximum shift time.
+		$largest_maximum_shift_time = NULL;
+
+		if ( is_object( $this->getRecurringScheduleTemplateControlObject() ) ) {
+			$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
+			$ppslf->getByCompanyId( $this->getRecurringScheduleTemplateControlObject()->getCompany() );
+			if ( $ppslf->getRecordCount() > 0 ) {
+				foreach ( $ppslf as $pps_obj ) {
+					if ( $pps_obj->getMaximumShiftTime() > $largest_maximum_shift_time ) {
+						$largest_maximum_shift_time = $pps_obj->getMaximumShiftTime();
+					}
+				}
+			}
+			unset( $ppslf, $pps_obj );
+
+			if ( $largest_maximum_shift_time > 0 AND $this->getTotalTime() > $largest_maximum_shift_time ) {
+				$this->Validator->isTRUE( 'end_time' . $this->getLabelID(),
+										  FALSE,
+										  TTi18n::gettext( 'Schedule total time exceeds maximum shift time of' ) . ' ' . TTDate::getTimeUnit( $largest_maximum_shift_time ) . ' ' . TTi18n::getText( 'hrs set for all pay period schedules' ) );
+			}
 		}
 
 		return TRUE;

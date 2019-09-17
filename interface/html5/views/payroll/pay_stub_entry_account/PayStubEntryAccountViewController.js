@@ -87,7 +87,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		var menu = this._super( 'buildContextMenuModels' )[0];
 
 		var wizard = new RibbonSubMenu( {
-			label: $.i18n._( 'Migrate<br>PS Accounts ' ),
+			label: $.i18n._( 'Migrate<br>PS Accounts' ),
 			id: ContextMenuIconName.migrate_pay_stub_account,
 			group: this.getContextMenuGroupByName( menu, 'other' ),
 			icon: Icons.wizard,

@@ -648,8 +648,8 @@ class TimeTrexPaymentServices {
 				return TRUE;
 			} else {
 				Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
-
-				return FALSE; //This will trigger a general error to the user.
+				return $api_result; //Return raw result object so we can get validation errors from it.
+				//return FALSE; //This will trigger a general error to the user.
 			}
 		} else {
 			//Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );

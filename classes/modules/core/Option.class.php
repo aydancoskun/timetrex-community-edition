@@ -69,6 +69,7 @@ class Option {
 		if ( $value_is_translated == TRUE ) {
 			$value = TTi18n::gettext( $value );
 		}
+
 		if ( is_array( $value ) ) {
 			return FALSE;
 		}
@@ -77,7 +78,9 @@ class Option {
 			return FALSE;
 		}
 
-		$flipped_options = array_flip($options);
+		$value = strtolower( $value ); //Use a case insensitive match so things like iButton matches iBUTTON.
+
+		$flipped_options = array_flip( array_map( 'strtolower', $options ) );
 
 		if ( isset($flipped_options[$value]) ) {
 			//Debug::text('Returning Key: '. $flipped_options[$value], __FILE__, __LINE__, __METHOD__, 9);

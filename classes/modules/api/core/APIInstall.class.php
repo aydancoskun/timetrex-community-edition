@@ -210,11 +210,11 @@ class APIInstall extends APIFactory {
 				//This prevents the CLI requirements from always appearing as failed when something else unrelated (ie: Not Writable Log Dir) fails.
 				if ( $install_obj->checkAllRequirements( FALSE, array('php_cli_requirements') ) == 0 ) {
 					$retval['cli_requirements']['check_php_cli_requirements'] = $install_obj->checkPHPCLIRequirements();
-					$extended_error_messages = $install_obj->getExtendedErrorMessage();
 				} else {
 					$retval['cli_requirements']['check_php_cli_requirements'] = 0;
 				}
 
+				$extended_error_messages = $install_obj->getExtendedErrorMessage();
 				if ( isset($extended_error_messages) AND is_array($extended_error_messages) AND count( $extended_error_messages ) > 0 ) {
 					$retval['extended_error_messages'] = $extended_error_messages;
 				} else {
@@ -338,6 +338,7 @@ class APIInstall extends APIFactory {
 			if ( !isset($retval['priv_user']) ) {
 				$retval['priv_user'] = NULL;
 			}
+
 			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'database_config', 'priv_user' => $retval['priv_user']), 'pre_install.php'), "r");
 			@fclose($handle);
 
@@ -484,9 +485,6 @@ class APIInstall extends APIFactory {
 					$install_obj->setIsUpgrade( FALSE );
 				}
 
-				$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'database_schema'), 'pre_install.php'), "r");
-				@fclose($handle);
-
 				if ( $install_obj->getIsUpgrade() == TRUE ) {
 					$retval = array('upgrade' => 1);
 				} else {
@@ -542,6 +540,9 @@ class APIInstall extends APIFactory {
 			}
 
 			if ( $install_obj->checkDatabaseExists( $config_vars['database']['database_name'] ) == TRUE ) {
+				$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'database_schema'), 'pre_install.php'), "r");
+				@fclose($handle);
+
 				//Create SQL, always try to install every schema version, as
 				//installSchema() will check if its already been installed or not.
 				$install_obj->setDatabaseDriver( $config_vars['database']['type'] );
@@ -699,8 +700,8 @@ class APIInstall extends APIFactory {
 				SystemSettingFactory::setSystemSetting( 'anonymous_update_notify', 0 );
 			}
 
-//			$handle = fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'system_setting', 'update_notify' => (int)$data['update_notify'], 'anonymous_update_notify' => (int)$data['anonymous_update_notify']), 'pre_install.php'), "r");
-//			fclose($handle);
+			$handle = fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'system_setting', 'update_notify' => (int)$data['update_notify'], 'anonymous_update_notify' => (int)$data['anonymous_update_notify']), 'pre_install.php'), "r");
+			fclose($handle);
 
 			return $this->returnHandler( TRUE );
 		}
@@ -770,16 +771,6 @@ class APIInstall extends APIFactory {
 			$company_data['country_options'] = $cf->getOptions('country');
 			$company_data['industry_options'] = $cf->getOptions('industry');
 
-//			if (!isset($id) AND isset($company_data['id']) ) {
-//				$id = $company_data['id'];
-//			} else {
-//				$id = '';
-//			}
-//			$company_data['user_list_options'] = UserListFactory::getByCompanyIdArray($id);
-
-			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'company'), 'pre_install.php'), "r");
-			@fclose($handle);
-
 			return $this->returnHandler( $company_data );
 		}
 
@@ -829,15 +820,17 @@ class APIInstall extends APIFactory {
 			$cf->setEnableAddRecurringHolidayPreset( TRUE );
 
 			if ( $cf->isValid() ) {
-				$cf->Save( FALSE );
-				$company_id = $cf->getId();
-				unset( $cf );
-				$install_obj->writeConfigFile( array( 'other' => array( 'primary_company_id' => (string)$company_id ) ) );
+				if ( $cf->Save( FALSE ) ) {
+					$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'company'), 'pre_install.php'), "r");
+					@fclose($handle);
 
-				return $this->returnHandler( $company_id );
+					$company_id = $cf->getId();
+					unset( $cf );
+					$install_obj->writeConfigFile( array('other' => array('primary_company_id' => (string)$company_id)) );
 
+					return $this->returnHandler( $company_id );
+				}
 			} else {
-
 				$validator = array();
 				$validator[] = $cf->Validator->getErrorsArray();
 				$validator_stats = array('total_records' => 1, 'valid_records' => 1 );
@@ -875,9 +868,6 @@ class APIInstall extends APIFactory {
 
 			$user_data['application_name'] = APPLICATION_NAME;
 
-			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'user'), 'pre_install.php'), "r");
-			@fclose($handle);
-
 			return $this->returnHandler( $user_data );
 		}
 
@@ -904,92 +894,96 @@ class APIInstall extends APIFactory {
 			}
 
 			//Grab first legal entity associated with this company.
-			$lef = TTnew('LegalEntityListFactory'); /** @var LegalEntityListFactory $lef */
+			$lef = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lef */
 			$lef->getByCompanyId( $user_data['company_id'] );
 			if ( $lef->getRecordCount() > 0 ) {
 				$le_obj = $lef->getCurrent();
-			}
 
-			$uf->StartTransaction();
-			$uf->setCompany( $user_data['company_id'] );
-			$uf->setLegalEntity( $le_obj->getId() );
-			$uf->setStatus( 10 );
-			$uf->setUserName($user_data['user_name']);
-			if ( !empty($user_data['password']) AND $user_data['password'] == $user_data['password2'] ) {
-				$uf->setPassword($user_data['password']);
-			} else {
-				$uf->Validator->isTrue(	'password',
-					FALSE,
-					TTi18n::gettext('Passwords don\'t match') );
-			}
-
-			$uf->setEmployeeNumber(1);
-			$uf->setFirstName($user_data['first_name']);
-			$uf->setLastName($user_data['last_name']);
-			$uf->setWorkEmail($user_data['work_email']);
-			$uf->setLastLoginDate( time() + 5 ); //This prevents them from needing to change their password upon first login.
-
-			if ( is_object( $uf->getCompanyObject() ) ) {
-				$uf->setCountry( $uf->getCompanyObject()->getCountry() );
-				$uf->setProvince( $uf->getCompanyObject()->getProvince() );
-				$uf->setAddress1( $uf->getCompanyObject()->getAddress1() );
-				$uf->setAddress2( $uf->getCompanyObject()->getAddress2() );
-				$uf->setCity( $uf->getCompanyObject()->getCity() );
-				$uf->setPostalCode( $uf->getCompanyObject()->getPostalCode() );
-				$uf->setWorkPhone( $uf->getCompanyObject()->getWorkPhone() );
-				$uf->setHomePhone( $uf->getCompanyObject()->getWorkPhone() );
-
-				if ( is_object( $uf->getCompanyObject()->getUserDefaultObject() ) ) {
-					$uf->setCurrency( $uf->getCompanyObject()->getUserDefaultObject()->getCurrency() );
-				}
-			}
-
-			//Get Permission Control with highest level, assume its for Administrators and use it.
-			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
-			$pclf->getByCompanyId( $user_data['company_id'], NULL, NULL, NULL, array('level' => 'desc' ) );
-			if ( $pclf->getRecordCount() > 0 ) {
-				$pc_obj = $pclf->getCurrent();
-				if ( is_object($pc_obj) ) {
-					Debug::Text('Adding User to Permission Control: '. $pc_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-					$uf->setPermissionControl( $pc_obj->getId() );
-				}
-			}
-
-			if ( $uf->isValid() ) {
-				$user_id = $uf->getId();
-				$uf->Save( TRUE, TRUE );
-				//Assign this user as admin/support/billing contact for now.
-				$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
-				$clf->getById( $user_data['company_id'] );
-				if ( $clf->getRecordCount() == 1 ) {
-					$c_obj = $clf->getCurrent();
-					$c_obj->setAdminContact( $user_id );
-					$c_obj->setBillingContact( $user_id );
-					$c_obj->setSupportContact( $user_id );
-					if ( $c_obj->isValid() ) {
-						$c_obj->Save();
-					}
-					unset($c_obj, $clf);
-				}
-
-				$uf->CommitTransaction();
-
-				if ( $external_installer == 1 ) {
-					return $this->returnHandler( array( 'user_id' => $user_id, 'next_page' => 'installDone' ) );
+				$uf->StartTransaction();
+				$uf->setCompany( $user_data['company_id'] );
+				$uf->setLegalEntity( $le_obj->getId() );
+				$uf->setStatus( 10 );
+				$uf->setUserName( $user_data['user_name'] );
+				if ( !empty( $user_data['password'] ) AND $user_data['password'] == $user_data['password2'] ) {
+					$uf->setPassword( $user_data['password'] );
 				} else {
-					return $this->returnHandler( array( 'user_id' => $user_id, 'next_page' => 'maintenanceJobs' ) );
+					$uf->Validator->isTrue( 'password',
+											FALSE,
+											TTi18n::gettext( 'Passwords don\'t match' ) );
 				}
 
+				$uf->setEmployeeNumber( 1 );
+				$uf->setFirstName( $user_data['first_name'] );
+				$uf->setLastName( $user_data['last_name'] );
+				$uf->setWorkEmail( $user_data['work_email'] );
+				$uf->setLastLoginDate( time() + 5 ); //This prevents them from needing to change their password upon first login.
+
+				if ( is_object( $uf->getCompanyObject() ) ) {
+					$uf->setCountry( $uf->getCompanyObject()->getCountry() );
+					$uf->setProvince( $uf->getCompanyObject()->getProvince() );
+					$uf->setAddress1( $uf->getCompanyObject()->getAddress1() );
+					$uf->setAddress2( $uf->getCompanyObject()->getAddress2() );
+					$uf->setCity( $uf->getCompanyObject()->getCity() );
+					$uf->setPostalCode( $uf->getCompanyObject()->getPostalCode() );
+					$uf->setWorkPhone( $uf->getCompanyObject()->getWorkPhone() );
+					$uf->setHomePhone( $uf->getCompanyObject()->getWorkPhone() );
+
+					if ( is_object( $uf->getCompanyObject()->getUserDefaultObject() ) ) {
+						$uf->setCurrency( $uf->getCompanyObject()->getUserDefaultObject()->getCurrency() );
+					}
+				}
+
+				//Get Permission Control with highest level, assume its for Administrators and use it.
+				$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
+				$pclf->getByCompanyId( $user_data['company_id'], NULL, NULL, NULL, array('level' => 'desc') );
+				if ( $pclf->getRecordCount() > 0 ) {
+					$pc_obj = $pclf->getCurrent();
+					if ( is_object( $pc_obj ) ) {
+						Debug::Text( 'Adding User to Permission Control: ' . $pc_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+						$uf->setPermissionControl( $pc_obj->getId() );
+					}
+				}
+
+				if ( $uf->isValid() ) {
+					$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'user'), 'pre_install.php'), "r");
+					@fclose($handle);
+
+					$user_id = $uf->getId();
+					$uf->Save( TRUE, TRUE );
+					//Assign this user as admin/support/billing contact for now.
+					$clf = TTnew( 'CompanyListFactory' );
+					/** @var CompanyListFactory $clf */
+					$clf->getById( $user_data['company_id'] );
+					if ( $clf->getRecordCount() == 1 ) {
+						$c_obj = $clf->getCurrent();
+						$c_obj->setAdminContact( $user_id );
+						$c_obj->setBillingContact( $user_id );
+						$c_obj->setSupportContact( $user_id );
+						if ( $c_obj->isValid() ) {
+							$c_obj->Save();
+						}
+						unset( $c_obj, $clf );
+					}
+
+					$uf->CommitTransaction();
+
+					if ( $external_installer == 1 ) {
+						return $this->returnHandler( array('user_id' => $user_id, 'next_page' => 'installDone') );
+					} else {
+						return $this->returnHandler( array('user_id' => $user_id, 'next_page' => 'maintenanceJobs') );
+					}
+				} else {
+					$uf->FailTransaction();
+
+					$validator = array();
+					$validator[] = $uf->Validator->getErrorsArray();
+					$validator_stats = array('total_records' => 1, 'valid_records' => 1);
+
+					return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), $validator, $validator_stats );
+				}
 			} else {
-
-				$uf->FailTransaction();
-
-				$validator = array();
-				$validator[] = $uf->Validator->getErrorsArray();
-				$validator_stats = array('total_records' => 1, 'valid_records' => 1 );
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
+				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), array(0 => array('user_name' => array(TTi18n::getText( 'Legal Entity does not exist, please go back a step and try again.' ) ) ) ), array('total_records' => 1, 'valid_records' => 0) );
 			}
-
 		}
 
 		return $this->returnHandler( FALSE );

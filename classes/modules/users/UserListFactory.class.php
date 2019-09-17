@@ -322,7 +322,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_name' => strtolower( trim( $user_name ) ),
+					'user_name' => TTi18n::strtolower( trim( $user_name ) ),
 		);
 
 		$query = '
@@ -345,7 +345,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	 * @return bool|UserListFactory
 	 */
 	function getByHomeEmailOrWorkEmail( $email ) {
-		$email = trim(strtolower($email));
+		$email = TTi18n::strtolower( trim($email) );
 
 		if ( $email == '') {
 			return FALSE;
@@ -450,7 +450,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		$ph = array(
 			'company_id' => TTUUID::castUUID($company_id),
-					'user_name' => strtolower( trim( $user_name ) ),
+					'user_name' => TTi18n::strtolower( trim( $user_name ) ),
 		);
 
 		$query = '
@@ -481,7 +481,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-			'user_name' => strtolower( trim( $user_name ) ),
+			'user_name' => TTi18n::strtolower( trim( $user_name ) ),
 			'status' => $status,
 		);
 

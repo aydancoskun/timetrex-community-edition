@@ -662,6 +662,8 @@ class UserQualificationReport extends Report {
 		foreach ( $uwlf as $key => $uw_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) {
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = Misc::addKeyPrefix('user_wage.', (array)$uw_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_wage.', $columns ) ));
+				$this->tmp_data['user_wage'][$uw_obj->getUser()]['wage'] = $uw_obj->getWage(); //Get raw unformatted value as columnFormatter() will format it later on.
+				$this->tmp_data['user_wage'][$uw_obj->getUser()]['hourly_rate'] = $uw_obj->getHourlyRate(); //Get raw unformatted value as columnFormatter() will format it later on.
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
@@ -743,21 +745,23 @@ class UserQualificationReport extends Report {
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['qualification']), NULL, TTi18n::getText('Pre-Processing Data...') );
 		if ( isset($this->tmp_data['qualification']) ) {
+			$column_keys = array_keys( $this->getColumnDataConfig() );
+
 			//getReportDates() is quite time consuming, so run it on just the users, rather than qualification records which can be 10-100x more.
 			foreach( $this->tmp_data['user'] as $user_id => $user ) {
 				if ( isset( $user['user.hire_date'] ) ) {
-					$hire_date_columns = TTDate::getReportDates( 'user.hire', TTDate::parseDateTime( $user['user.hire_date'] ), FALSE, $this->getUserObject() );
+					$hire_date_columns = TTDate::getReportDates( 'user.hire', TTDate::parseDateTime( $user['user.hire_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 				} else {
 					$hire_date_columns = array();
 				}
 
 				if ( isset( $user['user.termination_date'] ) ) {
-					$termination_date_columns = TTDate::getReportDates( 'user.termination', TTDate::parseDateTime( $user['user.termination_date'] ), FALSE, $this->getUserObject() );
+					$termination_date_columns = TTDate::getReportDates( 'user.termination', TTDate::parseDateTime( $user['user.termination_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 				} else {
 					$termination_date_columns = array();
 				}
 				if ( isset( $user['user.birth_date'] ) ) {
-					$birth_date_columns = TTDate::getReportDates( 'user.birth', TTDate::parseDateTime( $user['user.birth_date'] ), FALSE, $this->getUserObject() );
+					$birth_date_columns = TTDate::getReportDates( 'user.birth', TTDate::parseDateTime( $user['user.birth_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 				} else {
 					$birth_date_columns = array();
 				}

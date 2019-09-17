@@ -220,7 +220,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 	 * @return bool|UserContactListFactory
 	 */
 	function getByHomeEmailOrWorkEmail( $email ) {
-		$email = trim(strtolower($email));
+		$email = TTi18n::strtolower( trim($email) );
 
 		if ( $email == '') {
 			return FALSE;

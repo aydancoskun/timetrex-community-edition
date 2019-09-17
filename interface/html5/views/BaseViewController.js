@@ -8000,4 +8000,4 @@ BaseViewController.loadView = function( view_id ) {
 
 };
 
-BaseViewController.default_layout_name = $.i18n._( '-Default-' );
+BaseViewController.default_layout_name = $.i18n._( '-- Default --' );

@@ -1828,13 +1828,20 @@ class ScheduleFactory extends Factory {
 
 			if ( $this->getDateStamp() != FALSE
 					AND is_object( $this->getPayPeriodObject() )
-					AND is_object( $this->getPayPeriodObject()->getPayPeriodScheduleObject() )
-					AND $this->getPayPeriodObject()->getPayPeriodScheduleObject()->getTimeSheetVerifyType() != 10 ) {
-				//Find out if timesheet is verified or not.
-				$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $pptsvlf */
-				$pptsvlf->getByPayPeriodIdAndUserId(  $this->getPayPeriod(), $this->getUser() );
-				if ( $pptsvlf->getRecordCount() > 0 ) {
-					$this->Validator->Warning( 'date_stamp', TTi18n::gettext('Pay period is already verified, saving these changes will require it to be reverified') );
+					AND is_object( $this->getPayPeriodObject()->getPayPeriodScheduleObject() ) ) {
+
+				if ( $this->getTotalTime() > $this->getPayPeriodObject()->getPayPeriodScheduleObject()->getMaximumShiftTime() ) {
+					$this->Validator->Warning( 'end_time', TTi18n::gettext('Schedule total time exceeds maximum shift time of') .' '. TTDate::getTimeUnit( $this->getPayPeriodObject()->getPayPeriodScheduleObject()->getMaximumShiftTime() )	.' '. TTi18n::getText('hrs set for this pay period schedule') );
+				}
+
+				if ( $this->getPayPeriodObject()->getPayPeriodScheduleObject()->getTimeSheetVerifyType() != 10 ) {
+					//Find out if timesheet is verified or not.
+					$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+					/** @var PayPeriodTimeSheetVerifyListFactory $pptsvlf */
+					$pptsvlf->getByPayPeriodIdAndUserId( $this->getPayPeriod(), $this->getUser() );
+					if ( $pptsvlf->getRecordCount() > 0 ) {
+						$this->Validator->Warning( 'date_stamp', TTi18n::gettext( 'Pay period is already verified, saving these changes will require it to be reverified' ) );
+					}
 				}
 			}
 		}

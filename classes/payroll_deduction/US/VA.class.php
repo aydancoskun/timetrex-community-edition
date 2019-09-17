@@ -52,6 +52,11 @@ class PayrollDeduction_US_VA extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20190101 => array(
+					'standard_deduction' => 4500,
+					'allowance'          => 930,
+					'age65_allowance'    => 800,
+			),
 			20080101 => array(
 					'standard_deduction' => 3000,
 					'allowance'          => 930,

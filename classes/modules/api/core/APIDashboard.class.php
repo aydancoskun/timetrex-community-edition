@@ -462,13 +462,8 @@ class APIDashboard extends APIFactory {
 
 				$product_edition = $this->getCurrentCompanyObject()->getProductEdition();
 
-				$permission_level = 1;
-				$pcf = new PermissionControlListFactory();
-				$pcf->getByCompanyIdAndUserId($this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId());
-				foreach ($pcf as $pf) {
-					$permission_level = $pf->getLevel();
-				}
-				unset($pf, $pcf);
+				$permission = new Permission();
+				$permission_level = $permission->getLevel( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
 
 				//Notify user of new features.
 				if ( Misc::MajorVersionCompare( APPLICATION_VERSION, '9.0.0', '=' ) AND TTDate::getBeginDayEpoch( $this->getCurrentUserObject()->getLastLoginDate() ) <= APPLICATION_VERSION_DATE ) {
@@ -898,13 +893,8 @@ class APIDashboard extends APIFactory {
 	function getDefaultDashlets() {
 		$parameters = FALSE;
 
-		$permission_level = 1;
-		$pcf = new PermissionControlListFactory();
-		$pcf->getByCompanyIdAndUserId($this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId());
-		foreach ($pcf as $pf) {
-			$permission_level = $pf->getLevel();
-		}
-		unset($pcf, $pf);
+		$permission = new Permission();
+		$permission_level = $permission->getLevel( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
 		Debug::Text('Permission Level: '. $permission_level, __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get available dashlets (as that performs permission checks), and only add ones that are available.

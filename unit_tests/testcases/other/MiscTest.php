@@ -737,8 +737,19 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Misc::getBeforeDecimal( 3.14 ), '3' );
 		$this->assertEquals( Misc::getBeforeDecimal( -3.14 ), '-3' );
 		$this->assertEquals( Misc::getBeforeDecimal( -3.1 ), '-3' );
-		$this->assertEquals( Misc::getBeforeDecimal( -123456789.123456789 ), '-123456789' );
-		$this->assertEquals( Misc::getBeforeDecimal( 123456789.123456789 ), '123456789' );
+		$this->assertEquals( Misc::getBeforeDecimal( 510.9 ), '510' );
+		$this->assertEquals( Misc::getBeforeDecimal( -510.9 ), '-510' );
+
+		$this->assertEquals( Misc::getBeforeDecimal( 123456789012.12 ), '123456789012' );
+		$this->assertEquals( Misc::getBeforeDecimal( 1234567890.1234 ), '1234567890' );
+		$this->assertEquals( Misc::getBeforeDecimal( 123456789.123456789 ), '123456789' );  // Float precision overflow
+		$this->assertEquals( Misc::getBeforeDecimal( '123456789.123456789' ), '123456789' );
+
+		$this->assertEquals( Misc::getBeforeDecimal( -123456789012.12 ), '-123456789012' );
+		$this->assertEquals( Misc::getBeforeDecimal( -1234567890.1234 ), '-1234567890' );
+		$this->assertEquals( Misc::getBeforeDecimal( -123456789.123456789 ), '-123456789' );  // Float precision overflow
+		$this->assertEquals( Misc::getBeforeDecimal( '-123456789.123456789' ), '-123456789' );
+
 
 		$this->assertEquals( Misc::getAfterDecimal( 0 ), '0' );
 		$this->assertEquals( Misc::getAfterDecimal( 1 ), '0' );
@@ -748,10 +759,19 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Misc::getAfterDecimal( -3.1, FALSE ), '1' );
 		$this->assertEquals( Misc::getAfterDecimal( 3.14 ), '14' );
 		$this->assertEquals( Misc::getAfterDecimal( -3.14 ), '14' );
+		$this->assertEquals( Misc::getAfterDecimal( 510.9 ), '90' );
+		$this->assertEquals( Misc::getAfterDecimal( -510.9 ), '90' );
 		$this->assertEquals( Misc::getAfterDecimal( -123456789.123456789, TRUE ), '12' );
 
-		$this->assertEquals( Misc::getAfterDecimal( -123456789.123456789, FALSE ), '12346' );//float precision overflow
-		$this->assertEquals( Misc::getAfterDecimal( '123456789.123456789', FALSE ), '123456789' );
+		$this->assertEquals( Misc::getAfterDecimal( 123456789012.12, FALSE ), '12' );
+		$this->assertEquals( Misc::getAfterDecimal( 1234567890.1234, FALSE ), '1234' );
+		$this->assertEquals( Misc::getAfterDecimal( 123456789.123456789, FALSE ), '12346' ); // Float precision overflow
+		$this->assertEquals( Misc::getAfterDecimal( '123456789.123456789', FALSE ), '123456789' ); //Passed as string, so no float precision overflow.
+
+		$this->assertEquals( Misc::getAfterDecimal( -123456789012.12, FALSE ), '12' );
+		$this->assertEquals( Misc::getAfterDecimal( -1234567890.1234, FALSE ), '1234' );
+		$this->assertEquals( Misc::getAfterDecimal( -123456789.123456789, FALSE ), '12346' ); // Float precision overflow
+		$this->assertEquals( Misc::getAfterDecimal( '-123456789.123456789', FALSE ), '123456789' ); //Passed as string, so no float precision overflow.
 	}
 
 	/**
@@ -1384,5 +1404,126 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 
 		unset( $uuid_arr, $sorted_uuid_arr, $diff_uuid_arr );
 	}
+
+	/**
+	 * @group testRemoveTrailingZeros
+	 */
+	function testRemoveTrailingZeros() {
+		TTi18n::setLocale( 'en_US' );
+
+		$validator = new Validator();
+
+		$this->assertEquals( Misc::removeTrailingZeros( 12.9 ), 12.9 );
+		$this->assertEquals( Misc::removeTrailingZeros( 12.90 ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( 12.900 ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( 12.9000 ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( 12.9000, 3 ), '12.900' );
+
+		$this->assertEquals( Misc::removeTrailingZeros( -12.9 ), -12.9 );
+		$this->assertEquals( Misc::removeTrailingZeros( -12.90 ), '-12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( -12.900 ), '-12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( -12.9000 ), '-12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( -12.9000, 3 ), '-12.900' );
+
+		$this->assertEquals( Misc::removeTrailingZeros( '12.9' ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( '12.90' ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( '12.900' ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( '12.9000' ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( '12.9000', 3 ), '12.900' );
+
+		$this->assertEquals( Misc::removeTrailingZeros( '-12.9' ), '-12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( '-12.90' ), '-12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( '-12.900' ), '-12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( '-12.9000' ), '-12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( '-12.9000', 3 ), '-12.900' );
+
+		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9', 1) ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,90', 2) ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,900', 3) ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9000', 4) ), '12.90' );
+
+		TTi18n::setLocale( 'es_ES' );
+		if ( TTi18n::getThousandsSymbol() == '.' AND TTi18n::getDecimalSymbol() == ',' ) {
+			$this->assertEquals( Misc::removeTrailingZeros( 12.9 ), 12.9 );
+			$this->assertEquals( Misc::removeTrailingZeros( 12.90 ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( 12.900 ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( 12.9000 ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( 12.9000, 3 ), '12.900' );
+
+			$this->assertEquals( Misc::removeTrailingZeros( -12.9 ), -12.9 );
+			$this->assertEquals( Misc::removeTrailingZeros( -12.90 ), '-12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( -12.900 ), '-12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( -12.9000 ), '-12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( -12.9000, 3 ), '-12.900' );
+
+			$this->assertEquals( Misc::removeTrailingZeros( '12.9' ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( '12.90' ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( '12.900' ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( '12.9000' ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( '12.9000', 3 ), '12.900' );
+
+			$this->assertEquals( Misc::removeTrailingZeros( '-12.9' ), '-12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( '-12.90' ), '-12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( '-12.900' ), '-12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( '-12.9000' ), '-12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( '-12.9000', 3 ), '-12.900' );
+
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9', 1) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,90', 2) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,900', 3) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9000', 4) ), '12.90' );
+
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9', 1) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,90', 2) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,900', 3) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9000', 4) ), '12.90' );
+		}
+	}
+
+	/**
+	 * @group testMoneyRound
+	 */
+	function testMoneyRound() {
+		$this->assertEquals( Misc::MoneyRound( 1.1234, 2 ), 1.12 );
+		$this->assertEquals( Misc::MoneyRound( 1.12456, 2 ), 1.12 );
+		$this->assertEquals( Misc::MoneyRound( 1.1256, 2 ), 1.13 );
+		$this->assertEquals( Misc::MoneyRound( 1234567890.145, 2 ), 1234567890.15 );
+		$this->assertEquals( Misc::MoneyRound( 1234567890123456780.145, 2 ), 1234567890123456780.15 );
+		$this->assertEquals( Misc::MoneyRound( 1234567890123456789123456789.145, 2 ), 1234567890123456789123456789.15 );
+		$this->assertEquals( Misc::MoneyRound( 1000000000000000000000000000000000.145, 2 ), 1000000000000000000000000000000000.15 );
+
+		$currency_obj = new CurrencyFactory();
+		$currency_obj->setRoundDecimalPlaces( 3 );
+
+		$this->assertEquals( Misc::MoneyRound( 1.1234, NULL, $currency_obj ), 1.123 );
+		$this->assertEquals( Misc::MoneyRound( 1.12444, NULL, $currency_obj ), 1.124 );
+		$this->assertEquals( Misc::MoneyRound( 1.1256, NULL, $currency_obj ), 1.126);
+
+		$this->assertEquals( Misc::MoneyRound( 1.1234, 2, $currency_obj ), 1.123 );
+		$this->assertEquals( Misc::MoneyRound( 1.12444, 2, $currency_obj ), 1.124 );
+		$this->assertEquals( Misc::MoneyRound( 1.1256, 2, $currency_obj ), 1.126);
+	}
+
+	/**
+	 * @group testInArrayKey
+	 */
+	function testOptionGetByValue() {
+		$options = array(
+				10 => 'test1',
+				20 => 'Test2',
+				30 => 'TEST3'
+		);
+
+		$this->assertEquals(  Option::getByValue( 'test1', $options ), 10 );
+		$this->assertEquals(  Option::getByValue( 'Test1', $options ), 10 ); //Test case insensitive match
+		$this->assertEquals(  Option::getByValue( 'TEST1', $options ), 10 ); //Test case insensitive match
+
+		$this->assertEquals(  Option::getByValue( 'Test2', $options ), 20 );
+		$this->assertEquals(  Option::getByValue( 'test2', $options ), 20 ); //Test case insensitive match
+		$this->assertEquals(  Option::getByValue( 'TEST2', $options ), 20 ); //Test case insensitive match
+
+		$this->assertEquals(  Option::getByValue( 'TEST3', $options ), 30 );
+	}
 }
 ?>
+

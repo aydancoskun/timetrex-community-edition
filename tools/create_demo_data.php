@@ -34,21 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
-
-//Debug::setBufferOutput(FALSE);
-//Debug::setEnable(FALSE);
-//Debug::setVerbosity(0);
-
-/*
-Debug::setBufferOutput(TRUE);
-Debug::setEnable(TRUE);
-Debug::setEnableDisplay(TRUE);
-//Debug::setVerbosity(11);
-Debug::setVerbosity(10);
-*/
-
 //Allow CLI scripts to run much longer.
 ini_set( 'max_execution_time', 86400 );
 ini_set( 'memory_limit', '1024M' );
@@ -93,6 +78,26 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	} else {
 		$skip = array();
 	}
+
+	if ( $data['force'] === TRUE ) {
+		define('DEMO_MODE', TRUE); //When forcing, define this before global.inc.php gets loaded.
+	}
+
+	require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
+	require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+
+	//Debug::setBufferOutput(FALSE);
+	//Debug::setEnable(FALSE);
+	//Debug::setVerbosity(0);
+
+	/*
+	Debug::setBufferOutput(TRUE);
+	Debug::setEnable(TRUE);
+	Debug::setEnableDisplay(TRUE);
+	//Debug::setVerbosity(11);
+	Debug::setVerbosity(10);
+	*/
+
 
 	$config_vars['other']['demo_mode'] = TRUE;
 	$config_vars['other']['enable_plugins'] = FALSE; //Disable plugins as they shouldn't be needed and likely just cause problems.

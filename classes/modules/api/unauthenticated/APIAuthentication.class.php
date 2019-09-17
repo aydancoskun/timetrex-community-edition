@@ -62,7 +62,7 @@ class APIAuthentication extends APIFactory {
 		if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == 1 ) ) {
 			Debug::text('WARNING: Installer is enabled... Normal logins are disabled!', __FILE__, __LINE__, __METHOD__, 10);
 			//When installer is enabled, just display down for maintenance message to user if they try to login.
-			$error_message = TTi18n::gettext('%1 is currently undergoing maintenance. We apologize for any inconvenience this may cause, please try again later.', array(APPLICATION_NAME) );
+			$error_message = TTi18n::gettext('%1 is currently undergoing maintenance. We apologize for any inconvenience this may cause, please try again later. (%2)', array(APPLICATION_NAME, ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) ? 'INSTALL' : 'MAINT' ) ) );
 			$validator_obj = new Validator();
 			$validator_stats = array('total_records' => 1, 'valid_records' => 0 );
 			$validator_obj->isTrue( 'user_name', FALSE, $error_message );
@@ -181,7 +181,7 @@ class APIAuthentication extends APIFactory {
 		if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == 1 ) ) {
 			Debug::text('WARNING: Installer is enabled... Normal logins are disabled!', __FILE__, __LINE__, __METHOD__, 10);
 			//When installer is enabled, just display down for maintenance message to user if they try to login.
-			$error_message = TTi18n::gettext('%1 is currently undergoing maintenance. We apologize for any inconvenience this may cause, please try again later.', array(APPLICATION_NAME) );
+			$error_message = TTi18n::gettext('%1 is currently undergoing maintenance. We apologize for any inconvenience this may cause, please try again later. (%2)', array(APPLICATION_NAME, ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) ? 'INSTALL' : 'MAINT' ) ) );
 			$validator_obj = new Validator();
 			$validator_stats = array('total_records' => 1, 'valid_records' => 0 );
 			$validator_obj->isTrue( 'user_name', FALSE, $error_message );

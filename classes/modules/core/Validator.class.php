@@ -315,7 +315,8 @@ class Validator {
 		//Don't use TTi18n::parseFloat() here, as if we are going to be doing that we should do it as early as possible to the user input, like in setObjectFromArray()
 		//  We do need to check if the value passed in is already cast to float/int and just accept it in that case.
 		//    Because in other locales preg_match() casts $value to a string, which means decimal could become a comma, then it won't match.
-		if ( ( is_float( $value ) == TRUE OR is_int( $value ) === TRUE ) OR preg_match('/^((\.[0-9]+)|([-0-9]+(\.[0-9]*)?))$/', $value ) ) {
+		//    Allow commas and decimals to be accepted as floats, as parseFloat() should almost always be called after this function, and it accepts both in all locales.
+		if ( ( is_float( $value ) == TRUE OR is_int( $value ) === TRUE ) OR preg_match('/^(([\.,][0-9]+)|([-0-9]+([\.,\ 0-9]*)?))$/', trim( $value ) ) === 1 ) {
 			return TRUE;
 		}
 
@@ -931,17 +932,26 @@ class Validator {
 	}
 
 	/**
-	 * @param $value
-	 * @return mixed
+	 * @param $value int|float|string
+	 * @return int|float|string
 	 */
 	function stripNonFloat( $value) {
-		//Don't use TTi18n::parseFloat() here, as if we are going to be doing that we should do it as early as possible to the user input, like in setObjectFromArray()
-		//  We do need to check if the value passed in is already cast to float/int and just accept it in that case.
+		//Don't use TTi18n::parseFloat() here, as if we are going to be doing that we should do it as early as possible to the user input, like in setObjectFromArray().
+		//  Then this function would often be called afterwards, so it should always return a float value or something that can be used in math.
+		//  TTi18n::parseFloat() parses out non-float characters itself.
+		//We do need to check if the value passed in is already cast to float/int and just accept it in that case.
 		//    Because in other locales preg_match() casts $value to a string, which means decimal could become a comma, then it won't match.
 		if ( is_float( $value ) === TRUE OR is_int( $value ) === TRUE ) {
 			return $value;
 		} else {
-			$retval = preg_replace( '/([\.\-])(?=.*?\1)|[^-0-9\.]/', '', $value ); //Strips repeating "." and "-" characters that might slip in due to typos. Then strips non-float valid characters.
+			//Strips repeating "." and "-" characters that might slip in due to typos. Then strips non-float valid characters.
+			//This is also done in TTi18n::parseFloat() and Validator->stripNonFloat()
+			//$retval = preg_replace( '/([\-\.,])(?=.*?\1)|[^-0-9\.,]/', '', $value );
+
+			//This should return a float value, or at least something that can be used in math functions.
+			// TTi18n::parseFloat() should be called in setObjectFromArray() well before this would ever be called, which is typically in set*() functions.
+			// CompanyDeductionFactory requires this, as Advanced Percent calculations have values entered as '124,000' which are run through stripNonFloat() prior to performing math on them.
+			$retval = preg_replace( '/([\-\.])(?=.*?\1)|[^-0-9\.]/', '', $value );
 		}
 
 		//Debug::Text('Float String:'. $retval, __FILE__, __LINE__, __METHOD__, $this->verbosity);

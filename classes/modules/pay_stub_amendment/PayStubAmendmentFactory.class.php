@@ -436,8 +436,6 @@ class PayStubAmendmentFactory extends Factory {
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
 		Debug::text('Setting Rate to: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		//Must round to 2 decimals otherwise discreptancy can occur when generating pay stubs.
-		//$this->data['rate'] = Misc::MoneyFormat( $value, FALSE );
 
 		//if you don't ship null, you get a zero and that makes the UI logic disables the amount field which is not desired.
 		if ($value == 0 OR $value == '') {
@@ -461,8 +459,6 @@ class PayStubAmendmentFactory extends Factory {
 	function setUnits( $value) {
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-		//Must round to 2 decimals otherwise discreptancy can occur when generating pay stubs.
-		//$this->data['units'] = Misc::MoneyFormat( $value, FALSE );
 
 		//if you don't ship null, you get a zero and that makes the UI logic disables the amount field which is not desired.
 		if ($value == 0 OR $value == '') {
@@ -822,10 +818,10 @@ class PayStubAmendmentFactory extends Factory {
 	 */
 	function calcAmount() {
 		$retval = bcmul( $this->getRate(), $this->getUnits(), 4 );
-		if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCurrencyObject() ) ) {
-			$retval = $this->getUserObject()->getCurrencyObject()->round( $retval );
-		} //else { //Debug::Text('No currency object found, amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+
+		$retval = Misc::MoneyRound( $retval, 2, ( ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCurrencyObject() ) ) ? $this->getUserObject()->getCurrencyObject() : NULL ) ); //Set MIN decimals to 2 and max to the currency rounding.
 		//Debug::Text('Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+
 		return $retval;
 	}
 
@@ -839,16 +835,18 @@ class PayStubAmendmentFactory extends Factory {
 					'pay_stub_entry_name_id' => TTUUID::castUUID($this->getPayStubEntryNameId()),
 					'effective_date' => (int)$this->getEffectiveDate(),
 					'amount' => (float)$this->getAmount(),
+					'id' => TTUUID::castUUID( $this->getId() ),
 					);
 
-		$query = 'select id from '. $this->getTable() .' where user_id = ? AND pay_stub_entry_name_id = ? AND effective_date = ? AND amount = ? AND deleted=0';
+		//This this is used for a warning now, there can be multiple duplicate records, so we have to always exclude the record we are working on in the SQL query, otherwise if it happens to be returned it won't trigger the warning.
+		$query = 'select id from '. $this->getTable() .' where user_id = ? AND pay_stub_entry_name_id = ? AND effective_date = ? AND amount = ? AND id != ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
 		Debug::Arr($id, 'Unique PSA: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
 		} else {
-			if ($id == $this->getId() ) {
+			if ( $id == $this->getId() ) {
 				return TRUE;
 			}
 		}
@@ -859,7 +857,7 @@ class PayStubAmendmentFactory extends Factory {
 	/**
 	 * @return bool
 	 */
-	function preSave() {
+	function preValidate() {
 		//Authorize all pay stub amendments until we decide they will actually go through an authorization process
 		if ( $this->getAuthorized() == FALSE ) {
 			$this->setAuthorized(TRUE);
@@ -873,16 +871,6 @@ class PayStubAmendmentFactory extends Factory {
 			$this->setType(10);
 		}
 
-		/*
-		//Handle YTD adjustments just like any other amendment.
-		if ( $this->getYTDAdjustment() == TRUE
-				AND $this->getStatus() != 55
-				AND $this->getStatus() != 60) {
-			Debug::Text('Calculating Amount...', __FILE__, __LINE__, __METHOD__, 10);
-			$this->setStatus( 52 );
-		}
-		*/
-
 		//If amount isn't set, but Rate and units are, calc amount for them.
 		if ( ( $this->getAmount() == NULL OR $this->getAmount() == 0 OR $this->getAmount() == '' )
 				AND $this->getRate() !== NULL AND $this->getUnits() !== NULL
@@ -890,7 +878,6 @@ class PayStubAmendmentFactory extends Factory {
 				AND $this->getRate() != '' AND $this->getUnits() != ''
 				) {
 			Debug::Text('Calculating Amount...', __FILE__, __LINE__, __METHOD__, 10);
-			//$this->setAmount( bcmul( $this->getRate(), $this->getUnits(), 4 ) );
 			$this->setAmount( $this->calcAmount() );
 		}
 
@@ -1101,6 +1088,10 @@ class PayStubAmendmentFactory extends Factory {
 				if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getHireDate() != '' AND TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) < TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) ) {
 					$this->Validator->Warning( 'effective_date', TTi18n::gettext('Effective date is before the employees hire date.'));
 				}
+
+				if ( $this->isUnique() == FALSE ) { //Post-Adjustment Carry-Forward calculations may require duplicate entries to exist when correcting for example Dental Benefits of a fixed amount from the last 3 pay periods.
+					$this->Validator->Warning( 'user_id', TTi18n::gettext( 'Another Pay Stub Amendment already exists for the same employee, account, effective date and amount' ) );
+				}
 			}
 
 			if ( $this->Validator->getValidateOnly() == FALSE AND $this->getUser() == FALSE AND $this->Validator->hasError('user_id') == FALSE) {
@@ -1108,10 +1099,6 @@ class PayStubAmendmentFactory extends Factory {
 												FALSE,
 												TTi18n::gettext('Invalid Employee'));
 			}
-
-			$this->Validator->isTrue(		'user_id',
-											$this->isUnique(),
-											TTi18n::gettext('Another Pay Stub Amendment already exists for the same employee, account, effective date and amount'));
 		}
 
 		//Only show this error if it wasn't already triggered earlier.
@@ -1121,11 +1108,12 @@ class PayStubAmendmentFactory extends Factory {
 											TTi18n::gettext('Invalid Pay Stub Account'));
 		}
 
-		if ( $this->getType() == 10 ) {
+		if ( $this->getDeleted() == FALSE AND $this->getType() == 10 ) {
 			//If rate and units are set, and not amount, calculate the amount for us.
-			if ( $this->getRate() !== NULL AND $this->getUnits() !== NULL AND $this->getAmount() == NULL ) {
-				$this->preSave();
-			}
+			// preSave() was changed to preValidate() so this shouldn't be needed anymore.
+//			if ( $this->getRate() !== NULL AND $this->getUnits() !== NULL AND $this->getAmount() == NULL ) {
+//				$this->preSave();
+//			}
 
 			//Make sure rate * units = amount
 			if ( $this->getAmount() === NULL ) {
@@ -1139,13 +1127,12 @@ class PayStubAmendmentFactory extends Factory {
 			if ( $this->getRate() !== NULL AND $this->getUnits() !== NULL
 					AND $this->getRate() != 0 AND $this->getUnits() != 0
 					AND $this->getRate() != '' AND $this->getUnits() != ''
-					//AND ( Misc::MoneyFormat( bcmul( $this->getRate(), $this->getUnits() ), FALSE) ) != Misc::MoneyFormat( $this->getAmount(), FALSE )
-					AND ( Misc::MoneyFormat( $this->calcAmount(), FALSE ) != Misc::MoneyFormat( $this->getAmount(), FALSE ) ) //Use MoneyFormat here as the legacy interface doesn't handle more than two decimal places.
+					AND ( Misc::MoneyRound( $this->calcAmount(), 2 ) != Misc::MoneyRound( $this->getAmount(), 2 ) ) //Use MoneyRound so we always compare consistent decimal places.
 				) {
 				Debug::text('Validate: Rate: '. $this->getRate() .' Units: '. $this->getUnits() .' Amount: '. $this->getAmount() .' Calc: Amount: '. $this->calcAmount() .' Raw: '.	 bcmul( $this->getRate(), $this->getUnits(), 4), __FILE__, __LINE__, __METHOD__, 10);
 				$this->Validator->isTrue(		'amount',
 												FALSE,
-												TTi18n::gettext('Invalid Amount, calculation is incorrect'));
+												TTi18n::gettext('Invalid Amount, calculation is incorrect'). ' ('. $this->calcAmount() .')');
 			}
 		}
 

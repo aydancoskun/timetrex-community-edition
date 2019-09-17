@@ -248,7 +248,7 @@ class APIAuthorization extends APIFactory {
 							// we need rethrow any exceptions to cause the outer nested transaction block to fail and retry as a whole. Since we can't retry just part of the transaction.
 							try {
 								$api_ts = new APITimeSheet();
-								$api_raw_retval = $api_ts->verifyTimeSheet( $row['user_id'], $row['pay_period_id'] );
+								$api_raw_retval = $api_ts->verifyTimeSheet( $row['user_id'], $row['pay_period_id'], FALSE ); //Don't enable setEnableAuthorize() as that duplicates the authorize records and causes validation errors.
 								Debug::Arr( $api_raw_retval, 'API Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 								$api_retval = $this->stripReturnHandler( $api_raw_retval );

@@ -1051,10 +1051,10 @@ class Authentication {
 		$type = strtoupper($type);
 		if ( $type == 'USER' ) {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-			$ulf->getByUserName( strtolower( $user_name ) );
+			$ulf->getByUserName( TTi18n::strtolower( $user_name ) );
 		} elseif ( $type == 'JOB_APPLICANT' )  {
 			$ulf = TTnew( 'JobApplicantListFactory' ); /** @var JobApplicantListFactory $ulf */
-			$ulf->getByUserName( $user_name );
+			$ulf->getByUserName( TTi18n::strtolower( $user_name ) );
 		}
 
 		if ( $ulf->getRecordCount() == 1 ) {
@@ -1096,7 +1096,7 @@ class Authentication {
 
 		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
 		foreach ($ulf as $user) {
-			if ( strtolower( $user->getUsername() ) == strtolower(trim($user_name)) ) {
+			if ( TTi18n::strtolower( $user->getUsername() ) == TTi18n::strtolower( trim($user_name) ) ) {
 				$this->setObjectID( $user->getID() );
 				$this->setObject( $user );
 
@@ -1257,7 +1257,7 @@ class Authentication {
 		//Use UserFactory to set name.
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
-		$ulf->getByUserNameAndStatus(strtolower($user_name), 10 );
+		$ulf->getByUserNameAndStatus( TTi18n::strtolower($user_name), 10 );
 
 		foreach ($ulf as $user) {
 			if ( $user->getUserName() == $user_name ) {

@@ -1368,6 +1368,11 @@ progress::-moz-progress-bar {
     border: 1px solid #D95252 !important;
 }
 
+.warning-tip {
+    background: #ffff00 !important;
+    border: 1px solid #e7be00 !important;
+}
+
 .qtip2-error-tip{
     color: rgb(203, 46, 46) !important;
     background-color:  rgb(203, 46, 46) !important;
@@ -1390,11 +1395,6 @@ progress::-moz-progress-bar {
     border: 1px solid #e7be00;
     background-color: #ffff00;
     color: #555;
-}
-
-.warning-tip {
-    background: #ffff00 !important;
-    border: 1px solid #e7be00 !important;
 }
 
 .ck-error-tip {

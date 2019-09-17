@@ -137,17 +137,14 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 			var widget = this.edit_view_ui_dic[key];
 
-//			if ( !Global.isSet( this.current_edit_record['value1'] ) ) {
-//				this.current_edit_record['value1'] = '';
-//			}
-
-			if ( key === 'value1' ) {
+			if ( key === 'value1' && this.current_edit_record[key] && !this.is_mass_editing ) {
 				if ( Global.isSet( this.ach_transaction_type_data[this.current_edit_record[key]] ) ) {
 					this.edit_view_ui_dic['value1_2'].setValue( this.current_edit_record[key] );
 				} else {
 					this.edit_view_ui_dic['value1_1'].setValue( this.current_edit_record[key] );
 				}
 			}
+
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'amount_type_id': //popular case
@@ -193,9 +190,14 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 	getTypeOptions: function() {
 		var $this = this;
-		var params = {
-			legal_entity_id: this.current_edit_record['legal_entity_id']
-		};
+
+		var params = {};
+		if ( this.is_mass_editing ) {
+			params.company_id = LocalCacheData.getLoginUser().company_id;
+		} else {
+			params.legal_entity_id = this.current_edit_record['legal_entity_id'];
+		}
+
 		this.api.getOptions( 'type', params, {
 			async: false,
 			onResult: function( res ) {
@@ -283,7 +285,12 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		var source_account_args = {};
 		source_account_args.filter_data = {};
 		source_account_args.filter_data.type_id = type_id;
-		source_account_args.filter_data.legal_entity_id = [legal_entity_id, TTUUID.not_exist_id];
+
+		if ( this.is_mass_editing ) {
+			source_account_args.filter_data.company_id = [ LocalCacheData.getLoginUser().company_id, TTUUID.not_exist_id ];
+		} else {
+			source_account_args.filter_data.legal_entity_id = [legal_entity_id, TTUUID.not_exist_id];
+		}
 
 		$this.edit_view_ui_dic['remittance_source_account_id'].setValue( 0 );
 		$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( null );
@@ -340,23 +347,28 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		if ( this.edit_view_ui_dic && this.current_edit_record.remittance_source_account_id != TTUUID.zero_id ) { //Keep accountd data if UUID == zero_id
 			for ( var i = 1; i <= 10; i++ ) {
 				if ( i == 1 ) {
-					if ( this.edit_view_ui_dic['value1_1'].is(':visible') ) {
+					if ( this.edit_view_ui_dic['value1_1'] && this.edit_view_ui_dic['value1_1'].is(':visible') ) {
 						record['value1'] =record['value1_1'] ?record['value1_1'] : this.edit_view_ui_dic['value1_1'].getValue();
-					} else if ( this.edit_view_ui_dic['value1_2'].is(':visible') ) {
+					} else if ( this.edit_view_ui_dic['value1_2'] && this.edit_view_ui_dic['value1_2'].is(':visible') ) {
 						record['value1'] =record['value1_2'] ? record['value1_2'] : this.edit_view_ui_dic['value1_2'].getValue();
 					} else {
-						record['value1'] = false;
+						if ( !this.is_mass_editing ) {
+							record['value1'] = false;
+						}
 					}
 
 				} else {
-					if ( record['value' + i] && ( typeof this.edit_view_ui_dic['value' + i] == 'undefined' || ( this.edit_view_ui_dic['value' + i] && this.edit_view_ui_dic['value' + i].is( ':visible' ) == false ) ) ) {
+					if ( !this.is_mass_editing && record['value' + i] && ( typeof this.edit_view_ui_dic['value' + i] == 'undefined' || ( this.edit_view_ui_dic['value' + i] && this.edit_view_ui_dic['value' + i].is( ':visible' ) == false ) ) ) {
 						record['value' + i] = false;
 					}
 				}
 			}
 		}
 
-		record.legal_entity_id = this.current_edit_record['legal_entity_id'];
+		if ( !this.is_mass_editing ) {
+			record.legal_entity_id = this.current_edit_record['legal_entity_id'];
+		}
+
 		return record;
 	},
 
@@ -430,7 +442,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				var rsa = this.remittance_source_account_api.getRemittanceSourceAccount( { filter_data: { id: this.edit_view_ui_dic.remittance_source_account_id.getValue() } }, { async: false } ).getResult();
 				country = rsa[0].country;
 			}
-			if ( country != null ) {
+			if ( !this.is_mass_editing && country != null ) {
 				if ( country == 'US' ) {
 					this.attachElement( 'value1_2' ).text( $.i18n._( 'Account Type' ) + ':' );
 					this.attachElement( 'value2' ).text( $.i18n._( 'Routing' ) + ':' );
@@ -504,7 +516,6 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		this.edit_view_tabs[0] = [];
 		this.edit_view_tabs[0].push( tab_remittance_destination_account_column1 );
 
-
 		// Legal entity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
@@ -520,7 +531,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		// Employee
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'user_id',
@@ -606,62 +617,64 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'percent_amount', width: 79 } );
 		this.addEditFieldToColumn( $.i18n._( 'Percent' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		// Value1
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'value1_1', validation_field: 'value1', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Value1' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+		if ( !this.is_mass_editing ) { //Never show these fields for mass edit as they should never be mass editable.
+			// Value1
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_input.TTextInput( { field: 'value1_1', validation_field: 'value1', width: 149 } );
+			this.addEditFieldToColumn( $.i18n._( 'Value1' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( { field: 'value1_2', validation_field: 'value1' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.ach_transaction_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Account Type' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+			form_item_input.TComboBox( { field: 'value1_2', validation_field: 'value1' } );
+			form_item_input.setSourceData( Global.addFirstItemToArray( $this.ach_transaction_type_array ) );
+			this.addEditFieldToColumn( $.i18n._( 'Account Type' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		// Value2
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'value2', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Value2' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+			// Value2
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_input.TTextInput( { field: 'value2', width: 149 } );
+			this.addEditFieldToColumn( $.i18n._( 'Value2' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		// Value3
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'value3', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Value3' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+			// Value3
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_input.TTextInput( { field: 'value3', width: 149 } );
+			this.addEditFieldToColumn( $.i18n._( 'Value3' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		// Value4
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'value4', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Value4' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+			// Value4
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_input.TTextInput( { field: 'value4', width: 149 } );
+			this.addEditFieldToColumn( $.i18n._( 'Value4' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		// Value5
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'value5', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Value5' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+			// Value5
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_input.TTextInput( { field: 'value5', width: 149 } );
+			this.addEditFieldToColumn( $.i18n._( 'Value5' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		// the below are all non-display
+			// the below are all non-display
 
-		// Value6
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'value6', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Value6' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+			// Value6
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_input.TTextInput( { field: 'value6', width: 149 } );
+			this.addEditFieldToColumn( $.i18n._( 'Value6' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		// Value7
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'value7', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Value7' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+			// Value7
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_input.TTextInput( { field: 'value7', width: 149 } );
+			this.addEditFieldToColumn( $.i18n._( 'Value7' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		// Value8
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'value8', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Value8' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+			// Value8
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_input.TTextInput( { field: 'value8', width: 149 } );
+			this.addEditFieldToColumn( $.i18n._( 'Value8' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		// Value9
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'value9', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Value9' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+			// Value9
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_input.TTextInput( { field: 'value9', width: 149 } );
+			this.addEditFieldToColumn( $.i18n._( 'Value9' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-		// Value10
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'value10', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Value10' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+			// Value10
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_input.TTextInput( { field: 'value10', width: 149 } );
+			this.addEditFieldToColumn( $.i18n._( 'Value10' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
+		}
 
 	},
 

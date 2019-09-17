@@ -353,15 +353,15 @@ InstallWizardController = BaseWizardController.extend( {
 					if (stepData.tt_product_edition > 10) {
 						step_title_htm = step_title_htm
 							+ '<p style="background-color: #FFFF00">'
-							+ $.i18n._('For installation assistance, please contact ')
+							+ $.i18n._('For installation assistance, please contact') + ' '
 							+ '<a href="https://www.timetrex.com/contact-us" target="_blank">' + $.i18n._('TimeTrex support') + '</a>';
 					} else if (stepData.tt_product_edition == 10) {
 
 						step_title_htm = step_title_htm
 							+ '<p style="background-color: #FFFF00">'
-							+ $.i18n._('For installation assistance, please join our community ')
+							+ $.i18n._('For installation assistance, please join our community') + ' '
 							+ '<a href="https://forums.timetrex.com" target="_blank">' + $.i18n._('forums') + '</a>'
-							+ $.i18n._(' or contact a TimeTrex support expert for ')
+							+ ' ' + $.i18n._('or contact a TimeTrex support expert for') + ' '
 							+ '<a href="https://www.timetrex.com/setup-support" target="_blank">' + $.i18n._('Implementation Support Services') + '</a></p>';
 					}
 
@@ -599,7 +599,9 @@ InstallWizardController = BaseWizardController.extend( {
 					ProgressBar.showOverlay();
 					$this.api.getRequirements( $this.external_installer, {
 						onResult: function( res ) {
-							if ( res.isValid() ) {
+							if ( res.getResult().action ) {
+								$this.onNextClick();
+							} else if ( res.isValid() ) {
 								$this.stepsDataDic[$this.current_step] = res.getResult();
 								$this._initCurrentStep();
 							}
@@ -895,7 +897,7 @@ InstallWizardController = BaseWizardController.extend( {
 			case 'postUpgrade':
 				step_title.empty();
 				this.title_1.text( $.i18n._( 'Upgrade Complete' ) );
-				postUpgrade.html( '<b>' + $.i18n._( 'Congratulations! ' ) + '</b>'
+				postUpgrade.html( '<b>' + $.i18n._( 'Congratulations!' ) + '</b>'
 						+ $.i18n._( 'You have successfully upgraded' ) + ' '
 						+ $.i18n._( stepData.application_name ) + ' '
 						+ $.i18n._( 'to' ) + ' '
@@ -918,7 +920,7 @@ InstallWizardController = BaseWizardController.extend( {
 				step_title.empty();
 				this.title_1.text( $.i18n._( 'Done!' ) );
 				if ( stepData.upgrade == 1 ) {
-					installDone.html( '<b>' + $.i18n._( 'Congratulations! ' ) + '</b>' + ' '
+					installDone.html( '<b>' + $.i18n._( 'Congratulations!' ) + '</b>' + ' '
 							+ $.i18n._( 'You have successfully upgraded' ) + ' ' + $.i18n._( stepData.application_name )
 							+ '<br>'
 							+ '<br>'
@@ -1527,7 +1529,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else if ( stepData[key].check_disabled_functions == 1 ) {
-								widget.html( $.i18n._( 'Critical functions disabled: ' + stepData[key].disabled_function_list + '. (Please enable them in php.ini)' ) );
+								widget.html( $.i18n._( 'Critical functions disabled' ) + ': ' + stepData[key].disabled_function_list + ' (' + $.i18n._( 'Please enable them in php.ini' ) + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;

@@ -575,10 +575,10 @@ class CompanyFactory extends Factory {
 														'02' => TTi18n::gettext( 'Azua' ),
 														'03' => TTi18n::gettext( 'Bahoruco' ),
 														'04' => TTi18n::gettext( 'Barahona' ),
-														'05' => TTi18n::gettext( 'Dajabón' ),
+														'05' => TTi18n::gettext( 'Dajabon' ),
 														'01' => TTi18n::gettext( 'Distrito Nacional' ),
 														'06' => TTi18n::gettext( 'Duarte' ),
-														'07' => TTi18n::gettext( 'Elias Piña' ),
+														'07' => TTi18n::gettext( 'Elias Pina' ),
 														'08' => TTi18n::gettext( 'El Seibo' ),
 														'09' => TTi18n::gettext( 'Espaillat' ),
 														'30' => TTi18n::gettext( 'Hato Mayor' ),
@@ -587,21 +587,21 @@ class CompanyFactory extends Factory {
 														'11' => TTi18n::gettext( 'La Altagracia' ),
 														'12' => TTi18n::gettext( 'La Romana' ),
 														'13' => TTi18n::gettext( 'La Vega' ),
-														'14' => TTi18n::gettext( 'María Trinidad Sánchez' ),
-														'28' => TTi18n::gettext( 'Monseñor Nouel' ),
+														'14' => TTi18n::gettext( 'Maria Trinidad Sanchez' ),
+														'28' => TTi18n::gettext( 'Monsenor Nouel' ),
 														'15' => TTi18n::gettext( 'Monte Cristi' ),
 														'29' => TTi18n::gettext( 'Monte Plata' ),
 														'16' => TTi18n::gettext( 'Pedernales' ),
 														'17' => TTi18n::gettext( 'Peravia' ),
 														'18' => TTi18n::gettext( 'Puerto Plata' ),
-														'20' => TTi18n::gettext( 'Samaná' ),
-														'21' => TTi18n::gettext( 'San Cristóbal' ),
-														'31' => TTi18n::gettext( 'San José de Ocoa' ),
+														'20' => TTi18n::gettext( 'Samana' ),
+														'21' => TTi18n::gettext( 'San Cristobal' ),
+														'31' => TTi18n::gettext( 'San Jose de Ocoa' ),
 														'22' => TTi18n::gettext( 'San Juan' ),
-														'23' => TTi18n::gettext( 'San Pedro de Macorís' ),
-														'24' => TTi18n::gettext( 'Sánchez Ramírez' ),
+														'23' => TTi18n::gettext( 'San Pedro de Macoris' ),
+														'24' => TTi18n::gettext( 'Sanchez Ramirez' ),
 														'25' => TTi18n::gettext( 'Santiago' ),
-														'26' => TTi18n::gettext( 'Santiago Rodríguez' ),
+														'26' => TTi18n::gettext( 'Santiago Rodriguez' ),
 														'32' => TTi18n::gettext( 'Santo Domingo' ),
 														'27' => TTi18n::gettext( 'Valverde' ),
 														),
@@ -2873,6 +2873,10 @@ class CompanyFactory extends Factory {
 	 * @return bool
 	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		//NOTE: CompanyFactory->Validate and LegalEntityFactory->Validate() need to be identical on the fields they share, since legal entities are automatically created from companies.
+		//
+
 		global $config_vars;
 
 		//
@@ -3038,6 +3042,7 @@ class CompanyFactory extends Factory {
 											$options
 										);
 		unset( $options, $options_arr );
+
 		// Postal/ZIP Code
 		if ( $this->getPostalCode() != '' ) {
 			$this->Validator->isPostalCode(	'postal_code',
@@ -3054,24 +3059,11 @@ class CompanyFactory extends Factory {
 										);
 			}
 		}
-		// Longitude
-		if ( $this->getLongitude() != 0 ) {
-			$this->Validator->isFloat(	'longitude',
-											$this->getLongitude(),
-											TTi18n::gettext('Longitude is invalid')
-										);
-		}
-		// Latitude
-		if ( $this->getLatitude() != 0 ) {
-			$this->Validator->isFloat(	'latitude',
-											$this->getLatitude(),
-											TTi18n::gettext('Latitude is invalid')
-										);
-		}
+
 		// Work phone number
 		$this->Validator->isPhoneNumber(		'work_phone',
-											$this->getWorkPhone(),
-											TTi18n::gettext('Work phone number is invalid')
+												$this->getWorkPhone(),
+												TTi18n::gettext('Work phone number is invalid')
 										);
 		// Fax phone number
 		if ( $this->getFaxPhone() != '' ) {
@@ -3079,6 +3071,21 @@ class CompanyFactory extends Factory {
 											$this->getFaxPhone(),
 											TTi18n::gettext('Fax phone number is invalid')
 										);
+		}
+
+		// Longitude
+		if ( $this->getLongitude() != 0 ) {
+			$this->Validator->isFloat(	'longitude',
+										  $this->getLongitude(),
+										  TTi18n::gettext('Longitude is invalid')
+			);
+		}
+		// Latitude
+		if ( $this->getLatitude() != 0 ) {
+			$this->Validator->isFloat(	'latitude',
+										  $this->getLatitude(),
+										  TTi18n::gettext('Latitude is invalid')
+			);
 		}
 
 		if ( $this->getDeleted() == FALSE ) {
@@ -3390,7 +3397,6 @@ class CompanyFactory extends Factory {
 				$lef->setCompany( $this->getId() );
 				$lef->setStatus( 10 ); //10=Active
 				$lef->setType( 10 ); //10=Corporation.
-				//$lef->setClassificationCode( 541214 );
 				$lef->setLegalName( $this->getname() );
 				$lef->setTradeName( $this->getname() );
 				$lef->setAddress1( $this->getAddress1() );
@@ -3404,10 +3410,11 @@ class CompanyFactory extends Factory {
 				$lef->setEnableAddRemittanceSource( TRUE );
 				$lef->setEnableAddPresets( FALSE );
 				if ( $lef->isValid() ) {
-					$this->legal_entity_id = $lef->save(); //This must be saved so it can be accessed outside this class too
+					$this->legal_entity_id = $lef->Save(); //This must be saved so it can be accessed outside this class too
 					Debug::Text( '  Legal Entity: ' . $this->legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
 				} else {
-					Debug::Text( '  ERROR: Invalid legal entity.', __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( '  ERROR: Invalid legal entity, unable to continue as this is required!', __FILE__, __LINE__, __METHOD__, 10 );
+					return FALSE; //Since legal entity *must* be created to create a user, if it fails for some reason error out so the company record can be re-created from the installer.
 				}
 			}
 

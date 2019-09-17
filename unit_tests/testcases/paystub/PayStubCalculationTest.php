@@ -384,7 +384,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$cdf->setPayStubEntryAccount( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Other') );
 		$cdf->setUserValue1( 10 ); //10%
 		//$cdf->setUserValue2( 0 );
-		$cdf->setUserValue3( 78000 ); //Annual
+		$cdf->setUserValue3( '78, 000' ); //Annual -- Test with commas in the values to make sure they are handled properly.
 
 		if ( $cdf->isValid() ) {
 			$cdf->Save(FALSE);

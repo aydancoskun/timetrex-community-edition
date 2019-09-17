@@ -1716,15 +1716,35 @@ class RemittanceSourceAccountFactory extends Factory {
 			}
 		}
 
-		if ( $this->getDeleted() == FALSE AND $this->getType() == 3000 AND $this->getDataFormat() == 5 AND is_object( $this->getLegalEntityObject() ) ) { //3000=EFT/ACH, 5=TimeTrex EFT
-			if ( $this->getLegalEntityObject()->getPaymentServicesStatus() == 10 ) {
+		if ( $ignore_warning == FALSE AND $this->getDeleted() == FALSE AND $this->getStatus() == 10 AND $this->getType() == 3000 AND $this->getDataFormat() == 5 AND is_object( $this->getLegalEntityObject() ) ) { //3000=EFT/ACH, 5=TimeTrex EFT
+			$le_obj = $this->getLegalEntityObject();
+
+			if ( $le_obj->getPaymentServicesStatus() == 10 ) {
 				$this->Validator->isTrue( 'data_format_id',
-										  $this->getLegalEntityObject()->checkPaymentServicesCredentials(),
+										  $le_obj->checkPaymentServicesCredentials(),
 										  TTi18n::gettext( 'Payment Services User Name or API Key is incorrect, or service not activated' ) );
 			} else {
 				$this->Validator->isTrue( 'data_format_id',
 										  FALSE,
 										  TTi18n::gettext( 'Payment Services are not enabled for this Legal Entity' ) );
+			}
+
+			if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+				try {
+					$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+					$retval = $tt_ps_api->validateBankAccount( $tt_ps_api->convertRemittanceSourceAccountObjectToBankAccountArray( $this ) );
+					if ( is_object($retval) AND $retval->isValid() === FALSE ) {
+						Debug::Text( 'ERROR! Unable to validate remittance destination account data through Payment Services API... (a)', __FILE__, __LINE__, __METHOD__, 10 );
+						$api_f = new APIRemittanceDestinationAccount();
+						$validation_arr = $api_f->convertAPIReturnHandlerToValidatorObject( $retval->getResultData() );
+
+						$this->Validator->merge( $validation_arr );
+					}
+				} catch ( Exception $e ) {
+					Debug::Text( 'ERROR! Unable to validate remittance destination account  data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			} else {
+				Debug::Text( 'Payment Services not enabled in legal entity...', __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		}
 

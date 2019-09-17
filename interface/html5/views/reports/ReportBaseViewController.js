@@ -729,9 +729,16 @@ ReportBaseViewController = BaseViewController.extend( {
 			this.api.getCompanyFormConfig( {
 				onResult: function( result ) {
 					var res_Data = result.getResult();
-
-					$this.setFormSetupData( res_Data );
-
+					if ( res_Data.length == 1 && res_Data.hasOwnProperty('0') && res_Data[0] === false ) {
+						//There seem to be cases where the form setup data is somehow saved as the following, which should be ignored, otherwise when trying to re-save the form setup data it doesn't get uploaded to the server because 0 => false.
+						//   array(1) {
+						//     [0]=>
+						//     bool(false)
+						//   }
+						//
+					} else {
+						$this.setFormSetupData( res_Data );
+					}
 				}
 			} );
 		}
@@ -3354,8 +3361,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 							ProgressBar.closeOverlay();
 						}
+					} else {
+						TAlertManager.showErrorAlert( res );
 					}
-
 				}
 			} );
 		} else if ( key === 'pdf_form_publish_employee' ) {

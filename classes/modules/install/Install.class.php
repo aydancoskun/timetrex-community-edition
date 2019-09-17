@@ -666,17 +666,21 @@ class Install {
 		$total_schema_versions = count($schema_versions);
 		if ( is_array($schema_versions) AND $total_schema_versions > 0 ) {
 			//$this->getDatabaseConnection()->StartTrans();
-			if ( $this->is_upgrade == TRUE ) {
-				$msg = TTi18n::getText('Upgrading database');
+			if ( $this->getIsUpgrade() == TRUE ) {
+				$msg = TTi18n::getText('Upgrading database'.'...');
+			} else {
+				$msg = TTi18n::getText('Initializing database'.'...');
+			}
+
+			//Its possible $this->getIsUpgrade() == TRUE when all the schema is created, but no company record exists yet. See APIInstall->setDatabaseSchema()
+			// Try to be smarter on when/how we set the PRIMARY_KEY_IS_UUID flag.
+			if ( $this->checkTableExists( 'system_setting') == TRUE ) {
 				if ( (int)SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_A' ) < 1100 ) {
-					Debug::Text( '  Upgrading database before schema first UUID schema version... Setting PRIMARY_KEY_IS_UUID = FALSE', __FILE__, __LINE__, __METHOD__, 1);
+					Debug::Text( '  Upgrading database before first UUID schema version... Setting PRIMARY_KEY_IS_UUID = FALSE', __FILE__, __LINE__, __METHOD__, 1);
 					$PRIMARY_KEY_IS_UUID = FALSE;
 					$config_vars['other']['disable_audit_log'] = TRUE; //After v11, when UUID is disabled, disable all audit logging too.
 				}
-
-			} else {
-				$msg = TTi18n::getText('Initializing database');
-				Debug::Text( '  Initializing database... Setting PRIMARY_KEY_IS_UUID = FALSE', __FILE__, __LINE__, __METHOD__, 1);
+			} else { //Likely no DB schema exists yet, so no UUIDs can exist either.
 				$PRIMARY_KEY_IS_UUID = FALSE;
 				$config_vars['other']['disable_audit_log'] = TRUE; //After v11, when UUID is disabled, disable all audit logging too.
 			}

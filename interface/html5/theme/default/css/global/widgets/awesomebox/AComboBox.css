@@ -73,6 +73,14 @@
 .a-error-tip .a-combobox-mid-bg,
 .a-error-tip .clickable-space {
     border-color: #f22403;
+    background: #F78B83 !important;
+}
+
+.a-warning-tip .a-combobox-left-bg,
+.a-warning-tip .a-combobox-mid-bg,
+.a-warning-tip .clickable-space {
+    border-color: #e7be00;
+    background: #ffff00 !important;
 }
 
 .a-combobox-readonly .a-combobox-left-bg,

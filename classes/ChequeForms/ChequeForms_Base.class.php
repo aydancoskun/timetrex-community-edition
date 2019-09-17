@@ -156,7 +156,7 @@ class ChequeForms_Base {
         return $value;
     }
     function filterAmountWordsCents( $value ) {
-        return $this->filterAmountWords($value) . TTi18n::gettext(' and ') . $this->filterAmountCents($value) .  ' *****';
+        return $this->filterAmountWords($value) . ' '. TTi18n::gettext('and') . ' '. $this->filterAmountCents($value) .  ' *****';
     }
 
     /*

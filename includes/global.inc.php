@@ -58,8 +58,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '11.5.3' );
-define('APPLICATION_VERSION_DATE', 1563174000 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("15-Jul-2019")."\n\n";'
+define('APPLICATION_VERSION', '11.6.0' );
+define('APPLICATION_VERSION_DATE', 1566975600 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("28-Aug-2019")."\n\n";'
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
 	define('OPERATING_SYSTEM', 'WIN' );
@@ -95,16 +95,20 @@ if ( file_exists(CONFIG_FILE) ) {
 	exit(1);
 }
 
-if ( isset($config_vars['debug']['production']) AND $config_vars['debug']['production'] == 1 ) {
-	define('PRODUCTION', TRUE);
-} else {
-	define('PRODUCTION', FALSE);
+if ( defined('PRODUCTION') == FALSE ) {
+	if ( isset( $config_vars['debug']['production'] ) AND $config_vars['debug']['production'] == 1 ) {
+		define( 'PRODUCTION', TRUE );
+	} else {
+		define( 'PRODUCTION', FALSE );
+	}
 }
 
-if ( isset($config_vars['other']['demo_mode']) AND $config_vars['other']['demo_mode'] == 1 ) {
-	define('DEMO_MODE', TRUE);
-} else {
-	define('DEMO_MODE', FALSE);
+if ( defined('DEMO_MODE') == FALSE ) {
+	if ( isset( $config_vars['other']['demo_mode'] ) AND $config_vars['other']['demo_mode'] == 1 ) {
+		define( 'DEMO_MODE', TRUE );
+	} else {
+		define( 'DEMO_MODE', FALSE );
+	}
 }
 																																																																//**REMOVING OR CHANGING THIS APPLICATION NAME AND ORGANIZATION URL IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
 																																																																define('APPLICATION_NAME', (PRODUCTION == FALSE AND DEMO_MODE == FALSE) ? 'TimeTrex-Debug' : 'TimeTrex'); define('ORGANIZATION_NAME', 'TimeTrex'); define('ORGANIZATION_URL', 'www.TimeTrex.com');

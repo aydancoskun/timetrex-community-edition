@@ -43,7 +43,6 @@ class DependencyTree {
 		Take a look at PEAR: Structures_Graph
 	*/
 
-	protected $cache = NULL;
 	var $raw_data = NULL;
 	var $raw_data_order = array();
 
@@ -94,6 +93,7 @@ class DependencyTree {
 		$dtn->setRequires( $requires );
 		$dtn->setProvides( $provides );
 		$dtn->setOrder( $order );
+		$dtn->removeCircularDependency();
 
 		$this->addProvideIDs( $dtn->getProvides() );
 		$this->addObjectByProvideIDs( $dtn->getProvides(), $dtn );
@@ -279,7 +279,7 @@ class DependencyTree {
 	}
 
 	/**
-	 * Get an object's depth by traversing all its parents (recursively) ontul there are no edges left. the count of edges is the 'depth'.
+	 * Get an object's depth by traversing all its parents (recursively) until there are no edges left. The count of edges is the 'depth'.
 	 * @param object $obj
 	 * @param array $marked_edges
 	 * @param int $depth
@@ -337,7 +337,6 @@ class DependencyTree {
 
 		usort( $this->raw_data, array($this, 'sort') );
 
-		//Debug::Arr($this->cache, 'dependency cache', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->provide_id_raw_data, 'provides, raw', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this, 'After - Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -451,6 +450,20 @@ class DependencyTreeNode {
 		}
 
 		return FALSE;
+	}
+
+
+	/**
+	 * Removes circular dependencies within the same node. Must be run after both requires and provides are defined.
+	 * @return bool
+	 */
+	function removeCircularDependency() {
+		//Check to see if any item in $requires also appears in $provides, if so strip them out as it creates a circular dependency within the same node.
+		if ( is_array( $this->getRequires() ) AND is_array( $this->getProvides() ) ) {
+			$this->data['requires'] = array_diff( $this->getRequires(), $this->getProvides() );
+		}
+
+		return TRUE;
 	}
 
 	/**

@@ -1575,14 +1575,6 @@ class UserDeductionFactory extends Factory {
 			case 83: //US - Medicare - Employer
 			case 84: //US - Social Security - Employee
 			case 85: //US - Social Security - Employer
-				if ( $this->getUserValue1() == '' ) {
-					$user_value1 = $cd_obj->getUserValue1();
-				} else {
-					$user_value1 = $this->getUserValue1();
-				}
-
-				Debug::Text('UserValue1: '. $user_value1, __FILE__, __LINE__, __METHOD__, 10);
-
 				$amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
 
 				Debug::Text('Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
@@ -1731,6 +1723,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setGrossPayPeriodIncome( $amount );
 
 				if ( $cd_obj->getCountry() == 'CA' ) {
+					$user_value1 = $this->Validator->stripNonFloat( $user_value1 );
+
 					//CA
 					$pd_obj->setFederalTotalClaimAmount( $user_value1 );
 					$pd_obj->setEnableCPPAndEIDeduction(TRUE);
@@ -1857,6 +1851,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setGrossPayPeriodIncome( $amount );
 
 				if ( $cd_obj->getCountry() == 'CA' ) {
+					$user_value1 = $this->Validator->stripNonFloat( $user_value1 );
+
 					Debug::Text('Canada Pay Period Deductions...', __FILE__, __LINE__, __METHOD__, 10);
 					$pd_obj->setProvincialTotalClaimAmount( $user_value1 );
 
@@ -2400,6 +2396,16 @@ class UserDeductionFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
+						case 'company_deduction_id':
+							if ( method_exists( $this, $function ) ) {
+								$this->$function( $data[$key] );
+
+								//As soon as we set the Company Deduction record, parse the UserValues before they are set later on.
+								if ( is_object( $this->getCompanyDeductionObject() ) ) {
+									$data = $this->getCompanyDeductionObject()->parseUserValues( $this->getCompanyDeductionObject()->getCalculation(), $data );
+								}
+							}
+							break;
 						case 'length_of_service_date':
 						case 'start_date':
 						case 'end_date':

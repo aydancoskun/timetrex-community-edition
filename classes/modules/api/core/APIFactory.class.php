@@ -578,12 +578,12 @@ abstract class APIFactory {
 				}
 
 				//Before warnings were added, validation errors were just directly in the details array, so try to handle those here.
+				//  This is used by TimeTrexPaymentServices API, since it doesn't use warnings.
 				if ( !isset($validation_row['error']) AND !isset($validation_row['warning']) ) {
-					foreach( $validation_row as $validation_error_msg ) {
-						$validator->Error( $tmp_validation_error_label, $validation_error_msg );
+					foreach( $validation_row as $tmp_validation_error_label_b => $validation_error_msg ) {
+						$validator->Error( $tmp_validation_error_label_b, $validation_error_msg[0] );
 					}
 				}
-
 			}
 		}
 
@@ -600,13 +600,26 @@ abstract class APIFactory {
 		//Handle primary validator first
 		$validator = array();
 
+		//Sometimes a Factory object is passed in, so we have to pull the ->Validator property from that if it happens.
+		if ( is_a( $primary_validator, 'Validator' ) == FALSE AND isset( $primary_validator->Validator ) AND is_a( $primary_validator->Validator, 'Validator' ) ) {
+			$primary_validator = $primary_validator->Validator;
+		}
+
+		if ( is_a( $secondary_validator, 'Validator' ) == FALSE AND isset( $secondary_validator->Validator ) AND is_a( $secondary_validator->Validator, 'Validator' ) ) {
+			$secondary_validator = $secondary_validator->Validator;
+		}
+
+		if ( is_a( $tertiary_validator, 'Validator' ) == FALSE AND isset( $tertiary_validator->Validator ) AND is_a( $tertiary_validator->Validator, 'Validator' ) ) {
+			$tertiary_validator = $tertiary_validator->Validator;
+		}
+
 		if ( $this->getProtocolVersion() == 1 ) { //Don't return any warnings and therefore don't put errors in its own array element.
 			if ( $primary_validator->isError() === TRUE ) {
 				$validator = $primary_validator->getErrorsArray();
 			} else {
 				//Check secondary validator for errors.
-				if ( $secondary_validator->Validator->isError() === TRUE ) {
-					$validator = $secondary_validator->Validator->getErrorsArray();
+				if ( $secondary_validator->isError() === TRUE ) {
+					$validator = $secondary_validator->getErrorsArray();
 				} else {
 					//Check tertiary validator for errors.
 					if ( $tertiary_validator->isError() === TRUE ) {
@@ -620,15 +633,15 @@ abstract class APIFactory {
 			} else {
 				//Check for primary validator warnings next.
 				if ( $primary_validator->isWarning() === TRUE ) {
-					$validator['warning'] = $primary_validator->Validator->getWarningsArray();
+					$validator['warning'] = $primary_validator->getWarningsArray();
 				} else {
 					//Check secondary validator for errors.
-					if ( $secondary_validator->Validator->isError() === TRUE ) {
-						$validator['error'] = $secondary_validator->Validator->getErrorsArray();
+					if ( $secondary_validator->isError() === TRUE ) {
+						$validator['error'] = $secondary_validator->getErrorsArray();
 					} else {
 						//Check secondary validator for warnings.
-						if ( $secondary_validator->Validator->isWarning() === TRUE ) {
-							$validator['warning'] = $secondary_validator->Validator->getWarningsArray();
+						if ( $secondary_validator->isWarning() === TRUE ) {
+							$validator['warning'] = $secondary_validator->getWarningsArray();
 						} else {
 							//Check tertiary validator for errors.
 							if ( $tertiary_validator->isError() === TRUE ) {

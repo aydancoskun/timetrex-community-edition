@@ -104,7 +104,7 @@ TopMenuManager.buildPortalRibbonMenuModels = function() {
 	} );
 
 	var logoutGroup = new RibbonSubMenuGroup( {
-		label: $.i18n._( '' ),
+		label: '',
 		id: 'logoutGroup',
 		ribbon_menu: my_account_menu,
 		sub_menus: []

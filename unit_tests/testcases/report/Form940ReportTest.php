@@ -363,36 +363,36 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $report_output[0]['exempt_payments'], 51.70 );
 		$this->assertEquals( $report_output[0]['excess_payments'], 0.00 );
 		$this->assertEquals( $report_output[0]['taxable_wages'], 5053.40 );
-		$this->assertEquals( $report_output[0]['before_adjustment_tax'], 30.3204 );
-		$this->assertEquals( $report_output[0]['adjustment_tax'], 192.0292 );
-		$this->assertEquals( $report_output[0]['after_adjustment_tax'], 222.3496 );
+		$this->assertEquals( $report_output[0]['before_adjustment_tax'], 30.32 );
+		$this->assertEquals( $report_output[0]['adjustment_tax'], 192.03 );
+		$this->assertEquals( $report_output[0]['after_adjustment_tax'], 222.35 );
 
 		$this->assertEquals( $report_output[1]['date_month'], 'February' );
 		$this->assertEquals( $report_output[1]['total_payments'], 10209.75 );
 		$this->assertEquals( $report_output[1]['exempt_payments'], 103.25 );
 		$this->assertEquals( $report_output[1]['excess_payments'], 0.00 );
 		$this->assertEquals( $report_output[1]['taxable_wages'], 10106.50 );
-		$this->assertEquals( $report_output[1]['before_adjustment_tax'], 60.639 );
-		$this->assertEquals( $report_output[1]['adjustment_tax'], 384.047 );
-		$this->assertEquals( $report_output[1]['after_adjustment_tax'], 444.686 );
+		$this->assertEquals( $report_output[1]['before_adjustment_tax'], 60.64 );
+		$this->assertEquals( $report_output[1]['adjustment_tax'], 384.05 );
+		$this->assertEquals( $report_output[1]['after_adjustment_tax'], 444.69 );
 
 		$this->assertEquals( $report_output[2]['date_month'], 'March' );
 		$this->assertEquals( $report_output[2]['total_payments'], 10209.15 );
 		$this->assertEquals( $report_output[2]['exempt_payments'], 103.05 );
 		$this->assertEquals( $report_output[2]['excess_payments'], 0.00 );
 		$this->assertEquals( $report_output[2]['taxable_wages'], 10106.10 );
-		$this->assertEquals( $report_output[2]['before_adjustment_tax'], 60.6366 );
-		$this->assertEquals( $report_output[2]['adjustment_tax'], 384.0318 );
-		$this->assertEquals( $report_output[2]['after_adjustment_tax'], 444.6684 );
+		$this->assertEquals( $report_output[2]['before_adjustment_tax'], 60.64 );
+		$this->assertEquals( $report_output[2]['adjustment_tax'], 384.03 );
+		$this->assertEquals( $report_output[2]['after_adjustment_tax'], 444.67 );
 
 		//Total
 		$this->assertEquals( $report_output[3]['total_payments'], 25524.00 );
 		$this->assertEquals( $report_output[3]['exempt_payments'], 258.00 );
 		$this->assertEquals( $report_output[3]['excess_payments'], 0.00 );
 		$this->assertEquals( $report_output[3]['taxable_wages'], 25266.00 );
-		$this->assertEquals( $report_output[3]['before_adjustment_tax'], 151.5960 );
-		$this->assertEquals( $report_output[3]['adjustment_tax'], 960.108 );
-		$this->assertEquals( $report_output[3]['after_adjustment_tax'], 1111.704 );
+		$this->assertEquals( $report_output[3]['before_adjustment_tax'], 151.60 );
+		$this->assertEquals( $report_output[3]['adjustment_tax'], 960.11 );
+		$this->assertEquals( $report_output[3]['after_adjustment_tax'], 1111.70 );
 
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -443,12 +443,12 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $report_output[0]['exempt_payments'], 102.85 );
 		$this->assertEquals( $report_output[0]['excess_payments'], 371.70 );
 		$this->assertEquals( $report_output[0]['taxable_wages'], 9734.00 );
-		$this->assertEquals( $report_output[0]['before_adjustment_tax'], 58.4040 );
-		$this->assertEquals( $report_output[0]['adjustment_tax'], 369.8920 );
-		$this->assertEquals( $report_output[0]['after_adjustment_tax'], 428.2960 );
+		$this->assertEquals( $report_output[0]['before_adjustment_tax'], 58.40 );
+		$this->assertEquals( $report_output[0]['adjustment_tax'], 369.89 );
+		$this->assertEquals( $report_output[0]['after_adjustment_tax'], 428.30 );
 
 		$this->assertEquals( $report_output[1]['date_month'], 'May' );
-		$this->assertEquals( $report_output[1]['total_payments'], 15312.150 );
+		$this->assertEquals( $report_output[1]['total_payments'], 15312.15 );
 		$this->assertEquals( $report_output[1]['exempt_payments'], 154.05 );
 		$this->assertEquals( $report_output[1]['excess_payments'], 15158.10 );
 		$this->assertEquals( $report_output[1]['taxable_wages'], 0.00 );
@@ -470,9 +470,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $report_output[3]['exempt_payments'], 359.60 );
 		$this->assertEquals( $report_output[3]['excess_payments'], 25635.20 );
 		$this->assertEquals( $report_output[3]['taxable_wages'], 9734.00 );
-		$this->assertEquals( $report_output[3]['before_adjustment_tax'], 58.4040 );
-		$this->assertEquals( $report_output[3]['adjustment_tax'], 369.8920);
-		$this->assertEquals( $report_output[3]['after_adjustment_tax'], 428.2960 );
+		$this->assertEquals( $report_output[3]['before_adjustment_tax'], 58.40 );
+		$this->assertEquals( $report_output[3]['adjustment_tax'], 369.89 );
+		$this->assertEquals( $report_output[3]['after_adjustment_tax'], 428.30 );
 
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -523,39 +523,39 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $report_output[0]['exempt_payments'], 51.70 );
 		$this->assertEquals( $report_output[0]['excess_payments'], 0.00 );
 		$this->assertEquals( $report_output[0]['taxable_wages'], 5053.40 );
-		$this->assertEquals( $report_output[0]['before_adjustment_tax'], 30.3204 );
-		$this->assertEquals( $report_output[0]['adjustment_tax'], 192.02920 ); //This is different from 1st and 2nd quarter due to 'line_10' above.
-		$this->assertEquals( $report_output[0]['after_adjustment_tax'], 222.3496 ); //This is different from 1st and 2nd quarter due to 'line_10' above.
+		$this->assertEquals( $report_output[0]['before_adjustment_tax'], 30.32 );
+		$this->assertEquals( $report_output[0]['adjustment_tax'], 192.03 ); //This is different from 1st and 2nd quarter due to 'line_10' above.
+		$this->assertEquals( $report_output[0]['after_adjustment_tax'], 222.35 ); //This is different from 1st and 2nd quarter due to 'line_10' above.
 
 		$this->assertEquals( $report_output[1]['date_month'], 'February' );
 		$this->assertEquals( $report_output[1]['total_payments'], 10209.75 );
 		$this->assertEquals( $report_output[1]['exempt_payments'], 103.25 );
 		$this->assertEquals( $report_output[1]['excess_payments'], 0.00 );
 		$this->assertEquals( $report_output[1]['taxable_wages'], 10106.50 );
-		$this->assertEquals( $report_output[1]['before_adjustment_tax'], 60.639 );
-		$this->assertEquals( $report_output[1]['adjustment_tax'], 384.0470 );
-		$this->assertEquals( $report_output[1]['after_adjustment_tax'], 444.6860 );
+		$this->assertEquals( $report_output[1]['before_adjustment_tax'], 60.64 );
+		$this->assertEquals( $report_output[1]['adjustment_tax'], 384.05 );
+		$this->assertEquals( $report_output[1]['after_adjustment_tax'], 444.69 );
 
 		$this->assertEquals( $report_output[2]['date_month'], 'March' );
 		$this->assertEquals( $report_output[2]['total_payments'], 10209.15 );
 		$this->assertEquals( $report_output[2]['exempt_payments'], 103.05 );
 		$this->assertEquals( $report_output[2]['excess_payments'], 0.00 );
 		$this->assertEquals( $report_output[2]['taxable_wages'], 10106.10 );
-		$this->assertEquals( $report_output[2]['before_adjustment_tax'], 60.6366 );
-		$this->assertEquals( $report_output[2]['adjustment_tax'], 384.0318 );
-		$this->assertEquals( $report_output[2]['after_adjustment_tax'], 444.6684 );
+		$this->assertEquals( $report_output[2]['before_adjustment_tax'], 60.64 );
+		$this->assertEquals( $report_output[2]['adjustment_tax'], 384.03 );
+		$this->assertEquals( $report_output[2]['after_adjustment_tax'], 444.67 );
 
 		$this->assertEquals( $report_output[3]['date_month'], 'April' );
 		$this->assertEquals( $report_output[3]['total_payments'], 10208.55 );
 		$this->assertEquals( $report_output[3]['exempt_payments'], 102.85 );
 		$this->assertEquals( $report_output[3]['excess_payments'], 371.70 );
 		$this->assertEquals( $report_output[3]['taxable_wages'], 9734.00 );
-		$this->assertEquals( $report_output[3]['before_adjustment_tax'], 58.4040 );
-		$this->assertEquals( $report_output[3]['adjustment_tax'], 369.8920 );
-		$this->assertEquals( $report_output[3]['after_adjustment_tax'], 428.2960 );
+		$this->assertEquals( $report_output[3]['before_adjustment_tax'], 58.40 );
+		$this->assertEquals( $report_output[3]['adjustment_tax'], 369.89 );
+		$this->assertEquals( $report_output[3]['after_adjustment_tax'], 428.30 );
 
 		$this->assertEquals( $report_output[4]['date_month'], 'May' );
-		$this->assertEquals( $report_output[4]['total_payments'], 15312.150 );
+		$this->assertEquals( $report_output[4]['total_payments'], 15312.15 );
 		$this->assertEquals( $report_output[4]['exempt_payments'], 154.05 );
 		$this->assertEquals( $report_output[4]['excess_payments'], 15158.10 );
 		$this->assertEquals( $report_output[4]['taxable_wages'], 0.00 );

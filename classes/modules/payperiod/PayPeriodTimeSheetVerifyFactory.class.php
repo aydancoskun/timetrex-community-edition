@@ -327,6 +327,27 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	/**
 	 * @return bool
 	 */
+	function getEnableAuthorize() {
+		if ( isset($this->authorize) ) {
+			return $this->authorize;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableAuthorize( $bool) {
+		$this->authorize = $bool;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getVerificationType() {
 		if ( is_object( $this->getPayPeriodObject() ) AND $this->getPayPeriodObject()->getPayPeriodScheduleObject() != FALSE ) {
 			$time_sheet_verification_type_id = $this->getPayPeriodObject()->getPayPeriodScheduleObject()->getTimeSheetVerifyType();
@@ -785,6 +806,16 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 			);
 		}
 
+		if ( $this->getDeleted() == FALSE ) {
+			//Check to make sure an authorized/declined request is not set back to pending status.
+			$data_diff = $this->getDataDifferences();
+			if ( $this->isDataDifferent( 'status_id', $data_diff ) == TRUE AND in_array( $data_diff['status_id'], array(50, 55) ) AND $this->getStatus() < 50 ) {
+				$this->Validator->isTRUE( 'status_id',
+										  FALSE,
+										  TTi18n::gettext( 'TimeSheet has already been authorized/declined' ) );
+			}
+		}
+
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
@@ -848,7 +879,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 					}
 				}
 
-				if ( $authorize_timesheet == TRUE AND TTUUID::isUUID( $this->getCurrentUser() ) ) {
+				if ( $this->getEnableAuthorize() == TRUE AND $authorize_timesheet == TRUE AND TTUUID::isUUID( $this->getCurrentUser() ) ) {
 					$af = TTnew( 'AuthorizationFactory' ); /** @var AuthorizationFactory $af */
 					$af->setCurrentUser( $this->getCurrentUser() );
 					$af->setObjectType( 90 ); //TimeSheet
@@ -856,6 +887,8 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 					$af->setAuthorized( TRUE );
 					if ( $af->isValid() ) {
 						$af->Save(); //AuthorizationFactory->postSave() re-saves the TimeSheetVerify record, and can cause recalculation to occur twice.
+					} else {
+						Debug::Text( 'WARNING: Unable to create timesheet authorization record, perhaps it already exists?', __FILE__, __LINE__, __METHOD__, 10 );
 					}
 				} else {
 					Debug::Text( 'Not authorizing timesheet...', __FILE__, __LINE__, __METHOD__, 10 );

@@ -234,6 +234,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$retval = $permission->getLevel( $this->user_id, $this->company_id );
 		$this->assertEquals( 25, $retval );
 
+		//Check twice just in case of caching.
+		$retval = $permission->getLevel( $this->user_id, $this->company_id );
+		$this->assertEquals( 25, $retval );
+
 		return TRUE;
 	}
 

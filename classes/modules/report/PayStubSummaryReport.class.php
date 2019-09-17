@@ -837,6 +837,8 @@ class PayStubSummaryReport extends Report {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
+			$column_keys = array_keys( $this->getColumnDataConfig() );
+
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach( $level_1 as $date_stamp => $level_2 ) {
@@ -844,19 +846,19 @@ class PayStubSummaryReport extends Report {
 							$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
 
 							if ( isset($this->tmp_data['user'][$user_id]['hire_date']) ) {
-								$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), FALSE, $this->getUserObject() );
+								$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 							} else {
 								$hire_date_columns = array();
 							}
 
 							if ( isset($this->tmp_data['user'][$user_id]['termination_date']) ) {
-								$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['termination_date'] ), FALSE, $this->getUserObject() );
+								$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['termination_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 							} else {
 								$termination_date_columns = array();
 							}
 
 							if ( isset($this->tmp_data['user'][$user_id]['birth_date']) ) {
-								$birth_date_columns = TTDate::getReportDates( 'birth', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['birth_date'] ), FALSE, $this->getUserObject() );
+								$birth_date_columns = TTDate::getReportDates( 'birth', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['birth_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 							} else {
 								$birth_date_columns = array();
 							}

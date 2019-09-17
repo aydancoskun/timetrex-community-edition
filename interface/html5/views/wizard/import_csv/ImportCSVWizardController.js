@@ -265,7 +265,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			onResult: function( result ) {
 				var res_data = result.getResult();
 				if ( $.type( res_data ) !== 'array' ) {
-					$this.saveNewMapping( $.i18n._( '-Default-' ) );
+					$this.saveNewMapping( $.i18n._( '-- Default --' ) );
 				} else {
 
 					res_data.sort( function( a, b ) {
@@ -307,7 +307,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		var select_layout = this.getLayoutById( select_id );
 		var $this = this;
 
-		if ( select_layout.name === $.i18n._( '-Default-' ) ) {
+		if ( select_layout.name === $.i18n._( '-- Default --' ) ) {
 			TAlertManager.showAlert( $.i18n._( 'Can\'t delete default layout' ) );
 			return;
 		}

@@ -22,6 +22,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIPayStubAmendment' ))();
 		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
 		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
+		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
 
 		this.render();
 		this.buildContextMenu();
@@ -611,6 +612,8 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				} else {
 					this.is_mass_adding = false;
 				}
+				doNotValidate = true; //Don't validate since setCurrency() triggers calcAmount(), which changes the amount field asynchronously, only then should we validate.
+				this.setCurrency();
 				this.setEditMenu();
 				break;
 			case 'type_id':
@@ -659,43 +662,54 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	},
 
-	onFormItemKeyUp: function( target ) {
+	calcAmount: function() {
 		var widget_rate = this.edit_view_ui_dic['rate'];
 		var widget_units = this.edit_view_ui_dic['units'];
 		var widget_amount = this.edit_view_ui_dic['amount'];
 
-		if ( target.getValue().length === 0 ) {
-			widget_amount.setReadOnly( false );
-		}
-		if ( widget_rate.getValue().length > 0 || widget_units.getValue().length > 0 ) {
-			widget_amount.setReadOnly( true );
-		}
-
 		if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
 			//widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) ); //This fails on 17.07 * 9.50 as it rounds to 162.16 rather than 162.17
 			//calc_amount = ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ); //This fails on 16.5 * 130.23
-			calc_amount = new Decimal( parseFloat( widget_rate.getValue() ) ).mul( parseFloat( widget_units.getValue() ) ).toFixed(4);
+			calc_amount = new Decimal( parseFloat( widget_rate.getValue() ) ).mul( parseFloat( widget_units.getValue() ) ).toFixed(4); //Need to use Decimal() class for proper money math operations
 			Debug.Text( 'Calculate Amount before rounding: ' + calc_amount, 'PayStubAmendmentViewController.js', 'PayStubAmendmentViewController', 'onFormItemKeyUp', 10 );
-			widget_amount.setValue( Global.MoneyRound( calc_amount ) );
+
+			if ( this.currency_array.round_decimal_places ) {
+				round_decimal_places = this.currency_array.round_decimal_places;
+			} else {
+				round_decimal_places = 2;
+			}
+			widget_amount.setValue( Global.MoneyRound( calc_amount, round_decimal_places ) );
 		} else {
-			widget_amount.setValue( '0.00' );
+			if ( widget_amount.getValue() == '' ) {
+				widget_amount.setValue( '0.00' );
+			}
+		}
+
+		if ( !this.is_mass_editing ) { //Make sure this is only done when editing a single record otherwise Mass Edit will default to changing the amount to 0.00.
+			this.current_edit_record['amount'] = this.edit_view_ui_dic['amount'].getValue(); //Update current record Amount, otherwise edit/save (without any changes) won't save the rounded value.
 		}
 	},
 
-	/* jshint ignore:start */
-	onFormItemKeyDown: function( target ) {
-		var widget = this.edit_view_ui_dic['amount'];
+	onRateOrUnitChange: function() {
 		var widget_rate = this.edit_view_ui_dic['rate'];
 		var widget_units = this.edit_view_ui_dic['units'];
-		if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
+		var widget_amount = this.edit_view_ui_dic['amount'];
 
+		if ( widget_rate.getValue().length > 0 || widget_units.getValue().length > 0 ) {
+			widget_amount.setReadOnly( true );
 		} else {
-			widget.setValue( '0.00' );
+			widget_amount.setReadOnly( false );
 		}
-
-		widget.setReadOnly( true );
 	},
-	/* jshint ignore:end */
+
+	onFormItemKeyUp: function( target ) {
+		this.onRateOrUnitChange();
+		this.calcAmount();
+	},
+
+	onFormItemKeyDown: function( target ) {
+		this.onRateOrUnitChange();
+	},
 
 	onCustomContextClick: function( id ) {
 		switch ( id ) {
@@ -783,6 +797,26 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		Global.APIFileDownload( this.api.className, 'get' + this.api.key_name, postData );
 	},
 
+	setCurrency: function() {
+		var $this = this;
+		if ( Global.isSet( this.current_edit_record.user_id ) ) {
+			var filter = {};
+			filter.filter_data = { user_id: this.current_edit_record.user_id };
+
+			this.currency_api.getCurrency( filter, false, false, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( Global.isArray( res ) ) {
+						$this.currency_array = res[0];
+						$this.calcAmount();
+					} else {
+						$this.currency_array = null;
+					}
+				}
+			} );
+		}
+	},
+
 	setCurrentEditRecordData: function() {
 		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
 		this.setDefaultData( {
@@ -794,7 +828,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
+		this.setCurrency();
 		this.onTypeChange();
+		this.onRateOrUnitChange();
 	},
 
 	validate: function() {

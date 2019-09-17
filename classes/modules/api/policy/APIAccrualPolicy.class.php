@@ -387,7 +387,7 @@ class APIAccrualPolicy extends APIFactory {
 						$new_id = $retval;
 					}
 
-					if ( $new_id !== NULL ) {
+					if ( TTUUID::isUUID( $new_id ) ) {
 						//Get milestones by original_id.
 						$apmlf = TTnew( 'AccrualPolicyMilestoneListFactory' ); /** @var AccrualPolicyMilestoneListFactory $apmlf */
 						$apmlf->getByAccrualPolicyID( $original_id );

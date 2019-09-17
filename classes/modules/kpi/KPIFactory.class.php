@@ -83,8 +83,21 @@ class KPIFactory extends Factory {
 	 */
 	function _getVariableToFunctionMap( $data ) {
 
-		$variable_function_map = array( 'id' => 'ID', 'company_id' => 'Company', 'name' => 'Name', 'group_id' => 'Group', //'group' => FALSE,
-			'type_id' => 'Type', 'type' => FALSE, 'tag' => 'Tag', 'description' => 'Description', 'minimum_rate' => 'MinimumRate', 'maximum_rate' => 'MaximumRate', 'status_id' => 'Status', 'status' => FALSE, 'deleted' => 'Deleted', );
+		$variable_function_map = array(
+				'id'           => 'ID',
+				'company_id'   => 'Company',
+				'name'         => 'Name',
+				'group_id'     => 'Group', //'group' => FALSE,
+				'type_id'      => 'Type',
+				'type'         => FALSE,
+				'tag'          => 'Tag',
+				'description'  => 'Description',
+				'minimum_rate' => 'MinimumRate',
+				'maximum_rate' => 'MaximumRate',
+				'status_id'    => 'Status',
+				'status'       => FALSE,
+				'deleted'      => 'Deleted',
+		);
 
 		return $variable_function_map;
 	}

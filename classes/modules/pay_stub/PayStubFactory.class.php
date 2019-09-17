@@ -944,10 +944,6 @@ class PayStubFactory extends Factory {
 				Debug::Text('Pay Stub1 Amount: '. $pay_stub1_entry_arr['amount'] .' Pay Stub2 Amount: '. $pay_stub2_entry_arr['amount'], __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( $pay_stub1_entry_arr['amount'] != $pay_stub2_entry_arr['amount'] ) {
-					$amount_diff = bcsub($pay_stub1_entry_arr['amount'], $pay_stub2_entry_arr['amount'], 2);
-					$units_diff = abs( bcsub($pay_stub1_entry_arr['units'], $pay_stub2_entry_arr['units'], 2) );
-					Debug::Text('FOUND DIFFERENCE of: Amount: '. $amount_diff .' Units: '. $units_diff, __FILE__, __LINE__, __METHOD__, 10);
-
 					//Generate PS Amendment.
 					$psaf = TTnew( 'PayStubAmendmentFactory' ); /** @var PayStubAmendmentFactory $psaf */
 					$psaf->setUser( $pay_stub1_obj->getUser() );
@@ -955,6 +951,9 @@ class PayStubFactory extends Factory {
 					$psaf->setType( 10 );
 					$psaf->setPayStubEntryNameId( $pay_stub_entry_id );
 
+					$units_diff = abs( bcsub($pay_stub1_entry_arr['units'], $pay_stub2_entry_arr['units'], 4) ); //Allow units to be up to 4 decimal places, especially important for customers who don't round punches, as this could result in a slightly different amount than expected, especially if the rate is auto calculated below.
+					$amount_diff = Misc::MoneyRound( bcsub($pay_stub1_entry_arr['amount'], $pay_stub2_entry_arr['amount'], 4), 2, ( ( is_object( $psaf->getUserObject() ) AND is_object( $psaf->getUserObject()->getCurrencyObject() ) ) ? $psaf->getUserObject()->getCurrencyObject() : NULL ) ); //Set MIN decimals to 2 and max to the currency rounding.
+					Debug::Text('aFOUND DIFFERENCE of: Amount: '. $amount_diff .' Units: '. $units_diff, __FILE__, __LINE__, __METHOD__, 10);
 					if ( $units_diff > 0 ) {
 						//Re-calculate amount when units are involved, due to rounding issues.
 						//FIXME: However in the case of salaried employees, where there were no units previously, or no units after,
@@ -964,8 +963,8 @@ class PayStubFactory extends Factory {
 						// However 254.80 / 42.50 = 5.995, which rounds to 6.00 * 42.5 = 255.00. So its $0.20 different when using a rate calculation.
 						// If we just check to see if before/after units != 0, it will break having units in any other case where the line item didn't exist before, like adding overtime.
 						//   Not sure if there is an easy way to fix this...
-						$unit_rate = Misc::MoneyFormat( bcdiv( $amount_diff, $units_diff ) );
-						$amount_diff = Misc::MoneyFormat( bcmul( $unit_rate, $units_diff ) );
+						$unit_rate = bcdiv( $amount_diff, $units_diff, 4 );
+						$amount_diff = Misc::MoneyRound( bcmul( $unit_rate, $units_diff, 4 ), 2, ( ( is_object( $psaf->getUserObject() ) AND is_object( $psaf->getUserObject()->getCurrencyObject() ) ) ? $psaf->getUserObject()->getCurrencyObject() : NULL ) ); //Set MIN decimals to 2 and max to the currency rounding.
 						Debug::Text('bFOUND DIFFERENCE of: Amount: '. $amount_diff .' Units: '. $units_diff .' Unit Rate: '. $unit_rate, __FILE__, __LINE__, __METHOD__, 10);
 
 						$psaf->setRate( $unit_rate );
@@ -981,6 +980,8 @@ class PayStubFactory extends Factory {
 
 					if ( $psaf->isValid() ) {
 						$psaf->Save();
+					} else {
+						Debug::Text('ERROR: Unable to save PS Amendment!', __FILE__, __LINE__, __METHOD__, 10);
 					}
 
 					unset($amount_diff, $units_diff, $unit_rate);
@@ -2139,8 +2140,10 @@ class PayStubFactory extends Factory {
 		//Round amount to 2 decimal places.
 		//So any totaling is proper after this point, because it gets rounded to two decimal places in PayStubEntryFactory too.
 		//PHP has a bug that round() converts large values with 0's on the end into scientific notation. Use number_format() instead.
-		$amount = ( is_object($this->getCurrencyObject()) ) ? $this->getCurrencyObject()->round( $amount ) : Misc::MoneyFormat( $amount, FALSE );
-		$ytd_amount = ( is_object($this->getCurrencyObject()) ) ? $this->getCurrencyObject()->round( $ytd_amount ) : Misc::MoneyFormat( $ytd_amount, FALSE );
+		//$amount = ( is_object($this->getCurrencyObject()) ) ? $this->getCurrencyObject()->round( $amount ) : Misc::MoneyFormat( $amount, FALSE );
+		//$ytd_amount = ( is_object($this->getCurrencyObject()) ) ? $this->getCurrencyObject()->round( $ytd_amount ) : Misc::MoneyFormat( $ytd_amount, FALSE );
+		$amount = Misc::MoneyRound( $amount, 2, $this->getCurrencyObject() );
+		$ytd_amount = Misc::MoneyRound( $ytd_amount, 2, $this->getCurrencyObject() );
 		if ( is_numeric( $amount ) ) {
 			$psea_arr = $this->getPayStubEntryAccountArray( $pay_stub_entry_account_id );
 			if ( is_array( $psea_arr ) ) {
@@ -3208,10 +3211,13 @@ class PayStubFactory extends Factory {
 					$legal_entity_obj = $legal_entity_obj_cache[$user_obj->getLegalEntity()];
 				}
 
-				//Change locale to users own locale.
-				TTi18n::setLanguage( $user_obj->getUserPreferenceObject()->getLanguage() );
-				TTi18n::setCountry( $user_obj->getCountry() );
-				TTi18n::setLocale();
+				//If printing pay stubs for employees, change locale to users own locale.
+				//Otherwise when printing pay stubs for employer, show in employers own locale.
+				if ( $hide_employer_rows == TRUE ) {
+					TTi18n::setLanguage( $user_obj->getUserPreferenceObject()->getLanguage() );
+					TTi18n::setCountry( $user_obj->getCountry() );
+					TTi18n::setLocale();
+				}
 
 				//
 				// Pay Stub Header

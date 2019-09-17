@@ -59,7 +59,7 @@ class LogFactory extends Factory {
 											10 => TTi18n::gettext('Add'),
 											20 => TTi18n::gettext('Edit'),
 											30 => TTi18n::gettext('Delete'),
-											31 => TTi18n::gettext('Delete (F)'), //Full Delete
+											//31 => TTi18n::gettext('Delete (F)'), //Full Delete (Not actually used currently)
 											40 => TTi18n::gettext('UnDelete'),
 											100 => TTi18n::gettext('Login'),
 											110 => TTi18n::gettext('Logout'),

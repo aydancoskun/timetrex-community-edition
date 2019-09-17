@@ -1015,6 +1015,8 @@ class UserSummaryReport extends Report {
 		foreach ( $uwlf as $key => $uw_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) { //This is required in cases where they have 'view'(all) wage permisisons, but only view_child user permissions. As the SQL will return all employees wages, which then need to be filtered out here.
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = (array)$uw_obj->getObjectAsArray( $columns );
+				$this->tmp_data['user_wage'][$uw_obj->getUser()]['wage'] = $uw_obj->getWage(); //Get raw unformatted value as columnFormatter() will format it later on.
+				$this->tmp_data['user_wage'][$uw_obj->getUser()]['hourly_rate'] = $uw_obj->getHourlyRate(); //Get raw unformatted value as columnFormatter() will format it later on.
 
 				if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 					$this->tmp_data['user_wage'][$uw_obj->getUser()]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
@@ -1040,52 +1042,35 @@ class UserSummaryReport extends Report {
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['user']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
-		//Because we include date columns no matter what, do the optimization here to make sure they are actually being displayed, otherwise don't process them.
-		$enable_date_columns = array(
-									'hire' => FALSE,
-									'termination' => FALSE,
-									'birth' => FALSE,
-									'created' => FALSE,
-									'updated' => FALSE,
-									 );
-		$columns = $this->getColumnDataConfig();
-		foreach( $columns as $column => $value ) {
-			foreach( $enable_date_columns as $enable_date_column => $enable_date_column_value ) {
-				//Debug::Text('Checking for Column: '. $enable_date_column .' In: '. $column, __FILE__, __LINE__, __METHOD__, 10);
-				if ( strpos( $column, $enable_date_column.'-' ) !== FALSE ) {
-					$enable_date_columns[$enable_date_column] = TRUE;
-				}
-			}
-		}
-		unset($columns, $column, $value, $enable_date_column, $enable_date_column_value );
-
 		$key = 0;
 		if ( isset($this->tmp_data['user']) ) {
+			$column_keys = array_keys( $this->getColumnDataConfig() );
+
 			foreach( $this->tmp_data['user'] as $user_id => $row ) {
-				if ( isset($row['hire_date']) AND $enable_date_columns['hire'] == TRUE ) {
-					$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $row['hire_date'] ), FALSE, $this->getUserObject() );
+				if ( isset($row['hire_date']) ) {
+					$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $row['hire_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 				} else {
 					$hire_date_columns = array();
 				}
 
-				if ( isset($row['termination_date']) AND $enable_date_columns['termination'] == TRUE ) {
-					$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $row['termination_date'] ), FALSE, $this->getUserObject() );
+				if ( isset($row['termination_date']) ) {
+					$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $row['termination_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 				} else {
 					$termination_date_columns = array();
 				}
-				if ( isset($row['birth_date']) AND $enable_date_columns['birth'] == TRUE ) {
-					$birth_date_columns = TTDate::getReportDates( 'birth', TTDate::parseDateTime( $row['birth_date'] ), FALSE, $this->getUserObject() );
+				if ( isset($row['birth_date']) ) {
+					$birth_date_columns = TTDate::getReportDates( 'birth', TTDate::parseDateTime( $row['birth_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 				} else {
 					$birth_date_columns = array();
 				}
 
-				if ( isset($row['created_date']) AND $enable_date_columns['created'] == TRUE ) {
-					$created_date_columns = TTDate::getReportDates( 'created', TTDate::parseDateTime( $row['created_date'] ), FALSE, $this->getUserObject() );
+				if ( isset($row['created_date']) ) {
+					$created_date_columns = TTDate::getReportDates( 'created', TTDate::parseDateTime( $row['created_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 				} else {
 					$created_date_columns = array();
 				}
-				if ( isset($row['updated_date']) AND $enable_date_columns['updated'] == TRUE ) {
-					$updated_date_columns = TTDate::getReportDates( 'updated', TTDate::parseDateTime( $row['updated_date'] ), FALSE, $this->getUserObject() );
+				if ( isset($row['updated_date']) ) {
+					$updated_date_columns = TTDate::getReportDates( 'updated', TTDate::parseDateTime( $row['updated_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 				} else {
 					$updated_date_columns = array();
 				}

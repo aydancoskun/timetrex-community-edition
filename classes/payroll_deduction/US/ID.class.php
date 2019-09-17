@@ -41,6 +41,28 @@
 class PayrollDeduction_US_ID extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20190627 => array(
+							   10 => array(
+									   array('income' => 12200, 'rate' => 0, 'constant' => 0),
+									   array('income' => 13741, 'rate' => 1.125, 'constant' => 0),
+									   array('income' => 15281, 'rate' => 3.125, 'constant' => 17),
+									   array('income' => 16822, 'rate' => 3.625, 'constant' => 65),
+									   array('income' => 18362, 'rate' => 4.625, 'constant' => 121),
+									   array('income' => 19903, 'rate' => 5.625, 'constant' => 192),
+									   array('income' => 23754, 'rate' => 6.625, 'constant' => 279),
+									   array('income' => 23754, 'rate' => 6.925, 'constant' => 534),
+							   ),
+							   20 => array(
+									   array('income' => 24400, 'rate' => 0, 'constant' => 0),
+									   array('income' => 27482, 'rate' => 1.125, 'constant' => 0),
+									   array('income' => 30562, 'rate' => 3.125, 'constant' => 35),
+									   array('income' => 33644, 'rate' => 3.625, 'constant' => 131),
+									   array('income' => 36724, 'rate' => 4.625, 'constant' => 243),
+									   array('income' => 39806, 'rate' => 5.625, 'constant' => 385),
+									   array('income' => 47508, 'rate' => 6.625, 'constant' => 558),
+									   array('income' => 47508, 'rate' => 6.925, 'constant' => 1068),
+							   ),
+			),
 			20180101 => array( //01-Jan-2018 (Guide updated Apr 2018, but it was retroactive.)
 							   10 => array(
 									   array('income' => 12000, 'rate' => 0, 'constant' => 0),

@@ -43,7 +43,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 			case 2:
 				Global.setWidgetEnabled( this.next_btn, false );
 				label = this.getLabel();
-				label.text( $.i18n._( 'Please choose the preferred settings that you would like to use to display information throughout' + ' ' + LocalCacheData.getApplicationName() + '.' ) );
+				label.text( $.i18n._( 'Please choose the preferred settings that you would like to use to display information throughout' ) + ' ' + LocalCacheData.getApplicationName() + '.' );
 
 				this.content_div.append( label );
 

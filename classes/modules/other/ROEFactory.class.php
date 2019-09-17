@@ -1125,6 +1125,16 @@ class ROEFactory extends Factory {
 															TTi18n::gettext('Invalid Employee')
 														);
 		}
+
+		//ROEs need a SIN to be submitted. Though there seem to be some rare cases where out of country employees won't have one, so allow 0's or 9's.
+		if ( is_object( $this->getUserObject() ) ) {
+			$this->Validator->isSIN(		'user_id',
+											$this->getUserObject()->getSIN(),
+											TTi18n::gettext('Employee record must have a valid SIN specified'),
+											$this->getUserObject()->getCountry()
+			);
+		}
+
 		// Pay period type
 		if ( $this->getPayPeriodType() !== FALSE ) {
 			$ppsf = TTnew( 'PayPeriodScheduleFactory' ); /** @var PayPeriodScheduleFactory $ppsf */

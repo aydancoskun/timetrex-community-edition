@@ -432,7 +432,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 					$retval = $this->returnHandler( $output_arr );
 				} else {
 					//getOutput() returned FALSE, some error occurred. Likely load too high though.
-					$retval = $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'ERROR: Please try again later or narrow your search criteria to decrease the size of your report' ) . '...' );
+					$retval = $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'ERROR: Report is too large, please try again later or narrow your search criteria to decrease the size of your report' ) . '...' );
 				}
 
 				return $this->returnHandler( $retval ); //This is double wrapped in returnHandler() for some reason

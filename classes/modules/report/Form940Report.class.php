@@ -236,7 +236,7 @@ class Form940Report extends Report {
 				break;
 			case 'return_type':
 				$retval = array(
-											//0 => TTi18n::getText('--'),
+											//0 => '--',
 											10 => TTi18n::getText('Amended'),
 											20 => TTi18n::getText('Successor Employer'),
 											30 => TTi18n::getText('No Payments to Employees'),
@@ -245,7 +245,7 @@ class Form940Report extends Report {
 				break;
 			case 'exempt_payment':
 				$retval = array(
-											//0 => TTi18n::getText('--'),
+											//0 => '--',
 											10 => TTi18n::getText('4a. Fringe benefits'),
 											20 => TTi18n::getText('4b. Group term life insurance'),
 											30 => TTi18n::getText('4c. Retirement/Pension'),

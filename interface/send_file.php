@@ -90,10 +90,10 @@ switch ($object_type) {
 			Debug::Text('Excessive document download attempts... Preventing downloads from: '. Misc::getRemoteIPAddress() .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
 			sleep(5); //Excessive download attempts, sleep longer.
 		} else {
-			if ( $permission->Check( 'document', 'view')
-					OR $permission->Check('document', 'view_own')
-					OR $permission->Check('document', 'view_child')
-					OR $permission->Check('document', 'view_private') ) {
+			if ( ( $permission->Check( 'document', 'view') OR $permission->Check('document', 'view_own') OR $permission->Check('document', 'view_child') OR $permission->Check('document', 'view_private') )
+					OR ( isset( $parent_object_type_id ) AND $parent_object_type_id == 400 //400=Expense
+							AND ( $permission->Check('expense', 'view_own') OR $permission->Check('expense', 'view_child') OR $permission->Check('expense', 'view') ) )
+			) {
 
 				$filter_data = array('filter_data' => array( 'id' => $parent_id, 'filter_items_per_page' => 1, 'filter_columns' => array( 'id' => TRUE ) ) );
 				if ( isset($parent_object_type_id) AND $parent_object_type_id != '' ) {

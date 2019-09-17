@@ -133,9 +133,9 @@
 		function initPositivePage() {
 			var feedback_rating = feedback.POSITIVE;
 			page_title.html( $.i18n._( 'Feedback' ) );
-			positive_page.find( '.page-text.block1' ).text( $.i18n._( 'It thrills us to hear you think TimeTrex is great! ' ) );
+			positive_page.find( '.page-text.block1' ).text( $.i18n._( 'It thrills us to hear you think TimeTrex is great!' ) );
 			positive_page.find( '.page-text.block2' ).text( $.i18n._( 'Share your experience and WIN a tasty lunch for your team!' ) );
-			positive_page.find( '.page-text.block3' ).text( $.i18n._( 'We’ll select one winner each month. ' ) );
+			positive_page.find( '.page-text.block3' ).text( $.i18n._( 'We\'ll select one winner each month.' ) );
 			positive_page.find( '.openReviewPageButton' )
 				.html( $.i18n._( 'Share experience' ) )
 				.bind( 'click', function () {
@@ -162,7 +162,7 @@
 			var form_phone = negative_page.find( '.feedback-phone' );
 
 			page_title.html( $.i18n._( 'Feedback' ) );
-			negative_page.find( '.page-text' ).html( $.i18n._( 'We’re all ears!<br>What improvements do you think we should make?' ) );
+			negative_page.find( '.page-text' ).html( $.i18n._( 'We\'re all ears!<br>What improvements do you think we should make?' ) );
 			negative_page.find( '.contact-notice-text' ).html( $.i18n._( 'What is the best way to contact you?' ) );
 			negative_page.find( '.email-label-text' ).html( $.i18n._( 'Email' ) );
 			negative_page.find( '.phone-label-text' ).html( $.i18n._( 'Phone' ) );

@@ -2260,7 +2260,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$sort_column_aliases = array(
 									'status' => 'a.status_id',
 									'type' => 'a.type_id',
-									'group' => 'd.group_id',
 									'first_name' => 'd.first_name',
 									'last_name' => 'd.last_name',
 									'date_stamp' => 'b.date_stamp',
@@ -2530,7 +2529,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 

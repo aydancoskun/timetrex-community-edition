@@ -196,6 +196,65 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $test1, TRUE );
 	}
 
+	function testCircularDependency_4() {
+
+		//Unit Test 4 - Simple Circ. Dep test within the same node
+		$deptree = new DependencyTree();
+
+		$deptree->addNode('SS-EE', array('HSA'), array('EE'), '50000800000000122' );
+		$deptree->addNode('SS-ER', array('HSA'), array('ER'), '60000810000000123' );
+		$deptree->addNode('HSA', array('HSA'), array('HSA'), '50001000000001778' );
+
+		$result = $deptree->_buildTree();
+
+		$should_match = array(
+				0 => 'HSA',
+				1 => 'SS-EE',
+				2 => 'SS-ER',
+		);
+
+		$test1 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-EE', $result ) ? TRUE : FALSE;
+		$this->assertEquals( $test1, TRUE );
+
+		$test2 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-ER', $result ) ? TRUE : FALSE;
+		$this->assertEquals( $test2, TRUE );
+
+		$test3 = $this->indexOf( 'SS-EE', $result ) < $this->indexOf( 'SS-ER', $result ) ? TRUE : FALSE;
+		$this->assertEquals( $test3, TRUE );
+	}
+
+	function testCircularDependency_4b() {
+
+		//Unit Test 4 - Simple Circ. Dep test within the same node
+		$deptree = new DependencyTree();
+
+		$deptree->addNode('SS-EE', array('HSA'), array('EE'), '50000800000000122' );
+		$deptree->addNode('SS-ER', array('HSA'), array('ER'), '60000810000000123' );
+		$deptree->addNode('HSA', array('HSA', 'HSA2'), array('HSA'), '50001000000001778' );
+		$deptree->addNode('HSA2', array(), array('HSA2'), '50001000000001779' );
+
+		$result = $deptree->_buildTree();
+
+		$should_match = array(
+				0 => 'HSA2',
+				1 => 'HSA',
+				2 => 'SS-EE',
+				3 => 'SS-ER',
+		);
+
+		$test1 = $this->indexOf( 'HSA2', $result ) < $this->indexOf( 'HSA', $result ) ? TRUE : FALSE;
+		$this->assertEquals( $test1, TRUE );
+
+		$test2 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-EE', $result ) ? TRUE : FALSE;
+		$this->assertEquals( $test2, TRUE );
+
+		$test3 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-ER', $result ) ? TRUE : FALSE;
+		$this->assertEquals( $test3, TRUE );
+
+		$test4 = $this->indexOf( 'SS-EE', $result ) < $this->indexOf( 'SS-ER', $result ) ? TRUE : FALSE;
+		$this->assertEquals( $test4, TRUE );
+	}
+
 	function testHard_1() {
 		//Unit Test 4 - Harder
 		$deptree = new DependencyTree();

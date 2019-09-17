@@ -685,6 +685,9 @@ class LegalEntityFactory extends Factory {
 	 * @return bool
 	 */
 	function Validate( $ignore_warning = TRUE ) {
+		//
+		//NOTE: CompanyFactory->Validate and LegalEntityFactory->Validate() need to be identical on the fields they share, since legal entities are automatically created from companies.
+		//
 
 		//
 		// BELOW: Validation code moved from set*() functions.
@@ -766,7 +769,7 @@ class LegalEntityFactory extends Factory {
 		}
 
 		// Address1
-		if ( $this->getAddress1() !== FALSE AND $this->getAddress1() != '' ) {
+		if ( $this->getAddress1() != '' ) {
 			$this->Validator->isLength(		'address1',
 											   $this->getAddress1(),
 											   TTi18n::gettext('Address1 is too short or too long'),
@@ -783,7 +786,7 @@ class LegalEntityFactory extends Factory {
 			}
 		}
 		// Address2
-		if ( $this->getAddress2() !== FALSE AND $this->getAddress2() != '' ) {
+		if ( $this->getAddress2() != '' ) {
 			$this->Validator->isLength(		'address2',
 											   $this->getAddress2(),
 											   TTi18n::gettext('Address2 is too short or too long'),
@@ -799,24 +802,38 @@ class LegalEntityFactory extends Factory {
 				);
 			}
 		}
-		// City
-		if ( $this->getCity() !== FALSE ) {
-			$this->Validator->isRegEx(		'city',
-											  $this->getCity(),
-											  TTi18n::gettext('City contains invalid characters'),
-											  $this->city_validator_regex
+
+		// City -- Allow it to be blank as Company records can have it blank as well, and legal entities often get automatically created from them.
+		if ( $this->getCity() != '' ) {
+			$this->Validator->isLength( 'city',
+										$this->getCity(),
+										TTi18n::gettext( 'City name is too short or too long' ),
+										2,
+										250
 			);
-			if ( $this->Validator->isError('city') == FALSE ) {
-				$this->Validator->isLength(		'city',
-												   $this->getCity(),
-												   TTi18n::gettext('City name is too short or too long'),
-												   2,
-												   250
-				);
-			}
 		}
-		// Province
+
+		if ( $this->getCity() != '' AND $this->Validator->isError('city') == FALSE ) {
+			$this->Validator->isRegEx( 'city',
+									   $this->getCity(),
+									   TTi18n::gettext( 'City contains invalid characters' ),
+									   $this->city_validator_regex
+			);
+		}
+
+		//Needed for country/province validation.
 		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
+
+		// Country
+		if ( $this->getCountry() !== FALSE ) {
+			$this->Validator->inArrayKey(		'country',
+												 $this->getCountry(),
+												 TTi18n::gettext('Invalid Country'),
+												 $cf->getOptions('country')
+			);
+		}
+
+		// Province
 		if ( $this->getCountry() != FALSE  ) {
 			$options_arr = $cf->getOptions('province');
 			if ( isset($options_arr[$this->getCountry()]) ) {
@@ -831,14 +848,7 @@ class LegalEntityFactory extends Factory {
 			);
 			unset($options_arr, $options);
 		}
-		// Country
-		if ( $this->getCountry() !== FALSE ) {
-			$this->Validator->inArrayKey(		'country',
-												 $this->getCountry(),
-												 TTi18n::gettext('Invalid Country'),
-												 $cf->getOptions('country')
-			);
-		}
+
 		// Postal/ZIP Code
 		if ( $this->getPostalCode() != '' ) {
 			$this->Validator->isPostalCode(		'postal_code',
@@ -855,6 +865,7 @@ class LegalEntityFactory extends Factory {
 				);
 			}
 		}
+
 		// Work phone number
 		if ( $this->getWorkPhone() !== FALSE ) {
 			$this->Validator->isPhoneNumber(	'work_phone',
@@ -862,6 +873,7 @@ class LegalEntityFactory extends Factory {
 												TTi18n::gettext('Work phone number is invalid')
 			);
 		}
+
 		// Fax phone number
 		if ( $this->getFaxPhone() != '' ) {
 			$this->Validator->isPhoneNumber(	'fax_phone',
@@ -869,6 +881,7 @@ class LegalEntityFactory extends Factory {
 												TTi18n::gettext('Fax phone number is invalid')
 			);
 		}
+
 		// Start date
 		if ( $this->getStartDate() != '' ) {
 			$this->Validator->isDate(		'start_date',
@@ -876,6 +889,7 @@ class LegalEntityFactory extends Factory {
 											 TTi18n::gettext('Incorrect start date')
 			);
 		}
+
 		// End date
 		if ( $this->getEndDate() != '' ) {
 			$this->Validator->isDate(		'end_date',
@@ -883,6 +897,7 @@ class LegalEntityFactory extends Factory {
 											 TTi18n::gettext('Incorrect end date')
 			);
 		}
+
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//

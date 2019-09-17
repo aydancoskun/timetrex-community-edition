@@ -779,6 +779,31 @@ class AuthorizationFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
+	function isUnique() {
+		$ph = array(
+				'object_type' => (int)$this->getObjectType(),
+				'object_id' => TTUUID::castUUID( $this->getObject() ),
+				'authorized' => (int)$this->getAuthorized(),
+				'created_by' => TTUUID::castUUID( $this->getCreatedBy() ),
+		);
+
+		$query = 'select id from '. $this->getTable() .' where object_type_id = ? AND object_id = ? AND authorized = ? AND created_by = ?';
+		$id = $this->db->GetOne($query, $ph);
+		Debug::Arr($id, 'Unique Authorization: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $id === FALSE ) {
+			return TRUE;
+		} else {
+			if ($id == $this->getId() ) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
 
 	/**
 	 * @param bool $ignore_warning
@@ -799,6 +824,18 @@ class AuthorizationFactory extends Factory {
 												( is_object( $this->getObjectHandler() ) ) ? $this->getObjectHandler()->getByID($this->getObject()) : FALSE,
 												TTi18n::gettext('Object ID is invalid')
 											);
+
+		//Prevent duplicate authorizations by the same person.
+		// This may cause problems if the hierarchy is changed and the same superior needs to authorize the request again though?
+		//   By definition this should never happen at the final authorization level, so someone higher up in the hierarchy could always drop down and authorize it during the transition.
+		if ( $this->getDeleted() == FALSE ) {
+			if ( $this->Validator->getValidateOnly() == FALSE AND $this->isUnique() == FALSE ) {
+				$this->Validator->isTrue( 'object',
+										  FALSE,
+										  TTi18n::gettext( 'Record has already been authorized/declined by you' ) );
+			}
+		}
+
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//

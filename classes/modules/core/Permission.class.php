@@ -41,6 +41,7 @@
 class Permission {
 	private $cached_permissions = array();
 	private $cached_permission_children_ids = array();
+	private $cached_permission_levels = array();
 
 	/**
 	 * @param string $user_id UUID
@@ -140,13 +141,41 @@ class Permission {
 			$company_id = $current_company->getId();
 		}
 
-		$permission_arr = $this->getPermissions( $user_id, $company_id );
+		$cache_id = 'permission_level'.$user_id.$company_id; //This is cleared in PermissionFactory->clearCache() which is also called from PermissionControlFactory->postSave()
 
-		if ( isset($permission_arr['_system']['level']) ) {
-			return $permission_arr['_system']['level'];
+		$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
+		$retval = $plf->getCache($cache_id);
+		if ( $retval === FALSE ) {
+			//Check if permissions are already cached, if so just grab the level directly from that.
+			if ( isset($this->cached_permissions[$user_id][$company_id]) AND $this->cached_permissions[$user_id][$company_id] != FALSE ) {
+				$permission_arr = $this->getPermissions( $user_id, $company_id );
+				if ( isset($permission_arr['_system']['level']) ) {
+					$retval = (int)$permission_arr['_system']['level'];
+				}
+			} else {
+				//If permissions are not cached, rather than getting all permissions when we just need to the level, just grab the level itself and cache that separately.
+
+				//Because caching is disabled when inside a RetryTransaction() add local memory caching to getting permission levels
+				if ( isset($this->cached_permission_levels[$user_id][$company_id]) AND $this->cached_permission_levels[$user_id][$company_id] != FALSE ) {
+					$retval = $this->cached_permission_levels[$user_id][$company_id];
+				} else {
+					$pcf = new PermissionControlListFactory();
+					$pcf->getByCompanyIdAndUserId( $company_id, $user_id );
+					if ( $pcf->getRecordCount() == 1 ) {
+						$retval = (int)$pcf->getCurrent()->getLevel();
+						$this->cached_permission_levels[$user_id][$company_id] = $retval;
+					}
+				}
+			}
+
+			if ( $retval !== FALSE ) {
+				$plf->saveCache( $retval, $cache_id ); //Only save cache if there is a permission level to return, so we aren't caching negative values in cases where a new user may be created.
+			} else {
+				$retval = 1; //Lowest level.
+			}
 		}
 
-		return 1; //Lowest level.
+		return $retval;
 	}
 
 	/**

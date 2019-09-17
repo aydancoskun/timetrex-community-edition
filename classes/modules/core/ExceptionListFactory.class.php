@@ -630,7 +630,8 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 //			$filter_data['type_id'] = 5; // Pre-Mature type.
 //		}
 
-		$additional_order_fields = array('d.name', 'e.name', 'f.name', 'g.name', 'h.status_id', 'i.severity_id', 'i.type_id', 'c.first_name', 'c.last_name', 'c.country', 'c.province', 'a.date_stamp', 'pgf.name', 'pscf.name', 'ppsf.name');
+		$additional_order_fields = array('d.name', 'e.name', 'f.name', 'g.name', 'h.status_id', 'group', 'i.severity_id', 'i.type_id', 'c.first_name', 'c.last_name', 'c.country', 'c.province', 'a.date_stamp', 'pgf.name', 'pscf.name', 'ppsf.name');
+
 		$sort_column_aliases = array(
 									'status' => 'status_id',
 									'type' => 'type_id',

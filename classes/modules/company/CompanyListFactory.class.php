@@ -305,7 +305,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_name' => strtolower( $user_name ),
+					'user_name' => TTi18n::strtolower( $user_name ),
 					);
 
 		$query = '
@@ -342,7 +342,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'phone_id' => strtolower( $phone_id ),
+					'phone_id' => (string)$phone_id,
 					);
 
 		$query = '

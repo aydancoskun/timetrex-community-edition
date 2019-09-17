@@ -323,9 +323,9 @@ class CurrencyRateFactory extends Factory {
 						case 'date_stamp':
 							$this->$function( TTDate::parseDateTime( $data[$key] ) );
 							break;
-//						case 'conversion_rate':
-//							$this->$function( TTi18n::parseFloat( $data[$key] ) );
-//							break;
+						case 'conversion_rate':
+							$this->$function( TTi18n::parseFloat( $data[$key], 10 ) );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -369,7 +369,7 @@ class CurrencyRateFactory extends Factory {
 							$data[$variable] = $this->$function( TRUE );
 							break;
 //						case 'conversion_rate':
-//							$data[$variable] = TTi18n::formatNumber( $this->$function(), TRUE, 10, 10 );
+//							$data[$variable] = TTi18n::formatNumber( $this->$function(), TRUE, 10, 10 ); //Don't format numbers here, as it could break scripts using the API.
 //							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

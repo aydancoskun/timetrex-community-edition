@@ -357,11 +357,11 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.date', $filter_data['end_date'], 'end_date', $ph ) : NULL;
 
 		if ( isset($filter_data['first_name']) AND !is_array($filter_data['first_name']) AND trim($filter_data['first_name']) != '' ) {
-			$ph[] = $this->handleSQLSyntax(strtolower(trim($filter_data['first_name'])));
+			$ph[] = $this->handleSQLSyntax( TTi18n::strtolower( trim( $filter_data['first_name'] ) ) );
 			$query	.=	' AND (lower(uf.first_name) LIKE ? ) ';
 		}
 		if ( isset($filter_data['last_name']) AND !is_array($filter_data['last_name']) AND trim($filter_data['last_name']) != '' ) {
-			$ph[] = $this->handleSQLSyntax(strtolower(trim($filter_data['last_name'])));
+			$ph[] = $this->handleSQLSyntax( TTi18n::strtolower( trim( $filter_data['last_name'] ) ) );
 			$query	.=	' AND (lower(uf.last_name) LIKE ? ) ';
 		}
 

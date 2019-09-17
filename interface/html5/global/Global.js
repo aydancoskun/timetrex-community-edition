@@ -3290,9 +3290,10 @@ RightClickMenuType.NORESULTBOX = '3';
 RightClickMenuType.ABSENCE_GRID = '4';
 RightClickMenuType.VIEW_ICON = '5';
 
+
 /**
- * decoding encoded html enitities (ex &gt;)
- * to avoid xss vulnerabilities do not eval anything that has gone through this function
+ * Decoding encoded html enitities (ie: "&gt;")
+ * to avoid XSS vulnerabilities do not eval anything that has gone through this function
  *
  * @param str
  * @returns {*|jQuery}
@@ -3303,12 +3304,19 @@ Global.htmlDecode = function( str ) {
 
 Global.htmlEncode = function( str ) {
 	var encodedStr = str;
+
 	if ( encodedStr ) {
-		encodedStr = str.replace( /[\u00A0-\u9999<>\'"\&]/gim, function( i ) {
-			return '&#' + i.charCodeAt( 0 ) + ';';
-		} );
-		encodedStr = encodedStr.replace( /&#60;br&#62;/g, '<br>' );
-		return encodedStr;
+		// This replaces 'S' in 'MST' with the encoded value, which is invalid.
+		// encodedStr = str.replace( /[\u00A0-\u9999<>\'"\&]/gim, function( i ) {
+		// 	return '&#' + i.charCodeAt( 0 ) + ';';
+		// } );
+		// encodedStr = encodedStr.replace( /&#60;br&#62;/g, '<br>' );
+		// return encodedStr;
+
+		var tmp = document.createElement('div');
+		tmp.textContent = encodedStr;
+
+		return tmp.innerHTML;
 	} else {
 		return encodedStr;
 	}
@@ -4049,78 +4057,6 @@ Global.getStationID = function() {
 	}
 
 	return retval;
-};
-
-Global.getInternalIP = function () {
-	if ( window.internal_ips ) {
-		Debug.Text( 'Internal IPs: '+ window.internal_ips, 'Global.js', '', 'getInternalIP', 11 );
-		return window.internal_ips;
-	}
-};
-Global.setInternalIP = function () {
-	//Uses a RTC connection to get the internal IP address of the web browser so it can be used for station restrictions.
-	function getRTCIP() {
-		try { // Handle: Uncaught NotSupportedError: Failed to construct 'RTCPeerConnection': No PeerConnection handler can be created, perhaps WebRTC is disabled?
-			var RTCPeerConnection = window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
-
-			if ( RTCPeerConnection ) {
-				var rtc = new RTCPeerConnection( { iceServers: [] } );
-				if ( typeof rtc.createDataChannel === 'function' ) { // This disables the check on Microsoft Edge. It will be switching to Chrome soon anyways.
-					if ( 1 || window.mozRTCPeerConnection ) {      // FF [and now Chrome!] needs a channel/stream to proceed
-						rtc.createDataChannel( '', { reliable: false } );
-					}
-
-					rtc.onicecandidate = function ( evt ) {
-						// convert the candidate to SDP so we can run it through our general parser
-						// see https://twitter.com/lancestout/status/525796175425720320 for details
-						if ( evt.candidate ) grepSDP( 'a=' + evt.candidate.candidate );
-					};
-					rtc.createOffer( function ( offerDesc ) {
-						grepSDP( offerDesc.sdp );
-						rtc.setLocalDescription( offerDesc );
-					}, function ( e ) {
-						console.warn( 'RTC offer failed.', e );
-					} );
-
-					var addrs = Object.create( null );
-					addrs['0.0.0.0'] = false;
-
-					function parseAddr( newAddr ) {
-						if ( newAddr in addrs ) return;
-						else addrs[newAddr] = true;
-						var displayAddrs = Object.keys( addrs ).filter( function ( k ) {
-							return addrs[k];
-						} );
-
-						//Save IP addresses to a global variable for later reading due to async.
-						window.internal_ips = displayAddrs.join( ',' );
-						Debug.Text( 'Setting Internal IPs: ' + window.internal_ips, 'Global.js', '', 'setInternalIP', 11 );
-					}
-
-					function grepSDP( sdp ) {
-						sdp.split( '\r\n' ).forEach( function ( line ) { // c.f. http://tools.ietf.org/html/rfc4566#page-39
-							if ( ~line.indexOf( 'a=candidate' ) ) {     // http://tools.ietf.org/html/rfc4566#section-5.13
-								var parts = line.split( ' ' ),        // http://tools.ietf.org/html/rfc5245#section-15.1
-									addr = parts[4],
-									type = parts[7];
-								if ( type === 'host' ) parseAddr( addr );
-							} else if ( ~line.indexOf( 'c=' ) ) {       // http://tools.ietf.org/html/rfc4566#section-5.7
-								var parts = line.split( ' ' ),
-									addr = parts[2];
-								parseAddr( addr );
-							}
-						} );
-					}
-				}
-			}
-		} catch( e ) {
-			Debug.Text( 'ERROR: Unable to initiate RTC peer connection due to: '+ e.message, 'Global', 'getRTCIP', 10 );
-		}
-	}
-
-	getRTCIP();
-
-	return true;
 };
 
 //#2342 - Close all open edit views from one place.

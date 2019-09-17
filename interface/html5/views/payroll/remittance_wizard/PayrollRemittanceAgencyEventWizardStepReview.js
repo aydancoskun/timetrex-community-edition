@@ -22,7 +22,7 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 
 	_render: function() {
 		this.setTitle( $.i18n._( 'Review and Verify Information' ) );
-		this.setInstructions( $.i18n._( 'Review and verify all necessary information' + ': ' ) );
+		this.setInstructions( $.i18n._( 'Review and verify all necessary information') + ': ' );
 
 		var $this = this;
 		this.getWizardObject().getPayrollRemittanceAgencyEventById( this.getWizardObject().selected_remittance_agency_event_id, null, function( result ) {

@@ -42,6 +42,7 @@ class UserFactory extends Factory {
 	protected $table = 'users';
 	protected $pk_sequence_name = 'users_id_seq'; //PK Sequence name
 
+	protected $permission_obj = NULL;
 	protected $user_preference_obj = NULL;
 	protected $user_tax_obj = NULL;
 	protected $legal_entity_obj = NULL;
@@ -338,6 +339,18 @@ class UserFactory extends Factory {
 	/**
 	 * @return bool
 	 */
+	function getPermissionObject() {
+		if ( isset($this->permission_obj) AND is_object($this->permission_obj) ) {
+			return $this->permission_obj;
+		} else {
+			$this->permission_obj = new Permission();
+			return $this->permission_obj;
+		}
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getLegalEntityObject() {
 		return $this->getGenericObject( 'LegalEntityListFactory', $this->getLegalEntity(), 'legal_entity_obj' );
 	}
@@ -458,8 +471,7 @@ class UserFactory extends Factory {
 	 * @return bool|int
 	 */
 	function getPermissionLevel() {
-		$permission = new Permission();
-		return $permission->getLevel( $this->getID(), $this->getCompany() );
+		return $this->getPermissionObject()->getLevel( $this->getID(), $this->getCompany() );
 	}
 
 	/**
@@ -469,8 +481,7 @@ class UserFactory extends Factory {
 		//Get currently logged in users permission level, so we can ensure they don't assign another user to a higher level.
 		global $current_user;
 		if ( isset($current_user) AND is_object($current_user) ) {
-			$permission = new Permission();
-			$current_user_permission_level = $permission->getLevel( $current_user->getId(), $current_user->getCompany() );
+			$current_user_permission_level = $this->getPermissionObject()->getLevel( $current_user->getId(), $current_user->getCompany() );
 		} else {
 			//If we can't find the current_user object, we need to allow any permission group to be assigned, in case
 			//its being modified from raw factory calls.
@@ -736,7 +747,7 @@ class UserFactory extends Factory {
 	 */
 	function isUniqueUserName( $user_name) {
 		$ph = array(
-					'user_name' => trim(strtolower($user_name)),
+					'user_name' => TTi18n::strtolower( trim($user_name) ),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where user_name = ? AND deleted=0';
@@ -766,7 +777,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setUserName( $value ) {
-		$value = trim(strtolower($value));
+		$value = TTi18n::strtolower( trim($value) );
 		return $this->setGenericDataValue( 'user_name', $value );
 	}
 
@@ -774,8 +785,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function checkLoginPermissions() {
-		$permission = new Permission();
-		return $permission->Check( 'system', 'login', $this->getId(), $this->getCompany() ) === TRUE;
+		return $this->getPermissionObject()->Check( 'system', 'login', $this->getId(), $this->getCompany() ) === TRUE;
 	}
 
 	/**
@@ -929,7 +939,7 @@ class UserFactory extends Factory {
 												TTi18n::gettext('Password must not be a part of the User Name') )
 				AND
 				$this->Validator->isTrue(		'password',
-												( ( $force == FALSE AND in_array( strtolower($password), array( strtolower($this->getFirstName()), strtolower($this->getMiddleName()), strtolower($this->getLastName()), strtolower($this->getCity()), strtolower($this->getWorkEmail()), strtolower($this->getHomeEmail()), $this->getHomePhone(), $this->getWorkPhone(), $this->getSIN(), $this->getPhoneID() ) ) == TRUE ) ? FALSE : TRUE ),
+												( ( $force == FALSE AND in_array( TTi18n::strtolower($password), array( TTi18n::strtolower($this->getFirstName()), TTi18n::strtolower($this->getMiddleName()), TTi18n::strtolower($this->getLastName()), TTi18n::strtolower($this->getCity()), TTi18n::strtolower($this->getWorkEmail()), TTi18n::strtolower($this->getHomeEmail()), $this->getHomePhone(), $this->getWorkPhone(), $this->getSIN(), $this->getPhoneID() ) ) == TRUE ) ? FALSE : TRUE ),
 												TTi18n::gettext('Password is too weak, it should not match any commonly known personal information') )
 				AND
 				$this->Validator->isTrue(		'password',
@@ -1800,8 +1810,8 @@ class UserFactory extends Factory {
 		}
 
 		$ph = array(
-					'email' => trim(strtolower($email)),
-					'email2' => trim(strtolower($email)),
+					'email' => TTi18n::strtolower( trim($email) ),
+					'email2' => TTi18n::strtolower( trim($email) ),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where ( work_email = ? OR home_email = ? ) AND deleted=0';
@@ -2521,7 +2531,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	static function UnsubscribeEmail( $email ) {
-		$email = trim(strtolower($email));
+		$email = TTi18n::strtolower( trim($email) );
 
 		try {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
@@ -2529,13 +2539,13 @@ class UserFactory extends Factory {
 			if ( $ulf->getRecordCount() > 0 ) {
 				foreach( $ulf as $u_obj ) {
 					Debug::Text('Unsubscribing: '. $email .' User ID: '. $u_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
-					if ( strtolower( $u_obj->getWorkEmail() ) == $email AND $u_obj->getWorkEmailIsValid() == TRUE ) {
+					if ( TTi18n::strtolower( $u_obj->getWorkEmail() ) == $email AND $u_obj->getWorkEmailIsValid() == TRUE ) {
 						//$u_obj->setWorkEmail( '' );
 						$u_obj->setWorkEmailIsValid( FALSE );
 						$u_obj->sendValidateEmail( 'work' );
 					}
 
-					if ( strtolower( $u_obj->getHomeEmail() ) == $email AND $u_obj->getHomeEmailIsValid() == TRUE ) {
+					if ( TTi18n::strtolower( $u_obj->getHomeEmail() ) == $email AND $u_obj->getHomeEmailIsValid() == TRUE ) {
 						//$u_obj->setHomeEmail( '' );
 						$u_obj->setHomeEmailIsValid( FALSE );
 						$u_obj->sendValidateEmail( 'home' );
@@ -2694,8 +2704,7 @@ class UserFactory extends Factory {
 			global $current_user;
 			// Ignore this check if the supervisor is modifying their own record.
 			if ( isset($current_user) AND is_object($current_user) AND $this->getId() != $current_user->getId() ) {
-				$permission = new Permission();
-				if ( $permission->Check( 'user', 'view_child', $current_user->getId(), $current_user->getCompany() ) == TRUE AND $permission->Check( 'user', 'view', $current_user->getId(), $current_user->getCompany() ) == FALSE ) {
+				if ( $this->getPermissionObject()->Check( 'user', 'view_child', $current_user->getId(), $current_user->getCompany() ) == TRUE AND $this->getPermissionObject()->Check( 'user', 'view', $current_user->getId(), $current_user->getCompany() ) == FALSE ) {
 					Debug::text('Detected Supervisor (Subordinates Only), ensure a proper hierarchy is specified...', __FILE__, __LINE__, __METHOD__, 10);
 					if ( $this->getHierarchyControl() === FALSE ) {
 						$this->Validator->isTrue(		'100',
@@ -2715,7 +2724,6 @@ class UserFactory extends Factory {
 						unset( $hierarchy_control_arr, $hierarchy_object_type_id, $hierarchy_control_id );
 					}
 				}
-				unset($permission);
 			}
 		}
 
@@ -3367,7 +3375,7 @@ class UserFactory extends Factory {
 				$start_date = TTDate::incrementDate( time(), -2, 'year');
 
 				$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
-				$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->getCompany(), $this->getId(), 10, $start_date, $end_date, 1 ); //10=System, Limit 1
+				$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->getCompany(), $this->getId(), 10, $start_date, $end_date, 1 ); //10=Worked, Limit 1
 				if ( $udtlf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
 											  FALSE,

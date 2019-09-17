@@ -229,10 +229,10 @@ class UserWageFactory extends Factory {
 	}
 
 	/**
-	 * @return bool|string
+	 * @return bool|float
 	 */
 	function getWage() {
-		return Misc::removeTrailingZeros( (float)$this->getGenericDataValue( 'wage' ) );
+		return (float)$this->getGenericDataValue( 'wage' ); //Needs to return float so TTi18n::NumberFormat() can always handle it properly.
 	}
 
 	/**
@@ -249,7 +249,7 @@ class UserWageFactory extends Factory {
 	 * @return bool|float
 	 */
 	function getHourlyRate() {
-		return (float)$this->getGenericDataValue( 'hourly_rate' );
+		return (float)$this->getGenericDataValue( 'hourly_rate' ); //Needs to return float so TTi18n::NumberFormat() can always handle it properly.
 	}
 
 	/**
@@ -274,7 +274,6 @@ class UserWageFactory extends Factory {
 	 * @return bool
 	 */
 	function setWeeklyTime( $value) {
-		//$value = $value;
 		return $this->setGenericDataValue( 'weekly_time', $value );
 	}
 
@@ -417,13 +416,10 @@ class UserWageFactory extends Factory {
 		}
 		$hourly_wage = bcmul( $rate, bcadd( bcdiv( $this->getLaborBurdenPercent(), 100 ), 1) );
 
+		$retval = Misc::MoneyRound( $hourly_wage, 2, ( ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCurrencyObject() ) ) ? $this->getUserObject()->getCurrencyObject() : NULL ) );
+
 		//return Misc::MoneyFormat($hourly_wage, FALSE);
 		//Format in APIUserWage() instead, as this gets passed back into setHourlyRate() and if in a locale that use comma decimal symbol, it will fail.
-		if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCurrencyObject() ) ) {
-			$retval = $this->getUserObject()->getCurrencyObject()->round( $hourly_wage );
-		} else {
-			$retval = round( $hourly_wage, 2 );
-		}
 
 		return $retval;
 	}
@@ -500,13 +496,10 @@ class UserWageFactory extends Factory {
 			$hourly_wage = $this->getAnnualHourlyRate( $this->getAnnualWage(), $epoch, $accurate_calculation );
 		}
 
+		$retval = (float)Misc::MoneyRound( $hourly_wage, 2, ( ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCurrencyObject() ) ) ? $this->getUserObject()->getCurrencyObject() : NULL ) );
+
 		//return Misc::MoneyFormat($hourly_wage, FALSE);
 		//Format in APIUserWage() instead, as this gets passed back into setHourlyRate() and if in a locale that use comma decimal symbol, it will fail.
-		if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCurrencyObject() ) ) {
-			$retval = $this->getUserObject()->getCurrencyObject()->round( $hourly_wage );
-		} else {
-			$retval = round( $hourly_wage, 2 );
-		}
 
 		return $retval;
 	}
@@ -908,11 +901,11 @@ class UserWageFactory extends Factory {
 								$this->$function( TTDate::parseDateTime( $data[$key] ) );
 							}
 							break;
-//						case 'hourly_rate':
-//						case 'wage':
-//						case 'labor_burden_percent':
-//							$this->$function( TTi18n::parseFloat( $data[$key] ) );
-//							break;
+						case 'hourly_rate':
+						case 'wage':
+						case 'labor_burden_percent':
+							$this->$function( TTi18n::parseFloat( $data[$key] ) );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -968,13 +961,15 @@ class UserWageFactory extends Factory {
 								$data[$variable] = TTDate::getAPIDate( 'DATE', $this->$function() );
 							}
 							break;
-//						case 'hourly_rate':
-//						case 'wage':
-//							$data[$variable] = TTi18n::formatNumber( $this->$function(), TRUE, 2, 4 );
-//							break;
-//						case 'labor_burden_percent':
-//							$data[$variable] = TTi18n::formatNumber( $this->$function(), TRUE, 0, 4 );
-//							break;
+						case 'hourly_rate':
+						case 'wage':
+							//$data[$variable] = TTi18n::formatNumber( $this->$function(), TRUE, 2, 4 ); //Don't format numbers here, as it could break scripts using the API.
+							$data[$variable] = Misc::removeTrailingZeros( $this->$function(), 2 );
+							break;
+						case 'labor_burden_percent':
+							//$data[$variable] = TTi18n::formatNumber( $this->$function(), TRUE, 0, 4 ); //Don't format numbers here, as it could break scripts using the API.
+							$data[$variable] = Misc::removeTrailingZeros( $this->$function(), 0 );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();

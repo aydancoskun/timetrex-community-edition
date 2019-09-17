@@ -3529,7 +3529,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'df_0' } );
 
 		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'> (' + $.i18n._( '%' ) + ')</span>' );
+		var label = $( '<span class=\'widget-right-label\'> %</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -3642,7 +3642,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'df_12', width: 30 } );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( ' ' ) + ' </span>' );
+		label = $( '<span class=\'widget-right-label\'> ' + ' ' + ' </span>' );
 
 		var widget_combo_box = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		widget_combo_box.TComboBox( { field: 'df_13' } );
@@ -3833,7 +3833,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'minimum_length_of_service', width: 30 } );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( ' ' ) + ' </span>' );
+		label = $( '<span class=\'widget-right-label\'> ' + ' ' + ' </span>' );
 
 		widget_combo_box = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		widget_combo_box.TComboBox( { field: 'minimum_length_of_service_unit_id' } );
@@ -3851,7 +3851,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'maximum_length_of_service', width: 30 } );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( ' ' ) + ' </span>' );
+		label = $( '<span class=\'widget-right-label\'> ' + ' ' + ' </span>' );
 
 		widget_combo_box = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		widget_combo_box.TComboBox( { field: 'maximum_length_of_service_unit_id' } );

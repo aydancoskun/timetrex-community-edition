@@ -5225,7 +5225,7 @@ class SetupPresets extends Factory {
 		}
 
 		if ( $retval == FALSE ) {
-			Debug::text( '  ERROR: Unable to find recurring holiday: '. $name .' Prefix: '. $prefix, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::text( '  WARNING: Unable to find recurring holiday: '. $name .' Prefix: '. $prefix, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		return $retval;

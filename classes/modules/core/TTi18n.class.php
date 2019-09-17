@@ -183,6 +183,7 @@ class TTi18n {
 
 		//Don't call setLocale() with LC_ALL here, only LC_MESSAGES or some other LC_* type that is *NOT* numeric.
 		//  If we change the numeric locale to say es_ES, then PHP converts (float)1.234 to '1,1234' as a string which causes a SQL syntax error when inserting into SQL.
+		//    It also caused bcmath() to break, since '1,1234' is not recognized.
 		//  setLocale() must be called individually for each category, we used to combine the categories like "(LC_COLLAGE | LC_CTYPE)", which was accepted (though not sure what it was actually doing) on Linux/Windows, but would fail on OSX.
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			$valid_locale = setlocale( LC_COLLATE, $locale );
@@ -1119,11 +1120,12 @@ class TTi18n {
 	}
 
 	/**
-	 * Parses a locale specific string that represents a float (ie: -46,1234 or -46.1234) and converts it to a float that PHP will recognize for functions like number_format()/round, etc...
-	 * @param $value
-	 * @return string
+	 * Parses a locale specific string that represents a float (ie: -46,1234 or -46.1234) and converts it to a float that PHP will recognize for math functions like number_format()/round, etc...
+	 * This strips out all non-float characters as well, so no need to call Validator->stripNonFloat() before or after this. In fact we *can't* call Validator->stripNonFloat() before this as it will break parsing values from other locales with commas in them.
+	 * @param $value int|float|string
+	 * @return int|float|string
 	 */
-	public static function parseFloat( $value ) {
+	public static function parseFloat( $value, $precision = 2 ) {
 		if ( is_float( $value ) === TRUE OR is_int( $value ) === TRUE ) {
 			if ( is_infinite( $value ) OR is_nan( $value ) ) { //Check for INF, -INF, +INF and NaN so we just return 0 instead.
 				return 0;
@@ -1135,11 +1137,46 @@ class TTi18n {
 				return 0;
 			}
 
+			//Strips repeating "." and "-" characters that might slip in due to typos. Then strips non-float valid characters.
+			//This is also done in TTi18n::parseFloat() and Validator->stripNonFloat()
+			//  This is required otherwise a value like '123.91ABC' will cause the length of the characters after decimal to not match $precision and parse incorrectly.
+			$value = preg_replace( '/([\-\.,])(?=.*?\1)|[^-0-9\.,]/', '', $value );
+
+			//This might be a possible option as well: https://php.net/manual/en/numberformatter.parse.php
+
 			//We can't short circuit this check for locales where decimal symbol = '.', because we still need to handle commas for thousands separators, and casting to float won't do that.
-			$retval = (string)str_replace( array(self::getThousandsSymbol(), self::getDecimalSymbol(), ' '), array('', '.', ''), trim( $value ) ); //Cant cast this to float as it will put back in the "," for a decimal in other locales. Always remove spaces.
+			//$retval = (string)str_replace( array(self::getThousandsSymbol(), self::getDecimalSymbol(), ' '), array('', '.', ''), trim( $value ) ); //Cant cast this to float as it will put back in the "," for a decimal in other locales. Always remove spaces.
 			//Debug::Arr( $retval, 'Symbol: Thousands: ' . self::getThousandsSymbol() . ' Decimal: ' . self::getDecimalSymbol() . ' Value: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
 
-			return $retval;
+			//Most flexible option is the below, which tries to be as smart as possible to determine what the float value should be.
+			// The only real ambigious case is "1,234" and "1,23" where the decimal separator does not match the current locale.
+
+			//Check to see if both decimal and thousands separate exist, so we can handle them differently below.
+			$separators = array();
+			if ( strpos( $value, '.' ) !== FALSE ) {
+				$separators[] = '.';
+			}
+
+			if ( strpos( $value, ',' ) !== FALSE ) {
+				$separators[] = ',';
+			}
+
+			//Normalize down to one separator so we can explode on it later.
+			$retval = str_replace( array(' ', ','), array('', '.'), $value );
+			if ( strpos( $retval, '.' ) !== FALSE ) {
+				$groups = explode( '.', $retval );
+				$last_group = array_pop( $groups );
+
+				//Try to detect the difference between "1,234" and "1,23". Since its ambiguous, use the locale specific decimal symbol or the $precision value to help determine one way or the other.
+				//  If the last group is not 3 digits (how many digits a thousands separator would have), assume its the decimal. But allow the precision value to be set to 3 digits and handle that case too.
+				if ( count( $separators ) == 2 OR ( count( $separators ) == 1 AND $separators[0] == self::getDecimalSymbol() ) OR strlen( $last_group ) != 3 OR strlen( $last_group ) == $precision ) {
+					$retval = implode( '', $groups ) . '.' . $last_group;
+				} else {
+					$retval = implode( '', $groups ) . $last_group;
+				}
+			}
+
+			return (string)$retval; //Don't cast to float() as depending on the locale it may put the comma decimal separator back in, or with large values it could overflow. Especially if passed into bcmath.
 		}
 
 		//Return boolean TRUE/FALSE, or NULL as 0.

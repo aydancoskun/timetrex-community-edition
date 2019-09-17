@@ -507,6 +507,14 @@ class RequestFactory extends Factory {
 											  TTi18n::gettext( 'No supervisors are assigned to you at this time, please try again later' ) );
 				}
 			}
+
+			//Check to make sure an authorized/declined request is not set back to pending status.
+			$data_diff = $this->getDataDifferences();
+			if ( $this->isDataDifferent( 'status_id', $data_diff ) == TRUE AND in_array( $data_diff['status_id'], array( 50, 55) ) AND $this->getStatus() <= 30 ) {
+				$this->Validator->isTRUE( 'status_id',
+										  FALSE,
+										  TTi18n::gettext( 'Request has already been authorized/declined' ) );
+			}
 		}
 
 		if ( $this->isNew() == TRUE

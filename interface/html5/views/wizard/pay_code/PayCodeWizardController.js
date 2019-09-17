@@ -27,7 +27,7 @@ PayCodeWizardController = BaseWizardController.extend( {
 		switch ( this.current_step ) {
 			case 1:
 				var label = this.getLabel();
-				label.html( $.i18n._( 'This wizard will migrate data associated with one pay code to another pay code without recalculating timesheets or otherwise affecting employees time or wages. ' ) + '<br><br>' +
+				label.html( $.i18n._( 'This wizard will migrate data associated with one pay code to another pay code without recalculating timesheets or otherwise affecting employees time or wages.' ) + '<br><br>' +
 						'<span style="color: #ff0000; font-weight: bold;">' + $.i18n._( 'WARNING' ) + ': ' + '</span>' +
 						$.i18n._( 'This operation can not be reversed once complete.' ) );
 

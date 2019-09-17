@@ -440,14 +440,16 @@ class APIUserWage extends APIFactory {
 			return '0.00';
 		}
 
+		$data = array(
+				'type_id' => $wage_type_id,
+				'wage' => $wage,
+				'weekly_time' => TTDate::parseTimeUnit( $weekly_hours ),
+		);
+
 		//FIXME: Pass user_id and/or currency_id so we can properly round to the right number of decimals.
 		$uwf = TTnew( 'UserWageFactory' ); /** @var UserWageFactory $uwf */
-		$uwf->setType( $wage_type_id );
-		//$uwf->setWage( TTi18n::parseFloat( $wage ) );
-		$uwf->setWage( $wage );
-		$uwf->setWeeklyTime( TTDate::parseTimeUnit($weekly_hours) );
-		//$hourly_rate = TTi18n::formatNumber( $uwf->calcHourlyRate(), TRUE, 2, 4 );
-		$hourly_rate = $uwf->calcHourlyRate();
+		$uwf->setObjectFromArray( $data );
+		$hourly_rate = TTi18n::formatNumber( $uwf->calcHourlyRate(), TRUE, 2, 4 );
 
 		return $this->returnHandler( $hourly_rate );
 	}

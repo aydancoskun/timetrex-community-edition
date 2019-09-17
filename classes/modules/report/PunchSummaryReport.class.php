@@ -979,15 +979,14 @@ class PunchSummaryReport extends Report {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['punch']) ) {
+			$column_keys = array_keys( $this->getColumnDataConfig() );
+
 			foreach( $this->tmp_data['punch'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach( $level_1 as $row ) {
-						$date_columns = TTDate::getReportDates( NULL, $row['date_stamp'], FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-						//$date_columns1 = TTDate::getReportDates( 'in_time_stamp', $row['in_time_stamp'], FALSE, $this->getUserObject() );
-						//$date_columns2 = TTDate::getReportDates( 'out_time_stamp', $row['out_time_stamp'], FALSE, $this->getUserObject() );
-						$processed_data	 = array(
-												//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
-												);
+						$date_columns = TTDate::getReportDates( NULL, $row['date_stamp'], FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']), $column_keys );
+
+						$processed_data	 = array();
 
 						if ( isset( $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]) ) {
 							$processed_data['verified_time_sheet'] = $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]['status'];

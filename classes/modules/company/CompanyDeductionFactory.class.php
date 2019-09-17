@@ -631,6 +631,8 @@ class CompanyDeductionFactory extends Factory {
 										'status' => FALSE,
 										'type_id' => 'Type',
 										'type' => FALSE,
+										'calculation_id' => 'Calculation', //Should go fairly early so we can change behavior based on calculation type.
+										'calculation' => FALSE,
 										'payroll_remittance_agency_id' => 'PayrollRemittanceAgency', //Set this before name, so unique names can be determined by legal entity.
 										'payroll_remittance_agency'	=> FALSE,
 										'legal_entity_id'	=> 'LegalEntity',
@@ -656,8 +658,6 @@ class CompanyDeductionFactory extends Factory {
 										'apply_frequency_quarter_month' => 'ApplyFrequencyQuarterMonth',
 										'apply_payroll_run_type_id' => 'ApplyPayrollRunType',
 										'pay_stub_entry_description' => 'PayStubEntryDescription',
-										'calculation_id' => 'Calculation',
-										'calculation' => FALSE,
 										'calculation_order' => 'CalculationOrder',
 										'country' => 'Country',
 										'province' => 'Province',
@@ -3937,6 +3937,119 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	/**
+	 * Parse user values coming directly from the user, for handling things like parseFloat() which can be different for each calculation.
+	 * This is also called from UserDeductionFactory.
+	 * @param $calculation_id
+	 * @param $data
+	 * @return mixed
+	 */
+	function parseUserValues( $calculation_id, $data ) {
+		switch ( $calculation_id ) {
+			case 10: //Basic Percent
+				if ( isset($data['user_value1']) ) {
+					$data['user_value1'] = ( $data['user_value1'] != '' ) ? TTi18n::parseFloat( $data['user_value1'] ) : $data['user_value1'];
+				}
+				break;
+			case 15: //Advanced Percent
+				if ( isset($data['user_value1']) ) {
+					$data['user_value1'] = ( $data['user_value1'] != '' ) ? TTi18n::parseFloat( $data['user_value1'] ) : $data['user_value1'];
+				}
+				if ( isset($data['user_value2']) ) {
+					$data['user_value2'] = ( $data['user_value2'] != '' ) ? TTi18n::parseFloat( $data['user_value2'] ) : $data['user_value2'];
+				}
+				if ( isset($data['user_value3']) ) {
+					$data['user_value3'] = ( $data['user_value3'] != '' ) ? TTi18n::parseFloat( $data['user_value3'] ) : $data['user_value3'];
+				}
+				break;
+			case 16: //Advanced Percent (w/Target)
+				if ( isset($data['user_value1']) ) {
+					$data['user_value1'] = ( $data['user_value1'] != '' ) ? TTi18n::parseFloat( $data['user_value1'] ) : $data['user_value1'];
+				}
+				if ( isset($data['user_value2']) ) {
+					$data['user_value2'] = ( $data['user_value2'] != '' ) ? TTi18n::parseFloat( $data['user_value2'] ) : $data['user_value2'];
+				}
+				if ( isset($data['user_value3']) ) {
+					$data['user_value3'] = ( $data['user_value3'] != '' ) ? TTi18n::parseFloat( $data['user_value3'] ) : $data['user_value3'];
+				}
+				break;
+			case 17: //Advanced Percent (Range Bracket)
+				if ( isset($data['user_value1']) ) {
+					$data['user_value1'] = ( $data['user_value1'] != '' ) ? TTi18n::parseFloat( $data['user_value1'] ) : $data['user_value1'];
+				}
+				if ( isset($data['user_value2']) ) {
+					$data['user_value2'] = ( $data['user_value2'] != '' ) ? TTi18n::parseFloat( $data['user_value2'] ) : $data['user_value2'];
+				}
+				if ( isset($data['user_value3']) ) {
+					$data['user_value3'] = ( $data['user_value3'] != '' ) ? TTi18n::parseFloat( $data['user_value3'] ) : $data['user_value3'];
+				}
+				if ( isset($data['user_value4']) ) {
+					$data['user_value4'] = ( $data['user_value4'] != '' ) ? TTi18n::parseFloat( $data['user_value4'] ) : $data['user_value4'];
+				}
+				break;
+			case 18: //Advanced Percent (Tax Bracket)
+				if ( isset($data['user_value1']) ) {
+					$data['user_value1'] = ( $data['user_value1'] != '' ) ? TTi18n::parseFloat( $data['user_value1'] ) : $data['user_value1'];
+				}
+				if ( isset($data['user_value2']) ) {
+					$data['user_value2'] = ( $data['user_value2'] != '' ) ? TTi18n::parseFloat( $data['user_value2'] ) : $data['user_value2'];
+				}
+				if ( isset($data['user_value3']) ) {
+					$data['user_value3'] = ( $data['user_value3'] != '' ) ? TTi18n::parseFloat( $data['user_value3'] ) : $data['user_value3'];
+				}
+				if ( isset($data['user_value4']) ) {
+					$data['user_value4'] = ( $data['user_value4'] != '' ) ? TTi18n::parseFloat( $data['user_value4'] ) : $data['user_value4'];
+				}
+				break;
+			case 19: //Advanced Percent (Tax Bracket Alternate)
+				if ( isset($data['user_value1']) ) {
+					$data['user_value1'] = ( $data['user_value1'] != '' ) ? TTi18n::parseFloat( $data['user_value1'] ) : $data['user_value1'];
+				}
+				if ( isset($data['user_value2']) ) {
+					$data['user_value2'] = ( $data['user_value2'] != '' ) ? TTi18n::parseFloat( $data['user_value2'] ) : $data['user_value2'];
+				}
+				if ( isset($data['user_value3']) ) {
+					$data['user_value3'] = ( $data['user_value3'] != '' ) ? TTi18n::parseFloat( $data['user_value3'] ) : $data['user_value3'];
+				}
+				if ( isset($data['user_value4']) ) {
+					$data['user_value4'] = ( $data['user_value4'] != '' ) ? TTi18n::parseFloat( $data['user_value4'] ) : $data['user_value4'];
+				}
+				if ( isset($data['user_value5']) ) {
+					$data['user_value5'] = ( $data['user_value5'] != '' ) ? TTi18n::parseFloat( $data['user_value5'] ) : $data['user_value5'];
+				}
+				break;
+			case 20: //Fixed amount
+				if ( isset($data['user_value1']) ) {
+					$data['user_value1'] = ( $data['user_value1'] != '' ) ? TTi18n::parseFloat( $data['user_value1'] ) : $data['user_value1'];
+				}
+				break;
+			case 30: //Fixed Amount (Range Bracket)
+				if ( isset($data['user_value1']) ) {
+					$data['user_value1'] = ( $data['user_value1'] != '' ) ? TTi18n::parseFloat( $data['user_value1'] ) : $data['user_value1'];
+				}
+				if ( isset($data['user_value2']) ) {
+					$data['user_value2'] = ( $data['user_value2'] != '' ) ? TTi18n::parseFloat( $data['user_value2'] ) : $data['user_value2'];
+				}
+				if ( isset($data['user_value3']) ) {
+					$data['user_value3'] = ( $data['user_value3'] != '' ) ? TTi18n::parseFloat( $data['user_value3'] ) : $data['user_value3'];
+				}
+				if ( isset($data['user_value4']) ) {
+					$data['user_value4'] = ( $data['user_value4'] != '' ) ? TTi18n::parseFloat( $data['user_value4'] ) : $data['user_value4'];
+				}
+				break;
+			case 52: //Fixed Amount (w/Limit)
+				if ( isset($data['user_value1']) ) {
+					$data['user_value1'] = ( $data['user_value1'] != '' ) ? TTi18n::parseFloat( $data['user_value1'] ) : $data['user_value1'];
+				}
+				if ( isset($data['user_value2']) ) {
+					$data['user_value2'] = ( $data['user_value2'] != '' ) ? TTi18n::parseFloat( $data['user_value2'] ) : $data['user_value2'];
+				}
+				break;
+		}
+
+		return $data;
+	}
+
+	/**
 	 * @param $data
 	 * @return bool
 	 */
@@ -3948,6 +4061,14 @@ class CompanyDeductionFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
+						case 'calculation_id':
+							if ( method_exists( $this, $function ) ) {
+								$this->$function( $data[$key] );
+
+								//As soon as we set the calculation_id, parse the UserValues before they are set later on.
+								$data = $this->parseUserValues( $data['calculation_id'], $data );
+							}
+							break;
 						case 'start_date':
 						case 'end_date':
 							if ( method_exists( $this, $function ) ) {

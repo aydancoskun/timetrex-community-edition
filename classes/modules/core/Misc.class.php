@@ -765,7 +765,7 @@ class Misc {
 	 */
 	static function removeTrailingZeros( $value, $minimum_decimals = 2 ) {
 		//Remove trailing zeros after the decimal, leave a minimum of X though.
-		//*NOTE: This should always be passed in a float, so we don't need to worry about locales or TTi18n::getDecimalSymbol().
+		//*NOTE: This should always be passed in a float, so we don't need to worry about locales or TTi18n::getDecimalSymbol(), since we don't set LC_NUMERIC anymore.
 		//       If you are running into problems traced to here, try casting to float first.
 		//		 If a casted float value is float(50), there won't be a decimal place, so make sure we handle those cases too.
 		if ( is_float($value) OR strpos( $value, '.') !== FALSE ) {
@@ -803,6 +803,28 @@ class Misc {
 
 		return number_format( (float)$value, 2, TTi18n::getDecimalSymbol(), $thousand_sep );
 	}
+
+	/**
+	 * Round currency value without formatting it. In most cases where Misc::MoneyFormat( $var, FALSE ) is used, this should be used instead.
+	 *
+	 * @param float|int  $value
+	 * @param int $decimals
+	 * @param null|CurrencyFactory $currency_obj
+	 * @return float|int
+	 */
+	static function MoneyRound( $value, $decimals = 2, $currency_obj = NULL ) {
+		if ( is_object( $currency_obj ) ) {
+			$retval = $currency_obj->round( $value );
+		} else {
+			//When using round() it returns a float, so large values like 100000000000000000000.00 get converted to scientific notation when passed to bcmath() due to the string conversion. Use number_format() instead.
+			//$retval = round( $value, $decimals );
+			//Could use bcadd( $value, 0, $decimals ) to round larger values perhaps?
+			$retval = number_format( $value, $decimals, '.', '' );
+		}
+
+		return $retval;
+	}
+
 
 	/**
 	 * Removes vowels from the string always keeping the first and last letter.
@@ -872,17 +894,25 @@ class Misc {
 	}
 
 	/**
-	 * @param $float
+	 * @param float|int|string $float
 	 * @return int
 	 */
-	static function getBeforeDecimal( $float) {
-		//$split_float = explode(TTi18n::getDecimalSymbol(), $float);
-		$split_float = explode('.', $float);
+	static function getBeforeDecimal( $float ) {
+		$float = (float)$float;
+
+		//Locale agnostic, so we can handle decimal separators that are commas.
+		if ( strpos( $float, ',' ) !== FALSE ) {
+			$separator = ',';
+		} else {
+			$separator = '.';
+		}
+
+		$split_float = explode( $separator, (float)$float );
 		return (int)$split_float[0];
 	}
 
 	/**
-	 * @param $float
+	 * @param float|int|string $float
 	 * @param bool $format_number
 	 * @return int
 	 */
@@ -891,8 +921,14 @@ class Misc {
 			$float = Misc::MoneyFormat( $float, FALSE );
 		}
 
-		//$split_float = explode(TTi18n::getDecimalSymbol(), $float);
-		$split_float = explode('.', $float);
+		//Locale agnostic, so we can handle decimal separators that are commas.
+		if ( strpos( $float, ',' ) !== FALSE ) {
+			$separator = ',';
+		} else {
+			$separator = '.';
+		}
+
+		$split_float = explode( $separator, $float);
 		if ( isset($split_float[1]) ) {
 			return (int)$split_float[1];
 		} else {
@@ -2509,7 +2545,7 @@ class Misc {
 			$retval = TTi18n::getText('Copy of').' '. $name .' ['. rand(1, 99) .']';
 		}
 
-		$retval = substr( $retval, 0, 99 ); //Make sure the name doesn't get too long.
+		$retval = substr( $retval, 0, 49 ); //Make sure the name doesn't get too long.
 		return $retval;
 	}
 
@@ -3248,6 +3284,11 @@ class Misc {
 		}
 
 		$browser = new Browser( $useragent );
+
+		if ( $browser->isRobot() == TRUE ) { //Never redirect robots, as GoogleBot sometimes appears as Chrome v41.
+			Debug::Text('Detected Robot: '. $browser->getBrowser() .' Version: '. $browser->getVersion() .' User Agent: '. $useragent, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
 
 		//This is for the full web interface
 		//IE < 11

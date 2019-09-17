@@ -59,6 +59,7 @@ class APIPunch extends APIFactory {
 	}
 
 	/**
+	 * Get default punch data (ie: type, status, branch, department, job, task) prior to a user punching in/out. This also checks that the user is allowed to punch in/out from their station.
 	 * @param string $user_id UUID
 	 * @param int $epoch EPOCH
 	 * @param string $station_id UUID
@@ -384,14 +385,14 @@ class APIPunch extends APIFactory {
 			$message = TTi18n::getText('Due to <specify reason here>, please correct the %1 %2 punch at %3 to be a %1 %2 punch at <X:XX AM/PM> instead.', array($type_text, $status_text, $current_punch_time_text) );
 		} else {
 			$request_type_id = 10;
-			//missing punch
+			//Missing punch
 			$punch_data = $this->getPunchDefaultData($user_id, $date, $punch_control_id, $previous_punch_id, $status_id, $type_id);
-			$type_text = Option::getByKey( $punch_data['api_retval']['type_id'], $plf->getOptions( 'type' ) );
-			$status_text = Option::getByKey( $punch_data['api_retval']['status_id'], $plf->getOptions( 'status' ) );
+			if ( isset($punch_data['api_retval']) ) {
+				$type_text = Option::getByKey( $punch_data['api_retval']['type_id'], $plf->getOptions( 'type' ) );
+				$status_text = Option::getByKey( $punch_data['api_retval']['status_id'], $plf->getOptions( 'status' ) );
 
-			//$type_id = $punch_data['api_retval']['type_id'];
-			//$status_id = $punch_data['api_retval']['status_id'];
-			$message = TTi18n::getText('Due to <specify reason here>, please add the missing %1 %2 punch at <%3>', array($type_text, $status_text, $punch_data['api_retval']['punch_time']) );
+				$message = TTi18n::getText( 'Due to <specify reason here>, please add the missing %1 %2 punch at <%3>', array($type_text, $status_text, $punch_data['api_retval']['punch_time']) );
+			}
 		}
 
 		$data = array(

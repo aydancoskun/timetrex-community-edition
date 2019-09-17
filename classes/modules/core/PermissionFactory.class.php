@@ -3111,8 +3111,13 @@ class PermissionFactory extends Factory {
 	function clearCache( $user_id, $company_id ) {
 		Debug::Text(' Clearing Cache for User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 
+		$cache_id = 'permission_level'.$user_id.$company_id;
+		$retval = $this->removeCache( $cache_id );
+
 		$cache_id = 'permission_all'.$user_id.$company_id;
-		return $this->removeCache( $cache_id );
+		$retval = $this->removeCache( $cache_id );
+
+		return $retval;
 	}
 
 	/**

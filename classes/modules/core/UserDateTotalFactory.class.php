@@ -1026,9 +1026,10 @@ class UserDateTotalFactory extends Factory {
 	 * @return string
 	 */
 	function calcTotalTimeAmount() {
-		//Before switching to *not* setting setLocale() LC_NUMERIC, calculating in es_ES locale, it returns float value using comma decimal symbol which causes a SQL error on insert.
-		$retval = ( TTDate::getHours( $this->getTotalTime() ) * $this->getHourlyRate() );
-		//$retval = bcmul( TTDate::getHours( $this->getTotalTime() ), $this->getHourlyRate() );
+		//When TTi18n::setLocale() used to set LC_NUMERIC, then bcmath() breaks in locales such as es_ES, due to float values being converted to a string with comma decimal separators. This also causes SQL errors on insert.
+		//$retval = ( TTDate::getHours( $this->getTotalTime() ) * $this->getHourlyRate() );
+		$retval = bcmul( TTDate::getHours( $this->getTotalTime() ), $this->getHourlyRate() );
+
 		return $retval;
 	}
 

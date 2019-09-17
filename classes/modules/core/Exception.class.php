@@ -230,7 +230,7 @@ class GeneralError extends Exception {
 			ob_clean();
 
 			if ( defined('TIMETREX_JSON_API') ) {
-				global $obj;
+				$obj = new APIAuthentication();
 				echo json_encode( $obj->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('%1 experienced a general error, please contact technical support.', array( APPLICATION_NAME ) ) ) );
 				exit;
 			} else {

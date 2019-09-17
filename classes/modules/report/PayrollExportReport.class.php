@@ -297,7 +297,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 			case 'quickbooks_job_options':
 			case 'quickbooks_item_options':
 				$retval = array(
-								0 => TTi18n::gettext('-- NONE --'),
+								0 => TTi18n::gettext('-- None --'),
 								'default_branch' => TTi18n::gettext('Default Branch'),
 								'default_department' => TTi18n::gettext('Default Department'),
 								'group' => TTi18n::gettext('Group'),
@@ -827,10 +827,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$export_column_map = array(
 										'company_code' => 'Co Code',
 										'batch_id' => 'Batch ID',
-										'temp_dept' => 'Temp Dept',
-										'employee_number' => 'File #',
+										'employee_number' => 'File #', //Needs to be in third position for ADP Workforce Now
 										'regular_time' => 'Reg Hours',
 										'overtime' => 'O/T Hours',
+										'temp_dept' => 'Temp Dept',
 										'3_code' => 'Hours 3 Code',
 										'3_amount' => 'Hours 3 Amount',
 										'4_code' => 'Hours 4 Code',
@@ -870,8 +870,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					$static_columns = array(
 										'company_code' => ( isset($row[$company_code_column]) ) ? $row[$company_code_column] : $setup_data['adp']['company_code_value'],
 										'batch_id' => ( isset($row[$batch_id_column]) ) ? $row[$batch_id_column] : $setup_data['adp']['batch_id_value'],
-										'temp_dept' => ( isset($row[$temp_dept_column]) ) ? $row[$temp_dept_column] : $setup_data['adp']['temp_dept_value'],
 										'employee_number' => str_pad( $row['employee_number'], 6, 0, STR_PAD_LEFT), //ADP employee numbers should always be 6 digits.
+										'temp_dept' => ( isset($row[$temp_dept_column]) ) ? $row[$temp_dept_column] : $setup_data['adp']['temp_dept_value'],
 										);
 
 					foreach( $setup_data['adp']['columns'] as $column_id => $column_data ) {

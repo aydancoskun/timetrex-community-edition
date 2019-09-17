@@ -1941,7 +1941,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 		if ( for_display ) {
 			for ( key in this.save_export_setup_data ) {
-				if ( typeof(this.save_export_setup_data[key]) !== 'String' ) {
+				if ( key !== false && typeof(this.save_export_setup_data[key]) !== 'String' ) {
 					this.save_export_setup_data[key] = this.convertExportSetupValues( this.save_export_setup_data[key] );
 				}
 			}
@@ -2013,15 +2013,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 		if ( !res_Data.export_columns ) {
 			for ( key in res_Data ) {
-				if ( typeof(res_Data[key]) !== 'String' ) {
+				if ( key !== false && typeof(res_Data[key]) !== 'String' ) {
 					res_Data[key] = this.convertExportSetupValues( res_Data[key] );
 				}
 			}
 			this.save_export_setup_data = res_Data;
-			//this.export_setup_data = res_Data[res_Data.export_type];
 		} else {
 			res_Data = this.convertExportSetupValues( res_Data );
-			//this.export_setup_data = res_Data;
 			this.save_export_setup_data[res_Data.export_type] = res_Data;
 			this.save_export_setup_data['export_type'] = res_Data.export_type;
 		}

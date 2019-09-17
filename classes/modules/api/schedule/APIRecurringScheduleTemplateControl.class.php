@@ -268,7 +268,7 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 							$rstlf = TTnew( 'APIRecurringScheduleTemplate' ); /** @var APIRecurringScheduleTemplate $rstlf */
 							foreach( $row['recurring_schedule_template'] as $recurring_schedule_template_row ) {
 								$recurring_schedule_template_row['recurring_schedule_template_control_id'] = TTUUID::castUUID( $row['id'] );
-								$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $rstlf->setRecurringScheduleTemplate( $recurring_schedule_template_row, $validate_only ), $tertiary_validator );
+								$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $rstlf->setRecurringScheduleTemplate( $recurring_schedule_template_row, $validate_only, $ignore_warning ), $tertiary_validator );
 								$is_valid = $tertiary_validator->isValid( $ignore_warning );
 							}
 						}

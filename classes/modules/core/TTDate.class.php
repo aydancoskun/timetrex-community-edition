@@ -1377,7 +1377,7 @@ class TTDate {
 	/**
 	 * @param int $epoch EPOCH
 	 * @param $round_value
-	 * @param int $round_type
+	 * @param int $round_type 10=Down, 20=Average, 25=Average (split seconds up), 27=Average (split seconds down) 30=Up
 	 * @param int $grace_time
 	 * @return int
 	 */
@@ -3890,7 +3890,7 @@ class TTDate {
 	 * @param null $params
 	 * @return array|bool|false|null|string
 	 */
-	public static function getReportDates( $column, $epoch = NULL, $post_processing = TRUE, $user_obj = NULL, $params = NULL ) {
+	public static function getReportDates( $column, $epoch = NULL, $post_processing = TRUE, $user_obj = NULL, $params = NULL, $display_columns = NULL ) {
 		//Make sure if epoch is actually NULL that we return a blank array and not todays date.
 		//This is import for things like termination dates that may be NULL when not set.
 		if ( $epoch === NULL ) {
@@ -3899,10 +3899,10 @@ class TTDate {
 
 		$column = Misc::trimSortPrefix( $column );
 
-		//Trim off a column_name_prefix, or everything before the "-"
-		$tmp_column = explode( '-', $column );
-		if ( isset($tmp_column[1]) ) {
-			$column = $tmp_column[1];
+		//Trim off a column_name_prefix, or everything before the "-". Technically we return everything after the '-'
+		$column_delimiter = strpos( $column, '-' );
+		if ( $column_delimiter !== FALSE ) {
+			$column = substr( $column, ( $column_delimiter + 1 ) );
 		}
 
 		//Don't use todays date, as that can cause a lot of confusion in reports, especially when displaying time not assigned to a pay period
@@ -3911,16 +3911,9 @@ class TTDate {
 		//	$epoch = self::getTime();
 		//}
 
-		$start_week_day = 0;
-		if ( is_object( $user_obj ) ) {
-			$user_prefs = $user_obj->getUserPreferenceObject();
-			if ( is_object($user_prefs) ) {
-				$start_week_day = $user_prefs->getStartWeekDay();
-			}
-		}
-
 		if ( $post_processing == TRUE ) {
 			$split_epoch = explode('-', $epoch);
+
 			//Human friendly display, NOT for sorting.
 			switch( $column ) {
 				case 'pay_period_start_date':
@@ -4015,52 +4008,177 @@ class TTDate {
 			if ( $column != '' ) {
 				$column_prefix = $column.'-';
 			}
-			$retval = array(
-				$column_prefix.'date_stamp' => date('Y-m-d', $epoch ),
-				$column_prefix.'time_stamp' => $epoch,
-				$column_prefix.'hour_of_day' => TTDate::roundTime( $epoch, 3600, 10 ),
-				$column_prefix.'date_time_stamp' => $epoch,
-				$column_prefix.'date_dow' => date('w', $epoch),
-				$column_prefix.'date_dow_week' => date('W-w', $epoch ),
-				$column_prefix.'date_dow_month' => date('m-w', $epoch ),
-				$column_prefix.'date_dow_month_year' => date('Y-m-w', $epoch ),
-				$column_prefix.'date_dow_dom_month_year' => date('Y-m-w-W', $epoch ),
-				$column_prefix.'date_week' => self::getWeek( $epoch, $start_week_day ),
-				$column_prefix.'date_week_month' => date('Y-m-d-W', TTDate::getBeginWeekEpoch( $epoch, $start_week_day ) ), //Need to have day in here so sorting is done properly.
-				$column_prefix.'date_week_month_year' => date('Y-m-d-W', TTDate::getBeginWeekEpoch( $epoch, $start_week_day ) ), //Need to have day in here so sorting is done properly.
-				$column_prefix.'date_week_start' => date('Y-m-d', TTDate::getBeginWeekEpoch( $epoch, $start_week_day ) ),
-				$column_prefix.'date_week_end' => date('Y-m-d', TTDate::getEndWeekEpoch( $epoch, $start_week_day ) ),
-				$column_prefix.'date_dom' => date('d', $epoch ),
-				$column_prefix.'date_dom_month' => date('m-d', $epoch ),
-				$column_prefix.'date_dom_month_year' => date('Y-m-d', $epoch ),
-				$column_prefix.'date_month' => date('m', $epoch ),
-				$column_prefix.'date_month_year' => date('Y-m', $epoch ),
-				$column_prefix.'date_month_start' => date('Y-m-d', TTDate::getBeginMonthEpoch( $epoch ) ),
-				$column_prefix.'date_month_end' => date('Y-m-d', TTDate::getEndMonthEpoch( $epoch ) ),
-				$column_prefix.'date_quarter' => TTDate::getYearQuarter( $epoch ),
-				$column_prefix.'date_quarter_year' => date('Y', $epoch).'-'.TTDate::getYearQuarter( $epoch ),
-				$column_prefix.'date_quarter_start' => date('Y-m-d', TTDate::getBeginQuarterEpoch( $epoch ) ),
-				$column_prefix.'date_quarter_end' => date('Y-m-d', TTDate::getEndQuarterEpoch( $epoch ) ),
-				$column_prefix.'date_year' => TTDate::getYear( $epoch ),
-				$column_prefix.'date_year_start' => date('Y-m-d', TTDate::getBeginYearEpoch( $epoch ) ),
-				$column_prefix.'date_year_end' => date('Y-m-d', TTDate::getEndYearEpoch( $epoch ) ),
+
+			$report_date_columns = array(
+					$column_prefix . 'pay_period_start_date',
+					$column_prefix . 'pay_period_end_date',
+					$column_prefix . 'pay_period_transaction_date',
+					$column_prefix . 'date_stamp',
+					$column_prefix . 'date_week_start',
+					$column_prefix . 'date_week_end',
+					$column_prefix . 'date_month_start',
+					$column_prefix . 'date_month_end',
+					$column_prefix . 'date_quarter_start',
+					$column_prefix . 'date_quarter_end',
+					$column_prefix . 'date_year_start',
+					$column_prefix . 'date_year_end',
+					$column_prefix . 'time_stamp',
+					$column_prefix . 'hour_of_day',
+					$column_prefix . 'date_time_stamp',
+					$column_prefix . 'date_dow',
+					$column_prefix . 'date_dow_week',
+					$column_prefix . 'date_dow_month',
+					$column_prefix . 'date_dow_month_year',
+					$column_prefix . 'date_dow_dom_month_year',
+					$column_prefix . 'date_week',
+					$column_prefix . 'date_week_month',
+					$column_prefix . 'date_week_month_year',
+					$column_prefix . 'date_dom',
+					$column_prefix . 'date_dom_month',
+					$column_prefix . 'date_dom_month_year',
+					$column_prefix . 'date_month',
+					$column_prefix . 'date_month_year',
+					$column_prefix . 'date_quarter',
+					$column_prefix . 'date_quarter_year',
+					$column_prefix . 'date_year',
+					$column_prefix . 'pay_period',
 			);
 
-			//Only display these dates if they are passed in separately in the $param array.
-			if ( isset( $params['pay_period_start_date'] ) AND $params['pay_period_start_date'] != '' AND isset( $params['pay_period_end_date'] ) AND $params['pay_period_end_date'] != '' ) {
-				$retval[$column_prefix.'pay_period'] = array('sort' => $params['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $params['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $params['pay_period_end_date'] ) );
+			if ( $display_columns != '' ) {
+				$display_columns = array_intersect( $report_date_columns, $display_columns );
+			} else {
+				$display_columns = $report_date_columns;
 			}
-			if ( isset( $params['pay_period_start_date'] ) AND $params['pay_period_start_date'] != '' ) {
-				$retval[$column_prefix.'pay_period_start_date'] = $params['pay_period_start_date'];
-			}
-			if ( isset( $params['pay_period_end_date'] ) AND $params['pay_period_end_date'] != ''  ) {
-				$retval[$column_prefix.'pay_period_end_date'] = $params['pay_period_end_date'];
-			}
-			if ( isset( $params['pay_period_transaction_date'] ) AND $params['pay_period_transaction_date'] != ''  ) {
-				$retval[$column_prefix.'pay_period_transaction_date'] = $params['pay_period_transaction_date'];
+
+			$retval = array();
+
+			if ( is_array( $display_columns ) AND count( $display_columns ) > 0 ) {
+				$start_week_day = 0;
+				if ( is_object( $user_obj ) ) {
+					$user_prefs = $user_obj->getUserPreferenceObject();
+					if ( is_object($user_prefs) ) {
+						$start_week_day = $user_prefs->getStartWeekDay();
+					}
+				}
+
+				foreach ( $display_columns as $display_column ) {
+					$display_column_delimiter = strpos( $display_column, '-' );
+					if ( $display_column_delimiter !== FALSE ) {
+						$display_column = substr( $display_column, ( $display_column_delimiter + 1 ) );
+					}
+
+					switch ( $display_column ) {
+						case 'date_stamp':
+							$retval[ $column_prefix . 'date_stamp' ] = date( 'Y-m-d', $epoch );
+							break;
+						case 'time_stamp':
+							$retval[ $column_prefix . 'time_stamp' ] = $epoch;
+							break;
+						case 'hour_of_day':
+							$retval[ $column_prefix . 'hour_of_day' ] = TTDate::roundTime( $epoch, 3600, 10 );
+							break;
+						case 'date_time_stamp':
+							$retval[ $column_prefix . 'date_time_stamp' ] = $epoch;
+							break;
+						case 'date_dow':
+							$retval[ $column_prefix . 'date_dow' ] = date( 'w', $epoch );
+							break;
+						case 'date_dow_week':
+							$retval[ $column_prefix . 'date_dow_week' ] = date( 'W-w', $epoch );
+							break;
+						case 'date_dow_month':
+							$retval[ $column_prefix . 'date_dow_month' ] = date( 'm-w', $epoch );
+							break;
+						case 'date_dow_month_year':
+							$retval[ $column_prefix . 'date_dow_month_year' ] = date( 'Y-m-w', $epoch );
+							break;
+						case 'date_dow_dom_month_year':
+							$retval[ $column_prefix . 'date_dow_dom_month_year' ] = date( 'Y-m-w-W', $epoch );
+							break;
+						case 'date_week':
+							$retval[ $column_prefix . 'date_week' ] = self::getWeek( $epoch, $start_week_day );
+							break;
+						case 'date_week_month':
+							$retval[ $column_prefix . 'date_week_month' ] = date( 'Y-m-d-W', TTDate::getBeginWeekEpoch( $epoch, $start_week_day ) ); //Need to have day in here so sorting is done properly.
+							break;
+						case 'date_week_month_year':
+							$retval[ $column_prefix . 'date_week_month_year' ] = date( 'Y-m-d-W', TTDate::getBeginWeekEpoch( $epoch, $start_week_day ) ); //Need to have day in here so sorting is done properly.
+							break;
+						case 'date_week_start':
+							$retval[ $column_prefix . 'date_week_start' ] = date( 'Y-m-d', TTDate::getBeginWeekEpoch( $epoch, $start_week_day ) );
+							break;
+						case 'date_week_end':
+							$retval[ $column_prefix . 'date_week_end' ] = date( 'Y-m-d', TTDate::getEndWeekEpoch( $epoch, $start_week_day ) );
+							break;
+						case 'date_dom':
+							$retval[ $column_prefix . 'date_dom' ] = date( 'd', $epoch );
+							break;
+						case 'date_dom_month':
+							$retval[ $column_prefix . 'date_dom_month' ] = date( 'm-d', $epoch );
+							break;
+						case 'date_dom_month_year':
+							$retval[ $column_prefix . 'date_dom_month_year' ] = date( 'Y-m-d', $epoch );
+							break;
+						case 'date_month':
+							$retval[ $column_prefix . 'date_month' ] = date( 'm', $epoch );
+							break;
+						case 'date_month_year':
+							$retval[ $column_prefix . 'date_month_year' ] = date( 'Y-m', $epoch );
+							break;
+						case 'date_month_start':
+							$retval[ $column_prefix . 'date_month_start' ] = date( 'Y-m-d', TTDate::getBeginMonthEpoch( $epoch ) );
+							break;
+						case 'date_month_end':
+							$retval[ $column_prefix . 'date_month_end' ] = date( 'Y-m-d', TTDate::getEndMonthEpoch( $epoch ) );
+							break;
+						case 'date_quarter':
+							$retval[ $column_prefix . 'date_quarter' ] = TTDate::getYearQuarter( $epoch );
+							break;
+						case 'date_quarter_year':
+							$retval[ $column_prefix . 'date_quarter_year' ] = date( 'Y', $epoch ) . '-' . TTDate::getYearQuarter( $epoch );
+							break;
+						case 'date_quarter_start':
+							$retval[ $column_prefix . 'date_quarter_start' ] = date( 'Y-m-d', TTDate::getBeginQuarterEpoch( $epoch ) );
+							break;
+						case 'date_quarter_end':
+							$retval[ $column_prefix . 'date_quarter_end' ] = date( 'Y-m-d', TTDate::getEndQuarterEpoch( $epoch ) );
+							break;
+						case 'date_year':
+							$retval[ $column_prefix . 'date_year' ] = TTDate::getYear( $epoch );
+							break;
+						case 'date_year_start':
+							$retval[ $column_prefix . 'date_year_start' ] = date( 'Y-m-d', TTDate::getBeginYearEpoch( $epoch ) );
+							break;
+						case 'date_year_end':
+							$retval[ $column_prefix . 'date_year_end' ] = date( 'Y-m-d', TTDate::getEndYearEpoch( $epoch ) );
+							break;
+
+						//Only display these dates if they are passed in separately in the $param array.
+						case 'pay_period':
+							if ( isset( $params['pay_period_start_date'] ) AND $params['pay_period_start_date'] != '' AND isset( $params['pay_period_end_date'] ) AND $params['pay_period_end_date'] != '' ) {
+								$retval[ $column_prefix . 'pay_period' ] = array('sort' => $params['pay_period_start_date'], 'display' => TTDate::getDate( 'DATE', $params['pay_period_start_date'] ) . ' -> ' . TTDate::getDate( 'DATE', $params['pay_period_end_date'] ));
+							}
+							break;
+						case 'pay_period_start_date':
+							if ( isset( $params['pay_period_start_date'] ) AND $params['pay_period_start_date'] != '' ) {
+								$retval[ $column_prefix . 'pay_period_start_date' ] = $params['pay_period_start_date'];
+							}
+
+							break;
+						case 'pay_period_end_date':
+							if ( isset( $params['pay_period_end_date'] ) AND $params['pay_period_end_date'] != '' ) {
+								$retval[ $column_prefix . 'pay_period_end_date' ] = $params['pay_period_end_date'];
+							}
+							break;
+						case 'pay_period_transaction_date':
+							if ( isset( $params['pay_period_transaction_date'] ) AND $params['pay_period_transaction_date'] != '' ) {
+								$retval[ $column_prefix . 'pay_period_transaction_date' ] = $params['pay_period_transaction_date'];
+							}
+							break;
+					}
+				}
 			}
 		}
-
 
 		if ( isset( $retval ) ) {
 			return $retval;

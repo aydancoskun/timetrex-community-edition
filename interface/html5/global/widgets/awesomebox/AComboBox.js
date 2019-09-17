@@ -843,10 +843,9 @@
 		};
 
 		this.setLabel = function() {
-			var last_value;
+			label_arr = Array();
 
 			if ( allow_multiple_selection ) {
-
 				if ( !select_items ) {
 					this.setEmptyLabel();
 					return;
@@ -856,8 +855,6 @@
 				if ( len === 1 ) {
 
 					var display_column_len = display_columns.length;
-
-					var is_first_visible_column = true;
 					for ( y = 0; y < display_column_len; y++ ) {
 
 						if ( display_columns[y].hidden === true ) { //Hidden field for jGgrid, usually is id
@@ -865,7 +862,6 @@
 						}
 
 						if ( layout_name === ALayoutIDs.SORT_COLUMN && select_items[0][display_columns[y].name] === undefined ) {
-
 							var item = select_items[0];
 
 							for ( var key in item ) {
@@ -883,35 +879,33 @@
 								}
 							}
 
-							label_span.text( c_value );
-							break;
+							if ( !c_value || c_value == '' ) {
+								c_value = '--';
+							}
+							label_arr.push( c_value );
 
+							break;
 						} else {
 							var c_value = select_items[0][display_columns[y].name];
 						}
 
-						if ( is_first_visible_column ) {
-							last_value = c_value;
-							if ( c_value || $.type( c_value ) === 'number' ) {
-								label_span.text( c_value );
-							}
-							is_first_visible_column = false;
-						} else {
-							if ( last_value && c_value ) {
-								label_span.text( label_span.text() + ' | ' );
-							}
-							if ( c_value ) {
-								last_value = c_value;
-								label_span.text( label_span.text() + c_value );
-							}
+						if ( c_value == '' ) {
+							c_value = '--';
 						}
 
+						if ( c_value ) {
+							label_arr.push( c_value );
+						}
 					}
 
+					if ( label_arr.length > 0 ) {
+						label_span.text( label_arr.join( ' | ' ) );
+					} else {
+						this.setEmptyLabel();
+					}
 				} else {
 					label_span.text( len + ' ' + $.i18n._( 'items selected' ) );
 				}
-
 			} else {
 				// Error: Uncaught TypeError: Cannot read property 'length' of null in interface/html5/global/widgets/awesomebox/AComboBox.js?v=9.0.6-20151231-140748 line 902
 				if ( !select_item || !display_columns ) {
@@ -920,38 +914,30 @@
 				}
 
 				display_column_len = display_columns.length;
-
-				is_first_visible_column = true;
-
 				for ( var y = 0; y < display_column_len; y++ ) {
-
 					if ( display_columns[y].hidden === true ) { //Hidden field for jGgrid, usually is id
 						continue;
 					}
 
 					c_value = select_item[display_columns[y].name];
 
-					if ( is_first_visible_column ) {
-						last_value = c_value;
-						if ( c_value ) {
-							label_span.text( c_value );
-						}
-						is_first_visible_column = false;
-					} else {
-						if ( last_value && c_value ) {
-							label_span.text( label_span.text() + ' | ' );
-						}
-						if ( c_value ) {
-							last_value = c_value;
-							label_span.text( label_span.text() + c_value );
-						}
+					if ( c_value == '' ) {
+						c_value = '--';
 					}
 
+					if ( c_value ) {
+						label_arr.push( c_value );
+					}
+				}
+
+				if ( label_arr.length > 0 ) {
+					label_span.text( label_arr.join( ' | ' ) );
+				} else {
+					this.setEmptyLabel();
 				}
 			}
 
 			$this.find( '.a-combobox-label' ).width( 'auto' );
-
 		};
 
 		this.setEmptyLabel = function() {

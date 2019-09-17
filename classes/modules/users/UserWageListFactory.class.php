@@ -835,7 +835,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 
 		$query = '
 					select	a.*,
-							CASE WHEN a.wage_group_id = \''. TTUUID::getZeroID() .'\' THEN \''. TTi18n::getText('-Default-') .'\' ELSE ab.name END as wage_group,
+							CASE WHEN a.wage_group_id = \''. TTUUID::getZeroID() .'\' THEN \''. TTi18n::getText('-- Default --') .'\' ELSE ab.name END as wage_group,
 							b.first_name as first_name,
 							b.last_name as last_name,
 							b.country as country,
@@ -966,7 +966,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 
 		$query = '
 					select	a.*,
-							CASE WHEN a.wage_group_id = \''. TTUUID::getZeroID() .'\' THEN \''. TTi18n::getText('-Default-') .'\' ELSE ab.name END as wage_group,
+							CASE WHEN a.wage_group_id = \''. TTUUID::getZeroID() .'\' THEN \''. TTi18n::getText('-- Default --') .'\' ELSE ab.name END as wage_group,
 							b.first_name as first_name,
 							b.last_name as last_name,
 							b.country as country,

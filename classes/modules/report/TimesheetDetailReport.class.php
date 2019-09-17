@@ -883,6 +883,11 @@ class TimesheetDetailReport extends Report {
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array('user_date_total' => array(), 'schedule' => array(), 'worked_days' => array(), 'user' => array(), 'user_title' => array(), 'timesheet_authorization' => array(), 'verified_timesheet' => array(), 'punch_rows' => array(), 'punch_control_rows' => array(), 'pay_period_schedule' => array(), 'pay_period' => array() );
 
+		//Now that we only return columns that are displayed, when generating a printable timesheet we need to include the necessary date/time columns that is requires.
+		if ( strpos($format, 'pdf_') !== FALSE ) {
+			$this->setColumnDataConfig( array_merge( $this->getColumnDataConfig(), array( 'time_stamp' => TRUE, 'pay_period' => TRUE ) ) );
+		}
+
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 
@@ -1334,6 +1339,8 @@ class TimesheetDetailReport extends Report {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['user_date_total']) ) {
+			$column_keys = array_keys( $this->getColumnDataConfig() );
+
 			foreach( $this->tmp_data['user_date_total'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach( $level_1 as $date_stamp => $level_2 ) {
@@ -1345,16 +1352,16 @@ class TimesheetDetailReport extends Report {
 									$level_5[0] = $level_4;
 								}
 								foreach( $level_5 as $row ) {
-									$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
+									$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']), $column_keys );
 
 									if ( isset($this->tmp_data['user'][$user_id]['hire_date']) ) {
-										$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), FALSE, $this->getUserObject() );
+										$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 									} else {
 										$hire_date_columns = array();
 									}
 
 									if ( isset($this->tmp_data['user'][$user_id]['termination_date']) ) {
-										$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['termination_date'] ), FALSE, $this->getUserObject() );
+										$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['termination_date'] ), FALSE, $this->getUserObject(), NULL, $column_keys );
 									} else {
 										$termination_date_columns = array();
 									}

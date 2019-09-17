@@ -3043,9 +3043,10 @@ TimeSheetViewController = BaseViewController.extend( {
 								continue;
 							}
 
-							var key = $this.generateManualTimeSheetRecordKey( item, false ); //Don't prepend item_id
+							var key = $this.generateManualTimeSheetRecordKey( item );
 							var item_id_key = item.id + '-' + key;
 
+							//Check to see if the record with no ID (pre-save) exists, and if so update it, or replace it with the saved record.
 							if ( $this.manual_grid_records_map[item_id_key] ) {
 								$this.manual_grid_records_map[item_id_key][item.date_stamp].setValue( item.total_time );
 							} else if ( $this.manual_grid_records_map[key] ) {
@@ -8009,16 +8010,12 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 
-	generateManualTimeSheetRecordKey: function( item, prepend_id ) {
+	generateManualTimeSheetRecordKey: function( item ) {
 		var key = item.date_stamp + '-' + ( ( this.show_branch_ui && item.branch_id ) ? item.branch_id : TTUUID.zero_id ) +
 			'-' + ( ( this.show_department_ui && item.department_id ) ? item.department_id : TTUUID.zero_id )
 			+ '-' + ( ( this.show_job_ui && item.job_id && Global.getProductEdition() >= 20 ) ? item.job_id : TTUUID.zero_id ) +
 			'-' + ( ( this.show_job_item_ui && item.job_item_id && Global.getProductEdition() >= 20 ) ? item.job_item_id : TTUUID.zero_id ) +
 			'-' + item.total_time;
-
-		if ( prepend_id == true ) {
-			key = ( ( item.id && item.id != '' ) ? item.id : TTUUID.zero_id ) + '-' + key;
-		}
 
 		return key;
 	},
@@ -8029,10 +8026,12 @@ TimeSheetViewController = BaseViewController.extend( {
 		for ( var i = 0, m = records.length; i < m; i++ ) {
 			var item = records[i];
 
-			var key = this.generateManualTimeSheetRecordKey( item, true ); //Always prepend item.id
+			var key = this.generateManualTimeSheetRecordKey( item );
+			if ( item.id ) {
+				key = item.id + '-' + key;
+			}
 
 			this.manual_grid_records_map[key] = item.row;
-
 			delete item.row;
 		}
 
@@ -8707,6 +8706,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				case ContextMenuIconName.generate_pay_stub:
 					this.setDefaultMenuGeneratePayStubIcon( context_btn, grid_selected_length );
 					break;
+				case ContextMenuIconName.print:
+					this.setDefaultMenuPrintIcon( context_btn, grid_selected_length );
+					break;
 				case ContextMenuIconName.schedule:
 					this.setDefaultMenuScheduleIcon( context_btn, grid_selected_length );
 					break;
@@ -8936,8 +8938,12 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	setEditMenuMapIcon: function ( context_btn, pId ) {
-		if ( this.absence_model ) {
-			context_btn.addClass( 'disable-image' );
+		this._super( 'setDefaultMenuMapIcon', context_btn );
+
+		if ( context_btn.hasClass( 'disable-image' ) == false ) {
+			if ( this.absence_model || this.getPunchMode() == 'manual' ) {
+				context_btn.addClass( 'disable-image' );
+			}
 		}
 	},
 
@@ -9078,6 +9084,18 @@ TimeSheetViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.export_excel:
 					this.setDefaultMenuExportIcon( context_btn );
+					break;
+				case ContextMenuIconName.edit_employee:
+					this.setDefaultMenuEditEmployeeIcon( context_btn );
+					break;
+				case ContextMenuIconName.edit_pay_period:
+					this.setDefaultMenuEditPayPeriodIcon( context_btn );
+					break;
+				case ContextMenuIconName.re_calculate_timesheet:
+					this.setDefaultMenuReCalculateTimesheet( context_btn );
+					break;
+				case ContextMenuIconName.generate_pay_stub:
+					this.setDefaultMenuGeneratePayStubIcon( context_btn );
 					break;
 				case 'AddRequest':
 					this.setAddRequestIcon( context_btn );

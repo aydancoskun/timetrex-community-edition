@@ -154,7 +154,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		var label_1 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'of the' ) + ' </span>' );
 		var label_2 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'prior to the holiday' ) + ' </span>' );
-		var label_3 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( ' ' ) + ' </span>' );
+		var label_3 = $( '<span class=\'widget-right-label\'> ' + ' ' + ' </span>' );
 
 		widgetContainer.append( form_item_minimum_worked_days_input );
 		widgetContainer.append( label_1 );
@@ -191,7 +191,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		label_1 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'of the' ) + ' </span>' );
 		label_2 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'following the holiday' ) + ' </span>' );
-		label_3 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( ' ' ) + ' </span>' );
+		label_3 = $( '<span class=\'widget-right-label\'> ' + ' ' + ' </span>' );
 
 		widgetContainer.append( form_item_minimum_worked_days_input );
 		widgetContainer.append( label_1 );

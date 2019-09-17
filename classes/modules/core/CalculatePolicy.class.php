@@ -481,7 +481,8 @@ class CalculatePolicy {
 				//  Don't resave override absence entries, this caused a bug where UDT rows would switch to different dates when calcExceptions was run.
 				//  *If a note is specified, always insert the record, this way we can give the user notes as to why they arent eligible for holiday time for example.
 				//  Since we implemented getPartialUserDateTotalObject() to split UDT records, it might split records of ObjectTypeID=10, which causes the KEY to be < 0 introducing a bug where this was inserting it into the DB and corrupting the data. Added check for this: $udt_obj->getObjectType() != 10 (5 must still be allowed)
-				if ( ( is_numeric( $key ) AND $key < 0 AND $udt_obj->getObjectType() != 10 AND ( $udt_obj->getTotalTime() != 0 OR $udt_obj->getTotalTimeAmount() != 0 OR $udt_obj->getNote() != '' ) )
+				//  *Still save system (ObjectType=5) rows even if total time is 0, if there is a start/end time for cases where their might be 1hr of worked time and -1hr of absence time, netting out to 0hrs.
+				if ( ( is_numeric( $key ) AND $key < 0 AND $udt_obj->getObjectType() != 10 AND ( $udt_obj->getTotalTime() != 0 OR $udt_obj->getTotalTimeAmount() != 0 OR $udt_obj->getNote() != '' OR ( $udt_obj->getObjectType() == 5 AND $udt_obj->getStartTimeStamp() != FALSE AND $udt_obj->getEndTimeStamp() != FALSE ) ) )
 						OR ( TTUUID::isUUID( $key ) == TRUE AND $udt_obj->getObjectType() != 50 AND $udt_obj->getOverride() == TRUE AND isset($this->dates['calculated'][TTDate::getBeginDayEpoch($udt_obj->getDateStamp())]) ) ) {
 					//Debug::text('    Currency ID: '. $this->getUserObject()->getCurrency() .' Rate: '. $this->filterCurrencyRate( $udt_obj->getDateStamp() )->getReverseConversionRate(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -2782,7 +2783,7 @@ class CalculatePolicy {
 							AND $prev_udt_obj->getTotalTime() > 0 //If the previous UDT record has been reduced to TotalTime=0, ignore it when it comes to this gap adjustment. This helps with overlapping OT policies that have differential criteria.
 						) {
 						$current_trigger_time_arr['start_time_stamp'] += ( $udt_obj->getStartTimeStamp() - $prev_udt_obj->getEndTimeStamp() );
-						Debug::text('    Found gap between UDT records, either a split shift, lunch or break, adjusting next start time... Prev Start: '. TTDate::getDate('DATE+TIME', $prev_udt_obj->getStartTimeStamp() ) .' End: '. TTDate::getDate('DATE+TIME', $prev_udt_obj->getEndTimeStamp() ) .' Total Time: '. $prev_udt_obj->getTotalTime() .' Current Start: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ) .' End: '. TTDate::getDate('DATE+TIME', $udt_obj->getEndTimeStamp() ) .' Total Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('    Found gap between UDT records, either a split shift, lunch or break, adjusting next start time... Prev Start: '. TTDate::getDate('DATE+TIME', $prev_udt_obj->getStartTimeStamp() ) .' End: '. TTDate::getDate('DATE+TIME', $prev_udt_obj->getEndTimeStamp() ) .' Total Time: '. $prev_udt_obj->getTotalTime() .' Current Start: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ) .' End: '. TTDate::getDate('DATE+TIME', $udt_obj->getEndTimeStamp() ) .' Total Time: '. $udt_obj->getTotalTime() .' New Trigger TimeStamp: '. TTDate::getDate('DATE+TIME', $current_trigger_time_arr['start_time_stamp'] ), __FILE__, __LINE__, __METHOD__, 10);
 					}
 
 					//This must be below the gap detection/adjustment above.
@@ -2916,7 +2917,7 @@ class CalculatePolicy {
 												}
 
 												$this->over_time_recurse_map[$udt_key] = $this->user_date_total_insert_id;
-												Debug::text('        Reducing source recursive UDT row... ID: \''. TTUUID::castUUID($udt_obj->getId()) .'\' KEY: '. $udt_key .' row EndTimeStamp: '. TTDate::getDate('DATE+TIME', $udt_obj->getEndTimeStamp() ) .'/'. TTDate::getDate('DATE+TIME', ( $udt_obj->getEndTimeStamp() - $udt_overlap_time ) ) .' TotalTime: '. $udt_obj->getTotalTime() .'/'. ( $udt_obj->getTotalTime() - $udt_overlap_time ) .' Object Type: '. $udt_obj->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
+												Debug::text('        Reducing source recursive UDT row... ID: \''. TTUUID::castUUID($udt_obj->getId()) .'\' KEY: '. $udt_key .' row EndTimeStamp: '. TTDate::getDate('DATE+TIME', $udt_obj->getEndTimeStamp() ) .' to: '. TTDate::getDate('DATE+TIME', ( $udt_obj->getEndTimeStamp() - $udt_overlap_time ) ) .' TotalTime: '. $udt_obj->getTotalTime() .'/'. ( $udt_obj->getTotalTime() - $udt_overlap_time ) .' Object Type: '. $udt_obj->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
 
 												$udt_obj->setEndTimeStamp( ( $udt_obj->getEndTimeStamp() - $udt_overlap_time ) );
 												$udt_obj->setQuantity( ( $udt_obj->getQuantity() - $udt_quantity ) );
@@ -4023,7 +4024,11 @@ class CalculatePolicy {
 									if ( TTDate::doesRangeSpanMidnight( ( $s_obj->getStartTime() - $s_obj->getStartStopWindow() ), ( $s_obj->getEndTime() + $s_obj->getStartStopWindow() ) ) ) {
 										//Get punches from both days.
 										$plf_tmp = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf_tmp */
-										$plf_tmp->getShiftPunchesByUserIDAndEpoch( $user_id, $s_obj->getStartTime(), 0, $premature_delay );
+
+										//Can't use $premature_delay here, as we don't and can't really check maximum shift time when creating schedules,
+										//  so there are cases where the schedule may exceed the maximum shift time and we still need to find punches within it.
+										//  Since we use the full schedule shift time + start/stop window to detect if the range spans midnight, we should use the exact same values for finding punches too.
+										$plf_tmp->getShiftPunchesByUserIDAndEpoch( $user_id, $s_obj->getStartTime(), 0, ( ( $s_obj->getEndTime() + $s_obj->getStartStopWindow() ) - ( $s_obj->getStartTime() - $s_obj->getStartStopWindow() ) ) );
 										Debug::text(' Schedule spans midnight... Found rows from expanded search: '. $plf_tmp->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 										if ( $plf_tmp->getRecordCount() > 0 ) {
 											foreach( $plf_tmp as $p_obj_tmp ) {
@@ -4204,7 +4209,11 @@ class CalculatePolicy {
 										if ( TTDate::doesRangeSpanMidnight( ( $s_obj->getStartTime() - $s_obj->getStartStopWindow() ), ( $s_obj->getEndTime() + $s_obj->getStartStopWindow() ) ) ) {
 											//Get punches from both days.
 											$plf_tmp = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf_tmp */
-											$plf_tmp->getShiftPunchesByUserIDAndEpoch( $user_id, $s_obj->getStartTime(), 0, $premature_delay );
+
+											//Can't use $premature_delay here, as we don't and can't really check maximum shift time when creating schedules,
+											//  so there are cases where the schedule may exceed the maximum shift time and we still need to find punches within it.
+											//  Since we use the full schedule shift time + start/stop window to detect if the range spans midnight, we should use the exact same values for finding punches too.
+											$plf_tmp->getShiftPunchesByUserIDAndEpoch( $user_id, $s_obj->getStartTime(), 0, ( ( $s_obj->getEndTime() + $s_obj->getStartStopWindow() ) - ( $s_obj->getStartTime() - $s_obj->getStartStopWindow() ) ) );
 											Debug::text(' Schedule spans midnight... Found rows from expanded search: '. $plf_tmp->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 											if ( $plf_tmp->getRecordCount() > 0 ) {
 												foreach( $plf_tmp as $p_obj_tmp ) {
@@ -6680,7 +6689,7 @@ class CalculatePolicy {
 										} else {
 											if ( $maximum_weekly_trigger_time !== FALSE AND ( $maximum_weekly_trigger_time <= 0 OR ( $maximum_weekly_trigger_time < $daily_trigger_time ) ) ) {
 												Debug::text(' Exceeded Weekly Maximum Time to: '. $pp_obj->getMaximumTime() .' Skipping...', __FILE__, __LINE__, __METHOD__, 10);
-												break;
+												continue 2;
 											}
 
 											if ( $maximum_weekly_trigger_time < $pp_obj->getMaximumTime() ) {
@@ -6786,35 +6795,11 @@ class CalculatePolicy {
 												AND ( $maximum_daily_trigger_time === FALSE OR ( $maximum_daily_trigger_time !== FALSE AND ($total_daily_time_used - abs($tmp_punch_total_time) ) < $maximum_daily_trigger_time ) )
 											)
 										) {
-									/*
-									//The below helped deal with negative time entries, before compactin meal/break policy function was added.
-									if (
-											(
-												$punch_total_time > 0
-												AND $total_daily_time_used > $daily_trigger_time
-												AND ( $maximum_daily_trigger_time === FALSE OR ( $maximum_daily_trigger_time !== FALSE AND ($total_daily_time_used - abs($tmp_punch_total_time) ) < $maximum_daily_trigger_time ) )
-											)
-											OR
-											(
-												(
-													$punch_total_time < 0 AND $daily_trigger_time == 0
-													AND $total_daily_time_used > $daily_trigger_time
-													AND ( $maximum_daily_trigger_time === FALSE OR ( $maximum_daily_trigger_time !== FALSE AND ($total_daily_time_used ) < $maximum_daily_trigger_time ) )
-												)
-												OR
-												(
-													$punch_total_time < 0 AND $daily_trigger_time > 0
-													AND ( $total_daily_time_used - $tmp_punch_total_time ) > $daily_trigger_time
-												)
-											)
-										) {
-										*/
 										Debug::text('Past Trigger Time!! '. ($total_daily_time_used - $tmp_punch_total_time), __FILE__, __LINE__, __METHOD__, 10);
 
 										//Calculate how far past trigger time we are.
 										$past_trigger_time = ( $total_daily_time_used - $daily_trigger_time );
 										if ( $punch_total_time > $past_trigger_time ) {
-										//if ( $past_trigger_time > 0 AND $daily_trigger_time > 0 AND $punch_total_time > $past_trigger_time ) { //This helped deal with negative time entries, before compactin meal/break policy function was added.
 											$punch_total_time = $past_trigger_time;
 											Debug::text('Using Past Trigger Time as punch total time: '. $past_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
 										} else {
@@ -6823,10 +6808,17 @@ class CalculatePolicy {
 
 										//If we are close to exceeding the maximum daily/weekly time, just use the remaining time.
 										if ( $maximum_daily_trigger_time > 0 AND $total_daily_time_used > $maximum_daily_trigger_time ) {
-											Debug::text('Using New Maximum Trigger Time as punch total time: '. $maximum_daily_trigger_time .'('. $total_daily_time_used.')', __FILE__, __LINE__, __METHOD__, 10);
-											$punch_total_time = ( $punch_total_time - ($total_daily_time_used - $maximum_daily_trigger_time) );
+											$tmp_daily_time_used = ( $total_daily_time_used - $maximum_daily_trigger_time );
+											//Only calculate new punch_total_time if $tmp_daily_time_used < $punch_total_time, otherwise it will result in a negative punch_total_time which is clearly incorrect.
+											if ( $tmp_daily_time_used < $punch_total_time ) {
+												Debug::text('Using New Maximum Trigger Time as punch total time: '. $maximum_daily_trigger_time .'('. $total_daily_time_used.')', __FILE__, __LINE__, __METHOD__, 10);
+												$punch_total_time = ( $punch_total_time - $tmp_daily_time_used );
+											} else {
+												Debug::text('bNOT Using New Maximum Trigger Time as punch total time: '. $maximum_daily_trigger_time .'('. $total_daily_time_used.')', __FILE__, __LINE__, __METHOD__, 10);
+											}
+											unset( $tmp_daily_time_used );
 										} else {
-											Debug::text('NOT Using New Maximum Trigger Time as punch total time: '. $maximum_daily_trigger_time .'('. $total_daily_time_used.')', __FILE__, __LINE__, __METHOD__, 10);
+											Debug::text('aNOT Using New Maximum Trigger Time as punch total time: '. $maximum_daily_trigger_time .'('. $total_daily_time_used.')', __FILE__, __LINE__, __METHOD__, 10);
 										}
 
 										$total_time = $punch_total_time;
@@ -8881,22 +8873,25 @@ class CalculatePolicy {
 	 */
 	function sortUserDateTotalDataByDateAndObjectTypeAndStartTimeStampAndID( $a, $b ) {
 		//Sort order obtained from: getUserDateTotalData(), if changes are needed, change there too.
-		//array( 'a.date_stamp' => 'asc', 'a.object_type_id' => 'asc', 'a.start_time_stamp' => 'asc', 'a.id' => 'asc' )
+		//  Need to sort by date, then start_time_stamp, otherwise lunch/break auto-add policies will be considered in OT calculation after all regular time, and that can throw things off.
+		//array( 'a.date_stamp' => 'asc', 'a.start_time_stamp' => 'asc', 'a.object_type_id' => 'asc', 'a.id' => 'asc' )
 		if ( $a->getDateStamp() == $b->getDateStamp() ) {
 
 			//Treat 25 (Absence) like its regular time, so its sorted by timestamp with the regular time policies.
 			//This makes it so absences without timestamps come before regular time with timestamps, and greatly affects how overtime policies are calculated.
-			$a_object_type_id = ( $a->getObjectType() == 25 ) ? 20 : $a->getObjectType();
-			$b_object_type_id = ( $b->getObjectType() == 25 ) ? 20 : $b->getObjectType();
+			//  Since we changed the sort order to be date_stamp, start_time_stamp, it handles this behavior for us instead.
+//			$a_object_type_id = ( $a->getObjectType() == 25 ) ? 20 : $a->getObjectType();
+//			$b_object_type_id = ( $b->getObjectType() == 25 ) ? 20 : $b->getObjectType();
 
-			if ( $a_object_type_id == $b_object_type_id ) {
-				if ( $a->getStartTimeStamp() == $b->getStartTimeStamp() ) {
+			if ( $a->getStartTimeStamp() == $b->getStartTimeStamp() ) {
+				if ( $a->getObjectType() == $b->getObjectType() ) {
 					return ( $a->getID() < $b->getID() ) ? (-1) : 1;
 				} else {
-					return ( $a->getStartTimeStamp() < $b->getStartTimeStamp() ) ? (-1) : 1;
+					return ( $a->getObjectType() < $b->getObjectType() ) ? (-1) : 1;
 				}
+
 			} else {
-				return ( $a_object_type_id < $b_object_type_id ) ? (-1) : 1;
+				return ( $a->getStartTimeStamp() < $b->getStartTimeStamp() ) ? (-1) : 1;
 			}
 		} else {
 			return ( $a->getDateStamp() < $b->getDateStamp() ) ? (-1) : 1;
@@ -9310,7 +9305,7 @@ class CalculatePolicy {
 							);
 
 		//If SORT order is changed, also change it in: sortUserDateTotalDataByDateAndObjectTypeAndStartTimeStampAndID()
-		$udtlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array( 'a.date_stamp' => 'asc', 'a.object_type_id' => 'asc', 'a.start_time_stamp' => 'asc', 'a.id' => 'asc' ) );
+		$udtlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array( 'a.date_stamp' => 'asc', 'a.start_time_stamp' => 'asc', 'a.object_type_id' => 'asc', 'a.id' => 'asc' ) );
 		if ( $udtlf->getRecordCount() > 0 ) {
 			Debug::text('Found UserDateTotal rows: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $udtlf as $udt_obj ) {
@@ -9709,11 +9704,14 @@ class CalculatePolicy {
 				//  So if the user punched in for 8hrs, then an override record adds another 1hr, the total should be 9hrs.
 				//  However if they instead override the 8hr regular time record and make it 9hrs, it should also be 9hrs. But they still have 8hrs of punch time too and 9hrs of override regular time.
 				//  We also don't know if they are taking auto-add/deduction meal/break policies into account for the overrides.
-				$maximum_daily_total_time = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByObjectTypeIDs( $date_stamp, $date_stamp, array( 10, 20, 25, 30, 50, 100, 110 ) ) );
+				$maximum_daily_total_time_udt = $this->filterUserDateTotalDataByObjectTypeIDs( $date_stamp, $date_stamp, array( 10, 20, 25, 30, 50, 100, 110 ) );
+				$maximum_daily_total_time = $this->getSumUserDateTotalData( $maximum_daily_total_time_udt );
 				//$maximum_daily_total_time = $this->getSumUserDateTotalData( $this->compactUserDateTotalDataBasedOnOverride( $this->filterUserDateTotalDataByObjectTypeIDs( $date_stamp, $date_stamp, array( 10, 20, 25, 30, 50, 100, 110 ) ) ) );
 				Debug::text('Maximum Daily Total Time: '. $maximum_daily_total_time, __FILE__, __LINE__, __METHOD__, 10);
 
-				if ( $maximum_daily_total_time > 0 ) {
+				// If there are at least 1 or more UDT records, then calculate all other time related policies.
+				//   Do this check instead of if $maximum_daily_total_time > 0 (or even $maximum_daily_total_time != 0), so we can support negative time absences for -1hr along with worked time for +1hr (which nets out to 0hrs) as well.
+				if ( count( $maximum_daily_total_time_udt ) > 0 ) {
 					//Calculate absence time before regular time, as Regular Time is exclusive to Absence time.
 					//Undertime absence above deletes absence records, so we always need to recalculate absences if undertime absences are calculated.
 					if ( $this->getFlag('absence') == TRUE OR $this->getFlag('undertime_absence') == TRUE OR $this->getFlag('schedule_absence') == TRUE OR $this->getFlag('holiday') == TRUE ) {
@@ -9753,6 +9751,7 @@ class CalculatePolicy {
 						$this->calculateSystemTotalTime( $date_stamp, $maximum_daily_total_time );
 					}
 				}
+				unset( $maximum_daily_total_time_udt );
 			} else {
 				Debug::text('Not calculating any time related policies due to flags...', __FILE__, __LINE__, __METHOD__, 10);
 			}
@@ -9811,7 +9810,7 @@ class CalculatePolicy {
 		//  NOTE: We switched to setting transaction mode in the outer transactions as inner transaction can't switch the mode in many cases.
 		//$this->getUserObject()->setTransactionMode( 'SERIALIZABLE' );
 		$this->getUserObject()->StartTransaction();
-		if ( $this->getUserObject()->getTransactionMode( TRUE ) != 'REPEATABLE READ' ) {
+		if ( DEMO_MODE == FALSE AND PRODUCTION == TRUE AND $this->getUserObject()->getTransactionMode( TRUE ) != 'REPEATABLE READ' ) {
 			Debug::text('ERROR: Transaction not in SERIALIZABLE mode!', __FILE__, __LINE__, __METHOD__, 10);
 			Misc::sendSystemMail( 'ERROR: Transaction not in SERIALIZABLE mode!', 'ERROR: Transaction not in SERIALIZABLE mode!' ."\n\n". Debug::backTrace() );
 		}

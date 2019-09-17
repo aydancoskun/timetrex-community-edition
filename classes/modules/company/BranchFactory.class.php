@@ -853,39 +853,38 @@ class BranchFactory extends Factory {
 			Debug::Text('UnAssign Hours from Branch: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			//Unassign hours from this branch.
 			$pcf = TTnew( 'PunchControlFactory' ); /** @var PunchControlFactory $pcf */
-			$udtf = TTnew( 'UserDateTotalFactory' ); /** @var UserDateTotalFactory $udtf */
-			$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
-			$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
-			$sbf = TTnew( 'StationBranchFactory' ); /** @var StationBranchFactory $sbf */
-			$sf_b = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf_b */
-			$udf = TTnew( 'UserDefaultFactory' ); /** @var UserDefaultFactory $udf */
-			$rstf = TTnew( 'RecurringScheduleTemplateFactory' ); /** @var RecurringScheduleTemplateFactory $rstf */
-			$rsf = TTnew( 'RecurringScheduleFactory' ); /** @var RecurringScheduleFactory $rsf */
-
 			$query = 'update '. $pcf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->ExecuteSQL($query);
 
+			$udtf = TTnew( 'UserDateTotalFactory' ); /** @var UserDateTotalFactory $udtf */
 			$query = 'update '. $udtf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->ExecuteSQL($query);
 
+			$sf_b = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf_b */
 			$query = 'update '. $sf_b->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->ExecuteSQL($query);
 
+			$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 			$query = 'update '. $uf->getTable() .' set default_branch_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND default_branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->ExecuteSQL($query);
 
+			$udf = TTnew( 'UserDefaultFactory' ); /** @var UserDefaultFactory $udf */
 			$query = 'update '. $udf->getTable() .' set default_branch_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND default_branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->ExecuteSQL($query);
 
+			$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
 			$query = 'update '. $sf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->ExecuteSQL($query);
 
+			$sbf = TTnew( 'StationBranchFactory' ); /** @var StationBranchFactory $sbf */
 			$query = 'delete from '. $sbf->getTable() .' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->ExecuteSQL($query);
 
+			$rstf = TTnew( 'RecurringScheduleTemplateFactory' ); /** @var RecurringScheduleTemplateFactory $rstf */
 			$query = 'update '. $rstf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->ExecuteSQL($query);
 
+			$rsf = TTnew( 'RecurringScheduleFactory' ); /** @var RecurringScheduleFactory $rsf */
 			$query = 'update '. $rsf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->ExecuteSQL($query);
 
@@ -905,6 +904,11 @@ class BranchFactory extends Factory {
 				}
 			}
 
+			if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
+				$uef = TTNew( 'UserExpenseFactory' ); /** @var UserExpenseFactory $uef */
+				$query = 'update '. $uef->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
+				$this->ExecuteSQL($query);
+			}
 		}
 
 		return TRUE;

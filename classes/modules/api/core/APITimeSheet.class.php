@@ -724,9 +724,10 @@ class APITimeSheet extends APIFactory {
 	 * Verify/Authorize timesheet
 	 * @param integer $user_id User ID of the timesheet that is being verified.
 	 * @param integer $pay_period_id Pay Period ID of the timesheet that is being verified.
+	 * @param bool $enable_authorize Create authorization record or not, should only be TRUE if called from the TimeSheet view and not from the TimeSheet Authorization View.
 	 * @return array|bool
 	 */
-	function verifyTimeSheet( $user_id, $pay_period_id ) {
+	function verifyTimeSheet( $user_id, $pay_period_id, $enable_authorize = TRUE ) {
 		if ( $user_id != '' AND $pay_period_id != ''  ) {
 			Debug::text('Verifying Pay Period TimeSheet ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -735,7 +736,7 @@ class APITimeSheet extends APIFactory {
 			 * @return array
 			 */
 
-			$transaction_function = function() use ( $pptsvlf, $user_id, $pay_period_id ) {
+			$transaction_function = function() use ( $pptsvlf, $user_id, $pay_period_id, $enable_authorize ) {
 				$pptsvlf->setTransactionMode( 'REPEATABLE READ' );
 				$pptsvlf->StartTransaction();
 				$pptsvlf->getByPayPeriodIdAndUserId( $pay_period_id, $user_id );
@@ -750,6 +751,8 @@ class APITimeSheet extends APIFactory {
 				$pptsvf->setCurrentUser( $this->getCurrentUserObject()->getId() );
 				$pptsvf->setUser( $user_id );
 				$pptsvf->setPayPeriod( $pay_period_id );
+
+				$pptsvf->setEnableAuthorize( $enable_authorize );
 
 				if ( $pptsvf->isValid() ) {
 					$pptsvf->Save( FALSE );

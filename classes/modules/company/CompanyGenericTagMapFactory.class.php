@@ -148,7 +148,7 @@ class CompanyGenericTagMapFactory extends Factory {
 				$del_tag_ids = array();
 				if ( isset($parsed_tags['delete']) ) {
 					foreach( $parsed_tags['delete'] as $del_tag ) {
-						$del_tag = strtolower($del_tag);
+						$del_tag = TTi18n::strtolower($del_tag);
 						if ( isset($existing_tags[$del_tag]) AND TTUUID::isUUID( $existing_tags[$del_tag] ) AND $existing_tags[$del_tag] != TTUUID::getZeroID() ) {
 							$del_tag_ids[] = $existing_tags[$del_tag];
 						}
@@ -179,14 +179,14 @@ class CompanyGenericTagMapFactory extends Factory {
 				//Add new tags.
 				if ( isset($parsed_tags['add']) ) {
 					foreach( $parsed_tags['add'] as $add_tag ) {
-						$add_tag = strtolower($add_tag);
+						$add_tag = TTi18n::strtolower($add_tag);
 						if ( isset($existing_tags[$add_tag])
 								AND TTUUID::isUUID( $existing_tags[$add_tag] ) AND  $existing_tags[$add_tag] != TTUUID::getZeroID() AND $existing_tags[$add_tag] != TTUUID::getNotExistID()
 								AND !in_array($existing_tags[$add_tag], $tmp_ids) ) {
 							$cgtmf = TTnew('CompanyGenericTagMapFactory'); /** @var CompanyGenericTagMapFactory $cgtmf */
 							$cgtmf->setObjectType( $object_type_id );
 							$cgtmf->setObjectID( $object_id );
-							$cgtmf->setTagID( $existing_tags[strtolower($add_tag)] );
+							$cgtmf->setTagID( $existing_tags[TTi18n::strtolower($add_tag)] );
 							if ( $cgtmf->isValid() ) {
 								$cgtmf->Save();
 							}

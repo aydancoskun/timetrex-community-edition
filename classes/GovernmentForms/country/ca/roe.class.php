@@ -997,7 +997,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 				// Box6
 				$xml->ROE[ $e ]->addChild( 'B6', $pay_period_type_options[ $this->pay_period_type_id ] ); //maxLength 1
 				// Box8
-				$xml->ROE[ $e ]->addChild( 'B8', ( $this->sin != '' ) ? $this->sin : '000000000' ); //maxLength 9
+				$xml->ROE[ $e ]->addChild( 'B8', ( $this->sin != '' ) ? $this->sin : '999999999' ); //maxLength 9 - This must be specified, but allow all 9's for cases where the employee may be out of the country?
 				// Box9
 				$xml->ROE[ $e ]->addChild( 'B9' );
 				$xml->ROE[ $e ]->B9->addChild( 'FN', $this->first_name ); //maxLength 20

@@ -2005,14 +2005,14 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertNotEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['id'], $punch_arr[$date_epoch][1]['shift_data']['punches'][0]['id'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
-		//Total Time
-		if ( isset($udt_arr[$date_epoch][0]) ) {
-			$this->assertTrue( FALSE );
-		} else {
-			$this->assertTrue( TRUE );
-		}
-		//$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
-		//$this->assertEquals( (0 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
+		//print_r($udt_arr);
+
+		//Since there is an IN punch and an OUT punch (they just aren't paired) a system total record of 0hrs will be created.
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (0 * 3600) );
+
+		$this->assertEquals( count($udt_arr[$date_epoch]), 1 );
 
 		return TRUE;
 	}

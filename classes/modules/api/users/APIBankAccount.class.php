@@ -51,7 +51,7 @@ class APIBankAccount extends APIFactory {
 	}
 
 	/**
-	 * Get default branch data for creating new branches.
+	 * Get default bank account data for creating new bank accountes.
 	 * @param string $user_id UUID
 	 * @return array
 	 */
@@ -70,7 +70,7 @@ class APIBankAccount extends APIFactory {
 	}
 
 	/**
-	 * Get branch data for one or more branches.
+	 * Get bank account data for one or more bank accountes.
 	 * @param array $data filter data
 	 * @param bool $disable_paging
 	 * @return array|bool
@@ -147,8 +147,8 @@ class APIBankAccount extends APIFactory {
 	}
 
 	/**
-	 * Validate branch data for one or more branches.
-	 * @param array $data branch data
+	 * Validate bank account information.
+	 * @param array $data bank account data
 	 * @return array
 	 */
 	function validateBankAccount( $data ) {
@@ -156,8 +156,8 @@ class APIBankAccount extends APIFactory {
 	}
 
 	/**
-	 * Set branch data for one or more branches.
-	 * @param array $data branch data
+	 * Set bank account data for one or more bank accountes.
+	 * @param array $data bank account data
 	 * @param bool $validate_only
 	 * @param bool $ignore_warning
 	 * @return array|bool
@@ -297,8 +297,8 @@ class APIBankAccount extends APIFactory {
 	}
 
 	/**
-	 * Delete one or more branchs.
-	 * @param array $data branch data
+	 * Delete one or more bank accounts.
+	 * @param array $data bank account data
 	 * @return array|bool
 	 */
 	function deleteBankAccount( $data ) {
@@ -333,7 +333,7 @@ class APIBankAccount extends APIFactory {
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
-					//Get branch object, so we can only modify just changed data for specific records if needed.
+					//Get bank account object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
