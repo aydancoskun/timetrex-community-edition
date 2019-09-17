@@ -664,12 +664,13 @@ class APIPunch extends APIFactory {
 								//This is important when adding/editing a punch, without it there can be issues calculating exceptions
 								//because if a specific punch was modified that caused the day to change, smartReCalculate
 								//may only be able to recalculate a single day, instead of both.
-								//$pcf->setUser( $row['user_id'] ); //Set from PunchObject.
-								$old_date_stamp = ( is_object( $lf->getPunchControlObject() ) ) ? $lf->getPunchControlObject()->getDateStamp() : 0;
-								if ( $old_date_stamp != 0 ) {
-									Debug::Text('Setting old date stamp to: '. TTDate::getDate('DATE', $old_date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
-									$pcf->setOldDateStamp( $old_date_stamp );
-								}
+								//  **This actually breaks the case where the In punch is changed to move the shift on different days. ie: Jan 27 @ 11PM -> Jan 28th at 1AM.
+								//    Everything should be handled in PunchControlFactory->setDateStamp() instead.
+//								$old_date_stamp = ( is_object( $lf->getPunchControlObject() ) ) ? $lf->getPunchControlObject()->getDateStamp() : 0;
+//								if ( $old_date_stamp != 0 ) {
+//									Debug::Text('Setting old date stamp to: '. TTDate::getDate('DATE', $old_date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+//									$pcf->setOldDateStamp( $old_date_stamp );
+//								}
 
 								$pcf->setObjectFromArray( $row );
 

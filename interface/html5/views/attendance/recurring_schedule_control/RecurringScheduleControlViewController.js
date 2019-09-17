@@ -131,7 +131,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'display_weeks', width: 20 } );
 		this.addEditFieldToColumn( $.i18n._( 'Display Weeks' ), form_item_input, tab_recurring_schedule_column1, '', null );
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+		if ( ( Global.getProductEdition() >= 15 ) ) {
 			// Auto-Punch
 			form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 			form_item_input.TCheckbox( { field: 'auto_fill' } );
@@ -145,7 +145,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		// Employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		var default_args = {};
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+		if ( ( Global.getProductEdition() >= 15 ) ) {
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
 				allow_multiple_selection: true,
@@ -160,7 +160,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 						return source_data;
 					}
 
-					var first_item = form_item_input.createItem( 0, Global.open_item );
+					var first_item = form_item_input.createItem( TTUUID.zero_id, Global.open_item );
 					source_data.unshift( first_item );
 					return source_data;
 
@@ -310,7 +310,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	onEmployeeSourceCreate: function( target, source_data ) {
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 ) {
+		if ( Global.getProductEdition() <= 10 ) {
 			return source_data;
 		}
 
@@ -318,7 +318,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		var first_item = {};
 		$.each( display_columns, function( index, content ) {
 
-			first_item.id = '0';
+			first_item.id = TTUUID.zero_id;
 			first_item[content.name] = Global.open_item;
 
 			return false;
@@ -616,50 +616,10 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		$this.initEditView();
 	},
 
-	_continueDoCopyAsNew: function() {
-
-		var $this = this;
-		this.is_add = true;
-
-		LocalCacheData.current_doing_context_action = 'copy_as_new';
-
-		if ( Global.isSet( this.edit_view ) ) {
-
-			this.current_edit_record.id = '';
-			var navigation_div = this.edit_view.find( '.navigation-div' );
-			navigation_div.css( 'display', 'none' );
-			this.setEditMenu();
-			this.setTabStatus();
-			this.is_changed = false;
-			ProgressBar.closeOverlay();
-
-		} else {
-
-			var filter = {};
-			var grid_selected_id_array = this.getGridSelectIdArray();
-			var grid_selected_length = grid_selected_id_array.length;
-
-			if ( grid_selected_length > 0 ) {
-				var selectedId = grid_selected_id_array[0];
-			} else {
-				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
-				return;
-			}
-
-			selectedId = this.parseToRecordId( selectedId );
-
-			filter.filter_data = {};
-			filter.filter_data.id = [selectedId];
-
-			this.api['get' + this.api.key_name]( filter, {
-				onResult: function( result ) {
-
-					$this.onCopyAsNewResult( result );
-
-				}
-			} );
-		}
-
+	getCopyAsNewFilter: function ( filter ) {
+		var old_selected_id = filter.filter_data.id[0];
+		filter.filter_data.id = [ this.parseToRecordId( old_selected_id )];
+		return filter;
 	},
 
 	onCopyClick: function() {
@@ -788,7 +748,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 							filter.filter_data.include_user_ids = { value: include_users };
 							filter.select_date = now_date.format();
-							Global.addViewTab( $this.viewId, 'Recurring Schedules', window.location.href );
+							Global.addViewTab( $this.viewId, $.i18n._( 'Recurring Schedules' ), window.location.href );
 							IndexViewController.goToView( 'Schedule', filter );
 
 						}
@@ -799,7 +759,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 					filter.filter_data.include_user_ids = { value: include_users };
 					filter.select_date = now_date.format();
 
-					Global.addViewTab( this.viewId, 'Recurring Schedules', window.location.href );
+					Global.addViewTab( this.viewId, $.i18n._( 'Recurring Schedules' ), window.location.href );
 					IndexViewController.goToView( 'Schedule', filter );
 
 				}
@@ -828,7 +788,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 							filter.filter_data.id = [result_data.recurring_schedule_template_control_id];
 
-							Global.addViewTab( $this.viewId, 'Recurring Schedules', window.location.href );
+							Global.addViewTab( $this.viewId, $.i18n._( 'Recurring Schedules' ), window.location.href );
 							IndexViewController.goToView( 'RecurringScheduleTemplateControl', filter );
 
 						}
@@ -837,7 +797,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				} else {
 					filter.filter_data.id = [selected_item.recurring_schedule_template_control_id];
 
-					Global.addViewTab( this.viewId, 'Recurring Schedules', window.location.href );
+					Global.addViewTab( this.viewId, $.i18n._( 'Recurring Schedules' ), window.location.href );
 					IndexViewController.goToView( 'RecurringScheduleTemplateControl', filter );
 
 				}
@@ -1088,7 +1048,6 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 					item.id = item.id + '_' + item.user_id;
 				}
 
-				$this.grid.clearGridData();
 				$this.grid.setData( result_data );
 
 				$this.reSelectLastSelectItems();

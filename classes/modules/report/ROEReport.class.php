@@ -623,8 +623,8 @@ class ROEReport extends Report {
 					continue;
 				}
 
-				/** @var LegalEntityFactory $le_obj */
-				$le_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
+				/** @var LegalEntityFactory $legal_entity_obj */
+				$legal_entity_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
 
 				$cra_pra_obj = $this->form_data['remittance_agency'][ $legal_entity_id ][10];
 				$pra_obj = $this->form_data['remittance_agency'][ $legal_entity_id ][20];
@@ -634,15 +634,17 @@ class ROEReport extends Report {
 				//$roe->setDebug( TRUE );
 				//$roe->setType( $form_type );
 				$roe->business_number = $cra_pra_obj->getPrimaryIdentification();
-				$roe->company_name = $le_obj->getTradeName();
-				$roe->company_address1 = $le_obj->getAddress1();
-				$roe->company_address2 = $le_obj->getAddress2();
-				$roe->company_city = $le_obj->getCity();
-				$roe->company_province = $le_obj->getProvince();
-				$roe->company_postal_code = $le_obj->getPostalCode();
-				$roe->company_work_phone = $le_obj->getWorkPhone();
+				$roe->company_name = $legal_entity_obj->getLegalName();
+				$roe->company_address1 = $legal_entity_obj->getAddress1();
+				$roe->company_address2 = $legal_entity_obj->getAddress2();
+				$roe->company_city = $legal_entity_obj->getCity();
+				$roe->company_province = $legal_entity_obj->getProvince();
+				$roe->company_postal_code = $legal_entity_obj->getPostalCode();
+				$roe->company_work_phone = $legal_entity_obj->getWorkPhone();
 				$roe->english = TRUE;
 
+				$batch_id = '';
+				$report_data = array();
 				foreach ( $user_rows as $row ) {
 					$ulf = TTnew( 'UserListFactory' );
 					$ulf->getById( TTUUID::castUUID( $row['user_id'] ) );
@@ -682,7 +684,6 @@ class ROEReport extends Report {
 								'comments'            => $row['comments'],
 								'created_date'        => TTDate::parseDateTime( $row['created_date'] ),
 						);
-
 					}
 
 					if ( is_object( $pra_obj ) AND is_object( $pra_obj->getContactUserObject() ) ) {
@@ -708,28 +709,101 @@ class ROEReport extends Report {
 						}
 					}
 
+					//remote_id=Should be the ROE record ID, rather than the user_id so we can better differentiate between multiple ROEs for the same employee.
+					$report_data[] = array( 'remote_id' => $row['id'], 'first_name' => $user_obj->getFirstName(), 'last_name' => $user_obj->getLastName(), 'sin' => $user_obj->getSIN(), 'first_date' => TTDate::parseDateTime( $row['first_date'] ), 'last_date' => TTDate::parseDateTime( $row['last_date'] ), 'pay_period_end_date' => TTDate::parseDateTime( $row['pay_period_end_date'] ) );
+					$batch_id .= substr( $user_obj->getLastName(), 0, 9 ) . date('Ym', TTDate::parseDateTime( $row['pay_period_end_date'] ) );
+
 					$roe->addRecord( $ee_data );
 					unset( $ee_data );
 
 					$i++;
 				}
+				unset( $user_rows, $rows, $ulf, $user_obj, $title_obj, $contact_user_obj );
 
 				$this->getFormObject()->addForm( $roe );
 
+				$full_service_efile = FALSE;
 				if ( $format == 'efile_xml' ) {
-					$output_format = 'XML';
-					$file_name = 'roe_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.xml';
-					$mime_type = 'applications/octet-stream'; //Force file to download.
-				} else {
-					$output_format = 'PDF';
-					$file_name = 'roe_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.pdf';
-					$mime_type = $this->file_mime_type;
+					$praelf = TTNew( 'PayrollRemittanceAgencyEventListFactory' );
+					$praelf->getAPISearchByCompanyIdAndArrayCriteria( $legal_entity_obj->getCompany(), array('payroll_remittance_agency_id' => $pra_obj->getId(), 'type_id' => 'ROE', 'status_id' => 15 ) ); //15=Full Service
+					if ( $praelf->getRecordCount() > 0 ) {
+						$prae_obj = $praelf->getCurrent();
+						$full_service_efile = TRUE;
+						Debug::Text(' Full Service eFile: Yes', __FILE__, __LINE__, __METHOD__, 10);
+					}
 				}
-				$file_output = $this->getFormObject()->output( $output_format );
-				if ( !is_array( $file_output ) ) {
-					$file_arr[] = array('file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $file_output);
+
+				if ( PRODUCTION == TRUE AND $full_service_efile == TRUE AND is_object( $legal_entity_obj ) AND $legal_entity_obj->getPaymentServicesStatus() == 10 AND $legal_entity_obj->getPaymentServicesUserName() != '' AND $legal_entity_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+					if ( $roe->countRecords() > 0 ) {
+						try {
+							$tt_ps_api = $legal_entity_obj->getPaymentServicesAPIObject();
+
+							if ( strlen( $batch_id ) > 15 ) {
+								$batch_id = TTUUID::truncateUUID( TTUUID::convertStringToUUID( md5( $batch_id ) ), 15 );
+							}
+
+							$remote_id = TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $batch_id . $roe->countRecords() ) );
+
+							$agency_report_arr = $tt_ps_api->convertROEToAgencyReportArray( $this->getFormObject(), $report_data, $prae_obj, $pra_obj, $remote_id, $batch_id );
+							$retval = $tt_ps_api->setAgencyReport( $agency_report_arr ); //P=Payment
+							Debug::Arr( $retval, 'TimeTrexPaymentServices Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+							if ( $retval->isValid() == TRUE ) {
+								$retval = array(
+										'api_retval'  => FALSE, //Needs to be FALSE to show a popup to the user, even though its a success message.
+										'api_details' => array(
+												'code'        => 'SUCCESS',
+												'description' => TTi18n::gettext( 'ROE(s) submitted successfully!' ),
+										),
+								);
+							} else {
+								$retval = array(
+										'api_retval'  => FALSE,
+										'api_details' => array(
+												'code'        => 'ERROR',
+												'description' => TTi18n::gettext( 'ERROR! Unable to submit ROE(s)!' ),
+										),
+								);
+							}
+						} catch ( Exception $e ) {
+							Debug::Text( 'ERROR! Unable to upload agency report data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+							$retval = array(
+									'api_retval'  => FALSE,
+									'api_details' => array(
+											'code'        => 'ERROR',
+											'description' => TTi18n::gettext('Payment Services ERROR: %1', array( $e->getMessage() ) ),
+									),
+							);
+						}
+					} else {
+						Debug::Text(' ERROR! No ROE records to eFile!', __FILE__, __LINE__, __METHOD__, 10);
+						$retval = array(
+								'api_retval'  => FALSE,
+								'api_details' => array(
+										'code'        => 'ERROR',
+										'description' => TTi18n::gettext( 'ERROR! No ROE(s) to submit!' ),
+								),
+						);
+					}
+
+					Debug::Arr( $retval, ' Full Service eFile Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+					return $retval;
 				} else {
-					return $file_output;
+					if ( $format == 'efile_xml' ) {
+						$output_format = 'XML';
+						$file_name = 'roe_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.xml';
+						$mime_type = 'applications/octet-stream'; //Force file to download.
+					} else {
+						$output_format = 'PDF';
+						$file_name = 'roe_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.pdf';
+						$mime_type = $this->file_mime_type;
+					}
+
+					$file_output = $this->getFormObject()->output( $output_format );
+					if ( !is_array( $file_output ) ) {
+						$file_arr[] = array('file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $file_output);
+					} else {
+						return $file_output;
+					}
 				}
 
 				//Reset the file objects.

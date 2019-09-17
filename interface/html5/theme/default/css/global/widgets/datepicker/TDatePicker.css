@@ -121,7 +121,7 @@
 
 .ui-datepicker .ui-state-active {
     border: 1px solid #2694e8;
-    background: #3baae3 50% 50% repeat-x;
+    background: #3baae3 50% 50% repeat-x !important;
     font-weight: bold;
     /*color: #ffffff;*/
     user-drag: none;

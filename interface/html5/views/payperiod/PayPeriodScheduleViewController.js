@@ -208,53 +208,6 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	},
 
-	_continueDoCopyAsNew: function() {
-		var $this = this;
-		this.is_add = true;
-
-		LocalCacheData.current_doing_context_action = 'copy_as_new';
-
-		var selectedId;
-
-		if ( Global.isSet( this.edit_view ) ) {
-
-			this.current_edit_record.id = '';
-			var navigation_div = this.edit_view.find( '.navigation-div' );
-			navigation_div.css( 'display', 'none' );
-			this.setEditMenu();
-			this.setTabStatus();
-
-			$this.onTypeChange(); //Override for this;
-			this.is_changed = false;
-			ProgressBar.closeOverlay();
-
-		} else {
-
-			var filter = {};
-			var grid_selected_id_array = this.getGridSelectIdArray();
-			var grid_selected_length = grid_selected_id_array.length;
-
-			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
-				return;
-			}
-
-			filter.filter_data = {};
-			filter.filter_data.id = [selectedId];
-
-			this.api['get' + this.api.key_name]( filter, {
-				onResult: function( result ) {
-
-					$this.onCopyAsNewResult( result );
-
-				}
-			} );
-		}
-
-	},
-
 	onTypeChange: function() {
 
 		if ( this.current_edit_record.type_id == 5 ) {

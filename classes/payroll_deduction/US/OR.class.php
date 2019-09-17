@@ -544,7 +544,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 		return $retval;
 	}
 
-	function getStateTaxPayable() {
+	function _getStateTaxPayable() {
 		//IF exemptions are 3 or more, change filing status to married.
 		$this->original_filing_status = $this->getStateFilingStatus();
 

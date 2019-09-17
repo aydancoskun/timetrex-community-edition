@@ -528,5 +528,43 @@ class APILegalEntity extends APIFactory {
 			}
 		}
 	}
+
+	function getPaymentServicesAccountStatementReport( $legal_entity_id, $start_date = NULL, $end_date = NULL ) {
+		//Permissions match setLegalEntity
+		if ( !$this->getPermissionObject()->Check('legal_entity', 'enabled')
+				OR !( $this->getPermissionObject()->Check('legal_entity', 'edit') OR $this->getPermissionObject()->Check('legal_entity', 'edit_own') OR $this->getPermissionObject()->Check('legal_entity', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
+		}
+
+		$data['filter_data'] = $legal_entity_id;
+
+		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'] );
+		Debug::Text('Record Count: '. $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $lelf->getRecordCount() > 0 ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount() );
+
+			$output = array();
+			foreach( $lelf as $le_obj ) {
+				if ( $le_obj->checkPaymentServicesCredentials() == TRUE ) {
+					$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+					$output = $tt_ps_api->getAccountStatementReport( $start_date, $end_date );
+				}
+
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $lelf->getCurrentRow() );
+			}
+
+			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+
+			if ( $output != '' ) {
+				return Misc::APIFileDownload( 'payment_services_account_statement.txt', 'application/txt', $output );
+			} else {
+				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('ERROR: No data for account statement...') );
+			}
+
+		}
+
+		return $this->returnHandler( FALSE );
+	}
 }
 ?>

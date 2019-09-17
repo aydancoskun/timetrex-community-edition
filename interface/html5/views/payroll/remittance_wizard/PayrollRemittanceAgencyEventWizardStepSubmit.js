@@ -55,7 +55,6 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
 		this.getWizardObject().getPayrollRemittanceAgencyEventById( this.getWizardObject().selected_remittance_agency_event_id, null, function( result ) {
 			$this.getWizardObject().selected_remittance_agency_event = result;
 			$this.getWizardObject().buildEventDataBlock( 'payroll_remittance_agency_event_wizard-review-event_details', result );
-			$this.getWizardObject().enableButtons();
 			$this.initCardsBlock();
 
 			if ( $this.getWizardObject().selected_remittance_agency_event.status_id == 15 ) { //15=Full Service
@@ -66,6 +65,14 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
 							Icons.payment_method,
 							$.i18n._( 'Make Payment' ),
 							$.i18n._( 'Transmit payment with TimeTrex Payment Services automatically.' )
+						);
+						break;
+					case 'T4':
+					case 'T4A':
+						$this.addButton( ContextMenuIconName.e_file,
+							Icons.e_file,
+							$.i18n._( 'eFile' ),
+							$.i18n._( 'Transmit forms to the CRA with TimeTrex Payment Services automatically.' )
 						);
 						break;
 					default:
@@ -182,6 +189,11 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
 							$.i18n._( 'Report' ),
 							$.i18n._( 'Generate the report to file manually.' )
 						);
+						$this.addButton( ContextMenuIconName.payment_method,
+							Icons.payment_method,
+							$.i18n._( 'File Report' ),
+							$.i18n._( 'Navigate to the agency\'s website to file the report manually.' )
+						);
 						break;
 					case 'PAYMENT':
 					case 'REPORT+PAYMENT':
@@ -212,6 +224,8 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
 						break;
 				}
 			}
+
+			$this.getWizardObject().enableButtons();
 		} );
 	},
 
@@ -225,6 +239,14 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
 					switch ( icon ) {
 						case ContextMenuIconName.payment_method:
 							this.paymentServicesClick( 'payment' );
+							break;
+					}
+					break;
+				case 'T4':
+				case 'T4A':
+					switch ( icon ) {
+						case 'eFileIcon':
+							this.paymentServicesClick( 'efile_xml' );
 							break;
 					}
 					break;

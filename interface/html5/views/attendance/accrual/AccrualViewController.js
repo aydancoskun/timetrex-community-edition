@@ -316,26 +316,6 @@ AccrualViewController = BaseViewController.extend( {
 		];
 	},
 
-	onFormItemChange: function( target, doNotValidate ) {
-		this.setIsChanged( target );
-		this.setMassEditingFieldsWhenFormChange( target );
-
-		var key = target.getField();
-		var c_value = target.getValue();
-
-//		switch ( key ) {
-//			case 'amount':
-//				c_value = this.date_api.parseTimeUnit( target.getValue(), {async: false} ).getResult();
-//				break;
-//		}
-
-		this.current_edit_record[key] = c_value;
-
-		if ( !doNotValidate ) {
-			this.validate();
-		}
-	},
-
 	setEditViewData: function() {
 		//use the user_type_array in edit mode and new mode, use the system_type_array in view mode
 		//this prevents users from choosing type_ids that are for system use only but can see the system type_ids when viewing

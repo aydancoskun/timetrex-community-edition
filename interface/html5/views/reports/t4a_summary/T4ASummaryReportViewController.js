@@ -126,7 +126,7 @@ T4ASummaryReportViewController = ReportBaseViewController.extend( {
 			nav: view_print
 		} );
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+		if ( ( Global.getProductEdition() >= 15 ) ) {
 			var pdf_form_publish_employee = new RibbonSubMenuNavItem( {
 				label: $.i18n._( 'Publish Employee Forms' ),
 				id: 'pdf_form_publish_employee',

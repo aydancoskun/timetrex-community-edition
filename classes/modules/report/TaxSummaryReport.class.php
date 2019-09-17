@@ -1014,14 +1014,14 @@ class TaxSummaryReport extends Report {
 	 * Formats report data for exporting to TimeTrex payment service.
 	 * @return array
 	 */
-	function getPaymentServicesData() {
+	function getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj ) {
 		//Make sure we have the columns we need.
 		$report_data['config'] = $this->getConfig();
 		$report_data['config']['columns'] = array( 'payroll_remittance_agency_name', 'transaction-date_stamp', 'subject_wages', 'taxable_wages', 'tax_withheld', 'total_user' );
 		$report_data['config']['group'] = array( 'payroll_remittance_agency_name', 'transaction-date_stamp' );
 		$this->setConfig( (array)$report_data['config'] );
 
-		$output_data = $this->getOutput( 'raw' );
+		$output_data = $this->getOutput( 'payment_services' );
 		Debug::Arr( $output_data, 'Raw Report data!', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $this->hasData() ) {
@@ -1029,13 +1029,26 @@ class TaxSummaryReport extends Report {
 			$last_row = end( $output_data );
 
 			if ( isset( $last_row['_total'] ) ) {
+				$batch_id = date( 'M d', $prae_obj->getEndDate() );
+
+				$amount_due = ( isset( $last_row['tax_withheld'] ) ) ? $last_row['tax_withheld'] : NULL;
+
 				$retarr = array(
-						'object'          => 'TaxSummaryReport',
-						'total_employees' => ( isset( $last_row['total_user'] ) ) ? (int)$last_row['total_user'] : NULL,
-						'subject_wages'   => ( isset( $last_row['subject_wages'] ) ) ? $last_row['subject_wages'] : NULL,
-						'taxable_wages'   => ( isset( $last_row['taxable_wages'] ) ) ? $last_row['taxable_wages'] : NULL,
-						'amount_withheld' => ( isset( $last_row['tax_withheld'] ) ) ? $last_row['tax_withheld'] : NULL,
-						'amount_due'      => ( isset( $last_row['tax_withheld'] ) ) ? $last_row['tax_withheld'] : NULL,
+						'object'          => __CLASS__,
+						'user_success_message' => TTi18n::gettext( 'Payment submitted successfully for $%1', array( Misc::MoneyFormat( $amount_due ) ) ),
+						'agency_report_data' => array (
+							'total_employees' => ( isset( $last_row['total_user'] ) ) ? (int)$last_row['total_user'] : NULL,
+							'subject_wages'   => ( isset( $last_row['subject_wages'] ) ) ? $last_row['subject_wages'] : NULL,
+							'taxable_wages'   => ( isset( $last_row['taxable_wages'] ) ) ? $last_row['taxable_wages'] : NULL,
+							'amount_withheld' => ( isset( $last_row['tax_withheld'] ) ) ? $last_row['tax_withheld'] : NULL,
+							'amount_due'      => $amount_due,
+
+							'remote_batch_id' => $batch_id,
+
+							//Generate a consistent remote_id based on the exact pay stubs that are selected, the remittance agency event, and batch ID.
+							//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
+							'remote_id' => TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $batch_id ) )
+						),
 				);
 
 				return $retarr;

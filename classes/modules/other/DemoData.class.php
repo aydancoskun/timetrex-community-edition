@@ -2243,12 +2243,10 @@ class DemoData {
 			case 10: //Vacation
 				$apf->setName( 'PTO/Vacation' );
 				$apf->setPayCode( $pay_code_id );
-				//$apf->setType( 10 ); //Paid
-				//$apf->setRate( 1.0 );
-				//$apf->setAccrualPolicyID( $accrual_policy_id );
-				//$apf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 50, 'Vacation Accrual Release') );
-				//$apf->setAccrualRate( 1.0 );
-
+				break;
+			case 11: //Vacation (B) -- Same paycode, just different name for testing.
+				$apf->setName( 'PTO/Vacation (B)' );
+				$apf->setPayCode( $pay_code_id );
 				break;
 			case 20: //Bank Time
 				$apf->setName( 'Bank Time' );
@@ -4784,7 +4782,6 @@ class DemoData {
 		$uwf->setWageGroup( $wage_group_id );
 		$uwf->setType( 10 );
 		$uwf->setWage(	$rate );
-		//$uwf->setWeeklyTime( TTDate::parseTimeUnit( $wage_data['weekly_time'] ) );
 		$uwf->setLaborBurdenPercent( 13.5 );
 		$uwf->setEffectiveDate( $effective_date );
 

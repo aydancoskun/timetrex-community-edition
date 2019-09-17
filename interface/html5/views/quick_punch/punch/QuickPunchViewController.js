@@ -57,7 +57,7 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			$this.branch_api = new (APIFactory.getAPIClass( 'APIBranch' ))();
 			$this.department_api = new (APIFactory.getAPIClass( 'APIDepartment' ))();
 			$this.other_field_api = new (APIFactory.getAPIClass( 'APIOtherField' ))();
-			if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+			if ( ( Global.getProductEdition() >= 20 ) ) {
 				$this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
 				$this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
 			}
@@ -294,7 +294,7 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			}
 		} );
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			TTPromise.add( 'QuickPunch_options', 'Job' );
 			TTPromise.add( 'QuickPunch_options', 'JobItem' );
 
@@ -524,14 +524,14 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 		this.current_edit_record[key] = c_value;
 		switch ( key ) {
 			case 'job_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					var manual_id = $( $( e.currentTarget ).find( 'option[value=\'' + c_value + '\']' ) ).attr( 'manual_id' );
 					this.$( 'input[name="job_quick_search"]' ).val( manual_id ? manual_id : '' );
 					this.setJobItemValueWhenJobChanged( c_value );
 				}
 				break;
 			case 'job_item_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					var manual_id = $( $( e.currentTarget ).find( 'option[value=\'' + c_value + '\']' ) ).attr( 'manual_id' );
 					this.$( 'input[name="job_item_quick_search"]' ).val( manual_id ? manual_id : '' );
 				}
@@ -548,7 +548,7 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				break;
 			case 'job_quick_search':
 			case 'job_item_quick_search':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.onJobQuickSearch( key, c_value );
 				}
 				break;

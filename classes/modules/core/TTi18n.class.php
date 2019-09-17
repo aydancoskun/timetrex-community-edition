@@ -560,11 +560,9 @@ class TTi18n {
 	 * @return array
 	 */
 	static public function getLanguageArray() {
-
-		$this_language = self::getLanguage();
 		// Return supported languages
-		$supported_langs = array( 'en', 'da', 'de', 'es', 'id', 'it', 'fr', 'pt', 'ar', 'zh');
-		$beta_langs = array( 'da', 'de', 'es', 'id', 'it', 'fr', 'pt', 'ar', 'zh' );
+		$supported_langs = array( 'en', 'de', 'es', 'id', 'fr' );
+		$beta_langs = array( 'de', 'es', 'id', 'fr' );
 
 		if ( PRODUCTION == FALSE ) {
 			//YI is for testing only.

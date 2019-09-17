@@ -142,11 +142,11 @@ LocalCacheData.isLocalCacheExists = function( key ) {
 };
 
 LocalCacheData.getLocalCache = function( key, format ) {
-	//BUG#2066 - For testing bad cache. See getrequiredlocalcache
-	//if(key == 'current_company'){return null}
+	//BUG#2066 - For testing bad cache. See getRequiredLocalCache()
+	//if ( key == 'current_company' ){ return null; }
 	if ( LocalCacheData[key] ) {
 		return LocalCacheData[key];
-	} else if ( !LocalCacheData[key] && sessionStorage[key] ) {
+	} else if ( LocalCacheData.isSupportHTML5LocalCache == true && sessionStorage[key] ) { //Fall back to sessionStorage if available and data exists.
 		var result = sessionStorage.getItem( key );
 
 		if ( result !== 'undefined' && format === 'JSON' ) {
@@ -176,7 +176,9 @@ LocalCacheData.setLocalCache = function( key, val, format ) {
 		}
 	}
 
-	LocalCacheData[key] = val;
+	LocalCacheData[key] = val; //Always set in memory as well.
+
+	return true;
 };
 
 /**
@@ -195,13 +197,14 @@ LocalCacheData.getRequiredLocalCache = function( key, format ) {
 		//  Second is that a required local cache item is not yet loaded because most of the required data isn't set yet.
 		//  In the second case we need to fail gracefully to show the error and stack trace on the console.
 		try {
+			Global.sendErrorReport( 'ERROR: Unable to get required local cache data: ' + key ); //Send error as soon as possible, before any data gets cleared.
+
 			//This code is duplicated in RibbonViewController.doLogout() but that class can't be called here or reloads will throw a bunch of extra errors.
 			Global.clearSessionCookie();
 			LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
 			LocalCacheData.setLoginUser( null );
 			LocalCacheData.setCurrentCompany( null );
 			sessionStorage.clear();
-			Global.sendErrorReport( 'ERROR: Unable to get required local cache data: ' + key );
 			window.location.reload();
 		} catch ( e ) {
 			// Early page loads won't have Global or TAlertManager
@@ -212,23 +215,6 @@ LocalCacheData.getRequiredLocalCache = function( key, format ) {
 				window.location.reload();
 			}
 		}
-
-		// try {
-		// 	Global.sendErrorReport( 'ERROR: Unable to get required local cache data: '+ key, window.location, '', '', '' );
-		// 	TAlertManager.showConfirmAlert($.i18n._('Local cache has expired. Click Yes to reload.'), $.i18n._('ERROR'), function(choice) {
-		// 		if ( choice ) {
-		// 			window.location.reload();
-		// 		}
-		// 	} );
-		// } catch ( e ) {
-		// 	// Early page loads won't have Global or TAlertManager
-		// 	console.debug('ERROR: Unable to get required local cache data: '+ key);
-		// 	console.debug('ERROR: Unable to report error to server: '+ key);
-		// 	console.debug(e.stack);
-		// 	if ( confirm('Local cache has expired. Click OK to reload.') ) {
-		// 		window.location.reload();
-		// 	}
-		// }
 
 		return;
 	}

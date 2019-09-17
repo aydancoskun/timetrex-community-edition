@@ -571,55 +571,57 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 			return FALSE; //No XML object to append too. Needs T619 form first.
 		}
 
-		$xml->Return->T4A->addChild( 'T4ASummary' );
+		if ( isset( $xml->Return ) AND isset( $xml->Return->T4A ) AND $this->l88 > 0 ) {
+			$xml->Return->T4A->addChild( 'T4ASummary' );
 
-		$xml->Return->T4A->T4ASummary->addChild( 'bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) );
-		$xml->Return->T4A->T4ASummary->addChild( 'tx_yr', $this->year );
-		$xml->Return->T4A->T4ASummary->addChild( 'slp_cnt', $this->l88 );
-		$xml->Return->T4A->T4ASummary->addChild( 'rpt_tcd', $this->getStatus() ); //Report Type Code: O = Originals, A = Amendment, C = Cancel
+			$xml->Return->T4A->T4ASummary->addChild( 'bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) );
+			$xml->Return->T4A->T4ASummary->addChild( 'tx_yr', $this->year );
+			$xml->Return->T4A->T4ASummary->addChild( 'slp_cnt', $this->l88 );
+			$xml->Return->T4A->T4ASummary->addChild( 'rpt_tcd', $this->getStatus() ); //Report Type Code: O = Originals, A = Amendment, C = Cancel
 
-		$xml->Return->T4A->T4ASummary->addChild( 'PAYR_NM' ); //Employer name
-		$xml->Return->T4A->T4ASummary->PAYR_NM->addChild( 'l1_nm', substr( Misc::stripHTMLSpecialChars( $this->company_name ), 0, 30 ) );
+			$xml->Return->T4A->T4ASummary->addChild( 'PAYR_NM' ); //Employer name
+			$xml->Return->T4A->T4ASummary->PAYR_NM->addChild( 'l1_nm', substr( Misc::stripHTMLSpecialChars( $this->company_name ), 0, 30 ) );
 
-		$xml->Return->T4A->T4ASummary->addChild( 'PAYR_ADDR' ); //Employer Address
-		$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'addr_l1_txt', Misc::stripHTMLSpecialChars( $this->company_address1 ) );
-		if ( $this->company_address2 != '' ) {
-			$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'addr_l2_txt', Misc::stripHTMLSpecialChars( $this->company_address2 ) );
+			$xml->Return->T4A->T4ASummary->addChild( 'PAYR_ADDR' ); //Employer Address
+			$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'addr_l1_txt', Misc::stripHTMLSpecialChars( $this->company_address1 ) );
+			if ( $this->company_address2 != '' ) {
+				$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'addr_l2_txt', Misc::stripHTMLSpecialChars( $this->company_address2 ) );
+			}
+			$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'cty_nm', $this->company_city );
+			$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'prov_cd', $this->company_province );
+			$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'cntry_cd', 'CAN' );
+			$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'pstl_cd', $this->company_postal_code );
+
+			$xml->Return->T4A->T4ASummary->addChild( 'CNTC' ); //Contact Name
+			$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_nm', $this->l76 );
+
+			if ( $this->l78 != '' ) {
+				$phone_arr = $this->filterPhone( $this->l78 );
+			} else {
+				$phone_arr = $this->filterPhone( '000-000-0000' );
+			}
+
+			if ( is_array( $phone_arr ) ) {
+				$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_area_cd', $phone_arr[0] );
+				$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_phn_nbr', $phone_arr[1] . '-' . $phone_arr[2] );
+				//$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_extn_nbr', '' );
+			}
+
+			$xml->Return->T4A->T4ASummary->addChild( 'T4A_TAMT' );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_pens_spran_amt', $this->MoneyFormat( $this->l16, FALSE ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_lsp_amt', $this->MoneyFormat( $this->l18, FALSE ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_self_cmsn_amt', $this->MoneyFormat( $this->l20, FALSE ) );
+
+			( isset( $this->l30 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_ptrng_aloc_amt', $this->MoneyFormat( $this->l30, FALSE ) ) : NULL;
+			( isset( $this->l32 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_past_srvc_amt', $this->MoneyFormat( $this->l32, FALSE ) ) : NULL;
+			( isset( $this->l34 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_padj_amt', $this->MoneyFormat( $this->l34, FALSE ) ) : NULL;
+			( isset( $this->l42 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_resp_aip_amt', $this->MoneyFormat( $this->l42, FALSE ) ) : NULL;
+
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_itx_dedn_amt', $this->MoneyFormat( $this->l22, FALSE ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_annty_incamt', $this->MoneyFormat( $this->l24, FALSE ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'rpt_tot_fee_srvc_amt', $this->MoneyFormat( $this->l48, FALSE ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'rpt_tot_oth_info_amt', $this->MoneyFormat( $this->l101, FALSE ) );
 		}
-		$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'cty_nm', $this->company_city );
-		$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'prov_cd', $this->company_province );
-		$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'cntry_cd', 'CAN' );
-		$xml->Return->T4A->T4ASummary->PAYR_ADDR->addChild( 'pstl_cd', $this->company_postal_code );
-
-		$xml->Return->T4A->T4ASummary->addChild( 'CNTC' ); //Contact Name
-		$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_nm', $this->l76 );
-
-		if ( $this->l78 != '' ) {
-			$phone_arr = $this->filterPhone( $this->l78 );
-		} else {
-			$phone_arr = $this->filterPhone( '000-000-0000' );
-		}
-
-		if ( is_array( $phone_arr ) ) {
-			$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_area_cd', $phone_arr[0] );
-			$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_phn_nbr', $phone_arr[1] . '-' . $phone_arr[2] );
-			//$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_extn_nbr', '' );
-		}
-
-		$xml->Return->T4A->T4ASummary->addChild( 'T4A_TAMT' );
-		$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_pens_spran_amt', $this->MoneyFormat( $this->l16, FALSE ) );
-		$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_lsp_amt', $this->MoneyFormat( $this->l18, FALSE ) );
-		$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_self_cmsn_amt', $this->MoneyFormat( $this->l20, FALSE ) );
-
-		( isset( $this->l30 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_ptrng_aloc_amt', $this->MoneyFormat( $this->l30, FALSE ) ) : NULL;
-		( isset( $this->l32 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_past_srvc_amt', $this->MoneyFormat( $this->l32, FALSE ) ) : NULL;
-		( isset( $this->l34 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_padj_amt', $this->MoneyFormat( $this->l34, FALSE ) ) : NULL;
-		( isset( $this->l42 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_resp_aip_amt', $this->MoneyFormat( $this->l42, FALSE ) ) : NULL;
-
-		$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_itx_dedn_amt', $this->MoneyFormat( $this->l22, FALSE ) );
-		$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_annty_incamt', $this->MoneyFormat( $this->l24, FALSE ) );
-		$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'rpt_tot_fee_srvc_amt', $this->MoneyFormat( $this->l48, FALSE ) );
-		$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'rpt_tot_oth_info_amt', $this->MoneyFormat( $this->l101, FALSE ) );
 
 		return TRUE;
 	}

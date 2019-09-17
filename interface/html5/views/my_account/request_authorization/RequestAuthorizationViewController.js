@@ -38,7 +38,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		this.api_absence_policy = new (APIFactory.getAPIClass( 'APIAbsencePolicy' ))();
 		this.message_control_api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
 			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
 		}
@@ -312,14 +312,18 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
-
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
-		if ( !this.context_menu_array ) {
-			return;
+		//Check if there is a current_company object at all.
+		if ( LocalCacheData.isLocalCacheExists( 'current_company' ) == false ) {
+			return false;
 		}
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
+		}
+
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
 		}
 
 		this.setTotalDisplaySpan();
@@ -393,7 +397,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 
 	setDefaultMenuAuthorizationExpenseIcon: function( context_btn, grid_selected_length, pId ) {
 
-		if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 25 ) ) {
+		if ( !( Global.getProductEdition() >= 25 ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 
@@ -401,7 +405,6 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 	},
 
 	setEditMenu: function() {
-		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
 			var context_btn = $( this.context_menu_array[i] );
@@ -545,7 +548,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		}
 
 		var request_data;
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 && ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) ) {
+		if ( Global.getProductEdition() >= 15 && ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) ) {
 			request_data = $this.buildDataForAPI( this.current_edit_record );
 		} else {
 			request_data = this.getSelectedItem();
@@ -579,7 +582,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 						var retval = result.getResult();
 						if ( retval != false ) {
 							$this.is_changed = false;
-							$this.onRightArrowClick( $this.search() );
+							$this.onRightArrowClick( $this.search( false ) ); //Don't call setDefaultMenu() as it causes flashing of icons.
 						} else {
 							$this.setErrorMenu();
 							$this.setErrorTips( result, true );
@@ -867,21 +870,21 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		this.current_edit_record[key] = c_value;
 		switch ( key ) {
 			case 'job_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'job_item_id' );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_item_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_quick_search':
 			case 'job_item_quick_search':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.onJobQuickSearch( key, c_value, 'job_id', 'job_item_id' );
 				}
 				break;

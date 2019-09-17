@@ -34,7 +34,7 @@
 				ga('create', APIGlobal.pre_login_data.analytics_tracking_code, 'auto');
 
 				Global.setAnalyticDimensions();
-				Global.sendAnalytics("<?php echo $_SERVER['SCRIPT_NAME'] ?>");
+				Global.sendAnalyticsPageview("<?php echo $_SERVER['SCRIPT_NAME'] ?>");
 			} catch(e) {
 				throw e; //Attempt to catch any errors thrown by Google Analytics.
 			}

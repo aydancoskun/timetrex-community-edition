@@ -619,8 +619,9 @@ class T4SummaryReport extends Report {
 
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		if ( $pself->getRecordCount() > 0 ) {
-			foreach( $pself as $pse_obj ) {
+			foreach( $pself as $key => $pse_obj ) {
 				$user_id = $this->user_ids[] = $pse_obj->getColumn( 'user_id' );
 				$date_stamp = TTDate::strtotime( $pse_obj->getColumn( 'pay_stub_end_date' ) );
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
@@ -641,6 +642,8 @@ class T4SummaryReport extends Report {
 				} else {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn( 'amount' );
 				}
+
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
 
 			if ( isset( $this->tmp_data['pay_stub_entry'] ) AND is_array( $this->tmp_data['pay_stub_entry'] ) ) {
@@ -834,9 +837,6 @@ class T4SummaryReport extends Report {
 		//Debug::Arr($filter_data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		//$last_row = count($this->form_data)-1;
-		//$total_row = $last_row+1;
-
 		$current_company = $this->getUserObject()->getCompanyObject();
 		if ( is_object( $current_company ) == FALSE ) {
 			Debug::Text( 'Invalid company object...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -854,7 +854,6 @@ class T4SummaryReport extends Report {
 			$form_type = 'employee';
 		}
 		Debug::Text( 'Form Type: ' . $form_type, __FILE__, __LINE__, __METHOD__, 10 );
-		$i = 0;
 		$file_arr = array();
 		$file_name = NULL;
 		if ( isset( $this->form_data['user'] ) AND is_array( $this->form_data['user'] ) ) {
@@ -873,9 +872,12 @@ class T4SummaryReport extends Report {
 					continue;
 				}
 
-				/** @var LegalEntityFactory $le_obj */
-				$le_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
-				$company_name = $le_obj->getTradeName();
+				$x = 0; //Progress bar only.
+				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($user_rows), NULL, TTi18n::getText('Generating Forms...') );
+
+				/** @var LegalEntityFactory $legal_entity_obj */
+				$legal_entity_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
+				$company_name = $legal_entity_obj->getTradeName(); //T4s show Operating/Trade name on the forms.
 
 				if ( is_object( $this->form_data['remittance_agency'][ $legal_entity_id ] ) ) {
 					$contact_user_obj = $this->form_data['remittance_agency'][ $legal_entity_id ]->getContactUserObject();
@@ -884,17 +886,17 @@ class T4SummaryReport extends Report {
 					$contact_user_obj = $this->getUserObject();
 				}
 
-				if ( $format == 'efile_xml' ) {
+				if ( $format == 'efile_xml' OR $format == 'payment_services' ) {
 					$t619 = $this->getT619Object();
 					$t619->setStatus( $setup_data['status_id'] );
 					$t619->transmitter_number = $this->form_data['remittance_agency'][ $legal_entity_id ]->getSecondaryIdentification();
 
-					$t619->transmitter_name = $le_obj->getTradeName();
-					$t619->transmitter_address1 = $le_obj->getAddress1();
-					$t619->transmitter_address2 = $le_obj->getAddress2();
-					$t619->transmitter_city = $le_obj->getCity();
-					$t619->transmitter_province = $le_obj->getProvince();
-					$t619->transmitter_postal_code = $le_obj->getPostalCode();
+					$t619->transmitter_name = $legal_entity_obj->getTradeName();
+					$t619->transmitter_address1 = $legal_entity_obj->getAddress1();
+					$t619->transmitter_address2 = $legal_entity_obj->getAddress2();
+					$t619->transmitter_city = $legal_entity_obj->getCity();
+					$t619->transmitter_province = $legal_entity_obj->getProvince();
+					$t619->transmitter_postal_code = $legal_entity_obj->getPostalCode();
 
 					$t619->contact_name = $contact_user_obj->getFullName();
 					$t619->contact_phone = $contact_user_obj->getWorkPhone();
@@ -915,11 +917,9 @@ class T4SummaryReport extends Report {
 					$t4->payroll_account_number = $this->form_data['remittance_agency'][ $legal_entity_id ]->getPrimaryIdentification();//( isset( $setup_data['payroll_account_number'] ) AND $setup_data['payroll_account_number'] != '' ) ? $setup_data['payroll_account_number'] : $current_company->getBusinessNumber();
 					$t4->company_name = $company_name;
 				}
-				foreach ( $user_rows as $user_row_key => $row ) {
-					//if ( $i == $last_row ) {
-					//	continue;
-					//}
 
+				$report_meta_data = array();
+				foreach ( $user_rows as $user_row_key => $row ) {
 					if ( !isset( $row['user_id'] ) ) {
 						Debug::Text( 'User ID not set!', __FILE__, __LINE__, __METHOD__, 10 );
 						continue;
@@ -933,7 +933,7 @@ class T4SummaryReport extends Report {
 						$employment_province = $user_obj->getProvince();
 						//If employees address is out of the country, use the company province instead.
 						if ( strtolower( $user_obj->getCountry() ) != 'ca' ) {
-							$employment_province = $le_obj->getProvince();
+							$employment_province = $legal_entity_obj->getProvince();
 							Debug::Text( '  Using Company Province of Employment: ' . $employment_province, __FILE__, __LINE__, __METHOD__, 10 );
 						}
 
@@ -1087,45 +1087,50 @@ class T4SummaryReport extends Report {
 							}
 						}
 
-
 						if ( $tmp_total_amount_boxes != 0 ) {
+							if ( $format == 'payment_services' ) {
+								$report_meta_data['t4'][] = array('remote_id' => $row['user_id'], 'first_name' => $user_obj->getFirstName(), 'last_name' => $user_obj->getLastName(), 'sin' => $user_obj->getSIN(), 'l14' => $ee_data['l14'], 'l22' => $ee_data['l22']);
+							}
+
 							$t4->addRecord( $ee_data );
+
+							if ( $format == 'pdf_form_publish_employee' ) {
+								// generate PDF for every employee and assign to each government document records
+								$this->getFormObject()->addForm( $t4 );
+								GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 100, TTDate::getEndYearEpoch( $filter_data['end_date'] ), $this->getFormObject()->output( 'PDF' ) );
+								$this->getFormObject()->clearForms();
+							}
 						} else {
 							Debug::Text('  No amounts on T4 skipping: '. $user_obj->getFullName(), __FILE__, __LINE__, __METHOD__, 10);
 							unset($user_rows[$user_row_key]); //Remove user data from arrow does it doesn't get added to totals or counted as an employee.
 						}
 						unset( $ee_data );
-
-						if ( $format == 'pdf_form_publish_employee' ) {
-							// generate PDF for every employee and assign to each government document records
-							$this->getFormObject()->addForm( $t4 );
-							GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 100, TTDate::getEndYearEpoch( $filter_data['end_date'] ), $this->getFormObject()->output( 'PDF' ) );
-							$this->getFormObject()->clearForms();
-						}
-
-						$i++;
 					}
+
+					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
+					$x++;
 				}
 
 				$this->getFormObject()->addForm( $t4 );
+
 				if ( $format == 'pdf_form_publish_employee' ) {
 					$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $this->getUserObject()->getId() );
-
 					return $user_generic_status_batch_id;
 				}
-				if ( $form_type == 'government' OR $form_type = 'efile_xml' ) {
+
+				if ( $t4->countRecords() > 0 AND ( $form_type == 'government' OR $format == 'efile_xml' OR $format == 'payment_services' ) ) {
 					//Handle T4Summary
 					$t4s = $this->getT4SumObject();
 					$t4s->setStatus( $setup_data['status_id'] );
 					$t4s->year = $t4->year;
 					$t4s->payroll_account_number = $t4->payroll_account_number;
 
-					$t4s->company_name = $le_obj->getTradeName();
-					$t4s->company_address1 = $le_obj->getAddress1();
-					$t4s->company_address2 = $le_obj->getAddress2();
-					$t4s->company_city = $le_obj->getCity();
-					$t4s->company_province = $le_obj->getProvince();
-					$t4s->company_postal_code = $le_obj->getPostalCode();
+					$t4s->company_name = $legal_entity_obj->getTradeName(); //T4s show Operating/Trade name on the forms.
+					$t4s->company_address1 = $legal_entity_obj->getAddress1();
+					$t4s->company_address2 = $legal_entity_obj->getAddress2();
+					$t4s->company_city = $legal_entity_obj->getCity();
+					$t4s->company_province = $legal_entity_obj->getProvince();
+					$t4s->company_postal_code = $legal_entity_obj->getPostalCode();
 
 					$t4s->l76 = $contact_user_obj->getFullName(); //Contact name.
 					$t4s->l78 = $contact_user_obj->getWorkPhone();
@@ -1143,39 +1148,55 @@ class T4SummaryReport extends Report {
 					$t4s->l20 = ( isset( $total_row['l20'] ) ) ? $total_row['l20'] : NULL;
 					$t4s->l52 = ( isset( $total_row['l52'] ) ) ? $total_row['l52'] : NULL;
 
+					$total_deductions = Misc::MoneyFormat( Misc::sumMultipleColumns( $total_row, array('l16', 'l27', 'l18', 'l19', 'l22') ), FALSE );
+
 					if ( isset( $setup_data['remittances_paid'] ) AND $setup_data['remittances_paid'] != '' ) {
 						$t4s->l82 = (float)$setup_data['remittances_paid'];
 					} else {
-						$total_deductions = Misc::MoneyFormat( Misc::sumMultipleColumns( $total_row, array('l16', 'l27', 'l18', 'l19', 'l22') ), FALSE );
 						$t4s->l82 = $total_deductions;
 					}
+
+					if ( $format == 'payment_services' ) {
+						$report_meta_data['t4s'] = array( 'total_employees' => $t4->countRecords(), 'l14' => $t4s->l14, 'l22' => $t4s->l22, 'l80' => $total_deductions, 'l82' => $t4s->l82, 'balance' => bcsub( $total_deductions, $t4s->l82 ) );
+					}
+
 					$this->getFormObject()->addForm( $t4s );
 				}
 
-				if ( $format == 'efile_xml' ) {
-					$output_format = 'XML';
-					$file_name = 't4_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.xml';
-					$mime_type = 'applications/octet-stream'; //Force file to download.
-				} else {
-					$output_format = 'PDF';
-					$file_name = 't4_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.pdf';
-					$mime_type = $this->file_mime_type;
-				}
-				$file_output = $this->getFormObject()->output( $output_format );
-				if ( !is_array( $file_output ) ) {
-					$file_arr[] = array('file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $file_output);
-				} else {
-					return $file_output;
-				}
+				if ( $t4->countRecords() > 0 ) {
+					if ( $format == 'efile_xml' OR $format == 'payment_services' ) {
+						$output_format = 'XML';
+						$file_name = 't4_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.xml';
+						$mime_type = 'applications/octet-stream'; //Force file to download.
+					} else {
+						$output_format = 'PDF';
+						$file_name = 't4_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.pdf';
+						$mime_type = $this->file_mime_type;
+					}
+					$file_output = $this->getFormObject()->output( $output_format );
 
-				//reset the file objects.
-				$this->clearFormObject();
-				$this->clearT4Object();
-				$this->clearT619Object();
-				$this->clearT4SumObject();
-				unset( $file_output );
-			}//foreach
-		}//if
+					//reset the file objects.
+					$this->clearFormObject();
+					$this->clearT4Object();
+					$this->clearT619Object();
+					$this->clearT4SumObject();
+
+					if ( !is_array( $file_output ) ) {
+						if ( $format == 'payment_services' ) {
+							$tmp_output['xml'] = $file_output;
+							$tmp_output['metadata'] = $report_meta_data;
+							$file_output = $tmp_output;
+						}
+						$file_arr[] = array('file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $file_output);
+						unset( $file_output );
+					} else {
+						return $file_output;
+					}
+				} else {
+					return FALSE; //No records.
+				}
+			}
+		}
 
 		$zip_filename = explode( '.', $file_name );
 		if ( isset( $zip_filename[ ( count( $zip_filename ) - 1 ) ] ) ) {
@@ -1193,7 +1214,7 @@ class T4SummaryReport extends Report {
 	 * @return bool
 	 */
 	function _postProcess( $format = NULL ) {
-		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'pdf_form_publish_employee' ) {
+		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'payment_services' OR $format == 'pdf_form_publish_employee' ) {
 			Debug::Text('Skipping postProcess! Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		} else {
@@ -1206,11 +1227,52 @@ class T4SummaryReport extends Report {
 	 * @return array|bool
 	 */
 	function _output( $format = NULL ) {
-		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'pdf_form_publish_employee' ) {
+		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'payment_services' OR $format == 'pdf_form_publish_employee' ) {
 			return $this->_outputPDFForm( $format );
 		} else {
 			return parent::_output( $format );
 		}
+	}
+
+	/**
+	 * Formats report data for exporting to TimeTrex payment service.
+	 * @return array
+	 */
+	function getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj ) {
+		$output_data = $this->getOutput( 'payment_services' );
+		Debug::Arr( $output_data, 'Raw Report data!', __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $this->hasData() AND isset( $output_data['data'] ) AND isset( $output_data['data']['metadata']['t4s']['total_employees'] ) AND $output_data['data']['metadata']['t4s']['total_employees'] > 0 ) {
+			$batch_id = date( 'M d', $prae_obj->getEndDate() );
+
+			$retarr = array(
+					'object'               => __CLASS__,
+					'user_success_message' => TTi18n::gettext( 'T4s submitted successfully' ),
+
+					'agency_report_data'   => array(
+							'type_id'         => 'R', //R=Report
+							'total_employees' => (int)$output_data['data']['metadata']['t4s']['total_employees'],
+							'subject_wages'   => $output_data['data']['metadata']['t4s']['l14'],
+							'taxable_wages'   => $output_data['data']['metadata']['t4s']['l14'],
+							'amount_withheld' => $output_data['data']['metadata']['t4s']['l22'],
+							'amount_due'      => $output_data['data']['metadata']['t4s']['balance'],
+							'due_date'        => $prae_obj->getDueDate(),
+							'extra_data'      => $output_data['data']['metadata'],
+							'xml_data'		  => $output_data['data']['xml'],
+
+							'remote_batch_id'  => $batch_id,
+
+							//Generate a consistent remote_id based on the exact time period, the remittance agency event, and batch ID.
+							//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
+							'remote_id' => TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $batch_id ) ),
+					),
+			);
+
+			return $retarr;
+		}
+
+		Debug::Text('No report data!', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
 	}
 }
 ?>

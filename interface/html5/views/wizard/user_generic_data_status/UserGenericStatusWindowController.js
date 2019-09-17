@@ -1,6 +1,7 @@
 UserGenericStatusWindowController = BaseViewController.extend( {
 
-	el: '.user-generic-data-status',
+	// el: '.user-generic-data-status',
+	el: '', // el is set to the DOM id which is set in UserGenericStatusWindowController.open()
 
 	batch_id: '',
 	user_id: '',
@@ -12,7 +13,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 	},
 
 	onCloseClick: function() {
-		UserGenericStatusWindowController.instance = null;
+		// UserGenericStatusWindowController.instance = null;
 		$( this.el ).remove();
 
 		if ( this.call_back ) {
@@ -26,6 +27,11 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 		this.content_div = $( this.el ).find( '.content' );
 		this.batch_id = this.options.batch_id;
 		this.user_id = this.options.user_id;
+
+		if ( this.options.callback ) {
+			this.call_back = this.options.callback;
+		}
+
 		this.api = new (APIFactory.getAPIClass( 'APIUserGenericStatus' ))();
 		this.render();
 		this.initData();
@@ -205,7 +211,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 			this.grid = null;
 		}
 
-		this.grid = new TTGrid( 'user_generic_data__status_grid', {
+		this.grid = new TTGrid( 'user_generic_data_status_grid-'+ this.batch_id, {
 			altRows: true,
 			onSelectRow: $.proxy( this.onGridSelectRow, this ),
 			data: [],
@@ -231,31 +237,36 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 
 } );
 
-UserGenericStatusWindowController.instance = null;
+// UserGenericStatusWindowController.instance = null;
 
 UserGenericStatusWindowController.open = function( batch_id, user_id, call_back ) {
 	Global.loadViewSource( 'UserGenericStatus', 'UserGenericStatusWindow.css' );
 	Global.loadViewSource( 'UserGenericStatus', 'UserGenericStatusWindow.html', function( result ) {
 		var args = {
+			batch_id: batch_id,
 			failed: $.i18n._( 'Failed' ),
 			warning: $.i18n._( 'Warning' ),
 			success: $.i18n._( 'Success' )
 		};
+
 		var template = _.template( result );
 		$( 'body' ).append( template( args ) );
 
 		//Make it global variable
-		UserGenericStatusWindowController.instance = new UserGenericStatusWindowController( {
+		// UserGenericStatusWindowController.instance = new UserGenericStatusWindowController( {
+		// 	batch_id: batch_id,
+		// 	user_id: user_id,
+		// 	can_cache_controller: false
+		// } );
+		//UserGenericStatusWindowController.instance.call_back = call_back;
+
+		new UserGenericStatusWindowController( {
+			el: '#'+ batch_id,
 			batch_id: batch_id,
 			user_id: user_id,
-			can_cache_controller: false
+			can_cache_controller: false,
+			call_back: call_back,
 		} );
-		UserGenericStatusWindowController.instance.call_back = call_back;
+
 	} );
-};
-
-UserGenericStatusWindowController.close = function() {
-	if ( UserGenericStatusWindowController.instance ) {
-
-	}
 };

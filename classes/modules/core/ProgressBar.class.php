@@ -49,6 +49,8 @@ class ProgressBar {
 	private $key_prefix = 'progress_bar_';
 
 	var $update_iteration = 1; //This is how often we actually update the progress bar, even if the function is called more often.
+	var $update_interval = 30; //This is how often in seconds we actually update the progress bar, even if the function is called more often.
+	private $last_update_time = NULL; //Local last update time, to help update at least every X seconds for long running tasks.
 
 	/**
 	 * ProgressBar constructor.
@@ -221,7 +223,8 @@ class ProgressBar {
 
 		//Add quick IF statement to short circuit any work unless we meet the update_iteration, ie: every X calls do we actually do anything.
 		//When processing long batches though, we need to update every iteration for the first 10 iterations so we can get an accruate estimated time for completion.
-		if ( $current_iteration <= 10 OR ( $current_iteration % $this->update_iteration ) == 0 ) {
+		//  Also check for the update_interval as the maximum amount of time that can elapse before updating the progress bar. But only
+		if ( $current_iteration <= 10 OR ( $current_iteration % $this->update_iteration ) == 0 OR ( time() - $this->last_update_time ) > $this->update_interval ) {
 			//Debug::text('set: '. $key .' Iteration: '. $current_iteration, __FILE__, __LINE__, __METHOD__, 9);
 
 			try {
@@ -242,6 +245,7 @@ class ProgressBar {
 
 					$progress_bar_arr['current_iteration'] = $current_iteration;
 					$progress_bar_arr['last_update_time'] = microtime(TRUE);
+					$this->last_update_time = $progress_bar_arr['last_update_time'];
 				}
 
 				if ( $msg != '' ) {

@@ -213,11 +213,28 @@ WizardStep = Backbone.View.extend( {
 		if ( e ) {
 			this.addButtonClick( e, icon );
 		}
+
+		//Prevent double clicking on tax wizard buttons.
+		ProgressBar.showOverlay();
+
+		//this flag is turned off in ProgressBarManager::closeOverlay, or 2s whichever happens first
+		if ( window.clickProcessing == true ) {
+			return;
+		} else {
+			window.clickProcessing = true;
+			window.clickProcessingHandle = window.setTimeout( function() {
+				if ( window.clickProcessing == true ) {
+					window.clickProcessing = false;
+					ProgressBar.closeOverlay();
+				}
+			}, 1000 );
+		}
+
 		this._onNavigationClick( icon );
 	},
 
+	//Overridden in each Wizard step.
 	_onNavigationClick: function( icon ) {
-		//virtual
 	},
 
 	addButtonClick: function( e, icon ) {

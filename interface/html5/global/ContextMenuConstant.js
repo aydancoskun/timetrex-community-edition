@@ -10,7 +10,7 @@ ContextMenuIconName.save = 'saveIcon';
 
 ContextMenuIconName.add = 'addIcon';
 
-ContextMenuIconName.refresh_all = 'refressAllIcon';
+ContextMenuIconName.refresh_all = 'refreshAllIcon';
 
 ContextMenuIconName.reset_all = 'resetAllIcon';
 
@@ -205,6 +205,8 @@ ContextMenuIconName.job_application = 'jobApplicationIcon';
 ContextMenuIconName.portal_preview = 'portalPreviewIcon';
 ContextMenuIconName.tax_reports = 'taxReportsIcon';
 ContextMenuIconName.preferences = 'preferenceIcon';
+
+ContextMenuIconName.payment_services_statement = 'paymentServicesStatementIcon';
 
 var Icons = function() {
 

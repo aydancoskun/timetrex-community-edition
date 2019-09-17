@@ -500,7 +500,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	var legal_entity = new RibbonSubMenu( {
-		label: (LocalCacheData.getCurrentCompany().product_edition_id >= 15) ? $.i18n._( 'Legal<br>Entities' ) : $.i18n._( 'Legal<br>Entity' ),
+		label: ( Global.getProductEdition() >= 15 ) ? $.i18n._( 'Legal<br>Entities' ) : $.i18n._( 'Legal<br>Entity' ),
 		id: 'LegalEntity',
 		group: companySubMenuGroup,
 		icon: 'legal_entity-35x35.png',
@@ -1454,7 +1454,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	var email_help = new RibbonSubMenu( {
-		label: (LocalCacheData.getCurrentCompany().product_edition_id >= 15) ? $.i18n._( 'Email Help' ) : $.i18n._( 'Community<br>Forums' ),
+		label: ( Global.getProductEdition() >= 15 ) ? $.i18n._( 'Email Help' ) : $.i18n._( 'Community<br>Forums' ),
 		id: 'EmailHelp',
 		group: help_group,
 		icon: 'emailhelp-35x35.png',
@@ -1462,7 +1462,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission: true
 	} );
 
-	if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 && APIGlobal.pre_login_data['sandbox_url'] && APIGlobal.pre_login_data['sandbox_url'] != false && APIGlobal.pre_login_data['sandbox_url'].length > 0 && !APIGlobal.pre_login_data['sandbox'] ) {
+	if ( Global.getProductEdition() >= 15 && APIGlobal.pre_login_data['sandbox_url'] && APIGlobal.pre_login_data['sandbox_url'] != false && APIGlobal.pre_login_data['sandbox_url'].length > 0 && !APIGlobal.pre_login_data['sandbox'] ) {
 		var sandbox = new RibbonSubMenu( {
 			label: $.i18n._( 'Testing<br>Sandbox' ),
 			id: 'Sandbox',

@@ -2037,7 +2037,15 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool|mixed
 	 */
 	function getUserValue10() {
-		return $this->getGenericDataValue( 'user_value10' );
+		$retval = $this->getGenericDataValue( 'user_value10' );
+
+		//When its a Federal/Province/State/District income tax calculation, default to "0" or "Not Exempt"
+		//We do this so we don't have to add a "Exempt" dropdown box to the main Tax/Deduction edit screen, as no company will have everyone as exempt by default.
+		if ( $retval == '' AND in_array( $this->getCalculation(), array( 100, 200, 300 ) ) AND $this->getCountry() == 'US' ) {
+			$retval = 0;
+		}
+
+		return $retval;
 	}
 
 	/**

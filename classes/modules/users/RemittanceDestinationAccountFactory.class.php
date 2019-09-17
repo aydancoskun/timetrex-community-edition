@@ -1125,12 +1125,12 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 			//Make sure the name does not contain the account number for security reasons.
 			$this->Validator->isTrue( 'name',
-					( ( stripos( $this->getName(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
+					( ( stripos( $this->Validator->stripNonNumeric( $this->getName() ), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
 									  TTi18n::gettext( 'Account number must not be a part of the Name' ) );
 
 			//Make sure the description does not contain the account number for security reasons.
 			$this->Validator->isTrue( 'description',
-					( ( stripos( $this->getDescription(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
+					( ( stripos( $this->Validator->stripNonNumeric( $this->getDescription() ), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
 									  TTi18n::gettext( 'Account number must not be a part of the Description' ) );
 		}
 

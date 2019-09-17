@@ -329,7 +329,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 				Global.bottomFeedbackContainer().find( 'img' ).each( function() {
 					// Error: Uncaught ReferenceError: path is not defined in interface/html5/IndexController.js?v=9.0.6-20151231-155152 line 270
 					if ( path ) {
-						if ( Global.isSet( LocalCacheData.getLoginUser().feedback_rating ) && $( this ).attr( 'data-feedback' ) === LocalCacheData.getLoginUser().feedback_rating ) {
+						if ( LocalCacheData.getLoginUser() && LocalCacheData.getLoginUser().feedback_rating && $( this ).attr( 'data-feedback' ) === LocalCacheData.getLoginUser().feedback_rating ) {
 							$( this ).addClass( 'current' ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
 						}
 						$( this ).unbind( 'click' ).bind( 'click', function() {
@@ -477,8 +477,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 		label_container.children().eq( 0 ).text( label );
 		Global.topContainer().append( label_container );
 		this.testInternetConnection();
-		//if ( ( APIGlobal.pre_login_data.demo_mode === false && APIGlobal.pre_login_data.deployment_on_demand === true && LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
-		if ( ( APIGlobal.pre_login_data.demo_mode === false && LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+
+		if ( ( APIGlobal.pre_login_data.demo_mode === false && Global.getProductEdition() >= 15 ) ) {
 			var permission_api = new (APIFactory.getAPIClass( 'APIPermissionControl' ))();
 			var filter = {};
 			filter.filter_data = {};

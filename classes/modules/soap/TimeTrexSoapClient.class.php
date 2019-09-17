@@ -201,8 +201,8 @@ class TimeTrexSoapClient {
 
 				//Find the first created company that is still active.
 				Debug::Text('WARNING: Primary company is not defined in .ini file, attempting to guess...', __FILE__, __LINE__, __METHOD__, 10);
-				$clf->getAll( 1, NULL, array( 'status_id' => '= 10' ), array( 'created_date' => 'asc' ) );
-				if ( $clf->getAll() == 1 ) {
+				$clf->getAll( 1, NULL, array( 'status_id' => '= 10' ), array( 'created_date' => 'asc' ) ); //Limit 1
+				if ( $clf->getRecordCount() == 1 ) {
 					$config_vars['other']['primary_company_id'] = $clf->getCurrent()->getId();
 				}
 			}

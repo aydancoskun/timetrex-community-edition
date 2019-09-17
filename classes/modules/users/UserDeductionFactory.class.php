@@ -558,7 +558,10 @@ class UserDeductionFactory extends Factory {
 					$pd_obj->setFederalTotalClaimAmount( $user_value1 );
 					$retval = $country_label .' - '. TTI18n::getText('Claim Amount').': $'. Misc::MoneyFormat( $pd_obj->getFederalTotalClaimAmount() );
 				} elseif ( $cd_obj->getCountry() == 'US' ) {
-					$retval = $country_label .' - '. TTI18n::getText('Filing Status').': '. Option::getByKey( $user_value1, $cd_obj->getOptions('federal_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. $user_value2;
+					$retval = $country_label .' - '. TTI18n::getText('Filing Status') .': '. Option::getByKey( $user_value1, $cd_obj->getOptions('federal_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
+					if ( (int)$this->getUserValue10() >= 1 ) {
+						$retval .= ' '. TTI18n::getText('Exempt');
+					}
 				}
 				break;
 			case 200:
@@ -612,9 +615,6 @@ class UserDeductionFactory extends Factory {
 						case 'nj':
 							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_nj_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
 							break;
-						case 'ok':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_ok_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
-							break;
 						case 'ar':
 						case 'ia':
 						case 'ky':
@@ -639,6 +639,10 @@ class UserDeductionFactory extends Factory {
 						default:
 							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
 							break;
+					}
+
+					if ( (int)$this->getUserValue10() >= 1 ) {
+						$retval .= ' '. TTI18n::getText('Exempt');
 					}
 				}
 				break;
@@ -1771,6 +1775,9 @@ class UserDeductionFactory extends Factory {
 					//US
 					$pd_obj->setFederalFilingStatus( $user_value1 );
 					$pd_obj->setFederalAllowance( $user_value2 );
+					if ( (int)$this->getUserValue10() >= 1 ) {
+						$pd_obj->setFederalTaxExempt( TRUE );
+					}
 				} elseif ( $cd_obj->getCountry() == 'CR' ) {
 					//CR
 					$pd_obj->setFederalFilingStatus( $user_value1 ); //Single/Married
@@ -1917,6 +1924,9 @@ class UserDeductionFactory extends Factory {
 						Debug::Text('Found Federal User Deduction... Total Records: '. $udlf->getRecordCount() .' TmpUserValue1: '. $tmp_user_value1 .' TmpUserValue2: '. $tmp_user_value2, __FILE__, __LINE__, __METHOD__, 10);
 						$pd_obj->setFederalFilingStatus( $tmp_user_value1 );
 						$pd_obj->setFederalAllowance( $tmp_user_value2 );
+						if ( (int)$tmp_ud_obj->getUserValue10() >= 1 ) {
+							$pd_obj->setFederalTaxExempt( TRUE );
+						}
 
 						unset($tmp_ud_obj, $tmp_user_value1, $tmp_user_value1);
 					}
@@ -1928,6 +1938,10 @@ class UserDeductionFactory extends Factory {
 					$pd_obj->setUserValue1( $user_value1 );
 					$pd_obj->setUserValue2( $user_value2 );
 					$pd_obj->setUserValue3( $user_value3 );
+
+					if ( (int)$this->getUserValue10() >= 1 ) {
+						$pd_obj->setProvincialTaxExempt( TRUE );
+					}
 
 					$retval = $pd_obj->getStatePayPeriodDeductions();
 				}

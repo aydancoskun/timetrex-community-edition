@@ -21,7 +21,6 @@ PayrollRemittanceAgencyEventWizardStepPublish = WizardStep.extend( {
 		this.getWizardObject().getPayrollRemittanceAgencyEventById( this.getWizardObject().selected_remittance_agency_event_id, null, function( result ) {
 			$this.getWizardObject().selected_remittance_agency_event = result;
 			$this.getWizardObject().buildEventDataBlock( 'payroll_remittance_agency_event_wizard-publish-event_details', result );
-			$this.getWizardObject().enableButtons();
 			$this.initCardsBlock();
 
 			switch ( $this.getWizardObject().selected_remittance_agency_event.type_id ) {
@@ -81,15 +80,15 @@ PayrollRemittanceAgencyEventWizardStepPublish = WizardStep.extend( {
 					);
 					break;
 			}
+
+			$this.getWizardObject().enableButtons();
 		} );
-
-
 	},
 
 	_onNavigationClick: function( icon ) {
 		var $this = this;
 		switch ( this.getWizardObject().selected_remittance_agency_event.type_id ) {
-				//Canada
+			//Canada
 			case 'T4':
 				switch ( icon ) {
 					case ContextMenuIconName.print:
@@ -119,7 +118,7 @@ PayrollRemittanceAgencyEventWizardStepPublish = WizardStep.extend( {
 				}
 				break;
 
-				//US
+			//US
 			case 'FW2':
 				switch ( icon ) {
 					case ContextMenuIconName.print:

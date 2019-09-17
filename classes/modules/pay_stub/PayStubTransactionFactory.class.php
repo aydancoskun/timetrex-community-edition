@@ -1120,7 +1120,7 @@ class PayStubTransactionFactory extends Factory {
 							//Since the object has been cloned, the old object id needs to be set as the parent id.
 							$pst_obj->clearOldData();
 							$pst_obj->setParent( $pst_obj->getId() );
-							$pst_obj->setId( FALSE ); //Now that parent id is set, clear the id to make this a new record.
+							$pst_obj->setId( $pst_obj->getNextInsertId() ); //Now that parent id is set, force the ID to a new one. This must be done before data is uploaded to payment services ID, otherwise the mapping won't be made.
 							$pst_obj->setStatus( 10 ); //Pending
 
 							//Make sure we update some key pieces of information when cloning the object.
@@ -1272,7 +1272,7 @@ class PayStubTransactionFactory extends Factory {
 							$pst_obj->setStatus( 20 ); //20=Paid
 
 							if ( $pst_obj->isValid() ) {
-								$pst_obj->Save();
+								$pst_obj->Save( TRUE, TRUE ); //When Stop Payment - ReIssues are made, we manually set the ID before its sent to payment services ID, so there is a remote_id to be used.
 							} else {
 								$pstlf->FailTransaction();
 								Debug::Text( '  Validation failed, not sending any output...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -1347,8 +1347,6 @@ class PayStubTransactionFactory extends Factory {
 
 			Debug::Arr( $pay_period_run_ids, '  Total Pay Stub Pay Periods: '. count($pay_period_run_ids), __FILE__, __LINE__, __METHOD__, 10 );
 			if ( count($pay_period_run_ids) > 0 ) {
-				require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR . 'other' . DIRECTORY_SEPARATOR . 'TimeTrexPaymentServices.class.php' );
-
 				//Find all full service agency events that need to be processed.
 				$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
 				$praelf->getByCompanyIdAndStatus( $company_obj->getId(), 15 ); //15=Full Service
@@ -1356,99 +1354,130 @@ class PayStubTransactionFactory extends Factory {
 					foreach ( $praelf as $prae_obj ) {
 						/** @var $prae_obj PayrollRemittanceAgencyEventFactory */
 
-						if ( is_object( $prae_obj->getPayrollRemittanceAgencyObject() ) ) {
-							/** @var $pra_obj PayrollRemittanceAgencyFactory */
-							$pra_obj = $prae_obj->getPayrollRemittanceAgencyObject();
+						$event_data = $prae_obj->getEventData();
+						if ( is_array($event_data) AND isset($event_data['flags']) AND $event_data['flags']['auto_pay'] == TRUE ) {
 
-							/** @var $rs_obj PayrollRemittanceSourceFactory */
-							$rs_obj = $pra_obj->getRemittanceSourceAccountObject();
+							if ( is_object( $prae_obj->getPayrollRemittanceAgencyObject() ) ) {
+								/** @var $pra_obj PayrollRemittanceAgencyFactory */
+								$pra_obj = $prae_obj->getPayrollRemittanceAgencyObject();
 
-							/** @var LegalEntityFactory $le_obj */
-							$le_obj = $rs_obj->getLegalEntityObject();
+								/** @var $rs_obj PayrollRemittanceSourceFactory */
+								$rs_obj = $pra_obj->getRemittanceSourceAccountObject();
 
-							if ( $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 ) { //3000=EFT/ACH, 5=TimeTrex EFT  -- This is the remittance source account assigned the remittance agency, not the individual transactions.
+								/** @var LegalEntityFactory $le_obj */
+								$le_obj = $rs_obj->getLegalEntityObject();
 
-								if ( is_object( $pra_obj->getContactUserObject() ) ) {
-									Debug::Text( '  Agency Event: Agency: ' . $prae_obj->getPayrollRemittanceAgencyObject()->getName() . ' Legal Entity: ' . $prae_obj->getPayrollRemittanceAgencyObject()->getLegalEntity() . ' Type: ' . $prae_obj->getType() . ' Due Date: ' . TTDate::getDate( 'DATE', $prae_obj->getDueDate() ) . ' ID: ' . $prae_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-									Debug::Text( '  Remittance Source: Name: ' . $rs_obj->getName() . ' API Username: ' . $rs_obj->getValue5(), __FILE__, __LINE__, __METHOD__, 10 );
+								if ( $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 ) { //3000=EFT/ACH, 5=TimeTrex EFT  -- This is the remittance source account assigned the remittance agency, not the individual transactions.
 
-									$pra_user_obj = $pra_obj->getContactUserObject();
+									if ( is_object( $pra_obj->getContactUserObject() ) ) {
+										Debug::Text( '  Agency Event: Agency: ' . $prae_obj->getPayrollRemittanceAgencyObject()->getName() . ' Legal Entity: ' . $prae_obj->getPayrollRemittanceAgencyObject()->getLegalEntity() . ' Type: ' . $prae_obj->getType() . ' Due Date: ' . TTDate::getDate( 'DATE', $prae_obj->getDueDate() ) . ' ID: ' . $prae_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+										Debug::Text( '  Remittance Source: Name: ' . $rs_obj->getName() . ' API Username: ' . $rs_obj->getValue5(), __FILE__, __LINE__, __METHOD__, 10 );
 
-									foreach ( $pay_period_run_ids as $pay_period_id => $run_ids ) {
-										Debug::Text( '    Pay Period ID: ' . $pay_period_id . ' Total Runs: ' . count( $run_ids ), __FILE__, __LINE__, __METHOD__, 10 );
+										$pra_user_obj = $pra_obj->getContactUserObject();
 
-										$pplf = TTnew( 'PayPeriodListFactory' );
-										$pplf->getByIdAndCompanyId( $pay_period_id, $company_obj->getId() );
-										if ( $pplf->getRecordCount() > 0 ) {
-											$pp_obj = $pplf->getCurrent();
+										foreach ( $pay_period_run_ids as $pay_period_id => $run_ids ) {
+											Debug::Text( '    Pay Period ID: ' . $pay_period_id . ' Total Runs: ' . count( $run_ids ), __FILE__, __LINE__, __METHOD__, 10 );
 
-											foreach ( $run_ids as $run_id => $run_id_bool ) {
-												Debug::Text( '      Run ID: ' . $run_id, __FILE__, __LINE__, __METHOD__, 10 );
+											$pplf = TTnew( 'PayPeriodListFactory' );
+											$pplf->getByIdAndCompanyId( $pay_period_id, $company_obj->getId() );
+											if ( $pplf->getRecordCount() > 0 ) {
+												$pp_obj = $pplf->getCurrent();
 
-												/** @var $report_obj Report */
-												$report_obj = $prae_obj->getReport( 'raw', NULL, $pra_user_obj, new Permission() );
-												//$report_obj = $prae_obj->getReport( '123456', NULL, $pra_user_obj, new Permission() ); //Test with generic TaxSummaryReport
+												foreach ( $run_ids as $run_id => $run_id_bool ) {
+													Debug::Text( '      Run ID: ' . $run_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-												$report_data['config'] = $report_obj->getConfig();
+													/** @var $report_obj Report */
+													$report_obj = $prae_obj->getReport( 'raw', NULL, $pra_user_obj, new Permission() );
+													//$report_obj = $prae_obj->getReport( '123456', NULL, $pra_user_obj, new Permission() ); //Test with generic TaxSummaryReport
 
-												unset( $report_data['config']['filter']['time_period'], $report_data['config']['filter']['start_date'], $report_data['config']['filter']['end_date'] ); //Remove custom date filters and only use pay_period_run_ids.
-												//$report_data['config']['filter']['pay_stub_id'] = $run_pay_stub_ids; //Legal entity is already set in $prae_obj->getReport()
+													if ( is_object( $report_obj ) ) {
+														$report_data['config'] = $report_obj->getConfig();
 
-												//Get report for the entire pay period/run and only include OPEN pay stubs.
-												$report_data['config']['filter']['pay_period_id'] = $pay_period_id; //Legal entity is already set in $prae_obj->getReport()
-												$report_data['config']['filter']['pay_stub_run_id'] = $run_id;
-												$report_data['config']['filter']['pay_stub_status_id'] = 25; //25=OPEN
+														unset( $report_data['config']['filter']['time_period'], $report_data['config']['filter']['start_date'], $report_data['config']['filter']['end_date'] ); //Remove custom date filters and only use pay_period_run_ids.
+														//$report_data['config']['filter']['pay_stub_id'] = $run_pay_stub_ids; //Legal entity is already set in $prae_obj->getReport()
 
-												$report_obj->setConfig( (array)$report_data['config'] );
+														//Get report for the entire pay period/run and only include OPEN pay stubs.
+														$report_data['config']['filter']['pay_period_id'] = $pay_period_id; //Legal entity is already set in $prae_obj->getReport()
+														$report_data['config']['filter']['pay_stub_run_id'] = $run_id;
+														$report_data['config']['filter']['pay_stub_status_id'] = 25; //25=OPEN
 
-												$output_data = $report_obj->getPaymentServicesData();
-												Debug::Arr( $output_data, 'Report Payment Services Data: ', __FILE__, __LINE__, __METHOD__, 10 );
-												if ( is_array( $output_data ) ) {
-													if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
-														try {
-															$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+														$report_obj->setConfig( (array)$report_data['config'] );
 
-															$batch_id = $tt_ps_api->generateBatchID( $pp_obj->getEndDate(), $run_id );
+														$output_data = $report_obj->getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj );
+														Debug::Arr( $output_data, 'Report Payment Services Data: ', __FILE__, __LINE__, __METHOD__, 10 );
+														if ( is_array( $output_data ) ) {
+															if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+																try {
+																	$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
 
-															//Generate a consistent remote_id based on the exact pay stubs that are selected, the remittance agency event, and batch ID.
-															//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
-															$remote_id = TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $batch_id . $pay_period_id . $run_id ) );
+																	//Force agency report to D=Deposit and set other necessary data.
+																	$output_data['agency_report_data']['type_id'] = 'D'; //D=Deposit
+																	$output_data['agency_report_data']['remote_batch_id'] = $tt_ps_api->generateBatchID( $pp_obj->getEndDate(), $run_id );
 
-															$retval = $tt_ps_api->setAgencyReport( $tt_ps_api->convertReportPaymentServicesDataToAgencyReportArray( $output_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj, $pp_obj->getStartDate(), $pp_obj->getEndDate(), $pp_obj->getTransactionDate(), $run_id, $batch_id, $remote_id, 'D' ) ); //D=Deposit/Estimate
-															Debug::Arr( $retval, 'TimeTrexPaymentServices Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
-															if ( $retval->isValid() == TRUE ) {
-																Debug::Text( 'Upload successful!', __FILE__, __LINE__, __METHOD__, 10 );
+																	//Generate a consistent remote_id based on the exact pay stubs that are selected, the remittance agency event, and batch ID.
+																	//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
+																	$output_data['agency_report_data']['remote_id'] = TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $output_data['agency_report_data']['remote_batch_id'] . $pay_period_id . $run_id ) );
+																	$output_data['agency_report_data']['pay_period_start_date'] = $pp_obj->getStartDate();
+																	$output_data['agency_report_data']['pay_period_end_date'] = $pp_obj->getEndDate();
+																	$output_data['agency_report_data']['pay_period_transaction_date'] = $pp_obj->getTransactionDate();
+																	$output_data['agency_report_data']['pay_period_run'] = $run_id;
+
+																	//Check to see if transaction date is outside of the current agency event start/end period, if so then we want to use date from the next period.
+																	if ( $pp_obj->getTransactionDate() > $pp_obj->getEndDate() ) {
+																		$event_next_dates = $prae_obj->calculateNextDate( $prae_obj->getDueDate() );
+																		if ( is_array( $event_next_dates ) ) {
+																			$output_data['agency_report_data']['period_start_date'] = $event_next_dates['start_date'];
+																			$output_data['agency_report_data']['period_end_date'] = $event_next_dates['end_date'];
+																			$output_data['agency_report_data']['due_date'] = $event_next_dates['due_date'];
+																		}
+																		unset( $event_next_dates );
+																	}
+
+																	$agency_report_arr = $tt_ps_api->convertReportPaymentServicesDataToAgencyReportArray( $output_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj );
+
+																	$retval = $tt_ps_api->setAgencyReport( $agency_report_arr );
+																	//$retval = $tt_ps_api->setAgencyReport( $tt_ps_api->convertReportPaymentServicesDataToAgencyReportArray( $output_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj, $pp_obj->getStartDate(), $pp_obj->getEndDate(), $pp_obj->getTransactionDate(), $run_id, $batch_id, $remote_id, 'D' ) ); //D=Deposit/Estimate
+
+																	Debug::Arr( $retval, 'TimeTrexPaymentServices Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+																	if ( $retval->isValid() == TRUE ) {
+																		Debug::Text( 'Upload successful!', __FILE__, __LINE__, __METHOD__, 10 );
+																	} else {
+																		Debug::Arr( $retval, 'ERROR! Unable to upload agency report data... ', __FILE__, __LINE__, __METHOD__, 10 );
+
+																		//No point in failing the transaction, as there isn't any easy way to re-trigger this right now. Its also after the transactions have all been uploaded too.
+																		//$pstlf->FailTransaction();
+																		//return FALSE;
+																	}
+																	unset( $batch_id, $remote_id );
+																} catch ( Exception $e ) {
+																	Debug::Text( 'ERROR! Unable to upload agency report data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+																}
 															} else {
-																Debug::Arr( $retval, 'ERROR! Unable to upload agency report data... ', __FILE__, __LINE__, __METHOD__, 10 );
-
-																//No point in failing the transaction, as there isn't any easy way to re-trigger this right now. Its also after the transactions have all been uploaded too.
-																//$pstlf->FailTransaction();
-																//return FALSE;
+																Debug::Text( 'WARNING: Production is off, not calling payment services API...', __FILE__, __LINE__, __METHOD__, 10 );
+																$retval = TRUE;
 															}
-															unset( $batch_id, $remote_id );
-														} catch ( Exception $e ) {
-															Debug::Text( 'ERROR! Unable to upload agency report data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+														} else {
+															Debug::Arr( $output_data, 'Report returned unexpected number of rows, not transmitting...', __FILE__, __LINE__, __METHOD__, 10 );
 														}
 													} else {
-														Debug::Text( 'WARNING: Production is off, not calling payment services API...', __FILE__, __LINE__, __METHOD__, 10 );
-														$retval = TRUE;
+														Debug::Text( '  ERROR! Report object was not returned, likely a validation failure!', __FILE__, __LINE__, __METHOD__, 10 );
 													}
-												} else {
-													Debug::Arr( $output_data, 'Report returned unexpected number of rows, not transmitting...', __FILE__, __LINE__, __METHOD__, 10 );
 												}
+											} else {
+												Debug::Text( '  ERROR! Pay Period does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
 											}
-										} else {
-											Debug::Text( '  ERROR! Pay Period does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
 										}
+									} else {
+										Debug::Text( '  ERROR! Contact user assign to agency is invalid!', __FILE__, __LINE__, __METHOD__, 10 );
 									}
 								} else {
-									Debug::Text( '  ERROR! Contact user assign to agency is invalid!', __FILE__, __LINE__, __METHOD__, 10 );
+									Debug::Text( '  ERROR! Remittance Source Account is not EFT or TimeTrex Payment Services!', __FILE__, __LINE__, __METHOD__, 10 );
 								}
 							} else {
-								Debug::Text( '  ERROR! Remittance Source Account is not EFT or TimeTrex Payment Services!', __FILE__, __LINE__, __METHOD__, 10 );
+								Debug::Text( '  ERROR! Remittance Agency Object is invalid!', __FILE__, __LINE__, __METHOD__, 10 );
 							}
 						} else {
-							Debug::Text( '  ERROR! Remittance Agency Object is invalid!', __FILE__, __LINE__, __METHOD__, 10 );
+							Debug::Text( '  Skipping non-auto pay events...', __FILE__, __LINE__, __METHOD__, 10 );
 						}
 					}
 				} else {

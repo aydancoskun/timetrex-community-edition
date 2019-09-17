@@ -118,6 +118,17 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 	},
 
+	_continueDoCopyAsNew: function() {
+		LocalCacheData.current_doing_context_action = 'copy_as_new';
+		this.is_add = true;
+		if ( Global.isSet( this.edit_view ) ) {
+			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
+				this.editor.rows_widgets_array[i].current_edit_item.id = '';
+			}
+		}
+		this._super( '_continueDoCopyAsNew' );
+	},
+
 	onCopyAsNewResult: function( result ) {
 		var $this = this;
 		var result_data = result.getResult();
@@ -143,52 +154,6 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		$this.initEditView();
 	},
 
-	_continueDoCopyAsNew: function() {
-		var $this = this;
-		this.is_add = true;
-
-		LocalCacheData.current_doing_context_action = 'copy_as_new';
-
-		if ( Global.isSet( this.edit_view ) ) {
-			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
-				this.editor.rows_widgets_array[i].current_edit_item.id = '';
-			}
-			this.current_edit_record.id = '';
-			var navigation_div = this.edit_view.find( '.navigation-div' );
-			navigation_div.css( 'display', 'none' );
-			this.setEditMenu();
-			this.setTabStatus();
-			this.is_changed = false;
-			ProgressBar.closeOverlay();
-
-		} else {
-
-			var filter = {};
-			var selectedId;
-			var grid_selected_id_array = this.getGridSelectIdArray();
-			var grid_selected_length = grid_selected_id_array.length;
-
-			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
-				return;
-			}
-
-			filter.filter_data = {};
-			filter.filter_data.id = [selectedId];
-
-			this.api['get' + this.api.key_name]( filter, {
-				onResult: function( result ) {
-
-					$this.onCopyAsNewResult( result );
-
-				}
-			} );
-		}
-
-	},
-
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
 		this.initInsideEditorData();
@@ -206,7 +171,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		if ( !exception_control_id ) {
 
 			this.api_exception_policy.getExceptionPolicyDefaultData( args, true, {
-				onResult: function( res ) {
+				onResult: function ( res ) {
 
 					if ( !$this.edit_view ) {
 						return;
@@ -223,7 +188,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 						data[key].id = '';
 						array_data.push( data[key] );
 					}
-					array_data = array_data.sort( function( a, b ) {
+					array_data = array_data.sort( function ( a, b ) {
 						return Global.compare( a, b, 'type_id' );
 					} );
 
@@ -237,7 +202,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			args.filter_data.exception_policy_control_id = exception_control_id;
 
 			this.api_exception_policy.getExceptionPolicyDefaultData( args, true, {
-				onResult: function( res ) {
+				onResult: function ( res ) {
 
 					if ( !$this.edit_view ) {
 						return;
@@ -256,7 +221,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 						array_data.push( data[key] );
 					}
 
-					array_data = array_data.sort( function( a, b ) {
+					array_data = array_data.sort( function ( a, b ) {
 						return Global.compare( a, b, 'type_id' );
 					} );
 
@@ -266,7 +231,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 					ep_filter.filter_data = { exception_policy_control_id: exception_control_id };
 
 					$this.api_exception_policy.getExceptionPolicy( ep_filter, true, {
-						onResult: function( ep_res ) {
+						onResult: function ( ep_res ) {
 
 							if ( !$this.edit_view ) {
 								return;
@@ -283,7 +248,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 								array_data.push( data[key] );
 							}
 
-							array_data = array_data.sort( function( a, b ) {
+							array_data = array_data.sort( function ( a, b ) {
 								return Global.compare( a, b, 'type_id' );
 							} );
 
@@ -295,7 +260,6 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-
 	},
 
 	insideEditorUpdateAllRows: function( val ) {

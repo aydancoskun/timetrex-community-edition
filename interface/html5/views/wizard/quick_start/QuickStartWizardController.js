@@ -33,7 +33,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				var label = this.getLabel();
 				label.text( $.i18n._( 'Welcome to' ) + ' ' + LocalCacheData.getApplicationName() + ', ' + $.i18n._( 'this Quick Start Wizard will walk you through the initial setup by asking you a few basic questions about your company.' ) );
 
-				var guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Press' ) + '<button style="display: inline" class="forward-btn"><span style="opacity: 0">.</span></button> ' + $.i18n._( 'below to continue' ) + '</span></div>' );
+				var guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Press' ) + '<button style="display: inline" class="forward-btn"></button> ' + $.i18n._( 'below to continue' ) + '</span></div>' );
 
 				this.content_div.append( label );
 
@@ -136,7 +136,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				label.text( $.i18n._( 'To help determine how' ) + ' ' + LocalCacheData.getApplicationName() + ' ' + $.i18n._( 'should be initially setup, please select one or more locations that your employees reside within.' ) );
 				this.content_div.append( label );
 
-				guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Click' ) + ' <button style="display: inline" class="plus-icon"><span style="opacity: 0">.</span></button> ' + $.i18n._( 'icon to add additional locations' ) + '</span></div>' );
+				guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Click' ) + ' <button style="display: inline" class="plus-icon"></button> ' + $.i18n._( 'icon to add additional locations' ) + '</span></div>' );
 				this.content_div.append( guide_label );
 
 				legal_entity_label = $( '<br><div><span class="clear-both-div">' + $.i18n._( 'Legal Entity' ) + '</span></div>' );
@@ -188,7 +188,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				label.text( LocalCacheData.getApplicationName() + ' ' + $.i18n._( 'is now setup and ready for you to start adding employees and tracking their attendance.' ) );
 				this.content_div.append( label );
 
-				guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Click the' ) + ' <button style="display: inline" class="done-btn"><span style="opacity: 0">.</span></button> ' + $.i18n._( 'icon below to begin doing that now' ) + '</span></div>' );
+				guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Click the' ) + ' <button style="display: inline" class="done-btn"></button> ' + $.i18n._( 'icon below to begin doing that now' ) + '</span></div>' );
 				this.content_div.append( guide_label );
 
 				break;

@@ -274,7 +274,6 @@ WidgetTestViewController = BaseViewController.extend( {
 				var result_data = r.getResult();
 				$this.user_id_array = result_data;
 				result_data = $this.processResultData( result_data );
-				$this.grid.clearGridData();
 				$this.grid.setData( result_data );
 				$this.grid.setGridColumnsWidth();
 				$this.onEditClick( result_data[0].id );

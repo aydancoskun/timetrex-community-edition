@@ -855,13 +855,40 @@ class RemittanceSummaryReport extends Report {
 	 * Formats report data for exporting to TimeTrex payment service.
 	 * @return array
 	 */
-	function getPaymentServicesData() {
-		$output_data = $this->getOutput( 'raw' );
+	function getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj ) {
+		$tmp_data = $this->getOutput( 'raw' ); //Generate the report so getSummaryTableData() has data to work with.
 		if ( $this->hasData() ) {
-			$summary_table_data = $this->getSummaryTableData( 'raw' );
-			$summary_table_data['object'] = 'RemittanceSummaryReport';
+			$output_data = $this->getSummaryTableData( 'raw' );
 
-			return $summary_table_data;
+			$batch_id = date( 'M d', $prae_obj->getEndDate() );
+
+			$amount_due = ( isset( $output_data['total'] ) ) ? $output_data['total'] : NULL;
+
+			//NOTE: This is mostly for the tax wizard data, some of this data is overridden in PayStubTransactionFactory::exportPayStubRemittanceAgencyReports().
+			$retarr = array(
+					'object'               => __CLASS__,
+					'user_success_message' => TTi18n::gettext( 'Payment submitted successfully for $%1', array( Misc::MoneyFormat( $amount_due ) ) ),
+
+					'agency_report_data'   => array(
+							'type_id'         => 'P', //P=Payment
+							'total_employees' => ( isset( $output_data['employees'] ) ) ? (int)$output_data['employees'] : NULL,
+							'subject_wages'   => ( isset( $output_data['gross_payroll'] ) ) ? $output_data['gross_payroll'] : NULL,
+							'taxable_wages'   => ( isset( $output_data['gross_payroll'] ) ) ? $output_data['gross_payroll'] : NULL,
+							'amount_withheld' => $amount_due,
+							'amount_due'      => $amount_due,
+							'due_date'        => $prae_obj->getDueDate(),
+							'extra_data'      => $output_data,
+
+							'remote_batch_id'  => $batch_id,
+
+							//Generate a consistent remote_id based on the exact time period, the remittance agency event, and batch ID.
+							//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
+							'remote_id' => TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $batch_id ) ),
+					),
+			);
+
+			return $retarr;
+
 		}
 
 		Debug::Text('No report data!', __FILE__, __LINE__, __METHOD__, 10);

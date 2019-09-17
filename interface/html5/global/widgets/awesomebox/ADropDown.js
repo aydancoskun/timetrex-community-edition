@@ -621,7 +621,6 @@
 			static_source_data = val;
 
 			if ( !tree_mode ) {
-				unselect_grid.clearGridData();
 				unselect_grid.setData( val );
 
 				this.setTotalDisplaySpan();
@@ -647,7 +646,7 @@
 			//don't swap the grids. always size on left grid.
 			var p_data = primary_grid.getData();
 			var s_data = secondary_grid.getData();
-			if( s_data.length != 0 && p_data.length == 0 ){
+			if ( s_data && s_data.length != 0 && p_data && p_data.length == 0 ) {
 				//swap grids if no data in primary.
 				var temp = primary_grid;
 				primary_grid = secondary_grid;
@@ -771,7 +770,8 @@
 			var scroll_position = unselect_grid.grid.parent().parent().scrollTop();
 			var grid_data = unselect_grid.getData();
 			if ( grid_data.length > 0 && val.length > 0 ) {
-				unselect_grid.setData( val );
+				//If in tree_mode, don't clear the unselected grid, since we just bold/unbold the selected items otherwise the "tree" layout would be lost.
+				unselect_grid.setData( val, !tree_mode );
 			} else {
 				var col_model = unselect_grid.getGridParam( 'colModel' );
 
@@ -1451,7 +1451,6 @@
 				//You move 5 items to the right side, then search within those items to show only 1, then clear the search, and only 1 item would still be shown.
 				real_selected_items = this.getSelectItems().slice();
 			}
-			select_grid.clearGridData();
 			select_grid.setData( val );
 		};
 
@@ -1553,14 +1552,11 @@
 				//select_grid.clearGridData();
 				//FIXES BUG #1998: The api call returns true when the data it's looking for is deleted. This causes the grid to add a blank row to the unselected side when clear is clicked.
 				if ( typeof val === 'object' ) {
-					select_grid.clearGridData();
 					select_grid.setData( val );
 				}
-				select_grid.grid.trigger( 'reloadGrid' );
 			}
 
 			if ( !tree_mode ) {
-				unselect_grid.clearGridData();
 				unselect_grid.setData( all_columns );
 				this.setTotalDisplaySpan();
 			} else {
@@ -2166,11 +2162,7 @@
 				target_data = [];
 			}
 
-			if ( !Global.isSet( source_data[0].id ) ) {
-
-			} else {
-				var last_item_index = null; //for drag order fixing when drag to empty space
-
+			if ( source_data[0] && source_data[0].hasOwnProperty( 'id' )  ) {
 				if ( !Global.isSet( index ) ) {
 					array = array.reverse();
 				}
@@ -2891,16 +2883,12 @@
 					var target_grid = select_grid;
 					var source_data = unselect_grid.getData();
 					var target_data = select_grid.getData();
-
-					real_selected_items = source_data;
 				} else {
-					real_selected_items = [];
 					source_grid = select_grid;
 					target_grid = unselect_grid;
 					source_data = select_grid.getData();
 					target_data = unselect_grid.getData();
 				}
-
 
 				if ( tree_mode ) {
 					source_grid.clearGridData();
@@ -2910,6 +2898,14 @@
 				} else {
 					finalArray = target_data.concat( source_data );
 					target_grid.setData( finalArray );
+
+					//#2721 - This helps fixes a bug where if you expand a awesomebox (ie: Edit Policy Group, Absence Policys), on right-hand side click clear search. Click Move All on right-hand side. Collapse, expand, click move All left-hand side. Both sides are now blank.
+					if ( left_to_right ) {
+						real_selected_items = finalArray; // Fixes #2721
+					} else {
+						real_selected_items = [];
+					}
+
 					source_grid.clearGridData();
 					source_grid.grid.trigger( 'reloadGrid' );
 					a_dropdown_this.setTotalDisplaySpan();

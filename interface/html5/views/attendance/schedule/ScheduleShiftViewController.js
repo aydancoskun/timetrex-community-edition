@@ -35,7 +35,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
 		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
 			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
@@ -134,7 +134,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
 				PermissionManager.validate( p_id, 'edit_job' ) &&
-				( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				( Global.getProductEdition() >= 20 ) ) {
 			return true;
 		}
 		return false;
@@ -242,7 +242,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 	},
 
 	checkOpenPermission: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 && PermissionManager.validate( 'schedule', 'view_open' ) ) {
+		if ( Global.getProductEdition() >= 15 && PermissionManager.validate( 'schedule', 'view_open' ) ) {
 			return true;
 		}
 
@@ -431,7 +431,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			this.detachElement( 'department_id' );
 		}
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			//Job
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
@@ -551,6 +551,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 					break;
 				default:
 					widget.css( 'opacity', 1 );
+					break;
 			}
 
 		}
@@ -734,10 +735,10 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'job_id',
 				layout_name: ALayoutIDs.JOB,
-				api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? (APIFactory.getAPIClass( 'APIJob' )) : null,
+				api_class: ( Global.getProductEdition() >= 20 ) ? (APIFactory.getAPIClass( 'APIJob' )) : null,
 				multiple: true,
 				basic_search: false,
-				adv_search: (this.show_job_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )),
+				adv_search: (this.show_job_ui && ( Global.getProductEdition() >= 20 )),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -746,10 +747,10 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'job_item_id',
 				layout_name: ALayoutIDs.JOB_ITEM,
-				api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? (APIFactory.getAPIClass( 'APIJobItem' )) : null,
+				api_class: ( Global.getProductEdition() >= 20 ) ? (APIFactory.getAPIClass( 'APIJobItem' )) : null,
 				multiple: true,
 				basic_search: false,
-				adv_search: (this.show_job_item_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )),
+				adv_search: (this.show_job_item_ui && ( Global.getProductEdition() >= 20 )),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -804,7 +805,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		switch ( key ) {
 			case 'job_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'job_item_id', {
 						status_id: 10,
@@ -814,14 +815,14 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				}
 				break;
 			case 'job_item_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_quick_search':
 			case 'job_item_quick_search':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.onJobQuickSearch( key, c_value );
 
 					//Don't validate immediately as onJobQuickSearch is doing async API calls, and it would cause a guaranteed validation failure.
@@ -879,7 +880,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				projected_remaining_balance: 0
 			};
 
-			this.edit_view_ui_dic['available_balance'].setValue( Global.secondToHHMMSS( result_data.remaining_balance ) );
+			this.edit_view_ui_dic['available_balance'].setValue( Global.getTimeUnit( result_data.remaining_balance ) );
 
 			var container = $( this.edit_view_form_item_dic['available_balance'].find( '.schedule-view-balance-info' ) );
 
@@ -890,32 +891,32 @@ ScheduleShiftViewController = BaseViewController.extend( {
 					case 'available_balance':
 						p_str += '<tr>';
 						p_str += '<td>' + $.i18n._( 'Available Balance' ) + ':' + '</td>';
-						p_str += '<td>' + Global.secondToHHMMSS( result_data[key] ) + '</td>';
+						p_str += '<td>' + Global.getTimeUnit( result_data[key] ) + '</td>';
 						p_str += '</tr>';
 						break;
 					case 'current_time':
 						p_str += '<tr>';
 						p_str += '<td>' + $.i18n._( 'Current Time' ) + ':' + '</td>';
-						p_str += '<td>' + Global.secondToHHMMSS( result_data[key] ) + '</td>';
+						p_str += '<td>' + Global.getTimeUnit( result_data[key] ) + '</td>';
 						p_str += '</tr>';
 						break;
 					case 'remaining_balance':
 						p_str += '<tr>';
 						p_str += '<td>' + $.i18n._( 'Remaining Balance' ) + ':' + '</td>';
-						p_str += '<td>' + Global.secondToHHMMSS( result_data[key] ) + '</td>';
+						p_str += '<td>' + Global.getTimeUnit( result_data[key] ) + '</td>';
 						p_str += '</tr>';
 						p_str += '<tr><td colspan=\'2\'>&nbsp;</td></tr>';
 						break;
 					case 'projected_balance':
 						p_str += '<tr>';
 						p_str += '<td>' + $.i18n._( 'Projected Balance by false' ) + ':' + '</td>';
-						p_str += '<td>' + Global.secondToHHMMSS( result_data[key] ) + '</td>';
+						p_str += '<td>' + Global.getTimeUnit( result_data[key] ) + '</td>';
 						p_str += '</tr>';
 						break;
 					case 'projected_remaining_balance':
 						p_str += '<tr>';
 						p_str += '<td>' + $.i18n._( 'Projected Remaining Balance' ) + ':' + '</td>';
-						p_str += '<td>' + Global.secondToHHMMSS( result_data[key] ) + '</td>';
+						p_str += '<td>' + Global.getTimeUnit( result_data[key] ) + '</td>';
 						p_str += '</tr>';
 						break;
 				}
@@ -1047,7 +1048,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 						this.pre_total_time = ( this.is_add ) ? 0 : this.current_edit_record[key];
 						break;
 					case 'job_id':
-						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						if ( ( Global.getProductEdition() >= 20 ) ) {
 							var args = {};
 							args.filter_data = { status_id: 10, user_id: this.current_edit_record.user_id };
 							widget.setDefaultArgs( args );
@@ -1055,7 +1056,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 						}
 						break;
 					case 'job_item_id':
-						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						if ( ( Global.getProductEdition() >= 20 ) ) {
 							args = {};
 							args.filter_data = { status_id: 10, job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );
@@ -1106,7 +1107,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		var user_id = this.current_edit_record.user_id;
 
 		this.total_time = this.api.getScheduleTotalTime( startTime, endTime, schedulePolicyId, user_id, { async: false } ).getResult();
-		var total_time = Global.secondToHHMMSS( this.total_time );
+		var total_time = Global.getTimeUnit( this.total_time );
 
 		this.edit_view_ui_dic['total_time'].setValue( total_time );
 

@@ -242,6 +242,169 @@ function runUnitTests() {
 		assert.ok( res['11111111-1111-1111-1111-111111111111'] == 'uuid', 'prefix stripped properly' );
 	} );
 
+	QUnit.test( 'Global.js parseTimeUnit HH:MM:SS', function( assert ) {
+		assert.equal( Global.parseTimeUnit( '00:01', 10 ), 60 );
+		assert.equal( Global.parseTimeUnit( '-00:01', 10 ), -60 );
+
+		assert.equal( Global.parseTimeUnit( '01:00', 10 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '10:00', 10 ), 36000 );
+		assert.equal( Global.parseTimeUnit( '100:00', 10 ), 360000 );
+		assert.equal( Global.parseTimeUnit( '1000:00', 10 ), 3600000 );
+		assert.equal( Global.parseTimeUnit( '10000:00', 10 ), 36000000 );
+		assert.equal( Global.parseTimeUnit( '10000:01.5', 10 ), 36000060 );
+
+		assert.equal( Global.parseTimeUnit( '01', 10 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '1', 10 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '-1', 10 ), -3600 );
+		assert.equal( Global.parseTimeUnit( '1:', 10 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '1:00:00', 10 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '1:00:01', 10 ), 3601 );
+
+		assert.equal( Global.parseTimeUnit( '00:60', 10 ), 3600 );
+		assert.equal( Global.parseTimeUnit( ':60', 10 ), 3600 );
+		assert.equal( Global.parseTimeUnit( ':1', 10 ), 60 );
+
+		assert.equal( Global.parseTimeUnit( '1:00:01.5', 10 ), 3601 );
+		assert.equal( Global.parseTimeUnit( '1:1.5', 10 ), 3660 );
+
+		//Hybrid mode.
+		assert.equal( Global.parseTimeUnit( '1.000', 10 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '1.00', 10 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '1', 10 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '-1', 10 ), -3600 );
+		assert.equal( Global.parseTimeUnit( '01', 10 ), 3600 );
+
+		assert.equal( Global.parseTimeUnit( '0.25', 10 ), 900 );
+		assert.equal( Global.parseTimeUnit( '0.50', 10 ), 1800 );
+
+		assert.equal( Global.parseTimeUnit( '0.34', 10 ), 1200 ); //Automatically rounds to nearest 1min
+	} );
+
+	QUnit.test( 'Global.js parseTimeUnit Hours', function( assert ) {
+		assert.equal( Global.parseTimeUnit( '1.000', 20 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '1.00', 20 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '1', 20 ), 3600 );
+		assert.equal( Global.parseTimeUnit( '-1', 20 ), -3600 );
+		assert.equal( Global.parseTimeUnit( '01', 20 ), 3600 );
+
+		assert.equal( Global.parseTimeUnit( '0.25', 20 ), 900 );
+		assert.equal( Global.parseTimeUnit( '0.50', 20 ), 1800 );
+
+		assert.equal( Global.parseTimeUnit( '0.34', 20 ), 1200 ); //Automatically rounds to nearest 1min
+
+		//Hybrid mode
+		assert.equal( Global.parseTimeUnit( '00:01', 20 ), 60 );
+		assert.equal( Global.parseTimeUnit( '-00:01', 20 ), -60 );
+
+		assert.equal( Global.parseTimeUnit( ':60', 20 ), 3600 );
+		assert.equal( Global.parseTimeUnit( ':1', 20 ), 60 );
+
+		assert.equal( Global.parseTimeUnit( '1:00:01.5', 20 ), 3600 ); //These don't match PHP due to how
+		assert.equal( Global.parseTimeUnit( '1:1.5', 20 ), 3660 );
+
+	} );
+
+	QUnit.test( 'Global.js parseTimeUnit Hours Rounding', function( assert ) {
+		assert.equal( Global.parseTimeUnit( '0.02', 20 ), ( 1 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.03', 20 ), ( 2 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.05', 20 ), ( 3 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.06', 20 ), ( 4 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.08', 20 ), ( 5 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.10', 20 ), ( 6 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.12', 20 ), ( 7 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.13', 20 ), ( 8 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.15', 20 ), ( 9 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.17', 20 ), ( 10 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.18', 20 ), ( 11 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.20', 20 ), ( 12 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.22', 20 ), ( 13 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.23', 20 ), ( 14 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.25', 20 ), ( 15 * 60 ) );
+
+		assert.equal( Global.parseTimeUnit( '0.27', 20 ), ( 16 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.28', 20 ), ( 17 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.30', 20 ), ( 18 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.32', 20 ), ( 19 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.33', 20 ), ( 20 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.35', 20 ), ( 21 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.37', 20 ), ( 22 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.39', 20 ), ( 23 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.40', 20 ), ( 24 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.42', 20 ), ( 25 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.43', 20 ), ( 26 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.45', 20 ), ( 27 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.47', 20 ), ( 28 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.48', 20 ), ( 29 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.50', 20 ), ( 30 * 60 ) );
+
+
+		assert.equal( Global.parseTimeUnit( '0.52', 20 ), ( 31 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.53', 20 ), ( 32 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.55', 20 ), ( 33 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.57', 20 ), ( 34 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.58', 20 ), ( 35 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.60', 20 ), ( 36 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.62', 20 ), ( 37 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.63', 20 ), ( 38 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.65', 20 ), ( 39 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.67', 20 ), ( 40 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.68', 20 ), ( 41 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.70', 20 ), ( 42 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.72', 20 ), ( 43 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.73', 20 ), ( 44 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.75', 20 ), ( 45 * 60 ) );
+
+		assert.equal( Global.parseTimeUnit( '0.77', 20 ), ( 46 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.78', 20 ), ( 47 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.80', 20 ), ( 48 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.82', 20 ), ( 49 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.84', 20 ), ( 50 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.85', 20 ), ( 51 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.87', 20 ), ( 52 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.89', 20 ), ( 53 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.90', 20 ), ( 54 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.92', 20 ), ( 55 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.94', 20 ), ( 56 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.95', 20 ), ( 57 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.97', 20 ), ( 58 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '0.99', 20 ), ( 59 * 60 ) );
+		assert.equal( Global.parseTimeUnit( '1.00', 20 ), ( 60 * 60 ) );
+	} );
+
+	QUnit.test( 'Global.js getTimeUnit', function( assert ) {
+		assert.equal( Global.getTimeUnit( 3600, 10 ), '01:00' );
+		assert.equal( Global.getTimeUnit( 3660, 10 ), '01:01' );
+		assert.equal( Global.getTimeUnit( 36060, 10 ), '10:01' );
+		assert.equal( Global.getTimeUnit( 36660, 10 ), '10:11' );
+		assert.equal( Global.getTimeUnit( 360660, 10 ), '100:11' );
+		assert.equal( Global.getTimeUnit( 3600660, 10 ), '1000:11' );
+		assert.equal( Global.getTimeUnit( 36000660, 10 ), '10000:11' );
+		assert.equal( Global.getTimeUnit( 360000660, 10 ), '100000:11' );
+		assert.equal( Global.getTimeUnit( 3600000660, 10 ), '1000000:11' );
+
+		assert.equal( Global.getTimeUnit( -3600, 10 ), '-01:00' );
+		assert.equal( Global.getTimeUnit( -3660, 10 ), '-01:01' );
+		assert.equal( Global.getTimeUnit( -36060, 10 ), '-10:01' );
+		assert.equal( Global.getTimeUnit( -36660, 10 ), '-10:11' );
+		assert.equal( Global.getTimeUnit( -360660, 10 ), '-100:11' );
+		assert.equal( Global.getTimeUnit( -3600660, 10 ), '-1000:11' );
+		assert.equal( Global.getTimeUnit( -36000660, 10 ), '-10000:11' );
+		assert.equal( Global.getTimeUnit( -360000660, 10 ), '-100000:11' );
+		assert.equal( Global.getTimeUnit( -3600000660, 10 ), '-1000000:11' );
+
+		assert.equal( Global.getTimeUnit( 3600, 12 ), '01:00:00' );
+		assert.equal( Global.getTimeUnit( 3661, 12 ), '01:01:01' );
+		assert.equal( Global.getTimeUnit( 36060, 12 ), '10:01:00' );
+		assert.equal( Global.getTimeUnit( 36660, 12 ), '10:11:00' );
+
+		assert.equal( Global.getTimeUnit( 3600, 23 ), '1.0000' );
+		assert.equal( Global.getTimeUnit( 3660, 23 ), '1.0167' );
+		assert.equal( Global.getTimeUnit( 3600660, 23 ), '1000.1833' );
+
+		assert.equal( Global.getTimeUnit( 603, 99 ), '10:03' );
+		assert.equal( Global.getTimeUnit( 3600, 99 ), '60:00' );
+	} );
+
 	QUnit.module( 'UUID Generation' );
 	var uuids = [];
 	QUnit.test( 'uuuid TIGHTLOOP(default logged in user seed)', function( assert ) {

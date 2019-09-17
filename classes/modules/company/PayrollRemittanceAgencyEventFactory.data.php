@@ -145,8 +145,8 @@ return array(
 							'include_w2'          => FALSE,
 							'file_zero_wage'      => FALSE,
 							'file_zero_liability' => FALSE,
-							'auto_file'           => FALSE,
-							'auto_pay'            => FALSE,
+							'auto_file'           => TRUE, //TT can automatically files.
+							'auto_pay'            => FALSE, //TT only pays through the T4SD event currently. This is needed to allow T4 efiling without DD. Shortfalls need to be paid another way.
 					),
 					'frequency'        => array( //Annual
 												 array(
@@ -170,8 +170,8 @@ return array(
 							'include_w2'          => FALSE,
 							'file_zero_wage'      => FALSE,
 							'file_zero_liability' => FALSE,
-							'auto_file'           => FALSE,
-							'auto_pay'            => FALSE,
+							'auto_file'           => TRUE, //TT can automatically files.
+							'auto_pay'            => FALSE, //TT only pays through the T4SD event currently. This is needed to allow T4 efiling without DD. Shortfalls need to be paid another way.
 					),
 					'frequency'        => array( //Annual
 												 array(
@@ -198,8 +198,8 @@ return array(
 												 'include_w2'          => FALSE,
 												 'file_zero_wage'      => FALSE,
 												 'file_zero_liability' => FALSE,
-												 'auto_file'           => FALSE,
-												 'auto_pay'            => FALSE,
+												 'auto_file'           => TRUE, //TT can automatically files.
+												 'auto_pay'            => FALSE, //TT can automatically pays.
 										 ),
 										 'frequency'        => array(	//If you have a monthly pay period or 13 pay periods per year (every four weeks), you must issue electronic ROEs by whichever date is earlier:
 																		//  five calendar days after the end of the pay period in which an employee experiences an interruption of earnings; or

@@ -23,6 +23,7 @@ var TAlertManager = (function() {
 				isShownNetworkAlert = false;
 			} );
 			isShownNetworkAlert = true;
+			Global.sendAnalyticsEvent( 'alert-manager', 'error:network', 'network-error:jqXHR-status:' + jqXHR.status + 'error:' + textStatus );
 		}
 	};
 

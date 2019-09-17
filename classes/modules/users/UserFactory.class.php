@@ -2543,6 +2543,8 @@ class UserFactory extends Factory {
 	function Validate( $ignore_warning = TRUE ) {
 		global $current_user;
 
+		$data_diff = $this->getDataDifferences();
+
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
@@ -3362,7 +3364,7 @@ class UserFactory extends Factory {
 
 			//Check if birth date is not specified and payroll is being processed (some pay stubs do exist for this legal entity) to remind the user to specify a birth date.
 			//  This is critical especially in Canada for CPP eligibility.
-			if ( $this->getBirthDate() == ''  ) {
+			if ( $this->getBirthDate() == '' ) {
 				$pslf = TTnew( 'PayStubListFactory');
 				$pslf->getByCompanyIdAndLegalEntityId( $this->getCompany(), $this->getLegalEntity(), 1 ); //limit 1
 				if ( $pslf->getRecordCount() > 0 ) {

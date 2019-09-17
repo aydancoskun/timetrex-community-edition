@@ -972,17 +972,16 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		var args = {};
 		args.filter_data = {};
 
-		if ( this.mass_edit || (( !this.current_edit_record || !this.current_edit_record.id ) && !this.copied_record_id ) ) {
+		if ( this.mass_edit || ( ( !this.current_edit_record || !this.current_edit_record.id ) && !this.copied_record_id ) ) {
 			$this.editor.removeAllRows();
 			$this.editor.addRow();
 			$this.isDisplayLengthOfServiceHoursBasedOn();
 
 		} else {
-
 			args.filter_data.accrual_policy_id = this.current_edit_record.id ? this.current_edit_record.id : this.copied_record_id;
 			this.copied_record_id = '';
 			this.accrual_policy_milestone_api.getAccrualPolicyMilestone( args, true, {
-				onResult: function( res ) {
+				onResult: function ( res ) {
 					if ( !$this.edit_view ) {
 						return;
 					}
@@ -1176,39 +1175,14 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	},
 
 	_continueDoCopyAsNew: function() {
-		var $this = this;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		this.is_add = true;
 		if ( Global.isSet( this.edit_view ) ) {
 			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
 				this.editor.rows_widgets_array[i].length_of_service.attr( 'milestone_id', '' );
 			}
-			this.current_edit_record.id = '';
-			var navigation_div = this.edit_view.find( '.navigation-div' );
-			navigation_div.css( 'display', 'none' );
-			this.setEditMenu();
-			this.setTabStatus();
-			ProgressBar.closeOverlay();
-		} else {
-			var filter = {};
-			var selectedId;
-			var grid_selected_id_array = this.getGridSelectIdArray();
-			var grid_selected_length = grid_selected_id_array.length;
-
-			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
-				return;
-			}
-			filter.filter_data = {};
-			filter.filter_data.id = [selectedId];
-			this.api['get' + this.api.key_name]( filter, {
-				onResult: function( result ) {
-					$this.onCopyAsNewResult( result );
-				}
-			} );
 		}
+		this._super( '_continueDoCopyAsNew' );
 	},
 
 	onCopyAsNewResult: function( result ) {
@@ -1306,7 +1280,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			return;
 		}
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 			Global.loadScript( 'views/policy/accrual_policy/AccrualPolicyUserModifierViewController.js', function () {
 				var tab_accrual_policy = $this.edit_view_tab.find( '#tab_employee_settings' );
 

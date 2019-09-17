@@ -927,6 +927,14 @@ class LegalEntityFactory extends Factory {
 			);
 		}
 
+		//Make sure if payment services is enabled, that the country is a valid one that is supported.
+		if ( $this->getPaymentServicesStatus() == 10 AND !in_array( $this->getCountry(), array( 'CA', 'US') ) ) { //10=Enabled.
+			$this->Validator->isTrue( 'payment_services_status_id',
+									  FALSE,
+									  TTi18n::gettext( 'Payment Services is only available in Canada or the United States' ) );
+
+		}
+
 		if ( $this->getPaymentServicesStatus() == 10 AND $this->getPaymentServicesUserName() != '' AND $this->getPaymentServicesAPIKey() != '' ) { //10=Enabled
 			$this->Validator->isTrue( 'payment_services_user_name',
 									  $this->checkPaymentServicesCredentials(),
@@ -1049,6 +1057,18 @@ class LegalEntityFactory extends Factory {
 		//Remember if this is a new user for postSave()
 		if ( $this->isNew( TRUE ) ) {
 			$this->is_new = TRUE;
+		}
+
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
+	function preValidate() {
+		//If they are outside US/Canada, automatically disable payment services, as its not supported anyways.
+		if ( !in_array( $this->getCountry(), array( 'CA', 'US') ) ) {
+			$this->setPaymentServicesStatus( 20 ); //20=Disabled
 		}
 
 		return TRUE;

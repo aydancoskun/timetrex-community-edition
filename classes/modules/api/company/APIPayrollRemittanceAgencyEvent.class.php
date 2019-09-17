@@ -410,6 +410,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 			$permission_obj = $this->getPermissionObject();
 
 			$report_obj = $praelf->getCurrent()->getReport( $report_id, $data, $user_obj, $permission_obj );
+			$report_obj->setAMFMessageId( $this->getAMFMessageId() ); //Be sure to pass along the AMFMessageId so progress bars work properly, specifically from the Tax Wizard.
 
 			$output_arr = $report_obj->getOutput( $report_id );
 			if ( isset( $output_arr['file_name'] ) AND isset( $output_arr['mime_type'] ) AND isset( $output_arr['data'] ) ) {
@@ -491,6 +492,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
 		$praelf->getByIdAndCompanyId( $prae_id, $this->getCurrentCompanyObject()->getId() );
 		if ( $praelf->getRecordCount() == 1 ) {
+			/** @var $prae_obj PayrollRemittanceAgencyEventFactory */
 			$prae_obj = $praelf->getCurrent();
 
 			if ( $prae_obj->getStatus() == 15 ) { //15=Full Service
@@ -521,26 +523,26 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 							$report_obj = $prae_obj->getReport( 'raw', NULL, $pra_user_obj, new Permission() );
 							//$report_obj = $prae_obj->getReport( '123456', NULL, $pra_user_obj, new Permission() ); //Test with generic TaxSummaryReport
 
-							$output_data = $report_obj->getPaymentServicesData();
+							$output_data = $report_obj->getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj );
+
 							Debug::Arr( $output_data, 'Report Payment Services Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 							if ( is_array( $output_data ) ) {
+								if ( !isset($output_data['user_success_message']) ) {
+									$output_data['user_success_message'] = TTi18n::gettext('Data submitted successfully.' );
+								}
+
 								if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
 									try {
 										$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
 
-										$batch_id = $tt_ps_api->generateBatchID( $prae_obj->getEndDate() );
+										$agency_report_arr = $tt_ps_api->convertReportPaymentServicesDataToAgencyReportArray( $output_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj );
 
-										//Generate a consistent remote_id based on the exact pay stubs that are selected, the remittance agency event, and batch ID.
-										//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
-										$remote_id = TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $batch_id ) );
-
-										$agency_report_arr = $tt_ps_api->convertReportPaymentServicesDataToAgencyReportArray( $output_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj, NULL, NULL, NULL, NULL, $batch_id, $remote_id, 'P' );
 										$retval = $tt_ps_api->setAgencyReport( $agency_report_arr ); //P=Payment
 										Debug::Arr( $retval, 'TimeTrexPaymentServices Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
 										if ( $retval->isValid() == TRUE ) {
 											$retval = array(
 													'result'       => TRUE,
-													'user_message' => TTi18n::gettext( 'Payment submitted successfully for $%1', array(Misc::MoneyFormat( $agency_report_arr['amount_due'] )) ),
+													'user_message' => $output_data['user_success_message'],
 											);
 										} else {
 											$retval = array(
@@ -549,6 +551,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 											);
 										}
 										unset( $agency_report_arr );
+
 									} catch ( Exception $e ) {
 										Debug::Text( 'ERROR! Unable to upload agency report data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
 										$retval = array(

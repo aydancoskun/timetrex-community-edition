@@ -312,7 +312,7 @@
 .top-container .ui-tabs .ui-tabs-nav li a {
     float: left;
     font-size: 11px;
-    padding: 4px 7px 4px;
+    padding: 3px 6px 4px; /* Padding supplimented by border size on the parent li in SearchPanel.css (#2710) */
     text-decoration: none;
     font-weight: bold;
     user-drag: none;

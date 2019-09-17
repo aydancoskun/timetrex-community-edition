@@ -195,7 +195,7 @@ class PayrollDeduction_US_UT extends PayrollDeduction_US {
 	}
 
 
-	function getStateTaxPayable() {
+	function _getStateTaxPayable() {
 		$annual_income = $this->getStateAnnualTaxableIncome();
 
 		$retval = 0;

@@ -37,7 +37,7 @@ StationViewController = BaseViewController.extend( {
 		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
 		this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
 			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
@@ -111,12 +111,12 @@ StationViewController = BaseViewController.extend( {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'job_id':
-						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						if ( ( Global.getProductEdition() >= 20 ) ) {
 							widget.setValue( this.current_edit_record[key] );
 						}
 						break;
 					case 'job_item_id':
-						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						if ( ( Global.getProductEdition() >= 20 ) ) {
 							var args = {};
 							args.filter_data = { job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );
@@ -155,21 +155,21 @@ StationViewController = BaseViewController.extend( {
 				this.onTypeChange();
 				break;
 			case 'job_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'job_item_id', { job_id: this.current_edit_record.job_id } );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_item_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_quick_search':
 			case 'job_item_quick_search':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.onJobQuickSearch( key, c_value );
 				}
 				break;
@@ -597,7 +597,7 @@ StationViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Default Department' ), form_item_input, tab_station_column1, '' );
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			//Job
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 

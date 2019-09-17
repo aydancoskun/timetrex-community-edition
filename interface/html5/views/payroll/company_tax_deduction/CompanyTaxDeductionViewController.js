@@ -79,7 +79,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			this.buildContextMenu( true );
 		} else {
 			//Load the FormulaBuilder as early as possible to help avoid some race conditions with input box not appearing, or appearing out of order when clicking "new" after a fresh reload.
-			if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+			if ( ( Global.getProductEdition() >= 15 ) ) {
 				Global.loadScript( 'global/widgets/formula_builder/FormulaBuilder.js' );
 			}
 
@@ -118,7 +118,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'state_nj_filing_status' );
 		this.initDropDownOption( 'state_nc_filing_status' );
 		this.initDropDownOption( 'state_ma_filing_status' );
-		this.initDropDownOption( 'state_ok_filing_status' );
 		this.initDropDownOption( 'state_ga_filing_status' );
 		this.initDropDownOption( 'state_la_filing_status' );
 		this.initDropDownOption( 'state_me_filing_status' );
@@ -626,51 +625,14 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	},
 
 	_continueDoCopyAsNew: function() {
-		var $this = this;
 		this.is_add = true;
-
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 
-		var selectedId;
-
 		if ( Global.isSet( this.edit_view ) ) {
-
-			this.current_edit_record.id = '';
-
 			this.employee_setting_grid.clearGridData();
-			$this.edit_view_ui_dic.calculation_id.setEnabled( true );
-			var navigation_div = this.edit_view.find( '.navigation-div' );
-			navigation_div.css( 'display', 'none' );
-			this.setEditMenu();
-			this.setTabStatus();
-			this.is_changed = false;
-			ProgressBar.closeOverlay();
-
-		} else {
-
-			var filter = {};
-			var grid_selected_id_array = this.getGridSelectIdArray();
-			var grid_selected_length = grid_selected_id_array.length;
-
-			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
-				return;
-			}
-
-			filter.filter_data = {};
-			filter.filter_data.id = [selectedId];
-
-			this.api['get' + this.api.key_name]( filter, {
-				onResult: function( result ) {
-
-					$this.onCopyAsNewResult( result );
-
-				}
-			} );
+			this.edit_view_ui_dic.calculation_id.setEnabled( true );
 		}
-
+		this._super( '_continueDoCopyAsNew' );
 	},
 
 	clearEditViewData: function() {
@@ -913,26 +875,31 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			this.payroll_remittance_agency_api.getPayrollRemittanceAgency( new_arg, {
 				onResult: function( task_result ) {
 					var data = task_result.getResult();
-					if ( data.length > 0 ) {
-						$this.edit_view_ui_dic.payroll_remittance_agency_id.setSourceData( data );
-						var id_in_result = false;
-						for ( var i in  data ) {
-							if ( data[i].id == pra_value ) {
-								id_in_result = true;
-								break;
+
+					if ( $this.edit_view_ui_dic.payroll_remittance_agency_id ) {
+						if ( data.length > 0 ) {
+							$this.edit_view_ui_dic.payroll_remittance_agency_id.setSourceData( data );
+
+							var id_in_result = false;
+							for ( var i in  data ) {
+								if ( data[i].id == pra_value ) {
+									id_in_result = true;
+									break;
+								}
 							}
-						}
-						if ( id_in_result === false ) {
-							pra_value = TTUUID.zero_id;
-						}
-						$this.current_edit_record.payroll_remittance_agency_id = pra_value;
-						$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue( pra_value );
 
-					} else {
-						$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue( TTUUID.zero_id );
+							if ( id_in_result === false ) {
+								pra_value = TTUUID.zero_id;
+							}
+
+							$this.current_edit_record.payroll_remittance_agency_id = pra_value;
+							$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue( pra_value );
+
+						} else {
+							$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue( TTUUID.zero_id );
+						}
+						$this.edit_view_ui_dic.payroll_remittance_agency_id.setEnabled( true );
 					}
-					$this.edit_view_ui_dic.payroll_remittance_agency_id.setEnabled( true );
-
 				}
 			} );
 		} else {
@@ -1052,7 +1019,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.detachElement( 'df_14' );
 		this.detachElement( 'df_15' );
 
-		if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+		if ( !( Global.getProductEdition() >= 15 ) ) {
 			this.detachElement( 'df_100' );
 		}
 
@@ -1104,15 +1071,17 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	},
 
 	resetEmployeeSettingGridColumns: function() {
-		var data = this.employee_setting_grid.getGridParam( 'data' );
-		Global.formatGridData( data, this.api.key_name );
-		this.buildEmployeeSettingGrid();
-		this.employee_setting_grid.setData( data );
-		this.removeEmployeeSettingNoResultCover();
-		this.setEmployeeGridDateColumns();
-		this.setEmployeeGridSize();
-		if ( data.length < 1 && this.current_edit_record.id ) {
-			this.showEmployeeSettingNoResultCover();
+		if ( this.employee_setting_grid ) {
+			var data = this.employee_setting_grid.getGridParam( 'data' );
+			Global.formatGridData( data, this.api.key_name );
+			this.buildEmployeeSettingGrid();
+			this.employee_setting_grid.setData( data );
+			this.removeEmployeeSettingNoResultCover();
+			this.setEmployeeGridDateColumns();
+			this.setEmployeeGridSize();
+			if ( data.length < 1 && this.current_edit_record.id ) {
+				this.showEmployeeSettingNoResultCover();
+			}
 		}
 	},
 
@@ -2019,7 +1988,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-OK':
-				columnOptions = this.state_ok_filing_status_array;
+				columnOptions = this.federal_filing_status_array;
 
 				for ( i = 0; i < columnOptions.length; i++ ) {
 
@@ -2482,8 +2451,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				};
 				column_info_array.push( column_info );
 				break;
-
 		}
+
 		if ( (this.current_edit_record.minimum_length_of_service && this.current_edit_record.minimum_length_of_service != 0) ||
 				(this.current_edit_record.maximum_length_of_service && this.current_edit_record.maximum_length_of_service) != 0 ) {
 			column_info = {
@@ -2528,6 +2497,23 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		} else {
 			$( '.row-date-picker-start-date' ).remove();
 			$( '.row-date-picker-end-date' ).remove();
+		}
+
+		//Add Exempt column to all Federal/Provincial/State/District taxes.
+		if ( ( this.current_edit_record.calculation_id == 100 || this.current_edit_record.calculation_id == 200 || this.current_edit_record.calculation_id == 300 ) && this.current_edit_record.country == 'US' ) {
+			column_info = {
+				name: 'user_value10',
+				index: 'user_value10',
+				label: $.i18n._( 'Exempt' ),
+				width: 100,
+				sortable: false,
+				formatter: 'select',
+				editable: true,
+				title: false,
+				edittype: 'select',
+				editoptions: { value: '0:No;1:Yes' }
+			};
+			column_info_array.push( column_info );
 		}
 
 		if ( this.employee_setting_grid ) {
@@ -2618,7 +2604,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				var column = column_info_array[j];
 				if ( !item[column.name] ) {
-					item[column.name] = this.current_edit_record[column.name] ? this.current_edit_record[column.name] : '';
+					item[column.name] = ( this.current_edit_record.hasOwnProperty( column.name ) && this.current_edit_record[column.name] !== false ) ? this.current_edit_record[column.name] : '';
 				}
 			}
 
@@ -2780,7 +2766,9 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 									} );
 
 								} else {
-									$this.api.getCombinedCalculationID( c_id, $this.current_edit_record.country, '', { onResult: getCaResult } );
+									if ( $this.current_edit_record ) {
+										$this.api.getCombinedCalculationID( c_id, $this.current_edit_record.country, '', { onResult: getCaResult } );
+									}
 								}
 
 							}
@@ -2971,7 +2959,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value2 );
 					break;
 				case '69':
-					if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+					if ( Global.getProductEdition() >= 15 ) {
 						$this.attachElement( 'df_1' );
 						$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Custom Variable 1' ) + ': ' );
 						$this.edit_view_ui_dic.df_1.setField( 'user_value1' );
@@ -3051,9 +3039,9 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 					break;
-					//
-					//Canada
-					//
+				//
+				//Canada
+				//
 				case '100-CA': //Federal Income Tax Formula -- CA
 				case '200-CA': //Province/State Income TaxFormula -- CA-AB
 					$this.attachElement( 'df_1' );
@@ -3248,7 +3236,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				case '200-US-OK':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_ok_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.federal_filing_status_array );
 					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 
@@ -3597,7 +3585,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'df_10' } );
 		this.addEditFieldToColumn( 'df_10', form_item_input, tab_tax_deductions_column1, '', null, true );
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+		if ( ( Global.getProductEdition() >= 15 ) ) {
 			TTPromise.add( 'CompanyTaxDeduction', 'df_11' );
 			Global.loadScript( 'global/widgets/formula_builder/FormulaBuilder.js', function() {
 				// Dynamic Field 11

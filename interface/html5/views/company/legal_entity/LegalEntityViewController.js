@@ -225,11 +225,67 @@ LegalEntityViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var account_statement = new RibbonSubMenu( {
+			label: $.i18n._( 'Payment Services<br>Statement' ),
+			id: ContextMenuIconName.payment_services_statement,
+			group: this.getContextMenuGroupByName( menu, 'other' ),
+			icon: Icons.payroll_export_report,
+			permission_result: true,
+			permission: null,
+			// sort_order: 8000
+		} );
 
 		return [menu];
 
 	},
 
+	setDefaultMenu: function( doNotSetFocus ) {
+
+		this._super( 'setDefaultMenu', doNotSetFocus );
+
+		var len = this.context_menu_array.length;
+
+		var grid_selected_id_array = this.getGridSelectIdArray();
+
+		var grid_selected_length = grid_selected_id_array.length;
+
+		for ( var i = 0; i < len; i++ ) {
+			var context_btn = $( this.context_menu_array[i] );
+			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+
+			switch ( id ) {
+				case ContextMenuIconName.payment_services_statement:
+					this.setDefaultMenuPaymentServicesStatementIcon( context_btn, grid_selected_length );
+					break;
+			}
+		}
+
+	},
+
+	setDefaultMenuPaymentServicesStatementIcon: function( context_btn, grid_selected_length, pId ) {
+		if ( grid_selected_length === 1 ) {
+			context_btn.removeClass( 'disable-image' );
+		} else {
+			context_btn.addClass( 'disable-image' );
+		}
+	},
+
+	onCustomContextClick: function( id ) {
+		switch ( id ) {
+			case ContextMenuIconName.payment_services_statement:
+				this.onPaymentServicesStatementClick();
+				break;
+		}
+	},
+
+	onPaymentServicesStatementClick: function() {
+		var post_data = { 0: null, 1: null }; //Eventually we could pass start/end dates.
+		this.doFormIFrameCall( post_data );
+	},
+
+	doFormIFrameCall: function( postData ) {
+		Global.APIFileDownload( this.api.className, 'get' + 'PaymentServicesAccountStatementReport', postData );
+	},
 
 	onBuildAdvUIFinished: function() {
 

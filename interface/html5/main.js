@@ -628,6 +628,19 @@ require( [
 
 		};
 
+		window.addEventListener('beforeunload', function (e) {
+			// Note that Google recommends against the following, as it affects page caching, but we dont want caching anyway: https://developers.google.com/web/updates/2018/07/page-lifecycle-api#the-beforeunload-event
+			Global.sendAnalyticsEvent( 'browser', 'browser:beforeunload', 'browser:beforeunload' );
+			if ( ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.edit_view && LocalCacheData.current_open_primary_controller.is_changed == true )
+					|| ( LocalCacheData.current_open_report_controller && LocalCacheData.current_open_report_controller.is_changed == true )
+					|| ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.is_changed == true )
+					|| ( LocalCacheData.current_open_sub_controller && LocalCacheData.current_open_sub_controller.edit_view && LocalCacheData.current_open_sub_controller.is_changed == true )
+				 ) {
+				e.preventDefault(); // Cancel the unload event
+				e.returnValue = ''; // Chrome requires returnValue to be set
+			}
+		});
+
 		$( 'body' ).addClass( 'login-bg' );
 
 		//Load need API class

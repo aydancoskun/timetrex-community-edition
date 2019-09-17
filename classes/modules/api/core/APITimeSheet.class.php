@@ -614,6 +614,14 @@ class APITimeSheet extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		//Use report maximum execution time here because larger customers may need more time to recalculate many employees, similar to a report.
+		global $config_vars;
+		if ( isset($config_vars['other']['report_maximum_execution_limit']) AND $config_vars['other']['report_maximum_execution_limit'] != '' ) {
+			$maximum_execution_time = $config_vars['other']['report_maximum_execution_limit'];
+			Debug::Text('Setting maximum execution time: '. $maximum_execution_time, __FILE__, __LINE__, __METHOD__, 10);
+			ini_set( 'max_execution_time', $maximum_execution_time );
+		}
+
 		//Make sure pay period is not CLOSED.
 		//We can re-calc on locked though.
 		$pplf = TTnew( 'PayPeriodListFactory' );
@@ -651,21 +659,29 @@ class APITimeSheet extends APIFactory {
 							}
 
 							//Ignore terminated employees when recalculating company. However allow all employees to be recalculated if they are selected individually.
-							if ( $recalculate_company == FALSE
+							if (
+									( $u_obj->getStatus() == 10 OR $ulf->getRecordCount() == 1 ) //Always recalculate if just a single employee is selected.
 									OR
 									(
-									$recalculate_company == TRUE
-									AND ( $u_obj->getStatus() == 10
-											OR
-											(
-												$u_obj->getStatus() != 10
-												AND
-												( $u_obj->getTerminationDate() == '' OR TTDate::getMiddleDayEpoch( $u_obj->getTerminationDate() ) > TTDate::getMiddleDayEpoch( $start_date ) )
-											)
+										$u_obj->getStatus() != 10
+										AND
+										(
+												(
+													$recalculate_company == TRUE
+													AND
+													( $u_obj->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $u_obj->getTerminationDate() ) > TTDate::getMiddleDayEpoch( $start_date ) ) //Only recaclulate terminated employees if they were terminated within this pay period.
+												)
+												OR
+												(
+													$recalculate_company == FALSE
+													AND
+													( $u_obj->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $u_obj->getTerminationDate() ) > ( TTDate::getMiddleDayEpoch( $start_date ) - ( 86400 * 90 ) ) ) //If the user was terminated more than 3 months ago, skip recalculating.
+												)
+												OR
+												( $u_obj->getTerminationDate() == '' AND TTDate::getMiddleDayEpoch( $u_obj->getUpdatedDate() ) > ( TTDate::getMiddleDayEpoch( $start_date ) - ( 86400 * 30 ) ) ) //If user is terminated and no termination date is set, only recalculate if the user record has been updated in the last 30 days.
 										)
 									)
-								) {
-
+							) {
 								TTLog::addEntry( $u_obj->getId(), 500, TTi18n::gettext('Recalculating Employee TimeSheet').': '. $u_obj->getFullName() .' '. TTi18n::gettext('From').': '. TTDate::getDate('DATE', $start_date ) .' '.  TTi18n::gettext('To').': '. TTDate::getDate('DATE', $end_date ), $this->getCurrentUserObject()->getId(), 'user_date_total' );
 
 								$retry_max_attempts = 3;
@@ -692,9 +708,9 @@ class APITimeSheet extends APIFactory {
 									throw new DBError($e);
 								}
 							}
-							//else {
-							//	Debug::text('Skipping inactive or terminated user: '. $u_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
-							//}
+//							else {
+//								Debug::text('Skipping inactive or terminated user: '. $u_obj->getID() .' Status: '. $u_obj->getStatus() .' Termination Date: '. TTDate::getDate('DATE', $u_obj->getTerminationDate() ) .' Updated Date: '. TTDate::getDate('DATE', $u_obj->getUpdatedDate() ), __FILE__, __LINE__, __METHOD__, 10);
+//							}
 
 							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
 

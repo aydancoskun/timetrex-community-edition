@@ -956,9 +956,8 @@ class Validator {
 		return $retval;
 	}
 
-	//Suitable for passing to parseTimeUnit() after.
-
 	/**
+	 * Suitable for passing to parseTimeUnit() after.
 	 * @param $value
 	 * @return mixed
 	 */

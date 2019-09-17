@@ -349,7 +349,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 				$this.initEditView();
 			}
-
+			Global.triggerAnalyticsEditViewNavigation('navigation', $this.viewId );
 		} );
 
 	},
@@ -1119,13 +1119,13 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.setEditMenu();
 			} else if ( key === 1 ) {
 				this.edit_view_ui_dic.setup_field.setValue( this.current_edit_record.setup_field );
-				if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
+				if ( Global.getProductEdition() == 10 ) {
 					this.edit_view_ui_dic.auto_refresh.parent().parent().css( 'display', 'none' );
 				}
 				this.buildContextMenu( true );
 				this.setEditMenu();
 			} else if ( key === 2 ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+				if ( Global.getProductEdition() >= 15 ) {
 					this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 				} else {
@@ -1134,7 +1134,7 @@ ReportBaseViewController = BaseViewController.extend( {
 					this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 				}
 			} else if ( key === 3 ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+				if ( Global.getProductEdition() >= 15 ) {
 					this.edit_view_tab.find( '#tab_custom_columns' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 					this.initSubCustomColumnView();
@@ -1158,13 +1158,13 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.setEditMenu();
 			} else if ( key === 1 ) {
 				this.edit_view_ui_dic.setup_field.setValue( this.current_edit_record.setup_field );
-				if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
+				if ( Global.getProductEdition() == 10 ) {
 					this.edit_view_ui_dic.auto_refresh.parent().parent().css( 'display', 'none' );
 				}
 				this.buildContextMenu( true );
 				this.setEditMenu();
 			} else if ( key === 2 ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+				if ( Global.getProductEdition() >= 15 ) {
 					this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 				} else {
@@ -1173,7 +1173,7 @@ ReportBaseViewController = BaseViewController.extend( {
 					this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 				}
 			} else if ( key === 4 ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+				if ( Global.getProductEdition() >= 15 ) {
 					this.edit_view_tab.find( '#tab_form_setup' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 					this.initSubCustomColumnView();
@@ -1402,12 +1402,12 @@ ReportBaseViewController = BaseViewController.extend( {
 					widget = this.getTComboBox( field, ALayoutIDs.PAY_PERIOD, (APIFactory.getAPIClass( 'APIPayPeriod' )) );
 					break;
 				case 'job_id':
-					if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					if ( ( Global.getProductEdition() >= 20 ) ) {
 						widget = this.getTComboBox( field, ALayoutIDs.JOB, (APIFactory.getAPIClass( 'APIJob' )) );
 					}
 					break;
 				case 'job_item_id':
-					if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					if ( ( Global.getProductEdition() >= 20 ) ) {
 						widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, (APIFactory.getAPIClass( 'APIJobItem' )) );
 					}
 					break;
@@ -3014,6 +3014,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.onCustomContextClick( id, context_btn );
 				break;
 		}
+		Global.triggerAnalyticsContextMenuClick( context_btn, menu_name );
 	},
 
 	onSaveSetup: function( label ) {

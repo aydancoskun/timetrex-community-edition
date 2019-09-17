@@ -177,7 +177,7 @@ BaseViewController = Backbone.View.extend( {
 			retval = required_files;
 		} else {
 			for ( var edition_id in required_files ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= edition_id ) {
+				if ( Global.getProductEdition() >= edition_id ) {
 					retval = retval.concat( required_files[edition_id] );
 				}
 			}
@@ -1189,8 +1189,22 @@ BaseViewController = Backbone.View.extend( {
 
 	//Overridden in ReportBaseViewController.
 	onContextMenuClick: function( context_btn, menu_name ) {
+		var id;
+		if ( Global.isSet( menu_name ) ) {
+			id = menu_name;
+		} else {
+			context_btn = $( context_btn );
+
+			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+
+			//Check if icon is disabled and do nothing.
+			if ( context_btn.hasClass( 'disable-image' ) ) {
+				return;
+			}
+		}
+
 		ProgressBar.showOverlay();
-		//this flag is turned off in ProgressBarManager::closeOverlay, or 2s whichever happens first
+		//this flag is turned off in ProgressBarManager::closeOverlay, or 1 second whichever happens first
 		if ( window.clickProcessing == true ) {
 			return;
 		} else {
@@ -1203,19 +1217,9 @@ BaseViewController = Backbone.View.extend( {
 				}
 			}, 1000 );
 		}
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
 
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+		//Debug.Text( 'Context Menu Click: '+ id, 'BaseViewController.js', 'BaseViewController', 'onContextMenuClick', 10 );
 
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				ProgressBar.closeOverlay();
-				return;
-			}
-		}
 		/**
 		 *  Here where you see ProgressBar.showOverlay() it is how we prevent doubleclick from firing two single clicks
 		 */
@@ -1261,31 +1265,25 @@ BaseViewController = Backbone.View.extend( {
 				this.onCopyAsNewClick();
 				break;
 			case ContextMenuIconName.cancel:
-				window.clickProcessing == false;
-				ProgressBar.closeOverlay();
 				this.onCancelClick();
-				break;
-			case ContextMenuIconName.download:
 				ProgressBar.closeOverlay();
-				this.onDownloadClick();
-				break;
-			case ContextMenuIconName.export_export:
-				this.onExportClick();
 				break;
 			case ContextMenuIconName.export_excel:
-				ProgressBar.closeOverlay();
 				this.onExportClick( 'export' + this.api.key_name );
+				ProgressBar.closeOverlay();
 				break;
 			case ContextMenuIconName.map:
-				ProgressBar.closeOverlay();
 				this.onMapClick();
+				ProgressBar.closeOverlay();
 				break;
 			default:
-				ProgressBar.closeOverlay(); //FIXME: This may be closing the overlay too soon, allowing double-clicks to get through. For example when in Request Authorizations and hammer clicking "Authorize".
 				this.onCustomContextClick( id, context_btn );
+				ProgressBar.closeOverlay(); //FIXME: This may be closing the overlay too soon, allowing double-clicks to get through. For example when in Request Authorizations and hammer clicking "Authorize".
+				//Debug.Text( 'Context Menu Click: '+ id +' Overlay closing...', 'BaseViewController.js', 'BaseViewController', 'onContextMenuClick', 10 );
 				break;
 		}
 
+		Global.triggerAnalyticsContextMenuClick( context_btn, menu_name );
 	},
 
 	onCustomContextClick: function( id ) {
@@ -1962,23 +1960,32 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
-	preCopyAsNew: function( data ) {
+	copyAsNewResetIds: function( data ) {
 		//override where needed.
 		data.id = '';
 		return data;
+	},
+
+	getCopyAsNewFilter: function ( filter ) {
+		// override where needed.
+		return filter;
 	},
 
 	_continueDoCopyAsNew: function() {
 		var $this = this;
 		this.is_add = true;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
+
 		if ( Global.isSet( this.edit_view ) ) {
-			this.current_edit_record = this.preCopyAsNew( this.current_edit_record );
+			this.current_edit_record = this.copyAsNewResetIds( this.current_edit_record );
 			var navigation_div = this.edit_view.find( '.navigation-div' );
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
-			this.setCurrentEditRecordData();
-			this.setTabStatus();
+			this.setTabStatus(); // Show tabs based on permission. setCurrentEditRecordData has functions to set by record type. See #2687 - setTabStatus() must go before setCurrentEditRecordData(), otherwise Premium Policy Tabs incorrectly shown.
+			if ( !this.editor ) {
+				// #2687 if an editor exists in the view/tabs, we do not want to call setCurrentEditRecordData() as it wipes out the editor data in one of its child functions initInsideEditorData().
+				this.setCurrentEditRecordData();
+			}
 			this.is_changed = false;
 			ProgressBar.closeOverlay();
 		} else {
@@ -1993,6 +2000,9 @@ BaseViewController = Backbone.View.extend( {
 			}
 			filter.filter_data = {};
 			filter.filter_data.id = [selectedId];
+
+			filter = this.getCopyAsNewFilter( filter );
+
 			this.api['get' + this.api.key_name]( filter, {
 				onResult: function( result ) {
 					$this.onCopyAsNewResult( result );
@@ -2013,7 +2023,7 @@ BaseViewController = Backbone.View.extend( {
 
 		result_data = result_data[0];
 
-		result_data = this.preCopyAsNew( result_data );
+		result_data = this.copyAsNewResetIds( result_data );
 
 		if ( this.sub_view_mode && this.parent_key ) {
 			result_data[this.parent_key] = this.parent_value;
@@ -2256,6 +2266,7 @@ BaseViewController = Backbone.View.extend( {
 		if ( !this.current_edit_record ) {
 			return;
 		}
+
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -2439,7 +2450,6 @@ BaseViewController = Backbone.View.extend( {
 				this.setEditMenu();
 			}
 		}
-
 	},
 
 	//When overriding this function, always call super() so it can handle tab_audit/tab_attachment on its own.
@@ -2738,12 +2748,16 @@ BaseViewController = Backbone.View.extend( {
 				continue;
 			}
 			if ( error_list[key] ) {
+				var show_error = false;
 				if ( widget.is( ':visible' ) ) {
-					widget.setErrorStyle( error_list[key], true, true );
+					show_error = true;
 					found_in_current_tab = true;
-				} else {
-					widget.setErrorStyle( error_list[key], false, true );
 				}
+
+				if ( typeof widget.setErrorStyle === 'function' ) { //Fix JS exception: Uncaught TypeError: widget.setErrorStyle is not a function
+					widget.setErrorStyle( error_list[key], show_error, true );
+				}
+
 			}
 			this.showErrorStatusOnTab( widget, false );
 			this.edit_view_error_ui_dic[key] = widget;
@@ -3021,6 +3035,7 @@ BaseViewController = Backbone.View.extend( {
 				}
 
 				$this.onTabShow( e, ui );
+				Global.triggerAnalyticsTabs( e, ui );
 			}
 		} );
 
@@ -3052,7 +3067,8 @@ BaseViewController = Backbone.View.extend( {
 			return;
 		}
 		this.setURL();
-		this.setEditMenu();
+
+		this.setEditMenu(); //This is done in onTabeShow() later on, so it can probably be removed from here?
 		//Remove cover once edit menu is set
 		ProgressBar.closeOverlay();
 
@@ -3367,6 +3383,7 @@ BaseViewController = Backbone.View.extend( {
 		} else {
 			this.onCancelClick();
 		}
+		Global.triggerAnalyticsNavigationOther( 'close-X', 'click', this.viewId );
 	},
 
 	setWidgetVisible: function( widgets ) {
@@ -3610,6 +3627,7 @@ BaseViewController = Backbone.View.extend( {
 			}
 
 			$this.setNavigationArrowsEnabled();
+			Global.triggerAnalyticsEditViewNavigation('navigation', $this.viewId );
 
 		} );
 
@@ -4019,6 +4037,8 @@ BaseViewController = Backbone.View.extend( {
 			doLeftArrowClick();
 		}
 
+		Global.triggerAnalyticsEditViewNavigation( 'left-arrow', this.viewId );
+
 		function doLeftArrowClick() {
 			var selected_index = $this.navigation.getSelectIndex();
 			var source_data = $this.navigation.getSourceData();
@@ -4069,6 +4089,8 @@ BaseViewController = Backbone.View.extend( {
 		} else {
 			doRightArrowClick();
 		}
+
+		Global.triggerAnalyticsEditViewNavigation( 'right-arrow', this.viewId );
 
 		function doRightArrowClick() {
 			var selected_index = $this.getRightArrowClickSelectedIndex( $this.navigation.getSelectIndex() );
@@ -4533,11 +4555,11 @@ BaseViewController = Backbone.View.extend( {
 			return false;
 		}
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Client line 308
-
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
 		}
+
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Client line 308
 		if ( !this.context_menu_array ) {
 			return;
 		}
@@ -4712,7 +4734,7 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	setDefaultMenuMapIcon: function( context_btn ) {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 ) {
+		if ( Global.getProductEdition() <= 10 ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 
@@ -5861,7 +5883,6 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	onPaging2: function( e, action, page_number ) {
-		this.grid.clearGridData();
 		this.search( true, action, page_number );
 	},
 
@@ -6372,8 +6393,8 @@ BaseViewController = Backbone.View.extend( {
 					result_data = $this.processResultData( result_data );
 
 					if ( $this.grid ) {
-						$this.grid.clearGridData();
-						$this.grid.setData( result_data );
+						$this.grid.setData( result_data ); //This calls clearGridData and reloadGrid.
+
 						//$this.setGridColumnsWidth(); //Handle in searchDone() instead.
 						if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
 							$this.resizeSubGrid( len );
@@ -6482,6 +6503,16 @@ BaseViewController = Backbone.View.extend( {
 	autoOpenEditViewIfNecessary: function() {
 		//Auto open edit view. Should set in IndexController
 
+		//Only ever execute this once on the first load/refresh of the browser.
+		//Otherwise there are cases such as Attendance -> Schedule in Day mode where buildCalendars()
+		// is called on resize, and can execute this multiple times.
+		// Originally appeared when clicking Add Request icon in Day Mode, and the Edit Request view appearing, then Edit Schedule also appearing.
+		if ( LocalCacheData.auto_open_view_done == true ) {
+			return true;
+		} else {
+			LocalCacheData.auto_open_view_done = true;
+		}
+
 		switch ( LocalCacheData.current_doing_context_action ) {
 			case 'edit':
 				if ( LocalCacheData.edit_id_for_next_open_view ) {
@@ -6504,7 +6535,6 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 		this.autoOpenEditOnlyViewIfNecessary();
-
 	},
 
 	autoOpenEditOnlyViewIfNecessary: function() {
@@ -6513,6 +6543,7 @@ BaseViewController = Backbone.View.extend( {
 		if ( this.sub_view_mode ) {
 			return;
 		}
+
 		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm && !LocalCacheData.current_open_edit_only_controller ) {
 
 			if ( LocalCacheData.all_url_args.sm.indexOf( 'Report' ) < 0 ) {
@@ -6957,7 +6988,7 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	subDocumentValidate: function() {
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) && PermissionManager.checkTopLevelPermission( 'Document' ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) && PermissionManager.checkTopLevelPermission( 'Document' ) ) {
 			return true;
 		}
 
@@ -7518,10 +7549,10 @@ BaseViewController = Backbone.View.extend( {
 		}
 		$this.attachElement( 'available_balance' );
 
-		available_balance_value = Global.secondToHHMMSS( result_data.available_balance );
-		current_time_value = Global.secondToHHMMSS( result_data.current_time );
-		remaining_balance_value = Global.secondToHHMMSS( result_data.remaining_balance );
-		summary_available_value = Global.secondToHHMMSS( result_data.projected_remaining_balance );
+		available_balance_value = Global.getTimeUnit( result_data.available_balance );
+		current_time_value = Global.getTimeUnit( result_data.current_time );
+		remaining_balance_value = Global.getTimeUnit( result_data.remaining_balance );
+		summary_available_value = Global.getTimeUnit( result_data.projected_remaining_balance );
 		if ( result_data.hasOwnProperty( 'remaining_dollar_balance' ) ) {
 			available_balance_value = available_balance_value + ' / ' + LocalCacheData.getCurrentCurrencySymbol() + result_data.available_dollar_balance;
 			current_time_value = current_time_value + ' / ' + LocalCacheData.getCurrentCurrencySymbol() + result_data.current_dollar_amount;
@@ -7551,8 +7582,8 @@ BaseViewController = Backbone.View.extend( {
 					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Current Time' ) + ': </span><span style="float:right;">' + current_time_value + '</span></div>' +
 					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Remaining Balance' ) + ': </span><span style="float:right;">' + remaining_balance_value + '</span></div>' +
 					'<div style="width:100%; height: 20px; clear: both;"></div>' +
-					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Projected Balance by' ) + ' ' + last_date_stamp + ': </span><span style="float:right;">' + Global.secondToHHMMSS( result_data.projected_balance ) + '</span></div>' +
-					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Projected Remaining Balance' ) + ':</span><span style="float:right;">' + Global.secondToHHMMSS( result_data.projected_remaining_balance ) + '</span></div>' +
+					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Projected Balance by' ) + ' ' + last_date_stamp + ': </span><span style="float:right;">' + Global.getTimeUnit( result_data.projected_balance ) + '</span></div>' +
+					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Projected Remaining Balance' ) + ':</span><span style="float:right;">' + Global.getTimeUnit( result_data.projected_remaining_balance ) + '</span></div>' +
 					'</div>'
 				} );
 	},

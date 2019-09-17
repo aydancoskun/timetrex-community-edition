@@ -1143,13 +1143,18 @@ class Install {
 							$file_name = dirname( $file_name ) . DIRECTORY_SEPARATOR;
 						}
 
+						//Check if the file is ignored.
 						if (
 								//strcmp( basename($file_name), '.') == 0 OR //Make sure we do check "." (the current directory). As permissions could be denied on it, but allowed on all sub-dirs/files.
-								file_exists( $file_name ) == FALSE //Its possible if it takes a long time to iterate the files, they could be gone by the time we get to them, so just check them again.
-								OR strcmp( basename($file_name), '..' ) == 0
+								strcmp( basename($file_name), '..' ) == 0
 								OR strpos( $file_name, '.git' ) !== FALSE
 								OR strcmp( basename($file_name), '.htaccess' ) == 0 ) { //.htaccess files often aren't writable by the webserver.
-							Debug::Text('  Skipping: '. $file_name .' due to being ignored or not existing... File Exists: '. (int)file_exists( $file_name ), __FILE__, __LINE__, __METHOD__, 10);
+							continue;
+						}
+
+						//Its possible if it takes a long time to iterate the files, they could be gone by the time we get to them, so just check them again.
+						if ( file_exists( $file_name ) == FALSE ) {
+							Debug::Text('  Skipping: '. $file_name .' does not exist... File Exists: '. (int)file_exists( $file_name ), __FILE__, __LINE__, __METHOD__, 10);
 							continue;
 						}
 
@@ -1160,7 +1165,7 @@ class Install {
 						}
 
 						//Debug::Text('Checking readable/writable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-						if ( file_exists( $file_name ) AND is_readable( $file_name ) == FALSE ) {
+						if ( is_readable( $file_name ) == FALSE ) { //Since file_exists() is called a few lines above, no need to do it again here.
 							Debug::Text('File or directory is not readable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 							$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not Readable: '. $file_name );
 							return 1; //Invalid
@@ -1335,7 +1340,7 @@ class Install {
 		}
 
 		if ( $this->getDatabaseType() == 'postgresql' ) {
-			if ( $db_version == NULL OR version_compare( $db_version, '9.1', '>=') == 1 ) {
+			if ( $db_version == NULL OR version_compare( $db_version, '9.4', '>=') == 1 ) { //v9.4 has JSONB support.
 				return 0;
 			}
 		}
@@ -2484,17 +2489,5 @@ class Install {
 		}
 		return $retval;
 	}
-
-//	function convertComboColumns( $matches ) {
-//		if ( (count( $matches ) === 3 OR count( $matches ) === 4) AND is_numeric( $matches[2] ) ) {
-//
-//			$retval =  $matches[1].':'.TTUUID::convertIntToUUID( (int)$matches[2] );
-//			if ( isset($matches[3]) ) {
-//				$retval .= $matches[3];
-//			}
-//			return $retval;
-//		}
-//		return FALSE;
-//	}
 }
 ?>

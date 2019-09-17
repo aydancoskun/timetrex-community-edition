@@ -27,7 +27,7 @@ HomeViewController = Backbone.View.extend( {
 			retval = required_files;
 		} else {
 			for ( var edition_id in required_files ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= edition_id ) {
+				if ( Global.getProductEdition() >= edition_id ) {
 					retval = retval.concat( required_files[edition_id] );
 				}
 			}
@@ -229,6 +229,7 @@ HomeViewController = Backbone.View.extend( {
 				this.onNavigationClick( id );
 				break;
 		}
+		Global.triggerAnalyticsContextMenuClick( context_btn );
 	},
 
 	onNavigationClick: function( iconName ) {

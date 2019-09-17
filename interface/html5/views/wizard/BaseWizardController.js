@@ -55,7 +55,7 @@ BaseWizardController = BaseWindowController.extend( {
 			retval = this._required_files;
 		} else {
 			for ( var edition_id in this._required_files ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= edition_id ) {
+				if ( Global.getProductEdition() >= edition_id ) {
 					retval = retval.concat( this._required_files[edition_id] );
 				}
 			}

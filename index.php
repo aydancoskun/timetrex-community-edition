@@ -34,46 +34,8 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
+require_once('includes/global.inc.php');
 
-/**
- * @package PayrollDeduction\US
- */
-class PayrollDeduction_US_AZ extends PayrollDeduction_US {
-
-	function _getStateTaxPayable() {
-		//Arizona is a percent of federal tax rate.
-		//However after 01-Jul-10 it changed to a straight percent of gross.
-		$annual_income = $this->getAnnualTaxableIncome();
-
-		$rate = $this->getUserValue1();
-		Debug::text( 'Raw Rate: ' . $rate, __FILE__, __LINE__, __METHOD__, 10 );
-
-		//Because of the change from a percent of federal rate to a gross rate,
-		//add some checks so if an employee's amount isn't changed we default to the closest rate.
-		if ( $rate >= 39.5 ) {
-			$rate = 5.1;
-		} elseif ( $rate >= 33.1 ) {
-			$rate = 4.2;
-		} elseif ( $rate >= 26.7 ) {
-			$rate = 3.6;
-		} elseif ( $rate >= 24.5 ) {
-			$rate = 2.7;
-		} elseif ( $rate >= 20.3 ) {
-			$rate = 1.8;
-		} elseif ( $rate >= 10.7 ) {
-			$rate = 1.3;
-		}
-		Debug::text( ' Adjusted Rate: ' . $rate, __FILE__, __LINE__, __METHOD__, 10 );
-		$retval = bcmul( $annual_income, bcdiv( $rate, 100 ) );
-
-		if ( $retval < 0 ) {
-			$retval = 0;
-		}
-
-		Debug::text( 'State Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
-
-		return $retval;
-	}
-}
-
+header('HTTP/1.1 301 Moved Permanently');
+Redirect::Page( Environment::GetBaseURL().'html5/' );
 ?>

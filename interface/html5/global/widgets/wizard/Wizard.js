@@ -65,19 +65,31 @@ Wizard = Backbone.View.extend( {
 	},
 
 	onNextClick: function( e ) {
-		if ( e === true || $( e.target ).hasClass( 'disable-image' ) == false ) {
+		if ( this.button_click_procesing == true ) {
+			return false;
+		}
+
+		if ( $( e.target ).hasClass( 'disable-image' ) == false ) {
+			this.disableButtons();
+
 			var name = this.getStepObject().getNextStepName();
 			var $this = this;
 			this.initStepObject( name, function( step_obj ) {
 				step_obj.setPreviousStepName( $this.getCurrentStepName() );
 				$this.setCurrentStepName( name );
-				$this.enableButtons();
+				//$this.enableButtons(); //This should be done at the end of each _render() function to avoid race conditions and hammer clicking right arrow causing JS exceptions.
 			} );
 		}
 	},
 
 	onPrevClick: function( e ) {
+		if ( this.button_click_procesing == true ) {
+			return false;
+		}
+
 		if ( e === true || $( e.target ).hasClass( 'disable-image' ) == false ) {
+			this.disableButtons();
+
 			var name = this.getStepObject().getPreviousStepName();
 			var $this = this;
 
@@ -85,7 +97,7 @@ Wizard = Backbone.View.extend( {
 			this.initStepObject( name, function( step_obj ) {
 				//step_obj.setPreviousStepName($this.getCurrentStepName());
 				$this.setCurrentStepName( name );
-				$this.enableButtons();
+				//$this.enableButtons(); //This should be done at the end of each _render() function to avoid race conditions and hammer clicking right arrow causing JS exceptions.
 			} );
 		}
 	},
@@ -194,6 +206,13 @@ Wizard = Backbone.View.extend( {
 		}
 	},
 
+	disableButtons: function() {
+		this.button_click_procesing = true;
+
+		//Changing the button images causes flashing and isn't required for just disabling the buttons while the view loads.
+		// $( this.el ).find( '.forward-btn' ).addClass( 'disable-image' );
+		// $( this.el ).find( '.back-btn' ).addClass( 'disable-image' );
+	},
 
 	/**
 	 * Enables the next/prev buttons
@@ -222,6 +241,8 @@ Wizard = Backbone.View.extend( {
 		}
 
 		this._enableButtons();
+
+		this.button_click_procesing = false;
 	},
 
 	//override me.
@@ -245,7 +266,7 @@ Wizard = Backbone.View.extend( {
 	},
 
 	disableForCommunity: function( callback ) {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 ) {
+		if ( Global.getProductEdition() <= 10 ) {
 			TAlertManager.showAlert( Global.getUpgradeMessage(), $.i18n._( 'Denied' ) );
 		} else {
 			if ( typeof callback == 'function' ) {

@@ -165,7 +165,7 @@ CompanyViewController = BaseViewController.extend( {
 	},
 
 	initSubPasswordPolicyView: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.find( '#tab_password_policy' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 			this.buildContextMenu( true );

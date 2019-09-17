@@ -1119,7 +1119,6 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setStateFilingStatus( 10 ); //Single
 		$pd_obj->setStateAllowance( 0 );
-		$pd_obj->setStateTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
 		$current_pay_period = 1;
@@ -1292,7 +1291,6 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setStateFilingStatus( 10 ); //Single
 		$pd_obj->setStateAllowance( 0 );
-		$pd_obj->setStateTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
 		$current_pay_period = 1;
@@ -1466,7 +1464,6 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFormulaType( 10 ); //NonPeriodic
 		$pd_obj->setStateFilingStatus( 10 ); //Single
 		$pd_obj->setStateAllowance( 0 );
-		$pd_obj->setStateTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
 		//PP1
@@ -1486,7 +1483,6 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setStateFilingStatus( 10 ); //Single
 		$pd_obj->setStateAllowance( 0 );
-		$pd_obj->setStateTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
 		//PP1
@@ -1508,7 +1504,6 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFormulaType( 10 ); //NonPeriodic
 		$pd_obj->setStateFilingStatus( 10 ); //Single
 		$pd_obj->setStateAllowance( 1 );
-		$pd_obj->setStateTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
 		//PP1
@@ -1528,7 +1523,6 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setStateFilingStatus( 10 ); //Single
 		$pd_obj->setStateAllowance( 1 );
-		$pd_obj->setStateTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
 		//PP1

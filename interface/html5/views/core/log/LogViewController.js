@@ -315,9 +315,6 @@ LogViewController = BaseViewController.extend( {
 						}
 
 						if ( !found ) {
-//						$this.grid.addRowData( new_record.id, new_record, 0 );
-							$this.grid.clearGridData();
-
 							grid_source_data.push( new_record );
 							$this.grid.setData( grid_source_data );
 
@@ -325,8 +322,6 @@ LogViewController = BaseViewController.extend( {
 								len = Global.isSet( len ) ? len : 0;
 								$this.resizeSubGrid( len + 1 );
 							}
-
-							$this.grid.reloadGrid();
 						}
 					}
 
@@ -347,7 +342,6 @@ LogViewController = BaseViewController.extend( {
 
 					// Process result_data if necessary, this always needs override.
 					result_data = $this.processResultData( result_data );
-					$this.grid.clearGridData();
 					$this.grid.setData( result_data );
 					$this.setGridColumnsWidth();
 					if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
@@ -509,7 +503,7 @@ LogViewController = BaseViewController.extend( {
 
 	initEditViewData: function() {
 		this._super( 'initEditViewData' );
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.find( '#tab_audit_details' ).find( '.detail-grid-row' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 		} else {
@@ -565,7 +559,6 @@ LogViewController = BaseViewController.extend( {
 
 		log_detail_data = Global.formatGridData( log_detail_data );
 
-		$this.log_detail_grid.clearGridData();
 		$this.log_detail_grid.setData( log_detail_data );
 
 		$this.setLogDetailGridSize();

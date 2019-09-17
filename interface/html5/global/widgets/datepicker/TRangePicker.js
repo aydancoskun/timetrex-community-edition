@@ -410,6 +410,7 @@
 
 			range_start_picker.datepicker( {
 				showOtherMonths: true,
+				selectOtherMonths: true,
 				showTime: false,
 				dateFormat: format,
 				showHour: false,
@@ -437,6 +438,7 @@
 
 			range_end_picker.datepicker( {
 				showOtherMonths: true,
+				selectOtherMonths: true,
 				showTime: false,
 				dateFormat: format,
 				showHour: false,

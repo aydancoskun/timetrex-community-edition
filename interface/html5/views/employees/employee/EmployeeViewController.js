@@ -59,7 +59,7 @@ EmployeeViewController = BaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIUser' ))();
 		this.select_company_id = LocalCacheData.getCurrentCompany().id;
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
 			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
@@ -1110,7 +1110,7 @@ EmployeeViewController = BaseViewController.extend( {
 			return;
 		}
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 
 			Global.loadScript( 'views/policy/accrual_policy/AccrualPolicyUserModifierViewController.js', function() {
@@ -1198,7 +1198,7 @@ EmployeeViewController = BaseViewController.extend( {
 				widget.setValue( null );
 				break;
 			case 'default_job_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'default_job_item_id', {
 						status_id: 10,
@@ -1209,14 +1209,14 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 				break;
 			case 'default_job_item_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_quick_search':
 			case 'job_item_quick_search':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.onJobQuickSearch( key, target.getValue(), 'default_job_id', 'default_job_item_id',  { status_id: 10, company_id: $this.select_company_id } );
 
 					//Don't validate immediately as onJobQuickSearch is doing async API calls, and it would cause a guaranteed validation failure.
@@ -1433,46 +1433,10 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 	},
 
-	_continueDoCopyAsNew: function() {
-		var $this = this;
-		this.is_add = true;
-
-		LocalCacheData.current_doing_context_action = 'copy_as_new';
-		if ( Global.isSet( this.edit_view ) ) {
-
-			this.current_edit_record.id = '';
-			var navigation_div = this.edit_view.find( '.navigation-div' );
-			navigation_div.css( 'display', 'none' );
-			this.setEditMenu();
-			this.setTabStatus();
-			this.is_changed = false;
-			ProgressBar.closeOverlay();
-
-		} else {
-
-			var filter = {};
-			var grid_selected_id_array = this.getGridSelectIdArray();
-			var grid_selected_length = grid_selected_id_array.length;
-
-			if ( grid_selected_length > 0 ) {
-				var selectedId = grid_selected_id_array[0];
-			} else {
-				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
-				return;
-			}
-
-			filter.filter_data = {};
-			filter.filter_data.id = [selectedId];
-			filter.filter_data.company_id = this.select_company_id;
-
-			this.api['get' + this.api.key_name]( filter, {
-				onResult: function( result ) {
-					$this.onCopyAsNewResult( result );
-
-				}
-			} );
-		}
-
+	getCopyAsNewFilter: function ( filter ) {
+		// overriding BaseViewController for _continueDoCopyAsNew()
+		filter.filter_data.company_id = this.select_company_id;
+		return filter;
 	},
 
 	onAddClick: function() {
@@ -1797,11 +1761,9 @@ EmployeeViewController = BaseViewController.extend( {
 						result_data = current_data.concat( result_data );
 					}
 
-					$this.grid.clearGridData();
 					$this.grid.setData( result_data );
 
 					$this.reSelectLastSelectItems();
-
 				}
 
 				$this.setGridCellBackGround(); //Set cell background for some views
@@ -1879,7 +1841,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 	onMapClick: function() {
 		// only trigger map load in specific product editions.
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+		if ( ( Global.getProductEdition() >= 15 ) ) {
 			this.is_viewing = false;
 			ProgressBar.showProgressBar();
 			var data = {
@@ -1955,7 +1917,7 @@ EmployeeViewController = BaseViewController.extend( {
 				if ( user_ids.length > 0 ) {
 					filter.user_id = user_ids[0];
 					filter.base_date = base_date;
-					Global.addViewTab( $this.viewId, 'Employees', window.location.href );
+					Global.addViewTab( $this.viewId, $.i18n._( 'Employees' ), window.location.href );
 					IndexViewController.goToView( 'TimeSheet', filter );
 				}
 				break;
@@ -1964,14 +1926,14 @@ EmployeeViewController = BaseViewController.extend( {
 				var include_users = { value: user_ids };
 				filter.filter_data.include_user_ids = include_users;
 				filter.select_date = base_date;
-				Global.addViewTab( this.viewId, 'Employees', window.location.href );
+				Global.addViewTab( this.viewId, $.i18n._( 'Employees' ), window.location.href );
 				IndexViewController.goToView( 'Schedule', filter );
 				break;
 			case ContextMenuIconName.pay_stub:
 				if ( user_ids.length > 0 ) {
 					filter.filter_data = {};
 					filter.filter_data.user_id = user_ids[0];
-					Global.addViewTab( $this.viewId, 'Employees', window.location.href );
+					Global.addViewTab( $this.viewId, $.i18n._( 'Employees' ), window.location.href );
 					IndexViewController.goToView( 'PayStub', filter );
 				}
 				break;
@@ -1979,7 +1941,7 @@ EmployeeViewController = BaseViewController.extend( {
 				if ( user_ids.length > 0 ) {
 					filter.filter_data = {};
 					filter.filter_data.user_id = user_ids[0];
-					Global.addViewTab( this.viewId, 'Employees', window.location.href );
+					Global.addViewTab( this.viewId, $.i18n._( 'Employees' ), window.location.href );
 					IndexViewController.goToView( 'PayStubAmendment', filter );
 				}
 				break;
@@ -2296,7 +2258,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 
 		this.initPermission(); //#2398 - job/task permissions were getting broken on multiple opens of same employee.
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
@@ -2631,7 +2593,7 @@ EmployeeViewController = BaseViewController.extend( {
 			var data = res.getResult();
 			for ( var key in data ) {
 				if ( parseInt( key ) === 200 &&
-						LocalCacheData.getCurrentCompany().product_edition_id != 25 ) {
+						Global.getProductEdition() != 25 ) {
 					continue;
 				}
 				$this.hierarchy_options_dic[key] = Global.buildRecordArray( data[key] );

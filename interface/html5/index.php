@@ -262,7 +262,7 @@ unset($authentication);
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<meta name="Description" content="Employee Login | TimeTrex Workforce Management Software"/>
 			<meta name="google" content="notranslate">
-			<title><?php echo APPLICATION_NAME .' Workforce Management';?></title>
+			<title><?php echo 'Workforce Management Software | '. APPLICATION_NAME;?></title>
 			<link rel="shortcut icon" type="image/ico" href="<?php echo Environment::getBaseURL();?>../favicon.ico">
 			<?php if ( file_exists('theme/default/css/login.composite.css') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
 				<link rel="stylesheet" type="text/css" href="theme/default/css/login.composite.css?v=<?php echo APPLICATION_BUILD?>">
@@ -364,7 +364,7 @@ unset($authentication);
         <div id="login-bg_opacity_filter">
 			<?php
 			if ( Misc::isSearchEngineBrowser() == TRUE ) { ?>
-                <div class="site-description"><h1><a href="https://www.timetrex.com/time-and-attendance">TimeTrex Time and Attendance</a> Software</h1> - Web-based Time And Attendance suite which offers Employee Time and Attendance (timeclock, timecard, timesheet) and Payroll all in single tightly integrated package. With the ability to interface with biometric facial recognition tablets and cell phones employees are able to efficiently track their time at the office or on the road. Automatically calculate complex over time and premium time business policies and immediately be able to identify labor costs attributed to branches, and departments. Finally TimeTrex can process your payroll by calculating withholding taxes, generate detailed electronic pay stubs and even print paychecks or direct deposit funds.</div>
+                <div class="site-description"><h1><a href="https://www.timetrex.com/time-and-attendance">TimeTrex Time and Attendance Software</a></h1> <h3>Web-based Time And Attendance software which offers employee timeclock, timesheets and payroll all in single integrated package. With the ability to interface with biometric facial recognition tablets and smart phones employees are able to efficiently track their time at the office or in the field. Automatically calculate complex over time and premium time business policies and immediately be able to identify labor costs attributed to branches, and departments. TimeTrex can process your payroll by calculating withholding taxes, generate electronic pay stubs and direct deposit funds.</h3></div>
 			<?php } ?>
             <div id="topContainer" class="top-container"></div>
             <div id="contentContainer" class="content-container">

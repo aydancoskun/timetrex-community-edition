@@ -753,7 +753,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				if ( user_ids.length > 0 ) {
 					filter.user_id = user_ids[0];
 					filter.base_date = base_date;
-					Global.addViewTab( $this.viewId, 'Pay Stub Amendments', window.location.href );
+					Global.addViewTab( $this.viewId, $.i18n._( 'Pay Stub Amendments' ), window.location.href );
 					IndexViewController.goToView( 'TimeSheet', filter );
 				}
 				break;
@@ -761,7 +761,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				if ( user_ids.length > 0 ) {
 					filter.filter_data = {};
 					filter.filter_data.user_id = user_ids[0];
-					Global.addViewTab( $this.viewId, 'Pay Stub Amendments', window.location.href );
+					Global.addViewTab( $this.viewId, $.i18n._( 'Pay Stub Amendments' ), window.location.href );
 					IndexViewController.goToView( 'PayStub', filter );
 				}
 				break;
@@ -1312,7 +1312,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		return this._super( 'uniformVariable', data );
 	},
 
-	preCopyAsNew: function( data ) {
+	copyAsNewResetIds: function( data ) {
 		data = this.uniformVariable( data );
 		data.id = null;
 		data.effective_date = (new Date).format( Global.getLoginUserDateFormat() );

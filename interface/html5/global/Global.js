@@ -87,6 +87,7 @@ Global.sendErrorReport = function() {
 
 	if ( Global.idle_time > 15 ) {
 		Debug.Text( 'User inactive more than 15 mins, not sending error report.', 'Global.js', '', 'sendErrorReport', 1 );
+		ga( 'send', 'exception', { 'exDescription': 'Session Idle: '+ error_string + ' in ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '') : 'N/A' ) + ' line ' + line, 'exFatal': false } );
 		return;
 	}
 
@@ -578,86 +579,210 @@ Global.updateUserPreference = function( callBack, message ) {
 };
 
 /* jshint ignore:start */
-Global.secondToHHMMSS = function( sec_num, force_time_unit ) {
-	var add_minus = false;
-	var time;
-	// if ( parseFloat(sec_num) != sec_num || typeof sec_num === 'undefined' || sec_num === null || sec_num === false ) {
-	// 	Debug.Text('Invalid input: '+ sec_num, 'Global.js', 'Global', 'secondToHHMMSS', 10);
-	// 	return null;
-	// }
+Global.roundTime = function( epoch, round_value, round_type ) {
+	var round_type = round_type || 20;
 
-	//always return hh:ss. if we can't parse to float, then work with 0 seconds
-	var sec_num = parseFloat( sec_num );
-	if ( isNaN( sec_num ) ) {
-		sec_num = 0;
+	switch ( round_type ) {
+		case 10: //Down
+			epoch = ( epoch - ( epoch % round_value ) );
+			break;
+		case 20: //Average
+		case 25: //Average (round split seconds up)
+		case 27: //Average (round split seconds down)
+			if ( round_type == 20 || round_value <= 60 ) {
+				tmp_round_value = ( round_value / 2 );
+			} else if ( round_type == 25 ) { //Average (Partial Min. Down)
+				tmp_round_value = Global.roundTime( ( round_value / 2 ), 60, 10 ); //This is opposite rounding
+			} else if ( round_type == 27 ) { //Average (Partial Min. Up)
+				tmp_round_value = Global.roundTime( ( round_value / 2 ), 60, 30 );
+			}
+
+			if ( epoch > 0 ) {
+				//When doing a 15min average rounding, US law states 7mins and 59 seconds can be rounded down in favor of the employer, and 8mins and 0 seconds must be rounded up.
+				//So if the round interval is not an even number, round it up to the nearest minute before doing the calculations to avoid issues with seconds.
+				epoch = ( Math.floor( ( epoch + tmp_round_value ) / round_value ) * round_value );
+			} else {
+				epoch = ( Math.ceil( ( epoch - tmp_round_value ) / round_value ) * round_value );
+			}
+
+			break;
+		case 30: //Up
+			epoch = ( ( (epoch + (round_value - 1) ) / round_value ) * round_value );
+			break;
 	}
 
-	if ( sec_num < 0 ) {
-		sec_num = (-sec_num);
-		add_minus = true;
+	return epoch;
+},
+
+Global.parseTimeUnit = function( time_unit, format ) {
+	var format;
+
+	if ( !format ) {
+		format = LocalCacheData.getLoginUserPreference().time_unit_format;
+	}
+	format = parseInt( format );
+
+	var enable_rounding = true;
+	if ( time_unit.toString().charAt(0) == '"' ) {
+		enable_rounding = false;
+	}
+
+	var thousands_separator = ',';
+	var decimal_separator = '.';
+
+	time_unit = time_unit.replace( thousands_separator, '' ).replace( ' ', '' ).replace( '"', '' );
+
+	switch ( format ) {
+		case 10: //hh:mm
+		case 12: //hh:mm:ss
+			if ( time_unit.indexOf( decimal_separator ) !== -1 && time_unit.indexOf( ':' ) === -1 ) { //Hybrid mode, they passed a decimal format HH:MM, try to handle properly.
+				time_unit = Global.getTimeUnit( Global.parseTimeUnit( time_unit, 20 ), format );
+			}
+
+			time_units = time_unit.split( ':' );
+
+			if ( !time_units[0] ) {
+				time_units[0] = 0;
+			}
+
+			if ( !time_units[1] ) {
+				time_units[1] = 0;
+			}
+
+			if ( !time_units[2] ) {
+				time_units[2] = 0;
+			}
+
+			negative_number = false;
+			if ( time_units[0].toString().charAt( 0 ) == '-' || time_units[0] < 0 || time_units[1] < 0 || time_units[2] < 0 ) {
+				negative_number = true;
+			}
+
+			seconds = ( ( Math.abs( Math.floor( time_units[0] ) ) * 3600 ) + ( Math.abs( Math.floor( time_units[1] ) ) * 60 ) + Math.abs( Math.floor( time_units[2] ) ) );
+
+			if ( negative_number == true ) {
+				seconds = ( seconds * -1 );
+			}
+
+			break;
+		case 20: //hours
+		case 22: //hours [Precise]
+		case 23: //hours [Super Precise]
+			if ( time_unit.indexOf( ':' ) !== -1 ) { //Hybrid mode, they passed a decimal format HH:MM, try to handle properly.
+				time_unit = Global.getTimeUnit( Global.parseTimeUnit( time_unit, 10 ), format );
+			}
+
+			seconds = ( time_unit * 3600 );
+			if ( enable_rounding == true ) {
+				seconds = Global.roundTime( seconds, 60 );
+			}
+
+			break;
+		case 30: //minutes
+			seconds = ( time_unit * 60 );
+			break;
+		case 40: //seconds
+			secounds = Math.round( time_unit );
+			break;
+	}
+
+	//Debug.Text( 'Time Unit: '+ time_unit +' Retval: '+ seconds, 'Global.js', '', 'parseTimeUnit', 10 );
+	return seconds;
+},
+
+Global.convertSecondsToHMS = function( seconds, include_seconds, exclude_hours ) {
+	var negative_number = false;
+
+	if ( seconds < 0 ) {
+		negative_number = true;
+	}
+
+	seconds = Math.round( Math.abs( seconds ) );
+
+	tmp_hours = Math.floor( seconds / 3600 );
+	tmp_minutes = Math.floor( ( seconds / 60 ) % 60 );
+	tmp_seconds = Math.floor( seconds % 60 );
+
+	if ( exclude_hours == true ) { //Convert hours to minutes before we pad it.
+		tmp_minutes = ( ( tmp_hours * 60 ) + tmp_minutes );
+		tmp_hours = 0;
+	}
+
+	if ( tmp_hours < 10 ) {
+		tmp_hours = '0' + tmp_hours;
+	}
+
+	if ( tmp_minutes < 10 ) {
+		tmp_minutes = '0' + tmp_minutes;
+	}
+
+	if ( tmp_seconds < 10 ) {
+		tmp_seconds = '0' + tmp_seconds;
+	}
+
+	if ( exclude_hours == true ) {
+		retval = [ tmp_minutes, tmp_seconds].join(':');
+	} else {
+		if ( include_seconds == true ) {
+			retval = [ tmp_hours, tmp_minutes, tmp_seconds ].join(':');
+		} else {
+			retval = [ tmp_hours, tmp_minutes ].join(':');
+		}
+	}
+
+	if ( negative_number == true ) {
+		retval = '-'+ retval;
+	}
+
+	return retval;
+},
+
+//Was: Global.secondToHHMMSS
+Global.getTimeUnit = function( seconds, format ) {
+	var retval;
+
+	//always return hh:ss. if we can't parse to float, then work with 0 tmp_seconds
+	var seconds = parseFloat( seconds );
+	if ( isNaN( seconds ) ) {
+		seconds = 0;
 	}
 
 	//FIXES BUG#2071 - don't check the local cache data for default value, or it will fail and cause errors when unauthenticated. For example in the installer.
-	var time_unit;
-	if ( force_time_unit ) {
-		time_unit = force_time_unit;
-	} else {
-		time_unit = LocalCacheData.getLoginUserPreference().time_unit_format.toString();
+	var format;
+	if ( !format ) {
+		format = LocalCacheData.getLoginUserPreference().time_unit_format;
+	}
+	format = parseInt( format );
+
+	switch ( format ) {
+		case 10:
+			retval = Global.convertSecondsToHMS( seconds );
+			break;
+		case 12:
+			retval = Global.convertSecondsToHMS( seconds, true );
+			break;
+		case 99: //For local use only, in progress bar always show tmp_minutes and tmp_seconds
+			retval = Global.convertSecondsToHMS( seconds, true, true );
+			break;
+		case 20:
+			retval = ( seconds / 3600 ).toFixed( 2 );
+			break;
+		case 22:
+			retval = ( seconds / 3600 ).toFixed( 3 );
+			break;
+		case 23:
+			retval = ( seconds / 3600 ).toFixed( 4 );
+			break;
+		case 30:
+			retval = ( seconds / 60 ).toFixed( 0 );
+			break;
+		case 40:
+			retval = seconds;
+			break;
 	}
 
-	var hours = (sec_num / 3600);
-	var minutes = ((sec_num - (hours * 3600)) / 60);
-	var seconds = (sec_num - (hours * 3600) - (minutes * 60)).toFixed( 0 );
-	switch ( time_unit ) {
-		case '10':
-		case '12':
-		case '99':
-			hours = Math.floor( sec_num / 3600 );
-			minutes = Math.floor( (sec_num - (hours * 3600)) / 60 );
-			seconds = (sec_num - (hours * 3600) - (minutes * 60)).toFixed( 0 );
-			if ( hours < 10 ) {
-				hours = '0' + hours;
-			}
-			if ( minutes < 10 ) {
-				minutes = '0' + minutes;
-			}
-			if ( seconds < 10 ) {
-				seconds = '0' + seconds;
-			}
-
-			if ( time_unit === '10' ) {
-				time = hours + ':' + minutes;
-			} else if ( time_unit === '12' ) {
-				time = hours + ':' + minutes + ':' + seconds;
-			} else if ( time_unit === '99' ) { //For local use only, in progress bar always show minutes and seconds
-				time = minutes + ':' + seconds;
-			}
-			break;
-		case '20':
-			hours = hours.toFixed( 2 );
-			time = hours;
-			break;
-		case '22':
-			hours = hours.toFixed( 3 );
-			time = hours;
-			break;
-		case '23':
-			hours = hours.toFixed( 4 );
-			time = hours;
-			break;
-		case '30':
-			minutes = (hours * 60) + minutes;
-			minutes = minutes.toFixed( 0 );
-			time = minutes;
-			break;
-		case '40':
-			time = sec_num;
-			break;
-	}
-	if ( add_minus ) {
-		time = '-' + time;
-	}
-	return time;
+	//Debug.Text( 'Seconds: '+ seconds +' Retval: '+ retval, 'Global.js', '', 'getTimeUnit', 10 );
+	return retval;
 };
 
 Global.removeTrailingZeros = function( value, minimum_decimals ) {
@@ -1615,17 +1740,14 @@ Global.loadLanguage = function( name ) {
 	return (successflag);
 };
 
-Global.checkProperProductEdition = function( edition_id ) {
+Global.getProductEdition = function() {
+	var current_company_data = LocalCacheData.getCurrentCompany();
 
-	if ( !edition_id ) {
-		edition_id = 10;
+	if ( current_company_data && current_company_data.product_edition_id ) {
+		return current_company_data.product_edition_id;
 	}
 
-	if ( LocalCacheData.getCurrentCompany().product_edition_id > edition_id ) {
-		return true;
-	}
-
-	return false;
+	return 10; //Community
 };
 
 Global.setURLToBrowser = function( new_url ) {
@@ -2899,7 +3021,7 @@ Global.formatGridData = function( grid_data, key_name ) {
 				case 'total_time':
 				case 'start_stop_window':
 					if ( Global.isNumeric( grid_data[i][key] ) ) {
-						grid_data[i][key] = Global.secondToHHMMSS( grid_data[i][key] );
+						grid_data[i][key] = Global.getTimeUnit( grid_data[i][key] );
 					}
 					break;
 				case 'include_break_punch_time':
@@ -2976,7 +3098,7 @@ Global.formatGridData = function( grid_data, key_name ) {
 					switch ( key ) {
 						case 'amount':
 							if ( Global.isNumeric( grid_data[i][key] ) ) {
-								grid_data[i][key] = Global.secondToHHMMSS( grid_data[i][key] );
+								grid_data[i][key] = Global.getTimeUnit( grid_data[i][key] );
 							}
 							break;
 
@@ -2987,7 +3109,7 @@ Global.formatGridData = function( grid_data, key_name ) {
 					switch ( key ) {
 						case 'balance':
 							if ( Global.isNumeric( grid_data[i][key] ) ) {
-								grid_data[i][key] = Global.secondToHHMMSS( grid_data[i][key] );
+								grid_data[i][key] = Global.getTimeUnit( grid_data[i][key] );
 							}
 							break;
 
@@ -3335,7 +3457,7 @@ Global.trackView = function( name, action ) {
 		}
 
 		//Track address is sent in sendAnalytics as the 3rd parameter.
-		Global.sendAnalytics( track_address );
+		Global.sendAnalyticsPageview( track_address );
 	}
 };
 
@@ -3369,7 +3491,7 @@ Global.setAnalyticDimensions = function( user_name, company_name ) {
 	}
 };
 
-Global.sendAnalytics = function( track_address ) {
+Global.sendAnalyticsPageview = function( track_address ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
 		// Call this delay so view load goes first
 		if ( typeof(ga) !== 'undefined' ) {
@@ -3385,6 +3507,117 @@ Global.sendAnalytics = function( track_address ) {
 	}
 };
 
+/**
+ * This function is used to actually submit the analytics request to google.
+ * @param {string} event_category - Category relating to the event tracked, e.g. feedback or context_menu
+ * @param {string} event_action - What triggered the event. E.g. click, cancel.
+ * @param {string} event_label - This is often a combo of the actual value string combined with some of the above fields, for clarity. e.g. submit:feedback:sad
+ */
+Global.sendAnalyticsEvent = function( event_category, event_action, event_label ) {
+	var fieldsObject = {
+		eventCategory: event_category,
+		eventAction: event_action,
+		eventLabel: event_label
+	};
+
+	if ( typeof(ga) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
+		//Debug.Arr( fieldsObject, 'Sending analytics event payload. Event: ' + event_category + ', Action: ' + event_action + ', Label: ' + event_label, 'Global.js', 'Global', 'sendAnalyticsEvent', 10 );
+		try {
+			ga( 'send', 'event', fieldsObject );
+		} catch(e) {
+			throw e;
+		}
+	}
+};
+
+/**
+ *
+ * @param {jQuery} context_btn - the jQuery element that triggered the click event on the context menu
+ * @param {string} menu_name - the name of the icon if the click event was triggered by the right click context menu
+ */
+Global.triggerAnalyticsContextMenuClick = function( context_btn, menu_name ) {
+	// If more detail is needed above and beyond contextmenu name, then use 'LocalCacheData.current_open_view_id' in addition, but not instead of, as they are different.
+	var dom_context_menu = LocalCacheData.currentShownContextMenuName || 'error-with-context-menu'; // '||' is for graceful fail. identify correct context menu (vs DOM search, where there could be multiple inactive context menus)
+	var dom_context_menu_group;
+	var button_id;
+	var event_category;
+	var event_action;
+	var event_label;
+
+	if ( Global.isSet( menu_name ) ) {
+		// If menu_name exists, then context_btn is likely null and this is infact a right click context menu call
+		event_category = 'navigation:right_click_menu';
+		dom_context_menu_group = 'right_click';
+		button_id = menu_name || 'error-with-rightclick-icon';
+	} else {
+		// normal click route for context menu click on nav bar
+		event_category = 'navigation:context_menu';
+		dom_context_menu_group = $( context_btn ).parents('.top-ribbon-menu').find('.menu-bottom span').text();
+		button_id = $( context_btn ).find( '.ribbon-sub-menu-icon' ).attr( 'id' ) || 'error-with-icon'; // if fail, show error string to allow graceful fail. E.g. avoid JS exceptions with the .replace further down
+	}
+
+	// Beautify output
+	dom_context_menu = dom_context_menu.replace('ContextMenu', '');
+	button_id = button_id.replace('Icon', ''); //Remove "icon" from button_id.
+
+	event_action = 'click';
+	event_label = dom_context_menu + ':' + dom_context_menu_group + '|' + button_id;
+
+	// Debug.Text( 'Context Menu: Category: navigation_context_menu Action: ' + event_action + ' Label: ' + event_label, 'Global.js', 'Global', 'triggerAnalyticsContextMenuClick', 10 );
+	Global.sendAnalyticsEvent( event_category, event_action, event_label );
+};
+
+/**
+ *
+ * @param {string} context - Explains what element triggered the event
+ * @param {string} view_id - Name of the current view in which element was triggered
+ */
+Global.triggerAnalyticsEditViewNavigation = function( context, view_id ) {
+	// context in this case can be 'left-arrow', 'right-arrow', or 'awesomebox'
+	var event_action = 'click';
+	var event_label = view_id + ':' + context;
+
+	// Debug.Text( 'Context Menu: Category: navigation_edit_view_navigation Action: ' + event_action + ' Label: ' + event_label, 'Global.js', 'Global', 'triggerAnalyticsContextMenuClick', 10 );
+	Global.sendAnalyticsEvent( 'navigation:edit_view_navigation', event_action, event_label );
+};
+
+/**
+ *
+ * @param event - the event object from the jQuery UI tabs. Currently expecting it to be triggered by the activate event
+ * @param ui - the ui object from jQuery UI tabs, contains prev and target tab info
+ */
+Global.triggerAnalyticsTabs = function( event, ui ) {
+	// activate event triggered, ensure all required values are set
+	if( event && event.type && ui && ui.newTab ) {
+		var tab_target = ui.newTab.find('.ui-tabs-anchor').attr('ref') || 'tab-target-error'; // '||' is for gracful fail
+		var viewId = LocalCacheData.current_open_view_id || 'error-viewid'; // '||' is for graceful fail
+
+		// Beautify output
+		tab_target = tab_target.replace('tab_', '');
+
+		var event_action = 'click';
+		var event_label = viewId + ':tabs:' + tab_target;
+
+		// Debug.Text( 'Context Menu: Category: navigation_tabs Action: ' + event_action + ' Label: ' + event_label, 'Global.js', 'Global', 'triggerAnalyticsContextMenuClick', 10 );
+		Global.sendAnalyticsEvent( 'navigation:tabs', event_action, event_label );
+	} else {
+		Global.sendAnalyticsEvent( 'error:navigation:tabs', 'error-tabs', 'error' ); // Should never be triggered. If this appears in analytics results, investigate.
+	}
+};
+
+/**
+ *
+ * @param {string} context - the label of the object involved in the event. E.g. close button for click event
+ * @param {string} action - the action type of the event. E.g. click.
+ * @param {string} view_id - the viewId in which the event occurred. E.g. TimeSheet.
+ */
+Global.triggerAnalyticsNavigationOther = function( context, action, view_id ) {
+	var event_action = action;
+	var event_label = view_id + ':' + context;
+
+	// Debug.Text( 'Context Menu: Category: navigation_other Action: ' + event_action + ' Label: ' + event_label, 'Global.js', 'Global', 'triggerAnalyticsContextMenuClick', 10 );
+	Global.sendAnalyticsEvent( 'navigation:other', event_action, event_label );
+};
 
 Global.loadStyleSheet = function( path, fn, scope ) {
 	var head = document.getElementsByTagName( 'head' )[0], // reference to document.head for appending/ removing link nodes
@@ -3439,7 +3672,7 @@ Global.loadStyleSheet = function( path, fn, scope ) {
 	link.setAttribute( 'rel', 'stylesheet' );
 	link.setAttribute( 'type', 'text/css' );
 	var sheet, cssRules;
-// get the correct properties to check for depending on the browser
+	// get the correct properties to check for depending on the browser
 	if ( 'sheet' in link ) {
 		sheet = 'sheet';
 		cssRules = 'cssRules';
@@ -3571,6 +3804,14 @@ Global.compareMenuItems = function( a, b ) {
 Global.getDaysInSpan = function( start_date, end_date, sun, mon, tue, wed, thu, fri, sat ) {
 	var start_date_obj = Global.strToDate( start_date );
 	var end_date_obj = Global.strToDate( end_date );
+
+	if ( start_date_obj == null ) {
+		return 0;
+	}
+
+	if ( end_date_obj == null ) {
+		return 0;
+	}
 
 	var days = Math.round( Math.abs( (start_date_obj.getTime() - end_date_obj.getTime()) / (86400 * 1000) ) ) + 1;
 

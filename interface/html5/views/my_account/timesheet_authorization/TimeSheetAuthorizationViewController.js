@@ -335,7 +335,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	},
 
 	setDefaultMenuAuthorizationExpenseIcon: function( context_btn, grid_selected_length, pId ) {
-		if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 25 ) ) {
+		if ( !( Global.getProductEdition() >= 25 ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 		context_btn.removeClass( 'disable-image' );
@@ -569,7 +569,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				if ( user_ids.length > 0 ) {
 					filter.user_id = user_ids[0];
 					filter.base_date = base_date;
-					Global.addViewTab( $this.viewId, 'Authorization - TimeSheet', window.location.href );
+					Global.addViewTab( $this.viewId, $.i18n._( 'Authorization - TimeSheet' ), window.location.href );
 					IndexViewController.goToView( 'TimeSheet', filter );
 				}
 				break;
@@ -578,7 +578,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				var include_users = { value: user_ids };
 				filter.filter_data.include_user_ids = include_users;
 				filter.select_date = base_date;
-				Global.addViewTab( this.viewId, 'Authorization - TimeSheet', window.location.href );
+				Global.addViewTab( this.viewId, $.i18n._( 'Authorization - TimeSheet' ), window.location.href );
 				IndexViewController.goToView( 'Schedule', filter );
 				break;
 
@@ -674,6 +674,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	},
 
 	onPassClick: function() {
+		var $this = this;
 		this.onRightArrowClick( function() { $this.search(); } );
 	},
 
@@ -681,46 +682,10 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		IndexViewController.goToView( 'RequestAuthorization' );
 	},
 
-	onCancelClick: function( force, cancel_all, callback ) {
+	onCancelClick: function( force_no_confirm, cancel_all, callback ) {
+		//Refresh grid on cancel as its not done during authorize/decline anymore.
 		var $this = this;
-		TTPromise.add( 'base', 'onCancelClick' );
-
-		LocalCacheData.current_doing_context_action = 'cancel';
-		if ( this.is_changed && !force ) {
-			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
-
-				if ( flag === true ) {
-					doNext();
-				}
-
-			} );
-		} else {
-			doNext();
-		}
-
-		function doNext() {
-			if ( !$this.edit_view && $this.parent_view_controller && $this.sub_view_mode ) {
-				$this.parent_view_controller.is_changed = false;
-				$this.parent_view_controller.buildContextMenu( true );
-				$this.parent_view_controller.onCancelClick();
-
-			} else {
-
-				if ( $this.is_edit ) {
-					$this.onViewClick( $this.current_edit_record.id );
-				} else {
-					$this.removeEditView();
-				}
-
-			}
-			if ( callback ) {
-				callback();
-			}
-			Global.setUIInitComplete();
-			ProgressBar.closeOverlay();
-			TTPromise.resolve( 'base', 'onCancelClick' );
-		}
-
+		this._super( 'onCancelClick', force_no_confirm, cancel_all, function() { $this.search(); } );
 	},
 
 	onDeclineClick: function() {
@@ -1520,7 +1485,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				}
 
 				array[key].key = key;
-				row[date_string] = Global.secondToHHMMSS( array[key].total_time );
+				row[date_string] = Global.getTimeUnit( array[key].total_time );
 				row[date_string + '_data'] = array[key];
 
 				//if id == 0, put the row as first row.
@@ -1534,7 +1499,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				row = map[key];
 				if ( row[date_string] && key === 'total' ) { //Override total cell data since we set all to 00:00 at beginning
 					array[key].key = key;
-					row[date_string] = Global.secondToHHMMSS( array[key].total_time );
+					row[date_string] = Global.getTimeUnit( array[key].total_time );
 					row[date_string + '_data'] = array[key];
 					if ( row.parent_key === 'accumulated_time' ) {
 						if ( array[key].override ) {
@@ -1543,7 +1508,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 					}
 				} else {
 					array[key].key = key;
-					row[date_string] = Global.secondToHHMMSS( array[key].total_time );
+					row[date_string] = Global.getTimeUnit( array[key].total_time );
 					row[date_string + '_data'] = array[key];
 
 					if ( row.parent_key === 'accumulated_time' ) {
@@ -1661,7 +1626,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		var filter = { filter_data: {} };
 		filter.user_id = this.current_edit_record.user_id;
 		filter.base_date = Global.strToDateTime( this.current_edit_record.start_date ).format();
-		Global.addViewTab( this.viewId, 'TimeSheet (Authorizations)', window.location.href );
+		Global.addViewTab( this.viewId, $.i18n._( 'TimeSheet (Authorizations)' ), window.location.href );
 		IndexViewController.goToView( 'TimeSheet', filter );
 	},
 
@@ -1675,7 +1640,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		var filter = { filter_data: {} };
 		filter.user_id = this.current_edit_record.user_id;
 		filter.base_date = date_stamp;
-		Global.addViewTab( this.viewId, 'TimeSheet (Authorizations)', window.location.href );
+		Global.addViewTab( this.viewId, $.i18n._( 'TimeSheet (Authorizations)' ), window.location.href );
 		IndexViewController.goToView( 'TimeSheet', filter );
 	},
 
@@ -1784,18 +1749,30 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	setExceptionGridSize: function() {
 		if ( this.exception_grid ) {
 			this.exception_grid.grid.setGridWidth( $( '.exception-grid-div' ).width() + 1 );
+
 			var size = 2;
+
 			var data_array = this.exception_grid.getData();
-			this.exception_grid.setGridHeight( size + ( 22 * data_array.length ) );
+			if ( Global.isArray( data_array ) ) {
+				size += ( 22 * data_array.length )
+			}
+
+			this.exception_grid.setGridHeight( size );
 		}
 	},
 
 	setTimeSheetSummaryGridSize: function() {
 		if ( this.timesheet_authorization_summary_grid ) {
 			this.timesheet_authorization_summary_grid.grid.setGridWidth( $( '.timesheet-authorization-grid-div' ).width() );
+
 			var size = 2;
+
 			var data_array = this.timesheet_authorization_summary_grid.getData();
-			this.timesheet_authorization_summary_grid.setGridHeight( size + ( 22 * data_array.length ) );
+			if ( Global.isArray( data_array ) ) {
+				size += ( 22 * data_array.length )
+			}
+
+			this.timesheet_authorization_summary_grid.setGridHeight( size );
 		}
 	}
 

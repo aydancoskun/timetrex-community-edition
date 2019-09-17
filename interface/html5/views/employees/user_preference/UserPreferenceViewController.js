@@ -641,7 +641,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 //					case 'schedule_icalendar_alarm2_absence':
 //					case 'schedule_icalendar_alarm1_modified':
 //					case 'schedule_icalendar_alarm2_modified':
-//						var result = Global.secondToHHMMSS( this.current_edit_record[key] )
+//						var result = Global.getTimeUnit( this.current_edit_record[key] )
 //						widget.setValue( result );
 //						break;
 					default:
@@ -690,7 +690,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 	},
 
 	initSubScheduleSyncView: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.find( '#tab_schedule_sync' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 			this.buildContextMenu( true );

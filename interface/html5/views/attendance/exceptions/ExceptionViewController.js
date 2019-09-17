@@ -148,7 +148,7 @@ ExceptionViewController = BaseViewController.extend( {
 				var include_users = { value: [user_id] };
 				filter.filter_data.include_user_ids = include_users;
 				filter.select_date = select_item.date_stamp;
-				Global.addViewTab( this.viewId, 'Exception', window.location.href );
+				Global.addViewTab( this.viewId, $.i18n._( 'Exception' ), window.location.href );
 				IndexViewController.goToView( 'Schedule', filter );
 
 				break;
@@ -156,7 +156,7 @@ ExceptionViewController = BaseViewController.extend( {
 				filter = { filter_data: {} };
 				filter.user_id = user_id;
 				filter.base_date = select_item.date_stamp;
-				Global.addViewTab( this.viewId, 'Exception', window.location.href );
+				Global.addViewTab( this.viewId, $.i18n._( 'Exception' ), window.location.href );
 				IndexViewController.goToView( 'TimeSheet', filter );
 
 				break;

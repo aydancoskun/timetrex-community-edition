@@ -5,6 +5,7 @@
 		var message_container;
 		var $this = this;
 		var feedback_rating;
+		var feedback_rating_text;
 		var message_box;
 		var message_email;
 		var message_phone;
@@ -22,9 +23,11 @@
 			if ( this.feedback_submitted == false || this.feedback_submitted == undefined ) {
 				this.feedback_submitted = true;
 				var message = '';
+
 				if ( message_box.val().length > 0 ) {
 					message = message_box.val() + '\nEmail: ' + message_email.val() + '\nPhone: ' + message_phone.val();
 				}
+
 				$this.api['setUserFeedbackRating']( feedback_rating, message, {
 					onResult: function( res ) {
 						if ( res.isValid() ) {
@@ -32,7 +35,7 @@
 								$( this ).removeClass( 'current' ).attr( 'src', $( this ).attr( 'src' ).replace( /^(.*\/)[^\/]+$/, '$1' ) + $( this ).attr( 'alt' ) + '.png' );
 							} );
 							$this.addClass( 'current' ).attr( 'src', $this.attr( 'src' ).replace( /^(.*\/)[^\/]+$/, '$1' ) + $this.attr( 'alt' ) + '_light.png' );
-							$this.removeMessageContainer();
+							$this.removeMessageContainer( false );
 							$this.user_api['getUser']( { filter_data: { id: LocalCacheData.getLoginUser().id } }, {
 								onResult: function( res ) {
 									if ( res.isValid() ) {
@@ -43,7 +46,15 @@
 						}
 					}
 				} );
+				// Debug.Text( 'Feedback: Category: feedback Action: submit Label: submit:feedback:'+ feedback_rating_text, 'TFeedback.js', 'TFeedback', 'saveIconSelection', 10 );
+				Global.sendAnalyticsEvent( 'feedback', 'submit', 'submit:feedback:'+ feedback_rating_text );
 			}
+		};
+
+		this.cancelIconSelection = function() {
+			$this.removeMessageContainer();
+			// Debug.Text( 'Feedback: Category: feedback Action: cancel Label: cancel:feedback:'+ feedback_rating_text, 'TFeedback.js', 'TFeedback', 'cancelIconSelection', 10 );
+			Global.sendAnalyticsEvent( 'feedback', 'cancel', 'cancel:feedback:'+ feedback_rating_text );
 		};
 
 		this.each( function() {
@@ -76,12 +87,13 @@
 			message_phone.val( user_phone );
 
 			feedback_rating = $this.attr( 'data-feedback' );
+			feedback_rating_text = $this.attr( 'alt' );
 
-			if ( $( this ).attr( 'alt' ) == 'happy' ) {
+			if ( feedback_rating_text == 'happy' ) {
 				$( message_container.find( '.title' ) ).text( $.i18n._( 'Glad to hear that you are happy with your TimeTrex experience! But we don\'t want to rest on our laurels, so let us know what we are doing right, or what we can do to make further improvements, we will listen, promise.' ) );
-			} else if ( $( this ).attr( 'alt' ) == 'neutral' ) {
+			} else if ( feedback_rating_text == 'neutral' ) {
 				$( message_container.find( '.title' ) ).text( $.i18n._( 'Sorry to hear that you are not satisfied with your TimeTrex experience, please let us know how we can improve, we will listen, promise.' ) );
-			} else if ( $( this ).attr( 'alt' ) == 'sad' ) {
+			} else if ( feedback_rating_text == 'sad' ) {
 				$( message_container.find( '.title' ) ).text( $.i18n._( 'Oh no! Sorry to hear that you are unhappy with your TimeTrex experience, please let us know how we can improve, we will listen, promise.' ) );
 			}
 
@@ -94,12 +106,14 @@
 
 			message_container.find( '.sendButton' ).bind( 'click', $this.saveIconSelection );
 
-			message_container.find( '.cancelButton' ).bind( 'click', $this.removeMessageContainer );
+			message_container.find( '.cancelButton' ).bind( 'click', $this.cancelIconSelection );
 
 			if ( $( 'body' ).children( '.message-container' ).length == 0 ) {
 				$( 'body' ).append( message_container );
 			}
 
+			// Debug.Text( 'Feedback: Category: feedback Action: click Label: click:feedback:'+ feedback_rating_text, 'TFeedback.js', 'TFeedback', 'each', 10 );
+			Global.sendAnalyticsEvent( 'feedback', 'click', 'click:feedback:'+ feedback_rating_text );
 		} );
 
 		return this;

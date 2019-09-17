@@ -329,6 +329,14 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 
 	},
 
+	onCustomContextClick: function( id ) {
+		switch ( id ) {
+			case ContextMenuIconName.export_export:
+				this.onExportClick();
+				break;
+		}
+	},
+
 	onSaveClick: function() {
 		this._super( 'onSaveClick' );
 		Global.clearCache( 'getOptions' );
@@ -434,7 +442,7 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		if ( type_id == 2000 ) {
 			$( this.edit_view_tab.find( 'ul li' )[1] ).show(); //Show Advanced Tab
 
-			if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) { //All cheque formats.
+			if ( Global.getProductEdition() >= 15 ) { //All cheque formats.
 				this.attachElement('value5').text($.i18n._('Vertical Alignment') + ':');
 				this.attachElement('value6').text($.i18n._('Horizontal Alignment') + ':');
 				this.attachElement('signature');
@@ -664,7 +672,7 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 			var width = '200';
 
 			var type_id = this.edit_view_ui_dic.type_id.getValue();
-			if ( type_id == 2000 && LocalCacheData.getCurrentCompany().product_edition_id >= 15 && ( i == 5 || i == 6 ) ) { //5=Vertical Alignment, 6=Horizaontal Alignment
+			if ( type_id == 2000 && Global.getProductEdition() >= 15 && ( i == 5 || i == 6 ) ) { //5=Vertical Alignment, 6=Horizaontal Alignment
 				width = 42;
 			}
 

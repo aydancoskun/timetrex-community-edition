@@ -104,7 +104,7 @@ ScheduleViewController = BaseViewController.extend( {
 		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
 		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
 			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
 		}
@@ -134,7 +134,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
 				PermissionManager.validate( p_id, 'edit_job' ) &&
-				( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				( Global.getProductEdition() >= 20 ) ) {
 			return true;
 		}
 		return false;
@@ -232,7 +232,7 @@ ScheduleViewController = BaseViewController.extend( {
 		if ( PermissionManager.validate( this.permission_id, 'edit_department' ) ) {
 			this.default_display_columns.push('department');
 		}
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
+		if ( Global.getProductEdition() >= 20 ) {
 			if ( PermissionManager.validate( this.permission_id, 'edit_job' ) ) {
 				this.default_display_columns.push('job');
 			}
@@ -1101,7 +1101,7 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	addRequestFromScheduledShifts: function( id ) {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 ) {
+		if ( Global.getProductEdition() <= 10 ) {
 			TAlertManager.showAlert( Global.getUpgradeMessage() );
 			return false;
 		}
@@ -1223,7 +1223,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 	addPunchesFromScheduledShifts: function( id ) {
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 ) {
+		if ( Global.getProductEdition() <= 10 ) {
 			TAlertManager.showAlert( Global.getUpgradeMessage() );
 			return false;
 		}
@@ -1275,7 +1275,7 @@ ScheduleViewController = BaseViewController.extend( {
 			shift = { user_id: shift.user_id };
 		}
 
-		if ( this.edit_view ) {
+		if ( this.edit_view && this.current_edit_record ) {
 			shift.user_id = this.current_edit_record.user_id;
 		}
 
@@ -1283,7 +1283,7 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	onFindAvailableClick: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 ) {
+		if ( Global.getProductEdition() <= 10 ) {
 			TAlertManager.showAlert( Global.getUpgradeMessage() );
 			return;
 		}
@@ -1353,7 +1353,7 @@ ScheduleViewController = BaseViewController.extend( {
 				} else {
 					filter.base_date = this.start_date_picker.getValue();
 				}
-				Global.addViewTab( this.viewId, 'Schedules', window.location.href );
+				Global.addViewTab( this.viewId, $.i18n._( 'Schedules' ), window.location.href );
 				IndexViewController.goToView( 'TimeSheet', filter );
 
 				break;
@@ -1976,7 +1976,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 		switch ( key ) {
 			case 'job_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'job_item_id', {
 						status_id: 10,
@@ -1986,14 +1986,14 @@ ScheduleViewController = BaseViewController.extend( {
 				}
 				break;
 			case 'job_item_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_quick_search':
 			case 'job_item_quick_search':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.onJobQuickSearch( key, c_value );
 				}
 				break;
@@ -2006,7 +2006,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 				this.setAbsencePolicyWhenUserChanged();
 
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 && this.edit_view_ui_dic['job_id'] ) {
+				if ( Global.getProductEdition() >= 20 && this.edit_view_ui_dic['job_id'] ) {
 					this.setJobValueWhenUserChanged( this.edit_view_ui_dic['job_id'].getValue( true ), 'job_id', {
 						status_id: 10,
 						user_id: this.edit_view_ui_dic[key].getValue(),
@@ -2060,7 +2060,7 @@ ScheduleViewController = BaseViewController.extend( {
 						}
 
 						$this.current_edit_record.total_time = total_time;
-						total_time = Global.secondToHHMMSS( total_time );
+						total_time = Global.getTimeUnit( total_time );
 						$this.edit_view_ui_dic['total_time'].setValue( total_time );
 
 						$this.onAvailableBalanceChange();
@@ -2590,7 +2590,7 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	checkOpenPermission: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 && PermissionManager.validate( 'schedule', 'view_open' ) ) {
+		if ( Global.getProductEdition() >= 15 && PermissionManager.validate( 'schedule', 'view_open' ) ) {
 			return true;
 		}
 
@@ -2628,7 +2628,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 		//Employee
 
-		var production_edition_id = LocalCacheData.getCurrentCompany().product_edition_id;
+		var production_edition_id = Global.getProductEdition();
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUser' )),
@@ -2830,7 +2830,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 		}
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			//Job
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
@@ -3241,10 +3241,10 @@ ScheduleViewController = BaseViewController.extend( {
 						// Error: Uncaught TypeError: Cannot read property 'getResult' of undefined in interface/html5/#!m=Schedule&date=20160201&mode=week&a=new&tab=Schedule
 						total_time ? (total_time = total_time.getResult()) : total_time = false;
 						this.current_edit_record.total_time = total_time;
-						widget.setValue( Global.secondToHHMMSS( total_time ) );
+						widget.setValue( Global.getTimeUnit( total_time ) );
 						break;
 					case 'job_id':
-						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						if ( ( Global.getProductEdition() >= 20 ) ) {
 							var user_id = false;
 							if ( this.edit_view_ui_dic['user_ids'] && this.edit_view_ui_dic['user_ids'].is( ':visible' ) ) {
 								user_id = this.getSelectUsersArray();
@@ -3266,7 +3266,7 @@ ScheduleViewController = BaseViewController.extend( {
 						}
 						break;
 					case 'job_item_id':
-						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						if ( ( Global.getProductEdition() >= 20 ) ) {
 							args = {};
 							args.filter_data = { status_id: 10, job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );
@@ -5177,7 +5177,7 @@ ScheduleViewController = BaseViewController.extend( {
 				row.schedule_policy_id = shift.schedule_policy_id;
 				row.job_id = shift.job_id;
 				row.job_item_id = shift.job_item_id;
-				row.total = Global.secondToHHMMSS( shift.total_time );
+				row.total = Global.getTimeUnit( shift.total_time );
 
 				var display_columns = this.select_layout.data.display_columns;
 				var display_columns_len = display_columns.length;
@@ -5235,7 +5235,7 @@ ScheduleViewController = BaseViewController.extend( {
 					row.schedule_policy_id = shift.schedule_policy_id;
 					row.job_id = shift.job_id;
 					row.job_item_id = shift.job_item_id;
-					row.total = Global.secondToHHMMSS( shift.total_time );
+					row.total = Global.getTimeUnit( shift.total_time );
 
 					display_columns = this.select_layout.data.display_columns;
 					display_columns_len = display_columns.length;
@@ -5724,7 +5724,7 @@ ScheduleViewController = BaseViewController.extend( {
 					var total_span = $( '<span class=\'schedule-time total\'></span>' );
 					var currency = LocalCacheData.getCurrentCurrencySymbol();
 					time_span.text( 'S: ' + cell_value.shifts + ' A: ' + cell_value.absences );
-					total_span.text( Global.secondToHHMMSS( cell_value.total_time ) + ' = ' + currency + Global.MoneyRound( cell_value.total_time_wage ) );
+					total_span.text( Global.getTimeUnit( cell_value.total_time ) + ' = ' + currency + Global.MoneyRound( cell_value.total_time_wage ) );
 
 					content_div.prepend( total_span );
 					content_div.prepend( time_span );
@@ -5906,7 +5906,7 @@ ScheduleViewController = BaseViewController.extend( {
 					var total_div = $( '<div  style=\'text-align: left\'></div>' );
 					var currency = LocalCacheData.getCurrentCurrencySymbol();
 					time_span = $( '<span class=\'schedule-time total\'></span>' );
-					time_span.text( 'S: ' + cell_value.shifts + ' A: ' + cell_value.absences + ' ' + Global.secondToHHMMSS( cell_value.total_time ) + ' = ' + currency + cell_value.total_time_wage );
+					time_span.text( 'S: ' + cell_value.shifts + ' A: ' + cell_value.absences + ' ' + Global.getTimeUnit( cell_value.total_time ) + ' = ' + currency + cell_value.total_time_wage );
 					content_div.prepend( time_span );
 
 					if ( cell_value.total_shifts_dic ) {
@@ -6041,7 +6041,7 @@ ScheduleViewController = BaseViewController.extend( {
 					var total_span = $( '<span class=\'schedule-time total\'></span>' );
 					var currency = LocalCacheData.getCurrentCurrencySymbol();
 					time_span.text( 'S: ' + cell_value.shifts + ' A: ' + cell_value.absences );
-					total_span.text( Global.secondToHHMMSS( cell_value.total_time ) + ' = ' + currency + Global.MoneyRound( cell_value.total_time_wage ) );
+					total_span.text( Global.getTimeUnit( cell_value.total_time ) + ' = ' + currency + Global.MoneyRound( cell_value.total_time_wage ) );
 
 					content_div.prepend( total_span );
 					content_div.prepend( time_span );
@@ -7556,7 +7556,7 @@ ScheduleViewController = BaseViewController.extend( {
 				}
 			}
 
-			row.total_time = Global.secondToHHMMSS( total_time );
+			row.total_time = Global.getTimeUnit( total_time );
 			row.total_time_wage = LocalCacheData.getCurrentCurrencySymbol() + total_wage.toFixed( 2 );
 			//ViewManagerUtil.getTimeUnit(totalTime);
 			row.shifts = shifts;
@@ -7911,10 +7911,10 @@ ScheduleViewController = BaseViewController.extend( {
 					in_column: 2,
 					field: 'job_id',
 					layout_name: ALayoutIDs.JOB,
-					api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
+					api_class: ( Global.getProductEdition() >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
 					multiple: true,
 					basic_search: false,
-					adv_search: ( this.show_job_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ),
+					adv_search: ( this.show_job_ui && ( Global.getProductEdition() >= 20 ) ),
 					form_item_type: FormItemType.AWESOME_BOX
 				} ),
 
@@ -7923,10 +7923,10 @@ ScheduleViewController = BaseViewController.extend( {
 					in_column: 2,
 					field: 'job_item_id',
 					layout_name: ALayoutIDs.JOB_ITEM,
-					api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
+					api_class: ( Global.getProductEdition() >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
 					multiple: true,
 					basic_search: false,
-					adv_search: ( this.show_job_item_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ),
+					adv_search: ( this.show_job_item_ui && ( Global.getProductEdition() >= 20 ) ),
 					form_item_type: FormItemType.AWESOME_BOX
 				} ),
 
@@ -8036,14 +8036,14 @@ ScheduleViewController = BaseViewController.extend( {
 			}
 
 			//Could be permission issues with this, so disable for now.
-			// if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 && ( PermissionManager.validate( 'punch', 'edit_job' ) || PermissionManager.validate( this.permission_id, 'edit_job' ) ) ) {
+			// if ( Global.getProductEdition() >= 20 && ( PermissionManager.validate( 'punch', 'edit_job' ) || PermissionManager.validate( this.permission_id, 'edit_job' ) ) ) {
 			// 	this.search_fields.push(
 			// 		new SearchField( {
 			// 			label: $.i18n._( 'Job' ),
 			// 			in_column: 2,
 			// 			field: 'job_id',
 			// 			layout_name: ALayoutIDs.JOB,
-			// 			api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
+			// 			api_class: ( Global.getProductEdition() >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
 			// 			multiple: true,
 			// 			basic_search: true,
 			// 			adv_search: false,
@@ -8051,14 +8051,14 @@ ScheduleViewController = BaseViewController.extend( {
 			// 		} ) );
 			// }
 			//
-			// if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 && ( PermissionManager.validate( 'punch', 'edit_job_item' ) || PermissionManager.validate( this.permission_id, 'edit_job_item' ) ) ) {
+			// if ( Global.getProductEdition() >= 20 && ( PermissionManager.validate( 'punch', 'edit_job_item' ) || PermissionManager.validate( this.permission_id, 'edit_job_item' ) ) ) {
 			// 	this.search_fields.push(
 			// 		new SearchField( {
 			// 			label: $.i18n._( 'Task' ),
 			// 			in_column: 2,
 			// 			field: 'job_item_id',
 			// 			layout_name: ALayoutIDs.JOB_ITEM,
-			// 			api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
+			// 			api_class: ( Global.getProductEdition() >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
 			// 			multiple: true,
 			// 			basic_search: true,
 			// 			adv_search: false,
@@ -8142,7 +8142,7 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	setAddRequestIcon: function( context_btn, grid_selected_length, pId ) {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 || !this.addPermissionValidate( 'request' ) || this.edit_only_mode ) {
+		if ( Global.getProductEdition() <= 10 || !this.addPermissionValidate( 'request' ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 

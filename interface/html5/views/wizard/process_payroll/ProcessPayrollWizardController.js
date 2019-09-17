@@ -712,20 +712,20 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				var pay_period_ids = { value: ids };
 				filter.filter_data.pay_period_id = pay_period_ids;
 
-				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 				this.onCloseClick();
 				IndexViewController.goToView( 'Exception', filter );
 
 				break;
 			case ContextMenuIconName.request:
-				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 
 				IndexViewController.goToView( 'Request' );
 
 				this.onCloseClick();
 				break;
 			case ContextMenuIconName.timesheet_reports:
-				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 				this.onCloseClick();
 
 				LocalCacheData.default_filter_for_next_open_view = { template: 'by_pay_period_by_employee+verified_time_sheet' };
@@ -777,7 +777,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				break;
 			case ContextMenuIconName.pay_stub_amendment:
 
-				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 				this.onCloseClick();
 
 				grid = current_step_ui.pay_stub_amendments;
@@ -807,7 +807,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				break;
 			case ContextMenuIconName.pay_stub:
 
-				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 				this.onCloseClick();
 
 				if ( this.current_step === 7 ) {
@@ -820,19 +820,19 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				IndexViewController.goToView( 'PayStub', filter );
 				break;
 			case ContextMenuIconName.pay_stub_summary:
-				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 				this.onCloseClick();
 				IndexViewController.openReport( LocalCacheData.current_open_primary_controller, 'PayStubSummaryReport' );
 
 				break;
 			case ContextMenuIconName.pay_stub_transaction_summary:
-				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 				this.onCloseClick();
 				IndexViewController.openReport( LocalCacheData.current_open_primary_controller, 'PayStubTransactionSummaryReport' );
 
 				break;
 			case ContextMenuIconName.payroll_export_report:
-				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 				this.onCloseClick();
 				IndexViewController.openReport( LocalCacheData.current_open_primary_controller, 'PayrollExportReport' );
 
@@ -859,14 +859,14 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				} );
 				break;
 			case ContextMenuIconName.authorization_timesheet:
-				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 				IndexViewController.goToView( 'TimeSheetAuthorization' );
 				this.onCloseClick();
 				break;
 
 				//Process Payments Button Click
 			case ContextMenuIconName.direct_deposit:
-				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 
 				var pay_stub_transfer_grid = current_step_ui.pay_stub_transfer;
 				var data = {
@@ -907,8 +907,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 			} else {
 				current_step_ui.generate_pay_stub.removeClass( 'disable-image' );
 			}
-		}
-		else if ( this.current_step === 8 ) {
+		} else if ( this.current_step === 8 ) {
 			var pay_stub_transfer_grid = current_step_ui.pay_stub_transfer;
 			var pay_stub_transaction_grid = current_step_ui.pay_stub_transaction;
 
@@ -917,7 +916,6 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				this.content_div.find( '#directDepositIcon' ).addClass( 'disable-image' );
 
 				var grid = current_step_ui.pay_stub_transaction;
-				grid.grid.clearGridData();
 				grid.grid.trigger( 'reloadGrid' );
 				this.setGridAutoHeight( grid, this.transaction_source_data.length );
 				this.showNoResultCover( grid.grid.parents( '.grid-div' ) );

@@ -87,13 +87,15 @@ TTGrid = function( table_id, setup, column_info_array ) {
 	 *
 	 * @param data
 	 */
-	this.setData = function( data ) {
+	this.setData = function( data, clear_grid ) {
 		if ( this.grid ) {
-			//this.grid.clearGridData();
+			//Clear grid by default.
+			clear_grid = ( clear_grid == null ) ? true : clear_grid;
+			if ( clear_grid == true ) {
+				this.grid.clearGridData();
+			}
 
-			$( this.grid ).setGridParam( { 'data': data } );
-			$( this.grid ).trigger( 'reloadGrid' );
-
+			this.grid.setGridParam( { 'data': data } ).trigger( 'reloadGrid' );
 			//this.setGridColumnsWidth();
 		} else {
 			throw('ERROR: Grid is not ready yet.');

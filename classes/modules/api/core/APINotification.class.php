@@ -133,7 +133,7 @@ class APINotification extends APIFactory {
 				}
 
 				//Give early warning to installs using older stack components before the next version is released that forces the upgrade.
-				if ( version_compare( PHP_VERSION, '5.4.0', '<' ) == TRUE ) {
+				if ( version_compare( PHP_VERSION, '7.0.0', '<' ) == TRUE ) {
 					if ( OPERATING_SYSTEM == 'WIN' ) {
 						$message = TTi18n::getText( 'WARNING: System stack components are out-of-date and not supported with this version of %1! Please perform a manual upgrade to the latest version of %1 immediately!', APPLICATION_NAME );
 					} else {

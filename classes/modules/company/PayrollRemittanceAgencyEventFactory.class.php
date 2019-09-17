@@ -944,23 +944,25 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 													 TTi18n::gettext('Agency or Event Type is not eligible for Full Service yet, try again later'));
 				}
 
-				//Make sure the RemittanceAgency is linked to a source account, which is required to at least get a PaymentServices API username/password
-				if ( is_object( $this->getPayrollRemittanceAgencyObject() )
-						AND !is_object( $this->getPayrollRemittanceAgencyObject()->getRemittanceSourceAccountObject() ) ) {
-					$this->Validator->isTrue(		'status_id',
-													 FALSE,
-													 TTi18n::gettext('Remittance Agency must have Source Account specified'));
-				}
+				//If the agency/event is eligible for auto_pay, then make sure its linked to a source account of the proper type.
+				if ( is_array($event_data) AND isset($event_data['flags']) AND ( $event_data['flags']['auto_pay'] == TRUE ) ) {
+					//Make sure the RemittanceAgency is linked to a source account, which is required to at least get a PaymentServices API username/password
+					if ( is_object( $this->getPayrollRemittanceAgencyObject() )
+							AND !is_object( $this->getPayrollRemittanceAgencyObject()->getRemittanceSourceAccountObject() ) ) {
+						$this->Validator->isTrue( 'status_id',
+												  FALSE,
+												  TTi18n::gettext( 'Remittance Agency must have Source Account specified' ) );
+					}
 
-				//Make sure the source account is of TimeTrex Payment Services format.
-				if ( is_object( $this->getPayrollRemittanceAgencyObject() )
-						AND is_object( $this->getPayrollRemittanceAgencyObject()->getRemittanceSourceAccountObject() )
-						AND $this->getPayrollRemittanceAgencyObject()->getRemittanceSourceAccountObject()->getDataFormat() != 5 ) { //5=TimeTrex Payment Services
-					$this->Validator->isTrue(		'status_id',
-													 FALSE,
-													 TTi18n::gettext('Remittance Agency Source Account Format is incorrect'));
+					//Make sure the source account is of TimeTrex Payment Services format.
+					if ( is_object( $this->getPayrollRemittanceAgencyObject() )
+							AND is_object( $this->getPayrollRemittanceAgencyObject()->getRemittanceSourceAccountObject() )
+							AND $this->getPayrollRemittanceAgencyObject()->getRemittanceSourceAccountObject()->getDataFormat() != 5 ) { //5=TimeTrex Payment Services
+						$this->Validator->isTrue( 'status_id',
+												  FALSE,
+												  TTi18n::gettext( 'Remittance Agency Source Account Format is incorrect' ) );
+					}
 				}
-
 
 				if ( $this->getDeleted() == FALSE AND is_object( $this->getPayrollRemittanceAgencyObject() ) AND is_object( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject() )  ) {
 					$this->Validator->isTrue( 'status_id',
@@ -1011,7 +1013,6 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 			//Send data to TimeTrex Payment Services.
 			$le_obj = $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject();
 			if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
-				require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR . 'other' . DIRECTORY_SEPARATOR . 'TimeTrexPaymentServices.class.php' );
 				try {
 					$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
 					$retval = $tt_ps_api->setAgencyAuthorization( $tt_ps_api->convertRemittanceAgencyEventObjectToAgencyAuthorizationArray( $this ) );
@@ -2019,7 +2020,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		$retval = $mail->Send();
 
 		if ( $retval == TRUE ) {
-			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Email PayrollRemittanceAgencyEvent Reminder to').': '. $to .' Bcc: '. $headers['Bcc'], NULL, $this->getTable() );
+			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Emailed remittance agency event reminder to').': '. $to .' Bcc: '. $headers['Bcc'], NULL, $this->getTable() );
 			return TRUE;
 		}
 
@@ -2117,6 +2118,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 								case 'html':
 								case 'pdf_form':
 								case 'pdf_form_government':
+								case 'raw':
 								case 'efile_xml':
 								case 'pdf_form_publish_employee':
 									$template_name = 'by_employee';
@@ -2132,6 +2134,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 								case 'html':
 								case 'pdf_form':
 								case 'pdf_form_government':
+								case 'raw':
 								case 'efile_xml':
 								case 'pdf_form_publish_employee':
 									$template_name = 'by_employee';
@@ -2296,10 +2299,10 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 			$report_obj->setPermissionObject( $permission_obj );
 
 			if ( isset( $template_name ) AND $template_name != '' ) {
-				$report_data['config'] = $report_obj->getOptions( 'template_config', array('template' => $template_name) );
+				$report_data['config'] = Misc::trimSortPrefix( $report_obj->getOptions( 'template_config', array('template' => $template_name) ) );
 			}
 
-			if ( isset( $report_data['config'] ) ) {
+			if ( isset( $report_data['config'] ) AND isset( $tmp_config ) AND count( $tmp_config ) > 0 ) {
 				foreach ( $report_data['config'] as $key => $value ) {
 					foreach ( $tmp_config as $tmp_key => $tmp_value ) {
 						if ( Misc::trimSortPrefix( $key ) == $tmp_key ) {

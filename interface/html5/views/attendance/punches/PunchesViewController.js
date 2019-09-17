@@ -2,7 +2,7 @@ PunchesViewController = BaseViewController.extend( {
 	el: '#punches_view_container',
 
 	_required_files: {
-		10: ['APIPunch', 'APIUser', 'APIUserGroup', 'APIStation', 'APIBranch', 'APIDepartment', 'APIPayPeriod', 'APIUserTitle'],
+		10: ['APIPunch', 'APIUser', 'APIUserGroup', 'APIStation', 'APIBranch', 'APIDepartment', 'APIPayPeriod', 'APIUserTitle', 'TImage'],
 		15: ['leaflet-timetrex'],
 		20: ['APIJob', 'APIJobItem']
 	},
@@ -30,7 +30,7 @@ PunchesViewController = BaseViewController.extend( {
 		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
 		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
 			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 		}
@@ -40,13 +40,9 @@ PunchesViewController = BaseViewController.extend( {
 		this.initPermission();
 		this.render();
 
-		$this = this;
-		require( ['TImage'], function () {
-			$this.buildContextMenu();
-			$this.initData();
-			$this.setSelectRibbonMenuIfNecessary();
-		} );
-
+		this.buildContextMenu();
+		this.initData();
+		this.setSelectRibbonMenuIfNecessary();
 	},
 
 	jobUIValidate: function ( p_id ) {
@@ -390,7 +386,7 @@ PunchesViewController = BaseViewController.extend( {
 			this.detachElement( 'department_id' );
 		}
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 			//Job
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -458,7 +454,7 @@ PunchesViewController = BaseViewController.extend( {
 
 		}
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			// Quantity
 			var good = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			good.TTextInput( { field: 'quantity', width: 40 } );
@@ -497,7 +493,7 @@ PunchesViewController = BaseViewController.extend( {
 		}
 
 		//Location
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 
 			var latitude = Global.loadWidgetByName( FormItemType.TEXT );
 			latitude.TText( { field: 'latitude' } );
@@ -745,7 +741,7 @@ PunchesViewController = BaseViewController.extend( {
 						widget.setValue( this.current_edit_record[key] );
 						break;
 					case 'job_id':
-						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						if ( ( Global.getProductEdition() >= 20 ) ) {
 
 							var args = {};
 							args.filter_data = { status_id: 10, user_id: this.current_edit_record.user_id };
@@ -754,7 +750,7 @@ PunchesViewController = BaseViewController.extend( {
 						}
 						break;
 					case 'job_item_id':
-						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						if ( ( Global.getProductEdition() >= 20 ) ) {
 							args = {};
 							args.filter_data = { status_id: 10, job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );
@@ -813,7 +809,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 	setLocationValue: function ( location_data ) {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 			if( location_data ) {
 				this.current_edit_record.latitude = location_data.latitude;
 				this.current_edit_record.longitude = location_data.longitude;
@@ -1137,10 +1133,10 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'job_id',
 				layout_name: ALayoutIDs.JOB,
-				api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
+				api_class: ( Global.getProductEdition() >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
 				multiple: true,
 				basic_search: false,
-				adv_search: ( this.show_job_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ),
+				adv_search: ( this.show_job_ui && ( Global.getProductEdition() >= 20 ) ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -1149,10 +1145,10 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'job_item_id',
 				layout_name: ALayoutIDs.JOB_ITEM,
-				api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
+				api_class: ( Global.getProductEdition() >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
 				multiple: true,
 				basic_search: false,
-				adv_search: ( this.show_job_item_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ),
+				adv_search: ( this.show_job_item_ui && ( Global.getProductEdition() >= 20 ) ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -1350,7 +1346,7 @@ PunchesViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 			var map = new RibbonSubMenu( {
 				label: $.i18n._( 'Map' ),
 				id: ContextMenuIconName.map,
@@ -1387,7 +1383,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	onMapClick: function () {
 		// only trigger map load in specific product editions.
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+		if ( ( Global.getProductEdition() >= 15 ) ) {
 			ProgressBar.showProgressBar();
 
 			// TODO: this is repeated below, perhaps in future now that getFilterColumnsFromDisplayColumns() is commented out, this can be consolidated?
@@ -1435,11 +1431,15 @@ PunchesViewController = BaseViewController.extend( {
 				data.filter_columns.status = true;
 				data.filter_columns.punch_control_id = true;
 				data.filter_columns.branch = true;
+				data.filter_columns.branch_id = true;
 				data.filter_columns.department = true;
+				data.filter_columns.department_id = true;
 				data.filter_columns.job_manual_id = true;
 				data.filter_columns.job = true;
+				data.filter_columns.job_id = true;
 				data.filter_columns.job_item_manual_id = true;
 				data.filter_columns.job_item = true; // also known as Task
+				data.filter_columns.job_item_id = true;
 				data.filter_columns.total_time = true;
 				data.filter_columns.latitude = true;
 				data.filter_columns.longitude = true;
@@ -1666,7 +1666,7 @@ PunchesViewController = BaseViewController.extend( {
 
 					filter.user_id = this.current_edit_record.user_id;
 					filter.base_date = this.current_edit_record.punch_date;
-					Global.addViewTab( this.viewId, 'Punches', window.location.href );
+					Global.addViewTab( this.viewId, $.i18n._( 'Punches' ), window.location.href );
 					IndexViewController.goToView( 'TimeSheet', filter );
 				} else {
 					temp_filter = {};
@@ -1693,7 +1693,7 @@ PunchesViewController = BaseViewController.extend( {
 								filter.user_id = result_data.user_id;
 								filter.base_date = result_data.punch_date;
 
-								Global.addViewTab( $this.viewId, 'Punches', window.location.href );
+								Global.addViewTab( $this.viewId, $.i18n._( 'Punches' ), window.location.href );
 								IndexViewController.goToView( 'TimeSheet', filter );
 
 							}
@@ -1748,6 +1748,13 @@ PunchesViewController = BaseViewController.extend( {
 		}
 	},
 
+	copyAsNewResetIds: function( data ) {
+		//override where needed.
+		data.id = '';
+		data.punch_control_id = ''; //Clear the punch_control_id record as well so we don't force the punch to be assigned to it.
+		return data;
+	},
+
 	_continueDoCopyAsNew: function () {
 		var $this = this;
 		this.is_add = true;
@@ -1755,8 +1762,7 @@ PunchesViewController = BaseViewController.extend( {
 
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		if ( Global.isSet( this.edit_view ) ) {
-
-			this.current_edit_record.id = '';
+			this.current_edit_record = this.copyAsNewResetIds( this.current_edit_record );
 			var navigation_div = this.edit_view.find( '.navigation-div' );
 			navigation_div.css( 'display', 'none' );
 			this.openEditView();
@@ -1765,31 +1771,9 @@ PunchesViewController = BaseViewController.extend( {
 			this.setTabStatus();
 			this.is_changed = false;
 			ProgressBar.closeOverlay();
-
 		} else {
-
-			var filter = {};
-			var grid_selected_id_array = this.getGridSelectIdArray();
-			var grid_selected_length = grid_selected_id_array.length;
-
-			if ( grid_selected_length > 0 ) {
-				var selectedId = grid_selected_id_array[0];
-			} else {
-				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
-				return;
-			}
-
-			filter.filter_data = {};
-			filter.filter_data.id = [selectedId];
-
-			this.api['get' + this.api.key_name]( filter, {
-				onResult: function ( result ) {
-					$this.onCopyAsNewResult( result );
-
-				}
-			} );
+			this._super( '_continueDoCopyAsNew' );
 		}
-
 	},
 
 	isMassDateOrMassUser: function () {
@@ -2018,21 +2002,21 @@ PunchesViewController = BaseViewController.extend( {
 				this.setEditMenu();
 				break;
 			case 'job_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue() );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_item_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_quick_search':
 			case 'job_item_quick_search':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.onJobQuickSearch( key, c_value );
 				}
 				break;

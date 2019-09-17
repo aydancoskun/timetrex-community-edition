@@ -161,8 +161,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 				//add minus buttons
 				var action_button_div = $( '<div style="margin-left: 15px;text-align: left; margin-bottom: 5px;"></div>' );
-				var add_icon = $( '<button class="plus-icon" style="margin-right: 5px;" onclick=""><span style="opacity: 0">.</span></button>' );
-				var minus_icon = $( '<button class="minus-icon" onclick=""><span style="opacity: 0">.</span></button>' );
+				var add_icon = $( '<button class="plus-icon" style="margin-right: 5px;"></button>' );
+				var minus_icon = $( '<button class="minus-icon"></button>' );
 
 				action_button_div.append( add_icon );
 				action_button_div.append( minus_icon );

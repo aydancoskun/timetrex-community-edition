@@ -136,9 +136,11 @@ LoginUserContactViewController = BaseViewController.extend( {
 	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
 		var record = this.current_edit_record;
-		if ( !Global.isSet( ignoreWarning ) ) {
-			ignoreWarning = false;
-		}
+		// if ( !Global.isSet( ignoreWarning ) ) {
+		// 	ignoreWarning = false;
+		// }
+		ignoreWarning = true; //When login user is saving their own contact information, always ignore warnings because in most cases there isn't much they can do anyways.
+
 		LocalCacheData.current_doing_context_action = 'save';
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {

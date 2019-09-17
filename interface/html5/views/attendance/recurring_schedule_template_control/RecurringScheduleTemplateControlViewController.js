@@ -75,9 +75,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		this.edit_view_tab.css( 'max-width', 'none' );
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
+		if ( Global.getProductEdition() >= 20 ) {
 			this.edit_view_tab.css( 'min-width', '1250px' );
-		} else if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		} else if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.css( 'min-width', '1050px' );
 		} else {
 			this.edit_view_tab.css( 'min-width', '950px' );
@@ -156,9 +156,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		function getRender() {
 			var render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRender_1.html';
-			if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
+			if ( Global.getProductEdition() >= 20 ) {
 				render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRender.html';
-			} else if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			} else if ( Global.getProductEdition() >= 15 ) {
 				render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRender_2.html';
 			}
 
@@ -167,9 +167,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		function getRowRender() {
 			var render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRow_1.html';
-			if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
+			if ( Global.getProductEdition() >= 20 ) {
 				render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRow.html';
-			} else if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			} else if ( Global.getProductEdition() >= 15 ) {
 				render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRow_2.html';
 			}
 
@@ -205,7 +205,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			args.filter_data.recurring_schedule_template_control_id = this.current_edit_record.id ? this.current_edit_record.id : this.copied_record_id;
 			this.copied_record_id = '';
 			$this.recurring_schedule_template_api['get' + $this.recurring_schedule_template_api.key_name]( args, {
-				onResult: function( res ) {
+				onResult: function ( res ) {
 					if ( !$this.edit_view ) {
 						return;
 					}
@@ -216,7 +216,6 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			} );
 
 		}
-
 	},
 
 	insideEditorAddRow: function( data, index ) {
@@ -399,7 +398,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			// Total
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 			form_item_input.TText( { field: 'total_time' } );
-			form_item_input.setValue( data.total_time ? Global.secondToHHMMSS( data.total_time ) : '' ); //
+			form_item_input.setValue( data.total_time ? Global.getTimeUnit( data.total_time ) : '' ); //
 			widgets[form_item_input.getField()] = form_item_input;
 
 			row.children().eq( 4 ).append( form_item_input );
@@ -494,7 +493,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			// Job/Task
 
-			if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+			if ( ( Global.getProductEdition() >= 20 ) ) {
 
 				widgetContainer = $( '<div class=\'widget-h-box recurring-template-widget-h-box\'></div>' );
 
@@ -552,14 +551,14 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			}
 
-			if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			if ( Global.getProductEdition() >= 15 ) {
 				// Open Shift Multiplier
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( { field: 'open_shift_multiplier', width: 20 } );
 				form_item_input.setValue( data.open_shift_multiplier ? data.open_shift_multiplier : 1 );
 				widgets[form_item_input.getField()] = form_item_input;
 
-				if ( LocalCacheData.getCurrentCompany().product_edition_id <= 15 ) {
+				if ( Global.getProductEdition() <= 15 ) {
 					row.children().eq( 7 ).append( form_item_input );
 				} else {
 					row.children().eq( 8 ).append( form_item_input );
@@ -605,7 +604,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			if (startTime !== '' && endTime !== '' && schedulePolicyId !== '') {
 				var total_time = this.schedule_api.getScheduleTotalTime(startTime, endTime, schedulePolicyId, { async: false }).getResult();
-				row_widgets.total_time.setValue(Global.secondToHHMMSS(total_time));
+				row_widgets.total_time.setValue(Global.getTimeUnit(total_time));
 			}
 			this.validate();
 		}
@@ -642,11 +641,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 					id: recurring_schedule_template_id
 				};
 
-				if (LocalCacheData.getCurrentCompany().product_edition_id >= 15) {
+				if (Global.getProductEdition() >= 15) {
 					data.open_shift_multiplier = row.open_shift_multiplier.getValue();
 				}
 
-				if ((LocalCacheData.getCurrentCompany().product_edition_id >= 20)) {
+				if ((Global.getProductEdition() >= 20)) {
 
 					data.job_id = row.job_id.getValue();
 					data.job_item_id = row.job_item_id.getValue();
@@ -706,9 +705,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	},
 
 	_continueDoCopyAsNew: function() {
-		var $this = this;
 		this.is_add = true;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
+
 		if ( Global.isSet( this.edit_view ) ) {
 			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
 				//Fix JS exception: Uncaught TypeError: Cannot read property 'getValue' of undefined
@@ -721,39 +720,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 				this.editor.rows_widgets_array[i].week.attr( 'recurring_schedule_template_id', new_uuid );
 			}
-
-			this.current_edit_record.id = '';
-			var navigation_div = this.edit_view.find( '.navigation-div' );
-			navigation_div.css( 'display', 'none' );
-			this.setEditMenu();
-			this.setTabStatus();
-			this.is_changed = false;
-			ProgressBar.closeOverlay();
-
-		} else {
-
-			var filter = {};
-			var grid_selected_id_array = this.getGridSelectIdArray();
-			var grid_selected_length = grid_selected_id_array.length;
-
-			if ( grid_selected_length > 0 ) {
-				var selectedId = grid_selected_id_array[0];
-			} else {
-				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
-				return;
-			}
-
-			filter.filter_data = {};
-			filter.filter_data.id = [selectedId];
-
-			this.api['get' + this.api.key_name]( filter, {
-				onResult: function( result ) {
-					$this.onCopyAsNewResult( result );
-
-				}
-			} );
 		}
-
+		this._super( '_continueDoCopyAsNew' );
 	},
 
 	onCopyAsNewResult: function( result ) {
@@ -1056,7 +1024,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		switch ( iconName ) {
 			case ContextMenuIconName.recurring_schedule:
-				Global.addViewTab( this.viewId, 'Recurring Templates', window.location.href );
+				Global.addViewTab( this.viewId, $.i18n._( 'Recurring Templates' ), window.location.href );
 				IndexViewController.goToView( 'RecurringScheduleControl', filter );
 				break;
 		}

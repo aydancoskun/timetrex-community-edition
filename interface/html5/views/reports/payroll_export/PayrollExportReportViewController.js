@@ -228,6 +228,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				this.onSaveSetup( $.i18n._( 'Export setup' ) );
 				break;
 		}
+		Global.triggerAnalyticsContextMenuClick( context_btn, menu_name );
 	},
 	/* jshint ignore:end */
 	buildFormSetupUI: function() {
@@ -701,13 +702,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			this.setEditMenu();
 		} else if ( key === 1 ) {
 			this.edit_view_ui_dic.setup_field.setValue( this.current_edit_record.setup_field );
-			if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
+			if ( Global.getProductEdition() == 10 ) {
 				this.edit_view_ui_dic.auto_refresh.parent().parent().css( 'display', 'none' );
 			}
 			this.buildContextMenu( true );
 			this.setEditMenu();
 		} else if ( key === 2 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			if ( Global.getProductEdition() >= 15 ) {
 				this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'block' );
 				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 			} else {
@@ -720,7 +721,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			this.buildContextMenu( true );
 			this.setEditMenu();
 		} else if ( key === 4 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			if ( Global.getProductEdition() >= 15 ) {
 				this.edit_view_tab.find( '#tab4' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 				this.initSubCustomColumnView();

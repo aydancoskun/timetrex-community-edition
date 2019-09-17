@@ -990,7 +990,7 @@ class ContributingShiftPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function isActiveDayOfWeekOrHoliday( $date_epoch, $calculate_policy_obj ) {
-		Debug::text(' Date: '. TTDate::getDate('DATE+TIME', $date_epoch) .' Include Holiday Type: '. $this->getIncludeHolidayType(), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::text(' Date: '. TTDate::getDate('DATE+TIME', $date_epoch) .' Include Holiday Type: '. $this->getIncludeHolidayType(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->getIncludeHolidayType() > 10 AND is_object( $calculate_policy_obj ) ) {
 			$is_holiday = $this->isHoliday( TTDate::getMiddleDayEpoch( $date_epoch ), $calculate_policy_obj );
 		} else {

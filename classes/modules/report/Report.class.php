@@ -1746,7 +1746,7 @@ class Report {
 			return $value['display'];
 		} else {
 			$retval = $value;
-			if ( $format == 'csv' OR $format == 'json' OR $format == 'raw' ) { //Force specific field formats for exporting to CSV format.
+			if ( $format == 'csv' OR $format == 'json' OR $format == 'raw' OR $format == 'payment_services' ) { //Force specific field formats for exporting to CSV format.
 				switch ( $type ) {
 					case 'report_date':
 						$column = ( strpos( $column, 'custom_column' ) === FALSE ) ? $column : $column.'-'.'date_stamp';
@@ -2353,7 +2353,7 @@ class Report {
 
 
 		//if ( $format != 'csv' AND $format != 'xml' ) { //Exclude total/sub-totals for CSV/XML format
-		if ( $format == 'pdf' OR $format == 'html' OR $format == 'raw' OR stripos( $format, 'pdf_' ) !== FALSE ) {  //Only total/subtotal for PDF/RAW formats.
+		if ( $format == 'pdf' OR $format == 'html' OR $format == 'raw' OR $format == 'payment_services' OR stripos( $format, 'pdf_' ) !== FALSE ) {  //Only total/subtotal for PDF/RAW formats.
 			if ( $this->isSystemLoadValid() == TRUE ) {
 				$this->Total();
 				$this->subTotal();
@@ -2407,7 +2407,7 @@ class Report {
 		Debug::Text(' Format: '. $format .' Total Time: '. (microtime(TRUE) - $this->start_time) .' Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr( Debug::profileTimers( $this->profiler ), ' Profile Timers: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr( $retval, ' Report Data...', __FILE__, __LINE__, __METHOD__, 10);
-		if ( $format != 'raw' AND $format != 'pdf_form_publish_employee' AND $format != 'efile_xml' AND $format != 'html' AND ( !is_array($retval) OR !isset($retval['file_name']) OR !isset($retval['mime_type']) ) ) {
+		if ( $format != 'raw' AND $format != 'payment_services' AND $format != 'pdf_form_publish_employee' AND $format != 'efile_xml' AND $format != 'html' AND ( !is_array($retval) OR !isset($retval['file_name']) OR !isset($retval['mime_type']) ) ) {
 			if ( is_array($retval) AND isset($retval['api_retval']) ) {
 				//Passthru validation errors.
 				return $retval;
@@ -2452,7 +2452,7 @@ class Report {
 		unset($tmp);//code standards
 		//Debug::Arr($columns, 'Columns:  '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( $format == 'raw' ) {
+		if ( $format == 'raw' OR $format == 'payment_services' ) {
 			//Since only columns that are displayed are formatted, this can cause confusion if we return some formatted and some unformatted columns.
 			//Therefore make sure we still format the data somewhat, by ordering and removing columns that aren't actually displayed (with the exception of _total/_subtotal columns)
 			//return $this->data;

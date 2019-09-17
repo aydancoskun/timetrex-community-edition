@@ -560,8 +560,9 @@ class Form1099MiscReport extends Report {
 
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		if ( $pself->getRecordCount() > 0 ) {
-			foreach( $pself as $pse_obj ) {
+			foreach( $pself as $key => $pse_obj ) {
 				$legal_entity_id = $pse_obj->getColumn('legal_entity_id');
 				$user_id = $this->user_ids[] = $pse_obj->getColumn('user_id');
 				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') );
@@ -581,6 +582,8 @@ class Form1099MiscReport extends Report {
 				} else {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
 				}
+
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
 
 			if ( isset( $this->tmp_data['pay_stub_entry'] ) AND is_array( $this->tmp_data['pay_stub_entry'] ) ) {
@@ -817,6 +820,9 @@ class Form1099MiscReport extends Report {
 					continue;
 				}
 
+				$x = 0; //Progress bar only.
+				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($user_rows), NULL, TTi18n::getText('Generating Forms...') );
+
 				/** @var LegalEntityFactory $le_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
 
@@ -903,6 +909,9 @@ class Form1099MiscReport extends Report {
 							$i++;
 						}
 					}
+
+					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
+					$x++;
 				}
 
 				if ( $format == 'pdf_form_publish_employee' ) {

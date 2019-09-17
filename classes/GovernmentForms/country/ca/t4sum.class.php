@@ -512,7 +512,7 @@ class GovernmentForms_CA_T4Sum extends GovernmentForms_CA {
 			return FALSE; //No XML object to append too. Needs T619 form first.
 		}
 
-		if ( isset( $xml->Return ) AND isset( $xml->Return->T4 ) ) {
+		if ( isset( $xml->Return ) AND isset( $xml->Return->T4 ) AND $this->l88 > 0 ) {
 			$xml->Return->T4->addChild( 'T4Summary' );
 
 			$xml->Return->T4->T4Summary->addChild( 'bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) );

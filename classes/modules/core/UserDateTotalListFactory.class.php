@@ -1651,49 +1651,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $job_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
-	 * @return bool|UserDateTotalListFactory
-	 */
-	function getByJobId( $job_id, $where = NULL, $order = NULL) {
-		if ( $job_id == '') {
-			return FALSE;
-		}
-
-		$uwf = new UserWageFactory();
-
-		$ph = array(
-					'job_id' => TTUUID::castUUID($job_id),
-					);
-
-		//AND a.status_id = 10
-		$query = '
-					select	a.*,
-							z.id as user_wage_id,
-							z.effective_date as user_wage_effective_date
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $uwf->getTable() .' as z ON z.id = (select z.id
-																		from '. $uwf->getTable() .' as z
-																		where z.user_id = a.user_id
-																			and z.effective_date <= a.date_stamp
-																			and z.wage_group_id = \''. TTUUID::getZeroID() .'\'
-																			and z.deleted = 0
-																			order by z.effective_date desc LIMIT 1)
-
-					where	a.job_id = ?
-						AND a.object_type_id in ( 5, 20, 30, 40, 100, 110 )
-						AND ( a.deleted = 0 )
-				';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
-	/**
 	 * @param string $user_id UUID
 	 * @param string $pay_period_id UUID
 	 * @param int $end_date EPOCH

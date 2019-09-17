@@ -3020,7 +3020,7 @@ th.ui-th-column div {
 
 .process_transactions_wizard .content{
     width:100%;
-    height: calc(100% - 85px) !important;
+    height: calc(100% - 92px) !important; /* 92= 50+7+27 (btns&downloadtxt) +8 (tblcontenttop) */
     overflow-y:auto;
     overflow-x:hidden;
     border:#444;
@@ -3038,12 +3038,11 @@ th.ui-th-column div {
 
 .process_transactions_wizard .download_warning {
     position: absolute;
-    bottom:40px;
+    bottom: 50px;
     text-align:center;
-    width:550pt;
-    margin-bottom:8pt;
-    margin-bottom:5pt;
-    height:20pt;
+    width:100%;
+    margin-bottom:7px;
+    height:27px;
 }
 
 .process_transactions_wizard .download_warning button {

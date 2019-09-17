@@ -3226,7 +3226,7 @@ PayStubViewController = BaseViewController.extend( {
 				if ( user_ids.length > 0 ) {
 					filter.user_id = user_ids[0];
 					filter.base_date = base_date;
-					Global.addViewTab( $this.viewId, 'Pay Stubs', window.location.href );
+					Global.addViewTab( $this.viewId, $.i18n._( 'Pay Stubs' ), window.location.href );
 					IndexViewController.goToView( 'TimeSheet', filter );
 				}
 				break;
@@ -3235,14 +3235,14 @@ PayStubViewController = BaseViewController.extend( {
 				var include_users = { value: user_ids };
 				filter.filter_data.include_user_ids = include_users;
 				filter.select_date = base_date;
-				Global.addViewTab( this.viewId, 'Pay Stubs', window.location.href );
+				Global.addViewTab( this.viewId, $.i18n._( 'Pay Stubs' ), window.location.href );
 				IndexViewController.goToView( 'Schedule', filter );
 				break;
 			case ContextMenuIconName.pay_stub_amendment:
 				filter.filter_data = {};
 				filter.filter_data.user_id = user_ids[0];
 				filter.filter_data.pay_period_id = pay_period_ids[0];
-				Global.addViewTab( this.viewId, 'Pay Stubs', window.location.href );
+				Global.addViewTab( this.viewId, $.i18n._( 'Pay Stubs' ), window.location.href );
 				IndexViewController.goToView( 'PayStubAmendment', filter );
 				break;
 			case ContextMenuIconName.generate_pay_stub:
@@ -3284,7 +3284,7 @@ PayStubViewController = BaseViewController.extend( {
 				filter.filter_data.user_id = { value: user_ids };
 				filter.filter_data.pay_period_id = { value: pay_period_ids };
 
-				Global.addViewTab( this.viewId, 'Pay Stubs', window.location.href );
+				Global.addViewTab( this.viewId, $.i18n._( 'Pay Stubs' ), window.location.href );
 				IndexViewController.goToView( 'PayStubTransaction', filter );
 				break;
 			case ContextMenuIconName.export_excel:

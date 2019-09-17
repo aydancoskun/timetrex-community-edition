@@ -185,6 +185,16 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 	//Default to 0 unless otherwise defined in a State specific class.
 	function getStateTaxPayable() {
+		if ( $this->getProvincialTaxExempt() == TRUE ) {
+			Debug::text( 'State Tax Exempt!', __FILE__, __LINE__, __METHOD__, 10 );
+
+			return 0;
+		} else {
+			return $this->_getStateTaxPayable();
+		}
+	}
+
+	function _getStateTaxPayable() {
 		return 0;
 	}
 

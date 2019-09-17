@@ -275,7 +275,53 @@ class TimeTrexPaymentServices {
 	}
 
 	/**
-	 * Converts Pay Stub Transaction objects to a remittance transaction array for uploading.
+	 * Converts getPaymentServicesData() results to an AgencyReport array for uploading.
+	 * @param array $report_data
+	 * @param object $prae_obj
+	 * @param object $pra_obj
+	 * @param object $rs_obj
+	 * @param object $pra_user_obj
+	 * @return array
+	 */
+	function convertReportPaymentServicesDataToAgencyReportArray( $report_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj ) {
+		if ( !isset($report_data['agency_report_data'] ) ) {
+			Debug::Arr( $report_data, 'ERROR! Invalid Agency Report Data! ', __FILE__, __LINE__, __METHOD__, 10 );
+			return FALSE;
+		}
+
+		$settlement_bank_account_data = $this->convertRemittanceSourceAccountObjectToBankAccountArray( $rs_obj );
+
+		if ( isset($report_data['object']) ) {
+			Debug::Text( 'Report Object: ' . $report_data['object'], __FILE__, __LINE__, __METHOD__, 10 );
+		}
+
+		$agency_report_data = array(
+				'_kind' => 'AgencyReport',
+
+				'agency_id'   => $prae_obj->getPayrollRemittanceAgencyObject()->getAgency(),
+
+				'settlement_bank_account_id' => $settlement_bank_account_data,
+
+				'status_id'   => 'P', //Pending
+				'type_id'     => 'D', //Deposit/Estimate
+				'form_type_id' => $prae_obj->getType(),
+
+				'period_start_date' => TTDate::getISODateStamp( $prae_obj->getStartDate() ),
+				'period_end_date' => TTDate::getISODateStamp( $prae_obj->getEndDate() ),
+				'due_date' => TTDate::getISOTimeStamp( $prae_obj->getDueDate() ),
+
+				'frequency_id' => $prae_obj->getFrequency(),
+
+		);
+
+		$agency_report_data = array_merge( $agency_report_data, $report_data['agency_report_data'] );
+
+		Debug::Arr( $agency_report_data, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+		return $agency_report_data;
+	}
+
+	/**
+	 * Converts ROE objects to a agency report array for uploading.
 	 * @param $pst_obj
 	 * @param $ps_obj
 	 * @param $rs_obj
@@ -284,68 +330,101 @@ class TimeTrexPaymentServices {
 	 * @param $batch_id
 	 * @return array
 	 */
-	function convertReportPaymentServicesDataToAgencyReportArray( $report_data, $rae_obj, $ra_obj, $rs_obj, $user_obj, $pay_period_start_date, $pay_period_end_date, $pay_period_transaction_date, $pay_period_run, $batch_id, $remote_id, $type_id = 'D' ) {
-		$settlement_bank_account_data = $this->convertRemittanceSourceAccountObjectToBankAccountArray( $rs_obj );
+	function convertROEToAgencyReportArray( $form_obj, $report_data, $rae_obj, $ra_obj, $remote_id, $batch_id ) {
 
-		if ( isset($report_data['object']) ) {
-			Debug::Text( 'Report Object: ' . $report_data['object'], __FILE__, __LINE__, __METHOD__, 10 );
-			switch ( $report_data['object'] ) {
-				case 'RemittanceSummaryReport':
-					$standard_report_data = array(
-							'total_employees' => $report_data['employees'],
-							'subject_wages' => $report_data['gross_payroll'],
-							'taxable_wages' => $report_data['gross_payroll'],
-							'amount_withheld' => $report_data['total'],
-							'amount_due' => $report_data['total'],
-							'due_date' => $report_data['due_date'],
-					);
-					break;
-				case 'TaxSummaryReport':
-				default:
-					$standard_report_data = $report_data;
-					break;
-			}
+		//Set due date to the next day.
+		$period_start_date = $period_end_date = $due_date = TTDate::getMiddleDayEpoch( ( time() + 86400 ) );
+
+		if ( isset($report_data[0]) AND isset($report_data[0]['first_date']) ) {
+			$period_start_date = $report_data[0]['first_date'];
 		}
 
-		$remittances_transaction_data = array(
+		end($report_data);
+		$last_report_arr_key = key($report_data);
+		if ( isset($report_data[$last_report_arr_key]) AND isset($report_data[$last_report_arr_key]['last_date']) ) {
+			$period_end_date = $report_data[$last_report_arr_key]['last_date'];
+		}
+
+		$xml_data = $form_obj->output( 'XML' );
+
+		$agency_report_data = array(
 				'_kind' => 'AgencyReport',
 
 				'agency_id'   => $rae_obj->getPayrollRemittanceAgencyObject()->getAgency(),
-				//'agency_organization_id' => $ra_obj->getId(),
-
-				'settlement_bank_account_id' => $settlement_bank_account_data,
 
 				'status_id'   => 'P', //Pending
-				'type_id'     => $type_id, //Deposit/Estimate
+				'type_id'     => 'R', //Report
 				'form_type_id' => $rae_obj->getType(),
 
-				'pay_period_start_date' => $pay_period_start_date,
-				'pay_period_end_date' => $pay_period_end_date,
-				'pay_period_transaction_date' => $pay_period_transaction_date,
-				'pay_period_run' => $pay_period_run,
+				'period_start_date' => TTDate::getISODateStamp( $period_start_date ), //$pay_period_start_date,
+				'period_end_date' => TTDate::getISODateStamp( $period_end_date ),
+				'due_date' => TTDate::getISOTimeStamp( $due_date ),
 
-				'period_start_date' => $rae_obj->getStartDate(), //$pay_period_start_date,
-				'period_end_date' => $rae_obj->getEndDate(),
-				'due_date' => $rae_obj->getDueDate(),
-
-				'total_employees' => (int)$standard_report_data['total_employees'],
-				'subject_wages' => $standard_report_data['subject_wages'],
-				'taxable_wages' => $standard_report_data['taxable_wages'],
-				'amount_withheld' => $standard_report_data['amount_withheld'],
-				'amount_due' => $standard_report_data['amount_due'],
+				'total_employees' => count($report_data),
+				'subject_wages' => 0,
+				'taxable_wages' => 0,
+				'amount_withheld' => 0,
+				'amount_due' => 0,
 
 				'extra_data' => $report_data,
 
+				'xml_data' => $xml_data,
+
 				'frequency_id' => $rae_obj->getFrequency(),
 
-				'remote_id' => $remote_id, //TTUUID::convertStringToUUID( md5( $rae_obj->getId() . $batch_id ) ), //Try to get consistent IDs based on the event and batch_id, so mulitple submissions get uploaded.
+				'remote_id' => $remote_id,
 				'remote_batch_id' => $batch_id,
 		);
 
-		Debug::Arr( $remittances_transaction_data, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
-		return $remittances_transaction_data;
+		Debug::Arr( $agency_report_data, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+		return $agency_report_data;
 	}
 
+	/**
+	 * Converts T4 objects to a agency report array for uploading.
+	 * @param $pst_obj
+	 * @param $ps_obj
+	 * @param $rs_obj
+	 * @param $uf_obj
+	 * @param $confirmation_number
+	 * @param $batch_id
+	 * @return array
+	 */
+	function convertT4ToAgencyReportArray( $form_obj, $report_data, $rae_obj, $ra_obj, $remote_id, $batch_id ) {
+		$xml_data = $form_obj->output( 'XML' );
+
+		$agency_report_data = array(
+				'_kind' => 'AgencyReport',
+
+				'agency_id'   => $rae_obj->getPayrollRemittanceAgencyObject()->getAgency(),
+
+				'status_id'   => 'P', //Pending
+				'type_id'     => 'R', //Report
+				'form_type_id' => $rae_obj->getType(),
+
+				'period_start_date' => TTDate::getISODateStamp( $rae_obj->getStartDate() ), //$pay_period_start_date,
+				'period_end_date' => TTDate::getISODateStamp( $rae_obj->getEndDate() ),
+				'due_date' => TTDate::getISOTimeStamp( $rae_obj->getDueDate() ), //They can be filed earlier than their due date.
+
+				'total_employees' => count($report_data),
+				'subject_wages' => 0,
+				'taxable_wages' => 0,
+				'amount_withheld' => 0,
+				'amount_due' => 0,
+
+				'extra_data' => $report_data,
+
+				'xml_data' => $xml_data,
+
+				'frequency_id' => $rae_obj->getFrequency(),
+
+				'remote_id' => $remote_id,
+				'remote_batch_id' => $batch_id,
+		);
+
+		Debug::Arr( $agency_report_data, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+		return $agency_report_data;
+	}
 
 	/**
 	 * Uploads organization data to TimeTrex PaymentServices.
@@ -584,25 +663,6 @@ class TimeTrexPaymentServices {
 		$api = new PaymentServicesClientAPI( 'APIAgencyReport' );
 		$api_result = $api->setAgencyReport( $rows );
 		return $api_result;
-
-//		foreach( $rows as $row ) {
-//			$api = new PaymentServicesClientAPI( 'APIAgencyReport' );
-//			$api_result = $api->setAgencyReport( $row );
-//			if ( $api_result !== FALSE ) {
-//				if ( $api_result->isValid() === TRUE ) {
-//					Debug::Text( 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
-//				} else {
-//					Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
-//
-//					return FALSE; //This will trigger a general error to the user.
-//				}
-//			} else {
-//				//Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
-//				return FALSE; //This will trigger a general error to the user.
-//			}
-//		}
-
-		return TRUE;
 	}
 
 
@@ -619,25 +679,22 @@ class TimeTrexPaymentServices {
 		$api = new PaymentServicesClientAPI( 'APITransaction' );
 		$api_result = $api->setTransaction( $rows );
 		return $api_result;
+	}
 
-//		foreach( $rows as $row ) {
-//			$api = new PaymentServicesClientAPI( 'APITransaction' );
-//			$api_result = $api->setTransaction( $row );
-//			if ( $api_result !== FALSE ) {
-//				if ( $api_result->isValid() === TRUE ) {
-//					Debug::Text( 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
-//				} else {
-//					Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
-//
-//					return FALSE; //This will trigger a general error to the user.
-//				}
-//			} else {
-//				//Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
-//				return FALSE; //This will trigger a general error to the user.
-//			}
-//		}
+	function getAccountStatementReport( $start_date = NULL, $end_date = NULL ) {
+		$api = new PaymentServicesClientAPI( 'APIOrganization' );
+		$api_result = $api->getAccountStatementReport( $start_date, $end_date );
+		if ( $api_result !== FALSE ) {
+			if ( $api_result->isValid() === TRUE ) {
+				Debug::Text( 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+				return $api_result->getResultData();
+			} else {
+				Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		}
+
+		return FALSE;
 	}
 
 	function ping() {

@@ -6,11 +6,11 @@
     border-left: 2px solid #32689b;
     border-right: 2px solid #32689b;
     position: absolute;
-    top: 50%;
-    left: 50%;
-    -webkit-transform: translate(-50%, -50%);
-    -ms-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
+    bottom: 50%; /* #2704 Use right/bottom instead of top/left to fix IE11 scrollbar issues. See Microsoft SO reply here: https://stackoverflow.com/questions/27000492/css3-transform-property-working-differently-in-internet-explorer */
+    right: 50%; /* #2704 Use right/bottom instead of top/left to fix IE11 scrollbar issues. See Microsoft SO reply here: https://stackoverflow.com/questions/27000492/css3-transform-property-working-differently-in-internet-explorer */
+    -webkit-transform: translate(50%, 50%);
+    -ms-transform: translate(50%, 50%);
+    transform: translate(50%, 50%);
     height: calc(100% - 70px);
     width: calc(100% - 100px);
     max-width: 1000px;
@@ -758,7 +758,7 @@ progress::-moz-progress-bar {
 }
 /*forgot-password*/
 .forgot-password {
-    height: 90px;
+    height: 122px;
     margin: 0;
     padding: 0;
     top: 45%;

@@ -570,7 +570,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 							ab.description as recurring_schedule_template_control_description
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $rstcf->getTable() .' as ab ON ( a.recurring_schedule_template_control_id = ab.id AND ab.deleted = 0 )
-						LEFT JOIN '. $rsuf->getTable() .' as rsuf ON ( a.id = rsuf. recurring_schedule_control_id )
+						LEFT JOIN '. $rsuf->getTable() .' as rsuf ON ( a.id = rsuf.recurring_schedule_control_id )
 
 					where	a.company_id = ?
 					';
@@ -581,6 +581,8 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['recurring_schedule_template_control_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_template_control_id', $filter_data['recurring_schedule_template_control_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'rsuf.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['created_by'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( 'a.updated_by', $filter_data['updated_by'], 'uuid_list', $ph ) : NULL;
 

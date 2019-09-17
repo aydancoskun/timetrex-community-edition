@@ -282,7 +282,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 	},
 
 	initSubScheduleSynchronizationView: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.find( '#tab_schedule_synchronization' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 			this.buildContextMenu( true );

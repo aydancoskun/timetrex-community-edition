@@ -47,8 +47,8 @@ InOutViewController = BaseViewController.extend( {
 		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
 
-		//Tried to fix  Cannot call method 'getJobItem' of null. Use ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		//Tried to fix  Cannot call method 'getJobItem' of null. Use ( Global.getProductEdition() >= 20 )
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
 			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
 		}
@@ -357,14 +357,14 @@ InOutViewController = BaseViewController.extend( {
 				this.onTransferChanged();
 				break;
 			case 'job_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue() );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_item_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? (target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '') : '' );
 					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
@@ -372,7 +372,7 @@ InOutViewController = BaseViewController.extend( {
 
 			case 'job_quick_search':
 			case 'job_item_quick_search':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.onJobQuickSearch( key, c_value );
 
 					//Don't validate immediately as onJobQuickSearch is doing async API calls, and it would cause a guaranteed validation failure.
@@ -651,7 +651,7 @@ InOutViewController = BaseViewController.extend( {
 			this.detachElement( 'department_id' );
 		}
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 
 			//Job
@@ -723,7 +723,7 @@ InOutViewController = BaseViewController.extend( {
 
 		// Quantity
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 			var good = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			good.TTextInput( { field: 'quantity', width: 40 } );
@@ -795,7 +795,7 @@ InOutViewController = BaseViewController.extend( {
 						widget.setValue( this.current_edit_record.first_name + ' ' + this.current_edit_record.last_name );
 						break;
 					case 'job_id':
-						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						if ( ( Global.getProductEdition() >= 20 ) ) {
 							var args = {};
 							args.filter_data = { status_id: 10, user_id: this.current_edit_record.user_id };
 							widget.setDefaultArgs( args );
@@ -803,7 +803,7 @@ InOutViewController = BaseViewController.extend( {
 						}
 						break;
 					case 'job_item_id':
-						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						if ( ( Global.getProductEdition() >= 20 ) ) {
 							args = {};
 							args.filter_data = { status_id: 10, job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );

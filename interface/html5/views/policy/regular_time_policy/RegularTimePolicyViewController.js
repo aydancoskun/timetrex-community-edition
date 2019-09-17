@@ -33,7 +33,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this.navigation_label = $.i18n._( 'Regular Time Policy' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIRegularTimePolicy' ))();
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			this.job_group_api = new (APIFactory.getAPIClass( 'APIJobGroup' ))();
 			this.job_item_group_api = new (APIFactory.getAPIClass( 'APIJobItemGroup' ))();
 		}
@@ -56,7 +56,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'job_item_group_selection_type' );
 		this.initDropDownOption( 'job_item_selection_type' );
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			this.job_group_api.getJobGroup( '', false, false, {
 				onResult: function( res ) {
 					res = res.getResult();
@@ -262,7 +262,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 
 		this.addEditFieldToColumn( $.i18n._( 'Departments' ), [form_item_input, form_item_input_1, form_item_input_2], tab_differential_criteria_column1, '', v_box, false, true );
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 
 			// Job Groups
@@ -486,7 +486,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 
 	onJobGroupSelectionTypeChange: function() {
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 			if ( this.current_edit_record['job_group_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_group'].setEnabled( false );
@@ -497,7 +497,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 	},
 
 	onJobSelectionTypeChange: function() {
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			if ( this.current_edit_record['job_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job'].setEnabled( false );
 			} else {
@@ -507,7 +507,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 	},
 
 	onJobItemGroupSelectionTypeChange: function() {
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			if ( this.current_edit_record['job_item_group_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_item_group'].setEnabled( false );
 			} else {
@@ -517,7 +517,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 	},
 
 	onJobItemSelectionTypeChange: function() {
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 			if ( this.current_edit_record['job_item_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_item'].setEnabled( false );
 			} else {
@@ -592,7 +592,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 	},
 
 	initSubDifferentialCriteriaView: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 			this.buildContextMenu( true );

@@ -6,11 +6,15 @@ class PaymentServicesClientAPI {
 	protected $user_name = NULL;
 	protected $password = NULL;
 
+	protected $cookies = array();
+
 	//protected $session_id = NULL;
 	//protected $session_hash = NULL; //Used to determine if we need to login again because the URL or Session changed.
 	protected $class_factory = NULL;
 	protected $namespace = 'urn:api';
 	protected $protocol_version = 1;
+
+	protected $soap_obj = NULL; //Persistent SOAP object.
 
 	/**
 	 * PaymentServicesClientAPI constructor.
@@ -18,8 +22,8 @@ class PaymentServicesClientAPI {
 	 * @param null $url
 	 * @param string $session_id UUID
 	 */
-	function __construct( $class = NULL, $url = NULL ) {
-		global $PAYMENTSERVICES_URL;
+	function __construct( $class = NULL, $user_name = NULL, $password = NULL, $url = NULL, $cookies = NULL ) {
+		global $PAYMENTSERVICES_URL, $PAYMENTSERVICES_COOKIES, $PAYMENTSERVICES_USER, $PAYMENTSERVICES_PASSWORD;
 
 		ini_set( 'default_socket_timeout', 3600 );
 
@@ -27,6 +31,25 @@ class PaymentServicesClientAPI {
 			$url = $PAYMENTSERVICES_URL;
 		}
 
+		if ( $cookies == '' AND ( isset($PAYMENTSERVICES_COOKIES) AND is_array( $PAYMENTSERVICES_COOKIES ) ) ) {
+			$cookies = $PAYMENTSERVICES_COOKIES;
+		}
+
+		if ( $url == '' ) {
+			$url = $PAYMENTSERVICES_URL;
+		}
+
+		if ( $user_name == '' ) {
+			$user_name = $PAYMENTSERVICES_USER;
+		}
+
+		if ( $password == '' ) {
+			$password = $PAYMENTSERVICES_PASSWORD;
+		}
+
+		$this->setCookies( $cookies );
+		$this->setUsername( $user_name );
+		$this->setPassword( $password );
 		$this->setURL( $url );
 		$this->setClass( $class );
 
@@ -37,8 +60,6 @@ class PaymentServicesClientAPI {
 	 * @return SoapClient
 	 */
 	function getSoapClientObject() {
-		global $PAYMENTSERVICES_USER, $PAYMENTSERVICES_PASSWORD;
-
 		$url_pieces[] = 'Class=' . $this->class_factory;
 
 		if ( strpos( $this->url, '?' ) === FALSE ) {
@@ -49,38 +70,93 @@ class PaymentServicesClientAPI {
 
 		$url = $this->url . $url_separator . 'v=' . $this->protocol_version . '&' . implode( '&', $url_pieces );
 
-		if ( PRODUCTION == FALSE ) {
-			//Allow self-signed certificates to be accepted when not in production mode.
-			$steam_context = stream_context_create( array(
-															'ssl' => array(
-																// set some SSL/TLS specific options
-																'verify_peer'       => FALSE,
-																'verify_peer_name'  => FALSE,
-																'allow_self_signed' => TRUE
-															)
-													) );
+		//Try to maintain existing SOAP object as there could be cookies associated with it.
+		if ( !is_object( $this->soap_obj ) ) {
+			if ( PRODUCTION == FALSE ) {
+				//Allow self-signed certificates to be accepted when not in production mode.
+				$stream_context_options = array(
+						'ssl' => array(
+							// set some SSL/TLS specific options
+							'verify_peer'       => FALSE,
+							'verify_peer_name'  => FALSE,
+							'allow_self_signed' => TRUE,
+						),
+				);
+			} else {
+				$stream_context_options = array();
+			}
+			$steam_context = stream_context_create( $stream_context_options );
+
+			$retval = new SoapClient( NULL, array(
+												  'stream_context'     => $steam_context,
+												  'location'           => $url,
+												  'uri'                => $this->namespace,
+												  'encoding'           => 'UTF-8',
+												  'style'              => SOAP_RPC,
+												  'use'                => SOAP_ENCODED,
+												  'login'              => $this->user_name, //Username
+												  'password'           => $this->password, //API Key
+												  'connection_timeout' => 120,
+												  'request_timeout'    => 7200,
+												  'compression'        => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
+												  'trace'              => 1,
+												  'exceptions'         => 0,
+										  )
+			);
+
+			if ( is_array( $this->cookies ) ) {
+				foreach ( $this->cookies as $key => $value ) {
+					$retval->__setCookie( $key, $value );
+				}
+			}
 		} else {
-			$steam_context = stream_context_create();
+			$retval = $this->soap_obj;
+			$retval->__setLocation( $url );
 		}
 
-		$retval = new SoapClient( NULL, array(
-											  'stream_context' => $steam_context,
-											  'location'    => $url,
-											  'uri'         => $this->namespace,
-											  'encoding'    => 'UTF-8',
-											  'style'       => SOAP_RPC,
-											  'use'         => SOAP_ENCODED,
-											  'login'       => $PAYMENTSERVICES_USER, //Username
-											  'password'    => $PAYMENTSERVICES_PASSWORD, //API Key
-											  'connection_timeout' => 120,
-											  'request_timeout' => 7200,
-											  'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
-											  'trace'       => 1,
-											  'exceptions'  => 0,
-									  )
-		);
-
 		return $retval;
+	}
+
+	/**
+	 * @param $user_name
+	 * @return bool
+	 */
+	function setUserName( $user_name ) {
+		if ( $user_name != '' ) {
+			$this->user_name = $user_name;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param $password
+	 * @return bool
+	 */
+	function setPassword( $password ) {
+		if ( $password != '' ) {
+			$this->password = $password;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param $cookies
+	 * @return bool
+	 */
+	function setCookies( $cookies ) {
+		if ( is_array( $cookies ) ) {
+			$this->cookies = $cookies;
+
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 
 	/**

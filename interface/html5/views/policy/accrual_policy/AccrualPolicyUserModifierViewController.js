@@ -678,14 +678,12 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 						var current_data = $this.grid.getData();
 						result_data = current_data.concat( result_data );
 					}
-					// $this.grid.grid.clearGridData();
 					$this.grid.setData( result_data );
 
 					// if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
 					// 	$this.resizeSubGrid( len );
 					// }
 
-					//$this.grid.grid.trigger( 'reloadGrid' );
 					$this.reSelectLastSelectItems();
 
 				}
@@ -974,9 +972,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		if ( Global.isSet( result_data ) && !Global.isFalseOrNull( result_data ) ) {
 
 			$this.edit_view_form_item_dic['separated_2'].find( '.label' ).text( $.i18n._( 'Current Milestone' ) + ': ' + result_data.milestone_number );
-			$this.edit_view_ui_dic['accrual_rate'].setValue( Global.secondToHHMMSS( result_data.accrual_rate ) );
-			$this.edit_view_ui_dic['maximum_time'].setValue( Global.secondToHHMMSS( result_data.maximum_time ) );
-			$this.edit_view_ui_dic['rollover_time'].setValue( Global.secondToHHMMSS( result_data.rollover_time ) );
+			$this.edit_view_ui_dic['accrual_rate'].setValue( Global.getTimeUnit( result_data.accrual_rate ) );
+			$this.edit_view_ui_dic['maximum_time'].setValue( Global.getTimeUnit( result_data.maximum_time ) );
+			$this.edit_view_ui_dic['rollover_time'].setValue( Global.getTimeUnit( result_data.rollover_time ) );
 
 			$this.attachElement( 'separated_2' );
 			$this.attachElement( 'accrual_rate' );

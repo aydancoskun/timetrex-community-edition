@@ -484,7 +484,7 @@ class PayrollDeduction_US_NY extends PayrollDeduction_US { //Use New York State 
 		return $retval;
 	}
 
-	function getStateTaxPayable() {
+	function _getStateTaxPayable() {
 		$annual_income = $this->getStateAnnualTaxableIncome();
 
 		$retval = 0;

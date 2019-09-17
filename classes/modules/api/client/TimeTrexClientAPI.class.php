@@ -46,6 +46,8 @@ class TimeTrexClientAPI {
 	protected $namespace = 'urn:api';
 	protected $protocol_version = 1;
 
+	protected $soap_obj = NULL; //Persistent SOAP object.
+
 	/**
 	 * TimeTrexClientAPI constructor.
 	 * @param null $class
@@ -92,21 +94,29 @@ class TimeTrexClientAPI {
 
 		$url = $this->url.$url_separator.'v='. $this->protocol_version .'&'. implode('&', $url_pieces);
 
-		$retval = new SoapClient(NULL, array(
-								'location' => $url,
-								'uri' => $this->namespace,
-								'encoding' => 'UTF-8',
-								'style' => SOAP_RPC,
-								'use' => SOAP_ENCODED,
-								'login' => $TIMETREX_BASIC_AUTH_USER,
-								'password' => $TIMETREX_BASIC_AUTH_PASSWORD,
-								//'connection_timeout' => 120,
-								//'request_timeout' => 3600,
-								'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
-								'trace' => 1,
-								'exceptions' => 0
-								)
-						);
+		//Try to maintain existing SOAP object as there could be cookies associated with it.
+		if ( !is_object( $this->soap_obj ) ) {
+			$retval = new SoapClient( NULL, array(
+												  'location'    => $url,
+												  'uri'         => $this->namespace,
+												  'encoding'    => 'UTF-8',
+												  'style'       => SOAP_RPC,
+												  'use'         => SOAP_ENCODED,
+												  'login'       => $TIMETREX_BASIC_AUTH_USER,
+												  'password'    => $TIMETREX_BASIC_AUTH_PASSWORD,
+												  //'connection_timeout' => 120,
+												  //'request_timeout' => 3600,
+												  'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
+												  'trace'       => 1,
+												  'exceptions'  => 0
+										  )
+			);
+
+			$this->soap_obj = $retval;
+		} else {
+			$retval = $this->soap_obj;
+			$retval->__setLocation( $url );
+		}
 
 		return $retval;
 	}

@@ -6615,7 +6615,7 @@ class SetupPresets extends Factory {
 									'type_id'            => 20,
 									'special_day'        => 0,
 									//'pivot_day_direction_id' => 0,
-									'week_interval'      => 2,
+									'week_interval'      => 3,
 									'day_of_week'        => 1,
 									//'day_of_month' => 1,
 									'month_int'          => 2,

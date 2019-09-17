@@ -999,13 +999,6 @@ class OverTimePolicyFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
-						/* Once Flex interface is discontinued we can remove parseTimeUnit from HTML5 interface and do it in the API instead.
-						case 'trigger_time':
-							if ( method_exists( $this, $function ) ) {
-								$this->$function( TTDate::parseTimeUnit( $data[$key] ) );
-							}
-							break;
-						*/
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );

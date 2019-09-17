@@ -191,7 +191,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Holiday Policies' ), form_item_input, tab_policy_group_column1 );
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 25 ) {
+		if ( Global.getProductEdition() >= 25 ) {
 			// Expense Policies
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {

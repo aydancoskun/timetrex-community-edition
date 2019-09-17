@@ -157,7 +157,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::parseTimeUnit(':1'), 60 );
 
 		$this->assertEquals( TTDate::parseTimeUnit('1:00:01.5'), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit('1:1.5'), 3600 );
+		$this->assertEquals( TTDate::parseTimeUnit('1:1.5'), 3660 );
 	}
 
 	function testTimeUnit3() {
@@ -319,7 +319,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 
 		TTDate::setTimeUnitFormat(23);
-		$this->assertEquals( TTDate::getTimeUnit( 3600 ), '1.000' );
+		$this->assertEquals( TTDate::getTimeUnit( 3600 ), '1.0000' );
 		$this->assertEquals( TTDate::getTimeUnit( 3660 ), '1.0167' );
 		$this->assertEquals( TTDate::getTimeUnit( 36060 ), '10.0167' );
 		$this->assertEquals( TTDate::getTimeUnit( 36660 ), '10.1833' );
@@ -2041,6 +2041,29 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '' ), 'America/Nassau' );
 		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '', '2525555555' ), 'America/Nassau' );
 		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '00', '2525555555' ), 'America/Nassau' );
+	}
+
+	function testISODateParsing() {
+		TTDate::setTimeZone('EST5EDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+
+		$this->assertEquals( TTDate::getISODateStamp( strtotime( '31-Jan-2019') ), '20190131' );
+		$test_date = strtotime( TTDate::getISODateStamp( strtotime( '31-Jan-2019') ) );
+		$this->assertEquals( TTDate::getISODateStamp( $test_date ), '20190131' );
+
+		$test_date = TTDate::getISODateStamp( strtotime( '31-Jan-2019') ); //As if we are passing a string date through an API
+		TTDate::setTimeZone('PST8PDT', TRUE); //Change timezone to something different as its an API server.
+		$this->assertEquals( strtotime( $test_date ), strtotime( '31-Jan-2019') ); //Parse string date to the same value on the API server.
+
+
+		TTDate::setTimeZone('EST5EDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+
+		$this->assertEquals( TTDate::getISOTimeStamp( strtotime( '31-Jan-2019 22:22:22') ), 'Thu, 31 Jan 2019 22:22:22 -0500' );
+		$test_date = strtotime( TTDate::getISOTimeStamp( strtotime( '31-Jan-2019 22:22:22') ) );
+		$this->assertEquals( TTDate::getISOTimeStamp( $test_date ), 'Thu, 31 Jan 2019 22:22:22 -0500' );
+
+		$test_date = TTDate::getISOTimeStamp( strtotime( '31-Jan-2019 22:22:22') ); //As if we are passing a string date through an API
+		TTDate::setTimeZone('PST8PDT', TRUE); //Change timezone to something different as its an API server.
+		$this->assertEquals( strtotime( $test_date ), strtotime( 'Thu, 31 Jan 2019 22:22:22 -0500') ); //Parse string date to the same value on the API server.
 	}
 }
 ?>

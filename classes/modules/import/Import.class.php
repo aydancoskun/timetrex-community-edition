@@ -231,9 +231,14 @@ class Import {
 		$dir = $this->getStoragePath();
 		Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 		if ( isset($dir) ) {
-			@mkdir($dir, 0700, TRUE);
+			if ( file_exists( $dir ) == FALSE ) {
+				$mkdir_result = @mkdir( $dir, 0700, TRUE );
+				if ( $mkdir_result == FALSE ) {
+					Debug::Text( 'ERROR: Unable to create storage file directory: ' . $dir, __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			}
 
-			return file_put_contents( $dir.$this->getLocalFileName(), $data );
+			return file_put_contents( $dir . $this->getLocalFileName(), $data );
 		}
 
 		return FALSE;
@@ -789,6 +794,7 @@ class Import {
 		$dir = $this->getStoragePath( $company_id ) . DIRECTORY_SEPARATOR;
 
 		if ( $dir != '' ) {
+			Debug::Text( 'Cleaning storage path: ' . $dir, __FILE__, __LINE__, __METHOD__, 10 );
 			$this->deleteLocalFile(); //Delete the file that we know was uploaded.
 
 			//Delete tmp files that are older than 1 hour. This allows for the case where multiple users are importing at the same time, so we don't delete files in the middle of the import process.

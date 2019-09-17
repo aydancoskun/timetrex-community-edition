@@ -1070,7 +1070,7 @@ class PayStubAmendmentFactory extends Factory {
 													100
 												);
 		}
-		// Description
+		// Private Description
 		if ( $this->getGenericDataValue( 'private_description' ) !== FALSE AND $this->getGenericDataValue( 'private_description' ) != '' ) {
 			$this->Validator->isLength(		'description',
 													$this->getGenericDataValue( 'private_description' ),
@@ -1097,18 +1097,17 @@ class PayStubAmendmentFactory extends Factory {
 				if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) > TTDate::getMiddleDayEpoch( $this->getUserObject()->getTerminationDate() ) ) {
 					$this->Validator->Warning( 'effective_date', TTi18n::gettext('Effective date is after the employees termination date.') );
 				}
+
+				//This needs to be ignored when the PSA status is being changed from the pay stub when the employee has been rehired and the new hire date is after the effective date.
+				if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getHireDate() != '' AND TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) < TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) ) {
+					$this->Validator->Warning( 'effective_date', TTi18n::gettext('Effective date is before the employees hire date.'));
+				}
 			}
 
 			if ( $this->Validator->getValidateOnly() == FALSE AND $this->getUser() == FALSE AND $this->Validator->hasError('user_id') == FALSE) {
 				$this->Validator->isTrue(		'user_id',
 												FALSE,
 												TTi18n::gettext('Invalid Employee'));
-			}
-
-			if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getHireDate() != '' AND TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) < TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) ) {
-				$this->Validator->isTrue(		'effective_date',
-												FALSE,
-												TTi18n::gettext('Effective date is before the employees hire date.'));
 			}
 
 			$this->Validator->isTrue(		'user_id',

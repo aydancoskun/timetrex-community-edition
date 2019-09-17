@@ -1395,14 +1395,21 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		}
 
 		if ( $total->total > 0 ) {
-			$line[] = 'RV'; //RT Record
-			$line[] = $this->padRecord( $total->total, 7, 'N' ); //Total RW records.
-			$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 15, 'N' ); //State Wages, Tips and Other Compensation
-			$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 15, 'N' ); //State Income Tax
-			$line[] = $this->padRecord( '', 473, 'AN' ); //Blank
+			if ( strtolower( $this->efile_state ) == 'oh' ) {
+				//Optional for OH and RITA (regional) W2 efiling.
+				Debug::Text( 'Skipping RV Record...', __FILE__, __LINE__, __METHOD__, 10 );
+				$retval = FALSE;
+			} else {
+				//SSA specifications state RV records are optional and not processed or shared anyways.
+				$line[] = 'RV'; //RT Record
+				$line[] = $this->padRecord( $total->total, 7, 'N' ); //Total RW records.
+				$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 15, 'N' ); //State Wages, Tips and Other Compensation
+				$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 15, 'N' ); //State Income Tax
+				$line[] = $this->padRecord( '', 473, 'AN' ); //Blank
 
-			$retval = implode( ( $this->debug == TRUE ) ? ',' : '', $line );
-			Debug::Text( 'RV Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
+				$retval = implode( ( $this->debug == TRUE ) ? ',' : '', $line );
+				Debug::Text( 'RV Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
+			}
 		}
 
 		return $retval;

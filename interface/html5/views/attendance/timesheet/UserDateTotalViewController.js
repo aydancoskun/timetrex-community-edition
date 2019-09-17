@@ -877,7 +877,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			this.detachElement( 'department_id' );
 		}
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 			//Job
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -1004,7 +1004,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		widgetContainer.append( code );
 		this.addEditFieldToColumn( $.i18n._( 'Total Amount' ), form_item_input, tab_user_date_total_column2, '', widgetContainer, true );
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( Global.getProductEdition() >= 20 ) ) {
 
 			//Quanitity
 			var good = Global.loadWidgetByName( FormItemType.TEXT_INPUT );

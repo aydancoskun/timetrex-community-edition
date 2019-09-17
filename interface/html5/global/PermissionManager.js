@@ -66,7 +66,7 @@ var PermissionManager = (function() {
 				result = true;
 				break;
 			case 'JobInvoice':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -77,7 +77,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'PaymentGateway':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -87,7 +87,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'InvoiceConfig':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -166,7 +166,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'Companies':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) &&
+				if ( ( Global.getProductEdition() >= 15 ) &&
 						PermissionManager.validate( permission_section, 'enabled' ) && PermissionManager.validate( permission_section, 'view' ) ) {
 					result = true;
 				}
@@ -186,7 +186,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'DocumentGroup':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -231,7 +231,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'ExpenseAuthorization':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 25 ) ) {
+				if ( !( Global.getProductEdition() >= 25 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -240,7 +240,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'UserExpense':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 25 ) ) {
+				if ( !( Global.getProductEdition() >= 25 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -336,7 +336,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'Document':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -433,7 +433,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'ExpenseSummaryReport':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( 'report', 'view_expense' ) ) {
 					result = true;
@@ -444,7 +444,7 @@ var PermissionManager = (function() {
 			case 'JobSummaryReport':
 			case 'JobInformationReport':
 			case 'JobItemInformationReport':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( 'job_report', 'view_job_summary' ) ) {
 					result = true;
@@ -453,7 +453,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'JobAnalysisReport':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( 'job_report', 'view_job_analysis' ) ) {
 					result = true;
@@ -462,7 +462,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'InvoiceTransactionSummaryReport':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( 'invoice_report', 'view_transaction_summary' ) ) {
 					result = true;
@@ -533,7 +533,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'AffordableCareReport':
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 &&
+				if ( Global.getProductEdition() >= 15 &&
 						PermissionManager.validate( 'report', 'view_affordable_care' ) &&
 						countryPermissionValidate( 'US' )
 				) {
@@ -558,7 +558,7 @@ var PermissionManager = (function() {
 				break;
 			case 'UserRecruitmentSummaryReport':
 			case 'UserRecruitmentDetailReport':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 25 ) ) {
+				if ( !( Global.getProductEdition() >= 25 ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( 'recruitment_report', 'user_recruitment' ) ) {
 					result = true;
@@ -578,7 +578,7 @@ var PermissionManager = (function() {
 			case 'TaxPolicy':
 			case 'ShippingPolicy':
 			case 'AreaPolicy':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -592,7 +592,7 @@ var PermissionManager = (function() {
 			case 'JobItem':
 			case 'JobGroup':
 			case 'JobItemGroup':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -603,7 +603,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'GEOFence':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				if ( !( Global.getProductEdition() >= 20 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -618,7 +618,7 @@ var PermissionManager = (function() {
 			case 'JobApplicant':
 			case 'JobApplication':
 
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 25 ) ) {
+				if ( !( Global.getProductEdition() >= 25 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;

@@ -2358,7 +2358,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$rsaf->setCompany( $this->company_id );
 		$rsaf->setLegalEntity( $this->legal_entity_id );
 		$rsaf->setStatus( 10 ); //Enabled
-		$rsaf->setName( TTUUID::generateUUID() );
+		$rsaf->setName( 'testRemittanceSourceAccountValidation' );
 		$rsaf->setCurrency( $this->currency_id );
 		$rsaf->setType( 3000 );
 
@@ -2413,7 +2413,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$rsaf->setValue3( 12 ); //Account Number
 		$this->assertEquals( $rsaf->isValid(), FALSE );
 		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), TRUE );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1, $rsaf->Validator->getTextErrors() );
 		$rsaf->Validator->resetErrors();
 
 		//Account number invalid. -- Too long
@@ -2574,7 +2574,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$rsaf->setCompany( $this->company_id );
 		$rsaf->setLegalEntity( $this->legal_entity_id );
 		$rsaf->setStatus( 10 ); //Enabled
-		$rsaf->setName( TTUUID::generateUUID() );
+		$rsaf->setName( 'testRemittanceDestinationAccountValidationA' );
 		$rsaf->setCurrency( $this->currency_id );
 		$rsaf->setType( 3000 );
 		$rsaf->setCountry( 'US' );
@@ -2588,7 +2588,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$rdaf->setUser( $this->user_id );
 		$rdaf->setRemittanceSourceAccount( $remittance_source_account_id );
 		$rdaf->setStatus( 10 ); //Enabled
-		$rdaf->setName( TTUUID::generateUUID() );
+		$rdaf->setName( 'testRemittanceDestinationAccountValidationB' );
 		$rdaf->setType( 3000 );
 		$rdaf->setAmountType( 10 ); //10=Percent
 		$rdaf->setPercentAmount( 100 ); //100%
@@ -2679,7 +2679,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$rsaf->setCompany( $this->company_id );
 		$rsaf->setLegalEntity( $this->legal_entity_id );
 		$rsaf->setStatus( 10 ); //Enabled
-		$rsaf->setName( TTUUID::generateUUID() );
+		$rsaf->setName( 'testRemittanceDestinationAccountValidationC' );
 		$rsaf->setCurrency( $this->currency_id );
 		$rsaf->setType( 3000 );
 		$rsaf->setCountry( 'CA' );
@@ -2694,7 +2694,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$rdaf->setUser( $this->user_id );
 		$rdaf->setRemittanceSourceAccount( $remittance_source_account_id );
 		$rdaf->setStatus( 10 ); //Enabled
-		$rdaf->setName( TTUUID::generateUUID() );
+		$rdaf->setName( 'testRemittanceDestinationAccountValidationD' );
 		$rdaf->setType( 3000 );
 		$rdaf->setAmountType( 10 ); //10=Percent
 		$rdaf->setPercentAmount( 100 ); //100%
@@ -2771,7 +2771,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$rdaf->setValue3( 12 ); //Account Number
 		$this->assertEquals( $rdaf->isValid(), FALSE );
 		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), TRUE );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1, $rsaf->Validator->getTextErrors() );
 		$rdaf->Validator->resetErrors();
 
 		//Account number invalid. -- Too long

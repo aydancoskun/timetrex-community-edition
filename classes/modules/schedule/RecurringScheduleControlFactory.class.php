@@ -326,6 +326,7 @@ class RecurringScheduleControlFactory extends Factory {
 					//Delete users that are not selected.
 					if ( !in_array($id, $ids) ) {
 						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						$this->deleted_user_ids[] = $obj->getUser(); //Record deleted user_ids so we can recalculate their schedules in postSave();
 						$obj->Delete();
 					} else {
 						//Save ID's that need to be updated.
@@ -539,21 +540,49 @@ class RecurringScheduleControlFactory extends Factory {
 		//  so we at least have a chance of recalculating retroactively to some degree.
 		$current_epoch = TTDate::getBeginWeekEpoch( TTDate::getBeginWeekEpoch( time() ) - 86400 );
 
+		//FIXME: Put a cap on this perhaps, as 3mths into the future so we don't spend a ton of time doing this
+		//if the user puts sets it to display 1-2yrs in the future. Leave creating the rest of the rows to the maintenance job?
+		//Since things may change we will want to delete all schedules with each change, but only add back in X weeks at most unless from a maintenance job.
+		$maximum_end_date = ( TTDate::getEndWeekEpoch($current_epoch + ( 86400 * 7 )) + ( $this->getDisplayWeeks() * ( 86400 * 7 ) ) );
+		if ( $this->getEndDate() != '' AND $maximum_end_date > $this->getEndDate() ) {
+			$maximum_end_date = $this->getEndDate();
+		}
+
 		$rsf = TTnew('RecurringScheduleFactory');
 		$rsf->StartTransaction();
 		$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $this->getID(), ( $current_epoch - (86400 * 720) ), ( $current_epoch + (86400 * 720) ) );
 		if ( $this->getDeleted() == FALSE ) {
-			//FIXME: Put a cap on this perhaps, as 3mths into the future so we don't spend a ton of time doing this
-			//if the user puts sets it to display 1-2yrs in the future. Leave creating the rest of the rows to the maintenance job?
-			//Since things may change we will want to delete all schedules with each change, but only add back in X weeks at most unless from a maintenance job.
-			$maximum_end_date = ( TTDate::getEndWeekEpoch($current_epoch + ( 86400 * 7 )) + ( $this->getDisplayWeeks() * ( 86400 * 7 ) ) );
-			if ( $this->getEndDate() != '' AND $maximum_end_date > $this->getEndDate() ) {
-				$maximum_end_date = $this->getEndDate();
-			}
 			Debug::text('Recurring Schedule ID: '. $this->getID() .' Maximum End Date: '. TTDate::getDate('DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10);
-
 			$rsf->addRecurringSchedulesFromRecurringScheduleControl( $this->getCompany(), $this->getID(), $current_epoch, $maximum_end_date );
 		}
+
+		//If a user has two templates assigned to them that happen to be conflicting with one another, and the recurring schedule for one is deleted, it could leave "blank" shifts on the days where the conflict was.
+		//So when deleting recurring schedules OR when removing employees from recurring schedules, try to recalculate *all* recurring schedules of all the users that may be affected to ensure that any conflicting shifts will be recalculated.
+		if ( $this->getDeleted() == TRUE OR ( isset($this->deleted_user_ids) AND is_array( $this->deleted_user_ids ) AND count( $this->deleted_user_ids ) > 0 ) ) {
+			$user_ids = $this->getUser(); //This is all currently assigned users.
+
+			//Merge in any deleted users.
+			if ( isset($this->deleted_user_ids) AND is_array( $this->deleted_user_ids ) AND count( $this->deleted_user_ids ) > 0 ) {
+	            $user_ids = array_merge( $user_ids, $this->deleted_user_ids );
+			}
+
+			if ( is_array( $user_ids ) AND count( $user_ids ) > 0 ) {
+				$rsclf = TTnew( 'RecurringScheduleControlListFactory' );
+				$rsclf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'user_id' => $user_ids ) );
+				if ( $rsclf->getRecordCount() > 0 ) {
+					foreach( $rsclf as $rsc_obj ) {
+						if ( $this->getID() != $rsc_obj->getID() ) { //Don't recalculate the current recurring schedule record as thats already done above.
+							Debug::text( 'Recalculating Recurring Schedule ID: ' . $this->getID() . ' Maximum End Date: ' . TTDate::getDate( 'DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10 );
+							$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getID(), ( $current_epoch - ( 86400 * 720 ) ), ( $current_epoch + ( 86400 * 720 ) ) );
+							$rsf->addRecurringSchedulesFromRecurringScheduleControl( $this->getCompany(), $rsc_obj->getID(), $current_epoch, $maximum_end_date );
+						} else {
+							Debug::text('  Skipping recalculating ourself again...', __FILE__, __LINE__, __METHOD__, 10);
+						}
+					}
+				}
+			}
+		}
+
 		$rsf->CommitTransaction();
 
 		return TRUE;

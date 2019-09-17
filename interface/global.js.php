@@ -981,6 +981,9 @@ function firstElementFocus() {
     return false;
 }
 
+if ( Error ) {
+	Error.stackTraceLimit = 50; //Increase stack trace limit.
+}
 window.onerror = handleError;
 
 function handleError (err, url, line) {

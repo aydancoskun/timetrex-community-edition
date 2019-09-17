@@ -221,7 +221,8 @@
     position: relative;
     top: 1px;
     margin: 1px .2em 0 0;
-    border-bottom-width: 0;
+    border:  1px solid transparent; /* Sets to a colour on active. transparent border needed to maintain spacing and prevent UI jumping on tab change (#2710) */
+    border-bottom: none;
     padding: 0;
     white-space: nowrap;
 }

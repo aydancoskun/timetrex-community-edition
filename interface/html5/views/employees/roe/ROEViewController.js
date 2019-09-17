@@ -1062,7 +1062,7 @@ ROEViewController = BaseViewController.extend( {
 				if ( user_ids.length > 0 ) {
 					filter.filter_data = {};
 					filter.filter_data.user_id = user_ids[0];
-					Global.addViewTab( $this.viewId, 'Record of Employment', window.location.href );
+					Global.addViewTab( $this.viewId, $.i18n._( 'Record of Employment' ), window.location.href );
 					IndexViewController.goToView( 'PayStub', filter );
 
 				}
@@ -1071,7 +1071,7 @@ ROEViewController = BaseViewController.extend( {
 				if ( user_ids.length > 0 ) {
 					filter.user_id = user_ids[0];
 					filter.base_date = base_date;
-					Global.addViewTab( $this.viewId, 'Record of Employment', window.location.href );
+					Global.addViewTab( $this.viewId, $.i18n._( 'Record of Employment' ), window.location.href );
 					IndexViewController.goToView( 'TimeSheet', filter );
 
 				}

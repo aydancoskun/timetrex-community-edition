@@ -670,8 +670,9 @@ class FormW2Report extends Report {
 
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		if ( $pself->getRecordCount() > 0 ) {
-			foreach( $pself as $pse_obj ) {
+			foreach( $pself as $key => $pse_obj ) {
 				$legal_entity_id = $pse_obj->getColumn('legal_entity_id');
 				$user_id = $pse_obj->getColumn('user_id');
 				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') );
@@ -691,6 +692,8 @@ class FormW2Report extends Report {
 				} else {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
 				}
+
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
 
 			if ( isset( $this->tmp_data['pay_stub_entry'] ) AND is_array( $this->tmp_data['pay_stub_entry'] ) ) {
@@ -994,6 +997,9 @@ class FormW2Report extends Report {
 					continue;
 				}
 
+				$x = 0; //Progress bar only.
+				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($user_rows), NULL, TTi18n::getText('Generating Forms...') );
+
 				/** @var LegalEntityFactory $le_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][$legal_entity_id];
 
@@ -1020,7 +1026,7 @@ class FormW2Report extends Report {
 					$return1040->signature_date = TTDate::getDate( 'Y-m-d', TTDate::getTime() );
 					$return1040->return_type = '';
 					$return1040->ssn = '';
-					$return1040->name = $legal_entity_obj->getTradeName();
+					$return1040->name = $legal_entity_obj->getLegalName();
 					$return1040->address1 = $legal_entity_obj->getAddress1() . ' ' . $legal_entity_obj->getAddress2();
 					$return1040->city = $legal_entity_obj->getCity();
 					$return1040->state = $legal_entity_obj->getProvince();
@@ -1181,7 +1187,11 @@ class FormW2Report extends Report {
 
 							foreach ( range( 'a', 'z' ) as $z ) {
 								//Make sure state information is included if its just local income taxes.
-								if ( ( isset( $row[ 'l16' . $z ] ) OR isset( $row[ 'l18' . $z ] ) ) AND ( isset( $row[ 'l15' . $z . '_state' ] ) AND isset( $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l15' . $z . '_state' ] ] ] ) AND $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l15' . $z . '_state' ] ] ]->getType() == 20 ) ) {
+								if ( ( isset( $row[ 'l16' . $z ] ) OR isset( $row[ 'l18' . $z ] ) )
+										AND ( isset( $row[ 'l15' . $z . '_state' ] )
+												AND isset( $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l15' . $z . '_state' ] ] )
+												AND isset( $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l15' . $z . '_state' ] ] ] )
+												AND $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l15' . $z . '_state' ] ] ]->getType() == 20 ) ) {
 									$ee_data[ 'l15' . $z . '_state_id' ] = $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l15' . $z . '_state' ] ] ]->getPrimaryIdentification();
 									$ee_data[ 'l15' . $z . '_state' ] = $row[ 'l15' . $z . '_state' ];
 								} else {
@@ -1240,6 +1250,9 @@ class FormW2Report extends Report {
 
 							$i++;
 						}
+
+						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
+						$x++;
 					}
 				}
 

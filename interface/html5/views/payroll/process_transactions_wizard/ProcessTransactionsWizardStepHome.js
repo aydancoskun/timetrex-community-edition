@@ -72,7 +72,7 @@ ProcessTransactionsWizardStepHome = WizardStep.extend( {
 	},
 
 	initCardsBlock: function() {
-		$( this.wizard_obj.el ).find( '.download_warning' ).html( 'Click the <button class="done-btn"><span style="opacity: 0">.</span></button> icon to download the transaction file. Be sure to save it to your computer rather than open it' );
+		$( this.wizard_obj.el ).find( '.download_warning' ).html( 'Click the <button class="done-btn"></button> icon to download the transaction file. Be sure to save it to your computer rather than open it' );
 	},
 
 	getNextStepName: function() {

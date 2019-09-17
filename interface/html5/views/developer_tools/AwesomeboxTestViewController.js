@@ -346,7 +346,6 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 				'{"id":"11e85213-ac44-1830-9908-123456abcdef","status":"Active","employee_number":10,"first_name":"John","last_name":"Doe","full_name":"FAKE Doe, John","home_phone":"464-547-9452","is_owner":false,"is_child":true}]' );
 		this.user_id_array = result_data;
 		result_data = this.processResultData( result_data );
-		this.grid.clearGridData();
 		this.grid.setData( result_data );
 		this.grid.setGridColumnsWidth();
 		this.current_edit_record  = result_data[0];

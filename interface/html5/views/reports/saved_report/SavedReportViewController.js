@@ -59,7 +59,7 @@ SavedReportViewController = BaseViewController.extend( {
 		switch ( id ) {
 			case ContextMenuIconName.share_report:
 
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+				if ( Global.getProductEdition() >= 15 ) {
 					var default_data = [];
 					if ( this.edit_view && this.current_edit_record.id ) {
 						default_data.push( this.current_edit_record.id );
@@ -302,7 +302,7 @@ SavedReportViewController = BaseViewController.extend( {
 					report_name = 'JobAnalysisReport';
 					break;
 				case 'AffordableCareReport':
-					if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
+					if ( Global.getProductEdition() == 10 ) {
 						TAlertManager.showAlert( Global.getUpgradeMessage() );
 						report_name = null;
 					}
@@ -441,7 +441,7 @@ SavedReportViewController = BaseViewController.extend( {
 
 		$this.sub_view_mode = true;
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+		if ( Global.getProductEdition() >= 15 ) {
 			if ( this.sub_report_schedule_view_controller ) {
 				this.sub_report_schedule_view_controller.buildContextMenu( true );
 				this.sub_report_schedule_view_controller.setDefaultMenu();

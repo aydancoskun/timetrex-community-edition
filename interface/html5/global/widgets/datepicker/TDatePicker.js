@@ -280,6 +280,7 @@
 			if ( mode === 'date' ) {
 				date_picker_input = date_picker_input.datepicker( {
 					showOtherMonths: true,
+					selectOtherMonths: true,
 					showTime: false,
 					dateFormat: format,
 					showHour: false,
@@ -327,6 +328,7 @@
 			} else if ( mode === 'date_time' ) {
 				date_picker_input = date_picker_input.datetimepicker( {
 					showOtherMonths: true,
+					selectOtherMonths: true,
 					dateFormat: format,
 					timeFormat: time_format,
 					showTime: true,

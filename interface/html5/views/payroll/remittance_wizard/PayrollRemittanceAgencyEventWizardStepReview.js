@@ -29,7 +29,6 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 			$this.getWizardObject().selected_remittance_agency_event = result;
 
 			$this.getWizardObject().buildEventDataBlock( 'payroll_remittance_agency_event_wizard-review-event_details', result );
-			$this.getWizardObject().enableButtons();
 			$this.initCardsBlock();
 
 			Debug.Text( 'Selected tax report type: ' + $this.getWizardObject().selected_remittance_agency_event.type_id, null, null, null, 10 );
@@ -184,6 +183,8 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 			if ( tax_button != false ) {
 				$this.initRightClickMenuForTaxReportViewButton();
 			}
+
+			$this.getWizardObject().enableButtons();
 		} );
 
 	},
@@ -192,7 +193,7 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 		//When navigating away, link the wizard.
 		var $this = this;
 		switch ( $this.getWizardObject().selected_remittance_agency_event.type_id ) {
-				//Canada
+			//Canada
 			case 'T4':
 				switch ( icon ) {
 					case 'GovernmentT4':
@@ -232,7 +233,7 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 				}
 				break;
 
-				//US
+			//US
 			case 'FW2':
 				switch ( icon ) {
 					case 'GovernmentW2':

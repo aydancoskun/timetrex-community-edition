@@ -2249,7 +2249,7 @@ class PayrollDeduction_US_CT extends PayrollDeduction_US {
 		return $retval;
 	}
 
-	function getStateTaxPayable() {
+	function _getStateTaxPayable() {
 		$retval = bcmul( $this->getStateStandardDeduction(), bcsub( 1, $this->getStateTaxCreditDecimal() ) );
 
 		if ( $retval < 0 ) {

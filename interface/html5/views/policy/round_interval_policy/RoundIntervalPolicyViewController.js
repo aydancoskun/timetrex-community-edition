@@ -256,7 +256,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		var condition_start_window = this.edit_view_form_item_dic.condition_start_window;
 		var condition_stop_window = this.edit_view_form_item_dic.condition_stop_window;
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 ) {
+		if ( Global.getProductEdition() <= 10 ) {
 			this.detachElement( 'condition_type_id' );
 			this.detachElement( 'sp_box' );
 			this.detachElement( 'condition_static_total_time' );

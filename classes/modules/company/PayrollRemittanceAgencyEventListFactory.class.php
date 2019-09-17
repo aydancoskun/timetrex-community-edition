@@ -412,7 +412,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$query .= ( isset($filter_data['payroll_remittance_agency_status_id']) ) ? $this->getWhereClauseSQL( 'praf.status_id', $filter_data['payroll_remittance_agency_status_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'upper_text_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.start_date', $filter_data['start_date'], 'end_timestamp', $ph ) : NULL;//must be of type end_timestamp to ensure we get a <= in the where clause
 		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.end_date', $filter_data['end_date'], 'end_timestamp', $ph ) : NULL;

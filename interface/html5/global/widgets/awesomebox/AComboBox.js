@@ -2774,7 +2774,7 @@
 					}
 
 					if ( !Global.isEmpty( cached_select_grid_search_inputs_filter ) || !Global.isEmpty( cached_selected_grid_sort_filter ) ) {
-						a_dropdown.getSelectGrid().grid.hide();
+						//a_dropdown.getSelectGrid().grid.hide(); //#2721 - This helps fixes a bug where if you expand a awesomebox (ie: Edit Policy Group, Absence Policys), on right-hand side click clear search. Click Move All on right-hand side. Collapse, expand, click move All left-hand side. Both sides are now blank because the right grid had a display: none attached to it.
 						$this.onADropDownSearch( 'select_grid' );
 					}
 

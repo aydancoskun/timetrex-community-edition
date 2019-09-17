@@ -194,7 +194,7 @@
 			refresh_btn.bind( 'click', function() {
 				refresh_btn.addClass( 'button-rotate' );
 				related_view_controller.search();
-
+				Global.triggerAnalyticsNavigationOther( 'click:refresh_data', 'click', related_view_controller.viewId );
 			} );
 
 			$( searchButtonDiv ).css( 'display', 'none' );
@@ -234,7 +234,7 @@
 					}
 
 				}
-
+				Global.triggerAnalyticsNavigationOther( 'searchpanel:layout_change', 'click', related_view_controller.viewId );
 			} );
 
 			// Switch and expand search panel on tab changes.
@@ -276,6 +276,8 @@
 				// 		setGridSize();
 				// 	}
 				// }, 1 );
+
+				Global.triggerAnalyticsTabs( e, ui );
 			}
 
 			$( collapseBtn ).click( onCollapseBtnClick );

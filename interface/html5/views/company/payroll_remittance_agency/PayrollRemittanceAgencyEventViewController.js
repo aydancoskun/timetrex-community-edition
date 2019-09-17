@@ -303,7 +303,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 	},
 
-	preCopyAsNew: function record( record ) {
+	copyAsNewResetIds: function record( record ) {
 		record['id'] = '';
 		record['start_date'] = '';
 		record['end_date'] = '';

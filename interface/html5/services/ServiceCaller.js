@@ -268,11 +268,7 @@ var ServiceCaller = Backbone.Model.extend( {
 
 		}
 
-		if ( ie <= 8 ) {
-			apiArgs = {json: $.toJSON( apiArgs )};
-		} else {
-			apiArgs = {json: JSON.stringify( apiArgs )};
-		}
+		apiArgs = {json: JSON.stringify( apiArgs )};
 
 		var api_called_date = new Date();
 		var api_stack = {

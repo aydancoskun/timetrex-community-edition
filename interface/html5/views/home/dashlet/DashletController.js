@@ -505,7 +505,7 @@ DashletController = Backbone.View.extend( {
 				}
 
 				array[key].key = key;
-				row[date_string] = Global.secondToHHMMSS( array[key].total_time );
+				row[date_string] = Global.getTimeUnit( array[key].total_time );
 				row[date_string + '_data'] = array[key];
 
 				//if id == 0, put the row as first row.
@@ -520,7 +520,7 @@ DashletController = Backbone.View.extend( {
 				row = map[key];
 				if ( row[date_string] && key === 'total' ) { //Override total cell data since we set all to 00:00 at beginning
 					array[key].key = key;
-					row[date_string] = Global.secondToHHMMSS( array[key].total_time );
+					row[date_string] = Global.getTimeUnit( array[key].total_time );
 					row[date_string + '_data'] = array[key];
 
 					if ( row.parent_key === 'accumulated_time' ) {
@@ -532,7 +532,7 @@ DashletController = Backbone.View.extend( {
 				} else {
 
 					array[key].key = key;
-					row[date_string] = Global.secondToHHMMSS( array[key].total_time );
+					row[date_string] = Global.getTimeUnit( array[key].total_time );
 					row[date_string + '_data'] = array[key];
 
 					if ( row.parent_key === 'accumulated_time' ) {

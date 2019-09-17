@@ -64,7 +64,7 @@ RibbonViewController = Backbone.View.extend( {
 
 	onReportMenuClick: function( id ) {
 		Global.closeEditViews( function() {
-			if ( id === 'AffordableCareReport' && !(LocalCacheData.getCurrentCompany().product_edition_id >= 15) ) {
+			if ( id === 'AffordableCareReport' && !(Global.getProductEdition() >= 15) ) {
 				TAlertManager.showAlert( Global.getUpgradeMessage() );
 			} else {
 				var parent_view = LocalCacheData.current_open_edit_only_controller ? LocalCacheData.current_open_edit_only_controller : LocalCacheData.current_open_primary_controller;
@@ -288,20 +288,20 @@ RibbonViewController = Backbone.View.extend( {
 				this.doPortalLogout();
 				break;
 			case 'AdminGuide':
-				var url = 'https://www.timetrex.com/h?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version + '&e=' + LocalCacheData.getCurrentCompany().product_edition_id;
+				var url = 'https://www.timetrex.com/h?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version + '&e=' + Global.getProductEdition();
 				window.open( url, '_blank' );
 				break;
 			case 'FAQS':
-				url = 'https://www.timetrex.com/h?id=faq&v=' + LocalCacheData.getLoginData().application_version + '&e=' + LocalCacheData.getCurrentCompany().product_edition_id;
+				url = 'https://www.timetrex.com/h?id=faq&v=' + LocalCacheData.getLoginData().application_version + '&e=' + Global.getProductEdition();
 				window.open( url, '_blank' );
 				break;
 			case 'WhatsNew':
-				url = 'https://www.timetrex.com/h?id=changelog&v=' + LocalCacheData.getLoginData().application_version + '&e=' + LocalCacheData.getCurrentCompany().product_edition_id;
+				url = 'https://www.timetrex.com/h?id=changelog&v=' + LocalCacheData.getLoginData().application_version + '&e=' + Global.getProductEdition();
 				window.open( url, '_blank' );
 				break;
 			case 'EmailHelp':
 
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+				if ( Global.getProductEdition() >= 15 ) {
 					url = 'mailto:support@timetrex.com?subject=Company: ' + LocalCacheData.getCurrentCompany().name + '&body=Company: ' + LocalCacheData.getCurrentCompany().name + '  ' +
 							'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
 				} else {
@@ -341,7 +341,7 @@ RibbonViewController = Backbone.View.extend( {
 				} );
 				break;
 			case 'LegalEntity':
-				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+				if ( Global.getProductEdition() >= 15 ) {
 					TopMenuManager.goToView( TopMenuManager.selected_sub_menu_id );
 				} else {
 					IndexViewController.openEditView( LocalCacheData.current_open_primary_controller, name, false );

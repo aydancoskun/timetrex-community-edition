@@ -3320,9 +3320,11 @@ class Misc {
 		if ( !isset($desktop) ) {
 			$desktop = 0;
 		}
+
 		// ?desktop=1 must be sent in cases like password reset email links to prevent the user from being redirected to the QuickPunch login page when trying to reset passwords.
 		// Unfortunately when using #!m=... we can't detect what page they are really trying to go to on the server side.
-		if ( getTTProductEdition() != TT_PRODUCT_COMMUNITY AND $desktop != 1 ) {
+		// Don't redirect search engines either.
+		if ( getTTProductEdition() != TT_PRODUCT_COMMUNITY AND Misc::isSearchEngineBrowser() == FALSE AND $desktop != 1 ) {
 			$browser = self::detectMobileBrowser();
 			if ( $browser == 'ios' OR $browser == 'html5' OR $browser == 'android' ) {
 				Redirect::Page( URLBuilder::getURL( NULL, Environment::getBaseURL().'/html5/quick_punch/' ) );
@@ -3367,12 +3369,12 @@ class Misc {
 		$browser = new Browser( $useragent );
 
 		//This is for the full web interface
-		//IE < 9
-		//Firefox < 24
-		//Chrome < 32
+		//IE < 11
+		//Firefox < 24 (52 is latest version on Windows XP)
+		//Chrome < 30 (49 is latest version on Windows XP)
 		//Safari < 5
 		//Opera < 12
-		if ( $browser->getBrowser() == Browser::BROWSER_IE AND version_compare( $browser->getVersion(), 9, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_IE AND version_compare( $browser->getVersion(), 11, '<' ) ) {
 			$retval = TRUE;
 		}
 
@@ -3571,7 +3573,7 @@ class Misc {
 			if ( substr( $path, -1 ) == DIRECTORY_SEPARATOR OR substr( $path, -1 ) == '.' OR is_dir( $path ) ) {
 				//Debug::text( 'File is directory: ' . $path, __FILE__, __LINE__, __METHOD__, 10 );
 
-				return self::isWritable( $path . DIRECTORY_SEPARATOR . uniqid( mt_rand() ) . '.tmp' );
+				return self::isWritable( $path . DIRECTORY_SEPARATOR . uniqid( mt_rand() ) . '.tmp' ); //Try to write a temporary file to the directory to ensure it can be written and deleted.
 			}
 
 			$f = @fopen( $path, 'r+' );
@@ -3590,7 +3592,11 @@ class Misc {
 				return FALSE;
 			}
 			fclose( $f );
-			unlink( $path );
+
+			if ( @unlink( $path ) == FALSE ) { //This could error if create but not delete permission exists.
+				Debug::text( 'File can be created, but not deleted: ' . $path, __FILE__, __LINE__, __METHOD__, 10 );
+				return FALSE;
+			}
 
 			return TRUE;
 		}

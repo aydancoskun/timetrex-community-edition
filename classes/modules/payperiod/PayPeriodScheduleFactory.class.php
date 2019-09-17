@@ -2483,16 +2483,6 @@ class PayPeriodScheduleFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
-						/*
-						case 'new_day_trigger_time':
-						case 'maximum_shift_time':
-							Debug::text('Raw Time Unit: '. $data[$key] .' Parsing To: '. TTDate::parseTimeUnit( $data[$key] ), __FILE__, __LINE__, __METHOD__, 10);
-
-							if ( method_exists( $this, $function ) ) {
-								$this->$function( TTDate::parseTimeUnit( $data[$key] ) );
-							}
-							break;
-						*/
 						case 'anchor_date':
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( TTDate::parseDateTime( $data[$key] ) );

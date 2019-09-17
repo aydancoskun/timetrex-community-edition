@@ -256,7 +256,7 @@ BranchViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_branch_column1 );
 
 		//Allowed GEO Fences
-		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
+		if ( Global.getProductEdition() >= 20 ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIGEOFence' )),

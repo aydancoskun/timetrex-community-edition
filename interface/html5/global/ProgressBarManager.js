@@ -228,7 +228,7 @@ var ProgressBar = (function() {
 				}
 
 				//Error: 'console' is undefined in /interface/html5/global/ProgressBarManager.js?v=8.0.0-20141117-153515 line 224
-				time_remaining.text( Global.secondToHHMMSS( time_offset, '99' ) );
+				time_remaining.text( Global.getTimeUnit( time_offset, '99' ) );
 			}
 			secondDown();
 
@@ -261,7 +261,7 @@ var ProgressBar = (function() {
 					time_offset = 0;
 				}
 
-				time_remaining.text( Global.secondToHHMMSS( time_offset, '99' ) );
+				time_remaining.text( Global.getTimeUnit( time_offset, '99' ) );
 			}, 1000 );
 		}
 

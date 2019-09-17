@@ -42,28 +42,30 @@
 
 		var display_na = true; // Display N/A when no value
 
-		var cancel_date_parse = false;
+		// var cancel_date_parse = false;
 
 		var do_validate = true;
 
-		var parseDateAsync = function( callBack ) {
-			parsed_value = -1;
-			if ( !api_date ) {
-				api_date = new (APIFactory.getAPIClass( 'APIDate' ))();
-			}
-			api_date.parseTimeUnit( $this.val(), {
-				onResult: function( result ) {
-					if ( cancel_date_parse ) {
-						return;
-					}
-					parsed_value = result.getResult();
-					if ( callBack ) {
-						callBack();
-					}
-					ProgressBar.closeOverlay();
-				}
-			} );
-		};
+		// var parseDateAsync = function( callBack ) {
+		// 	parsed_value = -1;
+		// 	if ( !api_date ) {
+		// 		api_date = new (APIFactory.getAPIClass( 'APIDate' ))();
+		// 	}
+		// 	api_date.parseTimeUnit( $this.val(), {
+		// 		onResult: function( result ) {
+		// 			if ( cancel_date_parse ) {
+		// 				return;
+		// 			}
+		// 			parsed_value = result.getResult();
+		// 			if ( callBack ) {
+		// 				callBack();
+		// 			}
+		// 			ProgressBar.closeOverlay();
+		// 		}
+		// 	} );
+		//
+		// 	//parsed_value = Global.parseTimeUnit( $this.val() );
+		// };
 
 		this.setPlaceHolder = function( val ) {
 			$this.attr( 'placeholder', val );
@@ -75,7 +77,8 @@
 
 		this.setNeedParseSec = function( val ) {
 			if ( val ) {
-				parsed_value = parseDateAsync();
+				//parsed_value = parseDateAsync();
+				parsed_value = Global.parseTimeUnit( $this.val() );
 			}
 			need_parser_sec = val;
 
@@ -145,13 +148,14 @@
 				check_box.insertBefore( $( this ) );
 				check_box.change( function() {
 					if ( need_parser_date || need_parser_sec ) {
-						parseDateAsync( function() {
-							$this.trigger( 'formItemChange', [$this] );
-						} );
-					} else {
-						$this.trigger( 'formItemChange', [$this] );
+						parsed_value = Global.parseTimeUnit( $this.val() );
+						// parseDateAsync( function() {
+						// 	$this.trigger( 'formItemChange', [$this] );
+						// } );
 					}
+					$this.trigger( 'formItemChange', [$this] );
 				} );
+
 				if ( is_static_width && static_width.toString().indexOf( '%' ) > 0 ) {
 					$this.css( 'width', 'calc(' + static_width + ' - 25px)' );
 				}
@@ -189,8 +193,9 @@
 			}
 			if ( need_parser_sec || need_parser_date || parsed_value ) {
 				if ( parsed_value === -1 ) {
-					cancel_date_parse = true; // cancel orginal date parse process
-					parsed_value = api_date.parseTimeUnit( val, { async: false } ).getResult();
+					parsed_value = Global.parseTimeUnit( val );
+					// cancel_date_parse = true; // cancel orginal date parse process
+					// parsed_value = api_date.parseTimeUnit( val, { async: false } ).getResult();
 				}
 				return parsed_value;
 			} else {
@@ -205,10 +210,11 @@
 			}
 			$this.val( val );
 			if ( need_parser_date ) {
-				parseDateAsync();
+				//parseDateAsync();
+				parsed_value = Global.parseTimeUnit( $this.val() );
 			} else if ( need_parser_sec ) {
 				parsed_value = val;
-				$this.val( Global.secondToHHMMSS( val ) );
+				$this.val( Global.getTimeUnit( val ) );
 			}
 
 			this.autoResize();
