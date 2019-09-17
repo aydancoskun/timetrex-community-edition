@@ -228,14 +228,14 @@ class UserGenericDataFactory extends Factory {
 
 		if ( $this->getDeleted() == FALSE ) {
 			// Company
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows( 'company',
 												   $clf->getByID( $this->getCompany() ),
 												   TTi18n::gettext( 'Invalid Company' )
 			);
 			// User
 			if ( $this->getUser() != '' AND $this->getUser() != TTUUID::getZeroID() ) {
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$this->Validator->isResultSetWithRows( 'user',
 													   $ulf->getByID( $this->getUser() ),
 													   TTi18n::gettext( 'Invalid Employee' )
@@ -283,7 +283,7 @@ class UserGenericDataFactory extends Factory {
 
 		if ( $this->getDefault() == TRUE ) {
 			//Remove default flag from all other entries.
-			$ugdlf = TTnew( 'UserGenericDataListFactory' );
+			$ugdlf = TTnew( 'UserGenericDataListFactory' ); /** @var UserGenericDataListFactory $ugdlf */
 			if ( $this->getUser() == TTUUID::getZeroID() OR $this->getUser() == '' ) {
 				$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getCompany(), $this->getScript(), TRUE );
 			} else {

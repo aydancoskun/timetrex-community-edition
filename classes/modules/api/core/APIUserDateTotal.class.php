@@ -72,7 +72,7 @@ class APIUserDateTotal extends APIFactory {
 					);
 
 		//If user_id is specified, use their default branch/department.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getByIdAndCompanyId( $user_id, $company_obj->getID() );
 		if ( $ulf->getRecordCount() == 1 ) {
 			$user_obj = $ulf->getCurrent();
@@ -83,7 +83,7 @@ class APIUserDateTotal extends APIFactory {
 			$data['job_id'] = $user_obj->getDefaultJob();
 			$data['job_item_id'] = $user_obj->getDefaultJobItem();
 
-			$uwlf = TTnew('UserWageListFactory');
+			$uwlf = TTnew('UserWageListFactory'); /** @var UserWageListFactory $uwlf */
 			$uwlf->getByUserIdAndGroupIDAndBeforeDate( $user_id, TTUUID::getZeroID(), TTDate::parseDateTime( $date ), 1 );
 			if ( $uwlf->getRecordCount() > 0 ) {
 				foreach( $uwlf as $uw_obj ) {
@@ -111,7 +111,7 @@ class APIUserDateTotal extends APIFactory {
 
 		$data = $this->initializeFilterAndPager( $data );
 
-		$sf = TTnew( 'UserDateTotalFactory' );
+		$sf = TTnew( 'UserDateTotalFactory' ); /** @var UserDateTotalFactory $sf */
 		$retarr = $sf->getUserDateTotalArray( $data['filter_data'] );
 
 		Debug::Arr($retarr, 'RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -151,7 +151,7 @@ class APIUserDateTotal extends APIFactory {
 		//This can be used to edit Absences as well, how do we differentiate between them?
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
 
-		$blf = TTnew( 'UserDateTotalListFactory' );
+		$blf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -231,170 +231,187 @@ class APIUserDateTotal extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
-			//Wrap entire batch in the transaction.
-			$lf = TTnew( 'UserDateTotalListFactory' );
-			$lf->StartTransaction();
+			$transaction_function = function() use ( $data, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $permission_children_ids ) {
+				$lf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $lf */
+				if ( $validate_only	== FALSE ) { //Only switch into serializable mode when actually saving the record.
+					$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing incorrect calculations in user_date_total table.
+				}
+				$lf->StartTransaction(); //Wrap entire batch in the transaction.
 
-			$recalculate_user_date_stamp = FALSE;
-			foreach( $data as $key => $row ) {
-				$primary_validator = new Validator();
-				$lf = TTnew( 'UserDateTotalListFactory' );
-				//$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] != '' ) {
-					//Modifying existing object.
-					//Get user_date_total object, so we can only modify just changed data for specific records if needed.
-					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
-					if ( $lf->getRecordCount() == 1 ) {
-						//Object exists, check edit permissions
-						if (
-							$validate_only == TRUE
-							OR
-								(
-								$this->getPermissionObject()->Check('punch', 'edit')
-									OR ( $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
-								)
-							OR
-								(
-								$this->getPermissionObject()->Check('absence', 'edit')
-									OR ( $this->getPermissionObject()->Check('absence', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('absence', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
-								)
+				$recalculate_user_date_stamp = FALSE;
+				foreach ( $data as $key => $row ) {
+					$primary_validator = new Validator();
+					$lf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $lf */
+					//$lf->StartTransaction();
+					if ( isset( $row['id'] ) AND $row['id'] != '' ) {
+						//Modifying existing object.
+						//Get user_date_total object, so we can only modify just changed data for specific records if needed.
+						$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
+						if ( $lf->getRecordCount() == 1 ) {
+							//Object exists, check edit permissions
+							if (
+									$validate_only == TRUE
+									OR
+									(
+											$this->getPermissionObject()->Check( 'punch', 'edit' )
+											OR ( $this->getPermissionObject()->Check( 'punch', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+											OR ( $this->getPermissionObject()->Check( 'punch', 'edit_child' ) AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
+									)
+									OR
+									(
+											$this->getPermissionObject()->Check( 'absence', 'edit' )
+											OR ( $this->getPermissionObject()->Check( 'absence', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+											OR ( $this->getPermissionObject()->Check( 'absence', 'edit_child' ) AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
+									)
 							) {
 
-							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
-							$lf = $lf->getCurrent();
+								Debug::Text( 'Row Exists, getting current data for ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
+								$lf = $lf->getCurrent();
 
-							//When editing a record if the date changes, we need to recalculate the old date.
-							//This must occur before we merge the data together.
-							if (	( isset($row['user_id'])
-										AND $lf->getUser() != $row['user_id'] )
-									OR
-									( isset($row['date_stamp'])
-										AND $lf->getDateStamp()
-										AND TTDate::parseDateTime( $row['date_stamp'] ) != $lf->getDateStamp() )
-									) {
-								Debug::Text('Date has changed, recalculate old date... New: [ Date: '. $row['date_stamp'] .' ] UserID: '. $lf->getUser(), __FILE__, __LINE__, __METHOD__, 10);
-								$recalculate_user_date_stamp[$lf->getUser()][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
-							}
+								//When editing a record if the date changes, we need to recalculate the old date.
+								//This must occur before we merge the data together.
+								if ( ( isset( $row['user_id'] )
+												AND $lf->getUser() != $row['user_id'] )
+										OR
+										( isset( $row['date_stamp'] )
+												AND $lf->getDateStamp()
+												AND TTDate::parseDateTime( $row['date_stamp'] ) != $lf->getDateStamp() )
+								) {
+									Debug::Text( 'Date has changed, recalculate old date... New: [ Date: ' . $row['date_stamp'] . ' ] UserID: ' . $lf->getUser(), __FILE__, __LINE__, __METHOD__, 10 );
+									$recalculate_user_date_stamp[ $lf->getUser() ][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
+								}
 
-							//Since switching to batch calculation mode, need to store every possible date to recalculate.
-							if ( isset($row['user_id'])	AND $row['user_id'] != '' AND isset($row['date_stamp']) AND $row['date_stamp'] != '' ) {
 								//Since switching to batch calculation mode, need to store every possible date to recalculate.
-								$recalculate_user_date_stamp[TTUUID::castUUID($row['user_id'])][] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $row['date_stamp'] )); //Help avoid confusion with different timezones/DST.
+								if ( isset( $row['user_id'] ) AND $row['user_id'] != '' AND isset( $row['date_stamp'] ) AND $row['date_stamp'] != '' ) {
+									//Since switching to batch calculation mode, need to store every possible date to recalculate.
+									$recalculate_user_date_stamp[ TTUUID::castUUID( $row['user_id'] ) ][] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $row['date_stamp'] ) ); //Help avoid confusion with different timezones/DST.
+								}
+								$recalculate_user_date_stamp[ $lf->getUser() ][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
+
+								$row = array_merge( $lf->getObjectAsArray(), $row );
+							} else {
+								$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Edit permission denied' ) );
 							}
-							$recalculate_user_date_stamp[$lf->getUser()][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
-
-							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
+							//Object doesn't exist.
+							$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
 						}
 					} else {
-						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
-					}
-				} else {
-					//Adding new object, check ADD permissions.
-					if (	!( $validate_only == TRUE
+						//Adding new object, check ADD permissions.
+						if ( !( $validate_only == TRUE
 								OR
-								( $this->getPermissionObject()->Check('punch', 'add')
-									AND
-									(
-										$this->getPermissionObject()->Check('punch', 'edit')
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
-									)
+								( $this->getPermissionObject()->Check( 'punch', 'add' )
+										AND
+										(
+												$this->getPermissionObject()->Check( 'punch', 'edit' )
+												OR ( isset( $row['user_id'] ) AND $this->getPermissionObject()->Check( 'punch', 'edit_own' ) AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+												OR ( isset( $row['user_id'] ) AND $this->getPermissionObject()->Check( 'punch', 'edit_child' ) AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+										)
 								)
 								OR
-								( $this->getPermissionObject()->Check('absence', 'add')
-									AND
-									(
-										$this->getPermissionObject()->Check('absence', 'edit')
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('absence', 'edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('absence', 'edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
-									)
+								( $this->getPermissionObject()->Check( 'absence', 'add' )
+										AND
+										(
+												$this->getPermissionObject()->Check( 'absence', 'edit' )
+												OR ( isset( $row['user_id'] ) AND $this->getPermissionObject()->Check( 'absence', 'edit_own' ) AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+												OR ( isset( $row['user_id'] ) AND $this->getPermissionObject()->Check( 'absence', 'edit_child' ) AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+										)
 								)
-							) ) {
-						$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Add permission denied') );
-					} else {
-						if ( isset($row['user_id'])	AND $row['user_id'] != '' AND isset($row['date_stamp']) AND $row['date_stamp'] != '' ) {
-							//Since switching to batch calculation mode, need to store every possible date to recalculate.
-							$recalculate_user_date_stamp[TTUUID::castUUID($row['user_id'])][] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $row['date_stamp'] )); //Help avoid confusion with different timezones/DST.
-						}
-					}
-				}
-				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-				$is_valid = $primary_validator->isValid( $ignore_warning );
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
-
-					//If the currently logged in user is timezone GMT, and he edits an absence for a user in timezone PST
-					//it can cause confusion as to which date needs to be recalculated, the GMT or PST date?
-					//Try to avoid this by using getMiddleDayEpoch() as much as possible.
-					$lf->setObjectFromArray( $row );
-					$lf->Validator->setValidateOnly( $validate_only );
-
-					$is_valid = $lf->isValid( $ignore_warning );
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
-						if ( $validate_only == TRUE ) {
-							$save_result[$key] = TRUE;
+						) ) {
+							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Add permission denied' ) );
 						} else {
-							$lf->setEnableTimeSheetVerificationCheck(TRUE); //Unverify timesheet if its already verified.
-
-							//Before batch calculation mode was enabled...
-							//$lf->setEnableCalcSystemTotalTime( TRUE );
-							//$lf->setEnableCalcWeeklySystemTotalTime( TRUE );
-							//$lf->setEnableCalcException( TRUE );
-							$lf->setEnableCalcSystemTotalTime( FALSE );
-							$lf->setEnableCalcWeeklySystemTotalTime( FALSE );
-							$lf->setEnableCalcException( FALSE );
-
-							$save_result[$key] = $lf->Save();
+							if ( isset( $row['user_id'] ) AND $row['user_id'] != '' AND isset( $row['date_stamp'] ) AND $row['date_stamp'] != '' ) {
+								//Since switching to batch calculation mode, need to store every possible date to recalculate.
+								$recalculate_user_date_stamp[ TTUUID::castUUID( $row['user_id'] ) ][] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $row['date_stamp'] ) ); //Help avoid confusion with different timezones/DST.
+							}
 						}
-						$validator_stats['valid_records']++;
 					}
-				}
+					Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+					$is_valid = $primary_validator->isValid( $ignore_warning );
+					if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
+						Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 
-					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
+						//If the currently logged in user is timezone GMT, and he edits an absence for a user in timezone PST
+						//it can cause confusion as to which date needs to be recalculated, the GMT or PST date?
+						//Try to avoid this by using getMiddleDayEpoch() as much as possible.
+						$lf->setObjectFromArray( $row );
+						$lf->Validator->setValidateOnly( $validate_only );
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
-				} elseif ( $validate_only == TRUE ) {
-					$lf->FailTransaction();
-				}
-				//$lf->CommitTransaction();
+						$is_valid = $lf->isValid( $ignore_warning );
+						if ( $is_valid == TRUE ) {
+							Debug::Text( 'Saving data...', __FILE__, __LINE__, __METHOD__, 10 );
+							if ( $validate_only == TRUE ) {
+								$save_result[ $key ] = TRUE;
+							} else {
+								$lf->setEnableTimeSheetVerificationCheck( TRUE ); //Unverify timesheet if its already verified.
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-			}
+								//Before batch calculation mode was enabled...
+								//$lf->setEnableCalcSystemTotalTime( TRUE );
+								//$lf->setEnableCalcWeeklySystemTotalTime( TRUE );
+								//$lf->setEnableCalcException( TRUE );
+								$lf->setEnableCalcSystemTotalTime( FALSE );
+								$lf->setEnableCalcWeeklySystemTotalTime( FALSE );
+								$lf->setEnableCalcException( FALSE );
 
-			if ( $is_valid == TRUE AND $validate_only == FALSE ) {
-				if ( is_array( $recalculate_user_date_stamp ) AND count( $recalculate_user_date_stamp ) > 0 ) {
-					Debug::Arr($recalculate_user_date_stamp, 'Recalculating other dates...', __FILE__, __LINE__, __METHOD__, 10);
-					foreach( $recalculate_user_date_stamp as $user_id => $date_arr ) {
-						$ulf = TTNew('UserListFactory');
-						$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
-						if ( $ulf->getRecordCount() > 0 ) {
-							$cp = TTNew('CalculatePolicy');
-							$cp->setUserObject( $ulf->getCurrent() );
-							$cp->addPendingCalculationDate( $date_arr );
-							$cp->calculate(); //This sets timezone itself.
-							$cp->Save();
+								$save_result[ $key ] = $lf->Save();
+							}
+							$validator_stats['valid_records']++;
 						}
+					}
+
+					if ( $is_valid == FALSE ) {
+						Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
+
+						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
+
+						$validator[ $key ] = $this->setValidationArray( $primary_validator, $lf );
+					} elseif ( $validate_only == TRUE ) {
+						$lf->FailTransaction();
+					}
+					//$lf->CommitTransaction();
+
+					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				}
+
+				if ( $is_valid == TRUE AND $validate_only == FALSE ) {
+					if ( is_array( $recalculate_user_date_stamp ) AND count( $recalculate_user_date_stamp ) > 0 ) {
+						Debug::Arr( $recalculate_user_date_stamp, 'Recalculating other dates...', __FILE__, __LINE__, __METHOD__, 10 );
+						foreach ( $recalculate_user_date_stamp as $user_id => $date_arr ) {
+							$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+							$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
+							if ( $ulf->getRecordCount() > 0 ) {
+								$cp = TTNew( 'CalculatePolicy' ); /** @var CalculatePolicy $cp */
+								$cp->setUserObject( $ulf->getCurrent() );
+								$cp->addPendingCalculationDate( $date_arr );
+								$cp->calculate(); //This sets timezone itself.
+								$cp->Save();
+							}
+						}
+					} else {
+						Debug::Text( 'aNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10 );
 					}
 				} else {
-					Debug::Text('aNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( 'bNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10 );
 				}
-			} else {
-				Debug::Text('bNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
-			}
 
-			$lf->CommitTransaction();
+				$lf->CommitTransaction();
+				$lf->setTransactionMode(); //Back to default isolation level.
+
+				return array( $validator, $validator_stats, $key, $save_result );
+			};
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+
+			if ( $total_records > 100 ) { //When importing, or mass adding punches, don't retry as the transaction will be much too large.
+				$retry_max_attempts = 1;
+			} elseif ( $total_records > 20 ) { //When importing, or mass adding punches, don't retry as the transaction will be much too large.
+				$retry_max_attempts = 2;
+			} else {
+				$retry_max_attempts = 3;
+			}
+
+			list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function, $retry_max_attempts );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -435,109 +452,128 @@ class APIUserDateTotal extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
-			$lf = TTnew( 'UserDateTotalListFactory' );
-			$lf->StartTransaction();
+			$transaction_function = function() use ( $data, $validator_stats, $validator, $save_result, $permission_children_ids ) {
+				$lf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $lf */
+				$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing incorrect calculations in user_date_total table.
+				$lf->StartTransaction();
 
-			$recalculate_user_date_stamp = FALSE;
-			foreach( $data as $key => $id ) {
-				$primary_validator = new Validator();
-				$lf = TTnew( 'UserDateTotalListFactory' );
-				//$lf->StartTransaction();
-				if ( $id != '' ) {
-					//Modifying existing object.
-					//Get user_date_total object, so we can only modify just changed data for specific records if needed.
-					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
-					if ( $lf->getRecordCount() == 1 ) {
-						//Object exists, check edit permissions
-						if ( 	(
-									$this->getPermissionObject()->Check('punch', 'delete')
-									OR ( $this->getPermissionObject()->Check('punch', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('punch', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
-								)
-								OR
-								(
-									$this->getPermissionObject()->Check('absence', 'delete')
-									OR ( $this->getPermissionObject()->Check('absence', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('absence', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
-								)
+				$recalculate_user_date_stamp = FALSE;
+				foreach ( $data as $key => $id ) {
+					$primary_validator = new Validator();
+					$lf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $lf */
+					//$lf->StartTransaction();
+					if ( $id != '' ) {
+						//Modifying existing object.
+						//Get user_date_total object, so we can only modify just changed data for specific records if needed.
+						$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
+						if ( $lf->getRecordCount() == 1 ) {
+							//Object exists, check edit permissions
+							if ( (
+											$this->getPermissionObject()->Check( 'punch', 'delete' )
+											OR ( $this->getPermissionObject()->Check( 'punch', 'delete_own' ) AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+											OR ( $this->getPermissionObject()->Check( 'punch', 'delete_child' ) AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
+									)
+									OR
+									(
+											$this->getPermissionObject()->Check( 'absence', 'delete' )
+											OR ( $this->getPermissionObject()->Check( 'absence', 'delete_own' ) AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+											OR ( $this->getPermissionObject()->Check( 'absence', 'delete_child' ) AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
+									)
 							) {
-							Debug::Text('Record Exists, deleting record: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-							$lf = $lf->getCurrent();
+								Debug::Text( 'Record Exists, deleting record: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
+								$lf = $lf->getCurrent();
 
-							$recalculate_user_date_stamp[$lf->getUser()][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
+								$recalculate_user_date_stamp[ $lf->getUser() ][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
+							} else {
+								$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Delete permission denied' ) );
+							}
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
+							//Object doesn't exist.
+							$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 						}
 					} else {
-						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 					}
-				} else {
-					$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
-				}
 
-				//Debug::Arr($lf, 'AData: ', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::Arr($lf, 'AData: ', __FILE__, __LINE__, __METHOD__, 10);
 
-				$is_valid = $primary_validator->isValid();
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10);
-					$lf->setDeleted(TRUE);
-
-					$is_valid = $lf->isValid();
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
-						$lf->setEnableTimeSheetVerificationCheck(TRUE); //Unverify timesheet if its already verified.
-
-						//Before batch calculation mode was enabled...
-						//$lf->setEnableCalcSystemTotalTime( TRUE );
-						//$lf->setEnableCalcWeeklySystemTotalTime( TRUE );
-						//$lf->setEnableCalcException( TRUE );
-						$lf->setEnableCalcSystemTotalTime( FALSE );
-						$lf->setEnableCalcWeeklySystemTotalTime( FALSE );
-						$lf->setEnableCalcException( FALSE );
-
-						$save_result[$key] = $lf->Save();
-						$validator_stats['valid_records']++;
-					}
-				}
-
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
-
-					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
-
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
-				}
-
-				//$lf->CommitTransaction();
-
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-			}
-
-			if ( $is_valid == TRUE ) {
-				if ( is_array( $recalculate_user_date_stamp ) AND count( $recalculate_user_date_stamp ) > 0 ) {
-					Debug::Arr($recalculate_user_date_stamp, 'Recalculating other dates...', __FILE__, __LINE__, __METHOD__, 10);
-					foreach( $recalculate_user_date_stamp as $user_id => $date_arr ) {
-						$ulf = TTNew('UserListFactory');
-						$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
-						if ( $ulf->getRecordCount() > 0 ) {
-							$cp = TTNew('CalculatePolicy');
-							$cp->setUserObject( $ulf->getCurrent() );
-							$cp->addPendingCalculationDate( $date_arr );
-							$cp->calculate(); //This sets timezone itself.
-							$cp->Save();
+					//Prevent user from deleting records that haven't been overridden already. For example records created by punches and not the manual timesheet.
+					//  Just in case the manual timesheet UI for some reason shows them the delete (minus) icon on the wrong row when it shouldn't.
+					if ( $lf->getOverride() == FALSE ) {
+						Debug::Text( 'Skip deleting UDT record that isnt already overridden. Object Type: '. $lf->getObjectType() .' ID: '. $lf->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+						if ( $lf->getObjectType() == 50 ) {
+							$primary_validator->isTrue( 'override', FALSE, TTi18n::gettext( 'Unable to delete absences that originated from the schedule. Instead delete scheduled shift or edit this absence and set the total time to 0' ) );
+						} else {
+							$primary_validator->isTrue( 'override', FALSE, TTi18n::gettext( 'Unable to delete system records. Instead edit the record and set the total time to 0' ) );
 						}
 					}
-				} else {
-					Debug::Text('aNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
-				}
-			} else {
-				Debug::Text('bNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
-			}
 
-			$lf->CommitTransaction();
+					$is_valid = $primary_validator->isValid();
+					if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
+						Debug::Text( 'Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10 );
+						$lf->setDeleted( TRUE );
+
+						$is_valid = $lf->isValid();
+						if ( $is_valid == TRUE ) {
+							Debug::Text( 'Record Deleted...', __FILE__, __LINE__, __METHOD__, 10 );
+							$lf->setEnableTimeSheetVerificationCheck( TRUE ); //Unverify timesheet if its already verified.
+
+							//Before batch calculation mode was enabled...
+							//$lf->setEnableCalcSystemTotalTime( TRUE );
+							//$lf->setEnableCalcWeeklySystemTotalTime( TRUE );
+							//$lf->setEnableCalcException( TRUE );
+							$lf->setEnableCalcSystemTotalTime( FALSE );
+							$lf->setEnableCalcWeeklySystemTotalTime( FALSE );
+							$lf->setEnableCalcException( FALSE );
+
+							$save_result[ $key ] = $lf->Save();
+							$validator_stats['valid_records']++;
+						}
+					}
+
+					if ( $is_valid == FALSE ) {
+						Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
+
+						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
+
+						$validator[ $key ] = $this->setValidationArray( $primary_validator, $lf );
+					}
+
+					//$lf->CommitTransaction();
+
+					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				}
+
+				if ( $is_valid == TRUE ) {
+					if ( is_array( $recalculate_user_date_stamp ) AND count( $recalculate_user_date_stamp ) > 0 ) {
+						Debug::Arr( $recalculate_user_date_stamp, 'Recalculating other dates...', __FILE__, __LINE__, __METHOD__, 10 );
+						foreach ( $recalculate_user_date_stamp as $user_id => $date_arr ) {
+							$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+							$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
+							if ( $ulf->getRecordCount() > 0 ) {
+								$cp = TTNew( 'CalculatePolicy' ); /** @var CalculatePolicy $cp */
+								$cp->setUserObject( $ulf->getCurrent() );
+								$cp->addPendingCalculationDate( $date_arr );
+								$cp->calculate(); //This sets timezone itself.
+								$cp->Save();
+							}
+						}
+					} else {
+						Debug::Text( 'aNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10 );
+					}
+				} else {
+					Debug::Text( 'bNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10 );
+				}
+
+				$lf->CommitTransaction();
+				$lf->setTransactionMode(); //Back to default isolation level.
+
+				return array( $validator, $validator_stats, $key, $save_result );
+			};
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+
+			list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}

@@ -54,7 +54,7 @@ class RecurringPayStubAmendmentUserListFactory extends RecurringPayStubAmendment
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -83,7 +83,7 @@ class RecurringPayStubAmendmentUserListFactory extends RecurringPayStubAmendment
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -113,7 +113,7 @@ class RecurringPayStubAmendmentUserListFactory extends RecurringPayStubAmendment
 							b.company_id = ?
 							AND ( b.deleted = 0 )
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -142,7 +142,7 @@ class RecurringPayStubAmendmentUserListFactory extends RecurringPayStubAmendment
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -171,7 +171,7 @@ class RecurringPayStubAmendmentUserListFactory extends RecurringPayStubAmendment
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -204,7 +204,7 @@ class RecurringPayStubAmendmentUserListFactory extends RecurringPayStubAmendment
 					';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

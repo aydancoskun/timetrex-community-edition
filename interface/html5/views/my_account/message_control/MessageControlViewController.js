@@ -461,6 +461,10 @@ MessageControlViewController = BaseViewController.extend( {
 				$this.removeEditView();
 			}
 
+			$().TFeedback({
+				source: 'Save'
+			});
+
 		} else {
 			$this.setErrorMenu();
 			$this.setErrorTips( result );

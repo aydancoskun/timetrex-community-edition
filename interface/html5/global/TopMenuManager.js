@@ -1454,7 +1454,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	var email_help = new RibbonSubMenu( {
-		label: ( Global.getProductEdition() >= 15 ) ? $.i18n._( 'Email Help' ) : $.i18n._( 'Community<br>Forums' ),
+		label: ( Global.getProductEdition() >= 15 ) ? $.i18n._( 'Email<br>Support' ) : $.i18n._( 'Community<br>Forums' ),
 		id: 'EmailHelp',
 		group: help_group,
 		icon: 'emailhelp-35x35.png',

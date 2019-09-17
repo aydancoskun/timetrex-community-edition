@@ -55,7 +55,7 @@ class OtherFieldListFactory extends OtherFieldFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class OtherFieldListFactory extends OtherFieldFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -115,14 +115,14 @@ class OtherFieldListFactory extends OtherFieldFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
 
 	/**
 	 * @param string $id UUID
-	 * @param int $type_id
+	 * @param int[] $type_id
 	 * @param int $limit Limit the number of records returned
 	 * @param int $page Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
@@ -152,7 +152,7 @@ class OtherFieldListFactory extends OtherFieldFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -186,14 +186,14 @@ class OtherFieldListFactory extends OtherFieldFactory implements IteratorAggrega
 						AND a.deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
 	 * @param string $id UUID
-	 * @param int $type_id
+	 * @param int[] $type_id
 	 * @param null $key_prefix
 	 * @param null $name_prefix
 	 * @return array|bool
@@ -328,7 +328,7 @@ class OtherFieldListFactory extends OtherFieldFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -451,7 +451,7 @@ class OtherFieldListFactory extends OtherFieldFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

@@ -55,7 +55,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -118,7 +118,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -159,7 +159,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -195,7 +195,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -232,7 +232,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 						AND a.deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -268,7 +268,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -297,7 +297,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -334,7 +334,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -386,7 +386,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -433,7 +433,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -487,7 +487,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 		if ( $this->getRecordCount() > 0 ) {
 			Debug::text('PS Amendment rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -557,7 +557,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -565,11 +565,13 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 	/**
 	 * @param string $user_id UUID
 	 * @param $authorized
+	 * @param $status_id
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayStubAmendmentListFactory
+	 * @throws DBError
 	 */
 	function getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDate( $user_id, $authorized, $status_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
@@ -628,7 +630,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -684,7 +686,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 
@@ -775,19 +777,20 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $pay_period_id UUID
+	 * @param $pay_period_schedule_id
 	 * @param $status_id INT
 	 * @param $start_date INT
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayStubAmendmentListFactory
+	 * @throws DBError
 	 */
 	function getByCompanyIdAndPayPeriodScheduleIdAndStatusAndBeforeStartDate( $company_id, $pay_period_schedule_id, $status_id, $start_date, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
@@ -839,7 +842,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getSortSQL( $order );
 
 		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -1039,7 +1042,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		//Debug::Arr($query, 'Query: ', __FILE__, __LINE__, __METHOD__, 10);
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

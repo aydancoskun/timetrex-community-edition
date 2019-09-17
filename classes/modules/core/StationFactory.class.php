@@ -663,7 +663,7 @@ class StationFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getGroup() {
-		$lf = TTnew( 'StationUserGroupListFactory' );
+		$lf = TTnew( 'StationUserGroupListFactory' ); /** @var StationUserGroupListFactory $lf */
 		$lf->getByStationId( $this->getId() );
 		$list = array();
 		foreach ($lf as $obj) {
@@ -686,13 +686,17 @@ class StationFactory extends Factory {
 			$ids = array(); //This is for the API, it sends FALSE when no branches are selected, so this will delete all branches.
 		}
 
+		if ( !is_array($ids) AND TTUUID::isUUID( $ids ) ) {
+			$ids = array($ids);
+		}
+
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
 			$tmp_ids = array();
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'StationUserGroupListFactory' );
+				$lf_a = TTnew( 'StationUserGroupListFactory' ); /** @var StationUserGroupListFactory $lf_a */
 				$lf_a->getByStationId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -713,13 +717,11 @@ class StationFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'UserGroupListFactory' );
+			$lf_b = TTnew( 'UserGroupListFactory' ); /** @var UserGroupListFactory $lf_b */
 
 			foreach ($ids as $id) {
-				if ( isset($ids)
-						AND TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID()
-						AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'StationUserGroupFactory' );
+				if ( $id !== FALSE AND ( TTUUID::isUUID( $id ) AND ( $id == TTUUID::getNotExistID() OR $id != TTUUID::getZeroID() ) ) AND !in_array($id, $tmp_ids) ) {
+					$f = TTnew( 'StationUserGroupFactory' ); /** @var StationUserGroupFactory $f */
 					$f->setStation( $this->getId() );
 					$f->setGroup( $id );
 
@@ -760,7 +762,7 @@ class StationFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getBranch() {
-		$lf = TTnew( 'StationBranchListFactory' );
+		$lf = TTnew( 'StationBranchListFactory' ); /** @var StationBranchListFactory $lf */
 		$lf->getByStationId( $this->getId() );
 		$list = array();
 		foreach ($lf as $obj) {
@@ -782,6 +784,11 @@ class StationFactory extends Factory {
 		if ( $ids == '' ) {
 			$ids = array(); //This is for the API, it sends FALSE when no branches are selected, so this will delete all branches.
 		}
+
+		if ( !is_array($ids) AND TTUUID::isUUID( $ids ) ) {
+			$ids = array($ids);
+		}
+
 		//Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($ids, 'IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
@@ -789,7 +796,7 @@ class StationFactory extends Factory {
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'StationBranchListFactory' );
+				$lf_a = TTnew( 'StationBranchListFactory' ); /** @var StationBranchListFactory $lf_a */
 				$lf_a->getByStationId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -810,11 +817,11 @@ class StationFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'BranchListFactory' );
+			$lf_b = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $lf_b */
 
 			foreach ($ids as $id) {
-				if ( isset($ids) AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'StationBranchFactory' );
+				if ( $id !== FALSE AND ( TTUUID::isUUID( $id ) AND $id != TTUUID::getNotExistID() AND $id != TTUUID::getZeroID() ) AND !in_array($id, $tmp_ids) ) {
+					$f = TTnew( 'StationBranchFactory' ); /** @var StationBranchFactory $f */
 					$f->setStation( $this->getId() );
 					$f->setBranch( $id );
 
@@ -855,7 +862,7 @@ class StationFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getDepartment() {
-		$lf = TTnew( 'StationDepartmentListFactory' );
+		$lf = TTnew( 'StationDepartmentListFactory' ); /** @var StationDepartmentListFactory $lf */
 		$lf->getByStationId( $this->getId() );
 		$list = array();
 		foreach ($lf as $obj) {
@@ -878,13 +885,17 @@ class StationFactory extends Factory {
 			$ids = array(); //This is for the API, it sends FALSE when no branches are selected, so this will delete all branches.
 		}
 
+		if ( !is_array($ids) AND TTUUID::isUUID( $ids ) ) {
+			$ids = array($ids);
+		}
+
 		//Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
 			$tmp_ids = array();
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'StationDepartmentListFactory' );
+				$lf_a = TTnew( 'StationDepartmentListFactory' ); /** @var StationDepartmentListFactory $lf_a */
 				$lf_a->getByStationId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -905,11 +916,11 @@ class StationFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'DepartmentListFactory' );
+			$lf_b = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $lf_b */
 
 			foreach ($ids as $id) {
-				if ( isset($ids) AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'StationDepartmentFactory' );
+				if ( $id !== FALSE AND ( TTUUID::isUUID( $id ) AND $id != TTUUID::getNotExistID() AND $id != TTUUID::getZeroID() ) AND !in_array($id, $tmp_ids) ) {
+					$f = TTnew( 'StationDepartmentFactory' ); /** @var StationDepartmentFactory $f */
 					$f->setStation( $this->getId() );
 					$f->setDepartment( $id );
 
@@ -934,7 +945,7 @@ class StationFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getIncludeUser() {
-		$lf = TTnew( 'StationIncludeUserListFactory' );
+		$lf = TTnew( 'StationIncludeUserListFactory' ); /** @var StationIncludeUserListFactory $lf */
 		$lf->getByStationId( $this->getId() );
 		$list = array();
 		foreach ($lf as $obj) {
@@ -957,13 +968,17 @@ class StationFactory extends Factory {
 			$ids = array(); //This is for the API, it sends FALSE when no branches are selected, so this will delete all branches.
 		}
 
+		if ( !is_array($ids) AND TTUUID::isUUID( $ids ) ) {
+			$ids = array($ids);
+		}
+
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
 			$tmp_ids = array();
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'StationIncludeUserListFactory' );
+				$lf_a = TTnew( 'StationIncludeUserListFactory' ); /** @var StationIncludeUserListFactory $lf_a */
 				$lf_a->getByStationId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -984,11 +999,11 @@ class StationFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'UserListFactory' );
+			$lf_b = TTnew( 'UserListFactory' ); /** @var UserListFactory $lf_b */
 
 			foreach ($ids as $id) {
-				if ( isset($ids) AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'StationIncludeUserFactory' );
+				if ( $id !== FALSE AND ( TTUUID::isUUID( $id ) AND $id != TTUUID::getNotExistID() AND $id != TTUUID::getZeroID() ) AND !in_array($id, $tmp_ids) ) {
+					$f = TTnew( 'StationIncludeUserFactory' ); /** @var StationIncludeUserFactory $f */
 					$f->setStation( $this->getId() );
 					$f->setIncludeUser( $id );
 
@@ -1013,7 +1028,7 @@ class StationFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getExcludeUser() {
-		$lf = TTnew( 'StationExcludeUserListFactory' );
+		$lf = TTnew( 'StationExcludeUserListFactory' ); /** @var StationExcludeUserListFactory $lf */
 		$lf->getByStationId( $this->getId() );
 		$list = array();
 		foreach ($lf as $obj) {
@@ -1036,13 +1051,17 @@ class StationFactory extends Factory {
 			$ids = array(); //This is for the API, it sends FALSE when no branches are selected, so this will delete all branches.
 		}
 
+		if ( !is_array($ids) AND TTUUID::isUUID( $ids ) ) {
+			$ids = array($ids);
+		}
+
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
 			$tmp_ids = array();
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'StationExcludeUserListFactory' );
+				$lf_a = TTnew( 'StationExcludeUserListFactory' ); /** @var StationExcludeUserListFactory $lf_a */
 				$lf_a->getByStationId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -1063,11 +1082,11 @@ class StationFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'UserListFactory' );
+			$lf_b = TTnew( 'UserListFactory' ); /** @var UserListFactory $lf_b */
 
 			foreach ($ids as $id) {
-				if ( isset($ids) AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'StationExcludeUserFactory' );
+				if ( $id !== FALSE AND ( TTUUID::isUUID( $id ) AND $id != TTUUID::getNotExistID() AND $id != TTUUID::getZeroID() ) AND !in_array($id, $tmp_ids) ) {
+					$f = TTnew( 'StationExcludeUserFactory' ); /** @var StationExcludeUserFactory $f */
 					$f->setStation( $this->getId() );
 					$f->setExcludeUser( $id );
 
@@ -1200,7 +1219,7 @@ class StationFactory extends Factory {
 	}
 
 	/**
-	 * @param $bool
+	 * @param $value
 	 * @return bool
 	 */
 	function setEnableAutoPunchStatus( $value) {
@@ -1293,7 +1312,7 @@ class StationFactory extends Factory {
 			return FALSE;
 		}
 
-		$slf = TTnew( 'StationListFactory' );
+		$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 		$slf->getById( $id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$ph = array(
@@ -1302,7 +1321,7 @@ class StationFactory extends Factory {
 						'id' => $id,
 						);
 			$query = 'UPDATE '. $this->getTable() .' set last_poll_date = ?, last_punch_time_stamp = ? where id = ?';
-			$this->db->Execute($query, $ph);
+			$this->ExecuteSQL($query, $ph);
 
 			return TRUE;
 		}
@@ -1321,7 +1340,7 @@ class StationFactory extends Factory {
 			return FALSE;
 		}
 
-		$slf = TTnew( 'StationListFactory' );
+		$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 		$slf->getById( $id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$ph = array(
@@ -1329,7 +1348,7 @@ class StationFactory extends Factory {
 						'id' => $id,
 						);
 			$query = 'UPDATE '. $this->getTable() .' set last_poll_date = ? where id = ?';
-			$this->db->Execute($query, $ph);
+			$this->ExecuteSQL($query, $ph);
 
 			return TRUE;
 		}
@@ -1348,7 +1367,7 @@ class StationFactory extends Factory {
 			return FALSE;
 		}
 
-		$slf = TTnew( 'StationListFactory' );
+		$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 		$slf->getById( $id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$ph = array(
@@ -1357,7 +1376,7 @@ class StationFactory extends Factory {
 						);
 
 			$query = 'UPDATE '. $this->getTable() .' set last_push_date = ? where id = ?';
-			$this->db->Execute($query, $ph);
+			$this->ExecuteSQL($query, $ph);
 
 			return TRUE;
 		}
@@ -1376,7 +1395,7 @@ class StationFactory extends Factory {
 			return FALSE;
 		}
 
-		$slf = TTnew( 'StationListFactory' );
+		$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 		$slf->getById( $id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$ph = array(
@@ -1385,7 +1404,7 @@ class StationFactory extends Factory {
 						);
 
 			$query = 'UPDATE '. $this->getTable() .' set last_partial_push_date = ? where id = ?';
-			$this->db->Execute($query, $ph);
+			$this->ExecuteSQL($query, $ph);
 
 			return TRUE;
 		}
@@ -1641,9 +1660,8 @@ class StationFactory extends Factory {
 		return TRUE;
 	}
 
-	//Update JUST station allowed_date without affecting updated_date, and without creating an EDIT entry in the system_log.
-
 	/**
+	 * Update JUST station allowed_date without affecting updated_date, and without creating an EDIT entry in the system_log.
 	 * @param string $id UUID
 	 * @param string $user_id UUID
 	 * @return bool
@@ -1657,7 +1675,7 @@ class StationFactory extends Factory {
 			return FALSE;
 		}
 
-		$slf = TTnew( 'StationListFactory' );
+		$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 		$slf->getById( $id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$ph = array(
@@ -1665,7 +1683,7 @@ class StationFactory extends Factory {
 						'id' => $id,
 						);
 			$query = 'UPDATE '. $this->getTable() .' set allowed_date = ? where id = ?';
-			$this->db->Execute($query, $ph);
+			$this->ExecuteSQL($query, $ph);
 
 			TTLog::addEntry( $id, 200, TTi18n::getText('Access from station Allowed'), $user_id, $this->getTable() ); //Allow
 
@@ -1769,6 +1787,7 @@ class StationFactory extends Factory {
 	 * @param string $user_id UUID
 	 * @param string $current_station_id UUID
 	 * @param string $id UUID
+	 * @param bool $update_allowed_date
 	 * @return bool
 	 */
 	function isAllowed( $user_id = NULL, $current_station_id = NULL, $id = NULL, $update_allowed_date = TRUE ) {
@@ -1840,14 +1859,14 @@ class StationFactory extends Factory {
 	}
 
 
-
 	/**
 	 * A fast way to check many stations if the user is allowed. 10 = PC
 	 * @param string $user_id UUID
 	 * @param string $station_id UUID
 	 * @param int $type
-	 * @parem bool $update_allowed_date Updates the station allowed date, which should only be done when a punch is saved.
+	 * @param bool $update_allowed_date
 	 * @return bool
+	 * @parem bool $update_allowed_date Updates the station allowed date, which should only be done when a punch is saved.
 	 */
 	function checkAllowed( $user_id = NULL, $station_id = NULL, $type = 10, $update_allowed_date = TRUE ) {
 		if ($user_id == NULL OR $user_id == '') {
@@ -1868,7 +1887,7 @@ class StationFactory extends Factory {
 			}
 		}
 
-		$slf = TTnew( 'StationListFactory' );
+		$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 		$slf->getByUserIdAndStatusAndType($user_id, 20, $type, $station_id ); //Station ID just helps order more specific stations to the top of the list.
 		Debug::text('Station ID: '. $station_id .' Type: '. $type .' Found Stations: '. $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		foreach($slf as $station) {
@@ -1925,7 +1944,7 @@ class StationFactory extends Factory {
 			Debug::text('Station ID: '. $station_id .' (Type: '. $type_id .') does not exist, creating new station', __FILE__, __LINE__, __METHOD__, 10);
 
 			//Insert new station
-			$sf = TTnew( 'StationFactory' );
+			$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
 			$sf->setCompany( $company_id );
 			$sf->setID( $sf->getNextInsertId() ); //This is required to call setIncludeUser() properly.
 
@@ -2048,7 +2067,7 @@ class StationFactory extends Factory {
 		//
 
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -2113,7 +2132,7 @@ class StationFactory extends Factory {
 		}
 		// Default Branch
 		if ( $this->getDefaultBranch() !== FALSE AND $this->getDefaultBranch() != TTUUID::getZeroID() ) {
-			$blf = TTnew( 'BranchListFactory' );
+			$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 			$this->Validator->isResultSetWithRows(	'branch_id',
 															$blf->getByID($this->getDefaultBranch()),
 															TTi18n::gettext('Invalid Branch')
@@ -2121,7 +2140,7 @@ class StationFactory extends Factory {
 		}
 		// Default Department
 		if ( $this->getDefaultDepartment() !== FALSE AND $this->getDefaultDepartment() != TTUUID::getZeroID() ) {
-			$dlf = TTnew( 'DepartmentListFactory' );
+			$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 			$this->Validator->isResultSetWithRows(	'department_id',
 															$dlf->getByID($this->getDefaultDepartment()),
 															TTi18n::gettext('Invalid Department')
@@ -2130,7 +2149,7 @@ class StationFactory extends Factory {
 		// Default Job
 		if ( $this->getDefaultJob() !== FALSE AND $this->getDefaultJob() != TTUUID::getZeroID() ) {
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-				$jlf = TTnew( 'JobListFactory' );
+				$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 				$this->Validator->isResultSetWithRows(	'job_id',
 																$jlf->getByID($this->getDefaultJob()),
 																TTi18n::gettext('Invalid Job')
@@ -2141,7 +2160,7 @@ class StationFactory extends Factory {
 		// Default Task
 		if ( $this->getDefaultJobItem() !== FALSE AND $this->getDefaultJobItem() != TTUUID::getZeroID() ) {
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-				$jilf = TTnew( 'JobItemListFactory' );
+				$jilf = TTnew( 'JobItemListFactory' ); /** @var JobItemListFactory $jilf */
 				$this->Validator->isResultSetWithRows(	'job_item_id',
 																$jilf->getByID($this->getDefaultJobItem()),
 																TTi18n::gettext('Invalid Task')
@@ -2151,7 +2170,7 @@ class StationFactory extends Factory {
 		}
 		// Time Zone
 		if ( $this->getTimeZone() !== FALSE AND $this->getTimeZone() != TTUUID::getZeroID() ) {
-			$upf = TTnew( 'UserPreferenceFactory' );
+			$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 			$this->Validator->inArrayKey(	'time_zone',
 													$this->getTimeZone(),
 													TTi18n::gettext('Incorrect Time Zone'),
@@ -2358,6 +2377,7 @@ class StationFactory extends Factory {
 											FALSE,
 											TTi18n::gettext('Type is not available in %1 Community Edition, please contact our sales department for more information', APPLICATION_NAME ));
 		}
+
 		if ( $ignore_warning == FALSE ) {
 			if ( $this->getStatus() == 20 AND $this->isActiveForAnyEmployee() == FALSE ) {
 				$this->Validator->Warning( 'group', TTi18n::gettext('Employee Criteria denies access to all employees, if you save this record it will be marked as DISABLED') );
@@ -2367,9 +2387,8 @@ class StationFactory extends Factory {
 		return TRUE;
 	}
 
-	//Check to see if this station is active for any employees, if not, we may as well mark it as disabled to speed up queries.
-
 	/**
+	 * Check to see if this station is active for any employees, if not, we may as well mark it as disabled to speed up queries.
 	 * @return bool
 	 */
 	function isActiveForAnyEmployee() {
@@ -2385,6 +2404,7 @@ class StationFactory extends Factory {
 			Debug::text('Station is not active for any employees, everyone is denied.', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
+
 		Debug::text('Station IS active for at least some employees...', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
@@ -2546,6 +2566,8 @@ class StationFactory extends Factory {
 		if ( !( $log_action == 10 AND $this->getType() == 10 ) ) {
 			return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Station'), NULL, $this->getTable(), $this );
 		}
+
+		return FALSE;
 	}
 }
 ?>

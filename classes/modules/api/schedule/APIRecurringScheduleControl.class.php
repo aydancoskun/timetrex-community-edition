@@ -59,7 +59,7 @@ class APIRecurringScheduleControl extends APIFactory {
 
 		//Default the display weeks to the closest value (min/max) to the average display weeks of any recurring schedule. That way its somewhat configurable.
 		//We could also default it to the maximum amount of time between now and the further committed schedule, or some average thereof.
-		$rsclf = TTnew('RecurringScheduleControlListFactory');
+		$rsclf = TTnew('RecurringScheduleControlListFactory'); /** @var RecurringScheduleControlListFactory $rsclf */
 		$default_display_weeks = $rsclf->getMostCommonDisplayWeeksByCompanyId( $company_obj->getId() );
 		Debug::Text('Most Common Display Weeks: '. $default_display_weeks, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $default_display_weeks < 4 ) {
@@ -105,7 +105,7 @@ class APIRecurringScheduleControl extends APIFactory {
 			$data['filter_data']['permission_children_ids'][] = TTUUID::getZeroID();
 		}
 
-		$blf = TTnew( 'RecurringScheduleControlListFactory' );
+		$blf = TTnew( 'RecurringScheduleControlListFactory' ); /** @var RecurringScheduleControlListFactory $blf */
 		if ( $expanded_mode == TRUE ) {
 			$blf->getAPIExpandedSearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		} else {
@@ -202,7 +202,7 @@ class APIRecurringScheduleControl extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'RecurringScheduleControlListFactory' );
+				$lf = TTnew( 'RecurringScheduleControlListFactory' ); /** @var RecurringScheduleControlListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -321,7 +321,7 @@ class APIRecurringScheduleControl extends APIFactory {
 			$i = 0;
 			foreach( $data as $key => $tmp_id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'RecurringScheduleControlListFactory' );
+				$lf = TTnew( 'RecurringScheduleControlListFactory' ); /** @var RecurringScheduleControlListFactory $lf */
 				$lf->StartTransaction();
 
 				//Need to support deleting the entire recurring schedule, or just one user from it.

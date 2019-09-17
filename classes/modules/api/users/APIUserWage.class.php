@@ -63,14 +63,14 @@ class APIUserWage extends APIFactory {
 		//If user_id is passed, check for other wage entries, if none, default to the employees hire date.
 		if ( $user_id != '' ) {
 			//Check for existing wage entries.
-			$uwlf = TTnew( 'UserWageListFactory' );
+			$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 			$uwlf->getLastWageByUserId($user_id);
 			if ( $uwlf->getRecordCount() == 1 ) {
 				Debug::Text('Previous wage entry already exists...', __FILE__, __LINE__, __METHOD__, 10);
 				$effective_date = time();
 			} else {
 				Debug::Text('Trying to use hire date...', __FILE__, __LINE__, __METHOD__, 10);
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
 				if ( $ulf->getRecordCount() > 0 ) {
 					$effective_date = $ulf->getCurrent()->getHireDate();
@@ -112,7 +112,7 @@ class APIUserWage extends APIFactory {
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view' );
 
-		$blf = TTnew( 'UserWageListFactory' );
+		$blf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $blf */
 		if ( $last_user_wage_only == TRUE ) {
 			Debug::Text('Using APILastWageSearch...', __FILE__, __LINE__, __METHOD__, 10);
 			$blf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
@@ -209,7 +209,7 @@ class APIUserWage extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserWageListFactory' );
+				$lf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -328,7 +328,7 @@ class APIUserWage extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserWageListFactory' );
+				$lf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -441,7 +441,7 @@ class APIUserWage extends APIFactory {
 		}
 
 		//FIXME: Pass user_id and/or currency_id so we can properly round to the right number of decimals.
-		$uwf = TTnew( 'UserWageFactory' );
+		$uwf = TTnew( 'UserWageFactory' ); /** @var UserWageFactory $uwf */
 		$uwf->setType( $wage_type_id );
 		//$uwf->setWage( TTi18n::parseFloat( $wage ) );
 		$uwf->setWage( $wage );

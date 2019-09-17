@@ -65,10 +65,9 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 			case 'type':
 				$retval = array();
 
-				$praf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+				$praf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $praf */
 				$praf->getById( $params['payroll_remittance_agency_id'] );
 				if ( $praf->getRecordCount() > 0 ) {
-					/** @var PayrollRemittanceAgencyListFactory $pra_obj */
 					$pra_obj = $praf->getCurrent();
 					$agency_id = $pra_obj->getAgency();
 					Debug::Text( 'Agency ID: ' . $agency_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -241,6 +240,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				'payroll_remittance_agency_name' => FALSE,
 
 				'enable_recalculate_dates' => FALSE,
+				'recalculate_date' => FALSE,
 
 				'in_use' => FALSE,
 				'in_time_period' => FALSE,
@@ -250,8 +250,10 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
-		/** @var PayrollRemittanceAgencyFactory $pra_obj */
 		$pra_obj = $this->getPayrollRemittanceAgencyObject();
 		if( is_object($pra_obj) ) {
 			$le_obj = $pra_obj->getLegalEntityObject();
@@ -468,6 +470,9 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	/*
 	 * @return bool|mixed
 	 */
+	/**
+	 * @return bool|mixed
+	 */
 	function getDueDateDelayDays() {
 		return $this->getGenericDataValue( 'due_date_delay_days' );
 	}
@@ -594,7 +599,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setLastDueDate( $value) {
@@ -620,7 +625,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setStartDate( $value) {
@@ -645,7 +650,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setEndDate( $value) {
@@ -671,7 +676,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setDueDate( $value) {
@@ -697,7 +702,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setNextReminderDate( $value) {
@@ -724,7 +729,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setLastReminderDate( $value) {
@@ -733,7 +738,6 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param bool $raw
 	 * @return bool|int
 	 */
 	function getEnableRecalculateDates() {
@@ -741,11 +745,37 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setEnableRecalculateDates( $value) {
 		return $this->setGenericTempDataValue( 'enable_recalculate_dates', (bool)$value );
+	}
+
+	/**
+	 * @param bool $raw
+	 * @return bool|int
+	 */
+	function getRecalculateDate( $raw = FALSE ) {
+		$value = $this->getGenericTempDataValue( 'recalculate_date' );
+		if ( $value !== FALSE ) {
+			if ( $raw === TRUE ) {
+				return $value;
+			} else {
+				return TTDate::strtotime( $value );
+			}
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setRecalculateDate( $value) {
+		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		return $this->setGenericTempDataValue( 'recalculate_date', $value );
 	}
 
 	/**
@@ -799,7 +829,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Remittance agency
-		$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $pralf */
 		$this->Validator->isResultSetWithRows(	'payroll_remittance_agency_id',
 														$pralf->getByID($this->getPayrollRemittanceAgencyId()),
 														TTi18n::gettext('Remittance agency is invalid')
@@ -902,7 +932,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 			// Reminder Employee - Allow this to be NONE in cases where creating it during a fresh install when a user may not even exist yet.
 			if ( $this->getReminderUser() != '' AND $this->getReminderUser() != TTUUID::getZeroId() ) {
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$this->Validator->isResultSetWithRows( 'reminder_user_id',
 													   $ulf->getByID( $this->getReminderUser() ),
 													   TTi18n::gettext( 'Invalid Reminder Employee' )
@@ -1060,6 +1090,9 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						case 'enable_recalculate_dates':
 							$this->setEnableRecalculateDates( $data[$key] );
 							break;
+						case 'recalculate_date':
+							$this->setRecalculateDate( TTDate::parseDateTime( $data[$key] ) );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -1153,6 +1186,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	/**
 	 * Gets next event date based on the frequency type & other frequency signals provided.
 	 * @param null $last_due_date
+	 * @param null $current_epoch
 	 * @return array|bool
 	 */
 	function calculateNextDate( $last_due_date = NULL, $current_epoch = NULL ) {
@@ -1160,12 +1194,17 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 			$current_epoch = time();
 		}
 
-		if ( $last_due_date == '' ) {
-			$last_due_date = $this->getLastDueDate();
+		if ( $last_due_date == '' AND $this->getRecalculateDate() != '' ) {
+			$last_due_date = $this->getRecalculateDate();
+		} else {
+			if ( $last_due_date == '' ) {
+				$last_due_date = $this->getLastDueDate();
+			}
+			if ( $last_due_date == '' OR $this->getEffectiveDate() > $last_due_date ) {
+				$last_due_date = $this->getEffectiveDate();
+			}
 		}
-		if ( $last_due_date == '' OR $this->getEffectiveDate() > $last_due_date ) {
-			$last_due_date = $this->getEffectiveDate();
-		}
+
 		if ( $last_due_date == '' ) {
 			$last_due_date = $current_epoch;
 		}
@@ -1184,8 +1223,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				}
 				$last_due_date -= 86400;
 
-				/** @var PayPeriodListFactory $pplf */
-				$pplf = TTnew('PayPeriodListFactory');
+				$pplf = TTnew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 				if ( is_object( $this->getPayrollRemittanceAgencyObject() ) AND is_object( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject() ) ) {
 					$le_obj  = $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject();
 					if ( is_object( $le_obj ) ) {
@@ -1384,8 +1422,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				);
 				break;
 			case 50000: //CA - Accelerated threshold 1
-				/** @var PayrollRemittanceAgencyEventFactory $tmp_praef */
-				$tmp_praef = TTnew('PayrollRemittanceAgencyEventFactory');
+				$tmp_praef = TTnew('PayrollRemittanceAgencyEventFactory'); /** @var PayrollRemittanceAgencyEventFactory $tmp_praef */
 				$tmp_praef->setFrequency( 4200 );
 				$tmp_praef->setPrimaryDayOfMonth(15);
 				$tmp_praef->setSecondaryDayOfMonth(31);
@@ -1652,7 +1689,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				Debug::Text( 'Checking for newly hired users between: Start Date: ' . TTDate::getDATE('DATE+TIME', $start_date ) . ' End Date: ' . TTDate::getDATE('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				if ( is_object( $this->getCompanyObject() ) ) {
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 					//As of schema version 1093A, the hire date column was changed to a date_stamp rather than epoch, which causes a SQL error during upgrade from old versions of TimeTrex.
 					// So when called through the installer, use a less optimized SQL query that won't trigger that error.
@@ -1724,7 +1761,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				Debug::Text( 'Checking for terminated users between: Start Date: ' . TTDate::getDATE('DATE+TIME', $start_date ) . ' End Date: ' . TTDate::getDATE('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				if ( is_object( $this->getCompanyObject() ) ) {
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 					//As of schema version 1093A, the hire date column was changed to a date_stamp rather than epoch, which causes a SQL error during upgrade from old versions of TimeTrex.
 					// So when called through the installer, use a less optimized SQL query that won't trigger that error.
@@ -1780,13 +1817,13 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 				Debug::Text( 'Upon Termination: Last Due Date: '. TTDate::getDate('DATE+TIME', $last_due_date) .' Delay Days: '. $this->getDueDateDelayDays(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( is_object( $this->getCompanyObject() ) ) {
-					$pplf = TTnew('PayPeriodListFactory');
+					$pplf = TTnew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 					$pplf->getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $this->getCompanyObject()->getId(), $this->getPayPeriodSchedule(), $current_epoch );
 					Debug::Text( '  Pay periods found: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $pplf->getRecordCount() > 0 ) {
 						$pp_obj = $pplf->getCurrent();
 
-						$ulf = TTnew( 'UserListFactory' );
+						$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 						$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), array('pay_period_schedule_id' => $this->getPayPeriodSchedule(), 'termination_start_date' => $pp_obj->getStartDate(), 'termination_end_date' => $pp_obj->getEndDate() ), 1, NULL, NULL, array('termination_date' => 'asc') ); //Limit 1 so we get the earliest termination date first.
 						Debug::Text( '  Terminated users from '.TTDate::getDate('DATE+TIME', $pp_obj->getStartDate()).' to '.TTDate::getDate('DATE+TIME', $pp_obj->getEndDate()).': '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 						if ( $ulf->getRecordCount() > 0 ) { //If at least one user is terminated in the pay period, return the dates.
@@ -1828,7 +1865,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param $last_due_date
+	 * @param $due_date
 	 * @return bool|false|int|mixed
 	 */
 	function calculateNextReminderDate( $due_date ) {
@@ -1842,7 +1879,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	}
 
 	/**
-	 * @param int $start_epoch
+	 * @param bool $start_epoch
 	 * @return array
 	 */
 	function getRecurringHolidayDates( $start_epoch = FALSE ) {
@@ -1855,8 +1892,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				if ( is_object( $company_obj ) ) {
 
 					$company_id = $company_obj->getId();
-					/** @var RecurringHolidayListFactory $rhlf */
-					$rhlf = TTnew( 'RecurringHolidayListFactory' );
+					$rhlf = TTnew( 'RecurringHolidayListFactory' ); /** @var RecurringHolidayListFactory $rhlf */
 					$rhlf->getByIdAndCompanyId( $selected_holidays, $company_id );
 
 					if ( $rhlf->getRecordCount() > 0 ) {
@@ -1885,7 +1921,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 */
 	function getPayrollRemittanceAgencyEventReminderAddresses() {
 		if ( $this->getReminderUser() != '' ) {
-			$uplf = TTnew( 'UserPreferenceListFactory' );
+			$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 			$uplf->getByUserIdAndStatus( $this->getReminderUser(), 10 ); //Only email ACTIVE employees/supervisors.
 			if ( $uplf->getRecordCount() > 0 ) {
 				$retarr = array();
@@ -1936,22 +1972,18 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		}
 		Debug::Text('Bcc: '. $bcc, __FILE__, __LINE__, __METHOD__, 10);
 
-		/** @var UserFactory $u_obj */
 		$u_obj = $this->getReminderUserObject();
 		if ( is_object($u_obj) === FALSE ) {
 			return FALSE;
 		}
-		/** @var PayrollRemittanceAgencyFactory $pra_obj */
 		$pra_obj = $this->getPayrollRemittanceAgencyObject();
 		if ( is_object($pra_obj) === FALSE ) {
 			return FALSE;
 		}
-		/** @var CompanyFactory $company_obj */
 		$company_obj = $u_obj->getCompanyObject();
 		if ( is_object($company_obj) === FALSE ) {
 			return FALSE;
 		}
-		/** @var LegalEntityFactory $company_obj */
 		$legal_entity_obj = $pra_obj->getLegalEntityObject();
 		if ( is_object($legal_entity_obj) === FALSE ) {
 			return FALSE;
@@ -2027,6 +2059,9 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		return TRUE; //Always return true
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getEventData() {
 		$remittance_agency_event_data = include( 'PayrollRemittanceAgencyEventFactory.data.php' ); //Contains large array of necessary data.
 
@@ -2055,7 +2090,14 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		return $url;
 	}
 
-	function getReport( $report_id, $data = NULL, $user_obj, $permission_obj ) {
+	/**
+	 * @param $report_id
+	 * @param $data
+	 * @param $user_obj
+	 * @param $permission_obj
+	 * @return bool|object
+	 */
+	function getReport( $report_id, $data, $user_obj, $permission_obj ) {
 		$report_obj_name = NULL;
 		$report_data = array();
 		$report_data_override = array(); //Overrides report data.
@@ -2069,7 +2111,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 		$user_data_id = $this->getUserReportData();
 		if ( TTUUID::isUUID( $user_data_id ) AND $user_data_id != TTUUID::getZeroID() ) {
-			$urdlf = TTnew( 'UserReportDataListFactory' );
+			$urdlf = TTnew( 'UserReportDataListFactory' ); /** @var UserReportDataListFactory $urdlf */
 			$urdlf->getById( $user_data_id );
 			if ( $urdlf->getRecordCount() == 1 ) {
 				$urd_obj = $urdlf->getCurrent();
@@ -2273,8 +2315,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 					$report_obj_name = 'TaxSummaryReport';
 					$report_data['filter']['company_deduction_id'] = array();
 
-					/** @var CompanyDeductionListFactory $cdlf */
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndPayrollRemittanceAgencyId( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject()->getCompany(), $this->getPayrollRemittanceAgencyObject()->getId() );
 					if ( $cdlf->getRecordCount() > 0 ) {
 						foreach ( $cdlf as $cd_obj ) {

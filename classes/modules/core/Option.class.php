@@ -130,10 +130,10 @@ class Option {
 		return FALSE;
 	}
 
-	//Takes $needles as an array, loops through them returning matching
-	//keys => value pairs from haystack
-	//Useful for filtering results to a select box, like status.
 	/**
+	 * Takes $needles as an array, loops through them returning matching
+	 * keys => value pairs from haystack
+	 * Useful for filtering results to a select box, like status.
 	 * @param $needles
 	 * @param $haystack
 	 * @return array|bool

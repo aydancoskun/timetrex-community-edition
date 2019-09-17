@@ -99,7 +99,7 @@ class APIPayStubTransaction extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
 
-		$pstlf = TTnew( 'PayStubTransactionListFactory' );
+		$pstlf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pstlf */
 		$pstlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $pstlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $pstlf->getRecordCount() > 0 ) {
@@ -167,8 +167,7 @@ class APIPayStubTransaction extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				/** @var PayStubTransactionListFactory $lf */
-				$lf = TTnew( 'PayStubTransactionListFactory' );
+				$lf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -268,7 +267,7 @@ class APIPayStubTransaction extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayStubTransactionListFactory' );
+				$lf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -366,12 +365,11 @@ class APIPayStubTransaction extends APIFactory {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		/** @var PayStubTransactionListFactory $pstlf */
-		$pstlf = TTnew( 'PayStubTransactionListFactory' );
+		$pstlf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pstlf */
 		$company_id = $this->getCurrentCompanyObject()->getId();
 
 		if ( isset($filter_data['time_period']) AND is_array($filter_data['time_period']) ) {
-			$report_obj = TTnew('Report');
+			$report_obj = TTnew('Report'); /** @var Report $report_obj */
 			$report_obj->setUserObject( $this->getCurrentUserObject() );
 			$report_obj->setPermissionObject( $this->getPermissionObject() );
 			Debug::Text('Found TimePeriod...', __FILE__, __LINE__, __METHOD__, 10);
@@ -387,10 +385,9 @@ class APIPayStubTransaction extends APIFactory {
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
 		$pstlf->getAPISummaryByCompanyIdAndArrayCriteria( $company_id, $filter_data );
 
-		$rsa_obj = TTnew( 'RemittanceSourceAccountFactory' );
+		$rsa_obj = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsa_obj */
 
 		$retarr = array();
-		/** @var PayStubTransactionFactory $pst_obj */
 		foreach($pstlf as $pst_obj) {
 			$currency = $pst_obj->getCurrencyObject()->getName();
 			$retarr[] = array( 'pay_period_id' => $pst_obj->getPayPeriodID(),

@@ -199,7 +199,6 @@ class HelpGroupFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
 	 * @return bool
 	 */
 	function Validate() {
@@ -207,13 +206,13 @@ class HelpGroupFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Help Group Control
-		$hgclf = TTnew( 'HelpGroupControlListFactory' );
+		$hgclf = TTnew( 'HelpGroupControlListFactory' ); /** @var HelpGroupControlListFactory $hgclf */
 		$this->Validator->isResultSetWithRows(	'help_group_control',
 														$hgclf->getByID($this->getHelpGroupControl()),
 														TTi18n::gettext('Help Group Control is invalid')
 													);
 		// Help Entry
-		$hlf = TTnew( 'HelpListFactory' );
+		$hlf = TTnew( 'HelpListFactory' ); /** @var HelpListFactory $hlf */
 		$this->Validator->isResultSetWithRows(	'help',
 														$hlf->getByID($this->getHelp()),
 														TTi18n::gettext('Help Entry is invalid')

@@ -55,7 +55,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -139,7 +139,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 			$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 		}
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -172,7 +172,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -204,7 +204,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -241,7 +241,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 							AND deleted = 0';
 			$query .= $this->getSortSQL( $order, $strict );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $station_id);
 		}
@@ -284,7 +284,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -322,7 +322,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -362,7 +362,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -371,7 +371,9 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 	 * @param string $user_id UUID
 	 * @param $status
 	 * @param $type
+	 * @param null $station_id
 	 * @return bool|StationListFactory
+	 * @throws DBError
 	 */
 	function getByUserIdAndStatusAndType( $user_id, $status, $type, $station_id = NULL ) {
 		if ( $user_id == '') {
@@ -485,7 +487,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		//$query .= $this->getSortSQL( $order, $strict );
 
 		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -546,7 +548,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$query .= ' AND deleted = 0 GROUP BY company_id, type_id';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -632,7 +634,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -724,7 +726,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

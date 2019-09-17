@@ -53,7 +53,7 @@ class ImportDepartment extends Import {
 		$retval = NULL;
 		switch( $name ) {
 			case 'columns':
-				$bf = TTNew('DepartmentFactory');
+				$bf = TTNew('DepartmentFactory'); /** @var DepartmentFactory $bf */
 				$retval = $bf->getOptions('columns');
 				break;
 			case 'import_options':
@@ -93,6 +93,7 @@ class ImportDepartment extends Import {
 	//
 	// Generic parser functions.
 	//
+
 	/**
 	 * @param $input
 	 * @param null $default_value

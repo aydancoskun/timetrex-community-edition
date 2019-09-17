@@ -99,7 +99,7 @@ class APIKPI extends APIFactory {
 		}
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'kpi', 'view' );
 
-		$klf = TTnew( 'KPIListFactory' );
+		$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
 		$klf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $klf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $klf->getRecordCount() > 0 ) {
@@ -182,7 +182,7 @@ class APIKPI extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'KPIListFactory' );
+				$lf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -286,7 +286,7 @@ class APIKPI extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'KPIListFactory' );
+				$lf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

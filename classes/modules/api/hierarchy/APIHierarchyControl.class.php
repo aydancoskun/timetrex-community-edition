@@ -108,7 +108,7 @@ class APIHierarchyControl extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$blf = TTnew( 'HierarchyControlListFactory' );
+		$blf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -196,7 +196,7 @@ class APIHierarchyControl extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'HierarchyControlListFactory' );
+				$lf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -307,7 +307,7 @@ class APIHierarchyControl extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'HierarchyControlListFactory' );
+				$lf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -414,13 +414,13 @@ class APIHierarchyControl extends APIFactory {
 					}
 
 					if ( $new_id !== NULL ) {
-						$hllf = TTnew( 'APIHierarchyLevel' );
+						$hllf = TTnew( 'APIHierarchyLevel' ); /** @var APIHierarchyLevel $hllf */
 						$level_src_rows = $this->stripReturnHandler( $hllf->getHierarchyLevel( array('filter_data' => array('hierarchy_control_id' => $original_id) ), TRUE ) );
 						if ( is_array( $level_src_rows ) AND count($level_src_rows) > 0 ) {
 							//Debug::Arr($template_src_rows, 'TEMPLATE SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
-							foreach( $level_src_rows as $key => $row ) {
-								unset($level_src_rows[$key]['id']); //Clear fields that can't be copied
-								$level_src_rows[$key]['hierarchy_control_id'] = $new_id;
+							foreach( $level_src_rows as $key_b => $row ) {
+								unset($level_src_rows[$key_b]['id']); //Clear fields that can't be copied
+								$level_src_rows[$key_b]['hierarchy_control_id'] = $new_id;
 							}
 
 							$hllf->setHierarchyLevel( $level_src_rows ); //Save copied rows
@@ -437,10 +437,11 @@ class APIHierarchyControl extends APIFactory {
 
 	/**
 	 * Get hierarchy control options sorted by object_type_id
+	 * @param bool $include_blank
 	 * @return array
 	 */
 	function getHierarchyControlOptions( $include_blank = TRUE ) {
-		$hclf = TTnew( 'HierarchyControlListFactory' );
+		$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 
 		//If the currently logged in user is supervisor (subordinates only), then only show hierarchies they are a superior in.
 		if ( $this->getPermissionObject()->Check('user', 'view') == TRUE ) {

@@ -1,8 +1,4 @@
 <?php
-/**
- * $License$
- */
-
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -37,6 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
+
 require_once('../../../includes/global.inc.php');
 forceNoCacheHeaders(); //Send headers to disable caching.
 TTi18n::chooseBestLocale();
@@ -50,7 +47,7 @@ extract	(FormVariables::GetVariables(
 													'password2',
 												) ) );
 
-$rl = TTNew('RateLimit');
+$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 $rl->setID( 'client_contact_password_reset_'. Misc::getRemoteIPAddress() );
 $rl->setAllowedCalls( 10 );
 $rl->setTimeFrame( 900 ); //15 minutes
@@ -71,7 +68,7 @@ switch ($action) {
 			sleep(5); //Excessive password attempts, sleep longer.
 			$action = 'reset_password';
 		} else {
-			$cclf = TTnew( 'ClientContactListFactory' );
+			$cclf = TTnew( 'ClientContactListFactory' ); /** @var ClientContactListFactory $cclf */
 			$cclf->getByPasswordResetKey( $key );
 			if ( $cclf->getRecordCount() == 1 ) {
 				Debug::Text('FOUND Password reset key! ', __FILE__, __LINE__, __METHOD__,10);
@@ -118,7 +115,7 @@ switch ($action) {
 			sleep(5); //Excessive password attempts, sleep longer.
 			$action = 'reset_password';
 		} else {
-			$cclf = TTnew( 'ClientContactListFactory' );
+			$cclf = TTnew( 'ClientContactListFactory' ); /** @var ClientContactListFactory $cclf */
 			$cclf->getByPasswordResetKey( $key );
 			if ( $cclf->getRecordCount() == 1 ) {
 				Debug::Text('FOUND Password reset key! ', __FILE__, __LINE__, __METHOD__,10);
@@ -147,7 +144,7 @@ switch ($action) {
 			sleep(5); //Excessive password attempts, sleep longer.
 			$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (z)') );
 		} else {
-			$cclf = TTnew( 'ClientContactListFactory' );
+			$cclf = TTnew( 'ClientContactListFactory' ); /** @var ClientContactListFactory $cclf */
 			//$cclf->getByHomeEmailOrWorkEmail( $email );
 			$cclf->getByUserName( $email );
 			if ( $cclf->getRecordCount() == 1 ) {
@@ -205,13 +202,13 @@ require ('../../../includes/Header.inc.php');
                             <div class="form-group row">
                                 <label for="password" class="col-xs-12 col-sm-3 control-label"><?php echo TTi18n::getText('New Password:') ?> </label>
                                 <div class="col-xs-12 col-sm-9">
-                                    <input type="password" id="password" class="form-control" name="password">
+                                    <input type="password" id="password" class="form-control" name="password" autocomplete="new-password">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label for="password2" class="col-xs-12 col-sm-3 control-label"><?php echo TTi18n::getText('New Password (confirm):') ?> </label>
                                 <div class="col-xs-12 col-sm-9">
-                                    <input type="password" id="password2" class="form-control" name="password2">
+                                    <input type="password" id="password2" class="form-control" name="password2" autocomplete="new-password">
                                 </div>
                             </div>
 							<input type="hidden" name="key" value="<?php echo $key; ?>">

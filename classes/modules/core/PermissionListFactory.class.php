@@ -54,7 +54,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -83,7 +83,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -115,7 +115,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -154,7 +154,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -207,7 +207,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -263,7 +263,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -326,7 +326,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -366,7 +366,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 				';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

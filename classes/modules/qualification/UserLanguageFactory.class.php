@@ -68,7 +68,7 @@ class UserLanguageFactory extends Factory {
 									);
 				break;
 			case 'source_type':
-				$qf = TTnew('QualificationFactory');
+				$qf = TTnew('QualificationFactory'); /** @var QualificationFactory $qf */
 				$retval = $qf->getOptions( $name );
 				break;
 			case 'columns':
@@ -157,7 +157,7 @@ class UserLanguageFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setUser( $value) {
@@ -173,7 +173,7 @@ class UserLanguageFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setQualification( $value ) {
@@ -190,7 +190,7 @@ class UserLanguageFactory extends Factory {
 	}
 
 	/**
-	 * @param string $fluency_id int
+	 * @param $value
 	 * @return bool
 	 */
 	function setFluency( $value ) {
@@ -207,7 +207,7 @@ class UserLanguageFactory extends Factory {
 	}
 
 	/**
-	 * @param string $competency_id int
+	 * @param $value
 	 * @return bool
 	 */
 	function setCompetency( $value ) {
@@ -225,7 +225,7 @@ class UserLanguageFactory extends Factory {
 
 
 	/**
-	 * @param $description
+	 * @param $value
 	 * @return bool
 	 */
 	function setDescription( $value) {
@@ -252,7 +252,7 @@ class UserLanguageFactory extends Factory {
 	}
 
 	/**
-	 * @param $tags
+	 * @param $value
 	 * @return bool
 	 */
 	function setTag( $value ) {
@@ -271,7 +271,7 @@ class UserLanguageFactory extends Factory {
 		//
 		// Employee
 		if ( $this->getUser() !== FALSE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user_id',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Employee must be specified')
@@ -279,7 +279,7 @@ class UserLanguageFactory extends Factory {
 		}
 		// Qualification
 		if ( $this->getQualification() !== FALSE ) {
-			$qlf = TTnew( 'QualificationListFactory' );
+			$qlf = TTnew( 'QualificationListFactory' ); /** @var QualificationListFactory $qlf */
 			$this->Validator->isResultSetWithRows( 'qualification_id',
 															$qlf->getById( $this->getQualification() ),
 															TTi18n::gettext('Language must be specified')

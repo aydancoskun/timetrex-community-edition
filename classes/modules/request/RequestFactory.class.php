@@ -226,9 +226,8 @@ class RequestFactory extends Factory {
 		return $this->setGenericDataValue( 'date_stamp', $value );
 	}
 
-	//Convert hierarchy type_ids back to request type_ids.
-
 	/**
+	 * Convert hierarchy type_ids back to request type_ids.
 	 * @param int $type_id
 	 * @return array|int
 	 */
@@ -360,7 +359,7 @@ class RequestFactory extends Factory {
 	 */
 	function getRequestSchedule() {
 		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-			$rslf = TTNew( 'RequestScheduleListFactory' );
+			$rslf = TTNew( 'RequestScheduleListFactory' ); /** @var RequestScheduleListFactory $rslf */
 			$rslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array('request_id' => $this->getId()) );
 			if ( $rslf->getRecordCount() == 1 ) {
 				foreach ( $rslf as $rs_obj ) {
@@ -386,7 +385,7 @@ class RequestFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'user',
 														$ulf->getByID($this->getUser()),
 														TTi18n::gettext('Invalid Employee')
@@ -401,7 +400,7 @@ class RequestFactory extends Factory {
 		if ( $this->getDeleted() == FALSE ) { //Relax validation checks when deleting record, specifically to allow deleting records more than 1 year old that aren't authorized.
 			// Pay Period
 			if ( $this->getPayPeriod() !== FALSE AND $this->getPayPeriod() != TTUUID::getZeroID() ) {
-				$pplf = TTnew( 'PayPeriodListFactory' );
+				$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 				$this->Validator->isResultSetWithRows( 'pay_period',
 													   $pplf->getByID( $this->getPayPeriod() ),
 													   TTi18n::gettext( 'Invalid Pay Period' )
@@ -498,7 +497,7 @@ class RequestFactory extends Factory {
 
 			//Check to make sure this user has superiors to send a request too, otherwise we can't save the request.
 			if ( is_object( $this->getUserObject() ) ) {
-				$hlf = TTnew( 'HierarchyListFactory' );
+				$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 				$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUser(), $this->getHierarchyTypeId(), TRUE, FALSE ); //Request - Immediate parents only.
 				Debug::Arr( $request_parent_level_user_ids, 'Check for Superiors: ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -556,14 +555,14 @@ class RequestFactory extends Factory {
 	function postSave() {
 		//Save message here after we have the request_id.
 		if ( $this->getMessage() !== FALSE ) {
-			$mcf = TTnew( 'MessageControlFactory' );
+			$mcf = TTnew( 'MessageControlFactory' ); /** @var MessageControlFactory $mcf */
 			$mcf->StartTransaction();
 
-			$hlf = TTnew( 'HierarchyListFactory' );
+			$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 			$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUser(), $this->getHierarchyTypeId(), TRUE, FALSE ); //Request - Immediate parents only.
 			Debug::Arr($request_parent_level_user_ids, 'Sending message to current direct Superiors: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			$mcf = TTnew( 'MessageControlFactory' );
+			$mcf = TTnew( 'MessageControlFactory' ); /** @var MessageControlFactory $mcf */
 			$mcf->setFromUserId( $this->getUser() );
 			$mcf->setToUserId( $request_parent_level_user_ids );
 			$mcf->setObjectType( 50 ); //Messages don't break out request types like hierarchies do.
@@ -586,7 +585,7 @@ class RequestFactory extends Factory {
 
 		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			if ( $this->getDeleted() == FALSE AND $this->getAuthorized() == TRUE ) {
-				$rsf = TTNew('RequestScheduleFactory');
+				$rsf = TTNew('RequestScheduleFactory'); /** @var RequestScheduleFactory $rsf */
 				$add_related_schedules_retval = $rsf->addRelatedSchedules( $this );
 				if ( $add_related_schedules_retval == FALSE ) {
 					Debug::Text('  addRelatedSchedules failed, passing along validation errors!', __FILE__, __LINE__, __METHOD__, 10);
@@ -598,7 +597,7 @@ class RequestFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			Debug::Text('Delete authorization history for this request...'. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			$alf = TTnew( 'AuthorizationListFactory' );
+			$alf = TTnew( 'AuthorizationListFactory' ); /** @var AuthorizationListFactory $alf */
 			$alf->getByObjectTypeAndObjectId( $this->getHierarchyTypeId(), $this->getId() );
 			foreach( $alf as $authorization_obj ) {
 				Debug::Text('Deleting authorization ID: '. $authorization_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);

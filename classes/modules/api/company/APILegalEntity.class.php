@@ -105,7 +105,7 @@ class APILegalEntity extends APIFactory {
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
 
-		$blf = TTnew( 'LegalEntityListFactory' );
+		$blf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -151,7 +151,10 @@ class APILegalEntity extends APIFactory {
 	 * @param array $data legal entity data
 	 * @param bool $validate_only
 	 * @param bool $ignore_warning
+	 * @param bool $add_presets
 	 * @return array|bool
+	 * @throws DBError
+	 * @throws GeneralError
 	 */
 	function setLegalEntity( $data, $validate_only = FALSE, $ignore_warning = TRUE, $add_presets = TRUE ) {
 		$validate_only = (bool)$validate_only;
@@ -181,7 +184,7 @@ class APILegalEntity extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'LegalEntityListFactory' );
+				$lf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -293,7 +296,7 @@ class APILegalEntity extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'LegalEntityListFactory' );
+				$lf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -372,7 +375,7 @@ class APILegalEntity extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
-				$lef = TTnew( 'LegalEntityFactory' );
+				$lef = TTnew( 'LegalEntityFactory' ); /** @var LegalEntityFactory $lef */
 				$lef->StartTransaction();
 
 				$original_legal_entity_id = $src_rows[$key]['id'];
@@ -397,7 +400,7 @@ class APILegalEntity extends APIFactory {
 
 				if ( TTUUID::isUUID( $new_legal_entity_id ) AND $new_legal_entity_id != TTUUID::getNotExistID() ) {
 					//Copy Remittance Source Accounts
-					$rsalf = TTnew('RemittanceSourceAccountListFactory');
+					$rsalf = TTnew('RemittanceSourceAccountListFactory'); /** @var RemittanceSourceAccountListFactory $rsalf */
 					$rsalf->getByLegalEntityIdAndCompanyId( $original_legal_entity_id, $this->getCurrentCompanyObject()->getId() );
 					if ($rsalf->getRecordCount() > 0 ) {
 						foreach( $rsalf as $rsa_obj ) {
@@ -412,7 +415,7 @@ class APILegalEntity extends APIFactory {
 					unset( $rsalf, $rsa_obj );
 
 					//Copy Remittance Agencies
-					$pralf = TTnew('PayrollRemittanceAgencyListFactory');
+					$pralf = TTnew('PayrollRemittanceAgencyListFactory'); /** @var PayrollRemittanceAgencyListFactory $pralf */
 					$pralf->getByLegalEntityIdAndCompanyId( $original_legal_entity_id, $this->getCurrentCompanyObject()->getId() );
 					if ($pralf->getRecordCount() > 0 ) {
 						foreach( $pralf as $pra_obj ) {
@@ -424,7 +427,7 @@ class APILegalEntity extends APIFactory {
 							if ( $pra_obj->isValid() ) {
 								$new_pra_id = $pra_obj->Save();
 
-								$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
+								$praelf = TTnew('PayrollRemittanceAgencyEventListFactory'); /** @var PayrollRemittanceAgencyEventListFactory $praelf */
 								$praelf->getByLegalEntityIdAndRemittanceAgencyId( $original_legal_entity_id, $original_pra_id );
 								if ( $praelf->getRecordCount() > 0 ) {
 									foreach ( $praelf as $prae_obj ) {
@@ -442,7 +445,7 @@ class APILegalEntity extends APIFactory {
 					unset( $pralf, $prae_obj );
 
 					//Copy Tax/Deduction records (without users).
-					$cdlf = TTnew('CompanyDeductionListFactory');
+					$cdlf = TTnew('CompanyDeductionListFactory'); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndLegalEntityId( $this->getCurrentCompanyObject()->getId(), $original_legal_entity_id );
 					if ( $cdlf->getRecordCount() > 0 ) {
 						foreach( $cdlf as $cd_obj ) {
@@ -456,7 +459,7 @@ class APILegalEntity extends APIFactory {
 
 								//Find new Payroll Remittance Agency to assign it to.
 								if ( is_object( $cd_obj->getPayrollRemittanceAgencyObject() ) ) {
-									$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+									$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $pralf */
 									$pralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), array('legal_entity_id' => $new_legal_entity_id, 'agency_id' => $cd_obj->getPayrollRemittanceAgencyObject()->getAgency()) );
 									if ( $pralf->getRecordCount() == 1 ) {
 										Debug::Text( '      Found new Remittance Agency to assign... ID: ' . $pralf->getCurrent()->getId(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -475,7 +478,7 @@ class APILegalEntity extends APIFactory {
 
 								unset( $tmp_cd_obj_arr['user'] );
 
-								$tmp_cd_obj = TTnew( 'CompanyDeductionFactory' );
+								$tmp_cd_obj = TTnew( 'CompanyDeductionFactory' ); /** @var CompanyDeductionFactory $tmp_cd_obj */
 								$tmp_cd_obj->setObjectFromArray( $tmp_cd_obj_arr );
 								if ( $tmp_cd_obj->isValid() ) {
 									$tmp_cd_obj->Save( TRUE, TRUE );
@@ -510,6 +513,10 @@ class APILegalEntity extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @param $id
+	 * @return bool
+	 */
 	function deleteImage( $id ) {
 		//Permissions match setLegalEntity
 		if ( !$this->getPermissionObject()->Check('legal_entity', 'enabled')
@@ -519,16 +526,23 @@ class APILegalEntity extends APIFactory {
 
 		$result = $this->stripReturnHandler( $this->getLegalEntity( array('filter_data' => array( 'id' => $id ) ) ) );
 		if ( isset($result[0]) AND count($result[0]) > 0 ) {
-			/** @var LegalEntityFactory $f */
-			$f = TTnew( 'LegalEntityFactory' );
+			$f = TTnew( 'LegalEntityFactory' ); /** @var LegalEntityFactory $f */
 			$file_name = $f->getLogoFileName( $id, FALSE );
 
 			if ( file_exists($file_name) ) {
 				unlink($file_name);
 			}
 		}
+
+		return $this->returnHandler( TRUE );
 	}
 
+	/**
+	 * @param $legal_entity_id
+	 * @param null $start_date
+	 * @param null $end_date
+	 * @return array|bool
+	 */
 	function getPaymentServicesAccountStatementReport( $legal_entity_id, $start_date = NULL, $end_date = NULL ) {
 		//Permissions match setLegalEntity
 		if ( !$this->getPermissionObject()->Check('legal_entity', 'enabled')
@@ -538,7 +552,7 @@ class APILegalEntity extends APIFactory {
 
 		$data['filter_data'] = $legal_entity_id;
 
-		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'] );
 		Debug::Text('Record Count: '. $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $lelf->getRecordCount() > 0 ) {

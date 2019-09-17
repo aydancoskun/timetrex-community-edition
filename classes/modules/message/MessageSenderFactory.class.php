@@ -99,7 +99,7 @@ class MessageSenderFactory extends Factory {
 		//
 		// Employee
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Invalid Employee')
@@ -107,14 +107,14 @@ class MessageSenderFactory extends Factory {
 		}
 		// Parent
 		if ( $this->getParent() != TTUUID::getZeroID() ) {
-			$mslf = TTnew( 'MessageSenderListFactory' );
+			$mslf = TTnew( 'MessageSenderListFactory' ); /** @var MessageSenderListFactory $mslf */
 			$this->Validator->isResultSetWithRows(	'parent',
 															$mslf->getByID($this->getParent()),
 															TTi18n::gettext('Parent is invalid')
 														);
 		}
 		// Message Control
-		$mclf = TTnew( 'MessageControlListFactory' );
+		$mclf = TTnew( 'MessageControlListFactory' ); /** @var MessageControlListFactory $mclf */
 		$this->Validator->isResultSetWithRows(	'message_control_id',
 														$mclf->getByID($this->getMessageControl()),
 														TTi18n::gettext('Message Control is invalid')

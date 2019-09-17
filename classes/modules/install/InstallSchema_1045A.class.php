@@ -56,18 +56,18 @@ class InstallSchema_1045A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Go through each permission group, and enable absence/schedule edit field permissions for anyone who can edit absence/schedules.
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj ) {
 				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 				if ( $c_obj->getStatus() != 30 ) {
-					$pclf = TTnew( 'PermissionControlListFactory' );
+					$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 					$pclf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Force order to prevent references to columns that haven't been created yet.
 					if ( $pclf->getRecordCount() > 0 ) {
 						foreach( $pclf as $pc_obj ) {
 							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
-							$plf = TTnew( 'PermissionListFactory' );
+							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $c_obj->getId(), $pc_obj->getId(), 'absence', array('edit', 'edit_own', 'edit_child'), 1 );
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text('Found permission group with Edit Absence enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);

@@ -71,7 +71,6 @@ class APISchedulePolicy extends APIFactory {
 	 * @return array
 	 */
 	function getSchedulePolicyDefaultData() {
-		/** @var CompanyFactory $company_obj */
 		$company_obj = $this->getCurrentCompanyObject();
 
 		Debug::Text('Getting schedule policy default data...', __FILE__, __LINE__, __METHOD__, 10);
@@ -103,7 +102,7 @@ class APISchedulePolicy extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'schedule_policy', 'view' );
 
-		$blf = TTnew( 'SchedulePolicyListFactory' );
+		$blf = TTnew( 'SchedulePolicyListFactory' ); /** @var SchedulePolicyListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -182,7 +181,7 @@ class APISchedulePolicy extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'SchedulePolicyListFactory' );
+				$lf = TTnew( 'SchedulePolicyListFactory' ); /** @var SchedulePolicyListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -288,7 +287,7 @@ class APISchedulePolicy extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'SchedulePolicyListFactory' );
+				$lf = TTnew( 'SchedulePolicyListFactory' ); /** @var SchedulePolicyListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

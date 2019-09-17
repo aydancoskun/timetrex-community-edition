@@ -140,9 +140,8 @@ class APIReport extends APIFactory {
 		return $this->returnHandler( TRUE );
 	}
 
-	//Use JSON API to download PDF files.
-
 	/**
+	 * Use JSON API to download PDF files.
 	 * @param bool $config
 	 * @param string $format
 	 * @return array|bool

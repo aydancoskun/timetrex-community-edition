@@ -61,7 +61,7 @@ class APILog extends APIFactory {
 		//Its important that regular employees can't view the entire log as some sensitive information may be contained within.
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		$blf = TTnew( 'LogListFactory' );
+		$blf = TTnew( 'LogListFactory' ); /** @var LogListFactory $blf */
 
 		if ( isset($data['filter_data']['table_name_object_id']) ) {
 			if ( !is_array($data['filter_data']['table_name_object_id']) ) {
@@ -178,7 +178,7 @@ class APILog extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'LogListFactory' );
+				$lf = TTnew( 'LogListFactory' ); /** @var LogListFactory $lf */
 				$lf->StartTransaction();
 
 				//Can add log entries only.

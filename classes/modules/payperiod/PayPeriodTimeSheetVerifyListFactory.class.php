@@ -55,7 +55,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -121,7 +121,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -168,7 +168,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -208,7 +208,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -248,7 +248,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -279,7 +279,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -346,7 +346,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order, $additional_sort_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -399,14 +399,13 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order, $additional_sort_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
 
-	//This is used just for MyAccount -> TimeSheet Authorization, as its more complicated than a normal query.
-
 	/**
+	 * This is used just for MyAccount -> TimeSheet Authorization, as its more complicated than a normal query.
 	 * @param string $company_id UUID
 	 * @param $filter_data
 	 * @param int $limit Limit the number of records returned
@@ -574,7 +573,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -721,7 +720,7 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

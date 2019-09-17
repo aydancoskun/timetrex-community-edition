@@ -112,7 +112,7 @@ class APIUserGroup extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$uglf = TTnew( 'UserGroupListFactory' );
+		$uglf = TTnew( 'UserGroupListFactory' ); /** @var UserGroupListFactory $uglf */
 		if ( $mode == 'flat' ) {
 			$uglf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 			Debug::Text('Record Count: '. $uglf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -198,7 +198,7 @@ class APIUserGroup extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserGroupListFactory' );
+				$lf = TTnew( 'UserGroupListFactory' ); /** @var UserGroupListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -299,7 +299,7 @@ class APIUserGroup extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserGroupListFactory' );
+				$lf = TTnew( 'UserGroupListFactory' ); /** @var UserGroupListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

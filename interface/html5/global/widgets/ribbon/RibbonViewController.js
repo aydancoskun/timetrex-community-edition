@@ -300,15 +300,12 @@ RibbonViewController = Backbone.View.extend( {
 				window.open( url, '_blank' );
 				break;
 			case 'EmailHelp':
-
 				if ( Global.getProductEdition() >= 15 ) {
-					url = 'mailto:support@timetrex.com?subject=Company: ' + LocalCacheData.getCurrentCompany().name + '&body=Company: ' + LocalCacheData.getCurrentCompany().name + '  ' +
-							'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
+					location.href = 'mailto:'+ APIGlobal.pre_login_data.support_email +'?subject=Company: ' + LocalCacheData.getCurrentCompany().name + '&body=Company: ' + LocalCacheData.getCurrentCompany().name + '  ' + 'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
 				} else {
 					url = 'https://www.timetrex.com/r?id=29';
+					window.open( url, '_blank' );
 				}
-
-				window.open( url, '_blank' );
 				break;
 			case 'Sandbox':
 				if ( APIGlobal.pre_login_data['sandbox_url'] && APIGlobal.pre_login_data['sandbox_url'].length > 0 ) {
@@ -432,12 +429,7 @@ RibbonViewController = Backbone.View.extend( {
 			clearTimeout( lh_inst.timeoutStatuscheck );
 		}
 
-		//This code is duplicated at LocalCacheData.getRequiredLocalCache()
-		Global.clearSessionCookie();
-		LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
-		LocalCacheData.setLoginUser( null );
-		LocalCacheData.setCurrentCompany( null );
-		sessionStorage.clear();
+		Global.Logout();
 		TopMenuManager.goToView( 'Login' );
 
 		return;

@@ -1745,9 +1745,9 @@ class UserPreferenceFactory extends Factory {
 		return $this->setGenericDataValue( 'items_per_page', $value );
 	}
 
-	//A quick function to change just the timezone, without having to change
-	//date formats and such in the process.
 	/**
+	 * A quick function to change just the timezone, without having to change
+	 * date formats and such in the process.
 	 * @return bool
 	 */
 	function setTimeZonePreferences() {
@@ -1803,9 +1803,8 @@ class UserPreferenceFactory extends Factory {
 		return $this->setGenericDataValue( 'start_week_day', $value );
 	}
 
-	//Used in Flex interface only, currently its hardcoded for now at least. Default: CTRL+ALT
-
 	/**
+	 * Used in Flex interface only, currently its hardcoded for now at least. Default: CTRL+ALT
 	 * @return bool|mixed
 	 */
 	function getShortcutKeySequence() {
@@ -1942,9 +1941,8 @@ class UserPreferenceFactory extends Factory {
 		return $this->setGenericDataValue( 'schedule_icalendar_type_id', $value );
 	}
 
-	//Helper functions for dealing with unauthenticated calendar access, required by Google Calendar for now.
-
 	/**
+	 * Helper functions for dealing with unauthenticated calendar access, required by Google Calendar for now.
 	 * @param null $user_name
 	 * @param int $type_id ID
 	 * @return string
@@ -1980,6 +1978,7 @@ class UserPreferenceFactory extends Factory {
 	}
 
 	/**
+	 * @param null $version
 	 * @return bool|string
 	 */
 	function getScheduleIcalendarKey( $version = NULL ) {
@@ -2000,9 +1999,8 @@ class UserPreferenceFactory extends Factory {
 		return $retval;
 	}
 
-	//Currently used as part of the unauthenticated key, so if this changes the key to access the calendar changes too.
-
 	/**
+	 * Currently used as part of the unauthenticated key, so if this changes the key to access the calendar changes too.
 	 * @return bool
 	 */
 	function getScheduleIcalendarEventName() {
@@ -2129,9 +2127,8 @@ class UserPreferenceFactory extends Factory {
 		return $this->setGenericDataValue( 'enable_save_timesheet_state', $this->toBool($value) );
 	}
 
-	//Default: Home/Dashboard
-
 	/**
+	 * Default: Home/Dashboard
 	 * @return bool|mixed
 	 */
 	function getDefaultLoginScreen() {
@@ -2157,7 +2154,7 @@ class UserPreferenceFactory extends Factory {
 		//
 		// User
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Invalid Employee')
@@ -2342,9 +2339,9 @@ class UserPreferenceFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */
@@ -2380,7 +2377,7 @@ class UserPreferenceFactory extends Factory {
 	 * @return array
 	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
-		$uf = TTnew( 'UserFactory' );
+		$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {

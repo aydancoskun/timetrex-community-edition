@@ -119,7 +119,7 @@ class InstallSchema_1063A extends InstallSchema_Base {
 	function postInstall() {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		$clf = TTNew('CompanyListFactory');
+		$clf = TTNew('CompanyListFactory'); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			$x = 0;

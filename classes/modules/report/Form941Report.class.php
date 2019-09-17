@@ -147,7 +147,7 @@ class Form941Report extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'Form941Report', 'custom_column' );
@@ -158,13 +158,13 @@ class Form941Report extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'Form941Report', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'Form941Report', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -173,7 +173,7 @@ class Form941Report extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'Form941Report', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -568,6 +568,11 @@ class Form941Report extends Report {
 		return $retarr;
 	}
 
+	/**
+	 * @param $last_date
+	 * @param $quarter
+	 * @return false|int
+	 */
 	function get12thOfLastMoQ( $last_date, $quarter ) {
 		$quarter_dates = TTDate::getYearQuarters( $last_date, $quarter );
 
@@ -604,10 +609,10 @@ class Form941Report extends Report {
 		$employee_count_date = $this->get12thOfLastMoQ( $filter_data['end_date'], $report_quarter );
 		Debug::Text('Employee Count Date: '. TTDate::getDate('DATE', $employee_count_date ), __FILE__, __LINE__, __METHOD__, 10);
 
-		$pplf = TTnew('PayPeriodListFactory');
+		$pplf = TTnew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 		$employee_count_pay_periods = $pplf->getIDSByListFactory( $pplf->getByCompanyIdAndOverlapStartDateAndEndDate( $this->getUserObject()->getCompany(), $employee_count_date, $employee_count_date ) );
 
-		$pslf = TTnew( 'PayStubListFactory' );
+		$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 		$employee_count_filter_data = $filter_data;
 		$employee_count_filter_data['pay_period_id'] = $employee_count_pay_periods;
 		unset( $employee_count_filter_data['start_date'], $employee_count_filter_data['end_date']);
@@ -623,7 +628,7 @@ class Form941Report extends Report {
 		unset( $pplf, $pslf, $legal_entity_id, $employee_count_date, $employee_count_pay_periods );
 
 		//Need to get totals up to the beginning of this quarter so we can determine if any employees have exceeded the social security/additional medicare limit.
-		$pself = TTnew( 'PayStubEntryListFactory' );
+		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$ytd_filter_data = $filter_data;
 		$ytd_filter_data['end_date'] = ( $ytd_filter_data['start_date'] - 1 );
 		$ytd_filter_data['start_date'] = TTDate::getBeginYearEpoch( $ytd_filter_data['start_date'] );
@@ -717,9 +722,9 @@ class Form941Report extends Report {
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax']				= ( isset($form_data['income_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['income_tax']['include_pay_stub_entry_account'], $form_data['income_tax']['exclude_pay_stub_entry_account'] ) : 0;
 
 						//Because employees can be excluded from Social Security/Medicare, only include wage amounts if the SS tax is not 0.
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax']	= ( isset($form_data['social_security_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax']['include_pay_stub_entry_account'], $form_data['social_security_tax']['exclude_pay_stub_entry_account'] ) : 0;
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer']	= ( isset($form_data['social_security_tax_employer']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax_employer']['include_pay_stub_entry_account'], $form_data['social_security_tax_employer']['exclude_pay_stub_entry_account'] ) : 0;
-						if ( ( isset($form_data['social_security_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['social_security_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] != 0 ) {
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employee_deducted']	= ( isset($form_data['social_security_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax']['include_pay_stub_entry_account'], $form_data['social_security_tax']['exclude_pay_stub_entry_account'] ) : 0;
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer_deducted']	= ( isset($form_data['social_security_tax_employer']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax_employer']['include_pay_stub_entry_account'], $form_data['social_security_tax_employer']['exclude_pay_stub_entry_account'] ) : 0;
+						if ( ( isset($form_data['social_security_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['social_security_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employee_deducted'] != 0 ) {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = ( isset($form_data['social_security_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] ) : 0;
 						} else {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = 0;
@@ -730,7 +735,7 @@ class Form941Report extends Report {
 							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = 0;
 						}
 						if ( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] < $social_security_wage_limit ) {
-							if ( ( isset($form_data['social_security_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['social_security_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] != 0 ) {
+							if ( ( isset($form_data['social_security_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['social_security_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employee_deducted'] != 0 ) {
 								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages']	= ( isset($form_data['social_security_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] ) : 0;
 								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips']	= ( isset($form_data['social_security_tips']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tips']['include_pay_stub_entry_account'], $form_data['social_security_tips']['exclude_pay_stub_entry_account'] ) : 0;
 							} else {
@@ -750,13 +755,23 @@ class Form941Report extends Report {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips'] = 0;
 						}
 
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'] = ( isset($form_data['medicare_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax']['include_pay_stub_entry_account'], $form_data['medicare_tax']['exclude_pay_stub_entry_account'] ) : 0;
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer'] = ( isset($form_data['medicare_tax_employer']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax_employer']['include_pay_stub_entry_account'], $form_data['medicare_tax_employer']['exclude_pay_stub_entry_account'] ) : 0;
-						if ( ( isset($form_data['medicare_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['medicare_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'] != 0 ) {
+						//Social Security Tax must be calculated after the wages are fully adjusted.
+						//Calculate the social security based on the wages, not what the employee actually had deducted as the IRS doesn't care about that for the 941 Form. The W2's reconcile that part.
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) ), 2 ); //Rate is employeer & employer rate, so divide by two so we can split it up separately.
+
+
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employee_deducted'] = ( isset($form_data['medicare_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax']['include_pay_stub_entry_account'], $form_data['medicare_tax']['exclude_pay_stub_entry_account'] ) : 0;
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer_deducted'] = ( isset($form_data['medicare_tax_employer']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax_employer']['include_pay_stub_entry_account'], $form_data['medicare_tax_employer']['exclude_pay_stub_entry_account'] ) : 0;
+						if ( ( isset($form_data['medicare_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['medicare_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employee_deducted'] != 0 ) {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] = ( isset($form_data['medicare_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_wages']['include_pay_stub_entry_account'], $form_data['medicare_wages']['exclude_pay_stub_entry_account'] ) : 0;
 						} else {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] = 0;
 						}
+
+						//Medicare Tax must be calculated after the wages are fully adjusted.
+						//Calculate the medicare based on the wages, not what the employee actually had deducted as the IRS doesn't care about that for the 941 Form. The W2's reconcile that part.
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'], bcdiv( $this->getF941Object()->medicare_rate, 2 ) ), 2 ); //Rate is employeer & employer rate, so divide by two so we can split it up separately.
+
 
 						//Handle medicare additional wage limit, only consider wages earned above the threshold to be "medicare_additional_wages"
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] = 0;
@@ -787,8 +802,14 @@ class Form941Report extends Report {
 
 						//Separate data used for reporting, grouping, sorting, from data specific used for the Form.
 						if ( !isset($this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]) ) {
-							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'income_tax', 'medicare_tax', 'social_security_tax', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ), 0 );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'income_tax', 'medicare_tax_employee_deducted', 'medicare_tax_employer_deducted', 'medicare_tax', 'social_security_tax_employee_deducted', 'social_security_tax_employer_deducted', 'social_security_tax', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ), 0 );
 						}
+
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employee_deducted'] );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer_deducted'] );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employee_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employee_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employee_deducted'] );
+						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer_deducted'] );
+
 						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l2'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l2'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages'] );
 						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
 						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] );
@@ -843,7 +864,7 @@ class Form941Report extends Report {
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -856,8 +877,7 @@ class Form941Report extends Report {
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get legal entity data for joining.
-		/** @var LegalEntityListFactory $lelf */
-		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Legal Entity Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
@@ -876,14 +896,12 @@ class Form941Report extends Report {
 		//Get remittance agency for joining.
 		$filter_data['type_id'] = array(10, 20); //Federal/State (Need State here to determine if they are a multi-state employer or not.
 		$filter_data['country'] = array('US'); //US Federal
-		/** @var PayrollRemittanceAgencyListFactory $ralf */
-		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
 		if ( $ralf->getRecordCount() > 0 ) {
 			foreach( $ralf as $key => $ra_obj ) {
-				/** @var PayrollRemittanceAgencyFactory $ra_obj */
 				if ( $ra_obj->parseAgencyID( NULL, 'id') == 10 ) {
 					$province_id = ( $ra_obj->getType() == 20 ) ? $ra_obj->getProvince() : '00';
 					$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$province_id] = $ra_obj;
@@ -896,9 +914,8 @@ class Form941Report extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {
@@ -967,7 +984,6 @@ class Form941Report extends Report {
 					continue;
 				}
 
-				/** @var LegalEntityFactory $le_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][$legal_entity_id];
 
 				if ( $format == 'efile_xml' ) {
@@ -1015,7 +1031,10 @@ class Form941Report extends Report {
 					$f941->l5d = $this->form_data['total'][$legal_entity_id]['l5d'];
 
 					Debug::Text('L7 - Social Security Tax Total: '. $this->form_data['total'][$legal_entity_id]['social_security_tax'] .' Medicare Tax Total: '. $this->form_data['total'][$legal_entity_id]['medicare_tax'], __FILE__, __LINE__, __METHOD__, 10);
-					$f941->l7z = bcadd( $this->form_data['total'][$legal_entity_id]['social_security_tax'], $this->form_data['total'][$legal_entity_id]['medicare_tax'] ); //Input value used to calculate L7 itself.
+					$f941->l7z = bcadd( bcadd( $this->form_data['total'][$legal_entity_id]['social_security_tax'], $this->form_data['total'][$legal_entity_id]['l5b2']), $this->form_data['total'][$legal_entity_id]['medicare_tax'] ); //Input value used to calculate L7 itself. Be sure to include 'l5b2' (Social Security on Tip Wages)
+
+					Debug::Text('L5 - Actually Deducted from Employee Total: Social Security: '. bcadd( $this->form_data['total'][$legal_entity_id]['social_security_tax_employee_deducted'], $this->form_data['total'][$legal_entity_id]['social_security_tax_employer_deducted'] ) .' Medicare Tax Total: '. bcadd( $this->form_data['total'][$legal_entity_id]['medicare_tax_employee_deducted'], $this->form_data['total'][$legal_entity_id]['medicare_tax_employer_deducted'] ), __FILE__, __LINE__, __METHOD__, 10);
+					$f941->l5_actual_deducted = bcadd( $this->form_data['total'][$legal_entity_id]['social_security_tax_employee_deducted'], bcadd( $this->form_data['total'][$legal_entity_id]['social_security_tax_employer_deducted'], bcadd( $this->form_data['total'][$legal_entity_id]['medicare_tax_employee_deducted'], $this->form_data['total'][$legal_entity_id]['medicare_tax_employer_deducted'] ) ) ); //Input value used to calculate L7 itself.
 
 					if ( isset($setup_data['quarter_deposit']) AND $setup_data['quarter_deposit'] != ''	 ) {
 						$f941->l13 = Misc::MoneyFormat($setup_data['quarter_deposit'], FALSE);
@@ -1026,13 +1045,16 @@ class Form941Report extends Report {
 
 					if ( isset($setup_data['deposit_schedule']) AND $setup_data['deposit_schedule'] == 10 ) {
 						if ( isset($this->form_data['quarter'][$legal_entity_id][1]['l10']) ) {
-							$f941->l16_month1 = $this->form_data['quarter'][$legal_entity_id][1]['l10'];
+							//$f941->l16_month1 = $this->form_data['quarter'][$legal_entity_id][1]['l10'];
+							$f941->l16_month1 = bcadd($this->form_data['quarter'][$legal_entity_id][1]['income_tax'], bcadd( bcadd( $this->form_data['quarter'][$legal_entity_id][1]['social_security_tax'], $this->form_data['quarter'][$legal_entity_id][1]['l5b2']), $this->form_data['quarter'][$legal_entity_id][1]['medicare_tax'] ) ); //Don't use L10 as it is slightly off due to rounding.
 						}
 						if ( isset($this->form_data['quarter'][$legal_entity_id][2]['l10']) ) {
-							$f941->l16_month2 = $this->form_data['quarter'][$legal_entity_id][2]['l10'];
+							//$f941->l16_month2 = $this->form_data['quarter'][$legal_entity_id][2]['l10'];
+							$f941->l16_month2 = bcadd($this->form_data['quarter'][$legal_entity_id][2]['income_tax'], bcadd( bcadd( $this->form_data['quarter'][$legal_entity_id][2]['social_security_tax'], $this->form_data['quarter'][$legal_entity_id][2]['l5b2']), $this->form_data['quarter'][$legal_entity_id][2]['medicare_tax'] ) ); //Don't use L10 as it is slightly off due to rounding.
 						}
 						if ( isset($this->form_data['quarter'][$legal_entity_id][3]['l10']) ) {
-							$f941->l16_month3 = $this->form_data['quarter'][$legal_entity_id][3]['l10'];
+							//$f941->l16_month3 = $this->form_data['quarter'][$legal_entity_id][3]['l10'];
+							$f941->l16_month3 = bcadd($this->form_data['quarter'][$legal_entity_id][3]['income_tax'], bcadd( bcadd( $this->form_data['quarter'][$legal_entity_id][3]['social_security_tax'], $this->form_data['quarter'][$legal_entity_id][3]['l5b2']), $this->form_data['quarter'][$legal_entity_id][3]['medicare_tax'] ) ); //Don't use L10 as it is slightly off due to rounding.
 						}
 					} elseif ( isset($setup_data['deposit_schedule']) AND $setup_data['deposit_schedule'] == 20 ) {
 						$f941sb = $this->getFormObject()->getFormObject( '941sb', 'US' );
@@ -1049,8 +1071,7 @@ class Form941Report extends Report {
 							if ( isset($this->form_data['pay_period'][$legal_entity_id][$i]) ) {
 								foreach( $this->form_data['pay_period'][$legal_entity_id][$i] as $pay_period_epoch => $data ) {
 									//Debug::Text('SB: Month: '. $i .' Pay Period Date: '. TTDate::getDate('DATE', $pay_period_epoch) .' DOM: '. TTDate::getDayOfMonth($pay_period_epoch) .' Amount: '. $data['l10'], __FILE__, __LINE__, __METHOD__, 10);
-									//$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = $data['l10']; //Don't round this as it can cause mismatches in the totals.
-									$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = bcadd($data['income_tax'], bcadd( $data['social_security_tax'], $data['medicare_tax'] ) ); //This should be values that appeared on the actual pay stubs, which are already rounded of course.
+									$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = bcadd($data['income_tax'], bcadd( bcadd( $data['social_security_tax'], $data['l5b2'] ), $data['medicare_tax'] ) ); //This should be values that appeared on the actual pay stubs, which are already rounded of course.
 									$f941->schedule_b_total = bcadd($f941->schedule_b_total, $f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] );
 								}
 							}

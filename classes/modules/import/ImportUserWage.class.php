@@ -55,7 +55,7 @@ class ImportUserWage extends Import {
 		$retval = NULL;
 		switch( $name ) {
 			case 'columns':
-				$uwf = TTNew('UserWageFactory');
+				$uwf = TTNew('UserWageFactory'); /** @var UserWageFactory $uwf */
 				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('wage_group', 'type', 'wage', 'effective_date', 'hourly_rate', 'labor_burden_percent', 'weekly_time', 'note'), Misc::trimSortPrefix( $uwf->getOptions('columns') ) ) );
 
 				break;
@@ -72,7 +72,7 @@ class ImportUserWage extends Import {
 								);
 				break;
 			case 'parse_hint':
-				$upf = TTnew('UserPreferenceFactory');
+				$upf = TTnew('UserPreferenceFactory'); /** @var UserPreferenceFactory $upf */
 
 				$retval = array(
 								'effective_date' => $upf->getOptions('date_format'),
@@ -126,14 +126,15 @@ class ImportUserWage extends Import {
 	//
 	// Generic parser functions.
 	//
+
 	/**
 	 * @return bool
 	 */
 	function getWageGroupOptions() {
 		//Get job titles
-		$wglf = TTNew('WageGroupListFactory');
+		$wglf = TTNew('WageGroupListFactory'); /** @var WageGroupListFactory $wglf */
 		$wglf->getByCompanyId( $this->company_id );
-		$this->wage_group_options = (array)$wglf->getArrayByListFactory( $wglf, FALSE, TRUE );
+		$this->wage_group_options = (array)$wglf->getArrayByListFactory( $wglf, FALSE );
 		unset($wglf);
 
 		return TRUE;
@@ -187,7 +188,7 @@ class ImportUserWage extends Import {
 	 * @return array|bool|int|mixed
 	 */
 	function parse_type( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
-		$uwf = TTnew('UserWageFactory');
+		$uwf = TTnew('UserWageFactory'); /** @var UserWageFactory $uwf */
 		$options = Misc::trimSortPrefix( $uwf->getOptions( 'type' ) );
 
 		if ( isset($options[$input]) ) {

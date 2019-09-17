@@ -610,13 +610,11 @@ require( [
 		$.support.cors = true; // For IE
 		cleanProgress();
 
-		currentMousePos = { x: -1, y: -1 };
-		$( document ).mousemove( function( event ) {
-			currentMousePos.x = event.pageX;
-			currentMousePos.y = event.pageY;
-		} );
-
 		var api_authentication = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
+
+		if ( Error ) {
+			Error.stackTraceLimit = 50; //Increase JS exception stack trace limit.
+		}
 
 		//BUG-2065 see also: require.onError()
 		window.onerror = function() {
@@ -709,22 +707,26 @@ require( [
 
 		} );
 
-		$( 'body' ).unbind( 'click' ).click( function( e ) {
+		if( window._addToDebugClickStack === undefined ) {
+			window._addToDebugClickStack = function ( e ) {
+				// Must collect click data on 'event capture phase' vs bubbling phase, so the click is recorded as soon as possible, before any potential errors prevent the recording of last click.
+				// Function added to window, to prevent duplicate click listeners (JS wont add duplicate listeners referencing the same function). More context at https://stackoverflow.com/questions/38939937/when-are-duplicate-event-listeners-discarded-and-when-are-they-not
+				var ui_clicked_date = new Date();
+				var ui_stack = {
+					target_class: $( e.target ).attr( 'class' ) ? $( e.target ).attr( 'class' ) : '',
+					target_id: $( e.target ).attr( 'id' ) ? $( e.target ).attr( 'id' ) : '',
+					html: e.target.outerHTML,
+					ui_clicked_date: ui_clicked_date.toISOString()
+				};
+				if ( LocalCacheData.ui_click_stack.length === 16 ) {
+					LocalCacheData.ui_click_stack.pop();
+				}
 
-			var ui_clicked_date = new Date();
-			var ui_stack = {
-				target_class: $( e.target ).attr( 'class' ) ? $( e.target ).attr( 'class' ) : '',
-				target_id: $( e.target ).attr( 'id' ) ? $( e.target ).attr( 'id' ) : '',
-				html: e.target.outerHTML,
-				ui_clicked_date: ui_clicked_date.toISOString()
+				LocalCacheData.ui_click_stack.unshift( ui_stack );
+
 			};
-			if ( LocalCacheData.ui_click_stack.length === 16 ) {
-				LocalCacheData.ui_click_stack.pop();
-			}
-
-			LocalCacheData.ui_click_stack.unshift( ui_stack );
-
-		} );
+			window.addEventListener('click', window._addToDebugClickStack, true); // true is to set listener on 'event capture phase', so the click is recorded as soon as possible, before any potential errors prevent the recording of last click.
+		}
 
 		$( 'body' ).unbind( 'mousedown' ).bind( 'mousedown', function( e ) {
 			// MUST COLLECT DATA WHEN MOUSE down, otherwise when do save in edit view when awesomebox open, the data can't be saved.

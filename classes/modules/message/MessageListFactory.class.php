@@ -55,7 +55,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -119,7 +119,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -164,7 +164,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 							AND b.company_id = ?
 							AND a.deleted = 0
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -199,7 +199,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 								)
 							AND a.deleted = 0
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -364,7 +364,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 
 		//Debug::text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 9);
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -401,7 +401,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -433,7 +433,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

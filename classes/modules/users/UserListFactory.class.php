@@ -62,7 +62,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -88,7 +88,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -146,7 +146,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -191,7 +191,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						where	id = ?
 							AND deleted = 0';
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -238,7 +238,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict );
 
 		//This supports a list of IDs, so we need to make sure paging is also available.
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -275,14 +275,13 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order );
 
 		//This supports a list of IDs, so we need to make sure paging is also available.
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
 
-	//Security measure, only returns user_ids that are valid for the specific company.
-
 	/**
+	 * Security measure, only returns user_ids that are valid for the specific company.
 	 * @param string $id UUID
 	 * @param string $company_id UUID
 	 * @return bool
@@ -335,7 +334,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -373,7 +372,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						AND ( lower(a.home_email) = ? OR lower(a.work_email) = ? )
 						AND a.deleted = 0';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -401,7 +400,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						( work_email_is_valid_key = ? OR home_email_is_valid_key = ? )
 						AND deleted = 0';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -428,7 +427,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						password_reset_key = ?
 						AND deleted = 0';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -464,7 +463,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -496,7 +495,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -529,7 +528,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -561,7 +560,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -591,7 +590,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -643,7 +642,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -679,7 +678,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -715,7 +714,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -817,7 +816,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -937,7 +936,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -1040,7 +1039,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -1077,7 +1076,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -1121,7 +1120,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -1239,7 +1238,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order );
 
 		if ($limit == NULL) {
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 		} else {
 			$this->rs = $this->db->PageExecute($query, (int)$limit, (int)$page, $ph);
 
@@ -1339,7 +1338,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -1386,7 +1385,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 				';
 		$query .= $this->getSortSQL( $order, FALSE );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -1480,7 +1479,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -1740,6 +1739,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['user_group']) ) ? $this->getWhereClauseSQL( 'd.name', $filter_data['user_group'], 'text', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'a.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['legal_name']) ) ? $this->getWhereClauseSQL( 'lef.legal_name', $filter_data['legal_name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'a.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_branch']) ) ? $this->getWhereClauseSQL( 'b.name', $filter_data['default_branch'], 'text', $ph ) : NULL;
 
@@ -1871,7 +1871,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;

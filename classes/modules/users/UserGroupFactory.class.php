@@ -154,7 +154,7 @@ class UserGroupFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -177,7 +177,7 @@ class UserGroupFactory extends Factory {
 											);
 		} else {
 			if ( $this->isNew() == FALSE ) {
-				$uglf = TTnew('UserGroupListFactory');
+				$uglf = TTnew('UserGroupListFactory'); /** @var UserGroupListFactory $uglf */
 				$nodes = $uglf->getByCompanyIdArray( $this->getCompany() );
 				$children_ids = TTTree::getElementFromNodes( TTTree::flattenArray( TTTree::createNestedArrayWithDepth( $nodes, $this->getId() ) ), 'id' );
 				if ( is_array($children_ids) AND in_array( $this->getParent(), $children_ids) == TRUE ) {
@@ -204,9 +204,8 @@ class UserGroupFactory extends Factory {
 		return TRUE;
 	}
 
-	//Must be postSave because we need the ID of the object.
-
 	/**
+	 * Must be postSave because we need the ID of the object.
 	 * @return bool
 	 */
 	function postSave() {
@@ -214,7 +213,7 @@ class UserGroupFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Get parent of this object, and re-parent all groups to it.
-			$uglf = TTnew('UserGroupListFactory');
+			$uglf = TTnew('UserGroupListFactory'); /** @var UserGroupListFactory $uglf */
 			$uglf->getByCompanyIdAndParentId( $this->getCompany(), $this->getId() );
 			if ( $uglf->getRecordCount() > 0 ) {
 				foreach( $uglf as $ug_obj ) {
@@ -227,7 +226,7 @@ class UserGroupFactory extends Factory {
 			}
 
 			//Get items by group id.
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByCompanyIdAndGroupId( $this->getCompany(), $this->getId() );
 			if ( $ulf->getRecordCount() > 0 ) {
 				foreach( $ulf as $obj ) {
@@ -238,17 +237,17 @@ class UserGroupFactory extends Factory {
 			}
 
 			//Delete this group from station/job criteria
-			$sugf = TTnew( 'StationUserGroupFactory' );
+			$sugf = TTnew( 'StationUserGroupFactory' ); /** @var StationUserGroupFactory $sugf */
 
 			$query = 'DELETE FROM '. $sugf->getTable() .' WHERE group_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			//Job employee criteria
-			$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
+			$cgmlf = TTnew( 'CompanyGenericMapListFactory' ); /** @var CompanyGenericMapListFactory $cgmlf */
 			$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 1030, $this->getID() );
 			if ( $cgmlf->getRecordCount() > 0 ) {
 				foreach( $cgmlf as $cgm_obj ) {
-					Debug::text('Deleteing from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Deleting from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 					$cgm_obj->Delete();
 				}
 			}
@@ -260,9 +259,9 @@ class UserGroupFactory extends Factory {
 
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

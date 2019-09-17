@@ -81,7 +81,7 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function getUserObject( $user_id ) {
-		$ulf = TTNew( 'UserListFactory' );
+		$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getById( $user_id );
 		if ( $ulf->getRecordCount() > 0 ) {
 			return $ulf->getCurrent();
@@ -95,7 +95,7 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testRecurringHolidayDatesA() {
 		//First Monday in August
-		$rhf = TTNew('RecurringHolidayFactory');
+		$rhf = TTNew('RecurringHolidayFactory'); /** @var RecurringHolidayFactory $rhf */
 		$rhf->setCompany( $this->company_id );
 		$rhf->setName('BC - British Columbia Day');
 		$rhf->setType( 20 );
@@ -134,7 +134,7 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testRecurringHolidayDatesB() {
 		//First Monday in August
-		$rhf = TTNew('RecurringHolidayFactory');
+		$rhf = TTNew('RecurringHolidayFactory'); /** @var RecurringHolidayFactory $rhf */
 		$rhf->setCompany( $this->company_id );
 		$rhf->setName('BC - Family');
 		$rhf->setType( 20 );
@@ -173,7 +173,7 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testRecurringHolidayDatesC() {
 		//First Monday in August
-		$rhf = TTNew('RecurringHolidayFactory');
+		$rhf = TTNew('RecurringHolidayFactory'); /** @var RecurringHolidayFactory $rhf */
 		$rhf->setCompany( $this->company_id );
 		$rhf->setName('US - Thanksgiving');
 		$rhf->setType( 20 );

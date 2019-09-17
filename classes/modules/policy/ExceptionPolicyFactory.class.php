@@ -934,9 +934,8 @@ class ExceptionPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	//This function needs to determine which new exceptions to create, and which old exceptions are no longer valid and to delete.
-
 	/**
+	 * This function needs to determine which new exceptions to create, and which old exceptions are no longer valid and to delete.
 	 * @param $existing_exceptions
 	 * @param $current_exceptions
 	 * @return array
@@ -1058,7 +1057,7 @@ class ExceptionPolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Exception Policy Control
-		$epclf = TTnew( 'ExceptionPolicyControlListFactory' );
+		$epclf = TTnew( 'ExceptionPolicyControlListFactory' ); /** @var ExceptionPolicyControlListFactory $epclf */
 		$this->Validator->isResultSetWithRows(	'exception_policy_control',
 														$epclf->getByID($this->getExceptionPolicyControl()),
 														TTi18n::gettext('Exception Policy Control is invalid')
@@ -1191,9 +1190,9 @@ class ExceptionPolicyFactory extends Factory {
 		return $data;
 	}
 
-	//This is called for every record everytime, and doesn't help much because of that.
-	//This has to be enabled to properly log modifications though.
 	/**
+	 * This is called for every record everytime, and doesn't help much because of that.
+	 * This has to be enabled to properly log modifications though.
 	 * @param $log_action
 	 * @return bool
 	 */

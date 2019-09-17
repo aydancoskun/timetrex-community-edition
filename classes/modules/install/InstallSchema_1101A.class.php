@@ -35,10 +35,10 @@
  ********************************************************************************/
 
 /**
+ * THIS IS THE SCHEMA VERSION THAT SWITCHES TO UUIDs.
  * @package Modules\Install
  */
 class InstallSchema_1101A extends InstallSchema_Base {
-	//THIS IS THE SCHEMA VERSION THAT SWITCHES TO UUIDs.
 
 	/**
 	 * @return bool
@@ -68,6 +68,9 @@ class InstallSchema_1101A extends InstallSchema_Base {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function convertCompanyLogos() {
 		$root_path = realpath( Environment::getStorageBasePath() .'company_logo'. DIRECTORY_SEPARATOR );
 		if ( $root_path === FALSE ) {
@@ -102,6 +105,9 @@ class InstallSchema_1101A extends InstallSchema_Base {
 		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function convertUserPhoto(){
 		$root_path = realpath( Environment::getStorageBasePath() .'user_photo'. DIRECTORY_SEPARATOR );
 		if ( $root_path === FALSE ) {
@@ -152,7 +158,13 @@ class InstallSchema_1101A extends InstallSchema_Base {
 		return TRUE;
 	}
 
-	function renameFile($before, $after, $counter = 0 ) {
+	/**
+	 * @param $before
+	 * @param $after
+	 * @param int $counter
+	 * @return bool
+	 */
+	function renameFile( $before, $after, $counter = 0 ) {
 		Debug::text( $counter .'. Renaming file: '.$before .' to: '.$after, __FILE__, __LINE__, __METHOD__, 10 );
 		@mkdir( dirname( $after ), 0755, TRUE );
 		return Misc::rename($before, $after);

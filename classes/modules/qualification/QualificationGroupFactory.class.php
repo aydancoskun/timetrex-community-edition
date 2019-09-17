@@ -101,7 +101,7 @@ class QualificationGroupFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setCompany( $value) {
@@ -117,7 +117,7 @@ class QualificationGroupFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setParent( $value) {
@@ -165,7 +165,7 @@ class QualificationGroupFactory extends Factory {
 	}
 
 	/**
-	 * @param $name
+	 * @param $value
 	 * @return bool
 	 */
 	function setName( $value) {
@@ -183,7 +183,7 @@ class QualificationGroupFactory extends Factory {
 		//
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'company_id',
 															$clf->getByID($this->getCompany()),
 															TTi18n::gettext('Company is invalid')
@@ -215,7 +215,7 @@ class QualificationGroupFactory extends Factory {
 											);
 		} else {
 			if ( $this->isNew() == FALSE ) {
-				$qglf = TTnew('QualificationGroupListFactory');
+				$qglf = TTnew('QualificationGroupListFactory'); /** @var QualificationGroupListFactory $qglf */
 				$nodes = $qglf->getByCompanyIdArray( $this->getCompany() );
 				$children_ids = TTTree::getElementFromNodes( TTTree::flattenArray( TTTree::createNestedArrayWithDepth( $nodes, $this->getId() ) ), 'id' );
 				if ( is_array($children_ids) AND in_array( $this->getParent(), $children_ids) == TRUE ) {
@@ -238,9 +238,8 @@ class QualificationGroupFactory extends Factory {
 		return TRUE;
 	}
 
-	//Must be postSave because we need the ID of the object.
-
 	/**
+	 * Must be postSave because we need the ID of the object.
 	 * @return bool
 	 */
 	function postSave() {
@@ -249,7 +248,7 @@ class QualificationGroupFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Get parent of this object, and re-parent all groups to it.
-			$qglf = TTnew('QualificationGroupListFactory');
+			$qglf = TTnew('QualificationGroupListFactory'); /** @var QualificationGroupListFactory $qglf */
 			$qglf->getByCompanyIdAndParentId( $this->getCompany(), $this->getId() );
 			if ( $qglf->getRecordCount() > 0 ) {
 				foreach( $qglf as $qg_obj ) {
@@ -262,7 +261,7 @@ class QualificationGroupFactory extends Factory {
 			}
 
 			//Get items by group id.
-			$qlf = TTnew( 'QualificationListFactory' );
+			$qlf = TTnew( 'QualificationListFactory' ); /** @var QualificationListFactory $qlf */
 			$qlf->getByCompanyIdAndGroupId( $this->getCompany(), $this->getId() );
 			if ( $qlf->getRecordCount() > 0 ) {
 				foreach( $qlf as $obj ) {
@@ -273,7 +272,7 @@ class QualificationGroupFactory extends Factory {
 			}
 
 			//Company generic mapping
-			$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
+			$cgmlf = TTnew( 'CompanyGenericMapListFactory' ); /** @var CompanyGenericMapListFactory $cgmlf */
 			$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 1090, $this->getID() );
 			if ( $cgmlf->getRecordCount() > 0 ) {
 				foreach( $cgmlf as $cgm_obj ) {

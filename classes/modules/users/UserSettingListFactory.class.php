@@ -55,7 +55,7 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -83,7 +83,7 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -114,7 +114,7 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -149,7 +149,7 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 							AND	name = ?
 							AND deleted = 0';
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $cache_id);
 		}

@@ -145,7 +145,7 @@
 			// Error: Uncaught TypeError: Cannot read property 'val' of undefined in interface/html5/global/widgets/datepicker/TDatePicker.js?v=9.0.5-20151222-162114 line 145
 			var val = date_picker_input ? date_picker_input.val() : null;
 			//Error: Uncaught TypeError: Cannot read property 'format' of null in interface/html5/global/widgets/datepicker/TDatePicker.js?v=9.0.0-20150909-213207 line 140
-			val = Global.strToDate( val ) && Global.strToDate( val ).format( 'YYYYMMDD' );
+			val = Global.strToDate( val ) && Global.strToDate( val ).format( 'YYYY-MM-DD' );
 
 			return val;
 		};

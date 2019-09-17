@@ -68,6 +68,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 
 	/**
 	 * Get default remittance destination account data for creating new remittance destination accounts.
+	 * @param null $ach_transaction_type
 	 * @return array
 	 */
 	function getRemittanceDestinationAccountDefaultData( $ach_transaction_type = NULL ) {
@@ -95,7 +96,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 		);
 
 		//Get New Hire Defaults.
-		$udlf = TTnew( 'UserDefaultListFactory' );
+		$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 		$udlf->getByCompanyId( $company_obj->getId() );
 		if ( $udlf->getRecordCount() > 0 ) {
 			Debug::Text('Using User Defaults, as they exist...', __FILE__, __LINE__, __METHOD__, 10);
@@ -122,7 +123,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 	 * Get remittance destination account data for one or more accounts.
 	 * @param array $data filter data
 	 * @param bool $disable_paging
-	 * @return array
+	 * @return array|bool
 	 */
 	function getRemittanceDestinationAccount( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
@@ -143,7 +144,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' );
+		$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' ); /** @var RemittanceDestinationAccountListFactory $rdalf */
 		$rdalf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $rdalf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $rdalf->getRecordCount() > 0 ) {
@@ -201,6 +202,10 @@ class APIRemittanceDestinationAccount extends APIFactory {
 
 		if ( $validate_only == TRUE ) {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
+			$permission_children_ids = FALSE;
+		} else {
+			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
+			$permission_children_ids = $this->getPermissionChildren();
 		}
 
 		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
@@ -212,7 +217,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'RemittanceDestinationAccountListFactory' );
+				$lf = TTnew( 'RemittanceDestinationAccountListFactory' ); /** @var RemittanceDestinationAccountListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -304,6 +309,9 @@ class APIRemittanceDestinationAccount extends APIFactory {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
+		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
+		$permission_children_ids = $this->getPermissionChildren();
+
 		Debug::Text('Received data for: '. count($data) .' Remittance destination accounts', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -313,7 +321,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'RemittanceDestinationAccountListFactory' );
+				$lf = TTnew( 'RemittanceDestinationAccountListFactory' ); /** @var RemittanceDestinationAccountListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

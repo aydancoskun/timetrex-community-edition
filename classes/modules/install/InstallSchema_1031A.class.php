@@ -64,7 +64,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Go through all pay period schedules and update the annual pay period column
-		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+		$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 		$ppslf->getAll();
 		if ( $ppslf->getRecordCount() > 0 ) {
 			foreach( $ppslf as $pps_obj ) {
@@ -91,7 +91,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		*/
 
 		//Upgrade to new hierarchy format.
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			$object_types = array();
@@ -100,7 +100,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 					$company_id = $c_obj->getId();
 					Debug::Text(' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 
-					$hclf = TTnew( 'HierarchyControlListFactory' );
+					$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 					$hclf->StartTransaction();
 					$hclf->getByCompanyId( $company_id );
 					if ( $hclf->getRecordCount() > 0 ) {
@@ -108,11 +108,11 @@ class InstallSchema_1031A extends InstallSchema_Base {
 							$paths_to_root = array();
 							$hierarchy_id = $hc_obj->getId();
 
-							$hlf = TTnew( 'HierarchyListFactory' );
+							$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 							$hierarchy_users = $hlf->getByCompanyIdAndHierarchyControlId( $company_id, $hierarchy_id );
 							if ( is_array($hierarchy_users) AND count($hierarchy_users) > 0 ) {
 
-								$hotlf = TTnew( 'HierarchyObjectTypeListFactory' );
+								$hotlf = TTnew( 'HierarchyObjectTypeListFactory' ); /** @var HierarchyObjectTypeListFactory $hotlf */
 								$hotlf->getByHierarchyControlId( $hierarchy_id );
 								if ( $hotlf->getRecordCount() > 0 ) {
 									foreach( $hotlf as $hot_obj ) {
@@ -141,7 +141,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 									$i = 0;
 									do {
 										Debug::Text(' Iteration...', __FILE__, __LINE__, __METHOD__, 10);
-										$hlf_b = TTnew( 'HierarchyListFactory' );
+										$hlf_b = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf_b */
 										$parents = $hlf_b->getParentLevelIdArrayByHierarchyControlIdAndUserId( $hierarchy_id, $tmp_id);
 										sort($parents);
 
@@ -190,7 +190,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 										Debug::Text(' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 										//Create new hierarchy_control
-										$hcf = TTnew( 'HierarchyControlFactory' );
+										$hcf = TTnew( 'HierarchyControlFactory' ); /** @var HierarchyControlFactory $hcf */
 										$hcf->setID( $hcf->getNextInsertId() );
 										$hcf->setCompany( $company_id );
 										$hcf->setObjectType( $object_types[$decoded_path['hierarchy_control_id']] );
@@ -202,7 +202,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 
 											foreach( $decoded_path['path'] as $level => $superior_ids ) {
 												foreach( $superior_ids as $superior_id) {
-													$ulf = TTnew( 'UserListFactory' );
+													$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 													$ulf->getById( $superior_id );
 
 													if ( $ulf->getRecordCount() > 0 ) {
@@ -229,7 +229,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 										if ( isset($decoded_path['path']) AND is_array($decoded_path['path']) ) {
 											foreach( $decoded_path['path'] as $level => $superior_ids ) {
 												foreach( $superior_ids as $superior_id ) {
-													$hlf = TTnew( 'HierarchyLevelFactory' );
+													$hlf = TTnew( 'HierarchyLevelFactory' ); /** @var HierarchyLevelFactory $hlf */
 													$hlf->setHierarchyControl( $hcf->getID() );
 													$hlf->setLevel( $level );
 													$hlf->setUser( $superior_id );
@@ -266,18 +266,18 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		}
 
 		//Go through each permission group, and enable break policies for anyone who can see meal policies
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj ) {
 				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 				if ( $c_obj->getStatus() != 30 ) {
-					$pclf = TTnew( 'PermissionControlListFactory' );
+					$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 					$pclf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Force order to prevent references to columns that haven't been created yet.
 					if ( $pclf->getRecordCount() > 0 ) {
 						foreach( $pclf as $pc_obj ) {
 							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
-							$plf = TTnew( 'PermissionListFactory' );
+							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $c_obj->getId(), $pc_obj->getId(), 'meal_policy', 'enabled', 1 );
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text('Found permission group with meal policy enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
@@ -304,14 +304,14 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		//This used to be handled in 1016T postInstall function, but when upgrading really old versions (ie: 2.2.22) of TimeTrex to newer
 		//ones (ie: 3.3.2) it would fail because new columns have been added to the company_deduction table in schema 1031A.
 		//Migrate to completely separate Tax / Deductions for social security, as the employee and employer rates are different now.
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj ) {
 				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 				if ( $c_obj->getStatus() != 30 AND $c_obj->getCountry() == 'US' ) {
 					//Get PayStub Link accounts
-					$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+					$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 					$pseallf->getByCompanyId( $c_obj->getID() );
 					if	( $pseallf->getRecordCount() > 0 ) {
 						$psea_obj = $pseallf->getCurrent();
@@ -323,7 +323,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 					$include_pay_stub_accounts = FALSE;
 					$exclude_pay_stub_accounts = FALSE;
 
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Social Security - Employee' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();
@@ -345,7 +345,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 					}
 					unset($cdlf, $cd_obj);
 
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Social Security - Employer' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();
@@ -378,7 +378,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		}
 
 		//Add MiscDaily cronjob to database.
-		$cjf = TTnew( 'CronJobFactory' );
+		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
 		$cjf->setName('MiscDaily');
 		$cjf->setMinute(55);
 		$cjf->setHour(1);
@@ -389,7 +389,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		$cjf->Save();
 
 		//Add MiscWeekly cronjob to database.
-		$cjf = TTnew( 'CronJobFactory' );
+		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
 		$cjf->setName('MiscWeekly');
 		$cjf->setMinute(55);
 		$cjf->setHour(1);

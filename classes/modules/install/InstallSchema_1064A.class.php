@@ -55,7 +55,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function addPayCodeIdToContributingPayCodePolicy( $pay_code_id, $contributing_pay_code_policy_id ) {
-		$cpcplf = TTnew( 'ContributingPayCodePolicyListFactory' );
+		$cpcplf = TTnew( 'ContributingPayCodePolicyListFactory' ); /** @var ContributingPayCodePolicyListFactory $cpcplf */
 		$cpcplf->getById( $contributing_pay_code_policy_id );
 		if ( $cpcplf->getRecordCount() == 1 ) {
 			foreach( $cpcplf as $cpcp_obj ) {
@@ -85,19 +85,19 @@ class InstallSchema_1064A extends InstallSchema_Base {
 	function postInstall() {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		$clf = TTNew('CompanyListFactory');
+		$clf = TTNew('CompanyListFactory'); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			$x = 0;
 			foreach( $clf as $company_obj ) {
 				//Go through each permission group, and enable schedule, view_open for for anyone who has schedule, view
 				Debug::text('Company: '. $company_obj->getName() .' X: '. $x .' of :'. $clf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9);
-				$pclf = TTnew( 'PermissionControlListFactory' );
+				$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 				$pclf->getByCompanyId( $company_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Force order to prevent references to columns that haven't been created yet.
 				if ( $pclf->getRecordCount() > 0 ) {
 					foreach( $pclf as $pc_obj ) {
 						Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
-						$plf = TTnew( 'PermissionListFactory' );
+						$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_obj->getId(), $pc_obj->getId(), 'over_time_policy', 'add', 1 ); //Only return records where permission is ALLOWED.
 						if ( $plf->getRecordCount() > 0 ) {
 							Debug::text('Found permission group with over_time_policy, add enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
@@ -149,7 +149,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 
 				//Get list of valid pay stub accounts for this company, so we can make sure we don't get a validation error when creating pay codes.
 				$pay_stub_accounts = array();
-				$psealf = TTNew('PayStubEntryAccountListFactory');
+				$psealf = TTNew('PayStubEntryAccountListFactory'); /** @var PayStubEntryAccountListFactory $psealf */
 				$psealf->getByCompanyId( $company_obj->getId() );
 				if ( $psealf->getRecordCount() > 0 ) {
 					foreach( $psealf as $psea_obj ) {
@@ -160,7 +160,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 
 
 				//Dummy pay code.
-				$pcf = TTNew('PayCodeFactory');
+				$pcf = TTNew('PayCodeFactory'); /** @var PayCodeFactory $pcf */
 				$pcf->setCompany( $company_obj->getId() );
 				$pcf->setName( 'DUMMY (DELETE ME)' ); //Can't change name, as we need to delete this in 1065A schema upgrade.
 				$pcf->setCode( 'DUMMY' ); //Can't change code, as we need to delete this in 1065A schema upgrade.
@@ -176,7 +176,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 
 				//Contributing Pay Code Policy for just Regular Time
 				//Required to calculate Overtime Policies
-				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' );
+				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $cpcpf */
 				$cpcpf->setId( $cpcpf->getNextInsertId() );
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time' );
@@ -187,7 +187,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$contributing_pay_code_policy_insert_id['regular_time'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+					$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 					$cspf->setCompany( $company_obj->getId() );
 					$cspf->setName( $cpcpf->getName() );
 					$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_insert_id['regular_time'] );
@@ -208,7 +208,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				}
 				unset($cpcpf,$cspf);
 
-				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' );
+				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $cpcpf */
 				$cpcpf->setId( $cpcpf->getNextInsertId() );
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time + Meal + Break' );
@@ -217,7 +217,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$contributing_pay_code_policy_insert_id['regular_time_and_meal_policy_and_break_policy'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time_and_meal_policy_and_break_policy'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+					$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 					$cspf->setCompany( $company_obj->getId() );
 					$cspf->setName( $cpcpf->getName() );
 					$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_insert_id['regular_time_and_meal_policy_and_break_policy'] );
@@ -237,7 +237,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 
 				//Contributing Pay Code Policy for just Regular Time & Overtime
 				//Required to calculate Premium Policies
-				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' );
+				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $cpcpf */
 				$cpcpf->setId( $cpcpf->getNextInsertId() );
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time + Overtime' );
@@ -246,7 +246,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$contributing_pay_code_policy_insert_id['regular_time_and_over_time'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time_and_over_time'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+					$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 					$cspf->setCompany( $company_obj->getId() );
 					$cspf->setName( $cpcpf->getName() );
 					$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_insert_id['regular_time_and_over_time'] );
@@ -264,7 +264,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				}
 				unset($cpcpf,$cspf);
 
-				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' );
+				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $cpcpf */
 				$cpcpf->setId( $cpcpf->getNextInsertId() );
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time + Overtime + Meal' );
@@ -273,7 +273,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_meal_policy'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_meal_policy'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+					$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 					$cspf->setCompany( $company_obj->getId() );
 					$cspf->setName( $cpcpf->getName() );
 					$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_meal_policy'] );
@@ -291,7 +291,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				}
 				unset($cpcpf,$cspf);
 
-				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' );
+				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $cpcpf */
 				$cpcpf->setId( $cpcpf->getNextInsertId() );
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time + Overtime + Break' );
@@ -300,7 +300,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_break_policy'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_break_policy'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+					$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 					$cspf->setCompany( $company_obj->getId() );
 					$cspf->setName( $cpcpf->getName() );
 					$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_break_policy'] );
@@ -318,7 +318,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				}
 				unset($cpcpf,$cspf);
 
-				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' );
+				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $cpcpf */
 				$cpcpf->setId( $cpcpf->getNextInsertId() );
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time + Overtime + Meal + Break' );
@@ -327,7 +327,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_meal_policy_and_break_policy'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_meal_policy_and_break_policy'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+					$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 					$cspf->setCompany( $company_obj->getId() );
 					$cspf->setName( $cpcpf->getName() );
 					$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_meal_policy_and_break_policy'] );
@@ -347,7 +347,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 
 				//Contributing Pay Code Policy for just Regular Time & OverTime & Paid Absences
 				//Required to calculate Holiday Policies
-				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' );
+				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $cpcpf */
 				$cpcpf->setId( $cpcpf->getNextInsertId() );
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time + Paid Absence' );
@@ -356,7 +356,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$contributing_pay_code_policy_insert_id['regular_time_and_paid_absence'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time_and_paid_absence'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+					$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 					$cspf->setCompany( $company_obj->getId() );
 					$cspf->setName( $cpcpf->getName() );
 					$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_insert_id['regular_time_and_paid_absence'] );
@@ -374,7 +374,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				}
 				unset($cpcpf,$cspf);
 
-				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' );
+				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $cpcpf */
 				$cpcpf->setId( $cpcpf->getNextInsertId() );
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time + Meal + Break + Paid Absence' );
@@ -383,7 +383,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$contributing_pay_code_policy_insert_id['regular_time_and_meal_policy_and_break_policy_and_paid_absence'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time_and_meal_policy_and_break_policy_and_paid_absence'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+					$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 					$cspf->setCompany( $company_obj->getId() );
 					$cspf->setName( $cpcpf->getName() );
 					$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_insert_id['regular_time_and_meal_policy_and_break_policy_and_paid_absence'] );
@@ -401,7 +401,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				}
 				unset($cpcpf,$cspf);
 
-				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' );
+				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $cpcpf */
 				$cpcpf->setId( $cpcpf->getNextInsertId() );
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time + Overtime + Paid Absence' );
@@ -410,7 +410,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_paid_absence'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_paid_absence'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+					$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 					$cspf->setCompany( $company_obj->getId() );
 					$cspf->setName( $cpcpf->getName() );
 					$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_paid_absence'] );
@@ -428,7 +428,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				}
 				unset($cpcpf,$cspf);
 
-				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' );
+				$cpcpf = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $cpcpf */
 				$cpcpf->setId( $cpcpf->getNextInsertId() );
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time + Overtime + Meal + Break + Paid Absence' );
@@ -437,7 +437,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_meal_policy_and_break_policy_and_paid_absence'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_meal_policy_and_break_policy_and_paid_absence'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+					$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 					$cspf->setCompany( $company_obj->getId() );
 					$cspf->setName( $cpcpf->getName() );
 					$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_meal_policy_and_break_policy_and_paid_absence'] );
@@ -457,12 +457,12 @@ class InstallSchema_1064A extends InstallSchema_Base {
 
 
 				//This must go before PayFormulaPolicies are created.
-				$aplf = TTNew('AccrualPolicyListFactory');
+				$aplf = TTNew('AccrualPolicyListFactory'); /** @var AccrualPolicyListFactory $aplf */
 				$aplf->getByCompanyId( $company_obj->getId() );
 				if ( $aplf->getRecordCount() > 0 ) {
 					foreach( $aplf as $ap_obj ) {
 						//Create Accrual Policy Account with matching ID so we don't have to migrate Accrual/Pay Formula Policy rows.
-						$apa_obj = TTNew('AccrualPolicyAccountFactory');
+						$apa_obj = TTNew('AccrualPolicyAccountFactory'); /** @var AccrualPolicyAccountFactory $apa_obj */
 						$apa_obj->setId( $ap_obj->getID() );
 						$apa_obj->setCompany( $ap_obj->getCompany() );
 						$apa_obj->setName( $ap_obj->getName() );
@@ -482,7 +482,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				}
 
 				//Create pay formulas.
-				$pfpf = TTnew( 'PayFormulaPolicyFactory' );
+				$pfpf = TTnew( 'PayFormulaPolicyFactory' ); /** @var PayFormulaPolicyFactory $pfpf */
 				$pfpf->setCompany( $company_obj->getId() );
 				$pfpf->setName( 'UnPaid (0.0x)' );
 				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
@@ -496,7 +496,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				unset($pfpf);
 
 
-				$pfpf = TTnew( 'PayFormulaPolicyFactory' );
+				$pfpf = TTnew( 'PayFormulaPolicyFactory' ); /** @var PayFormulaPolicyFactory $pfpf */
 				$pfpf->setCompany( $company_obj->getId() );
 				$pfpf->setName( 'Regular (1.0x)' );
 				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
@@ -512,7 +512,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				$pay_code_map = array();
 
 				//Regular time pay code.
-				$pcf = TTNew('PayCodeFactory');
+				$pcf = TTNew('PayCodeFactory'); /** @var PayCodeFactory $pcf */
 				$pcf->setCompany( $company_obj->getId() );
 				$pcf->setName( 'Regular Time' );
 				$pcf->setCode( 'REG' );
@@ -541,7 +541,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					$this->addPayCodeIdToContributingPayCodePolicy( $insert_pay_code_id, $contributing_pay_code_policy_insert_id['regular_time_and_over_time_and_paid_absence'] );
 					$this->addPayCodeIdToContributingPayCodePolicy( $insert_pay_code_id, $contributing_pay_code_policy_insert_id['regular_time_and_meal_policy_and_break_policy_and_paid_absence'] );
 
-					$rtpf = TTnew( 'RegularTimePolicyFactory' );
+					$rtpf = TTnew( 'RegularTimePolicyFactory' ); /** @var RegularTimePolicyFactory $rtpf */
 					$rtpf->setCompany( $company_obj->getId() );
 					$rtpf->setName( 'Regular Time' );
 					$rtpf->setCalculationOrder( 9999 );
@@ -553,7 +553,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 						$regular_time_policy_id = $rtpf->Save();
 
 						//Add regular time policy to Policy Groups.
-						$pglf = TTNew('PolicyGroupListFactory');
+						$pglf = TTNew('PolicyGroupListFactory'); /** @var PolicyGroupListFactory $pglf */
 						$pglf->getByCompanyId( $company_obj->getId() );
 						if ( $pglf->getRecordCount() > 0 ) {
 							foreach( $pglf as $pg_obj ) {
@@ -571,13 +571,13 @@ class InstallSchema_1064A extends InstallSchema_Base {
 
 				//Loop over all overtime/premium/absence/meal/break policies and create pay codes based on them.
 				//Update pay_code_id on each policy as we go, so we can use that as the mapping later when user_date_total as modified.
-				$otplf = TTNew('OverTimePolicyListFactory');
+				$otplf = TTNew('OverTimePolicyListFactory'); /** @var OverTimePolicyListFactory $otplf */
 				$otplf->getByCompanyId( $company_obj->getId() );
 				if ( $otplf->getRecordCount() > 0 ) {
 					foreach( $otplf as $otp_obj ) {
 						Debug::text(' Converting OverTime Policy ID: '. $otp_obj->getID(), __FILE__, __LINE__, __METHOD__, 9);
 
-						$pfpf = TTnew( 'PayFormulaPolicyFactory' );
+						$pfpf = TTnew( 'PayFormulaPolicyFactory' ); /** @var PayFormulaPolicyFactory $pfpf */
 						$pfpf->setCompany( $company_obj->getId() );
 						$pfpf->setName( 'OverTime - '. $otp_obj->getName() .' ('. (float)$otp_obj->getColumn('rate') .'x) ['. $otp_obj->getID() .']' );
 						$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
@@ -589,7 +589,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 							$pay_formula_policy_id = $pfpf->Save();
 						}
 
-						$pcf = TTNew('PayCodeFactory');
+						$pcf = TTNew('PayCodeFactory'); /** @var PayCodeFactory $pcf */
 						$pcf->setCompany( $otp_obj->getCompany() );
 						$pcf->setName( 'OverTime - '. $otp_obj->getName().' ['. $otp_obj->getID().']' );
 						$pcf->setCode( 'OT'.$otp_obj->getID() );
@@ -635,7 +635,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				unset($otplf, $otp_obj, $pcf, $insert_pay_code_id );
 
 
-				$pplf = TTNew('PremiumPolicyListFactory');
+				$pplf = TTNew('PremiumPolicyListFactory'); /** @var PremiumPolicyListFactory $pplf */
 				$pplf->getByCompanyId( $company_obj->getId() );
 				if ( $pplf->getRecordCount() > 0 ) {
 					foreach( $pplf as $pp_obj ) {
@@ -648,7 +648,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 							$tmp_rate = ( (float)$pp_obj->getColumn('rate') - 1.0 );
 						}
 
-						$pfpf = TTnew( 'PayFormulaPolicyFactory' );
+						$pfpf = TTnew( 'PayFormulaPolicyFactory' ); /** @var PayFormulaPolicyFactory $pfpf */
 						$pfpf->setCompany( $company_obj->getId() );
 						$pfpf->setName( 'Premium - '. $pp_obj->getName() .' ('. $tmp_rate .'x) ['. $pp_obj->getID() .']' );
 
@@ -674,7 +674,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 							$pay_formula_policy_id = $pfpf->Save();
 						}
 
-						$pcf = TTNew('PayCodeFactory');
+						$pcf = TTNew('PayCodeFactory'); /** @var PayCodeFactory $pcf */
 						$pcf->setCompany( $pp_obj->getCompany() );
 						$pcf->setName('Premium - '.  $pp_obj->getName() .' ['. $pp_obj->getID().']' );
 						$pcf->setCode( 'PRE'.$pp_obj->getID() );
@@ -723,13 +723,13 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				unset($pplf, $pp_obj, $pcf, $insert_pay_code_id );
 
 
-				$aplf = TTNew('AbsencePolicyListFactory');
+				$aplf = TTNew('AbsencePolicyListFactory'); /** @var AbsencePolicyListFactory $aplf */
 				$aplf->getByCompanyId( $company_obj->getId() );
 				if ( $aplf->getRecordCount() > 0 ) {
 					foreach( $aplf as $ap_obj ) {
 						Debug::text(' Converting Absence Policy ID: '. $ap_obj->getID(), __FILE__, __LINE__, __METHOD__, 9);
 
-						$pfpf = TTnew( 'PayFormulaPolicyFactory' );
+						$pfpf = TTnew( 'PayFormulaPolicyFactory' ); /** @var PayFormulaPolicyFactory $pfpf */
 						$pfpf->setCompany( $company_obj->getId() );
 						$pfpf->setName( 'Absence - '. $ap_obj->getName() .' ('. (float)$ap_obj->getColumn('rate') .'x) ['. $ap_obj->getID() .']' );
 						$pfpf->setPayType( 10 ); //Multiplied by factor
@@ -741,7 +741,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 							$pay_formula_policy_id = $pfpf->Save();
 						}
 
-						$pcf = TTNew('PayCodeFactory');
+						$pcf = TTNew('PayCodeFactory'); /** @var PayCodeFactory $pcf */
 						$pcf->setCompany( $ap_obj->getCompany() );
 						$pcf->setName( 'Absence - '. $ap_obj->getName().' ['. $ap_obj->getID().']' );
 						$pcf->setCode( 'ABS'.$ap_obj->getID() );
@@ -781,13 +781,13 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				unset($pplf, $pp_obj, $pcf, $insert_pay_code_id );
 
 
-				$mplf = TTNew('MealPolicyListFactory');
+				$mplf = TTNew('MealPolicyListFactory'); /** @var MealPolicyListFactory $mplf */
 				$mplf->getByCompanyId( $company_obj->getId() );
 				if ( $mplf->getRecordCount() > 0 ) {
 					foreach( $mplf as $mp_obj ) {
 						Debug::text(' Converting Meal Policy ID: '. $mp_obj->getID(), __FILE__, __LINE__, __METHOD__, 9);
 
-						$pcf = TTNew('PayCodeFactory');
+						$pcf = TTNew('PayCodeFactory'); /** @var PayCodeFactory $pcf */
 						$pcf->setCompany( $mp_obj->getCompany() );
 						$pcf->setName( 'Meal - '. $mp_obj->getName().' ['. $mp_obj->getID() .']' );
 						$pcf->setCode( 'MEAL'.$mp_obj->getID() );
@@ -822,13 +822,13 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				unset($mplf, $mp_obj, $pcf, $insert_pay_code_id );
 
 
-				$bplf = TTNew('BreakPolicyListFactory');
+				$bplf = TTNew('BreakPolicyListFactory'); /** @var BreakPolicyListFactory $bplf */
 				$bplf->getByCompanyId( $company_obj->getId() );
 				if ( $bplf->getRecordCount() > 0 ) {
 					foreach( $bplf as $bp_obj ) {
 						Debug::text(' Converting Break Policy ID: '. $bp_obj->getID(), __FILE__, __LINE__, __METHOD__, 9);
 
-						$pcf = TTNew('PayCodeFactory');
+						$pcf = TTNew('PayCodeFactory'); /** @var PayCodeFactory $pcf */
 						$pcf->setCompany( $bp_obj->getCompany() );
 						$pcf->setName( 'Break - '. $bp_obj->getName().' ['. $bp_obj->getID() .']' );
 						$pcf->setCode( 'BRK'.$bp_obj->getID() );
@@ -862,7 +862,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				}
 				unset($bplf, $bp_obj, $pcf, $insert_pay_code_id );
 
-				$hplf = TTNew('HolidayPolicyListFactory');
+				$hplf = TTNew('HolidayPolicyListFactory'); /** @var HolidayPolicyListFactory $hplf */
 				$hplf->getByCompanyId( $company_obj->getId() );
 				if ( $hplf->getRecordCount() > 0 ) {
 					foreach( $hplf as $hp_obj ) {
@@ -893,7 +893,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				//However calcExceptions calculates dates retroactively using UserDate table, so they will always have 0 hour totals.
 				//Can we change this to calculate dates that don't technically exist yet? We just need to loop through the specific dates and recalculate the days.
 				//  - Also check to see if the pay period is closed and skip those dates to save processing?
-				$cjlf = TTnew('CronJobListFactory');
+				$cjlf = TTnew('CronJobListFactory'); /** @var CronJobListFactory $cjlf */
 				$cjlf->getByName('AddUserDate');
 				if ( $cjlf->getRecordCount() > 0 ) {
 					foreach( $cjlf as $cj_obj ) {
@@ -910,7 +910,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				//Migrate saved reports to the new pay codes
 				//This handles PayrollExport settings too as those are saved as UserReportData as well.
 				if ( is_array($pay_code_map) AND count($pay_code_map) > 0 ) {
-					$urdlf = TTnew('UserReportDataListFactory');
+					$urdlf = TTnew('UserReportDataListFactory'); /** @var UserReportDataListFactory $urdlf */
 					$urdlf->getAPISearchByCompanyIdAndArrayCriteria( $company_obj->getID(), array() );
 					Debug::text('  Found Saved Reports: '. $urdlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9);
 					if ( $urdlf->getRecordCount() > 0 ) {
@@ -944,7 +944,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 
 					if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 						//Custom Columns selections and formulas need to be converted as well.
-						$rcclf = TTnew('ReportCustomColumnListFactory');
+						$rcclf = TTnew('ReportCustomColumnListFactory'); /** @var ReportCustomColumnListFactory $rcclf */
 						$rcclf->getByCompanyId( $company_obj->getID() );
 						Debug::text('  Found Custom Columns: '. $rcclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9);
 						if ( $rcclf->getRecordCount() > 0 ) {
@@ -988,7 +988,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 
 
 				//Convert schedule policies to Include/Exclude format.
-				$splf = TTNew('SchedulePolicyListFactory');
+				$splf = TTNew('SchedulePolicyListFactory'); /** @var SchedulePolicyListFactory $splf */
 				$splf->getByCompanyId( $company_obj->getId() );
 				if ( $splf->getRecordCount() > 0 ) {
 					foreach( $splf as $sp_obj ) {

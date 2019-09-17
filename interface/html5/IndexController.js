@@ -97,14 +97,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 			return;
 		}
 
-		var reg = new RegExp( '^[0-9]*$' );
-
-		if ( reg.test( args.id ) ) {
-			edit_id = parseInt( args.id );
-		} else {
-			edit_id = args.id; //Accrual balance go here, because it's id is combined. x_x
-		}
-
+		edit_id = args.id; //Accrual id is combined. x_x -- Also need to support UUID.
 		action = args.a;
 
 		if ( LocalCacheData.current_open_view_id === view_id ) {
@@ -114,12 +107,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 				if ( action ) {
 					switch ( action ) {
 						case 'edit':
-
 							//Error: Unable to get property 'id' of undefined or null reference in /interface/html5/IndexController.js?v=8.0.0-20141230-125406 line 87
-							if ( !LocalCacheData.current_open_primary_controller.edit_view ||
-									(LocalCacheData.current_open_primary_controller.current_edit_record &&
-											LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id) ) {
-
+							if ( typeof LocalCacheData.current_open_primary_controller != 'undefined' && ( !LocalCacheData.current_open_primary_controller.edit_view || ( LocalCacheData.current_open_primary_controller.current_edit_record && LocalCacheData.current_open_primary_controller.current_edit_record.id && LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id ) ) ) {
 								//Makes ure when doing copy_as_new, don't open this
 								if ( LocalCacheData.current_doing_context_action === 'edit' ) {
 									openEditView( edit_id );
@@ -134,7 +123,6 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 							break;
 						case 'view':
-
 							switch ( view_id ) {
 								case 'MessageControl':
 									if ( args.t === 'message' ) {
@@ -151,10 +139,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 									break;
 								default:
 									// Error: Unable to get property 'id' of undefined or null reference
-									if ( typeof LocalCacheData.current_open_primary_controller != 'undefined' && (!LocalCacheData.current_open_primary_controller.edit_view || LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id ) ) {
+									if ( typeof LocalCacheData.current_open_primary_controller != 'undefined' && ( !LocalCacheData.current_open_primary_controller.edit_view || ( LocalCacheData.current_open_primary_controller.current_edit_record && LocalCacheData.current_open_primary_controller.current_edit_record.id && LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id ) ) ) {
 										openEditView( edit_id, true );
-									} else {
-										Debug.Text( 'ERROR: Cannot open edit view.', 'IndexController.js', 'IndexController', 'onViewChange', 1 );
 									}
 									break;
 							}
@@ -186,18 +172,6 @@ var ApplicationRouter = Backbone.Router.extend( {
 			if ( action ) {
 				LocalCacheData.current_doing_context_action = action;
 			}
-
-			// Prevent user bookmarking to past dates as starting from a bookmark with an old date leads to complaints.
-			// switch ( view_id ) {
-			// 	case 'TimeSheet':
-			// 	case 'Schedule':
-			// 		if ( args.date ) {
-			// 			LocalCacheData.current_selet_date = args.date;
-			// 		}
-			// 		break;
-			//
-			// }
-
 		}
 
 		Global.setDeepLink();
@@ -320,31 +294,15 @@ var ApplicationRouter = Backbone.Router.extend( {
 			Global.setSignalStrength();
 
 			//Add feedback event
-			if ( !Global.bottomFeedbackContainer().is( ':visible' ) ) {
-				var path = 'theme/default/css/global/widgets/ribbon/icons/';
-				$( '.yay-filter' ).attr( 'src', path + 'happy.png' );
-				$( '.meh-filter' ).attr( 'src', path + 'neutral.png' );
-				$( '.grr-filter' ).attr( 'src', path + 'sad.png' );
-				Global.bottomFeedbackContainer().css( 'display', 'block' );
-				Global.bottomFeedbackContainer().find( 'img' ).each( function() {
-					// Error: Uncaught ReferenceError: path is not defined in interface/html5/IndexController.js?v=9.0.6-20151231-155152 line 270
-					if ( path ) {
-						if ( LocalCacheData.getLoginUser() && LocalCacheData.getLoginUser().feedback_rating && $( this ).attr( 'data-feedback' ) === LocalCacheData.getLoginUser().feedback_rating ) {
-							$( this ).addClass( 'current' ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
-						}
-						$( this ).unbind( 'click' ).bind( 'click', function() {
-							$( this ).TFeedback();
-						} );
-						$( this ).hover( function() {
-							$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
-						}, function() {
-							if ( !$( this ).hasClass( 'current' ) ) {
-								$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '.png' );
-							}
-						} );
-					}
-				} );
-			}
+			Global.bottomFeedbackLinkContainer().css( 'display', 'block' );
+			$('#feedback-link').off('click.feedback').on('click.feedback', function() {
+				$().TFeedback({
+					source: 'ManualTrigger',
+					manual_trigger: true,
+					prompt_for_feedback: true // regardless of server feedback state input, click should always allow feedback
+				});
+			});
+
 			$( '#copy_right_info_1' ).css( 'display', 'inline' );
 			$( '#copy_right_logo_link' ).attr( 'href', 'https://' + LocalCacheData.getLoginData().organization_url );
 			if ( !$( '#copy_right_logo' ).attr( 'src' ) ) {
@@ -488,8 +446,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 					var permission = result.getResult()[0];
 					//Error: TypeError: permission is undefined interface/html5/IndexController.js?v=9.0.4-20151123-153601 line 405
 					if ( permission && permission.level > 10 ) {
-						//Add chat
-						var chat = $( '<a href="javascript:void(0)" onclick="return lh_inst.lh_openchatWindow()" class="tt-liveChat top-container-liveChat">Live Chat w/Support</a>' );
+						var chat = $( '<a href="javascript:void(0)" onclick="return openSupportChat()" class="tt-liveChat top-container-liveChat">Live Chat w/Support</a>' ); //Add chat
 						var check_connection_timer = setInterval( function() {
 							if ( !is_testing_internet_connection ) {
 								clearInterval( check_connection_timer );
@@ -548,7 +505,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 			if ( LocalCacheData.current_open_primary_controller.edit_view ) {
 				clean( LocalCacheData.current_open_primary_controller );
 			}
-			Global.contentContainer().empty();
+			Global.contentContainer().children().detach().remove(); // This is about 3x faster than Global.contentContainer().empty()
 			LocalCacheData.current_open_primary_controller.cleanWhenUnloadView( callBack );
 		} else {
 

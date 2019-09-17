@@ -58,7 +58,7 @@ class APIMessageControl extends APIFactory {
 	 */
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'user_columns' ) {
-			$uf = TTnew('UserFactory');
+			$uf = TTnew('UserFactory'); /** @var UserFactory $uf */
 			if	( $this->getPermissionObject()->Check('user', 'enabled') AND $this->getPermissionObject()->Check('user', 'view') ) {
 				$retarr = $uf->getOptions('columns');
 			} elseif  ( $this->getPermissionObject()->Check('user', 'enabled') AND $this->getPermissionObject()->Check('user', 'view_child') ) {
@@ -114,7 +114,7 @@ class APIMessageControl extends APIFactory {
 		//No need to check for permission_children, as the logged in user can only view their own messages anyways.
 		$data['filter_data']['current_user_id'] = $this->getCurrentUserObject()->getId();
 
-		$blf = TTnew( 'MessageControlListFactory' );
+		$blf = TTnew( 'MessageControlListFactory' ); /** @var MessageControlListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -168,7 +168,7 @@ class APIMessageControl extends APIFactory {
 
 		$data['filter_data']['current_user_id'] = $this->getCurrentUserObject()->getId();
 
-		$blf = TTnew( 'MessageControlListFactory' );
+		$blf = TTnew( 'MessageControlListFactory' ); /** @var MessageControlListFactory $blf */
 		$blf->getAPIMessageByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -234,7 +234,7 @@ class APIMessageControl extends APIFactory {
 		}
 
 
-		$blf = TTnew( 'MessageControlListFactory' );
+		$blf = TTnew( 'MessageControlListFactory' ); /** @var MessageControlListFactory $blf */
 		$blf->getByCompanyIDAndUserIdAndObjectTypeAndObject( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId(), $data['filter_data']['object_type_id'], $data['filter_data']['object_id'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -310,7 +310,7 @@ class APIMessageControl extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'MessageControlListFactory' );
+				$lf = TTnew( 'MessageControlListFactory' ); /** @var MessageControlListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
@@ -330,7 +330,7 @@ class APIMessageControl extends APIFactory {
 					if ( isset($row['object_type_id']) AND $row['object_type_id'] != 5 ) {
 						Debug::Text('Adding message to request, determining our own to_user_ids...', __FILE__, __LINE__, __METHOD__, 10);
 						//When replying to a request, find all users who have contributed messages to the request and make those the to_user_ids.
-						$mslf = TTNew('MessageSenderListFactory');
+						$mslf = TTNew('MessageSenderListFactory'); /** @var MessageSenderListFactory $mslf */
 						$mslf->getByCompanyIdAndObjectTypeAndObjectAndNotUser( $this->getCurrentCompanyObject()->getId(), (int)$row['object_type_id'], TTUUID::castUUID( $row['object_id'] ), $this->getCurrentUserObject()->getId() );
 						if ( $mslf->getRecordCount() > 0 ) {
 							$row['to_user_id'] = array();
@@ -340,8 +340,8 @@ class APIMessageControl extends APIFactory {
 							$row['to_user_id'] = array_unique( $row['to_user_id'] );
 							Debug::Arr($row['to_user_id'], 'New Recipients: ', __FILE__, __LINE__, __METHOD__, 10);
 						} else {
-							$hlf = TTnew( 'HierarchyListFactory' );
-							$rlf = TTnew('RequestListFactory');
+							$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
+							$rlf = TTnew('RequestListFactory'); /** @var RequestListFactory $rlf */
 							$rlf->getByIdAndCompanyId( TTUUID::castUUID($row['object_id']), $this->getCurrentCompanyObject()->getId() );
 							if ( $rlf->getRecordCount() == 1 ) {
 								$object_type_id = $rlf->getHierarchyTypeId( (int)$rlf->getCurrent()->getType() );
@@ -445,9 +445,9 @@ class APIMessageControl extends APIFactory {
 				$primary_validator = new Validator();
 
 				if ( $folder_id == 10 ) { //Inbox
-					$lf = TTnew( 'MessageRecipientListFactory' );
+					$lf = TTnew( 'MessageRecipientListFactory' ); /** @var MessageRecipientListFactory $lf */
 				} else { //Sent
-					$lf = TTnew( 'MessageSenderListFactory' );
+					$lf = TTnew( 'MessageSenderListFactory' ); /** @var MessageSenderListFactory $lf */
 				}
 				$lf->StartTransaction();
 				if ( $id != '' ) {
@@ -560,7 +560,7 @@ class APIMessageControl extends APIFactory {
 			$data['filter_data']['permission_children_ids'] = NULL;
 		} else {
 			//Only allow sending to supervisors OR children.
-			$hlf = TTnew( 'HierarchyListFactory' );
+			$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 
 			//FIXME: For supervisors, we may need to include supervisors at the same level
 			// Also how to handle cases where there are no To: recipients to select from.
@@ -593,7 +593,7 @@ class APIMessageControl extends APIFactory {
 		//Debug::Arr($this->getOptions('user_columns'), 'Final User Columns: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($data['filter_columns'], 'Final Filter Columns: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ulf->getRecordCount() > 0 ) {

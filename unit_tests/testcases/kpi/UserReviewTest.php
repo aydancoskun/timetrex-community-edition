@@ -88,7 +88,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 
 	function createKPIGroup( $company_id , $type, $parent_id = 0 ) {
-		$kgf = TTnew( 'KPIGroupFactory' );
+		$kgf = TTnew( 'KPIGroupFactory' ); /** @var KPIGroupFactory $kgf */
 		$kgf->setCompany( $company_id );
 		switch( $type ) {
 			case 10:
@@ -122,7 +122,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createKPI( $company_id , $type, $rate_type, $kpi_group_id = NULL, $minimum_rate = NULL, $maximum_rate = NULL ) {
-		$kf = TTnew( 'KPIFactory' );
+		$kf = TTnew( 'KPIFactory' ); /** @var KPIFactory $kf */
 		$kf->setCompany( $company_id );
 		switch($type) {
 			case 10:
@@ -197,7 +197,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createUserReviewControl( $user_id , $reviewer_user_id) {
-		$urcf = TTnew('UserReviewControlFactory');
+		$urcf = TTnew('UserReviewControlFactory'); /** @var UserReviewControlFactory $urcf */
 		$urcf->setUser( $user_id );
 		$urcf->setReviewerUser( $reviewer_user_id );
 		$urcf->setStartDate( time() - (86400 * rand(21, 30)) );
@@ -221,7 +221,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 	function getKPIArrayByGroupId( $id ) {
 
-		$klf = TTnew( 'KPIListFactory' );
+		$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
 		$klf->getByCompanyIDAndGroupID( $this->company_id, $id );
 		if ( $klf->getRecordCount() > 0 ) {
 			foreach( $klf as $kpi_obj ) {
@@ -242,7 +242,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function getKPIArrayByControlId( $id ) {
-		$urlf = TTnew( 'UserReviewListFactory' );
+		$urlf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $urlf */
 		$urlf->getByUserReviewControlId( $id );
 		if ( $urlf->getRecordCount() > 0 ) {
 			foreach( $urlf as $ur_obj ) {
@@ -282,7 +282,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$user_review_control_id = $this->createUserReviewControl( $user_ids[0], $user_ids[1] );
 		if ( $user_review_control_id != '' ) {
-			$urf = TTnew( 'UserReviewFactory' );
+			$urf = TTnew( 'UserReviewFactory' ); /** @var UserReviewFactory $urf */
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
 			$urf->setNote('');
@@ -342,7 +342,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$user_review_control_id = $this->createUserReviewControl( $user_ids[0], $user_ids[1] );
 		if ( $user_review_control_id != '' ) {
-			$urf = TTnew( 'UserReviewFactory' );
+			$urf = TTnew( 'UserReviewFactory' ); /** @var UserReviewFactory $urf */
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
 			$urf->setNote('');
@@ -410,7 +410,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$user_review_control_id = $this->createUserReviewControl( $user_ids[0], $user_ids[1] );
 		if ( $user_review_control_id != '' ) {
-			$urf = TTnew( 'UserReviewFactory' );
+			$urf = TTnew( 'UserReviewFactory' ); /** @var UserReviewFactory $urf */
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
 			if ( $urf->isValid() ) {
@@ -448,7 +448,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		$user_review_control_id = $this->createUserReviewControl( $user_ids[0], $user_ids[1] );
 
 		if ( $user_review_control_id != '' ) {
-			$urf = TTnew( 'UserReviewFactory' );
+			$urf = TTnew( 'UserReviewFactory' ); /** @var UserReviewFactory $urf */
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
 			if ( $urf->isValid() ) {
@@ -467,7 +467,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		unset( $kpi_arr, $user_ids, $user_review_control_id, $urf );
 
 		// Edit
-		$klf = TTnew( 'KPIListFactory' );
+		$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
 		$kf = $klf->getById( $kpi_id )->getCurrent();
 		$kf->setType(10);
 		$kf->setMinimumRate( 10 );
@@ -486,7 +486,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$user_review_control_id = $this->createUserReviewControl( $user_ids[0], $user_ids[1] );
 		if ( $user_review_control_id != '' ) {
-			$urf = TTnew( 'UserReviewFactory' );
+			$urf = TTnew( 'UserReviewFactory' ); /** @var UserReviewFactory $urf */
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
 			$urf->setNote('');
@@ -534,7 +534,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			$reviewer_user_key = ($user_key + 1);
 			$user_review_control_ids[] = $user_review_control_id = $this->createUserReviewControl( $user_ids[$user_key], $user_ids[$reviewer_user_key] );
 			if ( $user_review_control_id != '' ) {
-				$urf = TTnew( 'UserReviewFactory' );
+				$urf = TTnew( 'UserReviewFactory' ); /** @var UserReviewFactory $urf */
 				$urf->setUserReviewControl( $user_review_control_id );
 				$urf->setKPI( $kpi_id );
 				switch( $type ) {

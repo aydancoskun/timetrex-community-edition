@@ -167,6 +167,8 @@ class Serializer {
 		if ( $xml ) {
 			return $this->extractXML( $xml );
 		}
+
+		return FALSE;
 	}
 
 	/**

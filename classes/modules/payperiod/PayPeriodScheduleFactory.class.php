@@ -517,7 +517,7 @@ class PayPeriodScheduleFactory extends Factory {
 	 * @return mixed
 	 */
 	function getTimeZoneOptions() {
-		$upf = TTnew( 'UserPreferenceFactory' );
+		$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 
 		return $upf->getOptions('time_zone');
 	}
@@ -581,10 +581,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 */
-	//
-	// Instead of daily continuous time, use minimum time-off between shifts that triggers a new day to start.
-	//
+
 	/**
+	 * Instead of daily continuous time, use minimum time-off between shifts that triggers a new day to start.
 	 * @return bool|int
 	 */
 	function getNewDayTriggerTime() {
@@ -688,9 +687,8 @@ class PayPeriodScheduleFactory extends Factory {
 		return $this->setGenericDataValue( 'timesheet_verify_before_transaction_date', ($value * 86400) );//Convert to seconds to support partial days. Do not cast to INT!
 	}
 
-	//Notices are no longer required with TimeSheet not verified exception.
-
 	/**
+	 * Notices are no longer required with TimeSheet not verified exception.
 	 * @return bool|int
 	 */
 	function getTimeSheetVerifyNoticeBeforeTransactionDate() {
@@ -725,7 +723,7 @@ class PayPeriodScheduleFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getUser() {
-		$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
+		$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' ); /** @var PayPeriodScheduleUserListFactory $ppsulf */
 		$ppsulf->getByPayPeriodScheduleId( $this->getId() );
 		$user_list = array();
 		foreach ($ppsulf as $pay_period_schedule) {
@@ -751,7 +749,7 @@ class PayPeriodScheduleFactory extends Factory {
 		if ( is_array($ids) ) {
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
+				$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' ); /** @var PayPeriodScheduleUserListFactory $ppsulf */
 				$ppsulf->getByPayPeriodScheduleId( $this->getId() );
 
 				$user_ids = array();
@@ -772,11 +770,11 @@ class PayPeriodScheduleFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 			foreach ($ids as $id) {
 				if ( $id != '' AND isset($user_ids) AND !in_array($id, $user_ids) ) {
-					$ppsuf = TTnew( 'PayPeriodScheduleUserFactory' );
+					$ppsuf = TTnew( 'PayPeriodScheduleUserFactory' ); /** @var PayPeriodScheduleUserFactory $ppsuf */
 					$ppsuf->setPayPeriodSchedule( $this->getId() );
 					$ppsuf->setUser( $id );
 
@@ -817,7 +815,7 @@ class PayPeriodScheduleFactory extends Factory {
 		if ( !isset($this->holiday_epochs[$cache_id]) ) {
 			$user_ids = $this->getUser();
 			if ( is_array( $user_ids ) AND count( $user_ids ) > 0 ) {
-				$hlf = TTnew( 'HolidayListFactory' );
+				$hlf = TTnew( 'HolidayListFactory' ); /** @var HolidayListFactory $hlf */
 				$hlf->getByPolicyGroupUserIdAndStartDateAndEndDate( $user_ids, $start_date, $end_date );
 				if ( $hlf->getRecordCount() > 0 ) {
 					foreach ( $hlf as $h_obj ) {
@@ -853,7 +851,7 @@ class PayPeriodScheduleFactory extends Factory {
 			return FALSE;
 		}
 
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 
 		//Debug::text('PP Schedule ID: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::text('PP Schedule Name: '. $this->getName(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1114,8 +1112,7 @@ class PayPeriodScheduleFactory extends Factory {
 		//If the start date is within 24hrs of now, insert the next pay period.
 		if ( $this->getNextStartDate() <= ( TTDate::getTime() + $offset ) ) {
 			Debug::text('Insert new pay period. Start Date: '. $this->getNextStartDate() .' End Date: '. $this->getNextEndDate(), __FILE__, __LINE__, __METHOD__, 10);
-			/** @var PayPeriodFactory $ppf */
-			$ppf = TTnew( 'PayPeriodFactory' );
+			$ppf = TTnew( 'PayPeriodFactory' ); /** @var PayPeriodFactory $ppf */
 			$ppf->setCompany( $this->getCompany() );
 			$ppf->setPayPeriodSchedule( $this->getId() );
 			$ppf->setStatus(10);
@@ -1357,7 +1354,7 @@ class PayPeriodScheduleFactory extends Factory {
 				$retval = FALSE;
 
 				if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID() ) {
-					$pplf = TTnew( 'PayPeriodListFactory' );
+					$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 					$retarr = $pplf->getFirstStartDateAndLastEndDateByPayPeriodScheduleId( $this->getId() );
 					if ( is_array($retarr) AND isset($retarr['first_start_date']) AND isset($retarr['last_end_date']) ) {
 						$retarr['first_start_date'] = TTDate::strtotime( $retarr['first_start_date'] );
@@ -1406,9 +1403,8 @@ class PayPeriodScheduleFactory extends Factory {
 		return $retval;
 	}
 
-	//Given a single start date and the type of pay period schedule, try to determine all other dates.
-
 	/**
+	 * Given a single start date and the type of pay period schedule, try to determine all other dates.
 	 * @param int $type_id
 	 * @param int $start_date EPOCH
 	 * @return array|bool
@@ -1492,10 +1488,10 @@ class PayPeriodScheduleFactory extends Factory {
 		return $retarr;
 	}
 
-	//This function given the pay period schedule type and example dates will attempt to determine the pay period schedule settings.
-	//This will automatically configure the current object to be saved.
-	//Base create initial pay period functionality on the first pay period date, otherwise we need additional data for bi-weekly pay periods.
 	/**
+	 * This function given the pay period schedule type and example dates will attempt to determine the pay period schedule settings.
+	 * This will automatically configure the current object to be saved.
+	 * Base create initial pay period functionality on the first pay period date, otherwise we need additional data for bi-weekly pay periods.
 	 * @param int $type_id
 	 * @param int $example_dates EPOCH
 	 * @return bool
@@ -1644,8 +1640,13 @@ class PayPeriodScheduleFactory extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param $date_stamp
+	 * @param int $total_pay_periods
+	 * @return array|bool
+	 */
 	function getStartAndEndDateRangeFromPastPayPeriods( $date_stamp, $total_pay_periods = 1 ) {
-		$pplf = TTNew('PayPeriodListFactory');
+		$pplf = TTNew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 		$pplf->getByPayPeriodScheduleIdAndEndDateBefore( $this->getId(), $date_stamp, $total_pay_periods );
 		if ( $pplf->getRecordCount() > 0 ) {
 			$filter_start_date = FALSE;
@@ -1706,7 +1707,7 @@ class PayPeriodScheduleFactory extends Factory {
 		}
 
 		if ( !is_object( $plf ) ) {
-			$plf = TTnew( 'PunchListFactory' );
+			$plf = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf */
 			if ( $date_stamp != '' ) {
 				$plf->getByUserIdAndDateStamp( $user_id, $date_stamp );
 			} else {
@@ -1739,6 +1740,7 @@ class PayPeriodScheduleFactory extends Factory {
 			$nearest_punch_difference = FALSE;
 			$shift_data = array();
 			$prev_punch_arr = array();
+			$punch_control_id_shift_map = array();
 			foreach( $plf as $p_obj ) {
 				//Debug::text('Shift: '. $shift .' Punch ID: '. $p_obj->getID() .' Punch Control ID: '. $p_obj->getPunchControlID() .' TimeStamp: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1758,11 +1760,15 @@ class PayPeriodScheduleFactory extends Factory {
 				}
 
 				//Determine if a non-saved PunchControl object was passed, and if so, match the IDs to use that instead.
-				if ( is_object($tmp_punch_control_obj) AND $p_obj->getPunchControlID() == $tmp_punch_control_obj->getId() ) {
-					Debug::text('Passed non-saved punch control object that matches, using that instead... Using ID: \''. $tmp_punch_control_obj->getId() .'\'', __FILE__, __LINE__, __METHOD__, 10);
+				if ( is_object( $tmp_punch_control_obj ) AND $p_obj->getPunchControlID() == $tmp_punch_control_obj->getId() ) {
+					Debug::text('Passed non-saved punch control object that matches, using that instead... Using ID: '. $tmp_punch_control_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 					$punch_control_obj = $tmp_punch_control_obj;
 				} else {
 					$punch_control_obj = $p_obj->getPunchControlObject();
+					if ( !is_object( $punch_control_obj ) ) {
+						Debug::text('WARNING: Unable to find PunchControlObject, skipping... Punch ID: '. $p_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+						continue;
+					}
 				}
 
 				//Can't use PunchControl object total_time because the record may not be saved yet when editing
@@ -1771,61 +1777,72 @@ class PayPeriodScheduleFactory extends Factory {
 				//use it instead of the one in the database perhaps?
 				$total_time = $punch_control_obj->getTotalTime();
 
-				//We can't skip records with total_time == 0, because then when deleting one of the two
-				//punches in a pair, the remaining punch is ignored and causing punches to jump around between days in some cases.
-				if ( $i > 0 AND isset($shift_data[$shift]['last_out'])
-						AND ( $p_obj->getStatus() == 10 OR $p_obj->getStatus() == $prev_punch_arr['status_id'] )) {
-					Debug::text('Checking for new shift... This Control ID: '. $p_obj->getPunchControlID() .' Last Out Control ID: '. $shift_data[$shift]['last_out']['punch_control_id'] .' Last Out Time: '. TTDate::getDate('DATE+TIME', $shift_data[$shift]['last_out']['time_stamp']), __FILE__, __LINE__, __METHOD__, 10);
-					//Assume that if two punches are assigned to the same punch_control_id are the same shift, even if the time between
-					//them exceeds the new_shift_trigger_time. This helps fix the bug where you could add a In punch then add a Out
-					//punch BEFORE the In punch as long as it was more than the Maximum Shift Time before the In Punch.
-					//ie: Add: In Punch 10-Dec-09 @ 8:00AM, Add: Out Punch 09-Dec-09 @ 5:00PM.
-					//Basically it just helps the validation checks to determine the error.
-					//
-					//It used to be that if shifts are split at midnight, new_shift_trigger_time must be 0, so the "split" punch can occur at midnight.
-					//However we have since added a check to see if punches span midnight and trigger a new shift based on that, regardless of the new shift trigger time.
-					//As the new_shift_trigger_time of 0 also affected lunch/break automatic detection by Punch Time, since an Out punch and a In punch of any time
-					//would trigger a new shift, and it wouldn't be detected as lunch/break.
-					//
-					//What happens when the employee takes lunch/break over midnight? Lunch out at 11:30PM Lunch IN at 12:30AM
-					//	We need to split those into two lunches, or two breaks? But then that can affect those policies if they are only allowed one break.
-					//	Or do we not split the shift at all when this occurs? Currently we don't split at all.
-					if ( $p_obj->getPunchControlID() != $shift_data[$shift]['last_out']['punch_control_id']
-							AND (
-									(
-										( $p_obj->getType() == 10 OR $shift_data[$shift]['last_out']['type_id'] == 10 ) //Handle cases where there is a Normal Out punch, then Lunch In punch about 12-15hrs later. Treat this as a new shift.
-										AND ( ( $p_obj->getTimeStamp() != $shift_data[$shift]['last_out']['time_stamp'] )
-												OR ( $new_shift_trigger_time == 0 AND isset($shift_data[$shift]['first_in']['time_stamp']) AND TTDate::doesRangeSpanMidnight( $shift_data[$shift]['first_in']['time_stamp'], $p_obj->getTimeStamp(), TRUE ) == TRUE ) ) //Don't allow transfer punches to cause a new shift to start, *unless* new shift trigger time is 0 and the shift spans midnight, so we can have 24hr shifts for an entire week with no gap between them, but each assigned to their own day (ie: live-in care).
-										AND ( $p_obj->getTimeStamp() - $shift_data[$shift]['last_out']['time_stamp'] ) >= $new_shift_trigger_time
-									)
-									OR
-									(
-										isset($prev_punch_arr['time_stamp'])
-										AND $prev_punch_arr['punch_control_id'] != $p_obj->getPunchControlId()
-										AND abs( ( $prev_punch_arr['time_stamp'] - $p_obj->getTimeStamp() ) ) > $maximum_shift_time
-									) //If two punches ever exceed the maximum shift time, consider it a new shift. Specifically when a Normal Out punches then a Lunch In punch happen outside maximum shift time.
-									OR
-									(
-										$this->getShiftAssignedDay() == 40 //Shifts split at midnight.
-										//Only split shifts on NORMAL punches.
-										AND ( $p_obj->getType() == 10 OR $shift_data[$shift]['last_out']['type_id'] == 10 ) //Handle cases where there is a Normal Out punch, then Lunch In punch about 12-15hrs later. Treat this as a new shift.
-										AND $shift_data[$shift]['last_out']['type_id'] == 10
-										AND TTDate::doesRangeSpanMidnight( $shift_data[$shift]['last_out']['time_stamp'], $p_obj->getTimeStamp(), TRUE ) == TRUE
-									)
+				//Make sure punches of the same punch_control_id are always on the same shift.
+				//  This helps catch cases where a 1P - 11P punch pair is created, then a 12P punch, then a 1:13P punch (which clearly falls within the first punch pair and should be rejected).
+				if ( isset($punch_control_id_shift_map[$p_obj->getPunchControlId()]) ) {
+					Debug::text( 'Found Punch Control ID already assigned to a shift... Punch Control ID: ' . $p_obj->getPunchControlID() . ' Shift: '. $shift, __FILE__, __LINE__, __METHOD__, 10 );
+					$shift = $punch_control_id_shift_map[$p_obj->getPunchControlId()];
+				} else {
+					//We can't skip records with total_time == 0, because then when deleting one of the two
+					//punches in a pair, the remaining punch is ignored and causing punches to jump around between days in some cases.
+					if ( $i > 0 AND isset( $shift_data[ $shift ]['last_out'] )
+							AND ( $p_obj->getStatus() == 10 OR $p_obj->getStatus() == $prev_punch_arr['status_id'] ) ) {
+						Debug::text( 'Checking for new shift... This Control ID: ' . $p_obj->getPunchControlID() . ' Last Out Control ID: ' . $shift_data[ $shift ]['last_out']['punch_control_id'] . ' Last Out Time: ' . TTDate::getDate( 'DATE+TIME', $shift_data[ $shift ]['last_out']['time_stamp'] ), __FILE__, __LINE__, __METHOD__, 10 );
+						//Assume that if two punches are assigned to the same punch_control_id are the same shift, even if the time between
+						//them exceeds the new_shift_trigger_time. This helps fix the bug where you could add a In punch then add a Out
+						//punch BEFORE the In punch as long as it was more than the Maximum Shift Time before the In Punch.
+						//ie: Add: In Punch 10-Dec-09 @ 8:00AM, Add: Out Punch 09-Dec-09 @ 5:00PM.
+						//Basically it just helps the validation checks to determine the error.
+						//
+						//It used to be that if shifts are split at midnight, new_shift_trigger_time must be 0, so the "split" punch can occur at midnight.
+						//However we have since added a check to see if punches span midnight and trigger a new shift based on that, regardless of the new shift trigger time.
+						//As the new_shift_trigger_time of 0 also affected lunch/break automatic detection by Punch Time, since an Out punch and a In punch of any time
+						//would trigger a new shift, and it wouldn't be detected as lunch/break.
+						//
+						//What happens when the employee takes lunch/break over midnight? Lunch out at 11:30PM Lunch IN at 12:30AM
+						//	We need to split those into two lunches, or two breaks? But then that can affect those policies if they are only allowed one break.
+						//	Or do we not split the shift at all when this occurs? Currently we don't split at all.
+						if ( $p_obj->getPunchControlID() != $shift_data[ $shift ]['last_out']['punch_control_id']
+								AND (
+										(
+												( $p_obj->getType() == 10 OR $shift_data[ $shift ]['last_out']['type_id'] == 10 ) //Handle cases where there is a Normal Out punch, then Lunch In punch about 12-15hrs later. Treat this as a new shift.
+												AND ( ( $p_obj->getTimeStamp() != $shift_data[ $shift ]['last_out']['time_stamp'] )
+														OR ( $new_shift_trigger_time == 0 AND isset( $shift_data[ $shift ]['first_in']['time_stamp'] ) AND TTDate::doesRangeSpanMidnight( $shift_data[ $shift ]['first_in']['time_stamp'], $p_obj->getTimeStamp(), TRUE ) == TRUE ) ) //Don't allow transfer punches to cause a new shift to start, *unless* new shift trigger time is 0 and the shift spans midnight, so we can have 24hr shifts for an entire week with no gap between them, but each assigned to their own day (ie: live-in care).
+												AND ( $p_obj->getTimeStamp() - $shift_data[ $shift ]['last_out']['time_stamp'] ) >= $new_shift_trigger_time
+										)
+										OR
+										(
+												isset( $prev_punch_arr['time_stamp'] )
+												AND $prev_punch_arr['punch_control_id'] != $p_obj->getPunchControlId()
+												AND abs( ( $prev_punch_arr['time_stamp'] - $p_obj->getTimeStamp() ) ) > $maximum_shift_time
+										) //If two punches ever exceed the maximum shift time, consider it a new shift. Specifically when a Normal Out punches then a Lunch In punch happen outside maximum shift time.
+										OR
+										(
+												$this->getShiftAssignedDay() == 40 //Shifts split at midnight.
+												//Only split shifts on NORMAL punches.
+												AND ( $p_obj->getType() == 10 OR $shift_data[ $shift ]['last_out']['type_id'] == 10 ) //Handle cases where there is a Normal Out punch, then Lunch In punch about 12-15hrs later. Treat this as a new shift.
+												AND $shift_data[ $shift ]['last_out']['type_id'] == 10
+												AND TTDate::doesRangeSpanMidnight( $shift_data[ $shift ]['last_out']['time_stamp'], $p_obj->getTimeStamp(), TRUE ) == TRUE
+										)
 								)
-							) {
-						Debug::Text('	 New shift because of normal punches... Punch Time: '. $p_obj->getTimeStamp() .' Last Out: '. $shift_data[$shift]['last_out']['time_stamp'] .' New Shift: '. $new_shift_trigger_time .' ShiftAssignedType: '. $this->getShiftAssignedDay(), __FILE__, __LINE__, __METHOD__, 10);
+						) {
+							Debug::Text( '	 New shift because of normal punches... Punch Time: ' . $p_obj->getTimeStamp() . ' Last Out: ' . $shift_data[ $shift ]['last_out']['time_stamp'] . ' New Shift: ' . $new_shift_trigger_time . ' ShiftAssignedType: ' . $this->getShiftAssignedDay(), __FILE__, __LINE__, __METHOD__, 10 );
+							$shift++;
+							$x = 0;
+						}
+					} elseif ( $i > 0
+							AND isset( $prev_punch_arr['time_stamp'] )
+							AND $prev_punch_arr['punch_control_id'] != $p_obj->getPunchControlId()
+							AND abs( ( $prev_punch_arr['time_stamp'] - $p_obj->getTimeStamp() ) ) > $maximum_shift_time ) {
+						//Debug::text('	 New shift because two punch_control records exist and punch timestamp exceed maximum shift time.', __FILE__, __LINE__, __METHOD__, 10);
 						$shift++;
 						$x = 0;
 					}
-				} elseif ( $i > 0
-							AND isset($prev_punch_arr['time_stamp'])
-							AND $prev_punch_arr['punch_control_id'] != $p_obj->getPunchControlId()
-							AND abs( ( $prev_punch_arr['time_stamp'] - $p_obj->getTimeStamp() ) ) > $maximum_shift_time ) {
-					//Debug::text('	 New shift because two punch_control records exist and punch timestamp exceed maximum shift time.', __FILE__, __LINE__, __METHOD__, 10);
-					$shift++;
-					$x = 0;
+
+					$punch_control_id_shift_map[$p_obj->getPunchControlId()] = $shift;
 				}
+
+
 
 				if ( !isset($shift_data[$shift]['total_time']) ) {
 					$shift_data[$shift]['total_time'] = 0;
@@ -1997,7 +2014,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 		//Get all OPEN pay periods that have a transaction date *after* today, and import data into them.
 		//  Only OPEN pay periods. Definitely not post-adjustment ones incase they have switched pay period schedules and have to go back to make a correction.
-		$pplf = TTnew('PayPeriodListFactory');
+		$pplf = TTnew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 		$pplf->getByCompanyIdAndStatus( $this->getCompany(), array(10) );
 		Debug::Text('Found Open Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $pplf->getRecordCount() > 0 ) {
@@ -2056,12 +2073,12 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
-	//Close pay periods that were left open.
-	//Pay period schedule must be at least 45 days old so we don't close pay periods on new customers right away.
-	//Only close OPEN/Locked pay periods that have passed the transaction date by 5 days.
-	//Get OPEN pay periods with transaction dates at least 48hrs before the given date?
-	//Or should we just prevent customers from generating pay stubs in a pay period that has a previous pay period that is still open? Both.
 	/**
+	 * Close pay periods that were left open.
+	 * Pay period schedule must be at least 45 days old so we don't close pay periods on new customers right away.
+	 * Only close OPEN/Locked pay periods that have passed the transaction date by 5 days.
+	 * Get OPEN pay periods with transaction dates at least 48hrs before the given date?
+	 * Or should we just prevent customers from generating pay stubs in a pay period that has a previous pay period that is still open? Both.
 	 * @param int $date EPOCH
 	 * @return bool
 	 */
@@ -2071,7 +2088,7 @@ class PayPeriodScheduleFactory extends Factory {
 		}
 
 		$date = ( $date - (86400 * 5) ); //Give a 5 days grace period after the transaction date to start with.
-		$pplf = TTNew('PayPeriodListFactory');
+		$pplf = TTNew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 		$pplf->getByCompanyIDAndPayPeriodScheduleIdAndStatusAndStartTransactionDateAndEndTransactionDate( $this->getCompany(), $this->getID(), array( 10, 12 ), 1, $date );
 		Debug::text('Closing Open/Locked Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $pplf->getRecordCount() > 0 ) {
@@ -2114,7 +2131,7 @@ class PayPeriodScheduleFactory extends Factory {
 	 * @return bool|int
 	 */
 	function getFirstPayPeriodStartDate() {
-		$pplf = TTnew('PayPeriodListFactory');
+		$pplf = TTnew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 		$retarr = $pplf->getFirstStartDateAndLastEndDateByPayPeriodScheduleId( $this->getId() );
 		if ( is_array($retarr) AND isset($retarr['first_start_date']) ) {
 			$retval = TTDate::strtotime( $retarr['first_start_date'] );
@@ -2150,7 +2167,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Delete pay periods assigned to this schedule.
-			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			$pplf->getByPayPeriodScheduleId( $this->getId() );
 			if ( $pplf->getRecordCount() > 0 ) {
 				Debug::text('Delete Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -2174,7 +2191,7 @@ class PayPeriodScheduleFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -2413,7 +2430,7 @@ class PayPeriodScheduleFactory extends Factory {
 		$this->removeCache( NULL, $this->getTable( TRUE ) . $this->getCompany() ); //Clear cached getCurrentPayPeriodNumber()
 
 		if ( $this->getEnableInitialPayPeriods() == TRUE AND $this->getCreateInitialPayPeriods() == TRUE ) {
-			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+			$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 			$pay_period_schedule_obj = $ppslf->getById( $this->getId() )->getCurrent();
 
 			$pay_period_schedule_obj->createNextPayPeriod( $pay_period_schedule_obj->getAnchorDate() );
@@ -2430,7 +2447,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Delete all users assigned to this pay period. This helps prevent duplicate rows from appearing in recurring schedules and such, since joins may match on these, before they get to the pay period schedule row to detect if its deleted or not.
-			$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
+			$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' ); /** @var PayPeriodScheduleUserListFactory $ppsulf */
 			$ppsulf->getByPayPeriodScheduleId( $this->getID() );
 			if ( $ppsulf->getRecordCount() > 0 ) {
 				$ppsulf->bulkDelete( $this->getIDSByListFactory( $ppsulf ) ); //Can't use setDeleted() here as the PP schedule user table doesn't have a deleted column.
@@ -2438,7 +2455,7 @@ class PayPeriodScheduleFactory extends Factory {
 			unset($ppsulf);
 
 			//Delete all pay periods related to this pay period schedule. This will not delete data within those pay periods though.
-			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			$pplf->getByPayPeriodScheduleId( $this->getID() );
 			if ( $pplf->getRecordCount() > 0 ) {
 				foreach( $pplf as $pp_obj ) {
@@ -2451,7 +2468,7 @@ class PayPeriodScheduleFactory extends Factory {
 			unset($pplf, $pp_obj);
 
 			//Remove from User Defaults.
-			$udlf = TTnew( 'UserDefaultListFactory' );
+			$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 			$udlf->getByCompanyId( $this->getCompany() );
 			if ( $udlf->getRecordCount() > 0 ) {
 				foreach( $udlf as $udf_obj ) {
@@ -2469,9 +2486,9 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

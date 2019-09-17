@@ -55,7 +55,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -119,7 +119,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -166,7 +166,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -200,7 +200,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -256,7 +256,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					ORDER BY a.date_stamp asc, d.type_id
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -309,7 +309,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					ORDER BY a.date_stamp asc, d.type_id
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -356,7 +356,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					ORDER BY d.severity_id desc
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -401,7 +401,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					ORDER BY d.severity_id desc
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -458,7 +458,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -524,7 +524,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -588,7 +588,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -860,7 +860,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

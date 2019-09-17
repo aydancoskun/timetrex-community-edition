@@ -106,10 +106,10 @@ class LogDetailFactory extends Factory {
 		return $this->setGenericDataValue( 'new_value', $value );
 	}
 
-	//When comparing the two arrays, if there are sub-arrays, we need to *always* include those, as we can't actually
-	//diff the two, because they are already saved by the time we get to this function, so there will never be any changes to them.
-	//We don't want to include sub-arrays, as the sub-classes should handle the logging themselves.
 	/**
+	 * When comparing the two arrays, if there are sub-arrays, we need to *always* include those, as we can't actually
+	 * diff the two, because they are already saved by the time we get to this function, so there will never be any changes to them.
+	 * We don't want to include sub-arrays, as the sub-classes should handle the logging themselves.
 	 * @param $arr1
 	 * @param $arr2
 	 * @return bool
@@ -475,7 +475,7 @@ class LogDetailFactory extends Factory {
 					//Save data in a single SQL query.
 					$query = 'INSERT INTO '. $this->getTable() .'(ID, SYSTEM_LOG_ID, FIELD, NEW_VALUE, OLD_VALUE) VALUES'. implode(',', $data );
 					//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-					$this->db->Execute($query, $ph);
+					$this->ExecuteSQL( $query, $ph );
 
 					Debug::Text('Logged detail records in: '. (microtime(TRUE) - $start_time), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -488,6 +488,9 @@ class LogDetailFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function Validate() {
 		//
 		// BELOW: Validation code moved from set*() functions.
@@ -495,7 +498,7 @@ class LogDetailFactory extends Factory {
 
 		// System log
 		if ( $this->getSystemLog() !== FALSE AND $this->getSystemLog() != TTUUID::getZeroID() ) {
-			$llf = TTnew( 'LogListFactory' );
+			$llf = TTnew( 'LogListFactory' ); /** @var LogListFactory $llf */
 			$this->Validator->isResultSetWithRows(	'user',
 														$llf->getByID($this->getSystemLog()),
 														TTi18n::gettext('System log is invalid')
@@ -527,9 +530,8 @@ class LogDetailFactory extends Factory {
 		return TRUE;
 	}
 
-	//This table doesn't have any of these columns, so overload the functions.
-
 	/**
+	 * This table doesn't have any of these columns, so overload the functions.
 	 * @return bool
 	 */
 	function getDeleted() {

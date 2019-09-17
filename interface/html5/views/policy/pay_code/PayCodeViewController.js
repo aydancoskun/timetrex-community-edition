@@ -444,6 +444,11 @@ PayCodeViewController = BaseViewController.extend( {
 		}
 	},
 
+	onSaveClick: function( ignoreWarning ) {
+		this._super( 'onSaveClick', ignoreWarning );
+		Global.clearCache( 'getOptions_columns' ); //Needs to clear cache so if they add a pay code it will immediately appear on all reports in the Display Columns.
+	},
+
 	onWizardClick: function() {
 		var $this = this;
 		IndexViewController.openWizard( 'PayCodeWizard', null, function() {

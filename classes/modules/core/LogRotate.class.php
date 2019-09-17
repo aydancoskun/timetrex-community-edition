@@ -107,9 +107,8 @@ class LogRotate {
 		return $retval;
 	}
 
-	//Checks to see if the file has a numeric extension signifying that it is not a primary file and has already been rotated.
-
 	/**
+	 * Checks to see if the file has a numeric extension signifying that it is not a primary file and has already been rotated.
 	 * @param $file
 	 * @return bool
 	 */

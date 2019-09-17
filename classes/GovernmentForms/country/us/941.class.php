@@ -650,7 +650,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l7'   => array(
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => array('calcL7', 'drawSplitDecimalFloat'),
+					'function'      => array('calcL7', 'drawSplitDecimalFloat', 'showL5Warning' ), //showL5Warning requires calcL7 to be run first.
 					'coordinates'   => array(
 							array(
 									'x'      => 446,
@@ -714,7 +714,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l10' => array(
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => array('calcL10', 'drawSplitDecimalFloat', 'checkSBMatchTotals'),
+					'function'      => array('calcL10', 'drawSplitDecimalFloat', 'showSBMisMatchTotals'),
 					'coordinates'   => array(
 							array(
 									'x'      => 446,
@@ -1017,7 +1017,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l16_month_total' => array(
 					'page'          => 2,
 					'template_page' => 2,
-					'function'      => array('calcL16MonthTotal', 'drawSplitDecimalFloat'),
+					'function'      => array('calcL16MonthTotal', 'drawSplitDecimalFloat', 'showL16MisMatchTotals' ),
 					'coordinates'   => array(
 							array(
 									'x'      => 237,
@@ -1295,6 +1295,27 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 		return $this->l6;
 	}
 
+	function showL5Warning() {
+		if ( isset( $this->l5_actual_deducted) ) {
+			$l5e_actual_diff = round( bcsub( $this->l5_actual_deducted, $this->l5e ), 2 );
+			Debug::Text( 'L5e Actual Difference: ' . $l5e_actual_diff .' L7: '. $this->l7, __FILE__, __LINE__, __METHOD__, 10 );
+
+			//Only show warning if Line 13 (Total Deposits for Quarter) is *not* specified. If it is specified assume they don't match what was expected and are making manual corrections/adjustments, so hide the warning.
+			//As a precaution, show warning if calculated vs. actual amount is off more than twice the fraction of cents value.
+			if ( ( ( isset( $this->l13 ) AND (int)$this->l13 == 0 ) OR !isset( $this->l13 ) ) AND abs( $l5e_actual_diff ) > abs( $this->l7 * 2 ) ) { //Was: abs( $l5e_actual_diff ) > ( ( $this->l1 / 100 ) * 12 )
+				Debug::Text( 'L5e seems incorrect, show warning...', __FILE__, __LINE__, __METHOD__, 10 );
+				$pdf = $this->getPDFObject();
+
+				$pdf->setTextColor( 255, 0, 0 );
+				$pdf->setXY( 250 + $this->getPageOffsets( 'x' ), 495 + $this->getPageOffsets( 'y' ) );
+
+				$pdf->Cell( 180, 10, 'WARNING: Mismatch with amounts deducted from employees by ' . $l5e_actual_diff, 1, 0, 'C', 1, FALSE, 1 );
+			}
+		}
+
+		return TRUE;
+	}
+
 
 	//This requires 'l7z' to be passed in as a total of all the amounts actually deducted from the employee.
 	//So we can compare that with the calculated amounts that should have been deducted, the result of which is l7.
@@ -1304,13 +1325,6 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	function calcL7( $value, $schema ) {
 		$this->l7 = ( $this->l7z > 0 ) ? ( bcsub( $this->l7z, $this->l5e ) ) : 0;
 		Debug::Text( 'Raw: L7: ' . $this->l7 . ' L5e: ' . $this->l5e . ' L7z: ' . $this->l7z, __FILE__, __LINE__, __METHOD__, 10 );
-
-		//As a precaution, check to see if cents adjustment exceeds ( total_employees / 100 [cents] ) * 12 [weeks in a quarter], which would be the maximum rounding error that could possibly occur given weekly pay periods.
-		// if it does exceed that amount assume they have made some manual adjustments (ie: manually edited a pay stub) and just zero this out instead.
-		if ( abs( $this->l7 ) > ( ( $this->l1 / 100 ) * 12 ) ) {
-			Debug::Text( 'L7 seems incorrect, ignoring it...', __FILE__, __LINE__, __METHOD__, 10 );
-			$this->l7 = 0;
-		}
 
 		return $this->l7;
 	}
@@ -1322,8 +1336,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 		return $this->l10;
 	}
 
-	function checkSBMatchTotals( $value, $schema ) {
-		if ( isset($this->schedule_b_total) AND $this->schedule_b_total > 0 AND $this->l10 != $this->schedule_b_total ) {
+	function showSBMisMatchTotals( $value, $schema ) {
+		$schedule_b_total_to_l10_diff = abs( round( ( $this->schedule_b_total - $this->l10 ), 2 ) );
+		if ( isset($this->schedule_b_total) AND $this->schedule_b_total > 0 AND $schedule_b_total_to_l10_diff > 0 ) {
 			$pdf = $this->getPDFObject();
 
 			$pdf->setTextColor( 255, 0, 0 );
@@ -1355,6 +1370,24 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 
 			return $this->l15;
 		}
+	}
+
+	function showL16MisMatchTotals() {
+		if ( isset( $this->l16_month_total ) AND $this->l16_month_total > 0 AND isset( $this->l12 ) AND $this->l12 > 0 ) {
+			$l16_to_l12_diff = abs( round( ( $this->l16_month_total - $this->l12 ), 2 ) );
+			if ( $l16_to_l12_diff > 0 ) {
+				Debug::Text( 'L16 seems incorrect, show warning...', __FILE__, __LINE__, __METHOD__, 10 );
+				$pdf = $this->getPDFObject();
+
+				//Show warning on Page 2
+				$pdf->setTextColor( 255, 0, 0 );
+				$pdf->setXY( 375 + $this->getPageOffsets( 'x' ), 293 + $this->getPageOffsets( 'y' ) );
+
+				$pdf->Cell( 160, 13, 'WARNING: Mismatch with Line 12', 1, 0, 'C', 1, FALSE, 1 );
+			}
+		}
+
+		return TRUE;
 	}
 
 	function calcL16MonthTotal( $value, $schema ) {

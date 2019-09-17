@@ -55,7 +55,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 		$retval = NULL;
 		switch( $name ) {
 			case 'status':
-				$sf = TTNew('ScheduleFactory');
+				$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 				$retval = $sf->getOptions('status');
 				break;
 			case 'columns':
@@ -381,7 +381,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	 * @return mixed
 	 */
 	function getTotalTime() {
-		$sf = TTnew( 'ScheduleFactory' );
+		$sf = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
 
 		//This helps calculate the schedule total time based on schedule policy or policy groups.
 		$sf->setCompany( $this->getRecurringScheduleTemplateControlObject()->getCompany() );
@@ -555,7 +555,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 			return FALSE;
 		}
 
-		$ppsf = TTnew('PayPeriodScheduleFactory');
+		$ppsf = TTnew('PayPeriodScheduleFactory'); /** @var PayPeriodScheduleFactory $ppsf */
 
 		//Get week of start_date
 		$start_date_week = TTDate::getBeginWeekEpoch( $recurring_schedule_control_start_date, 0 ); //Start week on Sunday to match Recurring Schedule.
@@ -915,7 +915,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 		//
 		// Recurring Schedule Template Control
 		if ( $this->getRecurringScheduleTemplateControl() == TTUUID::getZeroID() ) {
-			$rstclf = TTnew( 'RecurringScheduleTemplateControlListFactory' );
+			$rstclf = TTnew( 'RecurringScheduleTemplateControlListFactory' ); /** @var RecurringScheduleTemplateControlListFactory $rstclf */
 			$this->Validator->isResultSetWithRows(	'recurring_schedule_template_control',
 															$rstclf->getByID($this->getRecurringScheduleTemplateControl()),
 															TTi18n::gettext('Recurring Schedule Template Control is invalid')
@@ -948,7 +948,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 											);
 		// Schedule Policy
 		if ( $this->getSchedulePolicyID() != '' AND $this->getSchedulePolicyID() != TTUUID::getZeroID() ) {
-			$splf = TTnew( 'SchedulePolicyListFactory' );
+			$splf = TTnew( 'SchedulePolicyListFactory' ); /** @var SchedulePolicyListFactory $splf */
 			$this->Validator->isResultSetWithRows(	'schedule_policy',
 															$splf->getByID($this->getSchedulePolicyID()),
 															TTi18n::gettext('Schedule Policy is invalid')
@@ -956,7 +956,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 		}
 		// Branch
 		if ( $this->getBranch() != '' AND $this->getBranch() != TTUUID::getZeroID() AND $this->getBranch() != TTUUID::getNotExistID() ) {
-			$blf = TTnew( 'BranchListFactory' );
+			$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 			$this->Validator->isResultSetWithRows(	'branch',
 															$blf->getByID($this->getBranch()),
 															TTi18n::gettext('Branch does not exist')
@@ -964,7 +964,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 		}
 		// Department
 		if ( $this->getDepartment() != '' AND $this->getDepartment() != TTUUID::getZeroID() AND $this->getDepartment() != TTUUID::getNotExistID() ) {
-			$dlf = TTnew( 'DepartmentListFactory' );
+			$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 			$this->Validator->isResultSetWithRows(	'department',
 															$dlf->getByID($this->getDepartment()),
 															TTi18n::gettext('Department does not exist')
@@ -972,7 +972,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 		}
 		// Job
 		if ( $this->getJob() != '' AND $this->getJob() != TTUUID::getZeroID() AND $this->getJob() != TTUUID::getNotExistID() ) {
-			$jlf = TTnew( 'JobListFactory' );
+			$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 			$this->Validator->isResultSetWithRows(	'job',
 															$jlf->getByID($this->getJob()),
 															TTi18n::gettext('Job does not exist')
@@ -980,7 +980,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 		}
 		// Job Item
 		if ( $this->getJobItem() != '' AND $this->getJobItem() != TTUUID::getZeroID() AND $this->getJobItem() != TTUUID::getNotExistID() ) {
-			$jilf = TTnew( 'JobItemListFactory' );
+			$jilf = TTnew( 'JobItemListFactory' ); /** @var JobItemListFactory $jilf */
 			$this->Validator->isResultSetWithRows(	'job_item',
 															$jilf->getByID($this->getJobItem()),
 															TTi18n::gettext('Job Item does not exist')
@@ -988,7 +988,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 		}
 		// Absence Policy ID
 		if ( $this->getAbsencePolicyID()  != '' AND $this->getAbsencePolicyID() != TTUUID::getZeroID() ) {
-			$aplf = TTnew( 'AbsencePolicyListFactory' );
+			$aplf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $aplf */
 			$this->Validator->isResultSetWithRows(	'absence_policy',
 															$aplf->getByID($this->getAbsencePolicyID()),
 															TTi18n::gettext('Invalid Absence Policy ID')

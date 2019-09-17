@@ -46,13 +46,13 @@ class OverTimePolicyFactory extends Factory {
 	protected $contributing_shift_policy_obj = NULL;
 	protected $pay_code_obj = NULL;
 
-	//Use the ordering of Type_ID
-	//We basically convert all types to Daily OT prior to calculation.
-	//Daily time always takes precedence, because more then 12hrs in a day deserves double time.
-	//Then Weekly time
-	//Then Bi Weekly
-	//Then Day Of Week
 	/**
+	 * Use the ordering of Type_ID
+	 * We basically convert all types to Daily OT prior to calculation.
+	 * Daily time always takes precedence, because more then 12hrs in a day deserves double time.
+	 * 	Then Weekly time
+	 * 	Then Bi Weekly
+	 * 	Then Day Of Week
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
@@ -806,7 +806,7 @@ class OverTimePolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -850,7 +850,7 @@ class OverTimePolicyFactory extends Factory {
 		}
 		// Contributing Shift Policy
 		if ( $this->getContributingShiftPolicy() !== FALSE ) {
-			$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+			$csplf = TTnew( 'ContributingShiftPolicyListFactory' ); /** @var ContributingShiftPolicyListFactory $csplf */
 			$this->Validator->isResultSetWithRows(	'contributing_shift_policy_id',
 															$csplf->getByID($this->getContributingShiftPolicy()),
 															TTi18n::gettext('Contributing Shift Policy is invalid')
@@ -865,7 +865,7 @@ class OverTimePolicyFactory extends Factory {
 		}
 		// Adjusting Contributing Shift Policy
 		if ( $this->getTriggerTimeAdjustContributingShiftPolicy() !== FALSE AND $this->getTriggerTimeAdjustContributingShiftPolicy() != TTUUID::getZeroID() ) {
-			$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+			$csplf = TTnew( 'ContributingShiftPolicyListFactory' ); /** @var ContributingShiftPolicyListFactory $csplf */
 			$this->Validator->isResultSetWithRows(	'trigger_time_adjust_contributing_shift_policy_id',
 														$csplf->getByID($this->getTriggerTimeAdjustContributingShiftPolicy()),
 														TTi18n::gettext('Adjusting Contributing Shift Policy is invalid')
@@ -873,7 +873,7 @@ class OverTimePolicyFactory extends Factory {
 		}
 		// Pay Code
 		if ( $this->getPayCode() !== FALSE AND $this->getPayCode() != TTUUID::getZeroID() ) {
-			$pclf = TTnew( 'PayCodeListFactory' );
+			$pclf = TTnew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $pclf */
 			$this->Validator->isResultSetWithRows(	'pay_code_id',
 														$pclf->getById($this->getPayCode()),
 														TTi18n::gettext('Invalid Pay Code')
@@ -881,7 +881,7 @@ class OverTimePolicyFactory extends Factory {
 		}
 		// Pay Formula Policy
 		if ( $this->getPayFormulaPolicy() !== FALSE AND $this->getPayFormulaPolicy() != TTUUID::getZeroID() ) {
-			$pfplf = TTnew( 'PayFormulaPolicyListFactory' );
+			$pfplf = TTnew( 'PayFormulaPolicyListFactory' ); /** @var PayFormulaPolicyListFactory $pfplf */
 			$this->Validator->isResultSetWithRows(	'pay_formula_policy_id',
 															$pfplf->getByID($this->getPayFormulaPolicy()),
 															TTi18n::gettext('Pay Formula Policy is invalid')
@@ -957,7 +957,7 @@ class OverTimePolicyFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('over_time_policy' => $this->getId() ), 1 );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',

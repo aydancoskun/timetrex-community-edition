@@ -64,7 +64,7 @@ class InstallSchema_1009A extends InstallSchema_Base {
 		}
 		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__, 9);
 
-		$cjf = TTnew( 'CronJobFactory' );
+		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
 		$cjf->setName('AddAccrualPolicyTime');
 		$cjf->setMinute(30);
 		$cjf->setHour(1);

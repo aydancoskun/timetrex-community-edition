@@ -183,10 +183,14 @@ class TTi18n {
 
 		//Don't call setLocale() with LC_ALL here, only LC_MESSAGES or some other LC_* type that is *NOT* numeric.
 		//  If we change the numeric locale to say es_ES, then PHP converts (float)1.234 to '1,1234' as a string which causes a SQL syntax error when inserting into SQL.
+		//  setLocale() must be called individually for each category, we used to combine the categories like "(LC_COLLAGE | LC_CTYPE)", which was accepted (though not sure what it was actually doing) on Linux/Windows, but would fail on OSX.
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
-			$valid_locale = setlocale( ( LC_MESSAGES | LC_COLLATE | LC_CTYPE ), $locale );
+			$valid_locale = setlocale( LC_COLLATE, $locale );
+			$valid_locale = setlocale( LC_CTYPE, $locale );
+			$valid_locale = setlocale( LC_MESSAGES, $locale );
 		} else {
-			$valid_locale = setlocale( ( LC_COLLATE | LC_CTYPE ), $locale );
+			$valid_locale = setlocale( LC_COLLATE, $locale );
+			$valid_locale = setlocale( LC_CTYPE, $locale );
 		}
 
 		if ( $valid_locale != '' ) {
@@ -561,8 +565,8 @@ class TTi18n {
 	 */
 	static public function getLanguageArray() {
 		// Return supported languages
-		$supported_langs = array( 'en', 'de', 'es', 'id', 'fr' );
-		$beta_langs = array( 'de', 'es', 'id', 'fr' );
+		$supported_langs = array( 'en', 'de', 'es', 'id', 'fr', 'hu' );
+		$beta_langs = array( 'de', 'es', 'id', 'fr', 'hu' );
 
 		if ( PRODUCTION == FALSE ) {
 			//YI is for testing only.
@@ -769,9 +773,8 @@ class TTi18n {
 		return $locale;
 	}
 
-	//Returns PDF font appropriate for language.
-
 	/**
+	 * Returns PDF font appropriate for language.
 	 * @param null $language
 	 * @param bool $encoding
 	 * @return string
@@ -1245,13 +1248,10 @@ class TTi18n {
 
 	}
 
-	//
-	// Show Code: 0 = No, 1 = Left, 2 = Right
-	//
 	/**
 	 * @param $amount
 	 * @param null $currency_code
-	 * @param int $show_code
+	 * @param int $show_code 0 = No, 1 = Left, 2 = Right
 	 * @return mixed|string
 	 */
 	static public function formatCurrency( $amount, $currency_code = NULL, $show_code = 0 ) {

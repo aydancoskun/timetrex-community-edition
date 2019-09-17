@@ -479,22 +479,27 @@ class APIDashboard extends APIFactory {
 					$retarr[] = '*<b>'.TTi18n::getText('Tip') .'</b>: '. TTi18n::getText('You can add your own custom reports to the dashboard by clicking the Add Dashlet icon at the top left.');
 				}
 
+				//
 				//Regular Employee Related news:
-				//  Check for critical severity exceptions
-				$elf = TTNew('ExceptionListFactory');
-				$elf->getFlaggedExceptionsByUserIdAndPayPeriodStatus( $this->getCurrentUserObject()->getId(), 10 );
-				if ( $elf->getRecordCount() > 0 ) {
-					foreach($elf as $e_obj) {
-						if ( $e_obj->getColumn('severity_id') == 30 ) {
-							$retarr[] = TTi18n::getText('Critical severity exceptions exist, you may want to take a look at those.');
+				//
+				if ( ( $this->getPermissionObject()->Check('punch', 'enabled') AND ( $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'punch_in_out') ) )  ) { //Exceptions are only viewable if they permissions to punch in/out.
+					//  Check for critical severity exceptions
+					$elf = TTNew( 'ExceptionListFactory' );
+					/** @var ExceptionListFactory $elf */
+					$elf->getFlaggedExceptionsByUserIdAndPayPeriodStatus( $this->getCurrentUserObject()->getId(), 10 );
+					if ( $elf->getRecordCount() > 0 ) {
+						foreach ( $elf as $e_obj ) {
+							if ( $e_obj->getColumn( 'severity_id' ) == 30 ) {
+								$retarr[] = TTi18n::getText( 'Critical severity exceptions exist, you may want to take a look at those.' );
+							}
+							break;
 						}
-						break;
 					}
+					unset( $elf, $e_obj );
 				}
-				unset($elf, $e_obj);
 
 				//  Check for recent unread messages
-				$api = TTNew('APIMessageControl');
+				$api = TTNew('APIMessageControl'); /** @var APIMessageControl $api */
 				$api_result = $this->stripReturnHandler( $api->getMessageControl( array( 'filter_data' => array( 'status_id' => 10, 'folder_id' => 10) ) ) );
 				if ( is_array($api_result) AND count($api_result) > 0 ) {
 					foreach( $api_result as $message_data ) {
@@ -505,17 +510,17 @@ class APIDashboard extends APIFactory {
 				unset($api_result, $message_data);
 
 				//  Check for timesheet verifications
-				$ppslf = TTNew('PayPeriodScheduleListFactory');
+				$ppslf = TTNew('PayPeriodScheduleListFactory'); /** @var PayPeriodScheduleListFactory $ppslf */
 				$ppslf->getByUserId( $this->getCurrentUserObject()->getId() );
 				if ( $ppslf->getRecordCount() > 0 ) {
 					foreach( $ppslf as $pps_obj ) {
 						if ( in_array( $pps_obj->getTimeSheetVerifyType(), array(20,40) ) ) { //Check if TimeSheet Verification is enabled or not.
-							$pplf = TTNew('PayPeriodListFactory');
+							$pplf = TTNew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 							$pplf->getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $pps_obj->getCompany(), array( $pps_obj->getId() ), $current_epoch );
 							if ( $pplf->getRecordCount() > 0 ) {
 								foreach( $pplf as $pp_obj ) {
 									Debug::Text( 'Pay Period ID: '. $pp_obj->getId() .' PP Schedule ID: '. $pps_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-									$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+									$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $pptsvlf */
 									$pptsvlf->getByPayPeriodIdAndUserId( $pp_obj->getId(), $this->getCurrentUserObject()->getId() );
 									if ( $pptsvlf->getRecordCount() > 0 ) {
 										$pptsv_obj = $pptsvlf->getCurrent();
@@ -549,7 +554,7 @@ class APIDashboard extends APIFactory {
 				unset($ppslf, $pps_obj, $pplf, $pp_obj);
 
 				//  Check for requests that changed status.
-				$rlf = TTNew('RequestListFactory');
+				$rlf = TTNew('RequestListFactory'); /** @var RequestListFactory $rlf */
 				$rlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentUserObject()->getCompany(), array( 'user_id' => $this->getCurrentUserObject()->getId(), 'status_id' => array(50,55), 'updated_date_start' => ( TTDate::getBeginDayEpoch( $current_epoch ) - ( 86400 * 2 ) ), 'updated_date_end' => TTDate::getEndDayEpoch( $current_epoch ) ) );
 				if ( $rlf->getRecordCount() > 0 ) {
 					foreach($rlf as $r_obj) {
@@ -564,7 +569,7 @@ class APIDashboard extends APIFactory {
 				unset($rlf, $r_obj);
 
 				//  Check for upcoming scheduled absences
-				$api = TTNew('APISchedule');
+				$api = TTNew('APISchedule'); /** @var APISchedule $api */
 				$api_result = $this->stripReturnHandler( $api->getCombinedSchedule( array( 'filter_data' => array('status_id' => 20, 'include_user_ids' => array($this->getCurrentUserObject()->getId()) ) ), TTDate::getDate('DATE', $current_epoch ), 'week', FALSE) );
 				if ( isset($api_result['schedule_data']) ) {
 					foreach( $api_result['schedule_data'] as $date => $schedule_data ) {
@@ -575,7 +580,7 @@ class APIDashboard extends APIFactory {
 				unset($api_result, $schedule_data, $date);
 
 				//  Check for recent pay stubs.
-				$api = TTNew('APIPayStub');
+				$api = TTNew('APIPayStub'); /** @var APIPayStub $api */
 				$api_result = $this->stripReturnHandler( $api->getPayStub( array( 'filter_data' => array('status_id' => 40, 'include_user_ids' => array($this->getCurrentUserObject()->getId()), 'start_date' => TTDate::getBeginDayEpoch( $current_epoch - (86400 * 2) ), 'end_date' => TTDate::getEndDayEpoch( $current_epoch + (86400 * 5) ) ) ), FALSE) );
 				if ( is_array($api_result) AND count($api_result) > 0 ) {
 					foreach( $api_result as $pay_stub_data ) {
@@ -586,7 +591,7 @@ class APIDashboard extends APIFactory {
 				unset($api_result, $pay_stub_data);
 
 				//  Check for Pay Periods nearing end date or transaction date
-				$pplf = TTNew('PayPeriodListFactory');
+				$pplf = TTNew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 				$pplf->getByUserIdAndTransactionDate( $this->getCurrentUserObject()->getId(), $current_epoch );
 				if ( $pplf->getRecordCount() > 0 ) {
 					foreach( $pplf as $pp_obj ) {
@@ -654,7 +659,7 @@ class APIDashboard extends APIFactory {
 				break;
 			case 'schedule_summary':
 			case 'schedule_summary_child':
-				$api = TTNew('APISchedule');
+				$api = TTNew('APISchedule'); /** @var APISchedule $api */
 
 				$maximum_row_limit = ( isset($data['rows_per_page']) AND $data['rows_per_page'] > 0 ) ? $data['rows_per_page'] : $this->getCurrentUserPreferenceObject()->getItemsPerPage();
 				$parameters = $this->buildDefaultDashletParameters($display_columns, $data['rows_per_page']);
@@ -691,7 +696,7 @@ class APIDashboard extends APIFactory {
 				unset($api_result, $i, $maximum_row_limit);
 				break;
 			case 'user_active_shift_summary':
-				$api = TTNew('APIActiveShiftReport');
+				$api = TTNew('APIActiveShiftReport'); /** @var APIActiveShiftReport $api */
 				$template_data = $api->getTemplate('by_status_by_type_by_employee');
 				$template_data = Misc::trimSortPrefix($template_data['api_retval']);
 				$template_data['other']['maximum_row_limit'] = ( isset($data['rows_per_page']) AND $data['rows_per_page'] > 0 ) ? $data['rows_per_page'] : $this->getCurrentUserPreferenceObject()->getItemsPerPage();
@@ -704,7 +709,7 @@ class APIDashboard extends APIFactory {
 				break;
 			case 'timesheet_verification_summary':
 			case 'timesheet_verification_summary_child':
-				$api = TTNew('APITimesheetSummaryReport');
+				$api = TTNew('APITimesheetSummaryReport'); /** @var APITimesheetSummaryReport $api */
 				$template_data = $api->getTemplate('by_pay_period_by_employee+verified_time_sheet');
 				$template_data = Misc::trimSortPrefix($template_data['api_retval']);
 				$template_data['other']['maximum_row_limit'] = ( isset($data['rows_per_page']) AND $data['rows_per_page'] > 0 ) ? $data['rows_per_page'] : $this->getCurrentUserPreferenceObject()->getItemsPerPage();
@@ -721,7 +726,7 @@ class APIDashboard extends APIFactory {
 				}
 				break;
 			case 'message_summary':
-				$api = TTNew('APIMessageControl');
+				$api = TTNew('APIMessageControl'); /** @var APIMessageControl $api */
 				$display_columns = $api->getOptions('default_display_columns');
 				$display_columns[] = 'status_id';
 				$parameters = $this->buildDefaultDashletParameters($display_columns, $data['rows_per_page']);
@@ -730,7 +735,7 @@ class APIDashboard extends APIFactory {
 				break;
 			case 'exception_summary':
 			case 'exception_summary_child':
-				$ppslf = TTnew('PayPeriodScheduleListFactory');
+				$ppslf = TTnew('PayPeriodScheduleListFactory'); /** @var PayPeriodScheduleListFactory $ppslf */
 				if ( $name == 'exception_summary_child' ) {
 					$ppslf->getByCompanyId($this->getCurrentCompanyObject()->getId() ); //Must be all PP schedules when showing subordinate exceptions.
 				} else {
@@ -743,7 +748,7 @@ class APIDashboard extends APIFactory {
 					$pay_period_ids = array();
 
 					//Get last and this pay period IDs.
-					$pplf = TTnew('PayPeriodListFactory');
+					$pplf = TTnew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 					$pplf->getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate($this->getCurrentCompanyObject()->getId(), $pay_period_schedule_id, time());
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach ($pplf as $pp_obj) {
@@ -761,7 +766,7 @@ class APIDashboard extends APIFactory {
 					}
 
 					if ( count($pay_period_ids) > 0 ) {
-						$api = TTNew('APIException');
+						$api = TTNew('APIException'); /** @var APIException $api */
 
 						if ( $name == 'exception_summary' ) { //Only show the users own exceptions
 							//No need to show first/last name as its only displaying their own exceptions anyways.
@@ -791,7 +796,7 @@ class APIDashboard extends APIFactory {
 				}
 				break;
 			case 'request_summary':
-				$api = TTNew('APIRequest');
+				$api = TTNew('APIRequest'); /** @var APIRequest $api */
 				$display_columns = $api->getOptions('default_display_columns');
 				$display_columns[] = 'status_id';
 				$parameters = $this->buildDefaultDashletParameters($display_columns, $data['rows_per_page']);
@@ -799,7 +804,7 @@ class APIDashboard extends APIFactory {
 				$retarr = $api->getRequest($parameters);
 				break;
 			case 'request_authorize_summary':
-				$api = TTNew('APIRequest');
+				$api = TTNew('APIRequest'); /** @var APIRequest $api */
 				$display_columns = $api->getOptions('default_display_columns');
 				$parameters = $this->buildDefaultDashletParameters($display_columns, $data['rows_per_page']);
 				$parameters['filter_data'] = array();
@@ -809,7 +814,7 @@ class APIDashboard extends APIFactory {
 				$retarr = $api->getRequest($parameters);
 				break;
 			case 'accrual_balance_summary':
-				$api = TTNew('APIAccrualBalance');
+				$api = TTNew('APIAccrualBalance'); /** @var APIAccrualBalance $api */
 				$display_columns = $api->getOptions('default_display_columns');
 				//$display_columns[] = 'status_id';
 				$parameters = $this->buildDefaultDashletParameters($display_columns, $data['rows_per_page']);
@@ -829,17 +834,17 @@ class APIDashboard extends APIFactory {
 						Debug::Text('  Getting UserGenericData for ID: ' . $data['user_generic_data_id'], __FILE__, __LINE__, __METHOD__, 10);
 
 						if ( $data['class'] == 'Request-Authorization' ) {
-							$api = TTNew('APIRequest');
+							$api = TTNew('APIRequest'); /** @var APIRequest $api */
 							$function_name = 'getRequest';
 						} else if ( $data['class'] == 'UserExpense-Authorization' ) {
-							$api = TTNew('APIUserExpense');
+							$api = TTNew('APIUserExpense'); /** @var APIUserExpense $api */
 							$function_name = 'getUserExpense';
 						} else {
 							$api = TTNew('API' . $data['class']);
 							$function_name = 'get' . $data['class'];
 						}
 
-						$augd = TTNew('APIUserGenericData');
+						$augd = TTNew('APIUserGenericData'); /** @var APIUserGenericData $augd */
 						$retval = $this->stripReturnHandler($augd->getUserGenericData(array('filter_data' => array('id' => TTUUID::castUUID($data['user_generic_data_id'])))));
 						if ( is_array($retval) AND count($retval) == 1 ) {
 							if ( isset($retval[0]['data']) ) {
@@ -907,7 +912,7 @@ class APIDashboard extends APIFactory {
 
 		//Check if TimeSheet Verifications are even enabled, not need to display dashlets if they aren't.
 		$enabled_timesheet_verification = FALSE;
-		$ppslf = TTNew('PayPeriodScheduleListFactory');
+		$ppslf = TTNew('PayPeriodScheduleListFactory'); /** @var PayPeriodScheduleListFactory $ppslf */
 		$ppslf->getByCompanyId( $this->getCurrentCompanyObject()->getId() );
 		if ( $ppslf->getRecordCount() > 0 ) {
 			foreach( $ppslf as $pps_obj ) {
@@ -917,6 +922,9 @@ class APIDashboard extends APIFactory {
 				}
 			}
 		}
+
+		//Note: Dashlet information including its name/title is saved to UserGenericData, which means if the user changes languages then the dashlet titles won't get changed unless they edit/save them, or restore defaults.
+		//      This is required behavior since the user can rename the dashlets to whatever they want.
 
 		//Common to all levels.
 		( ( isset($dashlet_options['news']) ) ? $parameters[] = $this->createDefaultDashletData('news', TTi18n::getText('News') ) : NULL );
@@ -949,19 +957,20 @@ class APIDashboard extends APIFactory {
 			( ( isset($dashlet_options['user_active_shift_summary']) ) ? $parameters[] = $this->createDefaultDashletData('user_active_shift_summary', TTi18n::getText('Whos In/Out') ) : NULL );
 		}
 
-		$augd = TTNew('APIUserGenericData');
-		$retval = $augd->setUserGenericData($parameters);
-		if($retval['api_retval'] == TRUE){
+		$augd = TTNew('APIUserGenericData'); /** @var APIUserGenericData $augd */
+		$retval = $augd->setUserGenericData( $parameters );
+		if ( $retval['api_retval'] == TRUE ) {
 			$parameters = array(
-				'name' => 'order_data',
-				'script' => 'global_dashboard_order',
-				'is_default' => TRUE,
-				'data' => $retval['api_details']['details']
+					'name'       => 'order_data',
+					'script'     => 'global_dashboard_order',
+					'is_default' => TRUE,
+					'data'       => $retval['api_details']['details'],
 			);
-			$augd->setUserGenericData($parameters);
-			return $augd->getUserGenericData(array('filter_data' => array('script' => 'global_dashboard','deleted' => FALSE)));
-		}else{
-			return $this->returnHandler(FALSE);
+			$augd->setUserGenericData( $parameters );
+
+			return $augd->getUserGenericData( array('filter_data' => array('script' => 'global_dashboard', 'deleted' => FALSE)) );
+		} else {
+			return $this->returnHandler( FALSE );
 		}
 	}
 

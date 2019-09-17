@@ -62,7 +62,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -92,7 +92,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -130,7 +130,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -158,7 +158,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -176,7 +176,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 		//$query .= $this->getWhereSQL( $where );
 		//$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->db->Execute($query);
+		$this->rs = $this->ExecuteSQL($query);
 
 		return $this;
 	}

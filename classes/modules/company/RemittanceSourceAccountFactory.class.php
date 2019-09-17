@@ -61,8 +61,7 @@ class RemittanceSourceAccountFactory extends Factory {
 				);
 				break;
 			case 'country':
-				/** @var CompanyFactory $cf */
-				$cf = TTNew('CompanyFactory');
+				$cf = TTNew('CompanyFactory'); /** @var CompanyFactory $cf */
 				$retval = $cf->getOptions('country');
 				break;
 			case 'type':
@@ -528,6 +527,7 @@ class RemittanceSourceAccountFactory extends Factory {
 
 	/**
 	 * VALUE 3 is the account number. It needs to be encrypted.
+	 * @param null $account
 	 * @return bool|string
 	 */
 	function getSecureValue3( $account = NULL ) {
@@ -968,6 +968,7 @@ class RemittanceSourceAccountFactory extends Factory {
 
 	/**
 	 * VALUE 28 is the return account number. It needs to be encrypted.
+	 * @param null $account
 	 * @return bool|string
 	 */
 	function getSecureValue28( $account = NULL ) {
@@ -1062,7 +1063,6 @@ class RemittanceSourceAccountFactory extends Factory {
 	/**
 	 * @param string $company_id UUID
 	 * @param string $id UUID
-	 * @param bool $include_default_signature
 	 * @return bool|string
 	 */
 	function getSignatureFileName( $company_id = NULL, $id = NULL ) {
@@ -1101,7 +1101,7 @@ class RemittanceSourceAccountFactory extends Factory {
 		$dir = $this->getStoragePath( $company_id ) . DIRECTORY_SEPARATOR;
 		if ( $dir != '' ) {
 			if ( $id != '' ) {
-				@unlink( $this->getSignatureFileName( $company_id, $id, FALSE ) ); //Delete just signature.
+				@unlink( $this->getSignatureFileName( $company_id, $id ) ); //Delete just signature.
 			} else {
 				//Delete tmp files.
 				foreach(glob($dir.'*') as $filename) {
@@ -1143,7 +1143,7 @@ class RemittanceSourceAccountFactory extends Factory {
 		//
 		// Legal entity
 		if ( $this->getLegalEntity() !== FALSE AND $this->getLegalEntity() != TTUUID::getNotExistID() ) {
-			$llf = TTnew( 'LegalEntityListFactory' );
+			$llf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $llf */
 			$this->Validator->isResultSetWithRows( 'legal_entity_id',
 												   $llf->getByID( $this->getLegalEntity() ),
 												   TTi18n::gettext( 'Legal entity is invalid' )
@@ -1161,7 +1161,7 @@ class RemittanceSourceAccountFactory extends Factory {
 
 		// Currency
 		if ( $this->getCurrency() !== FALSE ) {
-			$culf = TTnew( 'CurrencyListFactory' );
+			$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 			$this->Validator->isResultSetWithRows(	'currency_id',
 															$culf->getByID($this->getCurrency()),
 															TTi18n::gettext('Invalid Currency')
@@ -1458,7 +1458,7 @@ class RemittanceSourceAccountFactory extends Factory {
 		$data_diff = $this->getDataDifferences();
 		//$this->setProvince( $this->getProvince() ); //Not sure why this was there, but it causes duplicate errors if the province is incorrect.
 		if ( $this->getDeleted() == TRUE ) {
-			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory');
+			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory'); /** @var RemittanceDestinationAccountListFactory $rdalf */
 			$rdalf->getByRemittanceSourceAccountId( $this->getId(), 1 ); //limit 1.
 			if ( $rdalf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -1466,7 +1466,7 @@ class RemittanceSourceAccountFactory extends Factory {
 											TTi18n::gettext('This remittance source account is currently in use') .' '. TTi18n::gettext('by employee payment methods') );
 			}
 
-			$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+			$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $pralf */
 			$pralf->getByRemittanceSourceAccountId( $this->getId(), 1 ); //limit 1.
 			if ( $pralf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -1474,7 +1474,7 @@ class RemittanceSourceAccountFactory extends Factory {
 											TTi18n::gettext('This remittance source account is currently in use') .' '. TTi18n::gettext('by remittance agencies') );
 			}
 
-			$pstlf = TTnew( 'PayStubTransactionListFactory' );
+			$pstlf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pstlf */
 			$pstlf->getByRemittanceSourceAccountId( $this->getId(), 1 ); //limit 1.
 			if ( $pstlf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -1621,7 +1621,7 @@ class RemittanceSourceAccountFactory extends Factory {
 			//  Always allow going from a specific legal entity to ANY without any additional validation checks.
 			//  Switching from a specific legal entity to another specific legal entity should check that destination accounts aren't assigned.
 			//  Switching from ANY legal enity to any specific legal entity, should ensure that all destination accounts are assigned to the same legal entity.
-			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' );
+			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' ); /** @var RemittanceDestinationAccountListFactory $rdalf */
 
 			if ( $this->getLegalEntity() != TTUUID::getNotExistID() AND $data_diff['legal_entity_id'] != TTUUID::getNotExistID() ) { //Switching from any specific legal entity to any other specific legal entity.
 				$rdalf->getByRemittanceSourceAccountId( $this->getId(), 1 ); //Limit 1.
@@ -1649,7 +1649,7 @@ class RemittanceSourceAccountFactory extends Factory {
 		if ( is_array($data_diff) AND $this->isDataDifferent( 'country', $data_diff ) ) { //Country has changed
 			//Cases to handle:
 			//  Don't allow changing the country if destination accounts are linked to it already, as that will change the bank account validations and such.
-			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' );
+			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' ); /** @var RemittanceDestinationAccountListFactory $rdalf */
 			$rdalf->getByRemittanceSourceAccountId( $this->getId(), 1 ); //Limit 1.
 			if ( $rdalf->getRecordCount() > 0 ) {
 				$this->Validator->isTrue( 'country',

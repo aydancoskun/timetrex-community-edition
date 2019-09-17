@@ -71,7 +71,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 				$this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
 
-			var date_stamp = Global.strToDate( date_str, 'YYYYMMDD' ).format();
+			var date_stamp = Global.strToDate( date_str, 'YYYY-MM-DD' ).format();
 
 			$this.current_edit_record = {
 				date: date_str,
@@ -158,8 +158,9 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 		}
 
 		function getFilter( filter, target ) {
-			var date = Global.strToDate( target.parent_edit_record.date, 'YYYYMMDD' ).format();
-			filter.date_stamp = date; //Should be an epoch value.
+			var date = Global.strToDate( target.parent_edit_record.date, 'YYYY-MM-DD' ).format();
+
+			filter.date_stamp = date;
 			filter.user_id = target.parent_edit_record.user_id; //Should be selected user_id
 			filter.object_type_id = [20, 25, 30, 40, 100, 110];
 

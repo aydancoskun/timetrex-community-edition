@@ -55,7 +55,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -119,7 +119,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -154,7 +154,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -198,7 +198,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 
 		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -248,7 +248,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 
 		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -288,7 +288,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		$query .= $this->getSortSQL( $order );
 
 		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -424,7 +424,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

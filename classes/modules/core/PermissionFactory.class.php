@@ -1489,7 +1489,7 @@ class PermissionFactory extends Factory {
 			return $this->permission_control_obj;
 		} else {
 
-			$pclf = TTnew( 'PermissionControlListFactory' );
+			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 			$pclf->getById( $this->getPermissionControl() );
 
 			if ( $pclf->getRecordCount() == 1 ) {
@@ -2835,9 +2835,9 @@ class PermissionFactory extends Factory {
 		return $retarr;
 	}
 
-	//This is used by CompanyFactory to create the initial permissions when creating a new company.
-	//Also by the Quick Start wizard.
 	/**
+	 * This is used by CompanyFactory to create the initial permissions when creating a new company.
+	 * Also by the Quick Start wizard.
 	 * @param string $permission_control_id UUID
 	 * @param $preset
 	 * @param $preset_flags
@@ -2855,7 +2855,7 @@ class PermissionFactory extends Factory {
 		$product_edition = $this->getPermissionControlObject()->getCompanyObject()->getProductEdition();
 		//Debug::Arr($preset_flags, 'Preset: '. $preset .' Product Edition: '. $product_edition, __FILE__, __LINE__, __METHOD__, 10);
 
-		$pf = TTnew( 'PermissionFactory' );
+		$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 		$pf->StartTransaction();
 
 		//Delete all previous permissions for this control record..
@@ -2891,17 +2891,17 @@ class PermissionFactory extends Factory {
 			}
 		}
 
-		$pclf = TTnew( 'PermissionControlListFactory' );
+		$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 		if ( isset($data) ) {
 			//Save data in a single SQL query.
 			$query = 'INSERT INTO '. $this->getTable() .'(ID, PERMISSION_CONTROL_ID, SECTION, NAME, VALUE, CREATED_DATE) VALUES'. implode(',', $data );
 			//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-			$this->db->Execute($query, $ph);
+			$this->ExecuteSQL($query, $ph);
 
 			//Make sure we keep the seqenence in sync, only required for MySQL.
 			if ( $this->getDatabaseType() == 'mysql' ) {
 				Debug::Text('Keeping MySQL sequence in sync...', __FILE__, __LINE__, __METHOD__, 10);
-				$install = TTNew('Install');
+				$install = TTNew('Install'); /** @var Install $install */
 				$install->initializeSequence( $this, $this->getTable(), get_class( $this ), $this->db );
 				unset($install);
 			}
@@ -2944,10 +2944,10 @@ class PermissionFactory extends Factory {
 			return FALSE;
 		}
 
-		$plf = TTnew( 'PermissionListFactory' );
+		$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 		$plf->getByCompanyIDAndPermissionControlId( $company_id, $permission_control_id );
 		foreach($plf as $permission_obj) {
-			$permission_obj->delete(TRUE);
+			$permission_obj->Delete();
 			$this->removeCache( $this->getCacheID() );
 		}
 
@@ -3087,7 +3087,7 @@ class PermissionFactory extends Factory {
 	 */
 	function preSave() {
 		//Just update any existing permissions. It would probably be faster to delete them all and re-insert though.
-		$plf = TTnew( 'PermissionListFactory' );
+		$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 		$obj = $plf->getByCompanyIdAndPermissionControlIdAndSectionAndName( $this->getCompany(), $this->getPermissionControl(), $this->getSection(), $this->getName() )->getCurrent();
 		$this->setId( $obj->getId() );
 
@@ -3146,7 +3146,7 @@ class PermissionFactory extends Factory {
 		//
 		// Permission Group
 		if ( $this->getPermissionControl() == TTUUID::getZeroID() ) {
-			$pclf = TTnew( 'PermissionControlListFactory' );
+			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 			$this->Validator->isResultSetWithRows(	'permission_control',
 															$pclf->getByID($this->getPermissionControl()),
 															TTi18n::gettext('Permission Group is invalid')

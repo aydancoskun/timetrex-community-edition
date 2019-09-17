@@ -166,7 +166,7 @@ class ScheduleSummaryReport extends Report {
 				break;
 			case 'custom_columns':
 				//Get custom fields for report data.
-				$oflf = TTnew( 'OtherFieldListFactory' );
+				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 				//User and Punch fields conflict as they are merged together in a secondary process.
 				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10), array( 10 => '' ) );
 				if ( is_array($other_field_names) ) {
@@ -175,7 +175,7 @@ class ScheduleSummaryReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'ScheduleSummaryReport', 'custom_column' );
@@ -186,13 +186,13 @@ class ScheduleSummaryReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'ScheduleSummaryReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'ScheduleSummaryReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -201,7 +201,7 @@ class ScheduleSummaryReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'ScheduleSummaryReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -834,7 +834,7 @@ class ScheduleSummaryReport extends Report {
 		$wage_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$jlf = TTnew( 'JobListFactory' );
+			$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 			$job_status_options = $jlf->getOptions('status');
 		} else {
 			$job_status_options = array();
@@ -846,7 +846,7 @@ class ScheduleSummaryReport extends Report {
 		}
 
 		if ( strpos( $format, 'schedule' ) === FALSE ) { //Avoid running these queries when printing out the schedule.
-			$slf = TTnew( 'ScheduleListFactory' );
+			$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
 			$slf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array('last_name' => 'asc') ); //Sort by last name mainly for the PDF schedule for printing.
 			Debug::Text(' Total Rows: '. $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $slf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -947,7 +947,7 @@ class ScheduleSummaryReport extends Report {
 		}
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -968,9 +968,9 @@ class ScheduleSummaryReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
+	 * @param null $format
 	 * @return bool
 	 */
 	function _preProcess( $format = NULL ) {
@@ -1589,7 +1589,7 @@ class ScheduleSummaryReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), 2, NULL, TTi18n::getText('Querying Database...') ); //Iterations need to be 2, otherwise progress bar is not created.
 		$this->getProgressBarObject()->set( $this->getAMFMessageID(), 2 );
 
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 
 		//getScheduleArray() doesn't accept pay_period_ids, so no data is returned if a time period of "last_pay_period" is selected.
 		if ( isset($filter_data['pay_period_id']) ) {

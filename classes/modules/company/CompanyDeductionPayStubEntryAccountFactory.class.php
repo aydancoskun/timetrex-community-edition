@@ -72,7 +72,7 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 		if ( is_object($this->pay_stub_entry_account_obj) ) {
 			return $this->pay_stub_entry_account_obj;
 		} else {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$psealf->getById( $this->getPayStubEntryAccount() );
 			if ( $psealf->getRecordCount() > 0 ) {
 				$this->pay_stub_entry_account_obj = $psealf->getCurrent();
@@ -162,7 +162,7 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 											);
 
 		// Pay Stub Account
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+		$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 		$this->Validator->isResultSetWithRows(	'pay_stub_entry_account',
 														$psealf->getByID($this->getPayStubEntryAccount()),
 														TTi18n::gettext('Pay Stub Account is invalid')
@@ -173,9 +173,8 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 		return TRUE;
 	}
 
-	//This table doesn't have any of these columns, so overload the functions.
-
 	/**
+	 * This table doesn't have any of these columns, so overload the functions.
 	 * @return bool
 	 */
 	function getDeleted() {
@@ -291,6 +290,8 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 			$type = Option::getByKey($this->getType(), Misc::TrimSortPrefix( $this->getOptions('type') ) );
 			return TTLog::addEntry( $this->getCompanyDeduction(), $log_action, $type .' '. TTi18n::getText('Pay Stub Account').': '. $obj->getName(), NULL, $this->getTable() );
 		}
+
+		return FALSE;
 	}
 }
 ?>

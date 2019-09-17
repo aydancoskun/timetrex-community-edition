@@ -91,7 +91,7 @@ class APIUserDefault extends APIFactory {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		$uplf = TTnew( 'UserDefaultListFactory' );
+		$uplf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $uplf */
 		$uplf->getByCompanyId( $this->getCurrentCompanyObject()->getId() );
 		Debug::Text('Record Count: '. $uplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $uplf->getRecordCount() > 0 ) {
@@ -167,7 +167,7 @@ class APIUserDefault extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserDefaultListFactory' );
+				$lf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -273,7 +273,7 @@ class APIUserDefault extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserDefaultListFactory' );
+				$lf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

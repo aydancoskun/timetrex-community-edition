@@ -55,7 +55,7 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -86,7 +86,7 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -132,7 +132,7 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -167,7 +167,7 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 						AND ( a.deleted = 0 AND c.deleted = 0 )
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -198,7 +198,7 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 					';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -233,14 +233,13 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 					';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
-	//This function grabs all the punches on the given day
-	//and determines where the epoch will fit in.
 	/**
+	 * This function grabs all the punches on the given day and determines where the epoch will fit in.
 	 * @param string $user_id UUID
 	 * @param int $epoch EPOCH
 	 * @param int $status_id
@@ -315,12 +314,12 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 							if ( isset($prev_punch_arr[$data['out']]) ) {
 								Debug::text(' Punch Before In Gap... Range Start: '. TTDate::getDate('DATE+TIME', $prev_punch_arr[$data['out']]) .' End: '. TTDate::getDate('DATE+TIME', $data['out']), __FILE__, __LINE__, __METHOD__, 10);
 								if ( $prev_punch_arr[$data['out']] == $data['out'] OR TTDate::isTimeOverLap($epoch, $epoch, $prev_punch_arr[$data['out']], $data['out'] ) ) {
-									Debug::text(' Epoch OverLaps, THIS IS GOOD!', __FILE__, __LINE__, __METHOD__, 10);
+									Debug::text(' Epoch overlaps, THIS IS GOOD!', __FILE__, __LINE__, __METHOD__, 10);
 									Debug::text(' aReturning Punch Control ID: '. $punch_control_id, __FILE__, __LINE__, __METHOD__, 10);
 									$retval = $punch_control_id;
 									break; //Without this adding mass punches fails in some basic circumstances because it loops and attaches to a later punch control
 								} else {
-									Debug::text(' Epoch does not OverLaps, Cant attached to this punch_control!', __FILE__, __LINE__, __METHOD__, 10);
+									Debug::text(' Epoch does not overlap, cant attach to this punch_control!', __FILE__, __LINE__, __METHOD__, 10);
 								}
 
 							} else {
@@ -336,12 +335,12 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 							if ( isset($next_punch_arr[$data['in']]) ) {
 								Debug::text(' Punch After Out Gap... Range Start: '. TTDate::getDate('DATE+TIME', $data['in']) .' End: '. TTDate::getDate('DATE+TIME', $next_punch_arr[$data['in']]), __FILE__, __LINE__, __METHOD__, 10);
 								if ( $data['in'] == $next_punch_arr[$data['in']] OR TTDate::isTimeOverLap($epoch, $epoch, $data['in'], $next_punch_arr[$data['in']] ) ) {
-									Debug::text(' Epoch OverLaps, THIS IS GOOD!', __FILE__, __LINE__, __METHOD__, 10);
+									Debug::text(' Epoch overlaps, THIS IS GOOD!', __FILE__, __LINE__, __METHOD__, 10);
 									Debug::text(' bReturning Punch Control ID: '. $punch_control_id, __FILE__, __LINE__, __METHOD__, 10);
 									$retval = $punch_control_id;
 									break; //Without this adding mass punches fails in some basic circumstances because it loops and attaches to a later punch control
 								} else {
-									Debug::text(' Epoch does not OverLaps, Cant attached to this punch_control!', __FILE__, __LINE__, __METHOD__, 10);
+									Debug::text(' Epoch does not overlap, cant attach to this punch_control!', __FILE__, __LINE__, __METHOD__, 10);
 								}
 
 							} else {
@@ -578,7 +577,7 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 

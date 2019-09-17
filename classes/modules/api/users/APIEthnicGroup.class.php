@@ -100,7 +100,7 @@ class APIEthnicGroup extends APIFactory {
 		//Allow supervisor (subordinates only) to see all ethnic groups.
 		//$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view' );
 
-		$eglf = TTnew( 'EthnicGroupListFactory' );
+		$eglf = TTnew( 'EthnicGroupListFactory' ); /** @var EthnicGroupListFactory $eglf */
 		$eglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $eglf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $eglf->getRecordCount() > 0 ) {
@@ -180,7 +180,7 @@ class APIEthnicGroup extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'EthnicGroupListFactory' );
+				$lf = TTnew( 'EthnicGroupListFactory' ); /** @var EthnicGroupListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -280,7 +280,7 @@ class APIEthnicGroup extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'EthnicGroupListFactory' );
+				$lf = TTnew( 'EthnicGroupListFactory' ); /** @var EthnicGroupListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

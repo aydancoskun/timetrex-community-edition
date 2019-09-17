@@ -46,7 +46,7 @@ class HierarchyObjectTypeFactory extends Factory {
 
 	/**
 	 * @param $name
-	 * @param null $parent
+	 * @param null $params
 	 * @return array|null
 	 */
 	function _getFactoryOptions( $name, $params = NULL ) {
@@ -117,7 +117,7 @@ class HierarchyObjectTypeFactory extends Factory {
 		if ( is_object($this->hierarchy_control_obj) ) {
 			return $this->hierarchy_control_obj;
 		} else {
-			$hclf = TTnew( 'HierarchyControlListFactory' );
+			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 			$this->hierarchy_control_obj = $hclf->getById( $this->getHierarchyControl() )->getCurrent();
 
 			return $this->hierarchy_control_obj;
@@ -188,7 +188,7 @@ class HierarchyObjectTypeFactory extends Factory {
 		//
 		// Hierarchy Control
 		if ( $this->getHierarchyControl() == TTUUID::getZeroID() ) {
-			$hclf = TTnew( 'HierarchyControlListFactory' );
+			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 			$this->Validator->isResultSetWithRows(	'hierarchy_control_id',
 															$hclf->getByID($this->getHierarchyControl()),
 															TTi18n::gettext('Invalid Hierarchy Control')

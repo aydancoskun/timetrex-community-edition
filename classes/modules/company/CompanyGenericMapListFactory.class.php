@@ -54,7 +54,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -83,7 +83,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -112,7 +112,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -146,7 +146,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -192,7 +192,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $cache_id );
 		}
@@ -234,7 +234,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -276,7 +276,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -318,7 +318,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -344,7 +344,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -376,7 +376,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

@@ -76,7 +76,7 @@ class APIUserContact extends APIFactory {
 		Debug::Text('Getting user contact default data for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get New Hire Defaults.
-		$udlf = TTnew( 'UserDefaultListFactory' );
+		$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 		$udlf->getByCompanyId( $company_id );
 		if ( $udlf->getRecordCount() > 0 ) {
 			Debug::Text('Using User Defaults, as they exist...', __FILE__, __LINE__, __METHOD__, 10);
@@ -112,7 +112,7 @@ class APIUserContact extends APIFactory {
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_contact', 'view' );
 
-		$uclf = TTnew( 'UserContactListFactory' );
+		$uclf = TTnew( 'UserContactListFactory' ); /** @var UserContactListFactory $uclf */
 		$uclf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $uclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $uclf->getRecordCount() > 0 ) {
@@ -211,7 +211,7 @@ class APIUserContact extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserContactListFactory' );
+				$lf = TTnew( 'UserContactListFactory' ); /** @var UserContactListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -351,7 +351,7 @@ class APIUserContact extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserContactListFactory' );
+				$lf = TTnew( 'UserContactListFactory' ); /** @var UserContactListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

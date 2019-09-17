@@ -61,7 +61,7 @@ class InstallSchema_1012A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Get all pay period schedules.
-		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+		$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 		$ppslf->getAll();
 		if ( $ppslf->getRecordCount() > 0 ) {
 			foreach( $ppslf as $pps_obj ) {
@@ -69,7 +69,7 @@ class InstallSchema_1012A extends InstallSchema_Base {
 				if ( is_array($user_ids) ) {
 					$time_zone_arr = array();
 					foreach( $user_ids as $user_id ) {
-						$uplf = TTnew( 'UserPreferenceListFactory' );
+						$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 						$uplf->getByUserId( $user_id );
 						if ( $uplf->getRecordCount() > 0 ) {
 							if ( isset($time_zone_arr[$uplf->getCurrent()->getTimeZone()]) ) {

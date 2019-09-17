@@ -70,7 +70,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 				if ( !isset($params['legal_entity_id']) ) {
 					return FALSE;
 				}
-				$rsalf = TTnew( 'RemittanceSourceAccountListFactory' );
+				$rsalf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $rsalf */
 				$rsalf->getByLegalEntityId( $params['legal_entity_id'] );
 				$type_options = $rsalf->getOptions('type');
 
@@ -108,13 +108,14 @@ class RemittanceDestinationAccountFactory extends Factory {
 				$retval = array(
 					'-1010-status' => TTi18n::gettext('Status'),
 					'-1020-type' => TTi18n::gettext('Type'),
-					'-1010-user_first_name' => TTi18n::gettext('First Name'),
-					'-1020-user_last_name' => TTi18n::gettext('Last Name'),
+					'-1030-user_employee_number' => TTi18n::gettext('Employee #'),
+					'-1040-user_first_name' => TTi18n::gettext('First Name'),
+					'-1050-user_last_name' => TTi18n::gettext('Last Name'),
 
-					'-1020-amount_type' => TTi18n::gettext('Amount Type'),
-					'-1021-name' => TTi18n::gettext('Name'),
-					'-1030-priority' => TTi18n::gettext('Priority'),
-					'-1140-display_amount' => TTi18n::gettext('Amount'), //Needs to be excluded from importing.
+					'-1100-amount_type' => TTi18n::gettext('Amount Type'),
+					'-1110-name' => TTi18n::gettext('Name'),
+					'-1120-priority' => TTi18n::gettext('Priority'),
+					'-1130-display_amount' => TTi18n::gettext('Amount'), //Needs to be excluded from importing.
 
 					//Added to allow importing these columns
 					'-1140-amount' => TTi18n::gettext('Payment Amount'),
@@ -171,6 +172,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 			'legal_entity_id' => FALSE,
 			'user_id' => 'User',
 			'user' => FALSE,
+			'user_employee_number' => FALSE,
 			'user_first_name' => FALSE,
 			'user_last_name' => FALSE,
 			'status_id' => 'Status',
@@ -338,7 +340,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 			'name' => $name,
 		);
 
-		$uf = TTnew( 'UserFactory' );
+		$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 
 		$query = 'SELECT a.id
 					FROM '. $this->getTable() .' as a
@@ -507,6 +509,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 	/**
 	 * VALUE 3 is the account number. It must be stored encrypted.
+	 * @param null $account
 	 * @return bool|string
 	 */
 	function getSecureValue3( $account = NULL ) {
@@ -519,6 +522,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 	/**
 	 * VALUE 3 is the account number. It must be stored encrypted. Use getSecureAccountNumber()
+	 * @param null $value
 	 * @return bool
 	 */
 	function getValue3( $value = NULL ) {
@@ -704,15 +708,16 @@ class RemittanceDestinationAccountFactory extends Factory {
 	 * Migrates RemittanceDestinationAccount as best as it possibly can for an employee when switching legal entities.
 	 * @param $user_obj object
 	 * @param $data_diff array
+	 * @return bool
 	 */
 	static function MigrateLegalEntity( $user_obj, $data_diff ) {
 		//Get all RemittanceSourceAccounts assign to the new legal entity so we can quickly loop over them.
-		$rsalf = TTnew('RemittanceSourceAccountListFactory');
+		$rsalf = TTnew('RemittanceSourceAccountListFactory'); /** @var RemittanceSourceAccountListFactory $rsalf */
 		$rsalf->StartTransaction();
 		$rsalf->getByCompanyId( $user_obj->getCompany() );
 
 
-		$rdalf = TTnew('RemittanceDestinationAccountListFactory');
+		$rdalf = TTnew('RemittanceDestinationAccountListFactory'); /** @var RemittanceDestinationAccountListFactory $rdalf */
 		$rdalf->getByUserIdAndCompany( $user_obj->getId(), $user_obj->getCompany() );
 		if ( $rdalf->getRecordCount() > 0 ) {
 			Debug::text('Legal Entity changed. Trying to match all RemittanceDestiationAccount data to new entity for user: '. $user_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
@@ -786,7 +791,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 		if ( $this->getDeleted() == FALSE ) {
 			// Remittance source account
 			if ( $this->getRemittanceSourceAccount() !== FALSE AND $this->getRemittanceSourceAccount() != TTUUID::getZeroID() AND !$this->getEnableBlankRemittanceSourceAccount() ) {
-				$lf = TTnew( 'RemittanceSourceAccountListFactory' );
+				$lf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $lf */
 				$this->Validator->isResultSetWithRows( 'remittance_source_account_id',
 													   $lf->getByID( $this->getRemittanceSourceAccount() ),
 													   TTi18n::gettext( 'Remittance source account is invalid' )
@@ -804,7 +809,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 			if ( ( $this->getUser() != FALSE AND $this->Validator->isError( 'user_id' ) == FALSE ) ) {
 
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$this->Validator->isResultSetWithRows( 'user_id',
 													   $ulf->getByID( $this->getUser() ),
 													   TTi18n::gettext( 'Invalid Employee' )
@@ -813,7 +818,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 			// Currency
 			if ( $this->getCurrency() !== FALSE AND $this->getCurrency() != TTUUID::getZeroID() ) {
-				$culf = TTnew( 'CurrencyListFactory' );
+				$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 				$this->Validator->isResultSetWithRows( 'currency_id',
 													   $culf->getByID( $this->getCurrency() ),
 													   TTi18n::gettext( 'Invalid Currency' )
@@ -1134,7 +1139,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 									  TTi18n::gettext( 'Account number must not be a part of the Description' ) );
 		}
 
-		$pstlf = TTnew( 'PayStubTransactionListFactory' );
+		$pstlf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pstlf */
 		$pstlf->getByRemittanceDestinationAccountId($this->getId());
 		if ( $pstlf->getRecordCount() > 0 ) {
 
@@ -1180,7 +1185,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 		}
 
 		if ( $this->getDeleted() == TRUE ) {
-			$pstlf = TTnew( 'PayStubTransactionListFactory' );
+			$pstlf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pstlf */
 			$pstlf->getByRemittanceDestinationAccountId($this->getId());
 			if ( $pstlf->getRecordCount() > 0 ) {
 				Debug::Text('Pay Stub Transactions exist for Remittance Destination Account ID: '. $this->getID(). ' disabled instead of deleted', __FILE__, __LINE__, __METHOD__, 10);
@@ -1234,6 +1239,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 	/**
 	 * @param null $include_columns
+	 * @param bool $permission_children_ids
 	 * @return mixed
 	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
@@ -1246,6 +1252,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
 						case 'in_use':
+						case 'user_employee_number':
 						case 'user_first_name':
 						case 'user_last_name':
 						case 'remittance_source_account':
@@ -1255,7 +1262,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 							$data[$variable] = $this->getColumn( $variable );
 							break;
 						case 'type':
-							$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+							$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */
 
 							$function = 'get'.$variable;
 							if ( method_exists( $this, $function ) ) {

@@ -101,7 +101,7 @@ class APIQualificationGroup extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'qualification', 'view' );
 
-		$qglf = TTnew( 'QualificationGroupListFactory' );
+		$qglf = TTnew( 'QualificationGroupListFactory' ); /** @var QualificationGroupListFactory $qglf */
 
 		if ( $mode == 'flat' ) {
 
@@ -195,7 +195,7 @@ class APIQualificationGroup extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'QualificationGroupListFactory' );
+				$lf = TTnew( 'QualificationGroupListFactory' ); /** @var QualificationGroupListFactory $lf */
 				$lf->StartTransaction();
 
 				if ( isset($row['id']) AND $row['id'] != '' ) {
@@ -300,7 +300,7 @@ class APIQualificationGroup extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'QualificationGroupListFactory' );
+				$lf = TTnew( 'QualificationGroupListFactory' ); /** @var QualificationGroupListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

@@ -228,7 +228,7 @@ if ( DEPLOYMENT_ON_DEMAND == FALSE AND isset($config_vars['other']['installer_en
 		$install_obj = new Install();
 		$install_obj->setDatabaseConnection( $db );
 		if ( $install_obj->checkTableExists('company') == TRUE ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$clf->getAll();
 			if ( $clf->getRecordCount() == 0 ) {
 				Redirect::Page( URLBuilder::getURL( NULL, $installer_url ) );
@@ -318,6 +318,17 @@ unset($authentication);
 				}
 			</script>
 			<script src="global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
+            <style>
+                /* This code is related to the office animal background image on login. */
+                /* Note: This CSS is here to ensure the background image on login loads immediately vs putting it in the LoginView.css view. Even cached it was delayed while in css file. */
+                .login-bg {
+                    background: url('theme/default/images/login_background_base.png');
+                    position: fixed;
+                    background-size: cover;
+                    background-position: center;
+                    width: 100vw; /** hack to allow not half a screen width in safari... **/
+                }
+            </style>
 		</head>
 	<?php
 	/*
@@ -347,17 +358,6 @@ unset($authentication);
     <body class="login-bg mobile-device-mode" oncontextmenu="return true;">
     <?php } else { ?>
 
-    <style>
-        /* This code is related to the office-animal background image on login. */
-        /* Note: This CSS is here to ensure the background image on login loads immediately vs putting it in the LoginView.css view. Even cached it was delayed while in css file. */
-        .login-bg {
-            background: url('theme/default/images/login_background_base.png');
-            position: fixed;
-            background-size: cover;
-            background-position: center;
-            width: 100vw; /** hack to allow not half a screen width in safari... **/
-        }
-    </style>
     <body class="login-bg" oncontextmenu="return true;">
     <?php } ?>
     <div id="login-bg_animal">
@@ -391,12 +391,15 @@ unset($authentication);
                     <a id="copy_right_info" class="copy-right-info" target="_blank" style="display: none"></a>
                     <span id="copy_right_info_1" class="copy-right-info" style="display: none"><?php /*REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT*/ echo COPYRIGHT_NOTICE;?></span>
                 </div>
-                <div id="feedbackContainer" class="feedback-container">
-                    <span>Overall, how are you feeling about <?php echo APPLICATION_NAME; ?>?</span>
-                    <img class="filter yay-filter" title="Yay!" data-feedback = 1 alt="happy"  >
-                    <img class="filter meh-filter" title="Meh." data-feedback = 0 alt="neutral" >
-                    <img class="filter grr-filter" title="Grr!" data-feedback = -1 alt="sad" >
-                </div>
+                <?php
+                if ( !isset($config_vars['other']['disable_feedback']) OR $config_vars['other']['disable_feedback'] == FALSE ) {
+                    ?>
+                    <div id="feedbackLinkContainer" class="feedback-link-container">
+                        <span id="feedback-link">Send feedback to <?php echo APPLICATION_NAME; ?></span>
+                    </div>
+                    <?php
+                }
+                ?>
             </div>
         </div>
     </div>

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-19 08:10-0700\n"
+"POT-Creation-Date: 2019-03-06 11:07-0800\n"
 "PO-Revision-Date: 2015-05-03 02:02+0000\n"
 "Last-Translator: Adolfo Jayme <fitoschido@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -16,13 +16,13 @@ msgstr ""
 msgid " "
 msgstr ""
 
+msgid " Default "
+msgstr ""
+
 msgid " and "
 msgstr " y "
 
 msgid " or contact a TimeTrex support expert for "
-msgstr ""
-
-msgid " requires a modern HTML5 standards compatible web browser, click here for more information."
 msgstr ""
 
 msgid "#"
@@ -657,6 +657,9 @@ msgstr "ANIVERSARIO"
 msgid "AOL"
 msgstr ""
 
+msgid "API Key"
+msgstr ""
+
 msgid "AR-941A Payment"
 msgstr ""
 
@@ -1267,6 +1270,9 @@ msgid "Age 65/Blind"
 msgstr "Mayor de 65 / Ciego"
 
 msgid "Agency"
+msgstr ""
+
+msgid "Agency or Event Type is not eligible for Full Service yet, try again later"
 msgstr ""
 
 msgid "Aggregate"
@@ -2241,6 +2247,15 @@ msgstr ""
 msgid "Authorization"
 msgstr "Autorización"
 
+msgid "Authorization - Expense"
+msgstr ""
+
+msgid "Authorization - Request"
+msgstr ""
+
+msgid "Authorization - TimeSheet"
+msgstr ""
+
 msgid "Authorization History"
 msgstr "Historial de Autorizaciones"
 
@@ -2794,6 +2809,15 @@ msgid "Birth Date (Anniversary)"
 msgstr ""
 
 msgid "Birth Date Time Period"
+msgstr ""
+
+msgid "Birth Date is not specified, this may prevent some Tax/Deduction calculations from being performed accurately"
+msgstr ""
+
+msgid "Birth Date not specified, unable to determine age eligibility for %1"
+msgstr ""
+
+msgid "Birth date can not be after hire date"
 msgstr ""
 
 msgid "Birth date can not be in the future"
@@ -4105,9 +4129,6 @@ msgstr "Copia de"
 msgid "Copy<br>as New"
 msgstr ""
 
-msgid "Copyright ©️2015 TimeTrex. All Rights Reserved"
-msgstr ""
-
 msgid "Cordoba"
 msgstr "Córdoba"
 
@@ -4533,6 +4554,9 @@ msgid "Data Format"
 msgstr ""
 
 msgid "Data Processing, Hosting and Related Services"
+msgstr ""
+
+msgid "Data submitted successfully."
 msgstr ""
 
 msgid "Data verification successful"
@@ -5076,9 +5100,6 @@ msgstr ""
 msgid "Dinagat Islands"
 msgstr "Dinagat Islands"
 
-msgid "Directions Request from first punch to last punch is failed"
-msgstr ""
-
 msgid "Disable Grand Total"
 msgstr ""
 
@@ -5155,6 +5176,9 @@ msgid "Displaying"
 msgstr ""
 
 msgid "Distance Units"
+msgstr ""
+
+msgid "Distances"
 msgstr ""
 
 msgid "District"
@@ -5301,6 +5325,12 @@ msgstr ""
 msgid "Drivers License"
 msgstr ""
 
+msgid "Driving Distance"
+msgstr ""
+
+msgid "Driving Duration"
+msgstr ""
+
 msgid "Drug Test"
 msgstr ""
 
@@ -5391,13 +5421,25 @@ msgstr "HABILITADO"
 msgid "ERROR"
 msgstr ""
 
+msgid "ERROR! No ROE(s) to submit!"
+msgstr ""
+
+msgid "ERROR! Something went wrong, please contact customer service immediately!"
+msgstr ""
+
+msgid "ERROR! Unable to submit ROE(s)!"
+msgstr ""
+
 msgid "ERROR: A valid username/password is required to access this application. Press refresh in your web browser to try again."
+msgstr ""
+
+msgid "ERROR: Agency event is not configured for full service processing."
 msgstr ""
 
 msgid "ERROR: Employee number does not exist!"
 msgstr ""
 
-msgid "ERROR: Frame data DOES NOT exist."
+msgid "ERROR: General error occurred, please contact customer service immediately."
 msgstr ""
 
 msgid "ERROR: INVALID PAY CODE"
@@ -5413,6 +5455,9 @@ msgid "ERROR: Journal entries do not balance"
 msgstr ""
 
 msgid "ERROR: NO INVOICE SETTINGS DEFINED, UNABLE TO GENERATE INVOICE"
+msgstr ""
+
+msgid "ERROR: No data for account statement..."
 msgstr ""
 
 msgid "ERROR: No data matches criteria."
@@ -5440,6 +5485,9 @@ msgid "ERROR: UnAssigned Regular Time"
 msgstr ""
 
 msgid "ERROR: Unable to communicate with license server, please check your internet connection."
+msgstr ""
+
+msgid "ERROR: Unable to generate report to for transmission to Payment Services."
 msgstr ""
 
 msgid "ERROR: Unable to load resource!"
@@ -5817,9 +5865,6 @@ msgstr "Notificaciones por Correo"
 msgid "Email Pay Stub to"
 msgstr ""
 
-msgid "Email PayrollRemittanceAgencyEvent Reminder to"
-msgstr ""
-
 msgid "Email Sent"
 msgstr ""
 
@@ -5875,6 +5920,9 @@ msgid "Email:"
 msgstr "Correo Electrónico:"
 
 msgid "Emailed Report"
+msgstr ""
+
+msgid "Emailed remittance agency event reminder to"
 msgstr ""
 
 msgid "Emergency Contact"
@@ -6118,9 +6166,6 @@ msgid "Employee Tax / Deductions"
 msgstr "Impuestos / Deducciones del Empleado"
 
 msgid "Employee Termination Date"
-msgstr ""
-
-msgid "Employee TimeClock"
 msgstr ""
 
 msgid "Employee TimeSheet"
@@ -6570,8 +6615,14 @@ msgstr ""
 msgid "Enabled (UnAuthenticated)"
 msgstr ""
 
+msgid "Enabled - Full Service"
+msgstr ""
+
 msgid "Enabled - LDAP Only"
 msgstr "Habilitado - Solo LDAP"
+
+msgid "Enabled - Self Service"
+msgstr ""
 
 msgid "Enabled - w/Local Fallback"
 msgstr "Habilitado - c/Retroceso Local"
@@ -6876,6 +6927,9 @@ msgstr "Ejecutando Tarea de Cron"
 msgid "Executive"
 msgstr ""
 
+msgid "Exempt"
+msgstr ""
+
 msgid "Exempt Payment Types"
 msgstr ""
 
@@ -7056,6 +7110,12 @@ msgstr ""
 msgid "Facial Recognition (v2)"
 msgstr ""
 
+msgid "Facial Recognition (v3)"
+msgstr ""
+
+msgid "Facial Recognition (v4)"
+msgstr ""
+
 msgid "Facility ID"
 msgstr ""
 
@@ -7183,6 +7243,9 @@ msgid "File Name"
 msgstr ""
 
 msgid "File Permissions"
+msgstr ""
+
+msgid "File Report"
 msgstr ""
 
 msgid "File Trailer Line"
@@ -7750,6 +7813,9 @@ msgstr ""
 msgid "Generating Chart..."
 msgstr ""
 
+msgid "Generating Forms..."
+msgstr ""
+
 msgid "Generating HTML..."
 msgstr ""
 
@@ -8176,6 +8242,9 @@ msgstr "Control de jerarquía no es valido"
 msgid "Hierarchy is invalid"
 msgstr "La jerarquía es invalida"
 
+msgid "Hierarchy not specified"
+msgstr ""
+
 msgid "High"
 msgstr "Alto"
 
@@ -8192,6 +8261,9 @@ msgid "Hire Date"
 msgstr "Fecha de Contratación"
 
 msgid "Hire Date (Anniversary)"
+msgstr ""
+
+msgid "Hire Date not specified, unable to determine length of service eligibility for %1"
 msgstr ""
 
 msgid "Hire date is invalid"
@@ -8257,19 +8329,22 @@ msgstr ""
 msgid "Home Email"
 msgstr "Correo Electrónico del Hogar"
 
-msgid "Home Email address does not have a valid DNS MX record"
-msgstr ""
-
-msgid "Home Email address does not have a valid DNS record"
-msgstr ""
-
 msgid "Home Email address is invalid"
 msgstr "Correo Electrónico del Hogar no es valido"
 
 msgid "Home Phone"
 msgstr "Teléfono del Hogar"
 
+msgid "Home email address does not have a valid DNS MX record"
+msgstr ""
+
+msgid "Home email address does not have a valid DNS record"
+msgstr ""
+
 msgid "Home email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out"
+msgstr ""
+
+msgid "Home email address is invalid"
 msgstr ""
 
 msgid "Home phone number is invalid"
@@ -9185,6 +9260,9 @@ msgid "Incorrect Payment Method"
 msgstr ""
 
 msgid "Incorrect Payment Required date"
+msgstr ""
+
+msgid "Incorrect Payment Services Status"
 msgstr ""
 
 msgid "Incorrect Payment Type"
@@ -10177,6 +10255,9 @@ msgstr "Tamaño del Numero de Institución no es valido"
 msgid "Invalid institution number, must be digits only"
 msgstr "Numero de Institución no es valido, debe ser dígitos solamente"
 
+msgid "Invalid institution, must be digits only"
+msgstr ""
+
 msgid "Invalid insurable earnings"
 msgstr "Ingresos Asegurados no validos"
 
@@ -10906,9 +10987,6 @@ msgstr "Kiribati"
 msgid "Kirklees"
 msgstr ""
 
-msgid "Km"
-msgstr ""
-
 msgid "Known Since"
 msgstr ""
 
@@ -11292,6 +11370,9 @@ msgid "Legal Entity Trade Name"
 msgstr ""
 
 msgid "Legal Entity is invalid"
+msgstr ""
+
+msgid "Legal Entity must be specified"
 msgstr ""
 
 msgid "Legal Name"
@@ -11968,12 +12049,6 @@ msgstr "Casado - Esposa Trabaja"
 
 msgid "Married - Spouse does not Work"
 msgstr "Casado - Esposa no trabaja"
-
-msgid "Married - With Spouse Filing"
-msgstr "Casado - Esposo(a) Trabaja"
-
-msgid "Married - Without Spouse Filing"
-msgstr "Casado - Esposa No Trabaja"
 
 msgid "Married with 2 incomes"
 msgstr "Casado (a) con 2 ingresos"
@@ -12846,6 +12921,9 @@ msgid "Navigate to the agency's website and upload the eFile downloaded in the a
 msgstr ""
 
 msgid "Navigate to the agency's website to file the necessary information."
+msgstr ""
+
+msgid "Navigate to the agency's website to file the report manually."
 msgstr ""
 
 msgid "Navigate to the agency's website to make a payment if necessary."
@@ -14774,6 +14852,36 @@ msgstr "Pago requerido:"
 msgid "Payment Sent"
 msgstr "Pago Enviado"
 
+msgid "Payment Services"
+msgstr ""
+
+msgid "Payment Services API Key"
+msgstr ""
+
+msgid "Payment Services ERROR: %1"
+msgstr ""
+
+msgid "Payment Services Status"
+msgstr ""
+
+msgid "Payment Services User Name"
+msgstr ""
+
+msgid "Payment Services User Name or API Key is incorrect, or service not activated"
+msgstr ""
+
+msgid "Payment Services Validation ERROR: %1"
+msgstr ""
+
+msgid "Payment Services are not enabled for this Legal Entity"
+msgstr ""
+
+msgid "Payment Services is only available in Canada or the United States"
+msgstr ""
+
+msgid "Payment Services<br>Statement"
+msgstr ""
+
 msgid "Payment Signature"
 msgstr ""
 
@@ -14800,6 +14908,9 @@ msgstr ""
 
 msgid "Payment process message is too short or too long"
 msgstr "Mensaje de procesado de Pago es muy corto o muy largo"
+
+msgid "Payment submitted successfully for $%1"
+msgstr ""
 
 msgid "Payment<br>Gateway"
 msgstr ""
@@ -14832,6 +14943,9 @@ msgid "Payroll Processing Wizard"
 msgstr ""
 
 msgid "Payroll Remittance Agency"
+msgstr ""
+
+msgid "Payroll Remittance Agency Event"
 msgstr ""
 
 msgid "Payroll Report to complete HI Quarterly Wage Contribution Report"
@@ -14990,6 +15104,9 @@ msgstr "Grupo de Permisos no es valido"
 msgid "Permission Groups"
 msgstr "Grupo de Permisos"
 
+msgid "Permission Hierarchy not specified"
+msgstr ""
+
 msgid "Permission Wizard"
 msgstr ""
 
@@ -15102,6 +15219,9 @@ msgid "Please draw your full and complete signature in the signature pad with yo
 msgstr ""
 
 msgid "Please ensure that your profile is accurate and complete."
+msgstr ""
+
+msgid "Please enter a user name and password."
 msgstr ""
 
 msgid "Please enter the administrator user name and password"
@@ -15544,6 +15664,9 @@ msgstr ""
 
 msgid "Procedure/Policy"
 msgstr "Procedimiento/Política"
+
+msgid "Process Payroll"
+msgstr ""
 
 msgid "Process Transactions"
 msgstr ""
@@ -16160,6 +16283,9 @@ msgstr ""
 msgid "ROE Report"
 msgstr ""
 
+msgid "ROE(s) submitted successfully!"
+msgstr ""
+
 msgid "RPD-41072 - Annual Withholding Form"
 msgstr ""
 
@@ -16442,6 +16568,9 @@ msgstr "Region Autonoma Atlantico Norte"
 msgid "Region Autonoma Atlantico Sur"
 msgstr "Region Autonoma Atlantico Sur"
 
+msgid "Regional Income Tax Agency (RITA) [Local Income Tax]"
+msgstr ""
+
 msgid "Registration Key"
 msgstr ""
 
@@ -16521,6 +16650,12 @@ msgid "Remittance Agency"
 msgstr ""
 
 msgid "Remittance Agency Event"
+msgstr ""
+
+msgid "Remittance Agency Source Account Format is incorrect"
+msgstr ""
+
+msgid "Remittance Agency must have Source Account specified"
 msgstr ""
 
 msgid "Remittance Source Account"
@@ -16699,6 +16834,9 @@ msgstr ""
 
 msgid "Retalhuleu"
 msgstr "Retalhuleu"
+
+msgid "Retirement Plans (Box 13)"
+msgstr ""
 
 msgid "Retrieving Branches..."
 msgstr ""
@@ -17378,6 +17516,9 @@ msgstr ""
 msgid "Scheduled Absence"
 msgstr "Ausencias Planificadas"
 
+msgid "Scheduled Absent"
+msgstr ""
+
 msgid "Scheduled Days"
 msgstr ""
 
@@ -17690,6 +17831,9 @@ msgstr "El empleado seleccionado no es válido"
 msgid "Selected employee is invalid or already assigned to another policy group"
 msgstr ""
 
+msgid "Selected punches no longer exist, unable to map."
+msgstr ""
+
 msgid "Selected subordinate is invalid or already assigned to another hierarchy with the same object. User ID: %1"
 msgstr ""
 
@@ -17948,6 +18092,9 @@ msgstr "Almuerzo Corto"
 msgid "Short Name"
 msgstr ""
 
+msgid "Short Name/Abbreviation"
+msgstr ""
+
 msgid "Short name is too short or too long"
 msgstr "Nombre es muy corto o muy largo"
 
@@ -18019,9 +18166,6 @@ msgstr "Singapur"
 
 msgid "Single"
 msgstr "Soltero (a)"
-
-msgid "Single or Head of Household"
-msgstr "Soltero o Cabeza de la Familia"
 
 msgid "Siquijor"
 msgstr "Siquijor"
@@ -18804,6 +18948,12 @@ msgid "T4A Summary"
 msgstr "Sumario T4A"
 
 msgid "T4A Summary Report"
+msgstr ""
+
+msgid "T4As submitted successfully"
+msgstr ""
+
+msgid "T4s submitted successfully"
 msgstr ""
 
 msgid "TAX020/TAX026 Filing"
@@ -19635,6 +19785,9 @@ msgstr ""
 msgid "TimeSheet<br>Summary"
 msgstr ""
 
+msgid "TimeTrex Payment Services"
+msgstr ""
+
 msgid "TimeTrex Version"
 msgstr ""
 
@@ -20113,6 +20266,12 @@ msgstr ""
 msgid "Transit/Routing"
 msgstr ""
 
+msgid "Transmit forms to the CRA with TimeTrex Payment Services automatically."
+msgstr ""
+
+msgid "Transmit payment with TimeTrex Payment Services automatically."
+msgstr ""
+
 msgid "Transmittal of Wage and Tax Statement"
 msgstr ""
 
@@ -20356,7 +20515,19 @@ msgstr ""
 msgid "Unable to create punches, they may already exist"
 msgstr ""
 
-msgid "Unable to delete expense after it has been reimbursed"
+msgid "Unable to delete employees who are active"
+msgstr ""
+
+msgid "Unable to delete employees who have recorded worked time in the last 2 years"
+msgstr ""
+
+msgid "Unable to delete employees with pay stubs in the last 7 years"
+msgstr ""
+
+msgid "Unable to delete expenses after they have been authorized/declined"
+msgstr ""
+
+msgid "Unable to delete expenses after they have been reimbursed"
 msgstr ""
 
 msgid "Unable to delete pay stubs in closed pay periods"
@@ -20392,7 +20563,10 @@ msgstr ""
 msgid "Unable to modify Pay Stub Amendment that is currently in use by a Pay Stub marked PAID"
 msgstr ""
 
-msgid "Unable to modify expense after it has been reimbursed"
+msgid "Unable to modify expenses after they have been authorized/declined"
+msgstr ""
+
+msgid "Unable to modify expenses after they have been reimbursed"
 msgstr ""
 
 msgid "Unable to modify pay stubs assigned to a closed pay period"
@@ -21232,6 +21406,9 @@ msgstr ""
 msgid "W2 Forms"
 msgstr ""
 
+msgid "W2 Local Filing"
+msgstr ""
+
 msgid "W2 State Filing"
 msgstr ""
 
@@ -21278,6 +21455,9 @@ msgid "WARNING: Manually modifying Accumulated Time records may prevent policies
 msgstr ""
 
 msgid "WARNING: MySQL database support has been deprecated and migration to PostgreSQL is required. Click here for instructions."
+msgstr ""
+
+msgid "WARNING: Not in PRODUCTION mode, unable to send data to Payment Services."
 msgstr ""
 
 msgid "WARNING: Pay periods past their transaction date have not been closed yet. It's critical that these pay periods are closed to prevent data loss, click here to close them now."
@@ -21820,7 +22000,16 @@ msgstr ""
 msgid "Work Time+Wage+Total Shifts by Title/Start Time"
 msgstr ""
 
+msgid "Work email address does not have a valid DNS MX record"
+msgstr ""
+
+msgid "Work email address does not have a valid DNS record"
+msgstr ""
+
 msgid "Work email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out"
+msgstr ""
+
+msgid "Work email address is invalid"
 msgstr ""
 
 msgid "Work or Home email address is blank or invalid"
@@ -22018,14 +22207,8 @@ msgstr ""
 msgid "Yoro"
 msgstr "Yoro"
 
-msgid "You are about to delete data, once data is deleted it can not be recovered Are you sure you wish to continue?"
-msgstr ""
-
 msgid "You are about to delete data, once data is deleted it can not be recovered.<br>Are you sure you wish to continue?"
 msgstr ""
-
-msgid "You are about to delete data, once data is deleted it can not be recovered.\\nAre you sure you wish to continue?"
-msgstr "Esta a punto de borrar los datos, una vez que los datos sean borrados no se podrán recuperar. \\nEsta seguro que desea continuar?"
 
 msgid "You are about to delete the entire week worth of time for this row. Are you sure you wish to continue?"
 msgstr ""
@@ -22060,20 +22243,11 @@ msgstr "Tiene usted nuevos mensajes en"
 msgid "You have a new pay stub waiting for you in"
 msgstr ""
 
-msgid "You have already submitted this form! Please wait..."
-msgstr "Usted ya envió este formulario! Por favor espere..."
-
 msgid "You have modified"
 msgstr ""
 
 msgid "You have modified data without saving, are you sure you want to continue and lose your changes"
 msgstr ""
-
-msgid "You have modified data without saving, if you press OK you will lose any changes you have made!"
-msgstr "Usted ha modificado datos sin guardar, si presiona OK perderá todos los cambios realizados!"
-
-msgid "You have new mail waiting. Would you like to read it now?"
-msgstr "Tiene usted nuevos mensajes. Desea leerlos ahora?"
 
 msgid "You have successfully installed"
 msgstr ""
@@ -22241,6 +22415,9 @@ msgid "by employee timesheets"
 msgstr ""
 
 msgid "by employees"
+msgstr ""
+
+msgid "by expenses"
 msgstr ""
 
 msgid "by holiday policies"
@@ -22500,9 +22677,6 @@ msgid "log( expression ) - Example: log( #regular_time# )"
 msgstr ""
 
 msgid "login"
-msgstr ""
-
-msgid "m"
 msgstr ""
 
 msgid "min"
@@ -25502,6 +25676,12 @@ msgstr ""
 #~ msgid "Markup Percent:"
 #~ msgstr "Porcentaje"
 
+#~ msgid "Married - With Spouse Filing"
+#~ msgstr "Casado - Esposo(a) Trabaja"
+
+#~ msgid "Married - Without Spouse Filing"
+#~ msgstr "Casado - Esposa No Trabaja"
+
 #~ msgid "Married or Qualified Widow(er)"
 #~ msgstr "Casado o Viudo (a)"
 
@@ -26883,6 +27063,9 @@ msgstr ""
 #~ msgid "Since Hired"
 #~ msgstr "Desde que fue contratado"
 
+#~ msgid "Single or Head of Household"
+#~ msgstr "Soltero o Cabeza de la Familia"
+
 #, fuzzy
 #~ msgid "Social Security (FICA) Exempt:"
 #~ msgstr "Deducción del Seguro Social (4):"
@@ -27863,8 +28046,20 @@ msgstr ""
 #~ msgid "Year:"
 #~ msgstr "Año"
 
+#~ msgid "You are about to delete data, once data is deleted it can not be recovered.\\nAre you sure you wish to continue?"
+#~ msgstr "Esta a punto de borrar los datos, una vez que los datos sean borrados no se podrán recuperar. \\nEsta seguro que desea continuar?"
+
 #~ msgid "You can not unassign yourself from a permission group, assign yourself to a new group instead"
 #~ msgstr "Usted no se puede eliminar a si mismo de un grupo de permisos, mejor asignese a un nuevo grupo"
+
+#~ msgid "You have already submitted this form! Please wait..."
+#~ msgstr "Usted ya envió este formulario! Por favor espere..."
+
+#~ msgid "You have modified data without saving, if you press OK you will lose any changes you have made!"
+#~ msgstr "Usted ha modificado datos sin guardar, si presiona OK perderá todos los cambios realizados!"
+
+#~ msgid "You have new mail waiting. Would you like to read it now?"
+#~ msgstr "Tiene usted nuevos mensajes. Desea leerlos ahora?"
 
 #~ msgid ""
 #~ "You may use the position links at the top of this window to move it around the screen,\n"

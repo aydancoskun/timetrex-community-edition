@@ -149,6 +149,44 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	function testUserPre1970BirthDates() {
+		TTDate::setTimeZone( 'PST8PDT', TRUE ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
+
+		$u_obj = $ulf->getById( $this->user_id )->getCurrent();
+		$data = $u_obj->getObjectAsArray();
+		unset($data['permission_control_id']);
+		$data['birth_date'] = '31-Jul-69';
+		$u_obj->setObjectFromArray( $data );
+		if ( $u_obj->isValid() ) {
+			$result = $u_obj->Save();
+		}
+		unset( $u_obj );
+
+		//Save it multiple times to ensure it doesn't change.
+		$u_obj = $ulf->getById( $this->user_id )->getCurrent();
+		$data = $u_obj->getObjectAsArray();
+		unset($data['permission_control_id']);
+		$this->assertEquals( $data['birth_date'], '31-Jul-69' );
+		$data['birth_date'] = '31-Jul-69';
+		$u_obj->setObjectFromArray( $data );
+		if ( $u_obj->isValid() ) {
+			$result = $u_obj->Save();
+		}
+		unset( $u_obj );
+
+		//Save it multiple times to ensure it doesn't change.
+		$u_obj = $ulf->getById( $this->user_id )->getCurrent();
+		$data = $u_obj->getObjectAsArray();
+		unset($data['permission_control_id']);
+		$this->assertEquals( $data['birth_date'], '31-Jul-69' );
+		$data['birth_date'] = '31-Jul-69';
+		$u_obj->setObjectFromArray( $data );
+		if ( $u_obj->isValid() ) {
+			$result = $u_obj->Save();
+		}
+		unset( $u_obj );
+	}
 }
 ?>

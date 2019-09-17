@@ -73,21 +73,23 @@ class APIAuthentication extends APIFactory {
 		if ( isset($config_vars['other']['web_session_expire']) AND $config_vars['other']['web_session_expire'] != '' ) {
 			$authentication->setEnableExpireSession( (int)$config_vars['other']['web_session_expire'] );
 		}
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getByPhoneID( $user_name );
 		if ( $clf->getRecordCount() == 1 ) {
 			$c_obj = $clf->getCurrent();
 		} else {
 			$c_obj = FALSE;
 		}
+
 		//Checks user_name/password
 		$password_result = FALSE;
 		$user_name = trim($user_name);
-		if ( $user_name != '' AND $password != '' AND ( is_object($c_obj) AND $c_obj->getStatus() == 10 AND $c_obj->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) ) {
+		if ( $user_name != '' AND $password != '' AND ( is_object($c_obj) AND in_array( $c_obj->getStatus(), array( 10, 20 ) ) AND $c_obj->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) ) { //Allow QuickPunch logins when company is on hold so employees can still punch in/out.
 			$password_result = $authentication->Login($user_name, $password, 'QUICK_PUNCH_ID');
 		}
+
 		if ( $password_result === TRUE ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$clf->getByID( $authentication->getObject()->getCompany() );
 			$current_company = $clf->getCurrent();
 			unset($clf);
@@ -96,7 +98,7 @@ class APIAuthentication extends APIFactory {
 			if ( isset( $_COOKIE['StationID'] ) ) {
 				Debug::text('Station ID Cookie found! '. $_COOKIE['StationID'], __FILE__, __LINE__, __METHOD__, 10);
 
-				$slf = TTnew( 'StationListFactory' );
+				$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 				$slf->getByStationIdandCompanyId( $_COOKIE['StationID'], $current_company->getId() );
 				$current_station = $slf->getCurrent();
 				unset($slf);
@@ -111,7 +113,7 @@ class APIAuthentication extends APIFactory {
 
 			if ( $create_new_station == TRUE ) {
 				//Insert new station
-				$sf = TTnew( 'StationFactory' );
+				$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
 
 				$sf->setCompany( $current_company->getId() );
 				$sf->setStatus( 20 ); //Enabled
@@ -140,9 +142,11 @@ class APIAuthentication extends APIFactory {
 			$error_message = TTi18n::gettext('Quick Punch ID or Password is incorrect');
 			//Get company status from user_name, so we can display messages for ONHOLD/Cancelled accounts.
 			if ( is_object( $c_obj ) ) {
-				if ( $c_obj->getStatus() == 20 ) {
-					$error_message = TTi18n::gettext('Sorry, your company\'s account has been placed ON HOLD, please contact customer support immediately');
-				} elseif ( $c_obj->getStatus() == 23 ) {
+				//Allow QuickPunch when company is ON HOLD.
+//				if ( $c_obj->getStatus() == 20 ) {
+//					$error_message = TTi18n::gettext('Sorry, your company\'s account has been placed ON HOLD, please contact customer support immediately');
+//				} else
+				if ( $c_obj->getStatus() == 23 ) {
 					$error_message = TTi18n::gettext('Sorry, your trial period has expired, please contact our sales department to reactivate your account');
 				} elseif ( $c_obj->getStatus() == 28 ) {
 					if ( $c_obj->getMigrateURL() != '' ) {
@@ -202,7 +206,7 @@ class APIAuthentication extends APIFactory {
 			$error_message = TTi18n::gettext('User Name or Password is incorrect');
 
 			//Get company status from user_name, so we can display messages for ONHOLD/Cancelled accounts.
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$clf->getByUserName( $user_name );
 			if ( $clf->getRecordCount() > 0 ) {
 				$c_obj = $clf->getCurrent();
@@ -220,7 +224,7 @@ class APIAuthentication extends APIFactory {
 				} elseif ( $c_obj->getStatus() == 30 ) {
 					$error_message = TTi18n::gettext('Sorry, your company\'s account has been CANCELLED, please contact customer support if you believe this is an error');
 				} else {
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 					$ulf->getByUserName( $user_name );
 					if ( $ulf->getRecordCount() == 1 ) {
 						$u_obj = $ulf->getCurrent();
@@ -239,6 +243,10 @@ class APIAuthentication extends APIFactory {
 									$error_message = TTi18n::gettext('Your password has exceeded its maximum age specified by your company\'s password policy and must be changed immediately');
 									$error_column = 'password';
 								}
+							}
+						} else {
+							if ( $u_obj->checkLoginPermissions() == FALSE ) {
+								$error_message = TTi18n::gettext('Sorry, you don\'t have permission to login, please contact your supervisor or manager to request access.');
 							}
 						}
 					}
@@ -269,14 +277,14 @@ class APIAuthentication extends APIFactory {
 			if ( $this->getPermissionObject()->Check('company', 'view') AND $this->getPermissionObject()->Check('company', 'login_other_user') ) {
 				if ( TTUUID::isUUID( $user_id ) == FALSE ) { //If username is used, lookup user_id
 					Debug::Text('Lookup User ID by UserName: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 					$ulf->getByUserName( trim($user_id) );
 					if ( $ulf->getRecordCount() == 1 ) {
 						$user_id = $ulf->getCurrent()->getID();
 					}
 				}
 
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$ulf->getByIdAndStatus( TTUUID::castUUID($user_id), 10 );  //Can only switch to Active employees
 				if ( $ulf->getRecordCount() == 1 ) {
 					$new_session_user_obj = $ulf->getCurrent();
@@ -321,14 +329,14 @@ class APIAuthentication extends APIFactory {
 			if ( $this->getPermissionObject()->Check('company', 'view') AND $this->getPermissionObject()->Check('company', 'login_other_user') ) {
 				if ( TTUUID::isUUID( $user_id ) == FALSE ) { //If username is used, lookup user_id
 					Debug::Text('Lookup User ID by UserName: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 					$ulf->getByUserName( trim($user_id) );
 					if ( $ulf->getRecordCount() == 1 ) {
 						$user_id = $ulf->getCurrent()->getID();
 					}
 				}
 
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$ulf->getByIdAndStatus( TTUUID::castUUID($user_id), 10 );  //Can only switch to Active employees
 				if ( $ulf->getRecordCount() == 1 ) {
 					Debug::Text('Login as different user: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -423,7 +431,7 @@ class APIAuthentication extends APIFactory {
 	 */
 	function getCurrentUser() {
 		if ( is_object( $this->getCurrentUserObject() ) ) {
-			return $this->returnHandler( $this->getCurrentUserObject()->getObjectAsArray( array( 'id' => TRUE, 'company_id' => TRUE, 'currency_id' => TRUE, 'permission_control_id' => TRUE, 'pay_period_schedule_id' => TRUE, 'policy_group_id' => TRUE, 'employee_number' => TRUE, 'user_name' => TRUE, 'phone_id' => TRUE, 'first_name' => TRUE, 'middle_name' => TRUE, 'last_name' => TRUE, 'full_name' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'longitude' => TRUE, 'latitude' => TRUE, 'work_phone' => TRUE, 'home_phone' => TRUE, 'work_email' => TRUE, 'home_email' => TRUE, 'feedback_rating' => TRUE, 'last_login_date' => TRUE, 'created_date' => TRUE, 'is_owner' => TRUE, 'is_child' => TRUE ) ) );
+			return $this->returnHandler( $this->getCurrentUserObject()->getObjectAsArray( array( 'id' => TRUE, 'company_id' => TRUE, 'currency_id' => TRUE, 'permission_control_id' => TRUE, 'pay_period_schedule_id' => TRUE, 'policy_group_id' => TRUE, 'employee_number' => TRUE, 'user_name' => TRUE, 'phone_id' => TRUE, 'first_name' => TRUE, 'middle_name' => TRUE, 'last_name' => TRUE, 'full_name' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'longitude' => TRUE, 'latitude' => TRUE, 'work_phone' => TRUE, 'home_phone' => TRUE, 'work_email' => TRUE, 'home_email' => TRUE, 'feedback_rating' => TRUE, 'prompt_for_feedback' => TRUE, 'last_login_date' => TRUE, 'created_date' => TRUE, 'is_owner' => TRUE, 'is_child' => TRUE ) ) );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -451,9 +459,9 @@ class APIAuthentication extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
-	//Functions that can be called before the API client is logged in.
-	//Mainly so the proper loading/login page can be displayed.
 	/**
+	 * Functions that can be called before the API client is logged in.
+	 * Mainly so the proper loading/login page can be displayed.
 	 * @return bool
 	 */
 	function getProduction() {
@@ -631,7 +639,7 @@ class APIAuthentication extends APIFactory {
 	 */
 	function getCompanyName() {
 		//Get primary company data needs to be used when user isn't logged in as well.
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getByID( PRIMARY_COMPANY_ID );
 		Debug::text('Primary Company ID: '. PRIMARY_COMPANY_ID, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $clf->getRecordCount() == 1 ) {
@@ -642,9 +650,8 @@ class APIAuthentication extends APIFactory {
 		return FALSE;
 	}
 
-	//Returns all login data required in a single call for optimization purposes.
-
 	/**
+	 * Returns all login data required in a single call for optimization purposes.
 	 * @param null $api
 	 * @return array
 	 */
@@ -683,6 +690,7 @@ class APIAuthentication extends APIFactory {
 				'session_idle_timeout' => $this->getSessionIdle(),
 				'footer_left_html' => ( isset($config_vars['other']['footer_left_html']) AND $config_vars['other']['footer_left_html'] != '' ) ? $config_vars['other']['footer_left_html'] : FALSE,
 				'footer_right_html' => ( isset($config_vars['other']['footer_right_html']) AND $config_vars['other']['footer_right_html'] != '' ) ? $config_vars['other']['footer_right_html'] : FALSE,
+				'support_email' => ( isset($config_vars['other']['support_email']) AND $config_vars['other']['support_email'] != '' ) ? $config_vars['other']['support_email'] : 'support@timetrex.com',
 				'language_options' => Misc::addSortPrefix( TTi18n::getLanguageArray() ),
 				//Make sure locale is set properly before this function is called, either in api.php or APIGlobal.js.php for example.
 				'enable_default_language_translation' => ( isset($config_vars['other']['enable_default_language_translation']) ) ? $config_vars['other']['enable_default_language_translation'] : FALSE,
@@ -710,7 +718,7 @@ class APIAuthentication extends APIFactory {
 			//Only data that requires a DB connection to obtain here.
 			$retarr['company_name'] = $this->getCompanyName();
 			if ( $retarr['company_name'] == '' ) {
-				$retarr['company_name'] == 'N/A';
+				$retarr['company_name'] = 'N/A';
 			}
 
 			$retarr['registration_key'] = $this->getRegistrationKey();
@@ -727,7 +735,7 @@ class APIAuthentication extends APIFactory {
 	 * @return string
 	 */
 	function sendErrorReport( $data = NULL, $screenshot = NULL ) {
-		$rl = TTNew('RateLimit');
+		$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 		$rl->setID( 'error_report_'. Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 20 );
 		$rl->setTimeFrame( 900 ); //15 minutes
@@ -761,7 +769,7 @@ class APIAuthentication extends APIFactory {
 	 * @internal param string $type
 	 */
 	function changePassword( $user_name, $current_password = NULL, $new_password = NULL, $new_password2 = NULL ) {
-		$rl = TTNew( 'RateLimit' );
+		$rl = TTNew( 'RateLimit' ); /** @var RateLimit $rl */
 		$rl->setID( 'authentication_' . Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 20 );
 		$rl->setTimeFrame( 900 ); //15 minutes
@@ -769,13 +777,13 @@ class APIAuthentication extends APIFactory {
 		if ( $rl->check() == FALSE ) {
 			Debug::Text( 'Excessive failed password attempts... Preventing password change from: ' . Misc::getRemoteIPAddress() . ' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10 );
 			sleep( 5 ); //Excessive password attempts, sleep longer.
-			$u_obj = TTnew( 'UserListFactory' );
+			$u_obj = TTnew( 'UserListFactory' ); /** @var UserListFactory $u_obj */
 			$u_obj->Validator->isTrue( 'current_password', FALSE, TTi18n::gettext( 'Current User Name or Password is incorrect' ) );
 
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), $u_obj->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
 		}
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getByUserName( $user_name );
 		if ( $ulf->getRecordCount() == 1 ) {
 			$u_obj = $ulf->getCurrent();
@@ -841,7 +849,7 @@ class APIAuthentication extends APIFactory {
 			}
 		} else {
 			//Issue #2225 - Be sure to return the same error message even if username is not valid to avoid user enumeration attacks.
-			$u_obj = TTnew( 'UserListFactory' );
+			$u_obj = TTnew( 'UserListFactory' ); /** @var UserListFactory $u_obj */
 			$u_obj->Validator->isTrue( 'current_password', FALSE, TTi18n::gettext( 'Current User Name or Password is incorrect' ) );
 		}
 
@@ -857,7 +865,7 @@ class APIAuthentication extends APIFactory {
 	 */
 	function resetPassword( $email ) {
 		//Debug::setVerbosity( 11 );
-		$rl = TTNew('RateLimit');
+		$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 		$rl->setID( 'password_reset_'. Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 10 );
 		$rl->setTimeFrame( 900 ); //15 minutes
@@ -870,7 +878,7 @@ class APIAuthentication extends APIFactory {
 			sleep(5); //Excessive password attempts, sleep longer.
 			$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (z)') );
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByHomeEmailOrWorkEmail( $email );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$user_obj = $ulf->getCurrent();
@@ -914,7 +922,7 @@ class APIAuthentication extends APIFactory {
 	 * @return array
 	 */
 	function passwordReset( $key, $password, $password2 ) {
-		$rl = TTNew('RateLimit');
+		$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 		$rl->setID( 'password_reset_'. Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 10 );
 		$rl->setTimeFrame( 900 ); //15 minutes
@@ -924,7 +932,7 @@ class APIAuthentication extends APIFactory {
 			Debug::Text('Excessive password reset attempts... Preventing resets from: '. Misc::getRemoteIPAddress() .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
 			sleep(5); //Excessive password attempts, sleep longer.
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			Debug::Text('Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
 			$ulf->getByPasswordResetKey( $key );
 			if ( $ulf->getRecordCount() == 1 ) {
@@ -941,7 +949,7 @@ class APIAuthentication extends APIFactory {
 							Debug::Text('Password Change succesful!', __FILE__, __LINE__, __METHOD__, 10);
 
 							//Logout all sessions for this user when password is successfully reset.
-							$authentication = TTNew('Authentication');
+							$authentication = TTNew('Authentication'); /** @var Authentication $authentication */
 							$authentication->logoutUser( $user_obj->getId() );
 							unset($user_obj);
 

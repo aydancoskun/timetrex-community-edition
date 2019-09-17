@@ -1106,12 +1106,16 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		var user_id = this.current_edit_record.user_id;
 
-		this.total_time = this.api.getScheduleTotalTime( startTime, endTime, schedulePolicyId, user_id, { async: false } ).getResult();
-		var total_time = Global.getTimeUnit( this.total_time );
+		var result = this.api.getScheduleTotalTime( startTime, endTime, schedulePolicyId, user_id, { async: false } );
+		if ( result ) {
+			this.total_time = result.getResult();
 
-		this.edit_view_ui_dic['total_time'].setValue( total_time );
+			var total_time = Global.getTimeUnit( this.total_time );
 
-		this.current_edit_record['total_time'] = total_time;
+			this.edit_view_ui_dic['total_time'].setValue( total_time );
+
+			this.current_edit_record['total_time'] = total_time;
+		}
 	},
 
 	setEditViewDataDone: function() {

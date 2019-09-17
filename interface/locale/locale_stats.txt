@@ -3,12 +3,13 @@ de_DE|52|German <de@li.org>
 pt_PT|22|Portuguese <pt@li.org>
 zh_ZH|33|
 es_ES|34|Spanish <es@li.org>
-it_IT|26|Italian <it@li.org>
+it_IT|25|Italian <it@li.org>
 yi_US|0|
 en_US|0|
-pt_BR|23|Brazilian Portuguese <franciscoferreiraluz@yahoo.com.au>
+pt_BR|22|Brazilian Portuguese <franciscoferreiraluz@yahoo.com.au>
 ar_EG|46|Arabic <ar@li.org>
-da_DK|27|Danish <da@li.org>
+da_DK|26|Danish <da@li.org>
 zh_CN|33|
 id_ID|51|Indonesian <id@li.org>
-fr_CA|85|CodyCode Team
+fr_CA|84|CodyCode Team
+hu_HU|98|Hungarian <hu@li.org>

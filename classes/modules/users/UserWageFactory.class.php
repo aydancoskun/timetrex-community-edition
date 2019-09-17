@@ -166,7 +166,7 @@ class UserWageFactory extends Factory {
 			return $this->wage_group_obj;
 		} else {
 
-			$wglf = TTnew( 'WageGroupListFactory' );
+			$wglf = TTnew( 'WageGroupListFactory' ); /** @var WageGroupListFactory $wglf */
 			$wglf->getById( $this->getWageGroup() );
 
 			if ( $wglf->getRecordCount() == 1 ) {
@@ -308,7 +308,7 @@ class UserWageFactory extends Factory {
 
 		$must_validate = FALSE;
 
-		$uwlf = TTnew( 'UserWageListFactory' );
+		$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 		$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getUser(), TTUUID::getZeroID(), $epoch, 1, NULL, NULL, array('effective_date' => 'asc') );
 		Debug::text(' Total Rows: '. $uwlf->getRecordCount() .' User: '. $this->getUser() .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -388,9 +388,7 @@ class UserWageFactory extends Factory {
 	 * @return bool
 	 */
 	function setEffectiveDate( $value ) {
-		$value = TTDate::getBeginDayEpoch( trim($value) );
-		Debug::Text('Effective Date: '. TTDate::getDate('DATE+TIME', $value ), __FILE__, __LINE__, __METHOD__, 10);
-		return $this->setGenericDataValue( 'effective_date', $value );
+		return $this->setGenericDataValue( 'effective_date', TTDate::getISODateStamp( $value ) );
 	}
 
 	/**
@@ -443,7 +441,7 @@ class UserWageFactory extends Factory {
 			return FALSE;
 		}
 
-		$clf = TTnew( 'CurrencyListFactory' );
+		$clf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $clf */
 		$clf->getByCompanyIdAndBase( $this->getUserObject()->getCompany(), TRUE );
 		if ( $clf->getRecordCount() > 0 ) {
 			$base_currency_obj = $clf->getCurrent();
@@ -671,9 +669,8 @@ class UserWageFactory extends Factory {
 		return FALSE;
 	}
 
-	//Takes the employees
-
 	/**
+	 * Takes the employees
 	 * @param string $company_id UUID
 	 * @param string $user_id UUID
 	 * @return bool|string
@@ -691,10 +688,10 @@ class UserWageFactory extends Factory {
 
 		$retval = FALSE;
 
-		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 		$pseallf->getByCompanyID( $company_id );
 		if ( $pseallf->getRecordCount() > 0 ) {
-			$pself = TTnew( 'PayStubEntryListFactory' );
+			$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 			$total_gross = $pself->getAmountSumByUserIdAndEntryNameIdAndStartDateAndEndDate($user_id, $pseallf->getCurrent()->getTotalGross(), $start_epoch, $end_epoch );
 			$total_employer_deductions = $pself->getAmountSumByUserIdAndEntryNameIdAndStartDateAndEndDate($user_id, $pseallf->getCurrent()->getTotalEmployerDeduction(), $start_epoch, $end_epoch );
 
@@ -737,7 +734,7 @@ class UserWageFactory extends Factory {
 		}
 		if ( $this->getUser() !== FALSE ) {
 			if ( $this->Validator->isError('user_id') == FALSE ) {
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$this->Validator->isResultSetWithRows(	'user_id',
 																$ulf->getByID($this->getUser()),
 																TTi18n::gettext('Invalid Employee')
@@ -746,7 +743,7 @@ class UserWageFactory extends Factory {
 		}
 		// Group
 		if ( $this->getWageGroup() !== FALSE AND $this->getWageGroup() != TTUUID::getZeroID() ) {
-			$wglf = TTnew( 'WageGroupListFactory' );
+			$wglf = TTnew( 'WageGroupListFactory' ); /** @var WageGroupListFactory $wglf */
 			$this->Validator->isResultSetWithRows(	'wage_group_id',
 														$wglf->getByID($this->getWageGroup()),
 														TTi18n::gettext('Group is invalid')

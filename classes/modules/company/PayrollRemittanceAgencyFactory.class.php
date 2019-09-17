@@ -987,11 +987,14 @@ class PayrollRemittanceAgencyFactory extends Factory {
 
 			'deleted' => 'Deleted',
 		);
+
 		return $variable_function_map;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function getCompanyObject() {
-		/** @var PayrollRemittanceAgencyFactory $pra_obj */
 		$le_obj = $this->getLegalEntityObject();
 		if( is_object($le_obj) ) {
 			return $le_obj->getCompanyObject();
@@ -1024,7 +1027,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 	 * @return object|bool
 	 */
 	function getCompanyDeductionListFactory() {
-		$cdlf = TTnew('CompanyDeductionListFactory');
+		$cdlf = TTnew('CompanyDeductionListFactory'); /** @var CompanyDeductionListFactory $cdlf */
 		$cdlf->getByCompanyIdAndPayrollRemittanceAgencyId( $this->getCompanyObject()->getId(), $this->getId() );
 		return $cdlf;
 	}
@@ -1210,7 +1213,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 			'company_id' => TTUUID::castUUID($company_id),
 		);
 
-		$lef = TTnew( 'LegalEntityFactory' );
+		$lef = TTnew( 'LegalEntityFactory' ); /** @var LegalEntityFactory $lef */
 
 		$query = 'SELECT a.id
 					FROM '. $this->getTable() .' as a
@@ -1460,7 +1463,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 		//
 		// Legal entity
 		if ( $this->getLegalEntity() !== FALSE ) {
-			$llf = TTnew( 'LegalEntityListFactory' );
+			$llf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $llf */
 			$this->Validator->isResultSetWithRows(	'legal_entity_id',
 															$llf->getByID($this->getLegalEntity()),
 															TTi18n::gettext('Legal entity is invalid')
@@ -1468,7 +1471,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 		}
 		// Remittance source account
 		if ( $this->getRemittanceSourceAccount() != FALSE AND $this->getRemittanceSourceAccount() != TTUUID::getZeroID() ) {
-			$llf = TTnew( 'RemittanceSourceAccountListFactory' );
+			$llf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $llf */
 			$this->Validator->isResultSetWithRows(	'remittance_source_account_id',
 															$llf->getByID($this->getRemittanceSourceAccount()),
 															TTi18n::gettext('Remittance source account is invalid')
@@ -1513,7 +1516,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 		}
 
 		// Province/State
-		$cf = TTnew( 'CompanyFactory' );
+		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 
 		if ( $this->getCountry() !== FALSE AND $this->getProvince() != '' AND $this->getProvince() != '00' AND $this->Validator->getValidateOnly() == FALSE) {
 			$options_arr = $cf->getOptions('province');
@@ -1584,7 +1587,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 										);
 		// Contact - Allow this to be NONE in cases where creating it during a fresh install when a user may not even exist yet.
 		if ( $this->getContactUser() != '' AND $this->getContactUser() != TTUUID::getZeroId() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'contact_user_id',
 															$ulf->getByID($this->getContactUser()),
 															TTi18n::gettext('Invalid Contact')
@@ -1611,7 +1614,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 		//$this->setProvince( $this->getProvince() ); //Not sure why this was there, but it causes duplicate errors if the province is incorrect.
 		if ( $this->getDeleted() == TRUE ) {
 			if ( is_object( $this->getLegalEntityObject() ) ) {
-				$cdlf = TTnew( 'CompanyDeductionListFactory' );
+				$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 				$cdlf->getByCompanyIdAndPayrollRemittanceAgencyId( $this->getLegalEntityObject()->getCompany(), $this->getId(), 1 );
 				if ( $cdlf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',

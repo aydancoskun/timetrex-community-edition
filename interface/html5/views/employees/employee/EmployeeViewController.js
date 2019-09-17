@@ -1672,14 +1672,14 @@ EmployeeViewController = BaseViewController.extend( {
 
 		//If sub view controller set custom filters, get it
 		if ( Global.isSet( this.getSubViewFilter ) ) {
-
 			this.select_layout.data.filter_data = this.getSubViewFilter( this.select_layout.data.filter_data );
-
 		}
 
 		//select_layout will not be null, it's set in setSelectLayout function
 		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
-		filter.filter_sort = this.select_layout.data.filter_sort;
+		if ( this.select_layout && this.select_layout.data ) { //Fix: Uncaught TypeError: Cannot read property 'data' of null
+			filter.filter_sort = this.select_layout.data.filter_sort;
+		}
 
 		if ( TTUUID.isUUID( this.refresh_id ) ) {
 			filter.filter_data = {};
@@ -1761,9 +1761,11 @@ EmployeeViewController = BaseViewController.extend( {
 						result_data = current_data.concat( result_data );
 					}
 
-					$this.grid.setData( result_data );
+					if ( $this.grid ) {
+						$this.grid.setData( result_data );
 
-					$this.reSelectLastSelectItems();
+						$this.reSelectLastSelectItems();
+					}
 				}
 
 				$this.setGridCellBackGround(); //Set cell background for some views

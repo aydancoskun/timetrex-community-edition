@@ -69,6 +69,7 @@ TTPromise = {
 				for ( var i = 0; i < arguments.length; i++ ) {
 					//numerically indexed arguments come back from Promise resolution arguments.
 					var obj = arguments[i];
+
 					var category = obj.category;
 					var key = obj.key;
 					var wait_category = obj.wait_arguments.category;
@@ -89,22 +90,27 @@ TTPromise = {
 			};
 
 			var onError = function() {
+				//When one promise fails in a category, we need to call the error_callback if waiting on that category, and *never* call the success callback.
 				Debug.Text( 'Promise: ERROR callback', 'TTPromise.js', 'TTPromise.js', 'wait', 11 );
 				for ( var i = 0; i < arguments.length; i++ ) {
 					//numerically indexed arguments come back from Promise resolution arguments.
 					var obj = arguments[i];
+
 					var category = obj.category;
 					var key = obj.key;
 					var wait_category = obj.wait_arguments.category;
 					var wait_key = obj.wait_arguments.key;
+
 					TTPromise.clearCompletedPromise( category, key );
 				}
-				//different than success because we want to call the callback AND wait again if necessary
+
+				//Different than success because we always want to call the error_callback immediately, as the category can never be success after a single error.
 				if ( typeof error_callback != 'undefined' ) {
 					error_callback( false );
 				}
 
-				TTPromise.wait( wait_category, wait_key, success_callback, error_callback );
+				//Don't wait again, as that will cause success/error callbacks to be triggered multiple times and could cause an infinite loop too.
+				//TTPromise.wait( wait_category, wait_key, success_callback, error_callback );
 				return true;
 			};
 

@@ -74,7 +74,7 @@ class APIDepartment extends APIFactory {
 
 		Debug::Text('Getting department default data...', __FILE__, __LINE__, __METHOD__, 10);
 
-		$df = TTnew('DepartmentFactory');
+		$df = TTnew('DepartmentFactory'); /** @var DepartmentFactory $df */
 		$next_available_manual_id = $df->getNextAvailableManualId( $company_obj->getId() );
 
 		$data = array(
@@ -114,7 +114,7 @@ class APIDepartment extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$blf = TTnew( 'DepartmentListFactory' );
+		$blf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -202,7 +202,7 @@ class APIDepartment extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'DepartmentListFactory' );
+				$lf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -313,7 +313,7 @@ class APIDepartment extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'DepartmentListFactory' );
+				$lf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

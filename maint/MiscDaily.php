@@ -34,12 +34,57 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-/*
- * Checks for any version updates...
- *
- */
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+
+//
+// Update PRIMARY_COMPANY_ID if its invalid or does not exist anymore.
+//
+$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
+$clf->getByID( PRIMARY_COMPANY_ID );
+Debug::text( 'Primary Company ID: ' . PRIMARY_COMPANY_ID, __FILE__, __LINE__, __METHOD__, 10 );
+if ( $clf->getRecordCount() != 1 ) {
+	//Get all companies and try to determine which one should be the primary, based on created date and status.
+	$clf->getAll( 1, NULL, array( 'status_id' => '= 10' ), array( 'created_date' => 'asc' ) );
+	Debug::text( '  Total Companies: ' . $clf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+	if ( $clf->getRecordCount() > 0 ) {
+		foreach ( $clf as $c_obj ) {
+			if ( $c_obj->getDeleted() == FALSE AND $c_obj->getStatus() == 10 ) { //10=Active
+				Debug::text( '  Setting PRIMARY_COMPANY_ID to: ' . $c_obj->getId() .' Name: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
+				$install_obj = new Install();
+				$tmp_config_vars['other']['primary_company_id'] = (string)$c_obj->getId();
+				$write_config_result = $install_obj->writeConfigFile( $tmp_config_vars );
+				unset( $install_obj, $tmp_config_vars, $write_config_result );
+
+				break;
+			}
+		}
+	}
+} else {
+	Debug::text( '  Valid PRIMARY_COMPANY_ID, not modifying...', __FILE__, __LINE__, __METHOD__, 10 );
+}
+unset( $clf, $c_obj );
+
+
+//
+// Set system_timezone .ini setting to the most commonly used value if it hasn't been changed from the default of GMT.
+//
+if ( TTDate::getTimeZone() == 'GMT' ) {
+	$uplf = TTNew('UserPreferenceListFactory'); /** @var UserPreferenceListFactory $uplf */
+	$most_common_time_zone = $uplf->getMostCommonTimeZone();
+	Debug::text( 'Most Common TimeZone: '. $most_common_time_zone, __FILE__, __LINE__, __METHOD__, 10 );
+
+	if ( $most_common_time_zone != '' AND $most_common_time_zone != 'GMT' ) {
+		$install_obj = new Install();
+		$tmp_config_vars['other']['system_timezone'] = (string)$most_common_time_zone;
+		$write_config_result = $install_obj->writeConfigFile( $tmp_config_vars );
+		Debug::text( ' Setting System TimeZone to: '. $most_common_time_zone, __FILE__, __LINE__, __METHOD__, 10 );
+	}
+
+	unset($uplf, $most_common_time_zone, $install_obj, $tmp_config_vars, $write_config_result );
+}
+
+
 //
 // Backup database if script exists.
 // Always backup the database first before doing anything else like purging tables.
@@ -152,26 +197,36 @@ if ( !isset($config_vars['other']['disable_cache_permission_check'])
 		}
 
 		//Check all cache files and make sure they are owned by the same users.
-		$cache_files = Misc::getFileList( $config_vars['cache']['dir'], NULL, TRUE );
-		if ( is_array($cache_files) AND count($cache_files) > 0 ) {
-			foreach( $cache_files as $cache_file ) {
-				$cache_file_owners[] = @fileowner($cache_file);
-			}
+		try {
+			$prev_file_owner = NULL;
+			$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $config_vars['cache']['dir'], FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
+			foreach ( $files as $file_obj ) {
+				$cache_file = $file_obj->getRealPath(); //Check both files and directories.
 
-			$cache_file_owners = array_unique($cache_file_owners);
-			if ( count($cache_file_owners) > 1 ) {
-				Debug::Text( 'ERROR: Cache directory contains files from several different owners. Its likely that their permission conflict.', __FILE__, __LINE__, __METHOD__, 10);
-				Debug::Arr( $cache_file_owners, 'Cache File Owner UIDs: ', __FILE__, __LINE__, __METHOD__, 10);
-				Misc::disableCaching();
+				$file_owner = @fileowner( $cache_file );
+				if ( $prev_file_owner !== NULL AND $file_owner != $prev_file_owner ) {
+					Debug::Text( 'ERROR: Cache directory contains files from several different owners. Its likely that their permission conflict.', __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( 'Cache File Owner UIDs: ' . $prev_file_owner . ', ' . $file_owner, __FILE__, __LINE__, __METHOD__, 10 );
+					Misc::disableCaching();
+
+					break; //Stop loop as soon as more than one owner is detected.
+				}
+
+				$prev_file_owner = $file_owner;
 			}
+			unset( $prev_file_owner, $files, $cache_file, $file_owner );
+		} catch( Exception $e ) {
+			Debug::Text('Failed opening/reading file or directory: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
+			Misc::disableCaching();
 		}
 	}
 }
 
+
 //
 // Update Company contacts so they are always valid.
 //
-$clf = TTNew('CompanyListFactory');
+$clf = TTNew('CompanyListFactory'); /** @var CompanyListFactory $clf */
 $clf->getAllByInValidContacts();
 if ( $clf->getRecordCount() > 0 ) {
 	foreach( $clf as $c_obj ) {

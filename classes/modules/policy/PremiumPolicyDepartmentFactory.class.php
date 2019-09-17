@@ -51,7 +51,7 @@ class PremiumPolicyDepartmentFactory extends Factory {
 		if ( is_object($this->department_obj) ) {
 			return $this->department_obj;
 		} else {
-			$lf = TTnew( 'DepartmentListFactory' );
+			$lf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $lf */
 			$lf->getById( $this->getDepartment() );
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->department_obj = $lf->getCurrent();
@@ -108,7 +108,7 @@ class PremiumPolicyDepartmentFactory extends Factory {
 											);
 		}
 		// Department
-		$dlf = TTnew( 'DepartmentListFactory' );
+		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		$this->Validator->isResultSetWithRows(	'department',
 													$dlf->getByID($this->getDepartment()),
 													TTi18n::gettext('Selected Department is invalid')
@@ -245,6 +245,8 @@ class PremiumPolicyDepartmentFactory extends Factory {
 		if ( is_object($obj) ) {
 			return TTLog::addEntry( $this->getPremiumPolicy(), $log_action, TTi18n::getText('Department').': '. $obj->getName(), NULL, $this->getTable() );
 		}
+
+		return FALSE;
 	}
 }
 ?>

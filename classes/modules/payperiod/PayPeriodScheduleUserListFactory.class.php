@@ -54,7 +54,7 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -83,7 +83,7 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -113,7 +113,7 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 							b.company_id = ?
 							AND ( b.deleted = 0 )
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -160,7 +160,7 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -205,7 +205,7 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -245,7 +245,7 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -284,7 +284,7 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

@@ -158,9 +158,8 @@ class TimeTrexClientAPI {
 		return TRUE;
 	}
 
-	//Use the SessionHash to ensure the URL for the session doesn't get changed out from under us without re-logging in.
-
 	/**
+	 * Use the SessionHash to ensure the URL for the session doesn't get changed out from under us without re-logging in.
 	 * @param $url
 	 * @param string $session_id UUID
 	 * @return string

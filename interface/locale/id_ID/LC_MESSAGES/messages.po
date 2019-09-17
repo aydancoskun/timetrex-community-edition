@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-19 08:10-0700\n"
+"POT-Creation-Date: 2019-03-06 11:07-0800\n"
 "PO-Revision-Date: 2013-10-21 04:07+0000\n"
 "Last-Translator: Noke Nahuway <it-tech_yajasi@yajasi.org>\n"
 "Language-Team: Indonesian <id@li.org>\n"
@@ -21,13 +21,13 @@ msgstr ""
 msgid " "
 msgstr ""
 
+msgid " Default "
+msgstr ""
+
 msgid " and "
 msgstr ""
 
 msgid " or contact a TimeTrex support expert for "
-msgstr ""
-
-msgid " requires a modern HTML5 standards compatible web browser, click here for more information."
 msgstr ""
 
 msgid "#"
@@ -661,6 +661,9 @@ msgstr "ULANG TAHUN"
 msgid "AOL"
 msgstr ""
 
+msgid "API Key"
+msgstr ""
+
 msgid "AR-941A Payment"
 msgstr ""
 
@@ -1271,6 +1274,9 @@ msgid "Age 65/Blind"
 msgstr "Umur 65/Buta"
 
 msgid "Agency"
+msgstr ""
+
+msgid "Agency or Event Type is not eligible for Full Service yet, try again later"
 msgstr ""
 
 msgid "Aggregate"
@@ -2245,6 +2251,15 @@ msgstr "Otentikasi: Kartu Proximity & Password"
 msgid "Authorization"
 msgstr "otorisasi"
 
+msgid "Authorization - Expense"
+msgstr ""
+
+msgid "Authorization - Request"
+msgstr ""
+
+msgid "Authorization - TimeSheet"
+msgstr ""
+
 msgid "Authorization History"
 msgstr "otorisasi Sejarah"
 
@@ -2798,6 +2813,15 @@ msgid "Birth Date (Anniversary)"
 msgstr ""
 
 msgid "Birth Date Time Period"
+msgstr ""
+
+msgid "Birth Date is not specified, this may prevent some Tax/Deduction calculations from being performed accurately"
+msgstr ""
+
+msgid "Birth Date not specified, unable to determine age eligibility for %1"
+msgstr ""
+
+msgid "Birth date can not be after hire date"
 msgstr ""
 
 msgid "Birth date can not be in the future"
@@ -4108,9 +4132,6 @@ msgstr "Salinan dari"
 msgid "Copy<br>as New"
 msgstr ""
 
-msgid "Copyright ©️2015 TimeTrex. All Rights Reserved"
-msgstr ""
-
 msgid "Cordoba"
 msgstr "Cordoba"
 
@@ -4536,6 +4557,9 @@ msgstr ""
 
 msgid "Data Processing, Hosting and Related Services"
 msgstr "Pengolahan Data, Hosting dan Jasa Terkait"
+
+msgid "Data submitted successfully."
+msgstr ""
 
 msgid "Data verification successful"
 msgstr ""
@@ -5077,9 +5101,6 @@ msgstr "Satuan dimensi"
 msgid "Dinagat Islands"
 msgstr "Dinagat Islands"
 
-msgid "Directions Request from first punch to last punch is failed"
-msgstr ""
-
 msgid "Disable Grand Total"
 msgstr ""
 
@@ -5156,6 +5177,9 @@ msgid "Displaying"
 msgstr ""
 
 msgid "Distance Units"
+msgstr ""
+
+msgid "Distances"
 msgstr ""
 
 msgid "District"
@@ -5302,6 +5326,12 @@ msgstr ""
 msgid "Drivers License"
 msgstr ""
 
+msgid "Driving Distance"
+msgstr ""
+
+msgid "Driving Duration"
+msgstr ""
+
 msgid "Drug Test"
 msgstr ""
 
@@ -5392,13 +5422,25 @@ msgstr "MEMUNGKINKAN"
 msgid "ERROR"
 msgstr ""
 
+msgid "ERROR! No ROE(s) to submit!"
+msgstr ""
+
+msgid "ERROR! Something went wrong, please contact customer service immediately!"
+msgstr ""
+
+msgid "ERROR! Unable to submit ROE(s)!"
+msgstr ""
+
 msgid "ERROR: A valid username/password is required to access this application. Press refresh in your web browser to try again."
+msgstr ""
+
+msgid "ERROR: Agency event is not configured for full service processing."
 msgstr ""
 
 msgid "ERROR: Employee number does not exist!"
 msgstr "KESALAHAN: Nomor Karyawan tidak ada"
 
-msgid "ERROR: Frame data DOES NOT exist."
+msgid "ERROR: General error occurred, please contact customer service immediately."
 msgstr ""
 
 msgid "ERROR: INVALID PAY CODE"
@@ -5415,6 +5457,9 @@ msgstr ""
 
 msgid "ERROR: NO INVOICE SETTINGS DEFINED, UNABLE TO GENERATE INVOICE"
 msgstr "KESALAHAN: TIDAK ADA PENGATURAN FAKTUR DEFINISI, TIDAK MENCIPTAKAN FAKTUR"
+
+msgid "ERROR: No data for account statement..."
+msgstr ""
 
 msgid "ERROR: No data matches criteria."
 msgstr ""
@@ -5441,6 +5486,9 @@ msgid "ERROR: UnAssigned Regular Time"
 msgstr ""
 
 msgid "ERROR: Unable to communicate with license server, please check your internet connection."
+msgstr ""
+
+msgid "ERROR: Unable to generate report to for transmission to Payment Services."
 msgstr ""
 
 msgid "ERROR: Unable to load resource!"
@@ -5818,9 +5866,6 @@ msgstr "Notifikasi email"
 msgid "Email Pay Stub to"
 msgstr ""
 
-msgid "Email PayrollRemittanceAgencyEvent Reminder to"
-msgstr ""
-
 msgid "Email Sent"
 msgstr ""
 
@@ -5876,6 +5921,9 @@ msgid "Email:"
 msgstr "Surel:"
 
 msgid "Emailed Report"
+msgstr ""
+
+msgid "Emailed remittance agency event reminder to"
 msgstr ""
 
 msgid "Emergency Contact"
@@ -6119,9 +6167,6 @@ msgid "Employee Tax / Deductions"
 msgstr "Pajak / Pengurangan Karyawan"
 
 msgid "Employee Termination Date"
-msgstr ""
-
-msgid "Employee TimeClock"
 msgstr ""
 
 msgid "Employee TimeSheet"
@@ -6571,8 +6616,14 @@ msgstr ""
 msgid "Enabled (UnAuthenticated)"
 msgstr ""
 
+msgid "Enabled - Full Service"
+msgstr ""
+
 msgid "Enabled - LDAP Only"
 msgstr "Diaktifkan - LDAP Hanya"
+
+msgid "Enabled - Self Service"
+msgstr ""
 
 msgid "Enabled - w/Local Fallback"
 msgstr "Fallback w / Lokal - Aktifkan"
@@ -6877,6 +6928,9 @@ msgstr "Pelaksana Cron Pekerjaan"
 msgid "Executive"
 msgstr ""
 
+msgid "Exempt"
+msgstr ""
+
 msgid "Exempt Payment Types"
 msgstr ""
 
@@ -7057,6 +7111,12 @@ msgstr "Pengenalan Awal"
 msgid "Facial Recognition (v2)"
 msgstr ""
 
+msgid "Facial Recognition (v3)"
+msgstr ""
+
+msgid "Facial Recognition (v4)"
+msgstr ""
+
 msgid "Facility ID"
 msgstr ""
 
@@ -7184,6 +7244,9 @@ msgid "File Name"
 msgstr "Nama Berkas"
 
 msgid "File Permissions"
+msgstr ""
+
+msgid "File Report"
 msgstr ""
 
 msgid "File Trailer Line"
@@ -7750,6 +7813,9 @@ msgstr "Dibuat oleh"
 msgid "Generating Chart..."
 msgstr "Membangkitkan Bagan ..."
 
+msgid "Generating Forms..."
+msgstr ""
+
 msgid "Generating HTML..."
 msgstr ""
 
@@ -8176,6 +8242,9 @@ msgstr "Hirarki kontrol tidak valid"
 msgid "Hierarchy is invalid"
 msgstr "Hirarki tidak valid"
 
+msgid "Hierarchy not specified"
+msgstr ""
+
 msgid "High"
 msgstr "Tinggi"
 
@@ -8192,6 +8261,9 @@ msgid "Hire Date"
 msgstr "Tanggal Penyewaan"
 
 msgid "Hire Date (Anniversary)"
+msgstr ""
+
+msgid "Hire Date not specified, unable to determine length of service eligibility for %1"
 msgstr ""
 
 msgid "Hire date is invalid"
@@ -8257,19 +8329,22 @@ msgstr ""
 msgid "Home Email"
 msgstr "Email Rumah"
 
-msgid "Home Email address does not have a valid DNS MX record"
-msgstr ""
-
-msgid "Home Email address does not have a valid DNS record"
-msgstr ""
-
 msgid "Home Email address is invalid"
 msgstr "Depan Alamat email tidak valid"
 
 msgid "Home Phone"
 msgstr "Telepon Rumah"
 
+msgid "Home email address does not have a valid DNS MX record"
+msgstr ""
+
+msgid "Home email address does not have a valid DNS record"
+msgstr ""
+
 msgid "Home email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out"
+msgstr ""
+
+msgid "Home email address is invalid"
 msgstr ""
 
 msgid "Home phone number is invalid"
@@ -9185,6 +9260,9 @@ msgid "Incorrect Payment Method"
 msgstr ""
 
 msgid "Incorrect Payment Required date"
+msgstr ""
+
+msgid "Incorrect Payment Services Status"
 msgstr ""
 
 msgid "Incorrect Payment Type"
@@ -10177,6 +10255,9 @@ msgstr "Memperpanjang nomor institusi yang tidak sah"
 msgid "Invalid institution number, must be digits only"
 msgstr "harus menggunakan angka saja pada nomor institusi yang tidak sah"
 
+msgid "Invalid institution, must be digits only"
+msgstr ""
+
 msgid "Invalid insurable earnings"
 msgstr "Pendapatan dapat diasuransikan yang tidak sah"
 
@@ -10906,9 +10987,6 @@ msgstr "Kiribati"
 msgid "Kirklees"
 msgstr "Kirklees"
 
-msgid "Km"
-msgstr ""
-
 msgid "Known Since"
 msgstr ""
 
@@ -11291,6 +11369,9 @@ msgid "Legal Entity Trade Name"
 msgstr ""
 
 msgid "Legal Entity is invalid"
+msgstr ""
+
+msgid "Legal Entity must be specified"
 msgstr ""
 
 msgid "Legal Name"
@@ -11967,12 +12048,6 @@ msgstr "Menikah - Pasangan Pekerjaan"
 
 msgid "Married - Spouse does not Work"
 msgstr "Menikah - Pasangan tidak Bekerja"
-
-msgid "Married - With Spouse Filing"
-msgstr "Menikah - Dengan Pasangan Filing"
-
-msgid "Married - Without Spouse Filing"
-msgstr "Menikah - Tanpa Pasangan Filing"
 
 msgid "Married with 2 incomes"
 msgstr "Menikah dengan 2 pendapatan"
@@ -12845,6 +12920,9 @@ msgid "Navigate to the agency's website and upload the eFile downloaded in the a
 msgstr ""
 
 msgid "Navigate to the agency's website to file the necessary information."
+msgstr ""
+
+msgid "Navigate to the agency's website to file the report manually."
 msgstr ""
 
 msgid "Navigate to the agency's website to make a payment if necessary."
@@ -14773,6 +14851,36 @@ msgstr "Pembayaran Diperlukan"
 msgid "Payment Sent"
 msgstr "Pembayaran Terkirim"
 
+msgid "Payment Services"
+msgstr ""
+
+msgid "Payment Services API Key"
+msgstr ""
+
+msgid "Payment Services ERROR: %1"
+msgstr ""
+
+msgid "Payment Services Status"
+msgstr ""
+
+msgid "Payment Services User Name"
+msgstr ""
+
+msgid "Payment Services User Name or API Key is incorrect, or service not activated"
+msgstr ""
+
+msgid "Payment Services Validation ERROR: %1"
+msgstr ""
+
+msgid "Payment Services are not enabled for this Legal Entity"
+msgstr ""
+
+msgid "Payment Services is only available in Canada or the United States"
+msgstr ""
+
+msgid "Payment Services<br>Statement"
+msgstr ""
+
 msgid "Payment Signature"
 msgstr ""
 
@@ -14799,6 +14907,9 @@ msgstr ""
 
 msgid "Payment process message is too short or too long"
 msgstr "Pesan proses pembayaran terlalu pendek atau terlalu panjang"
+
+msgid "Payment submitted successfully for $%1"
+msgstr ""
 
 msgid "Payment<br>Gateway"
 msgstr ""
@@ -14831,6 +14942,9 @@ msgid "Payroll Processing Wizard"
 msgstr ""
 
 msgid "Payroll Remittance Agency"
+msgstr ""
+
+msgid "Payroll Remittance Agency Event"
 msgstr ""
 
 msgid "Payroll Report to complete HI Quarterly Wage Contribution Report"
@@ -14989,6 +15103,9 @@ msgstr "Daftar Izin Kelompok tidak sah"
 msgid "Permission Groups"
 msgstr "Izin Kelompok-kelompok:"
 
+msgid "Permission Hierarchy not specified"
+msgstr ""
+
 msgid "Permission Wizard"
 msgstr ""
 
@@ -15101,6 +15218,9 @@ msgid "Please draw your full and complete signature in the signature pad with yo
 msgstr "Harap menarik tanda tangan penuh dan lengkap Anda di signature pad dengan mouse Anda"
 
 msgid "Please ensure that your profile is accurate and complete."
+msgstr ""
+
+msgid "Please enter a user name and password."
 msgstr ""
 
 msgid "Please enter the administrator user name and password"
@@ -15543,6 +15663,9 @@ msgstr "prorata"
 
 msgid "Procedure/Policy"
 msgstr "Prosedur/Kebijakan"
+
+msgid "Process Payroll"
+msgstr ""
 
 msgid "Process Transactions"
 msgstr ""
@@ -16159,6 +16282,9 @@ msgstr ""
 msgid "ROE Report"
 msgstr "Laporan ROE"
 
+msgid "ROE(s) submitted successfully!"
+msgstr ""
+
 msgid "RPD-41072 - Annual Withholding Form"
 msgstr ""
 
@@ -16441,6 +16567,9 @@ msgstr "Kawasan Autonoma Atlantico Norte"
 msgid "Region Autonoma Atlantico Sur"
 msgstr "Region Autonoma Atlantico Sur"
 
+msgid "Regional Income Tax Agency (RITA) [Local Income Tax]"
+msgstr ""
+
 msgid "Registration Key"
 msgstr ""
 
@@ -16520,6 +16649,12 @@ msgid "Remittance Agency"
 msgstr ""
 
 msgid "Remittance Agency Event"
+msgstr ""
+
+msgid "Remittance Agency Source Account Format is incorrect"
+msgstr ""
+
+msgid "Remittance Agency must have Source Account specified"
 msgstr ""
 
 msgid "Remittance Source Account"
@@ -16698,6 +16833,9 @@ msgstr "Perdagangan Eceran"
 
 msgid "Retalhuleu"
 msgstr "Retalhuleu"
+
+msgid "Retirement Plans (Box 13)"
+msgstr ""
 
 msgid "Retrieving Branches..."
 msgstr ""
@@ -17377,6 +17515,9 @@ msgstr "Jadwal ( Minggu ini )"
 msgid "Scheduled Absence"
 msgstr "Jadwal Absen"
 
+msgid "Scheduled Absent"
+msgstr ""
+
 msgid "Scheduled Days"
 msgstr "Jadwal Hari - hari"
 
@@ -17689,6 +17830,9 @@ msgstr "Karyawan yang dipilih tidak sah"
 msgid "Selected employee is invalid or already assigned to another policy group"
 msgstr "Karyawan yang dipilih tidak valid atau sudah ditugaskan untuk kelompok kebijakan lain"
 
+msgid "Selected punches no longer exist, unable to map."
+msgstr ""
+
 msgid "Selected subordinate is invalid or already assigned to another hierarchy with the same object. User ID: %1"
 msgstr ""
 
@@ -17947,6 +18091,9 @@ msgstr "Makan siang Pendek"
 msgid "Short Name"
 msgstr "Nama Pendek"
 
+msgid "Short Name/Abbreviation"
+msgstr ""
+
 msgid "Short name is too short or too long"
 msgstr "Nama pendek terlalu pendek atau terlalu panjang"
 
@@ -18018,9 +18165,6 @@ msgstr "Singapura"
 
 msgid "Single"
 msgstr "Tunggal"
-
-msgid "Single or Head of Household"
-msgstr "Tunggal atau Kepala Rumah Tangga"
 
 msgid "Siquijor"
 msgstr "Siquijor"
@@ -18804,6 +18948,12 @@ msgstr "T4A Ringkasan"
 
 msgid "T4A Summary Report"
 msgstr "T4A Ringkasan Laporan"
+
+msgid "T4As submitted successfully"
+msgstr ""
+
+msgid "T4s submitted successfully"
+msgstr ""
 
 msgid "TAX020/TAX026 Filing"
 msgstr ""
@@ -19633,6 +19783,9 @@ msgstr ""
 msgid "TimeSheet<br>Summary"
 msgstr ""
 
+msgid "TimeTrex Payment Services"
+msgstr ""
+
 msgid "TimeTrex Version"
 msgstr ""
 
@@ -20110,6 +20263,12 @@ msgstr ""
 msgid "Transit/Routing"
 msgstr "Perjalanan / Routing"
 
+msgid "Transmit forms to the CRA with TimeTrex Payment Services automatically."
+msgstr ""
+
+msgid "Transmit payment with TimeTrex Payment Services automatically."
+msgstr ""
+
 msgid "Transmittal of Wage and Tax Statement"
 msgstr ""
 
@@ -20353,7 +20512,19 @@ msgstr ""
 msgid "Unable to create punches, they may already exist"
 msgstr ""
 
-msgid "Unable to delete expense after it has been reimbursed"
+msgid "Unable to delete employees who are active"
+msgstr ""
+
+msgid "Unable to delete employees who have recorded worked time in the last 2 years"
+msgstr ""
+
+msgid "Unable to delete employees with pay stubs in the last 7 years"
+msgstr ""
+
+msgid "Unable to delete expenses after they have been authorized/declined"
+msgstr ""
+
+msgid "Unable to delete expenses after they have been reimbursed"
 msgstr ""
 
 msgid "Unable to delete pay stubs in closed pay periods"
@@ -20389,7 +20560,10 @@ msgstr ""
 msgid "Unable to modify Pay Stub Amendment that is currently in use by a Pay Stub marked PAID"
 msgstr ""
 
-msgid "Unable to modify expense after it has been reimbursed"
+msgid "Unable to modify expenses after they have been authorized/declined"
+msgstr ""
+
+msgid "Unable to modify expenses after they have been reimbursed"
 msgstr ""
 
 msgid "Unable to modify pay stubs assigned to a closed pay period"
@@ -21229,6 +21403,9 @@ msgstr ""
 msgid "W2 Forms"
 msgstr ""
 
+msgid "W2 Local Filing"
+msgstr ""
+
 msgid "W2 State Filing"
 msgstr ""
 
@@ -21275,6 +21452,9 @@ msgid "WARNING: Manually modifying Accumulated Time records may prevent policies
 msgstr ""
 
 msgid "WARNING: MySQL database support has been deprecated and migration to PostgreSQL is required. Click here for instructions."
+msgstr ""
+
+msgid "WARNING: Not in PRODUCTION mode, unable to send data to Payment Services."
 msgstr ""
 
 msgid "WARNING: Pay periods past their transaction date have not been closed yet. It's critical that these pay periods are closed to prevent data loss, click here to close them now."
@@ -21817,7 +21997,16 @@ msgstr "Kerja Waktu + + Upah Jumlah Pergeseran berdasarkan Tanggal / Judul"
 msgid "Work Time+Wage+Total Shifts by Title/Start Time"
 msgstr "Waktu Kerja + + Upah Jumlah Pergeseran Judul / Start Time"
 
+msgid "Work email address does not have a valid DNS MX record"
+msgstr ""
+
+msgid "Work email address does not have a valid DNS record"
+msgstr ""
+
 msgid "Work email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out"
+msgstr ""
+
+msgid "Work email address is invalid"
 msgstr ""
 
 msgid "Work or Home email address is blank or invalid"
@@ -22015,14 +22204,8 @@ msgstr "York"
 msgid "Yoro"
 msgstr "Yoro"
 
-msgid "You are about to delete data, once data is deleted it can not be recovered Are you sure you wish to continue?"
-msgstr ""
-
 msgid "You are about to delete data, once data is deleted it can not be recovered.<br>Are you sure you wish to continue?"
 msgstr ""
-
-msgid "You are about to delete data, once data is deleted it can not be recovered.\\nAre you sure you wish to continue?"
-msgstr "Anda akan menghapus data, setelah data dihapus tidak dapat dipulihkan. \\ NYakin ingin melanjutkan?"
 
 msgid "You are about to delete the entire week worth of time for this row. Are you sure you wish to continue?"
 msgstr ""
@@ -22057,20 +22240,11 @@ msgstr "Anda memiliki pesan baru yang menunggu untuk Anda dalam"
 msgid "You have a new pay stub waiting for you in"
 msgstr ""
 
-msgid "You have already submitted this form! Please wait..."
-msgstr "Anda sudah mengirimkan formulir ini! Harap tunggu ..."
-
 msgid "You have modified"
 msgstr ""
 
 msgid "You have modified data without saving, are you sure you want to continue and lose your changes"
 msgstr ""
-
-msgid "You have modified data without saving, if you press OK you will lose any changes you have made!"
-msgstr "Anda telah memodifikasi data tanpa tabungan, jika Anda menekan OK Anda akan kehilangan perubahan yang Anda buat!"
-
-msgid "You have new mail waiting. Would you like to read it now?"
-msgstr "Anda memiliki menunggu surat baru. Apakah Anda ingin membacanya sekarang?"
 
 msgid "You have successfully installed"
 msgstr ""
@@ -22238,6 +22412,9 @@ msgid "by employee timesheets"
 msgstr ""
 
 msgid "by employees"
+msgstr ""
+
+msgid "by expenses"
 msgstr ""
 
 msgid "by holiday policies"
@@ -22496,9 +22673,6 @@ msgid "log( expression ) - Example: log( #regular_time# )"
 msgstr ""
 
 msgid "login"
-msgstr ""
-
-msgid "m"
 msgstr ""
 
 msgid "min"
@@ -25156,6 +25330,12 @@ msgstr "yrs"
 #~ msgid "Markup Percent:"
 #~ msgstr "Menandai Persen"
 
+#~ msgid "Married - With Spouse Filing"
+#~ msgstr "Menikah - Dengan Pasangan Filing"
+
+#~ msgid "Married - Without Spouse Filing"
+#~ msgstr "Menikah - Tanpa Pasangan Filing"
+
 #~ msgid "Married or Qualified Widow(er)"
 #~ msgstr "Menikah atau Berkualitas Duda"
 
@@ -26612,6 +26792,9 @@ msgstr "yrs"
 #~ msgid "Since Hired"
 #~ msgstr "sejak Dipekerjakan"
 
+#~ msgid "Single or Head of Household"
+#~ msgstr "Tunggal atau Kepala Rumah Tangga"
+
 #~ msgid "Social Security (FICA) Exempt:"
 #~ msgstr "Jaminan Sosial (FICA) Dikecualikan:"
 
@@ -27521,8 +27704,20 @@ msgstr "yrs"
 #~ msgid "Year:"
 #~ msgstr "Tahun:"
 
+#~ msgid "You are about to delete data, once data is deleted it can not be recovered.\\nAre you sure you wish to continue?"
+#~ msgstr "Anda akan menghapus data, setelah data dihapus tidak dapat dipulihkan. \\ NYakin ingin melanjutkan?"
+
 #~ msgid "You can not unassign yourself from a permission group, assign yourself to a new group instead"
 #~ msgstr "Anda tidak dapat membatalkan penetapan diri dari kelompok izin, menetapkan diri untuk kelompok baru sebagai gantinya"
+
+#~ msgid "You have already submitted this form! Please wait..."
+#~ msgstr "Anda sudah mengirimkan formulir ini! Harap tunggu ..."
+
+#~ msgid "You have modified data without saving, if you press OK you will lose any changes you have made!"
+#~ msgstr "Anda telah memodifikasi data tanpa tabungan, jika Anda menekan OK Anda akan kehilangan perubahan yang Anda buat!"
+
+#~ msgid "You have new mail waiting. Would you like to read it now?"
+#~ msgstr "Anda memiliki menunggu surat baru. Apakah Anda ingin membacanya sekarang?"
 
 #~ msgid ""
 #~ "You may use the position links at the top of this window to move it around the screen,\n"

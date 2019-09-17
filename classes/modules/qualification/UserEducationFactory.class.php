@@ -54,7 +54,7 @@ class UserEducationFactory extends Factory {
 		$retval = NULL;
 		switch( $name ) {
 			case 'source_type':
-				$qf = TTnew('QualificationFactory');
+				$qf = TTnew('QualificationFactory'); /** @var QualificationFactory $qf */
 				$retval = $qf->getOptions( $name );
 				break;
 			case 'columns':
@@ -158,7 +158,7 @@ class UserEducationFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setUser( $value) {
@@ -174,7 +174,7 @@ class UserEducationFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setQualification( $value ) {
@@ -190,7 +190,7 @@ class UserEducationFactory extends Factory {
 	}
 
 	/**
-	 * @param $institute
+	 * @param $value
 	 * @return bool
 	 */
 	function setInstitute( $value ) {
@@ -207,7 +207,7 @@ class UserEducationFactory extends Factory {
 	}
 
 	/**
-	 * @param $major
+	 * @param $value
 	 * @return bool
 	 */
 	function setMajor( $value ) {
@@ -224,7 +224,7 @@ class UserEducationFactory extends Factory {
 
 
 	/**
-	 * @param $minor
+	 * @param $value
 	 * @return bool
 	 */
 	function setMinor( $value ) {
@@ -240,7 +240,7 @@ class UserEducationFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setGraduateDate( $value) {
@@ -256,7 +256,7 @@ class UserEducationFactory extends Factory {
 	}
 
 	/**
-	 * @param $grade_score
+	 * @param $value
 	 * @return bool
 	 */
 	function setGradeScore( $value ) {
@@ -273,7 +273,7 @@ class UserEducationFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setStartDate( $value) {
@@ -289,7 +289,7 @@ class UserEducationFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setEndDate( $value) {
@@ -316,7 +316,7 @@ class UserEducationFactory extends Factory {
 	}
 
 	/**
-	 * @param $tags
+	 * @param $value
 	 * @return bool
 	 */
 	function setTag( $value ) {
@@ -335,7 +335,7 @@ class UserEducationFactory extends Factory {
 		//
 		// Employee
 		if ( $this->getUser() !== FALSE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user_id',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Employee must be specified')
@@ -343,7 +343,7 @@ class UserEducationFactory extends Factory {
 		}
 		// Qualification
 		if ( $this->getQualification() !== FALSE ) {
-			$qlf = TTnew( 'QualificationListFactory' );
+			$qlf = TTnew( 'QualificationListFactory' ); /** @var QualificationListFactory $qlf */
 			$this->Validator->isResultSetWithRows( 'qualification_id',
 															$qlf->getById( $this->getQualification() ),
 															TTi18n::gettext('Course must be specified')

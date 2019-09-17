@@ -678,14 +678,16 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 						var current_data = $this.grid.getData();
 						result_data = current_data.concat( result_data );
 					}
-					$this.grid.setData( result_data );
 
-					// if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
-					// 	$this.resizeSubGrid( len );
-					// }
+					if ( $this.grid ) {
+						$this.grid.setData( result_data );
 
-					$this.reSelectLastSelectItems();
+						// if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
+						// 	$this.resizeSubGrid( len );
+						// }
 
+						$this.reSelectLastSelectItems();
+					}
 				}
 
 				$this.result_details = null;

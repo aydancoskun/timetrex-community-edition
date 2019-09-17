@@ -44,9 +44,8 @@ class RoundIntervalPolicyFactory extends Factory {
 
 	protected $company_obj = NULL;
 
-	//Just need relations for each actual Punch Type
-
 	/**
+	 * Just need relations for each actual Punch Type
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
@@ -191,7 +190,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setCompany( $value) {
@@ -286,7 +285,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param $name
+	 * @param $value
 	 * @return bool
 	 */
 	function setName( $value) {
@@ -302,7 +301,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param $description
+	 * @param $value
 	 * @return bool
 	 */
 	function setDescription( $value) {
@@ -388,7 +387,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param $bool
+	 * @param $value
 	 * @return bool
 	 */
 	function setStrict( $value) {
@@ -493,7 +492,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setConditionStaticTime( $value) {
@@ -567,7 +566,7 @@ class RoundIntervalPolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -672,7 +671,7 @@ class RoundIntervalPolicyFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('round_interval_policy' => $this->getId() ), 1 );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',

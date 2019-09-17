@@ -1434,7 +1434,7 @@ BaseViewController = Backbone.View.extend( {
 			if ( $this.edit_view ) {
 				remove_ids.push( $this.current_edit_record.id );
 			} else {
-				remove_ids = $this.getGridSelectIdArray().slice();
+				remove_ids = $this.getGridSelectIdArray().slice(); //Use .slice() to make a copy of the IDs.
 			}
 			if ( result ) {
 				ProgressBar.showOverlay();
@@ -2335,7 +2335,8 @@ BaseViewController = Backbone.View.extend( {
 				model['tab_audit'] = {
 					'label': $.i18n._( 'Audit' ),
 					'init_callback': 'initSubLogView',
-					'display_on_mass_edit': false
+					'display_on_mass_edit': false,
+					'display_on_add': false
 				};
 			} else if ( i == 'tab_attachment' && model[i] === true ) {
 				model['tab_attachment'] = {
@@ -2484,7 +2485,8 @@ BaseViewController = Backbone.View.extend( {
 			for( i in tab_model ) {
 				var tab_index = $( this.edit_view_tab.find( 'ul li a[ref="' + i + '"]' ) ).parent().index();
 
-				if ( this.is_mass_editing && tab_model[i].hasOwnProperty('display_on_mass_edit') && tab_model[i].display_on_mass_edit == false ) {
+				if ( ( this.is_mass_editing && tab_model[i].hasOwnProperty('display_on_mass_edit') && tab_model[i].display_on_mass_edit == false )
+					|| ( ( this.is_add || this.is_mass_adding ) && tab_model[i].hasOwnProperty('display_on_add') && tab_model[i].display_on_add == false ) ) {
 					$( this.edit_view_tab.find( 'ul li a[ref="' + i + '"]' ) ).parent().hide();
 				} else {
 					if ( this.checkTabPermissions( i ) == true ) {
@@ -2613,6 +2615,11 @@ BaseViewController = Backbone.View.extend( {
 		if ( !$this.edit_view ) {
 			return;
 		}
+
+		if ( !result ) {
+			return;
+		}
+
 		if ( result.isValid() ) {
 			$this.edit_view.attr( 'validate_complete', true );
 			$this.setEditMenu();
@@ -6503,16 +6510,6 @@ BaseViewController = Backbone.View.extend( {
 	autoOpenEditViewIfNecessary: function() {
 		//Auto open edit view. Should set in IndexController
 
-		//Only ever execute this once on the first load/refresh of the browser.
-		//Otherwise there are cases such as Attendance -> Schedule in Day mode where buildCalendars()
-		// is called on resize, and can execute this multiple times.
-		// Originally appeared when clicking Add Request icon in Day Mode, and the Edit Request view appearing, then Edit Schedule also appearing.
-		if ( LocalCacheData.auto_open_view_done == true ) {
-			return true;
-		} else {
-			LocalCacheData.auto_open_view_done = true;
-		}
-
 		switch ( LocalCacheData.current_doing_context_action ) {
 			case 'edit':
 				if ( LocalCacheData.edit_id_for_next_open_view ) {
@@ -6535,6 +6532,7 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 		this.autoOpenEditOnlyViewIfNecessary();
+
 	},
 
 	autoOpenEditOnlyViewIfNecessary: function() {
@@ -6543,7 +6541,6 @@ BaseViewController = Backbone.View.extend( {
 		if ( this.sub_view_mode ) {
 			return;
 		}
-
 		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm && !LocalCacheData.current_open_edit_only_controller ) {
 
 			if ( LocalCacheData.all_url_args.sm.indexOf( 'Report' ) < 0 ) {

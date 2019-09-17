@@ -116,7 +116,7 @@ class PayrollDeduction {
 	}
 
 	private function setCountry( $country ) {
-		$this->data['country'] = strtoupper( trim( $country ) );
+		$this->data['country'] = strtoupper( substr( trim( $country ), 0, 2 ) ); //Sanitize country to at least be close to a country code.
 
 		return TRUE;
 	}
@@ -130,7 +130,7 @@ class PayrollDeduction {
 	}
 
 	private function setProvince( $province ) {
-		$this->data['province'] = strtoupper( trim( $province ) );
+		$this->data['province'] = strtoupper( substr( trim( $province ), 0, 2 ) ); //Sanitize province to at least be close to a country code.
 
 		return TRUE;
 	}
@@ -144,7 +144,7 @@ class PayrollDeduction {
 	}
 
 	private function setDistrict( $district ) {
-		$this->data['district'] = strtoupper( trim( $district ) );
+		$this->data['district'] = strtoupper( substr( trim( $district ), 0, 15 ) ); //Sanitize district to at least be close to a district code.
 
 		return TRUE;
 	}

@@ -39,9 +39,9 @@ class Telnet {
 	 * defaults to localhost port 23 (standard telnet port)
 	 *
 	 * @param string $host Host name or IP addres
-	 * @param int $port TCP port number
+	 * @param string $port TCP port number
 	 * @param int $timeout Connection timeout in seconds
-	 * @return void
+	 * @throws Exception
 	 */
 	public function __construct($host = '127.0.0.1', $port = '23', $timeout = 10) {
 
@@ -145,7 +145,11 @@ class Telnet {
 	 *
 	 * @param string $username Username
 	 * @param string $password Password
+	 * @param string $login_prompt
+	 * @param string $password_prompt
+	 * @param string $prompt
 	 * @return boolean
+	 * @throws Exception
 	 */
 	public function login($username, $password, $login_prompt = 'login:', $password_prompt = 'Password:', $prompt = '#' ) {
 
@@ -281,8 +285,8 @@ class Telnet {
 	/**
 	 * Telnet control character magic
 	 *
-	 * @param string $command Character to check
 	 * @return boolean
+	 * @throws Exception
 	 */
 	private function negotiateTelnetOptions() {
 

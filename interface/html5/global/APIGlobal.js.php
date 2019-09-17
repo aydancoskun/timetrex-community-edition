@@ -43,7 +43,7 @@ forceNoCacheHeaders(); //Send headers to disable caching.
 header('Content-Type: application/javascript; charset=UTF-8');
 
 TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in, this is needed for getPreLoginData as well.
-$auth = TTNew('APIAuthentication');
+$auth = TTNew('APIAuthentication'); /** @var APIAuthentication $auth */
 ?>
 var APIGlobal = function() {};
 APIGlobal.pre_login_data = <?php echo json_encode( $auth->getPreLoginData() );?>; //Convert getPreLoginData() array to JS.

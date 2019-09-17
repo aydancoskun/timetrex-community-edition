@@ -279,9 +279,9 @@ class HolidayFactory extends Factory {
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
-	//ignore_after_eligibility is used when scheduling employees as absent on a holiday, since they haven't worked after the holiday
-	// when the schedule is created, it will always fail.
 	/**
+	 * ignore_after_eligibility is used when scheduling employees as absent on a holiday, since they haven't worked after the holiday
+	 * when the schedule is created, it will always fail.
 	 * @param string $user_id UUID
 	 * @param bool $ignore_after_eligibility
 	 * @return bool
@@ -293,7 +293,7 @@ class HolidayFactory extends Factory {
 
 		$original_time_zone = TTDate::getTimeZone(); //Store current timezone so we can return to it after.
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getById( $user_id );
 		if ( $ulf->getRecordCount() == 1 ) {
 			$user_obj = $ulf->getCurrent();
@@ -320,10 +320,10 @@ class HolidayFactory extends Factory {
 								'future_dates' => FALSE, //Calculates dates in the future.
 								'past_dates' => FALSE, //Calculates dates in the past. This is only needed when Pay Formulas that use averaging are enabled?*
 							);
-			$cp = TTNew('CalculatePolicy');
+			$cp = TTNew('CalculatePolicy'); /** @var CalculatePolicy $cp */
 			$cp->setFlag( $flags );
 			$cp->setUserObject( $user_obj );
-			$cp->getRequiredData( $this->getDateStamp() );
+			$cp->getRequiredData( $this->getDateStamp(), $this->getDateStamp() );
 
 			$retval = $cp->isEligibleForHoliday( $this->getDateStamp(), $this->getHolidayPolicyObject(), $ignore_after_eligibility );
 
@@ -346,7 +346,7 @@ class HolidayFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Holiday Policy
-		$hplf = TTnew( 'HolidayPolicyListFactory' );
+		$hplf = TTnew( 'HolidayPolicyListFactory' ); /** @var HolidayPolicyListFactory $hplf */
 		$this->Validator->isResultSetWithRows(	'holiday_policy',
 														$hplf->getByID($this->getHolidayPolicyID()),
 														TTi18n::gettext('Holiday Policy is invalid')
@@ -409,7 +409,7 @@ class HolidayFactory extends Factory {
 			Debug::text('Holiday is today or in the future, try to recalculate recurring schedules on this date: '. TTDate::getDate('DATE', $this->getDateStamp() ) .' Old Date: '. TTDate::getDate('DATE', $this->getOldDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
 			$date_ranges = array();
-			if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) != TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) ) {
+			if ( $this->getOldDateStamp() != '' AND TTDate::getMiddleDayEpoch( $this->getDateStamp() ) != TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) ) {
 				$date_ranges[] = array( 'start_date' => TTDate::getBeginDayEpoch( $this->getOldDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getOldDateStamp() ) );
 			}
 
@@ -423,7 +423,7 @@ class HolidayFactory extends Factory {
 				//Get existing recurring_schedule rows on the holiday day, so we can figure out which recurring_schedule_control records to recalculate.
 				$recurring_schedule_control_ids = array();
 
-				$rslf = TTnew('RecurringScheduleListFactory');
+				$rslf = TTnew('RecurringScheduleListFactory'); /** @var RecurringScheduleListFactory $rslf */
 				$rslf->getByCompanyIDAndStartDateAndEndDateAndNoConflictingSchedule( $this->getHolidayPolicyObject()->getCompany(), $start_date, $end_date );
 				Debug::text('Recurring Schedule Record Count: '. $rslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $rslf->getRecordCount() > 0 ) {
@@ -440,7 +440,7 @@ class HolidayFactory extends Factory {
 					//
 					//**THIS IS DONE IN RecurringScheduleControlFactory, RecurringScheduleTemplateControlFactory, HolidayFactory postSave() as well.
 					//
-					$rsf = TTnew('RecurringScheduleFactory');
+					$rsf = TTnew('RecurringScheduleFactory'); /** @var RecurringScheduleFactory $rsf */
 					$rsf->StartTransaction();
 					$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $recurring_schedule_control_ids, $start_date, $end_date );
 					$rsf->addRecurringSchedulesFromRecurringScheduleControl( $this->getHolidayPolicyObject()->getCompany(), $recurring_schedule_control_ids, $start_date, $end_date );

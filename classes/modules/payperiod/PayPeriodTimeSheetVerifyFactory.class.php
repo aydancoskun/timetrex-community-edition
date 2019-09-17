@@ -446,7 +446,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	 * @return bool
 	 */
 	function getPreviousPayPeriodObject() {
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 		$pplf->getPreviousPayPeriodById( $this->getPayPeriod() );
 		if ( $pplf->getRecordCount() > 0 ) {
 			return $pplf->getCurrent();
@@ -478,7 +478,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 			} elseif ( $previous_pay_period_obj->getStatus() == 20 ) {
 				$is_previous_time_sheet_verified = TRUE;
 			} else {
-				$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+				$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $pptsvlf */
 				$pptsvlf->getByPayPeriodIdAndUserId( $previous_pay_period_obj->getId(), $user_id );
 				if ( $pptsvlf->getRecordCount() > 0 ) {
 					$pptsv_obj = $pptsvlf->getCurrent();
@@ -609,12 +609,12 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 			$user_id = $this->getUser();
 		}
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getById( $user_id );
 		if ( $ulf->getRecordCount() == 1 ) {
 			$user_obj = $ulf->getCurrent();
 
-			$hlf = TTnew( 'HierarchyListFactory' );
+			$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 			//Get timesheet verification hierarchy, so we know who the superiors are.
 			//Immediate superiors only can verify timesheets directly so we set $immediate_parents_only = TRUE
 			//  However this prevents superiors from dropping down levels and authorizing, as the superior wouldn't appear in the superior list then, so set $immediate_parents_only = FALSE
@@ -631,6 +631,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $current_user_id
+	 * @return bool
+	 */
 	function getHierarchyLevelForSuperior( $current_user_id ) {
 		if ( $current_user_id == '' ) {
 			$current_user_id = $this->getCurrentUser();
@@ -641,7 +645,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 		$retval = FALSE;
 
-		$hllf = TTnew('HierarchyLevelListFactory');
+		$hllf = TTnew('HierarchyLevelListFactory'); /** @var HierarchyLevelListFactory $hllf */
 		$hllf->getByUserIdAndObjectTypeID( $current_user_id, 90 );
 		if ( $hllf->getRecordCount() > 0 ) {
 			$retval = $hllf->getCurrent()->getLevel();
@@ -675,7 +679,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 			} elseif ( $time_sheet_verification_type_id == 30 ) { //Superior Only
 				//Make sure superiors can drop down levels and verify timesheets in this mode.
 				if ( $this->getCurrentUser() != $this->getUser() AND $is_timesheet_superior == TRUE ) {
-					Debug::Text('Superior is verifiying their suborindates timesheet...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text('Superior is verifiying their subordinates timesheet...', __FILE__, __LINE__, __METHOD__, 10);
 					$this->setStatus( 30 ); //Pending Authorization
 				} elseif( $this->getCurrentUser() == $this->getUser() ) {
 					Debug::Text('ERROR: Superior is trying to verifiy their own timesheet...', __FILE__, __LINE__, __METHOD__, 10);
@@ -724,14 +728,14 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Pay Period
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 		$this->Validator->isResultSetWithRows(	'pay_period',
 														$pplf->getByID($this->getPayPeriod()),
 														TTi18n::gettext('Invalid Pay Period')
 													);
 		// User
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Invalid Employee')
@@ -777,7 +781,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		if ( $this->getDeleted() == FALSE AND $this->getStatus() != 55 ) { //Declined
 			//Check to make sure no critical severity exceptions exist.
 			//Make sure we ignore the 'V1 - TimeSheet Not Verified' exception, as that could be critical and prevent them from ever verifying their timesheet.
-			$elf = TTNew('ExceptionListFactory');
+			$elf = TTNew('ExceptionListFactory'); /** @var ExceptionListFactory $elf */
 			$elf->getByCompanyIDAndUserIdAndPayPeriodIdAndSeverityAndNotTypeID( $this->getUserObject()->getCompany(), $this->getUser(), $this->getPayPeriod(), array(30), array( 'V1' ) );
 			Debug::Text(' Critcal Severity Exceptions: '. $elf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $elf->getRecordCount() > 0 ) {
@@ -809,13 +813,13 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	function postSave() {
 		//If status is pending auth (55=declined) delete all authorization history, because they could be re-verifying.
 		if ( $this->getCurrentUser() != FALSE AND $this->getStatus() == 55 ) {
-			$alf = TTnew( 'AuthorizationListFactory' );
+			$alf = TTnew( 'AuthorizationListFactory' ); /** @var AuthorizationListFactory $alf */
 			$alf->getByObjectTypeAndObjectId( 90, $this->getId() );
 			if ( $alf->getRecordCount() > 0 ) {
 				foreach( $alf as $a_obj ) {
 					//Delete the record outright for now, as marking it as deleted causes transaction issues
 					//and it never gets committed.
-					$a_obj->Delete();
+					$a_obj->Delete( TRUE );
 				}
 			}
 		}
@@ -841,7 +845,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 				}
 
 				if ( $authorize_timesheet == TRUE AND TTUUID::isUUID( $this->getCurrentUser() ) ) {
-					$af = TTnew( 'AuthorizationFactory' );
+					$af = TTnew( 'AuthorizationFactory' ); /** @var AuthorizationFactory $af */
 					$af->setCurrentUser( $this->getCurrentUser() );
 					$af->setObjectType( 90 ); //TimeSheet
 					$af->setObject( $this->getId() );
@@ -889,7 +893,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 						'past_dates'          => FALSE, //Calculates dates in the past. This is only needed when Pay Formulas that use averaging are enabled?*
 				);
 
-				$cp = TTNew( 'CalculatePolicy' );
+				$cp = TTNew( 'CalculatePolicy' ); /** @var CalculatePolicy $cp */
 				$cp->setFlag( $flags );
 				$cp->setUserObject( $this->getUserObject() );
 				$cp->calculate( $this->getPayPeriodObject()->getEndDate() ); //This sets timezone itself.
@@ -994,6 +998,8 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		if ( is_object( $this->getPayPeriodObject() ) ) {
 			return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('TimeSheet Verify').' - '. TTi18n::getText('Employee') .': '. UserListFactory::getFullNameById( $this->getUser() ) .' '. TTi18n::getText('Pay Period') .': '.	TTDate::getDate('DATE', $this->getPayPeriodObject()->getStartDate() ) .' -> '. TTDate::getDate('DATE', $this->getPayPeriodObject()->getEndDate() ), NULL, $this->getTable() );
 		}
+
+		return FALSE;
 	}
 }
 ?>

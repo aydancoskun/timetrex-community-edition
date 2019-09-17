@@ -328,7 +328,7 @@ class KPIFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows( 'company',
 														$clf->getByID( $this->getCompany() ),
 														TTi18n::gettext( 'Company is invalid' )
@@ -432,7 +432,7 @@ class KPIFactory extends Factory {
 			}
 		}
 		if ( $this->getDeleted() == TRUE ) {
-			$urlf = TTnew( 'UserReviewListFactory' );
+			$urlf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $urlf */
 			$urlf->getByKpiId( $this->getId() );
 			if ( $urlf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use', FALSE, TTi18n::gettext( 'KPI is in use' ) );
@@ -465,9 +465,9 @@ class KPIFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

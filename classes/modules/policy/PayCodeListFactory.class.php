@@ -55,7 +55,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -130,7 +130,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -174,7 +174,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -216,7 +216,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -258,7 +258,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -303,7 +303,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -313,7 +313,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 	 * @return array|bool
 	 */
 	static function getPayCodeTypeMap( $company_id ) {
-		$pclf = TTnew( 'PayCodeListFactory' );
+		$pclf = TTnew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $pclf */
 		$pclf->getByCompanyId( $company_id );
 		if ( $pclf->getRecordCount() > 0 ) {
 			$pay_codes = array();
@@ -460,7 +460,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

@@ -282,7 +282,7 @@ class AbsencePolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -323,7 +323,7 @@ class AbsencePolicyFactory extends Factory {
 
 		// Pay Code
 		if ( $this->getPayCode() !== FALSE AND $this->getPayCode() != TTUUID::getZeroID() ) {
-			$pclf = TTnew( 'PayCodeListFactory' );
+			$pclf = TTnew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $pclf */
 			$this->Validator->isResultSetWithRows(	'pay_code_id',
 															$pclf->getById($this->getPayCode()),
 															TTi18n::gettext('Invalid Pay Code')
@@ -332,7 +332,7 @@ class AbsencePolicyFactory extends Factory {
 
 		// Pay Formula Policy
 		if ( $this->getPayFormulaPolicy() !== FALSE AND $this->getPayFormulaPolicy() != TTUUID::getZeroID() ) {
-			$pfplf = TTnew( 'PayFormulaPolicyListFactory' );
+			$pfplf = TTnew( 'PayFormulaPolicyListFactory' ); /** @var PayFormulaPolicyListFactory $pfplf */
 			$this->Validator->isResultSetWithRows(	'pay_formula_policy_id',
 															$pfplf->getByID($this->getPayFormulaPolicy()),
 															TTi18n::gettext('Pay Formula Policy is invalid')
@@ -361,7 +361,7 @@ class AbsencePolicyFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('absence_policy' => $this->getId() ), 1 );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',
@@ -369,7 +369,7 @@ class AbsencePolicyFactory extends Factory {
 										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by policy groups' ) );
 			}
 
-			$hplf = TTnew( 'HolidayPolicyListFactory' );
+			$hplf = TTnew( 'HolidayPolicyListFactory' ); /** @var HolidayPolicyListFactory $hplf */
 			$hplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('absence_policy' => $this->getId() ), 1 );
 			if ( $hplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',

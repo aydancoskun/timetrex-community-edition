@@ -921,7 +921,7 @@ class TTDate {
 	 * @return false|string
 	 */
 	public static function getISODateStamp( $epoch ) {
-		$format = 'Ymd';
+		$format = 'Y-m-d'; //Needs to contain "-" so its a string and doesn't get confused with epoch values during is_numeric() checks.
 
 		return date( $format, $epoch);
 	}
@@ -1844,10 +1844,9 @@ class TTDate {
 		return $retval;
 	}
 
-
-	//Returns the month of the quarter that the date falls in.
-	//Used for government forms that require a break down for each month in the quarter.
 	/**
+	 * Returns the month of the quarter that the date falls in.
+	 * Used for government forms that require a break down for each month in the quarter.
 	 * @param int $epoch EPOCH
 	 * @return bool|mixed
 	 */
@@ -1876,9 +1875,9 @@ class TTDate {
 		return FALSE;
 	}
 
-	//Regardless of the quarter, this returns if its the 1st, 2nd or 3rd month in the quarter.
-	//Primary used for government forms.
 	/**
+	 * Regardless of the quarter, this returns if its the 1st, 2nd or 3rd month in the quarter.
+	 * Primary used for government forms.
 	 * @param int $epoch EPOCH
 	 * @return bool|mixed
 	 */
@@ -1934,12 +1933,35 @@ class TTDate {
 		}
 
 		$year = TTDate::getYear( $epoch );
-		$quarter_dates = array(
-								1 => array( 'start' => mktime(0, 0, 0, 1, $day_of_month, $year ), 'end' => mktime(0, 0, -1, 4, ( $day_of_month > 30 ) ? 30 : $day_of_month, $year ) ),
-								2 => array( 'start' => mktime(0, 0, 0, 4, ( $day_of_month > 30 ) ? 30 : $day_of_month, $year ), 'end' => mktime(0, 0, -1, 7, $day_of_month, $year ) ),
-								3 => array( 'start' => mktime(0, 0, 0, 7, $day_of_month, $year ), 'end' => mktime(0, 0, -1, 10, ( $day_of_month > 30 ) ? 30 : $day_of_month, $year ) ),
-								4 => array( 'start' => mktime(0, 0, 0, 10, $day_of_month, $year ), 'end' => mktime(0, 0, -1, 13, $day_of_month, $year ) ),
-								);
+
+		//When $quarter is specified, as an optimization only calculate dates for just it.
+
+		if ( $quarter == NULL ) {
+			$tmp_quarters = array( 1, 2, 3, 4);
+		} else {
+			if ( is_array($quarter) ) {
+				$tmp_quarters = $quarter;
+			} else {
+				$tmp_quarters = array( $quarter );
+			}
+		}
+
+		foreach( $tmp_quarters as $tmp_quarter ) {
+			switch ( $tmp_quarter ) {
+				case 1:
+					$quarter_dates[1] = array( 'start' => mktime(0, 0, 0, 1, $day_of_month, $year ), 'end' => mktime(0, 0, -1, 4, ( $day_of_month > 30 ) ? 30 : $day_of_month, $year ) );
+					break;
+				case 2:
+					$quarter_dates[2] = array( 'start' => mktime(0, 0, 0, 4, ( $day_of_month > 30 ) ? 30 : $day_of_month, $year ), 'end' => mktime(0, 0, -1, 7, $day_of_month, $year ) );
+					break;
+				case 3:
+					$quarter_dates[3] = array( 'start' => mktime(0, 0, 0, 7, $day_of_month, $year ), 'end' => mktime(0, 0, -1, 10, ( $day_of_month > 30 ) ? 30 : $day_of_month, $year ) );
+					break;
+				case 4:
+					$quarter_dates[4] = array( 'start' => mktime(0, 0, 0, 10, $day_of_month, $year ), 'end' => mktime(0, 0, -1, 13, $day_of_month, $year ) );
+					break;
+			}
+		}
 
 		if ( $quarter != '' ) {
 			if ( isset($quarter_dates[$quarter]) ) {
@@ -2149,7 +2171,7 @@ class TTDate {
 			$epoch = self::getTime();
 		}
 
-		if (  !is_numeric( $start_day_of_week ) ) {
+		if ( !is_numeric( $start_day_of_week ) ) {
 			if ( strtolower($start_day_of_week) == 'mon' ) {
 				$start_day_of_week = 1;
 			} elseif ( strtolower($start_day_of_week) == 'sun' ) {
@@ -2188,16 +2210,37 @@ class TTDate {
 			$epoch = self::getTime();
 		}
 
-		$retval = self::getEndDayEpoch( ( self::getMiddleDayEpoch( self::getBeginWeekEpoch( self::getMiddleDayEpoch($epoch), $start_day_of_week ) ) + ( 86400 * 6 ) ) );
+		if ( !is_numeric( $start_day_of_week ) ) {
+			if ( strtolower($start_day_of_week) == 'mon' ) {
+				$start_day_of_week = 1;
+			} elseif ( strtolower($start_day_of_week) == 'sun' ) {
+				$start_day_of_week = 0;
+			}
+		}
 
-		//Debug::text(' Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Start Day of Week: '. $start_day_of_week, __FILE__, __LINE__, __METHOD__, 10);
+		if (  !is_numeric( $start_day_of_week ) ) {
+			$start_day_of_week = 0;
+		}
 
+		//Get day of week
+		$day_of_week = date('w', $epoch);
+		//Debug::text('Current Day of week: '. $day_of_week, __FILE__, __LINE__, __METHOD__, 10);
+
+		$offset = 0;
+		if ( $day_of_week < $start_day_of_week ) {
+			$offset = ( ( $start_day_of_week - $day_of_week ) - 1 );
+		} else {
+			$offset = ( 6 - ($day_of_week - $start_day_of_week) );
+		}
+
+		$retval = mktime(23, 59, 59, date('m', $epoch), ( date('j', $epoch) + $offset), date('Y', $epoch) );
+
+		//Debug::text(' Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Start Day of Week: '. $start_day_of_week .' Offset: '. $offset, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
-	//This could also be called: getWeekOfYear
-
 	/**
+	 * This could also be called: getWeekOfYear
 	 * @param int $epoch EPOCH
 	 * @param int $start_week_day
 	 * @return int
@@ -2421,9 +2464,8 @@ class TTDate {
 		return $epoch;
 	}
 
-	//Returns an array of dates within the range.
-
 	/**
+	 * Returns an array of dates within the range.
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
 	 * @param bool $day_of_week
@@ -2445,9 +2487,8 @@ class TTDate {
 		return $retarr;
 	}
 
-	//Loop from filter start date to end date. Creating an array entry for each day.
-
 	/**
+	 * Loop from filter start date to end date. Creating an array entry for each day.
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
 	 * @param int $start_day_of_week
@@ -2551,8 +2592,6 @@ class TTDate {
 
 		return FALSE;
 	}
-
-	//Date pair1
 
 	/**
 	 * @param int $start_date1 EPOCH
@@ -2979,9 +3018,9 @@ class TTDate {
 		return sprintf('%0.01f', $num).' '.$suffix;
 	}
 
-	//Runs strtotime over a string, but if it happens to be an epoch, strtotime
-	//returns -1, so in this case, just return the epoch again.
 	/**
+	 * Runs strtotime over a string, but if it happens to be an epoch, strtotime
+	 * returns -1, so in this case, just return the epoch again.
 	 * @param $str
 	 * @return int
 	 */
@@ -3255,7 +3294,7 @@ class TTDate {
 				//Since we allow multiple pay_period schedules to be selected, we have to return pay_period_ids, not start/end dates.
 				if ( $time_period == 'this_pay_period' ) {
 					Debug::text('this_pay_period', __FILE__, __LINE__, __METHOD__, 10);
-					$pplf = TTnew( 'PayPeriodListFactory' );
+					$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 					$pplf->getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach( $pplf as $pp_obj ) {
@@ -3264,7 +3303,7 @@ class TTDate {
 					}
 				} elseif ( $time_period == 'last_pay_period' ) {
 					Debug::text('last_pay_period', __FILE__, __LINE__, __METHOD__, 10);
-					$pplf = TTnew( 'PayPeriodListFactory' );
+					$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 					$pplf->getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach( $pplf as $pp_obj ) {
@@ -3429,7 +3468,7 @@ class TTDate {
 				$end_date = FALSE;
 				//Since we allow multiple pay_period schedules to be selected, we have to return pay_period_ids, not start/end dates.
 				if ( $time_period == 'this_year_this_pay_period' ) {
-					$pplf = TTnew( 'PayPeriodListFactory' );
+					$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 					$pplf->getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach( $pplf as $pp_obj ) {
@@ -3439,7 +3478,7 @@ class TTDate {
 						}
 					}
 				} elseif ( $time_period == 'this_year_last_pay_period' ) {
-					$pplf = TTnew( 'PayPeriodListFactory' );
+					$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 					$pplf->getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach( $pplf as $pp_obj ) {
@@ -3572,7 +3611,7 @@ class TTDate {
 				//Since we allow multiple pay_period schedules to be selected, we have to return pay_period_ids, not start/end dates.
 				if ( $time_period == 'to_this_pay_period' ) {
 					Debug::text('to_this_pay_period', __FILE__, __LINE__, __METHOD__, 10);
-					$pplf = TTnew( 'PayPeriodListFactory' );
+					$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 					$pplf->getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach( $pplf as $pp_obj ) {
@@ -3583,7 +3622,7 @@ class TTDate {
 					}
 				} elseif ( $time_period == 'to_last_pay_period' ) {
 					Debug::text('to_last_pay_period', __FILE__, __LINE__, __METHOD__, 10);
-					$pplf = TTnew( 'PayPeriodListFactory' );
+					$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 					$pplf->getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach( $pplf as $pp_obj ) {

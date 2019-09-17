@@ -77,7 +77,7 @@ class APIPayStubAmendment extends APIFactory {
 	 * @param bool $format
 	 * @return array|bool
 	 */
-	function getPayStubAmendment( $data = NULL, $disable_paging = FALSE, $format = FALSE ) {
+	function getPayStubAmendment( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		if ( !$this->getPermissionObject()->Check('pay_stub_amendment', 'enabled')
@@ -87,63 +87,24 @@ class APIPayStubAmendment extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub_amendment', 'view' );
 
-		$blf = TTnew( 'PayStubAmendmentListFactory' );
+		$blf = TTnew( 'PayStubAmendmentListFactory' ); /** @var PayStubAmendmentListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $blf->getRecordCount() > 0 ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
 
-		$format = Misc::trimSortPrefix( $format );
-		if ( $format != '' ) {
-			$export_options = Misc::trimSortPrefix( $blf->getOptions('export_type') );
-			if ( isset($export_options[$format] ) ) {
-				if ( $blf->getRecordCount() > 0 ) {
-					$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
-					$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
-					$blf->setProgressBarObject( $this->getProgressBarObject() ); //Expose progress bar object to pay stub object.
+			$this->setPagerObject( $blf );
 
-					$output = $blf->exportPayStubAmendment( $blf, $format );
+			$retarr = array();
+			foreach( $blf as $b_obj ) {
+				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
-					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
-
-					if ( stristr( $format, 'cheque') ) {
-						return Misc::APIFileDownload( 'checks_'. str_replace(array('/', ',', ' '), '_', TTDate::getDate('DATE', time() ) ) .'.pdf', 'application/pdf', $output );
-					} else {
-						//Include file creation number in the exported file name, so the user knows what it is without opening the file,
-						//and can generate multiple files if they need to match a specific number.
-						$ugdlf = TTnew( 'UserGenericDataListFactory' );
-						$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getCurrentCompanyObject()->getId(), 'PayStubFactory', TRUE );
-						if ( $ugdlf->getRecordCount() > 0 ) {
-							$ugd_obj = $ugdlf->getCurrent();
-							$setup_data = $ugd_obj->getData();
-						}
-
-						if ( isset($setup_data) ) {
-							$file_creation_number = $setup_data['file_creation_number']++;
-						} else {
-							$file_creation_number = 0;
-						}
-						return Misc::APIFileDownload( 'eft_'. $file_creation_number .'_'. str_replace(array('/', ',', ' '), '_', TTDate::getDate('DATE', time() ) ) .'.txt', 'application/pdf', $output );
-					}
-				}
-			} else {
-				Debug::Text('Invalid format '. $format, __FILE__, __LINE__, __METHOD__, 10);
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $blf->getCurrentRow() );
 			}
-		} else {
-			if ( $blf->getRecordCount() > 0 ) {
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
 
-				$this->setPagerObject( $blf );
+			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-				$retarr = array();
-				foreach( $blf as $b_obj ) {
-					$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
-
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $blf->getCurrentRow() );
-				}
-
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
-
-				return $this->returnHandler( $retarr );
-			}
+			return $this->returnHandler( $retarr );
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
@@ -214,7 +175,7 @@ class APIPayStubAmendment extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayStubAmendmentListFactory' );
+				$lf = TTnew( 'PayStubAmendmentListFactory' ); /** @var PayStubAmendmentListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -325,7 +286,7 @@ class APIPayStubAmendment extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayStubAmendmentListFactory' );
+				$lf = TTnew( 'PayStubAmendmentListFactory' ); /** @var PayStubAmendmentListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -425,7 +386,7 @@ class APIPayStubAmendment extends APIFactory {
 	 * @return array|float
 	 */
 	function calcAmount( $user_id, $rate, $units ) {
-		$psf = TTnew( 'PayStubAmendmentFactory' );
+		$psf = TTnew( 'PayStubAmendmentFactory' ); /** @var PayStubAmendmentFactory $psf */
 		$psf->setUser( $user_id );
 		$psf->setRate( $rate );
 		$psf->setUnits( $units );

@@ -56,13 +56,13 @@ class InstallSchema_1008A extends InstallSchema_Base {
 	function postInstall() {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->StartTransaction();
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach ( $clf as $c_obj ) {
 				if ( $c_obj->getStatus() == 10 ) {
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 					$ulf->getHighestEmployeeNumberByCompanyId( $c_obj->getId() );
 					if ( $ulf->getRecordCount() > 0 ) {

@@ -190,9 +190,8 @@ class BackgroundProcess {
 		return $retval;
 	}
 
-	//Delete any lock files older then max age, incase they are stale.
-
 	/**
+	 * Delete any lock files older then max age, incase they are stale.
 	 * @param $lock_files
 	 * @return bool
 	 */

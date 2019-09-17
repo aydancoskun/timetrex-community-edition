@@ -58,7 +58,7 @@ class InstallSchema_1058A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Update permission for new modules.
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			$i = 0;
@@ -70,11 +70,11 @@ class InstallSchema_1058A extends InstallSchema_Base {
 					$config_vars['other']['disable_audit_log_detail'] = TRUE;
 					$config_vars['other']['disable_audit_log'] = TRUE;
 
-					$pclf = TTnew( 'PermissionControlListFactory' );
+					$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 					// Update all the HR related permissions for the Standard/Business Edition (KPIs, reviews, qualifications, etc..., but *not* job vacancy or job applicants)
 					$pclf->getByCompanyID( $c_obj->getID(), NULL, NULL, NULL, array( 'id' => 'asc' ) );
 					if ( $pclf->getRecordCount() > 0 ) {
-						$pf = TTnew( 'PermissionFactory' );
+						$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 						$preset_options = $pf->getOptions('preset');
 						$preset_level_options = $pf->getOptions('preset_level');
 						ksort( $preset_options );
@@ -116,7 +116,7 @@ class InstallSchema_1058A extends InstallSchema_Base {
 
 
 					//Assign all absence policies to every policy group.
-					$aplf = TTnew('AbsencePolicyListFactory');
+					$aplf = TTnew('AbsencePolicyListFactory'); /** @var AbsencePolicyListFactory $aplf */
 					$aplf->getByCompanyId( $c_obj->getId() );
 					$ap_ids = array();
 					if ( $aplf->getRecordCount() > 0 ) {
@@ -124,7 +124,7 @@ class InstallSchema_1058A extends InstallSchema_Base {
 							$ap_ids[] = $ap_obj->getId();
 						}
 					}
-					$pglf = TTnew('PolicyGroupListFactory');
+					$pglf = TTnew('PolicyGroupListFactory'); /** @var PolicyGroupListFactory $pglf */
 					$pglf->getByCompanyId( $c_obj->getId() );
 					if ( $pglf->getRecordCount() > 0 ) {
 						foreach( $pglf as $pg_obj ) {

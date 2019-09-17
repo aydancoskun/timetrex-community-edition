@@ -204,7 +204,7 @@ class ExceptionPolicyControlFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -243,7 +243,7 @@ class ExceptionPolicyControlFactory extends Factory {
 		//
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('exception_policy_control' => $this->getId() ), 1 );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',

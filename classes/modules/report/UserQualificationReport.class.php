@@ -112,6 +112,7 @@ class UserQualificationReport extends Report {
 										'-2200-membership_renewal_date' => TTi18n::gettext('Membership Renewal Date'),
 										'-2250-skill_expiry_date' => TTi18n::gettext('Skill Expiry Date'),
 										'-2300-license_expiry_date' => TTi18n::gettext('License Expiry Date'),
+										'-2400-education_graduate_date' => TTi18n::gettext('Education Graduation Date'),
 
 										'-3000-custom_filter' => TTi18n::gettext('Custom Filter'),
 
@@ -125,6 +126,7 @@ class UserQualificationReport extends Report {
 			case 'membership_renewal_date':
 			case 'skill_expiry_date':
 			case 'license_expiry_date':
+			case 'education_graduate_date':
 				$retval = TTDate::getTimePeriodOptions();
 				break;
 			case 'date_columns':
@@ -136,7 +138,7 @@ class UserQualificationReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'UserQualificationReport', 'custom_column' );
@@ -147,13 +149,13 @@ class UserQualificationReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'UserQualificationReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'UserQualificationReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -162,7 +164,7 @@ class UserQualificationReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'UserQualificationReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -587,9 +589,8 @@ class UserQualificationReport extends Report {
 		return $retval;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -623,7 +624,7 @@ class UserQualificationReport extends Report {
 		$columns['hire_date'] = $columns['termination_date'] = $columns['birth_date'] = TRUE;
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -641,7 +642,7 @@ class UserQualificationReport extends Report {
 		//Debug::Arr($this->tmp_data['user'], 'TMP User Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user preference data for joining.
-		$uplf = TTnew( 'UserPreferenceListFactory' );
+		$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 		$uplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Preference Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uplf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -654,7 +655,7 @@ class UserQualificationReport extends Report {
 
 		//Get user wage data for joining.
 		//$filter_data['wage_group_id'] = 0; //Use default wage groups only.
-		$uwlf = TTnew( 'UserWageListFactory' );
+		$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -665,7 +666,7 @@ class UserQualificationReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
-		$qlf =	TTnew('QualificationListFactory');
+		$qlf =	TTnew('QualificationListFactory'); /** @var QualificationListFactory $qlf */
 		$qlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' Qualification Rows: '.$qlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $qlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -674,7 +675,7 @@ class UserQualificationReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
-		$uslf = TTnew( 'UserSkillListFactory' );
+		$uslf = TTnew( 'UserSkillListFactory' ); /** @var UserSkillListFactory $uslf */
 		$uslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Skill Rows: '.$uslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uslf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -685,7 +686,7 @@ class UserQualificationReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
-		$uelf = TTnew( 'UserEducationListFactory' );
+		$uelf = TTnew( 'UserEducationListFactory' ); /** @var UserEducationListFactory $uelf */
 		$uelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Education Rows: '.$uelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uelf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -696,7 +697,7 @@ class UserQualificationReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
-		$ullf = TTnew( 'UserLicenseListFactory' );
+		$ullf = TTnew( 'UserLicenseListFactory' ); /** @var UserLicenseListFactory $ullf */
 		$ullf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User License Rows: '.$ullf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ullf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -708,19 +709,19 @@ class UserQualificationReport extends Report {
 		}
 
 
-		$ullf = TTnew( 'UserLanguageListFactory' );
+		$ullf = TTnew( 'UserLanguageListFactory' ); /** @var UserLanguageListFactory $ullf */
 		$ullf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Language Rows: '.$ullf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ullf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ullf as $key => $ul_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $ul_obj->getUser(), $user_language_permission_children_ids ) ) {
-				$this->tmp_data['user_language'][$ul_obj->getqualification()][$ul_obj->getUser()][] = Misc::addKeyPrefix('user_language.', (array)$ul_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_language.', $columns ) ), array( 'qualification' ));
+				$this->tmp_data['user_language'][$ul_obj->getQualification()][$ul_obj->getUser()][] = Misc::addKeyPrefix('user_language.', (array)$ul_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_language.', $columns ) ), array( 'qualification' ));
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
 
-		$umlf = TTnew( 'UserMembershipListFactory' );
+		$umlf = TTnew( 'UserMembershipListFactory' ); /** @var UserMembershipListFactory $umlf */
 		$umlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Membership Rows: '.$umlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $umlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -735,35 +736,40 @@ class UserQualificationReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['qualification']), NULL, TTi18n::getText('Pre-Processing Data...') );
 		if ( isset($this->tmp_data['qualification']) ) {
+			//getReportDates() is quite time consuming, so run it on just the users, rather than qualification records which can be 10-100x more.
+			foreach( $this->tmp_data['user'] as $user_id => $user ) {
+				if ( isset( $user['user.hire_date'] ) ) {
+					$hire_date_columns = TTDate::getReportDates( 'user.hire', TTDate::parseDateTime( $user['user.hire_date'] ), FALSE, $this->getUserObject() );
+				} else {
+					$hire_date_columns = array();
+				}
+
+				if ( isset( $user['user.termination_date'] ) ) {
+					$termination_date_columns = TTDate::getReportDates( 'user.termination', TTDate::parseDateTime( $user['user.termination_date'] ), FALSE, $this->getUserObject() );
+				} else {
+					$termination_date_columns = array();
+				}
+				if ( isset( $user['user.birth_date'] ) ) {
+					$birth_date_columns = TTDate::getReportDates( 'user.birth', TTDate::parseDateTime( $user['user.birth_date'] ), FALSE, $this->getUserObject() );
+				} else {
+					$birth_date_columns = array();
+				}
+
+				$this->tmp_data['user'][$user_id] = array_merge( $this->tmp_data['user'][$user_id], $hire_date_columns, $termination_date_columns, $birth_date_columns );
+			}
+			unset( $user, $user_id, $hire_date_columns, $termination_date_columns, $birth_date_columns );
+
 			$key = 0;
 			foreach( $this->tmp_data['qualification'] as $qualification_id => $row ) {
 				if ( isset( $this->tmp_data['user'] ) ) {
 					foreach( $this->tmp_data['user'] as $user_id => $user ) {
-						if ( isset($user['user.hire_date']) ) {
-							$hire_date_columns = TTDate::getReportDates( 'user.hire', TTDate::parseDateTime( $user['user.hire_date'] ), FALSE, $this->getUserObject() );
-						} else {
-							$hire_date_columns = array();
-						}
-
-						if ( isset($user['user.termination_date']) ) {
-							$termination_date_columns = TTDate::getReportDates( 'user.termination', TTDate::parseDateTime( $user['user.termination_date'] ), FALSE, $this->getUserObject() );
-						} else {
-							$termination_date_columns = array();
-						}
-						if ( isset($user['user.birth_date']) ) {
-							$birth_date_columns = TTDate::getReportDates( 'user.birth', TTDate::parseDateTime( $user['user.birth_date'] ), FALSE, $this->getUserObject() );
-						} else {
-							$birth_date_columns = array();
-						}
-
 						$processed_data = array();
 						if ( isset($this->tmp_data['user_preference'][$user_id]) ) {
 							$processed_data = array_merge( $processed_data, (array)$this->tmp_data['user_preference'][$user_id] );
@@ -782,7 +788,7 @@ class UserQualificationReport extends Report {
 								if ( isset($user_skill['user_skill.expiry_date']) ) {
 									$user_skill['user_skill.expiry_date'] = array( 'sort' => TTDate::parseDateTime( $user_skill['user_skill.expiry_date']	 ), 'display' => $user_skill['user_skill.expiry_date'] );
 								}
-								$this->data[] = array_merge( (array)$row, (array)$user, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data, (array)$user_skill );
+								$this->data[] = array_merge( (array)$row, (array)$user, $processed_data, (array)$user_skill );
 							}
 						}
 						if ( isset($this->tmp_data['user_education'][$qualification_id][$user_id]) ) {
@@ -796,7 +802,7 @@ class UserQualificationReport extends Report {
 								if ( isset($user_education['user_education.graduate_date']) ) {
 									$user_education['user_education.graduate_date'] = array( 'sort' => TTDate::parseDateTime( $user_education['user_education.graduate_date']  ), 'display' => $user_education['user_education.graduate_date'] );
 								}
-								$this->data[] = array_merge( (array)$row, (array)$user, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data, (array)$user_education );
+								$this->data[] = array_merge( (array)$row, (array)$user, $processed_data, (array)$user_education );
 							}
 						}
 						if ( isset($this->tmp_data['user_license'][$qualification_id][$user_id]) ) {
@@ -807,12 +813,12 @@ class UserQualificationReport extends Report {
 								if ( isset($user_license['user_license.license_expiry_date']) ) {
 									$user_license['user_license.license_expiry_date'] = array( 'sort' => TTDate::parseDateTime( $user_license['user_license.license_expiry_date']  ), 'display' => $user_license['user_license.license_expiry_date'] );
 								}
-								$this->data[] = array_merge( (array)$row, (array)$user, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data, (array)$user_license );
+								$this->data[] = array_merge( (array)$row, (array)$user, $processed_data, (array)$user_license );
 							}
 						}
 						if ( isset($this->tmp_data['user_language'][$qualification_id][$user_id]) ) {
 							foreach( $this->tmp_data['user_language'][$qualification_id][$user_id] as $user_language ) {
-								$this->data[] = array_merge( (array)$row, (array)$user, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data, (array)$user_language );
+								$this->data[] = array_merge( (array)$row, (array)$user, $processed_data, (array)$user_language );
 							}
 						}
 						if ( isset($this->tmp_data['user_membership'][$qualification_id][$user_id]) ) {
@@ -823,18 +829,17 @@ class UserQualificationReport extends Report {
 								if ( isset($user_membership['user_membership.renewal_date']) ) {
 									$user_membership['user_membership.renewal_date'] = array( 'sort' => TTDate::parseDateTime( $user_membership['user_membership.renewal_date']	 ), 'display' => $user_membership['user_membership.renewal_date'] );
 								}
-								$this->data[] = array_merge( (array)$row, (array)$user, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data, (array)$user_membership );
+								$this->data[] = array_merge( (array)$row, (array)$user, $processed_data, (array)$user_membership );
 							}
 						}
-
 					}
-
 				}
+
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 				$key++;
 
 			}
-			unset($this->tmp_data, $row, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data );
+			unset($this->tmp_data, $row, $processed_data );
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -856,6 +861,10 @@ class UserQualificationReport extends Report {
 
 		if ( isset($data['license_expiry_date']) ) {
 			$data = array_merge( $data, (array)$this->convertTimePeriodToStartEndDate( $data['license_expiry_date'], 'license_expiry_' ) );
+		}
+
+		if ( isset($data['education_graduate_date']) ) {
+			$data = array_merge( $data, (array)$this->convertTimePeriodToStartEndDate( $data['education_graduate_date'], 'education_graduate_' ) );
 		}
 
 		return $data;

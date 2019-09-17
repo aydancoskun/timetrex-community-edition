@@ -55,7 +55,7 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -116,7 +116,7 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -151,7 +151,7 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -190,17 +190,19 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 		$query .= $this->getSortSQL( $order );
 
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
 	 * @param string $id UUID
+	 * @param $type_id
 	 * @param string $company_id UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|RemittanceSourceAccountListFactory
+	 * @throws DBError
 	 */
 	function getByLegalEntityIdAndTypeIdAndCompanyId( $id, $type_id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
@@ -242,7 +244,7 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 		$query .= $this->getSortSQL( $order, $strict );
 
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -270,7 +272,7 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -391,7 +393,7 @@ class RemittanceSourceAccountListFactory extends RemittanceSourceAccountFactory 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		//Debug::Query($query, $ph,__FILE__, __LINE__, __METHOD__, 10);
 		return $this;

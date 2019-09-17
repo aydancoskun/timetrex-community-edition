@@ -47,7 +47,7 @@ if ( !isset($disable_database_connection) ) {
 			if ( isset($config_vars['database']['type']) AND trim( strtolower($config_vars['database']['type']) ) == 'mysqlt' ) { //Added in v9.0.6, 24-Dec-2015
 				if ( extension_loaded('mysqli') !== FALSE ) {
 					//If MySQLi extension is already loaded, just switch it in the config file.
-					$install_obj = TTnew('Install');
+					$install_obj = TTnew('Install'); /** @var Install $install_obj */
 					$install_obj->writeConfigFile( array('database' => array( 'type' => 'mysqli' ) ) );
 					$config_vars['database']['type'] = 'mysqli';
 					unset($install_obj);

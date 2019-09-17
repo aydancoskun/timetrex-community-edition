@@ -74,7 +74,7 @@ var ServiceCaller = Backbone.Model.extend( {
 
 //		var data = {filedata: form_data, SessionID: LocalCacheData.getSessionID()};
 //
-		var message_id = UUID.guid();
+		var message_id = TTUUID.generateUUID();
 		ProgressBar.showProgressBar( message_id );
 
 		//On IE 9
@@ -253,7 +253,7 @@ var ServiceCaller = Backbone.Model.extend( {
 				break;
 		}
 
-		message_id = UUID.guid();
+		message_id = TTUUID.generateUUID();
 		TTPromise.add('ServiceCaller', message_id);
 		if ( className !== 'APIProgressBar' && function_name !== 'Logout' ) {
 			url = url + '&MessageID=' + message_id;
@@ -270,12 +270,27 @@ var ServiceCaller = Backbone.Model.extend( {
 
 		apiArgs = {json: JSON.stringify( apiArgs )};
 
+		//Try to get a stack trace for each function call so if an error occurs we know exactly what triggered the call.
+		// IE11 doesn't support Error() like Firefox/Chrome/Edge do though, so skip the trace.
+		var stack_trace_str = null;
+		if ( typeof Error !== 'undefined' ) {
+			var stack_trace = (new Error());
+			if ( typeof stack_trace === 'object' && stack_trace.stack && typeof stack_trace.stack === 'string' ) {
+				stack_trace_str = stack_trace.stack.split( '\n' ); //This is eventually JSONified so convert it to an array for better formatting.
+			} else {
+				stack_trace_str = null;
+			}
+			delete stack_trace;
+		}
+
 		var api_called_date = new Date();
 		var api_stack = {
 			api: className + '.' + function_name,
 			args: apiArgs.json,
-			api_called_date: api_called_date.toISOString()
+			api_called_date: api_called_date.toISOString(),
+			stack_trace: stack_trace_str
 		};
+		delete stack_trace_str;
 
 		if ( LocalCacheData.api_stack.length === 16 ) {
 			LocalCacheData.api_stack.pop();
@@ -332,7 +347,7 @@ var ServiceCaller = Backbone.Model.extend( {
 						LocalCacheData.cleanNecessaryCache(); //make sure the cache is cleared when session is expired
 						ServiceCaller.cancelAllError = true;
 						LocalCacheData.login_error_string = $.i18n._( 'Session expired, please login again.' );
-						Global.clearSessionCookie();
+						Global.clearSessionCookie(); //This helps skip other API calls or prevent the UI from thinking we are still logged in.
 						if (window.location.href == Global.getBaseURL() + '#!m=' + 'Login') {
 							// Prevent a partially loaded login screen when SessionID cookie is set but not valid on server.
 							window.location.reload();

@@ -1108,6 +1108,15 @@ if (!defined('_ADODB_LAYER')) {
 				if ($this->debug) {
 					ADOConnection::outp("Smart Commit failed");
 				}
+
+				if ($this->debug == 99) {
+					adodb_backtrace(true,5);
+				}
+				$fn = $this->raiseErrorFn;
+				if ($fn) {
+					$fn($this->databaseType,'COMMIT',$this->ErrorNo(),$this->ErrorMsg(),null,null,$this);
+				}
+
 			} else {
 				if ($this->debug) {
 					ADOConnection::outp("Smart Commit occurred");

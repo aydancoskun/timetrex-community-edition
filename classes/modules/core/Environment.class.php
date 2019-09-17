@@ -85,9 +85,9 @@ class Environment {
 		return self::stripDuplicateSlashes( $retval );
 	}
 
-	//Due to how the legacy interface is handled, we need to use the this function to determine the URL to redirect too,
-	//as the base_url needs to be /interface most of the time, for images and such to load properly.
 	/**
+	 * Due to how the legacy interface is handled, we need to use the this function to determine the URL to redirect too,
+	 * as the base_url needs to be /interface most of the time, for images and such to load properly.
 	 * @return mixed
 	 */
 	static function getDefaultInterfaceBaseURL() {
@@ -110,9 +110,8 @@ class Environment {
 		return $retval;
 	}
 
-	//Returns the BASE_URL for the API functions.
-
 	/**
+	 * Returns the BASE_URL for the API functions.
 	 * @param null $api
 	 * @return mixed
 	 */
@@ -145,6 +144,9 @@ class Environment {
 		return self::getAPIBaseURL( $api ).'api.php';
 	}
 
+	/**
+	 * @return string
+	 */
 	static function getImagesPath() {
 		return self::getBasePath() . DIRECTORY_SEPARATOR .'interface'. DIRECTORY_SEPARATOR .'images'. DIRECTORY_SEPARATOR;
 	}

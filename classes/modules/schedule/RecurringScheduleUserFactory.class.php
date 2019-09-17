@@ -67,7 +67,7 @@ class RecurringScheduleUserFactory extends Factory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
@@ -112,7 +112,7 @@ class RecurringScheduleUserFactory extends Factory {
 										);
 		// Selected Employee
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 														$ulf->getByID($this->getUser()),
 														TTi18n::gettext('Selected Employee is invalid')
@@ -124,6 +124,7 @@ class RecurringScheduleUserFactory extends Factory {
 		//
 		return TRUE;
 	}
+
 	//This table doesn't have any of these columns, so overload the functions.
 
 	/**

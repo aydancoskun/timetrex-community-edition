@@ -519,21 +519,21 @@ WageViewController = BaseViewController.extend( {
 	setEditViewData: function() {
 		var $this = this;
 		this._super( 'setEditViewData' ); //Set Navigation
+
 		this.setCurrency();
 
 		if ( !this.sub_view_mode ) {
 			var widget = $this.edit_view_ui_dic['user_id'];
-			if ( ( !this.current_edit_record || !this.current_edit_record.id ) && !this.is_mass_editing ) {
-
-				widget.setAllowMultipleSelection( true );
-
-			} else {
-				widget.setAllowMultipleSelection( false );
+			if ( widget ) {
+				if ( ( !this.current_edit_record || !this.current_edit_record.id ) && !this.is_mass_editing ) {
+					widget.setAllowMultipleSelection( true );
+				} else {
+					widget.setAllowMultipleSelection( false );
+				}
 			}
 		}
 
 		$this.onTypeChange( false );
-
 	},
 
 	setCurrency: function() {

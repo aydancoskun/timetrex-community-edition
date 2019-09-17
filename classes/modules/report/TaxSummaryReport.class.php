@@ -123,7 +123,7 @@ class TaxSummaryReport extends Report {
 				break;
 			case 'custom_columns':
 				//Get custom fields for report data.
-				$oflf = TTnew( 'OtherFieldListFactory' );
+				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 				//User and Punch fields conflict as they are merged together in a secondary process.
 				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10), array( 10 => '' ) );
 				if ( is_array($other_field_names) ) {
@@ -132,7 +132,7 @@ class TaxSummaryReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'TaxSummaryReport', 'custom_column' );
@@ -143,13 +143,13 @@ class TaxSummaryReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'TaxSummaryReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'TaxSummaryReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -158,7 +158,7 @@ class TaxSummaryReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'TaxSummaryReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -253,7 +253,7 @@ class TaxSummaryReport extends Report {
 				//Get all pay stub accounts
 				$retval = array();
 
-				$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+				$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 				$psealf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), 10, array(10, 20, 30, 40, 50, 60, 65, 80) );
 				if ( $psealf->getRecordCount() > 0 ) {
 					$type_options  = $psealf->getOptions('type');
@@ -571,10 +571,16 @@ class TaxSummaryReport extends Report {
 		return $retval;
 	}
 
+	/**
+	 * @param $company_id
+	 * @param $filter_data
+	 * @param $columns
+	 * @return array
+	 */
 	function getCompanyDeductionData( $company_id, $filter_data, $columns ) {
 		$company_deduction_data = array();
 
-		$cdlf = TTnew( 'CompanyDeductionListFactory' );
+		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 		//Order by calculation_id DESC so Federal Taxes are always the parent of Fixed Amount records for example.
 		$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, NULL, NULL, NULL, array('calculation_id' => 'desc') );
 		Debug::Text('Company Deductions: '. $cdlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -583,6 +589,7 @@ class TaxSummaryReport extends Report {
 
 			//Splitting or combining data across agency/company deductions is important to prevent a report from duplicating subject wages.
 			//  For example if two taxes are selected (ie: 2x Workers Comp) and the employee has both deducted, the subject wages might be doubled up.
+			//  However if the employee is assigned to State Income Tax and State Addl. Income Tax both going to the same PS Account, the amounts shouldn't get doubled up.
 			if ( isset($columns['payroll_remittance_agency_name']) ) {
 				$enable_split_by_payroll_remittance_agency = TRUE;
 			} else {
@@ -599,7 +606,10 @@ class TaxSummaryReport extends Report {
 			foreach( $cdlf as $cd_obj ) {
 				//Check to see if its a Tax/Deduction that can be combined.
 				//Just State, District/Local taxes can't be combined, due to employees working in multiple jurisdictions and may or may not be taxable. So they could be assigned to multiple Tax/Deductions of the same State.
-				if ( strtoupper( $cd_obj->getCountry() ) == 'US' AND in_array( $cd_obj->getCalculation(), array(200, 300) ) ) {
+				//  However when there is State Income Tax and State Addl. Income Tax going to the same PS account, these do need to be combined, otherwise the tax amounts will be doubled (though Subject Wages wouldn't be since Addl. Income Tax doesn't have subject wages typically).
+				//  Only if we are splitting the data up company deduction do we ever consider not combining the tax data, otherwise subject wages and tax withheld will always get doubled up.
+				if ( $enable_split_by_company_deduction == TRUE AND
+						strtoupper( $cd_obj->getCountry() ) == 'US' AND in_array( $cd_obj->getCalculation(), array(200, 300) ) ) {
 					$can_be_combined = FALSE;
 				} else {
 					$can_be_combined = TRUE;
@@ -612,13 +622,12 @@ class TaxSummaryReport extends Report {
 				}
 
 				Debug::Text('  Company Deduction: '. $cd_obj->getName() .' Can Be Combined: '. (int)$can_be_combined .' Split: Agency: '. (int)$enable_split_by_payroll_remittance_agency .' Deduction: '. (int)$enable_split_by_company_deduction, __FILE__, __LINE__, __METHOD__, 10);
-
 				if ( $can_be_combined == TRUE AND $enable_split_by_company_deduction == FALSE ) {
 					$tmp_company_deduction_id = TTUUID::getZeroID();
 				} else {
 					if ( $can_be_combined == TRUE AND isset( $duplicate_pay_stub_entry_account_map[$tmp_payroll_remittance_agency_id][$cd_obj->getPayStubEntryAccount()] ) ) {
 						$tmp_company_deduction_id = $duplicate_pay_stub_entry_account_map[$tmp_payroll_remittance_agency_id][$cd_obj->getPayStubEntryAccount()];
-						Debug::Text( 'Merging Company Deductions: Parent: ' . $company_deduction_data[$tmp_payroll_remittance_agency_id][ $tmp_company_deduction_id ]->getName() . ' (' . $tmp_company_deduction_id . ') Child: ' . $cd_obj->getName() . ' (' . $cd_obj->getId() . ')', __FILE__, __LINE__, __METHOD__, 10 );
+						Debug::Text( '    Merging Company Deductions: Parent: ' . $company_deduction_data[$tmp_payroll_remittance_agency_id][ $tmp_company_deduction_id ]->getName() . ' (' . $tmp_company_deduction_id . ') Child: ' . $cd_obj->getName() . ' (' . $cd_obj->getId() . ')', __FILE__, __LINE__, __METHOD__, 10 );
 
 						$company_deduction_data[$tmp_payroll_remittance_agency_id][$tmp_company_deduction_id]->duplicate_of[] = $cd_obj;
 					} else {
@@ -660,10 +669,15 @@ class TaxSummaryReport extends Report {
 		return $company_deduction_data;
 	}
 
+	/**
+	 * @param $company_id
+	 * @param $filter_data
+	 * @return array
+	 */
 	function getUserDeductionData( $company_id, $filter_data ) {
 		//To help determine MaximumTaxableWages, we need to get the UserDeduction records and call getMaximumPayStubEntryAccountAmount().
 		$user_deduction_data = array();
-		$udlf = TTnew( 'UserDeductionListFactory' );
+		$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 		$udlf->getByCompanyIdAndCompanyDeductionId( $company_id, $filter_data );
 		if ( $udlf->getRecordCount() > 0 ) {
 			foreach( $udlf as $ud_obj ) {
@@ -676,6 +690,12 @@ class TaxSummaryReport extends Report {
 		return $user_deduction_data;
 	}
 
+	/**
+	 * @param $cd_obj
+	 * @param $pse_obj
+	 * @param $user_deduction_data
+	 * @return bool
+	 */
 	function addPayStubEntry( $cd_obj, $pse_obj, $user_deduction_data ) {
 		//If the deduction amount has no where to go, just exit early as its essentially disabled.
 		if ( empty( $tax_withheld_psea_ids ) == FALSE ) {
@@ -704,7 +724,7 @@ class TaxSummaryReport extends Report {
 			return TRUE;
 		}
 
-		//Debug::Text('    Processing PSE record: Agency ID: '. $remittance_agency_id .' Deduction ID: '. $company_deduction_id .' PSE Name ID: '. $pay_stub_entry_name_id .' Amount: '. $pse_obj->getColumn('amount'), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Text('    Processing PSE record: Agency ID: '. $remittance_agency_id .' Deduction: '. $cd_obj->getName() .' ('. $company_deduction_id .') PSE Name ID: '. $pay_stub_entry_name_id .' Amount: '. $pse_obj->getColumn('amount'), __FILE__, __LINE__, __METHOD__, 10);
 		if ( !isset( $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ] ) ) {
 			$this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ] = array(
 					'pay_period_start_date'       => strtotime( $pse_obj->getColumn( 'pay_period_start_date' ) ),
@@ -763,6 +783,7 @@ class TaxSummaryReport extends Report {
 		$this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages_ytd'] = bcadd( $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages_ytd'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn( 'ytd_amount' ), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
 
 		if ( empty( $tax_withheld_psea_ids ) == FALSE AND in_array( $pay_stub_entry_name_id, $tax_withheld_psea_ids ) ) {
+			//Debug::Text('      Tax Withheld Pay Stub Account: '. $pay_stub_entry_name_id .' Amount: '. $pse_obj->getColumn( 'amount' ), __FILE__, __LINE__, __METHOD__, 10);
 			if ( !isset( $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['tax_withheld'] ) ) {
 				$this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['tax_withheld'] = 0;
 			}
@@ -823,7 +844,7 @@ class TaxSummaryReport extends Report {
 
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		if ( $ulf->getRecordCount() > 0 ) {
 			if ( isset( $filter_data['company_deduction_id'] ) == FALSE ) {
@@ -842,12 +863,12 @@ class TaxSummaryReport extends Report {
 
 			//We have to use the same PSE records and combine them in different ways for different Tax/Deduction or Remittance Agencies.
 			//  For example, the same earnings records are likely to count towards many different Tax/Deduction records.
-			$pself = TTnew( 'PayStubEntryListFactory' );
+			$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 			$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 			if ( $pself->getRecordCount() > 0 ) {
 				if ( is_array( $company_deduction_data ) AND count( $company_deduction_data ) > 0 ) {
-					Debug::Text( 'Found Company Deductions...', __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( 'Found Company Deductions: '. $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					foreach ( $company_deduction_data as $payroll_remittance_agency_id => $payroll_remittance_agency_data ) {
 						Debug::Text( '  Processing Remittance Agency: ' . $payroll_remittance_agency_id, __FILE__, __LINE__, __METHOD__, 10 );
 						foreach ( $payroll_remittance_agency_data as $cd_obj ) {
@@ -906,7 +927,7 @@ class TaxSummaryReport extends Report {
 		//Debug::Arr($this->tmp_data['pay_stub_entry'], 'Pay Stub Entry Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -917,7 +938,7 @@ class TaxSummaryReport extends Report {
 		}
 
 		//Get remittance agency data for joining.
-		$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $pralf */
 		$pralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pralf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $pralf as $key => $ra_obj ) {
@@ -926,7 +947,7 @@ class TaxSummaryReport extends Report {
 		}
 
 		//Company Deduction data for joining...
-		$cdlf = TTnew( 'CompanyDeductionListFactory' );
+		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 		$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $company_deduction_filter_data );
 
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $cdlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -1012,7 +1033,11 @@ class TaxSummaryReport extends Report {
 
 	/**
 	 * Formats report data for exporting to TimeTrex payment service.
-	 * @return array
+	 * @param $prae_obj
+	 * @param $pra_obj
+	 * @param $rs_obj
+	 * @param $pra_user_obj
+	 * @return array|bool
 	 */
 	function getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj ) {
 		//Make sure we have the columns we need.

@@ -55,7 +55,7 @@ class ImportAccrual extends Import {
 		$retval = NULL;
 		switch( $name ) {
 			case 'columns':
-				$apf = TTNew('AccrualFactory');
+				$apf = TTNew('AccrualFactory'); /** @var AccrualFactory $apf */
 				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('accrual_policy_account', 'type', 'amount', 'date_stamp'), Misc::trimSortPrefix( $apf->getOptions('columns') ) ) );
 
 				break;
@@ -72,7 +72,7 @@ class ImportAccrual extends Import {
 								);
 				break;
 			case 'parse_hint':
-				$upf = TTnew('UserPreferenceFactory');
+				$upf = TTnew('UserPreferenceFactory'); /** @var UserPreferenceFactory $upf */
 
 				$retval = array(
 								'date_stamp' => $upf->getOptions('date_format'),
@@ -125,14 +125,15 @@ class ImportAccrual extends Import {
 	//
 	// Generic parser functions.
 	//
+
 	/**
 	 * @return bool
 	 */
 	function getAccrualPolicyAccountOptions() {
 		//Get accrual policies
-		$aplf = TTNew('AccrualPolicyAccountListFactory');
+		$aplf = TTNew('AccrualPolicyAccountListFactory'); /** @var AccrualPolicyAccountListFactory $aplf */
 		$aplf->getByCompanyId( $this->company_id );
-		$this->accrual_policy_account_options = (array)$aplf->getArrayByListFactory( $aplf, FALSE, TRUE );
+		$this->accrual_policy_account_options = (array)$aplf->getArrayByListFactory( $aplf, FALSE );
 		unset($aplf);
 
 		return TRUE;
@@ -178,7 +179,7 @@ class ImportAccrual extends Import {
 	 * @return array|bool|mixed
 	 */
 	function parse_type( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$af = TTnew('AccrualFactory');
+		$af = TTnew('AccrualFactory'); /** @var AccrualFactory $af */
 		$options = $af->getOptions( 'user_type' );
 
 		if ( isset($options[$input]) ) {

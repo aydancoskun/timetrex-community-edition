@@ -101,14 +101,14 @@ class APISetupPresets extends APIFactory {
 			$sp->UserDefaults( $this->getCurrentUserObject()->getLegalEntity() );
 
 			//Assign the current user to the only existing pay period schedule.
-			$ppslf = TTnew('PayPeriodScheduleListFactory');
+			$ppslf = TTnew('PayPeriodScheduleListFactory'); /** @var PayPeriodScheduleListFactory $ppslf */
 			$ppslf->getByCompanyId( $this->getCurrentCompanyObject()->getId() );
 			if ( $ppslf->getRecordCount() == 1 ) {
 				$pps_obj = $ppslf->getCurrent();
 
 				//In case the user runs the quick start wizard after they are already setup, assign all users to the only existing pay period schedule.
 				$user_ids = array();
-				$ulf = TTNew('UserListFactory');
+				$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 				$ulf->getByCompanyId(  $this->getCurrentCompanyObject()->getId() );
 				if ( $ulf->getRecordCount() > 0 ) {
 					foreach( $ulf as $u_obj ) {

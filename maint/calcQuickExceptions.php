@@ -84,14 +84,23 @@ if ( $udtlf->getRecordCount() > 0 ) {
 		Debug::text('('.$i.'). User: '. $udt_obj->getUser() .' Start Date: '. TTDate::getDate('DATE+TIME', strtotime( $udt_obj->getColumn('start_date') ) ) .' End Date: '. TTDate::getDate('DATE+TIME', strtotime( $udt_obj->getColumn('end_date') ) ), __FILE__, __LINE__, __METHOD__, 5);
 
 		if ( is_object( $udt_obj->getUserObject() ) ) {
-			//Calculate pre-mature exceptions, so pre-mature Missing Out Punch exceptions arn't made active until they are ready.
+			//Calculate pre-mature exceptions, so pre-mature Missing Out Punch exceptions aren't made active until they are ready.
 			//Don't calculate future exceptions though.
-			$cp = TTNew('CalculatePolicy');
-			$cp->setFlag( $flags );
-			$cp->setUserObject( $udt_obj->getUserObject() );
-			$cp->addPendingCalculationDate( strtotime( $udt_obj->getColumn('start_date') ), strtotime( $udt_obj->getColumn('end_date') ) );
-			$cp->calculate( strtotime( $udt_obj->getColumn('start_date') ) ); //This sets timezone itself.
-			$cp->Save();
+			$transaction_function = function() use ( $udt_obj, $flags ) {
+				$cp = TTNew('CalculatePolicy'); /** @var CalculatePolicy $cp */
+				$cp->setFlag( $flags );
+				$cp->setUserObject( $udt_obj->getUserObject() );
+				$cp->getUserObject()->setTransactionMode( 'REPEATABLE READ' );
+				$cp->addPendingCalculationDate( strtotime( $udt_obj->getColumn('start_date') ), strtotime( $udt_obj->getColumn('end_date') ) );
+				$cp->calculate( strtotime( $udt_obj->getColumn('start_date') ) ); //This sets timezone itself.
+				$cp->Save();
+				$cp->getUserObject()->setTransactionMode(); //Back to default isolation level.
+
+				return TRUE;
+			};
+
+			$udt_obj->RetryTransaction( $transaction_function, 2, 3 ); //Set retry_sleep this fairly high so real-time punches have a chance to get saved between retries.
+
 		} else {
 			Debug::Arr( $udt_obj->getUserObject(), 'ERROR: Invalid UserObject: User ID: '. $udt_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
 		}

@@ -179,7 +179,7 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 		global $config_vars;
 
 		//Populate global variables for current_user.
-		$ulf = TTnew('UserListFactory');
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $this->user_id )->getCurrent();
 		global $current_user, $current_company;
 		$current_user = $user_obj;

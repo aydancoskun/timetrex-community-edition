@@ -1,8 +1,4 @@
 <?php
-/**
- * $License$
- */
-
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -71,12 +67,12 @@ function unauthenticatedInvokeService( $class_name, $method, $arguments, $messag
 					echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', 'ERROR: JSON: '. $json_error ) );
 				}
 			} else {
-				$validator = TTnew('Validator');
+				$validator = TTnew('Validator'); /** @var Validator $validator */
 				Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
 				echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Method %1 does not exist.', array( $validator->escapeHTML( $method ) ) ) ) );
 			}
 		} else {
-			$validator = TTnew('Validator');
+			$validator = TTnew('Validator'); /** @var Validator $validator */
 			Debug::text('Class: '. $class_name .' does not exist! (unauth)', __FILE__, __LINE__, __METHOD__, 10);
 			echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Class %1 does not exist, or unauthenticated.', array( $validator->escapeHTML( $class_name ) ) ) ) );
 		}
@@ -90,7 +86,7 @@ function unauthenticatedInvokeService( $class_name, $method, $arguments, $messag
 
 function authenticatedInvokeService(  $class_name, $method, $arguments, $message_id, $authentication, $api_auth ) {
 	global $current_user, $current_user_prefs, $current_company, $obj;
-	
+
 	$current_user = $authentication->getObject();
 
 	if ( is_object( $current_user ) ) {
@@ -121,7 +117,7 @@ function authenticatedInvokeService(  $class_name, $method, $arguments, $message
 
 		if ( is_object( $current_company ) ) {
 			Debug::text('Current User: '. $current_user->getUserName() .' (User ID: '. $current_user->getID() .') Company: '. $current_company->getName() .' (Company ID: '. $current_company->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
-			
+
 			//Debug::text('Handling JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id .' UserName: '. $current_user->getUserName(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $class_name != '' AND class_exists( $class_name ) ) {
 				$obj = new $class_name;
@@ -243,7 +239,7 @@ if ( PRODUCTION == TRUE AND $argument_size > (1024 * 12) ) {
 }
 unset($argument_size);
 
-$api_auth = TTNew('APIAuthentication'); //Used to handle error cases and display error messages.
+$api_auth = TTNew('APIAuthentication'); /** @var APIAuthentication $api_auth */ //Used to handle error cases and display error messages.
 $session_id = getSessionID( 600 );
 if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == FALSE ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) AND $session_id != '' AND !isset($_GET['disable_db']) AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
 	$authentication = new Authentication();

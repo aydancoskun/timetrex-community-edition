@@ -2474,7 +2474,13 @@ TimeSheetViewController = BaseViewController.extend( {
 				sortable: false,
 				hoverrows: false,
 				ondblClickRow: function ( row_id, row_index, cell_index, e ) {
-					$this.onGridDblClickRow();
+					row = $this.getRowData( 'timesheet_grid', row_id );
+
+					//Make sure double click event doesn't get triggered on a request row (authorized/pending/declined)
+					// as we are already in the process of navigating to that view, so it causes edit view and navigation operations to occur at the same time.
+					if ( row.type !== TimeSheetViewController.REQUEST_ROW ) {
+						$this.onGridDblClickRow();
+					}
 				},
 				onRightClickRow: function ( row_id, iRow, cell_index, e ) {
 					if ( !$this.checkIsSelectedPunchCell( row_id, cell_index ) ) {
@@ -3812,14 +3818,15 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	searchDone: function () {
-		//the rotate icon from search panel
-		var $this = this;
-		$( '.button-rotate' ).removeClass( 'button-rotate' );
+		$( '.button-rotate' ).removeClass( 'button-rotate' ); //the rotate icon from search panel
 
-		TTPromise.resolve( 'init', 'init' );
-		TTPromise.wait( null, null, function () {
-			$( window ).trigger( 'resize' );
-		} );
+		TTPromise.resolve('init','init');
+		TTPromise.wait();
+
+		// TTPromise.wait( null, null, function () {
+		//  //This was triggering JS exception: Permission denied to access property "apply" -- Seems like its no longer needed either.
+		// 	$( window ).trigger( 'resize' );
+		// } );
 	},
 
 	showWarningMessageIfAny: function () {
@@ -4742,6 +4749,31 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.last_clicked_grid_id = grid_id;
 	},
 
+	getRowData: function( grid_id, row_id ) {
+		var $this = this;
+
+		if ( grid_id === 'absence_grid' ) {
+			row_data = $this.absence_grid.getGridParam( 'data' );
+		} else if ( grid_id === 'accumulated_grid' ) {
+			row_data = $this.accumulated_time_grid.getGridParam( 'data' );
+		} else if ( grid_id === 'premium_grid' ) {
+			row_data = $this.premium_grid.getGridParam( 'data' );
+		} else { //Should be: timesheet_grid
+			row_data = $this.grid.getGridParam( 'data' );
+		}
+
+		row = false;
+
+		for ( var i in row_data ) {
+			if ( row_data[i].id == row_id ) {
+				row = row_data[i];
+				break;
+			}
+		}
+
+		return row;
+	},
+
 	onCellSelect: function ( grid_id, row_id, cell_index, cell_val, target, e ) {
 		$( '#ribbon_view_container .context-menu:visible a' ).click();
 
@@ -4760,25 +4792,10 @@ TimeSheetViewController = BaseViewController.extend( {
 		var punch;
 		var related_punch;
 		var cells_array = [];
-		$this.absence_model = false;
 		var date;
+		$this.absence_model = false;
 
-		if ( grid_id === 'absence_grid' ) {
-			row_data = $this.absence_grid.getGridParam( 'data' );
-		} else if ( grid_id === 'accumulated_grid' ) {
-			row_data = $this.accumulated_time_grid.getGridParam( 'data' );
-		} else if ( grid_id === 'premium_grid' ) {
-			row_data = $this.premium_grid.getGridParam( 'data' );
-		} else { //Should be: timesheet_grid
-			row_data = $this.grid.getGridParam( 'data' );
-		}
-
-		for ( var i in row_data ) {
-			if ( row_data[i].id == row_id ) {
-				row = row_data[i];
-				break;
-			}
-		}
+		row = $this.getRowData( grid_id, row_id );
 
 		if ( grid_id === 'timesheet_grid' ) {
 			cells_array = $this.select_cells_Array;
@@ -6656,9 +6673,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 
 			if ( !LocalCacheData.last_timesheet_selected_date ) { //Saved current select date in cache. so still select last select date when go to other view and back
-				if ( LocalCacheData.current_selet_date && Global.strToDate( LocalCacheData.current_selet_date, 'YYYYMMDD' ) ) { //Select date get from URL.
-					this.setDatePickerValue( Global.strToDate( LocalCacheData.current_selet_date, 'YYYYMMDD' ).format() );
-					LocalCacheData.current_selet_date = '';
+				if ( LocalCacheData.current_select_date && Global.strToDate( LocalCacheData.current_select_date, 'YYYY-MM-DD' ) ) { //Select date get from URL.
+					this.setDatePickerValue( Global.strToDate( LocalCacheData.current_select_date, 'YYYY-MM-DD' ).format() );
+					LocalCacheData.current_select_date = '';
 				} else {
 					var date = new Date();
 					var format = Global.getLoginUserDateFormat();
@@ -6792,8 +6809,14 @@ TimeSheetViewController = BaseViewController.extend( {
 		return user;
 	},
 
-	getSelectDate: function () {
-		return this.start_date_picker.getValue();
+	getSelectDate: function() {
+		retval = this.start_date_picker.getValue();
+
+		if ( retval == 'Invalid date' ) {
+			retval = new Date();
+		}
+
+		return retval;
 	},
 
 	onDeleteAndNextClick: function () {
@@ -6801,9 +6824,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		var current_api = this.getCurrentAPI();
 
-		TAlertManager.showConfirmAlert( $.i18n._( 'You are about to delete data, once data is deleted it can not be recovered ' +
-			'Are you sure you wish to continue?' ), null, function ( result ) {
-
+		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
 			var remove_ids = [];
 			if ( $this.edit_view ) {
 				remove_ids.push( $this.current_edit_record.id );
@@ -6818,9 +6839,12 @@ TimeSheetViewController = BaseViewController.extend( {
 						ProgressBar.closeOverlay();
 						if ( result.isValid() ) {
 							$this.onRightArrowClick();
+
+							$this.first_build = true;
+							$this.search();
+						} else {
+							TAlertManager.showErrorAlert( result );
 						}
-						$this.first_build = true;
-						$this.search();
 					}
 				} );
 
@@ -6835,9 +6859,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		var current_api = this.getCurrentAPI();
 		LocalCacheData.current_doing_context_action = 'delete';
-		TAlertManager.showConfirmAlert( $.i18n._( 'You are about to delete data, once data is deleted it can not be recovered ' +
-			'Are you sure you wish to continue?' ), null, function ( result ) {
-
+		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
 			var remove_ids = [];
 			if ( $this.edit_view ) {
 				remove_ids.push( $this.current_edit_record.id );
@@ -6855,14 +6877,20 @@ TimeSheetViewController = BaseViewController.extend( {
 						$this.timesheet_grid.grid.find( 'td.ui-state-highlight' ).removeClass( 'ui-state-highlight' );
 						ProgressBar.closeOverlay();
 						if ( result.isValid() ) {
+							$this.search();
 							if ( $this.edit_view ) {
 								$this.removeEditView();
 							}
+						} else {
+							// If some valid records were deleted, we need to refresh the search grid.
+							if ( result.getRecordDetails().valid && result.getRecordDetails().valid > 0 ) {
+								$this.search();
+							}
+							TAlertManager.showErrorAlert( result );
 						}
-						$this.first_build = true;
-						$this.search();
-						$this.setDefaultMenu(); //Default menu needs to be set as we need to deactivate icons that are valid for the predeletion selection
 
+						$this.first_build = true;
+						$this.setDefaultMenu(); //Default menu needs to be set as we need to deactivate icons that are valid for the predeletion selection
 					}
 				} );
 
@@ -6936,7 +6964,10 @@ TimeSheetViewController = BaseViewController.extend( {
 				if ( result.isValid() ) {
 					var result_data = result.getResult();
 					if ( result_data === true ) {
-						$this.refresh_id = $this.current_edit_record.id;
+						//Fix Uncaught TypeError: Cannot read property 'id' of null
+						if ( $this.current_edit_record ) {
+							$this.refresh_id = $this.current_edit_record.id;
+						}
 					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 						$this.refresh_id = result_data;
 					}
@@ -7446,7 +7477,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 	onAccumulatedTimeClick: function () {
 		if ( PermissionManager.checkTopLevelPermission( 'AccumulatedTime' ) ) {
-			var select_date = Global.strToDate( this.getSelectDate() ).format( 'YYYYMMDD' );
+			var select_date = Global.strToDate( this.getSelectDate() ).format( 'YYYY-MM-DD' );
 			IndexViewController.openEditView( this, 'UserDateTotalParent', select_date );
 		}
 	},
@@ -7493,6 +7524,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				data.filter_columns.first_name = true;
 				data.filter_columns.last_name = true;
 				data.filter_columns.user_id = true;
+				data.filter_columns.date_stamp = true; // #2735 - grouping punches by date_stamp instead of punch_date, to allow cross date punch controls to plot distances.
 				data.filter_columns.punch_date = true;
 				data.filter_columns.punch_time = true;
 				data.filter_columns.time_stamp = true;

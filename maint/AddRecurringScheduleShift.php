@@ -99,7 +99,7 @@ if ( $clf->getRecordCount() > 0 ) {
 					if ( is_object( $rstc_obj ) ) {
 						Debug::text('Recurring Schedule Template Control last updated by: '. $rstc_obj->getUpdatedBy(), __FILE__, __LINE__, __METHOD__, 10);
 						if ( TTUUID::isUUID( $rstc_obj->getUpdatedBy() ) AND $rstc_obj->getUpdatedBy() != TTUUID::getZeroID() ) {
-							$ulf = TTnew( 'UserListFactory' );
+							$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 							$ulf->getById( $rstc_obj->getUpdatedBy() );
 							if ( $ulf->getRecordCount() == 1 ) {
 								$ulf->getCurrent()->getUserPreferenceObject()->setTimeZonePreferences();
@@ -120,8 +120,8 @@ if ( $clf->getRecordCount() > 0 ) {
 					}
 					Debug::text('Recurring Schedule ID: '. $rsc_obj->getID() .' Maximum End Date: '. TTDate::getDate('DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10);
 
-					$rsf = TTnew('RecurringScheduleFactory');
-					$rslf = TTNew('RecurringScheduleListFactory');
+					$rsf = TTnew('RecurringScheduleFactory'); /** @var RecurringScheduleFactory $rsf */
+					$rslf = TTNew('RecurringScheduleListFactory'); /** @var RecurringScheduleListFactory $rslf */
 
 					//Clear out recurring schedules for anything older than 1 week.
 					$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getID(), ( $current_epoch - (86400 * 720) ), TTDate::getEndWeekEpoch( ( TTDate::getBeginWeekEpoch( $current_epoch ) - ( 86400 * 8 ) ) ) );

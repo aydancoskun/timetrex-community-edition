@@ -55,7 +55,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -83,7 +83,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -126,7 +126,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -173,7 +173,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 					ORDER BY a.start_time asc, a.status_id desc
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -211,7 +211,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -306,7 +306,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -364,7 +364,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -470,7 +470,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -478,6 +478,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 	}
 
 	/**
+	 * @param $company_id
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
@@ -485,6 +486,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|RecurringScheduleListFactory
+	 * @throws DBError
 	 */
 	function getConflictingByCompanyIdAndUserIdAndStartDateAndEndDate( $company_id, $user_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
 		Debug::Text('User ID: '. $user_id .' Start Date: '. $start_date .' End Date: '. $end_date, __FILE__, __LINE__, __METHOD__, 10);
@@ -557,7 +559,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query .= $this->getSortSQL( $order );
 
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -816,7 +818,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

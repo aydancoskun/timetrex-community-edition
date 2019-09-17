@@ -302,6 +302,8 @@ class DependencyTree {
 		if ( $depth == 0 ) {
 			return count( $marked_edges );
 		}
+
+		return FALSE;
 	}
 
 	/**

@@ -54,6 +54,13 @@ class APIImport extends APIFactory {
 			$this->import_obj = new $this->main_class;
 			$this->import_obj->company_id = $this->getCurrentCompanyObject()->getID();
 			$this->import_obj->user_id = $this->getCurrentUserObject()->getID();
+
+			global $authentication;
+			if ( is_object($authentication) AND $authentication->getSessionID() != '' ) {
+				Debug::text('Session ID: '. $authentication->getSessionID(), __FILE__, __LINE__, __METHOD__, 10);
+				$this->import_obj->session_id = $authentication->getSessionID();
+			}
+
 			Debug::Text('Setting main class: '. $this->main_class .' Company ID: '. $this->import_obj->company_id, __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			Debug::Text('NOT Setting main class... Company ID: '. $this->getCurrentCompanyObject()->getID(), __FILE__, __LINE__, __METHOD__, 10);
@@ -143,6 +150,7 @@ class APIImport extends APIFactory {
 	}
 
 	/**
+	 * @param null $maximum_lines
 	 * @return array|bool
 	 */
 	function returnMaximumLineValidationError( $maximum_lines = NULL ) {

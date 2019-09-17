@@ -93,7 +93,7 @@ class APIPermissionControl extends APIFactory {
 
 		$retval = array();
 
-		$pf = TTnew( 'PermissionFactory' );
+		$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 		$sections = $pf->getOptions('section');
 		$names = $pf->getOptions('name');
 
@@ -152,7 +152,7 @@ class APIPermissionControl extends APIFactory {
 			$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$utlf = TTnew( 'PermissionControlListFactory' );
+		$utlf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $utlf */
 		$utlf->getAPISearchByCompanyIdAndArrayCriteria( $data['filter_data']['company_id'], $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $utlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $utlf->getRecordCount() > 0 ) {
@@ -232,7 +232,7 @@ class APIPermissionControl extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PermissionControlListFactory' );
+				$lf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -341,7 +341,7 @@ class APIPermissionControl extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PermissionControlListFactory' );
+				$lf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

@@ -664,7 +664,12 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		$this.authorization_api['setAuthorization']( [filter], {
 			onResult: function( res ) {
 				if ( res.isValid() ) {
-					$this.onRightArrowClick( function() { $this.search(); } );
+					$this.onRightArrowClick( function() {
+						$this.search();
+						$().TFeedback({
+							source: 'Authorize'
+						});
+					} );
 				} else {
 					TAlertManager.showErrorAlert( res );
 				}
@@ -675,7 +680,12 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 	onPassClick: function() {
 		var $this = this;
-		this.onRightArrowClick( function() { $this.search(); } );
+		this.onRightArrowClick( function() {
+			$this.search();
+			$().TFeedback({
+				source: 'Pass'
+			});
+		} );
 	},
 
 	onAuthorizationRequestClick: function() {
@@ -685,7 +695,14 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	onCancelClick: function( force_no_confirm, cancel_all, callback ) {
 		//Refresh grid on cancel as its not done during authorize/decline anymore.
 		var $this = this;
-		this._super( 'onCancelClick', force_no_confirm, cancel_all, function() { $this.search(); } );
+		this._super( 'onCancelClick', force_no_confirm, cancel_all, function() {
+			//Since we are overriding the callback function to call this.search(), make sure the original callback is still called.
+			if ( callback ) {
+				callback();
+			}
+
+			$this.search();
+		} );
 	},
 
 	onDeclineClick: function() {
@@ -706,7 +723,12 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		$this.authorization_api['setAuthorization']( [filter], {
 			onResult: function( res ) {
 				if ( res.isValid() ) {
-					$this.onRightArrowClick( function() { $this.search(); } );
+					$this.onRightArrowClick( function() {
+						$this.search();
+						$().TFeedback({
+							source: 'Decline'
+						});
+					} );
 				} else {
 					TAlertManager.showErrorAlert( res );
 				}

@@ -151,7 +151,7 @@ class InstallSchema_1014A extends InstallSchema_Base {
 					if ( $permission_no_differences_found == FALSE ) {
 						Debug::text('Creating New Permission Group...: '. $x, __FILE__, __LINE__, __METHOD__, 10);
 
-						$pf = TTnew( 'PermissionFactory' );
+						$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 						$preset_arr = array(10, 18, 20, 30, 40);
 						$preset_match = array();
 						foreach( $preset_arr as $preset ) {
@@ -224,14 +224,14 @@ class InstallSchema_1014A extends InstallSchema_Base {
 			foreach( $this->permission_groups as $company_id => $permission_group_data ) {
 				//Get all active users for this company, so we can assign them
 				//to the default permission group.
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$ulf->getByCompanyId( $company_id );
 				$all_user_ids = array_keys( (array)$ulf->getArrayByListFactory( $ulf, FALSE, TRUE ) );
 				$assigned_user_ids = array();
 				foreach( $permission_group_data as $group_name => $permission_data ) {
 					Debug::text('zGroup Name: '. $group_name, __FILE__, __LINE__, __METHOD__, 10);
 
-					$pcf = TTnew( 'PermissionControlFactory' );
+					$pcf = TTnew( 'PermissionControlFactory' ); /** @var PermissionControlFactory $pcf */
 					$pcf->StartTransaction();
 					$pcf->setCompany( $company_id );
 					$pcf->setName( ucfirst($group_name) );

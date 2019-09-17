@@ -158,7 +158,7 @@ class PayStubEntryFactory extends Factory {
 
 		Debug::text('PS Amendment ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
-		$psalf = TTnew( 'PayStubAmendmentListFactory' );
+		$psalf = TTnew( 'PayStubAmendmentListFactory' ); /** @var PayStubAmendmentListFactory $psalf */
 		if (  $id == TTUUID::getZeroID()
 				OR $this->Validator->isResultSetWithRows(	'pay_stub_amendment_id',
 														$psalf->getByIdAndStartDateAndEndDate($id, $start_date, $end_date ),
@@ -390,21 +390,21 @@ class PayStubEntryFactory extends Factory {
 		//
 		// Pay Stub
 		if ( $this->getPayStub() !== FALSE ) {
-			$pslf = TTnew( 'PayStubListFactory' );
+			$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 			$this->Validator->isResultSetWithRows(	'pay_stub',
 															$pslf->getByID($this->getPayStub()),
 															TTi18n::gettext('Invalid Pay Stub')
 														);
 		}
 		// Entry Account Id
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+		$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 		$this->Validator->isResultSetWithRows(	'pay_stub_entry_name_id',
 														$psealf->getById($this->getPayStubEntryNameId()),
 														TTi18n::gettext('Invalid Pay Stub Account')
 													);
 		// Expense
 		if ( $this->getUserExpense() !== FALSE AND $this->getUserExpense() != TTUUID::getZeroID() ) {
-			$uelf = TTnew( 'UserExpenseListFactory' );
+			$uelf = TTnew( 'UserExpenseListFactory' ); /** @var UserExpenseListFactory $uelf */
 			$result = $uelf->getById($this->getUserExpense());
 			$this->Validator->isResultSetWithRows(	'user_expense_id',
 															$result,

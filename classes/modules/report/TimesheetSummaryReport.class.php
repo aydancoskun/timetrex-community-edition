@@ -134,7 +134,7 @@ class TimesheetSummaryReport extends Report {
 				break;
 			case 'custom_columns':
 				//Get custom fields for report data.
-				$oflf = TTnew( 'OtherFieldListFactory' );
+				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 				//User and Punch fields conflict as they are merged together in a secondary process.
 				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(4, 5, 10), array( 4 => 'branch_', 5 => 'department_', 10 => '' ) );
 				if ( is_array($other_field_names) ) {
@@ -143,7 +143,7 @@ class TimesheetSummaryReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'TimesheetSummaryReport', 'custom_column' );
@@ -154,13 +154,13 @@ class TimesheetSummaryReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'TimesheetSummaryReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'TimesheetSummaryReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -169,7 +169,7 @@ class TimesheetSummaryReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'TimesheetSummaryReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -635,9 +635,8 @@ class TimesheetSummaryReport extends Report {
 		return $retval;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * //Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -658,7 +657,7 @@ class TimesheetSummaryReport extends Report {
 
 		$pay_period_ids = array();
 
-		$udtlf = TTnew( 'UserDateTotalListFactory' );
+		$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 		$udtlf->getTimesheetSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' Total Rows: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $udtlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -766,7 +765,7 @@ class TimesheetSummaryReport extends Report {
 		//Debug::Arr($this->tmp_data['user_date_total'], 'User Date Total Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( isset($columns['schedule_working']) OR isset($columns['schedule_working_diff']) OR isset($columns['schedule_absence']) ) {
-			$slf = TTnew( 'ScheduleListFactory' );
+			$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
 			//$slf->getDayReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			//$slf->getScheduleSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			$slf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
@@ -800,7 +799,7 @@ class TimesheetSummaryReport extends Report {
 		}
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -830,7 +829,7 @@ class TimesheetSummaryReport extends Report {
 
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$blf = TTnew( 'BranchListFactory' );
+		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text(' Branch Total Rows: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -841,7 +840,7 @@ class TimesheetSummaryReport extends Report {
 		}
 		//Debug::Arr($this->tmp_data['default_branch'], 'Default Branch Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$dlf = TTnew( 'DepartmentListFactory' );
+		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		$dlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text(' Department Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $dlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -856,7 +855,7 @@ class TimesheetSummaryReport extends Report {
 		//Get verified timesheets for all pay periods considered in report.
 		$pay_period_ids = array_keys( $pay_period_ids );
 		if ( isset($pay_period_ids) AND count($pay_period_ids) > 0 ) {
-			$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+			$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $pptsvlf */
 			$pptsvlf->getByPayPeriodIdAndCompanyId( $pay_period_ids, $this->getUserObject()->getCompany() );
 			if ( $pptsvlf->getRecordCount() > 0 ) {
 				foreach( $pptsvlf as $pptsv_obj ) {
@@ -872,9 +871,8 @@ class TimesheetSummaryReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {

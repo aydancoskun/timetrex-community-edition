@@ -633,16 +633,20 @@ BaseWizardController = BaseWindowController.extend( {
 
 
 	showNoResultCover: function( grid_div ) {
-		this.removeNoResultCover( grid_div );
-		var no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
-		no_result_box.NoResultBox( { related_view_controller: this, is_new: false } );
-		no_result_box.attr( 'class', 'no-result-div' );
+		if ( grid_div ) {
+			this.removeNoResultCover( grid_div );
+			var no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
+			no_result_box.NoResultBox( { related_view_controller: this, is_new: false } );
+			no_result_box.attr( 'class', 'no-result-div' );
 
-		grid_div.append( no_result_box );
+			grid_div.append( no_result_box );
+		}
 	},
 
 	removeNoResultCover: function( grid_div ) {
-		grid_div.find( '.no-result-div' ).remove();
+		if ( grid_div ) {
+			grid_div.find( '.no-result-div' ).remove();
+		}
 	}
 
 

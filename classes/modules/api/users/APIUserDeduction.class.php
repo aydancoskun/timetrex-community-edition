@@ -79,7 +79,7 @@ class APIUserDeduction extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_tax_deduction', 'view' );
 
-		$blf = TTnew( 'UserDeductionListFactory' );
+		$blf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -158,7 +158,7 @@ class APIUserDeduction extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserDeductionListFactory' );
+				$lf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -281,7 +281,7 @@ class APIUserDeduction extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserDeductionListFactory' );
+				$lf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

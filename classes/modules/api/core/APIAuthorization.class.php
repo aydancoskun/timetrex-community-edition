@@ -120,7 +120,7 @@ class APIAuthorization extends APIFactory {
 
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		$blf = TTnew( 'AuthorizationListFactory' );
+		$blf = TTnew( 'AuthorizationListFactory' ); /** @var AuthorizationListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -194,100 +194,112 @@ class APIAuthorization extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $row ) {
-				$primary_validator = $tertiary_validator = new Validator();
-				$lf = TTnew( 'AuthorizationListFactory' );
-				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] != '' ) {
-					//Modifying existing object.
-					//Get authorization object, so we can only modify just changed data for specific records if needed.
-					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
-					if ( $lf->getRecordCount() == 1 ) {
-						//Object exists, check edit permissions
-						if (
-							$validate_only == TRUE
-							OR
-								(
-								$this->getPermissionObject()->Check('request', 'authorize')
-								OR
-								$this->getPermissionObject()->Check('punch', 'authorize')
-								OR
-								$this->getPermissionObject()->Check('user_expense', 'authorize')
-								)
+				$transaction_function = function() use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key ) {
+					$primary_validator = $tertiary_validator = new Validator();
+
+					$lf = TTnew( 'AuthorizationListFactory' ); /** @var AuthorizationListFactory $lf */
+					if ( $validate_only	== FALSE ) { //Only switch into serializable mode when actually saving the record.
+						$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing duplicate user records or duplicate employee number/user_names.
+					}
+					$lf->StartTransaction();
+
+					if ( isset( $row['id'] ) AND $row['id'] != '' ) {
+						//Modifying existing object.
+						//Get authorization object, so we can only modify just changed data for specific records if needed.
+						$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
+						if ( $lf->getRecordCount() == 1 ) {
+							//Object exists, check edit permissions
+							if (
+									$validate_only == TRUE
+									OR
+									(
+											$this->getPermissionObject()->Check( 'request', 'authorize' )
+											OR
+											$this->getPermissionObject()->Check( 'punch', 'authorize' )
+											OR
+											$this->getPermissionObject()->Check( 'user_expense', 'authorize' )
+									)
 							) {
 
-							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
-							$lf = $lf->getCurrent();
-							$row = array_merge( $lf->getObjectAsArray(), $row );
-						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
-						}
-					} else {
-						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
-					}
-				} //else {
-					//Adding new object, check ADD permissions.
-					//$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('authorization', 'add'), TTi18n::gettext('Add permission denied') );
-				//}
-				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-				$is_valid = $primary_validator->isValid( $ignore_warning );
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					//Handle authorizing timesheets that have no PPTSVF records yet.
-					if ( isset($row['object_type_id']) AND $row['object_type_id'] == 90
-							AND isset($row['object_id']) AND $row['object_id'] == TTUUID::getNotExistID()
-							AND isset($row['user_id']) AND isset($row['pay_period_id']) ) {
-						$api_ts = new APITimeSheet();
-						$api_raw_retval = $api_ts->verifyTimeSheet( $row['user_id'], $row['pay_period_id'] );
-						Debug::Arr($api_raw_retval, 'API Retval: ', __FILE__, __LINE__, __METHOD__, 10);
-						$api_retval = $this->stripReturnHandler( $api_raw_retval );
-						if ( TTUUID::isUUID( $api_retval ) AND $api_retval != TTUUID::getZeroID() AND $api_retval != TTUUID::getNotExistID() ) {
-							$row['object_id'] = $api_retval;
-						} else {
-							$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $api_raw_retval, $tertiary_validator );
-							$is_valid = $tertiary_validator->isValid( $ignore_warning );
-						}
-					}
-
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
-						$lf->setObjectFromArray( $row );
-
-						//Set the current user so we know who is doing the authorization.
-						$lf->setCurrentUser( $this->getCurrentUserObject()->getId() );
-
-						$is_valid = $lf->isValid( $ignore_warning );
-						if ( $is_valid == TRUE ) {
-							Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
-							if ( $validate_only == TRUE ) {
-								$save_result[$key] = TRUE;
-								$validator_stats['valid_records']++;
+								Debug::Text( 'Row Exists, getting current data for ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
+								$lf = $lf->getCurrent();
+								$row = array_merge( $lf->getObjectAsArray(), $row );
 							} else {
-								$save_result[$key] = $lf->Save( FALSE );
+								$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Edit permission denied' ) );
+							}
+						} else {
+							//Object doesn't exist.
+							$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
+						}
+					} //else {
+						//Adding new object, check ADD permissions.
+						//$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('authorization', 'add'), TTi18n::gettext('Add permission denied') );
+					//}
+					Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-								//Make sure we test for validation failures after Save() is called, especially in cases of advanced requests, as the addRelatedSchedules() could fail.
-								if ( $lf->isValid( $ignore_warning ) == FALSE ) {
-									Debug::Arr($lf->Validator->getErrors(), 'PostSave() returned a validation error!', __FILE__, __LINE__, __METHOD__, 10);
-									$is_valid = FALSE;
-								} else {
+					$is_valid = $primary_validator->isValid( $ignore_warning );
+					if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
+						//Handle authorizing timesheets that have no PPTSVF records yet.
+						if ( isset( $row['object_type_id'] ) AND $row['object_type_id'] == 90
+								AND isset( $row['object_id'] ) AND $row['object_id'] == TTUUID::getNotExistID()
+								AND isset( $row['user_id'] ) AND isset( $row['pay_period_id'] ) ) {
+							$api_ts = new APITimeSheet();
+							$api_raw_retval = $api_ts->verifyTimeSheet( $row['user_id'], $row['pay_period_id'] );
+							Debug::Arr( $api_raw_retval, 'API Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+							$api_retval = $this->stripReturnHandler( $api_raw_retval );
+							if ( TTUUID::isUUID( $api_retval ) AND $api_retval != TTUUID::getZeroID() AND $api_retval != TTUUID::getNotExistID() ) {
+								$row['object_id'] = $api_retval;
+							} else {
+								$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $api_raw_retval, $tertiary_validator );
+								$is_valid = $tertiary_validator->isValid( $ignore_warning );
+							}
+						}
+
+						if ( $is_valid == TRUE ) {
+							Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
+							$lf->setObjectFromArray( $row );
+
+							//Set the current user so we know who is doing the authorization.
+							$lf->setCurrentUser( $this->getCurrentUserObject()->getId() );
+
+							$is_valid = $lf->isValid( $ignore_warning );
+							if ( $is_valid == TRUE ) {
+								Debug::Text( 'Saving data...', __FILE__, __LINE__, __METHOD__, 10 );
+								if ( $validate_only == TRUE ) {
+									$save_result[ $key ] = TRUE;
 									$validator_stats['valid_records']++;
+								} else {
+									$save_result[ $key ] = $lf->Save( FALSE );
+
+									//Make sure we test for validation failures after Save() is called, especially in cases of advanced requests, as the addRelatedSchedules() could fail.
+									if ( $lf->isValid( $ignore_warning ) == FALSE ) {
+										Debug::Arr( $lf->Validator->getErrors(), 'PostSave() returned a validation error!', __FILE__, __LINE__, __METHOD__, 10 );
+										$is_valid = FALSE;
+									} else {
+										$validator_stats['valid_records']++;
+									}
 								}
 							}
 						}
 					}
-				}
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+					if ( $is_valid == FALSE ) {
+						Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
-					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
+						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf, $tertiary_validator );
-				} elseif ( $validate_only == TRUE ) {
-					$lf->FailTransaction();
-				}
+						$validator[ $key ] = $this->setValidationArray( $primary_validator, $lf, $tertiary_validator );
+					} elseif ( $validate_only == TRUE ) {
+						$lf->FailTransaction();
+					}
 
-				$lf->CommitTransaction();
+					$lf->CommitTransaction();
+					$lf->setTransactionMode(); //Back to default isolation level.
+
+					return array( $validator, $validator_stats, $key, $save_result );
+				};
+
+				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
@@ -329,7 +341,7 @@ class APIAuthorization extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'AuthorizationListFactory' );
+				$lf = TTnew( 'AuthorizationListFactory' ); /** @var AuthorizationListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

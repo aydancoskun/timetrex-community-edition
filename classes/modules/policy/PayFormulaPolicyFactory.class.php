@@ -493,7 +493,7 @@ class PayFormulaPolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -552,7 +552,7 @@ class PayFormulaPolicyFactory extends Factory {
 		}
 		// Wage Source Contributing Shift Policy
 		if ( $this->getWageSourceContributingShiftPolicy() !== FALSE AND $this->getWageSourceContributingShiftPolicy() != TTUUID::getZeroID() ) {
-			$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+			$csplf = TTnew( 'ContributingShiftPolicyListFactory' ); /** @var ContributingShiftPolicyListFactory $csplf */
 			$this->Validator->isResultSetWithRows(	'wage_source_contributing_shift_policy_id',
 															$csplf->getByID($this->getWageSourceContributingShiftPolicy()),
 															TTi18n::gettext('Wage Source Contributing Shift Policy is invalid')
@@ -560,7 +560,7 @@ class PayFormulaPolicyFactory extends Factory {
 		}
 		// Time Source Contributing Shift Policy
 		if ( $this->getTimeSourceContributingShiftPolicy() !== FALSE AND $this->getTimeSourceContributingShiftPolicy() != TTUUID::getZeroID() ) {
-			$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+			$csplf = TTnew( 'ContributingShiftPolicyListFactory' ); /** @var ContributingShiftPolicyListFactory $csplf */
 			$this->Validator->isResultSetWithRows(	'time_source_contributing_shift_policy_id',
 															$csplf->getByID($this->getTimeSourceContributingShiftPolicy()),
 															TTi18n::gettext('Time Source Contributing Shift Policy is invalid')
@@ -575,7 +575,7 @@ class PayFormulaPolicyFactory extends Factory {
 		}
 		// Wage Group
 		if ( $this->getWageGroup() !== FALSE AND $this->getWageGroup() != TTUUID::getZeroID() ) {
-			$wglf = TTnew( 'WageGroupListFactory' );
+			$wglf = TTnew( 'WageGroupListFactory' ); /** @var WageGroupListFactory $wglf */
 			$this->Validator->isResultSetWithRows(	'wage_group_id',
 															$wglf->getByID($this->getWageGroup()),
 															TTi18n::gettext('Wage Group is invalid')
@@ -590,7 +590,7 @@ class PayFormulaPolicyFactory extends Factory {
 		}
 		// Accrual Account
 		if ( $this->getAccrualPolicyAccount() !== FALSE AND $this->getAccrualPolicyAccount() != TTUUID::getZeroID() ) {
-			$apalf = TTnew( 'AccrualPolicyAccountListFactory' );
+			$apalf = TTnew( 'AccrualPolicyAccountListFactory' ); /** @var AccrualPolicyAccountListFactory $apalf */
 			$this->Validator->isResultSetWithRows(	'accrual_policy_account_id',
 															$apalf->getByID($this->getAccrualPolicyAccount()),
 															TTi18n::gettext('Accrual Account is invalid')
@@ -601,7 +601,7 @@ class PayFormulaPolicyFactory extends Factory {
 		// ABOVE: Validation code moved from set*() functions.
 		//
 		if ( $this->getDeleted() == TRUE ) {
-			$pclf = TTNew('PayCodeListFactory');
+			$pclf = TTNew('PayCodeListFactory'); /** @var PayCodeListFactory $pclf */
 			$pclf->getByCompanyIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId() );
 			if ( $pclf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -609,7 +609,7 @@ class PayFormulaPolicyFactory extends Factory {
 											TTi18n::gettext('This pay formula policy is currently in use') .' '. TTi18n::gettext('by pay codes') );
 			}
 
-			$rtplf = TTNew('RegularTimePolicyListFactory');
+			$rtplf = TTNew('RegularTimePolicyListFactory'); /** @var RegularTimePolicyListFactory $rtplf */
 			$rtplf->getByCompanyIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId() );
 			if ( $rtplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -617,7 +617,7 @@ class PayFormulaPolicyFactory extends Factory {
 											TTi18n::gettext('This pay formula policy is currently in use') .' '. TTi18n::gettext('by regular time policies') );
 			}
 
-			$otplf = TTNew('OverTimePolicyListFactory');
+			$otplf = TTNew('OverTimePolicyListFactory'); /** @var OverTimePolicyListFactory $otplf */
 			$otplf->getByCompanyIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId() );
 			if ( $otplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -625,7 +625,7 @@ class PayFormulaPolicyFactory extends Factory {
 											TTi18n::gettext('This pay formula policy is currently in use') .' '. TTi18n::gettext('by overtime policies') );
 			}
 
-			$pplf = TTNew('PremiumPolicyListFactory');
+			$pplf = TTNew('PremiumPolicyListFactory'); /** @var PremiumPolicyListFactory $pplf */
 			$pplf->getByCompanyIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId() );
 			if ( $pplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -633,7 +633,7 @@ class PayFormulaPolicyFactory extends Factory {
 											TTi18n::gettext('This pay formula policy is currently in use') .' '. TTi18n::gettext('by premium policies') );
 			}
 
-			$aplf = TTNew('AbsencePolicyListFactory');
+			$aplf = TTNew('AbsencePolicyListFactory'); /** @var AbsencePolicyListFactory $aplf */
 			$aplf->getByCompanyIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId() );
 			if ( $aplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -641,7 +641,7 @@ class PayFormulaPolicyFactory extends Factory {
 											TTi18n::gettext('This pay formula policy is currently in use') .' '. TTi18n::gettext('by absence policies') );
 			}
 
-			$mplf = TTNew('MealPolicyListFactory');
+			$mplf = TTNew('MealPolicyListFactory'); /** @var MealPolicyListFactory $mplf */
 			$mplf->getByCompanyIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId() );
 			if ( $mplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -649,7 +649,7 @@ class PayFormulaPolicyFactory extends Factory {
 											TTi18n::gettext('This pay formula policy is currently in use') .' '. TTi18n::gettext('by meal policies') );
 			}
 
-			$bplf = TTNew('BreakPolicyListFactory');
+			$bplf = TTNew('BreakPolicyListFactory'); /** @var BreakPolicyListFactory $bplf */
 			$bplf->getByCompanyIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId() );
 			if ( $bplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',

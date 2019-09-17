@@ -396,12 +396,14 @@ progress::-moz-progress-bar {
 
 .bottom-container {
     bottom: 0px;
+    left:0;
+    right:0;
     display: block;
     margin-right: 20px;
     margin-left: 20px;
     position: fixed;
     height: 38px;
-    z-index: 1;
+    z-index: 0; /* the z-index needs to be less than the one for .paging-2-div otherwise the pagination nav buttons won't be clickable */
     user-drag: none;
     -moz-user-select: none;
     -webkit-user-drag: none;
@@ -412,7 +414,6 @@ progress::-moz-progress-bar {
 }
 
 .bottom-container .copyright-container {
-     width: 600px;
     float: left;
 }
 
@@ -436,121 +437,188 @@ progress::-moz-progress-bar {
     padding-top: 2px;
 }
 
+/* Feedback dialog general */
+.feedback-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 100;
+    opacity: 1;
+    /* Fallback for web browsers that doesn't support RGBa */
+    background: rgb(0, 0, 0);
+    /* RGBa with 0.6 opacity */
+    background: rgba(0, 0, 0, 0.6);
+    display: flex; /* For centering the feedback dialog. */
+    justify-content: center; /* For centering the feedback dialog horizontally. */
+    align-items: center; /* For centering the feedback dialog vertically. */
+}
+
 .feedback-container {
-    float: left;
-    padding-top: 12px;
-    color: #333333;
-    font-size: 11px;
-    display: none;
-}
-
-.feedback-container span {
-    vertical-align: top;
-}
-
-.feedback-container .filter {
-    margin-top: -4px;
-    width: 20px;
-    height: 20px;
-    /*filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale"); *//* Firefox 3.5+ */
-    /*filter: gray; *//* IE6-9 */
-    /*-webkit-filter: grayscale(100%); *//* Chrome 19+ & Safari 6+ */
-}
-
-.feedback-container img.filter:hover, .feedback-container img.normal {
-    margin-top: -4px;
-    width: 20px;
-    height: 20px;
-    /*filter: none;*/
-    /*-webkit-filter: grayscale(0%);*/
-    cursor: pointer;
-}
-
-.message-container {
-    display: block;
-    position: absolute;
+    position: relative;
     background-color: #f8f8f8;
-    border: 10px solid #a1a3a6;
-    text-align: center;
-    background-color: #f8f8f8;
-    border-bottom: 2px solid #355f87;
-    border-top: 30px solid #355f87;
-    border-left: 2px solid #355f87;
-    border-right: 2px solid #355f87;
-    position: absolute;
-    top: 40%;
-    left: 40%;
-    margin: -130px 0 0 -130px;
-    height: auto;
-    min-height: 100px;
-    width: 600px;
-    font-size: 12px;
-    text-align: center;
     z-index: 6001;
+    border: 2px solid #355f87;
+    border-top-width: 30px;
     border-radius: 4px;
-    padding: 6px;
-    padding-bottom: 35px;
+    padding: 7px;
     box-shadow: 5px 5px 8px 0px rgba(0, 0, 0, 0.3), 0 0 20px 0px rgba(0, 0, 0, 0.38);
-    /* For IE 8 */
-    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
-    /* For IE 5.5 - 7 */
-    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
+    text-align: center;
+    font-size: 21px;
+    width: 35%;
 }
 
-.message-container .top-bar-title {
+.feedback-container .top-bar-title {
     position:absolute;
     top: -1.7em;
     color:#fff;
     font-weight:bold;
+    font-size: 12px;
 }
 
-.message-container .user-contact-details {
+.feedback-container .title {
+    text-align: left;
+    font-weight: bold;
+    padding: 0 18px;
+}
+
+.feedback-container .context-box {
+    padding: 18px;
+}
+
+.feedback-container .feedback-messagebox {
+    min-height: 60px;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    width: 100%;
+}
+
+.feedback-container .bottom-bar {
+    position: absolute;
+    border: none;
+    bottom: 4px;
+    width: 100%;
+}
+/* footer bar manual click feedback link */
+.feedback-link-container {
+    margin: 0 auto;
+    width: 250px;
+    height: 32px;
+    line-height: 32px;
+    display: none;
+    text-align: center;
+    color: #333333;
+}
+.feedback-link-container span {
+    font-size: 14px;
+}
+
+.feedback-link-container #feedback-link:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.feedback-page.default .top-image {
+    width: 89%;
+}
+
+.feedback-page.positive .top-image {
+    width: 42%;
+}
+
+.feedback-page.negative .top-image {
+    width: 70%;
+}
+
+.feedback-page .page-text {
+    margin-top: 8px;
+}
+
+/* Page layout - positive page */
+
+.feedback-page.positive .page-text.block3 {
+    font-size: 15px;
+}
+
+/* Page layout - negative page */
+
+.feedback-container .user-contact-details {
     width:100%;
     text-align:left;
-    padding: 0 18px 15px;
+    padding: 0 0 15px;
 }
 
-.message-container .row {
+.feedback-container .contact-notice-text {
+    padding: 5px 0 10px;
+    font-size: 12px;
+}
+
+.feedback-container .row {
     padding-top: 4px;
     line-height: 24px;
     margin-left: 0;
     margin-right: 0;
 }
 
-.message-container .contact-notice-text {
-    padding: 5px 0 10px;
-    font-weight: bold;
+/* Buttons */
+.feedback-page .feedback-button {
+    display: block;
+    margin: 0 auto 17px;
+    padding: 10px 20px;
+    width: 66%;
+    font-size: 21px;
 }
 
-.message-container .title {
-    text-align: left;
-    /*left: 0;
-    min-width: 600px;
-    min-height: 55px;
-    width: auto;
-    height: auto;
-    font-size: 14px;*/
-    font-weight: bold;
-    padding: 0 18px;
+.feedback-page.negative .feedback-button {
+    display: inline-block;
+    width: 49%;
 }
 
-.message-container .feedback-messagebox {
-    /*width: 280px;*/
-    min-height: 200px;
-    margin-bottom: 5px;
-    margin-top: 5px;
-    min-width: 550px;
-    width: auto;
-    resize: none;
+/*.feedback-page .feedback-button.positive-button {*/
+    /*margin-top: 6px;*/
+    /*background-color: #fff;*/
+    /*border-color: #28a745;*/
+    /*color: #28a745;*/
+/*}*/
+
+/*.feedback-page .feedback-button.positive-button:hover {*/
+    /*background-color: #28a745;*/
+    /*border-color: #28a745;*/
+    /*color: #fff;*/
+/*}*/
+
+.feedback-page .feedback-button.negative-button {
+    background-color: #fff;
+    border-color: #fc9403;
+    color: #de7e00;
+}
+/*
+.feedback-page .feedback-button.negative-button:hover {
+    background-color: #fc9403;
+    border-color: #de7e00;
+    color: #fff;
+}
+*/
+.feedback-page .feedback-button.negative-button:hover {
+    background-color: rgba(255, 149, 0, 0.10);
+    border-color: #de7e00;
+    color: #de7e00;
 }
 
-.message-container .bottom-bar {
-    position: absolute;
-    height: 30px;
-    border: none;
-    bottom: 4px;
-    width: 100%;
+.feedback-page .feedback-button.cancel-button {
+    background-color: #fff;
+    border-color: #afafaf;
+    color: #656565;
 }
+
+.feedback-page .feedback-button.cancel-button:hover {
+    background-color: #f0f0f0;
+    border-color: #888888;
+    color: #444444;
+}
+
+/* End of feedback dialog section */
 
 .ui-th-ltr, .ui-jqgrid .ui-jqgrid-htable th.ui-th-ltr {
     border-left: 0 none;

@@ -53,7 +53,7 @@ class ImportBranch extends Import {
 		$retval = NULL;
 		switch( $name ) {
 			case 'columns':
-				$bf = TTNew('BranchFactory');
+				$bf = TTNew('BranchFactory'); /** @var BranchFactory $bf */
 				$retval = $bf->getOptions('columns');
 				break;
 			case 'import_options':
@@ -93,6 +93,7 @@ class ImportBranch extends Import {
 	//
 	// Generic parser functions.
 	//
+
 	/**
 	 * @param $input
 	 * @param null $default_value

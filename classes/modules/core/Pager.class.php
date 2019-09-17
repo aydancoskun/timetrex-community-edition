@@ -147,9 +147,8 @@ class Pager {
 		return FALSE;
 	}
 
-	//Return maximum rows per page
-
 	/**
+	 * Return maximum rows per page
 	 * @return bool|int
 	 */
 	function getRowsPerPage() {

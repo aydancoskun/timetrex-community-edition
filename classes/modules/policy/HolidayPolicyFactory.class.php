@@ -58,7 +58,7 @@ class HolidayPolicyFactory extends Factory {
 		$retval = NULL;
 		switch( $name ) {
 			case 'default_schedule_status':
-				$sf = TTnew( 'ScheduleFactory' );
+				$sf = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
 				$retval = $sf->getOptions('status');
 				break;
 			case 'type':
@@ -695,7 +695,7 @@ class HolidayPolicyFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getRecurringHoliday() {
-		$hprhlf = TTnew( 'HolidayPolicyRecurringHolidayListFactory' );
+		$hprhlf = TTnew( 'HolidayPolicyRecurringHolidayListFactory' ); /** @var HolidayPolicyRecurringHolidayListFactory $hprhlf */
 		$hprhlf->getByHolidayPolicyId( $this->getId() );
 		Debug::text('Found Recurring Holidays Attached to this Policy: '. $hprhlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -721,7 +721,7 @@ class HolidayPolicyFactory extends Factory {
 			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$hprhlf = TTnew( 'HolidayPolicyRecurringHolidayListFactory' );
+				$hprhlf = TTnew( 'HolidayPolicyRecurringHolidayListFactory' ); /** @var HolidayPolicyRecurringHolidayListFactory $hprhlf */
 				$hprhlf->getByHolidayPolicyId( $this->getId() );
 
 				foreach ($hprhlf as $obj) {
@@ -742,11 +742,11 @@ class HolidayPolicyFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$rhlf = TTnew( 'RecurringHolidayListFactory' );
+			$rhlf = TTnew( 'RecurringHolidayListFactory' ); /** @var RecurringHolidayListFactory $rhlf */
 
 			foreach ($ids as $id) {
 				if ( isset($ids) AND !in_array($id, $tmp_ids) AND TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() ) {
-					$hprhf = TTnew( 'HolidayPolicyRecurringHolidayFactory' );
+					$hprhf = TTnew( 'HolidayPolicyRecurringHolidayFactory' ); /** @var HolidayPolicyRecurringHolidayFactory $hprhf */
 					$hprhf->setHolidayPolicy( $this->getId() );
 					$hprhf->setRecurringHoliday( $id );
 
@@ -782,7 +782,7 @@ class HolidayPolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -826,7 +826,7 @@ class HolidayPolicyFactory extends Factory {
 		}
 		// Default Schedule Status
 		if ( $this->getDefaultScheduleStatus() !== FALSE ) {
-			$sf = TTnew( 'ScheduleFactory' );
+			$sf = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
 			$this->Validator->inArrayKey(	'default_schedule_status',
 													$this->getDefaultScheduleStatus(),
 													TTi18n::gettext('Incorrect Default Schedule Status'),
@@ -931,7 +931,7 @@ class HolidayPolicyFactory extends Factory {
 		}
 		// Rounding Policy
 		if ( $this->getRoundIntervalPolicyID() !== FALSE AND $this->getRoundIntervalPolicyID() != TTUUID::getZeroID() ) {
-			$riplf = TTnew( 'RoundIntervalPolicyListFactory' );
+			$riplf = TTnew( 'RoundIntervalPolicyListFactory' ); /** @var RoundIntervalPolicyListFactory $riplf */
 			$this->Validator->isResultSetWithRows(	'round_interval_policy',
 															$riplf->getByID($this->getRoundIntervalPolicyID()),
 															TTi18n::gettext('Rounding Policy is invalid')
@@ -939,7 +939,7 @@ class HolidayPolicyFactory extends Factory {
 		}
 		// Eligible Contributing Shift Policy
 		if ( $this->getEligibleContributingShiftPolicy() !== FALSE AND $this->getEligibleContributingShiftPolicy() != TTUUID::getZeroID() ) {
-			$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+			$csplf = TTnew( 'ContributingShiftPolicyListFactory' ); /** @var ContributingShiftPolicyListFactory $csplf */
 			$this->Validator->isResultSetWithRows(	'eligible_contributing_shift_policy_id',
 															$csplf->getByID($this->getEligibleContributingShiftPolicy()),
 															TTi18n::gettext('Eligible Contributing Shift Policy is invalid')
@@ -947,7 +947,7 @@ class HolidayPolicyFactory extends Factory {
 		}
 		// Contributing Shift Policy
 		if ( $this->getContributingShiftPolicy() !== FALSE AND $this->getContributingShiftPolicy() != TTUUID::getZeroID() ) {
-			$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+			$csplf = TTnew( 'ContributingShiftPolicyListFactory' ); /** @var ContributingShiftPolicyListFactory $csplf */
 			$this->Validator->isResultSetWithRows(	'contributing_shift_policy_id',
 															$csplf->getByID($this->getContributingShiftPolicy()),
 															TTi18n::gettext('Contributing Shift Policy is invalid')
@@ -955,7 +955,7 @@ class HolidayPolicyFactory extends Factory {
 		}
 		// Absence Policy
 		if ( $this->getAbsencePolicyID() !== FALSE AND $this->getAbsencePolicyID() != TTUUID::getZeroID() ) {
-			$aplf = TTnew( 'AbsencePolicyListFactory' );
+			$aplf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $aplf */
 			$this->Validator->isResultSetWithRows(	'absence_policy_id',
 															$aplf->getByID($this->getAbsencePolicyID()),
 															TTi18n::gettext('Absence Policy is invalid')
@@ -975,7 +975,7 @@ class HolidayPolicyFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('holiday_policy' => $this->getId() ), 1 );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',

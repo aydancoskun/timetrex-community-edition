@@ -503,7 +503,8 @@ BaseTreeViewController = BaseViewController.extend( {
 		tab_model['tab_audit'] = {
 				'label': $.i18n._( 'Audit' ),
 				'init_callback': 'initSubLogView',
-				'display_on_mass_edit': false
+				'display_on_mass_edit': false,
+				'display_on_add': false
 		};
 		this.setTabModel( tab_model );
 

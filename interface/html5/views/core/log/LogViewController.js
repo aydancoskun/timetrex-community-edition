@@ -342,13 +342,16 @@ LogViewController = BaseViewController.extend( {
 
 					// Process result_data if necessary, this always needs override.
 					result_data = $this.processResultData( result_data );
-					$this.grid.setData( result_data );
-					$this.setGridColumnsWidth();
-					if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
-						$this.resizeSubGrid( len );
-					}
 
-					$this.reSelectLastSelectItems();
+					if ( $this.grid ) {
+						$this.grid.setData( result_data );
+						$this.setGridColumnsWidth();
+						if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
+							$this.resizeSubGrid( len );
+						}
+
+						$this.reSelectLastSelectItems();
+					}
 				}
 
 				$this.setGridCellBackGround(); //Set cell background for some views

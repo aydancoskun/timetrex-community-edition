@@ -56,20 +56,20 @@ class InstallSchema_1055A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Make sure Medicare Employer uses the same include/exclude accounts as Medicare Employee.
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj ) {
 				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 				if ( $c_obj->getStatus() != 30 AND $c_obj->getCountry() == 'US' ) {
 					//Get PayStub Link accounts
-					$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+					$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 					$pseallf->getByCompanyId( $c_obj->getID() );
 					if	( $pseallf->getRecordCount() > 0 ) {
 						$psea_obj = $pseallf->getCurrent();
 					} else {
 						// @codingStandardsIgnoreStart
-						Debug::text('Failed getting PayStubEntryLink for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Failed getting PayStubEntryLink for Company ID: '. $c_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 						//leaving  debugging in place.
 						// @codingStandardsIgnoreEnd
 						continue;
@@ -78,7 +78,7 @@ class InstallSchema_1055A extends InstallSchema_Base {
 					$include_pay_stub_accounts = FALSE;
 					$exclude_pay_stub_accounts = FALSE;
 
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Medicare - Employee' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();
@@ -93,7 +93,7 @@ class InstallSchema_1055A extends InstallSchema_Base {
 					//Debug::Arr($include_pay_stub_accounts, 'Include Pay Stub Accounts: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 					//Debug::Arr($exclude_pay_stub_accounts, 'Exclude Pay Stub Accounts: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Medicare - Employer' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();

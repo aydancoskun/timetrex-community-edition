@@ -407,7 +407,7 @@ function runUnitTests() {
 
 	QUnit.module( 'UUID Generation' );
 	var uuids = [];
-	QUnit.test( 'uuuid TIGHTLOOP(default logged in user seed)', function( assert ) {
+	QUnit.test( 'uuuid TIGHTLOOP (default logged in user seed)', function( assert ) {
 		var max = 3000;
 		for ( var i = 0; i < max; i++ ) {
 			uuids.push( TTUUID.generateUUID() );
@@ -480,6 +480,164 @@ function runUnitTests() {
 
 		assert.ok( typeof (TTPromise.promises['test']['test1']) == 'object', 'promises object length = 1.' );
 		TTPromise.resolve( 'test', 'test1' );
+	} );
+
+	QUnit.test( 'TTPromise Case 1b: wait(category) on a single promise with reject', function( assert ) {
+		var done = assert.async();
+
+		TTPromise.clearAllPromises();
+		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
+		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+
+		TTPromise.add( 'test', 'test1' );
+		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 1, 'promises object length = 1.' );
+		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'TTPromise.filterPromiseArray(test).length == 1' );
+
+		TTPromise.wait( 'test', null, function() {
+			//will be run on resolve()
+			assert.ok( 0 == '1', 'TEST Promise test resolved.' ); //THIS SHOULD NOT BE CALLED.
+			done();
+		}, function() {
+			//will be run on reject()
+			assert.ok( 1 == '1', 'TEST Promise test rejected.' );
+			assert.ok( typeof (TTPromise.promises['test']) == 'undefined', 'promises[test] is null.' );
+			assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 0, 'filterPromiseArray(test).length == 0.' );
+			assert.ok( TTPromise.filterPromiseArray( 'test', 'test1' ) == false, 'filterPromiseArray("test","test1") length = 0.' );
+			done();
+		} );
+
+		assert.ok( typeof (TTPromise.promises['test']['test1']) == 'object', 'promises object length = 1.' );
+		TTPromise.reject( 'test', 'test1' );
+	} );
+
+	QUnit.test( 'TTPromise Case 1c: wait(category) two promises with two rejects on category', function( assert ) {
+		var done = assert.async();
+
+		TTPromise.clearAllPromises();
+		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
+		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+
+		TTPromise.add( 'test', 'test1' );
+		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 1, 'promises object length = 1.' );
+		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'TTPromise.filterPromiseArray(test).length == 1' );
+
+		TTPromise.add( 'test', 'test2' );
+		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 2, 'promises object length = 1.' );
+		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 2, 'TTPromise.filterPromiseArray(test).length == 1' );
+
+		remaining_reject_promises = 0;
+		TTPromise.wait( 'test', null, function() {
+			//will be run on resolve()
+			assert.ok( 0 == '1', 'TEST Promise test resolved.' ); //Fail the test if this is called, since there is a reject.
+			done();
+		}, function() {
+			//will be run on reject()
+			assert.ok( 1 == '1', 'TEST Promise test rejected.' );
+
+			assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'filterPromiseArray(test).length == 1.' );
+			assert.ok( TTPromise.filterPromiseArray( 'test', 'test1' ) == false, 'filterPromiseArray("test","test1") length = 0.' );
+			assert.ok( TTPromise.filterPromiseArray( 'test', 'test2' ).length == 1, 'filterPromiseArray("test","test2") length = 0.' );
+
+			assert.ok( remaining_reject_promises == 0, 'Make sure error callback is not called more than once.' );
+
+			remaining_reject_promises++;
+
+			done(); //Only finish once all promises are rejected.
+		} );
+
+		assert.ok( typeof (TTPromise.promises['test']['test1']) == 'object', 'promises object length = 2.' );
+		assert.ok( typeof (TTPromise.promises['test']['test2']) == 'object', 'promises object length = 2.' );
+		TTPromise.reject( 'test', 'test1' );
+		TTPromise.reject( 'test', 'test2' );
+	} );
+
+	QUnit.test( 'TTPromise Case 1d: wait(category) two promises with one reject one resolve on category', function( assert ) {
+		var done = assert.async();
+
+		TTPromise.clearAllPromises();
+		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
+		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+
+		TTPromise.add( 'test', 'test1' );
+		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 1, 'promises object length = 1.' );
+		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'TTPromise.filterPromiseArray(test).length == 1' );
+
+		TTPromise.add( 'test', 'test2' );
+		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 2, 'promises object length = 1.' );
+		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 2, 'TTPromise.filterPromiseArray(test).length == 1' );
+
+		remaining_reject_promises = 0;
+		TTPromise.wait( 'test', null, function() {
+			//will be run on resolve()
+			assert.ok( 0 == '1', 'TEST Promise test resolved.' ); //Fail the test if this is called, since there is a reject.
+			done();
+		}, function() {
+			//will be run on reject()
+			assert.ok( 1 == '1', 'TEST Promise test rejected.' );
+
+			assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'filterPromiseArray(test).length == 1.' );
+			assert.ok( TTPromise.filterPromiseArray( 'test', 'test1' ) == false, 'filterPromiseArray("test","test1") length = 0.' );
+			assert.ok( TTPromise.filterPromiseArray( 'test', 'test2' ).length == 1, 'filterPromiseArray("test","test2") length = 0.' );
+
+			assert.ok( remaining_reject_promises == 0, 'Make sure error callback is not called more than once.' );
+
+			remaining_reject_promises++;
+
+			done(); //Only finish once all promises are rejected.
+		} );
+
+		assert.ok( typeof (TTPromise.promises['test']['test1']) == 'object', 'promises object length = 2.' );
+		assert.ok( typeof (TTPromise.promises['test']['test2']) == 'object', 'promises object length = 2.' );
+		TTPromise.reject( 'test', 'test1' );
+		TTPromise.resolve( 'test', 'test2' );
+	} );
+
+	QUnit.test( 'TTPromise Case 1e: wait(category) two promises with one resolve and one reject on category', function( assert ) {
+		var done = assert.async();
+
+		TTPromise.clearAllPromises();
+		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
+		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+
+		TTPromise.add( 'test', 'test1' );
+		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 1, 'promises object length = 1.' );
+		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'TTPromise.filterPromiseArray(test).length == 1' );
+
+		TTPromise.add( 'test', 'test2' );
+		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 2, 'promises object length = 1.' );
+		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 2, 'TTPromise.filterPromiseArray(test).length == 1' );
+
+		remaining_reject_promises = 0;
+		TTPromise.wait( 'test', null, function() {
+			//will be run on resolve()
+			assert.ok( 0 == '1', 'TEST Promise test resolved.' ); //Fail the test if this is called, since there is a reject.
+			done();
+		}, function() {
+			//will be run on reject()
+			assert.ok( 1 == '1', 'TEST Promise test rejected.' );
+
+			assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'filterPromiseArray(test).length == 1.' );
+			assert.ok( TTPromise.filterPromiseArray( 'test', 'test1' ).length == 1, 'filterPromiseArray("test","test1") length = 0.' );
+			assert.ok( TTPromise.filterPromiseArray( 'test', 'test2' ) == false, 'filterPromiseArray("test","test2") length = 0.' );
+
+			assert.ok( remaining_reject_promises == 0, 'Make sure error callback is not called more than once.' );
+
+			remaining_reject_promises++;
+
+			done(); //Only finish once all promises are rejected.
+		} );
+
+		assert.ok( typeof (TTPromise.promises['test']['test1']) == 'object', 'promises object length = 2.' );
+		assert.ok( typeof (TTPromise.promises['test']['test2']) == 'object', 'promises object length = 2.' );
+		TTPromise.resolve( 'test', 'test1' );
+		TTPromise.reject( 'test', 'test2' );
 	} );
 
 	QUnit.test( 'TTPromise Case 2: wait(\'one_of_many_categories\').', function( assert ) {

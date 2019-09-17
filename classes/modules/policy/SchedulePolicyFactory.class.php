@@ -165,7 +165,7 @@ class SchedulePolicyFactory extends Factory {
 			AND is_object($this->meal_policy_obj[$meal_policy_id]) ) {
 			return $this->meal_policy_obj[$meal_policy_id];
 		} else {
-			$bplf = TTnew( 'MealPolicyListFactory' );
+			$bplf = TTnew( 'MealPolicyListFactory' ); /** @var MealPolicyListFactory $bplf */
 			$bplf->getById( $meal_policy_id );
 			if ( $bplf->getRecordCount() > 0 ) {
 				$this->meal_policy_obj[$meal_policy_id] = $bplf->getCurrent();
@@ -191,7 +191,7 @@ class SchedulePolicyFactory extends Factory {
 			AND is_object($this->break_policy_obj[$break_policy_id]) ) {
 			return $this->break_policy_obj[$break_policy_id];
 		} else {
-			$bplf = TTnew( 'BreakPolicyListFactory' );
+			$bplf = TTnew( 'BreakPolicyListFactory' ); /** @var BreakPolicyListFactory $bplf */
 			$bplf->getById( $break_policy_id );
 			if ( $bplf->getRecordCount() > 0 ) {
 				$this->break_policy_obj[$break_policy_id] = $bplf->getCurrent();
@@ -210,7 +210,7 @@ class SchedulePolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setCompany( $value) {
@@ -258,7 +258,7 @@ class SchedulePolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param $name
+	 * @param $value
 	 * @return bool
 	 */
 	function setName( $value) {
@@ -274,7 +274,7 @@ class SchedulePolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param $description
+	 * @param $value
 	 * @return bool
 	 */
 	function setDescription( $value) {
@@ -282,9 +282,8 @@ class SchedulePolicyFactory extends Factory {
 		return $this->setGenericDataValue( 'description', $value );
 	}
 
-	//Checks to see if we need to revert to the meal policies defined in the policy group, or use the ones defined in the schedule policy.
-
 	/**
+	 * Checks to see if we need to revert to the meal policies defined in the policy group, or use the ones defined in the schedule policy.
 	 * @return bool
 	 */
 	function isUsePolicyGroupMealPolicy() {
@@ -324,9 +323,8 @@ class SchedulePolicyFactory extends Factory {
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 155, $this->getID(), $ids, FALSE, TRUE ); //Use relaxed ID range.
 	}
 
-	//Checks to see if we need to revert to the break policies defined in the policy group, or use the ones defined in the schedule policy.
-
 	/**
+	 * Checks to see if we need to revert to the break policies defined in the policy group, or use the ones defined in the schedule policy.
 	 * @return bool
 	 */
 	function isUsePolicyGroupBreakPolicy() {
@@ -375,7 +373,7 @@ class SchedulePolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setFullShiftAbsencePolicyID( $value) {
@@ -391,7 +389,7 @@ class SchedulePolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setPartialShiftAbsencePolicyID( $value) {
@@ -503,7 +501,7 @@ class SchedulePolicyFactory extends Factory {
 	}
 
 	/**
-	 * @param $int
+	 * @param $value
 	 * @return bool
 	 */
 	function setStartStopWindow( $value) {
@@ -520,7 +518,7 @@ class SchedulePolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -557,7 +555,7 @@ class SchedulePolicyFactory extends Factory {
 		}
 		// Full Shift Absence Policy
 		if ( $this->getFullShiftAbsencePolicyID() !== FALSE AND $this->getFullShiftAbsencePolicyID() != TTUUID::getZeroID() ) {
-			$aplf = TTnew( 'AbsencePolicyListFactory' );
+			$aplf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $aplf */
 			$this->Validator->isResultSetWithRows(	'full_shift_absence_policy',
 															$aplf->getByID($this->getFullShiftAbsencePolicyID()),
 															TTi18n::gettext('Invalid Full Shift Absence Policy')
@@ -565,7 +563,7 @@ class SchedulePolicyFactory extends Factory {
 		}
 		// Partial Shift Absence Policy
 		if ( $this->getPartialShiftAbsencePolicyID() !== FALSE AND $this->getPartialShiftAbsencePolicyID() != TTUUID::getZeroID() ) {
-			$aplf = TTnew( 'AbsencePolicyListFactory' );
+			$aplf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $aplf */
 			$this->Validator->isResultSetWithRows(	'partial_shift_absence_policy',
 															$aplf->getByID($this->getPartialShiftAbsencePolicyID()),
 															TTi18n::gettext('Invalid Partial Shift Absence Policy')
@@ -597,14 +595,14 @@ class SchedulePolicyFactory extends Factory {
 	function postSave() {
 		if ( $this->getDeleted() == TRUE ) {
 			Debug::Text('UnAssign Schedule Policy from Schedule/Recurring Schedules...'. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			$sf = TTnew( 'ScheduleFactory' );
-			$rstf = TTnew( 'RecurringScheduleTemplateFactory' );
+			$sf = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
+			$rstf = TTnew( 'RecurringScheduleTemplateFactory' ); /** @var RecurringScheduleTemplateFactory $rstf */
 
 			$query = 'update '. $sf->getTable() .' set schedule_policy_id = \''. TTUUID::getZeroID() .'\' where schedule_policy_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $rstf->getTable() .' set schedule_policy_id = \''. TTUUID::getZeroID() .'\' where schedule_policy_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 		}
 
 		$this->removeCache( $this->getId() );

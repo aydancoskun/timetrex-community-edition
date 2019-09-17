@@ -155,11 +155,11 @@ class Debug {
 			$retval = APPLICATION_NAME.'-'.$suffix.$extra_ident;
 		}
 
-		return preg_replace('/[^a-zA-Z0-9-]/', '', escapeshellarg( $retval ) ); //This will remove spaces.
+		return strtolower( preg_replace('/[^a-zA-Z0-9-]/', '', escapeshellarg( $retval ) ) ); //This will remove spaces.
 	}
-	//	Three primary log types: $log_types = array( 0 => 'debug', 1 => 'client', 2 => 'timeclock' );
 
 	/**
+	 * Three primary log types: $log_types = array( 0 => 'debug', 1 => 'client', 2 => 'timeclock' );
 	 * @param int $log_type
 	 * @return int|mixed
 	 */
@@ -192,18 +192,16 @@ class Debug {
 		return LOG_DEBUG; //Default
 	}
 
-	//Used to add timing to each debug call.
-
 	/**
+	 * Used to add timing to each debug call.
 	 * @return float
 	 */
 	static function getExecutionTime() {
 		return ceil( ( (microtime( TRUE ) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000 ) );
 	}
 
-	//Splits long debug lines or array dumps to prevent syslog overflows.
-
 	/**
+	 * Splits long debug lines or array dumps to prevent syslog overflows.
 	 * @param $text
 	 * @param null $prefix
 	 * @param null $suffix
@@ -441,11 +439,7 @@ class Debug {
 	}
 
 	/**
-	 * @param $error_number
-	 * @param $error_str
-	 * @param $error_file
-	 * @param $error_line
-	 * @return bool
+	 * @return array Replacement for apache_request_headers() as it wasn't reliably available and would sometimes cause PHP fatal errors due to it being undefined.
 	 *
 	 * Replacement for apache_request_headers() as it wasn't reliably available and would sometimes cause PHP fatal errors due to it being undefined.
 	 */
@@ -479,6 +473,13 @@ class Debug {
 		return $arh;
 	}
 
+	/**
+	 * @param $error_number
+	 * @param $error_str
+	 * @param $error_file
+	 * @param $error_line
+	 * @return bool
+	 */
 	static function ErrorHandler( $error_number, $error_str, $error_file, $error_line ) {
 		//Only handle errors included in the error_reporting()
 		if ( ( error_reporting() & $error_number ) ) { //Bitwise operator.
@@ -528,9 +529,10 @@ class Debug {
 											AND stristr( $error_str, 'unique constraint' ) === FALSE
 											AND stristr( $error_str, 'deadlock' ) === FALSE
 											AND stristr( $error_str, 'server has gone away' ) === FALSE
+											AND stristr( $error_str, 'software caused connection abort' ) === FALSE
 											AND stristr( $error_str, 'closed the connection unexpectedly' ) === FALSE
 											AND stristr( $error_str, 'execution was interrupted' ) === FALSE
-											AND stristr( $error_str, 'No space left on device' ) === FALSE
+											AND stristr( $error_str, 'no space left on device' ) === FALSE
 											AND stristr( $error_str, 'unserialize' ) === FALSE
 											AND stristr( $error_str, 'headers already sent by' ) === FALSE
 

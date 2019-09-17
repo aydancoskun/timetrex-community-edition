@@ -65,9 +65,8 @@ class ProgressBar {
 		}
 	}
 
-	//Allow setting a default key so we don't have to pass the key around outside of this object.
-
 	/**
+	 * Allow setting a default key so we don't have to pass the key around outside of this object.
 	 * @param $key
 	 */
 	function setDefaultKey( $key ) {

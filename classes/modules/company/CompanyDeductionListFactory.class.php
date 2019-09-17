@@ -56,7 +56,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -90,7 +90,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			if ( !is_array($id) ) {
 				$this->saveCache($this->rs, $id);
@@ -131,7 +131,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -174,7 +174,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -228,18 +228,20 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
+	 * @param $company_id
 	 * @param string $agency_id UUID
 	 * @param int $limit Limit the number of records returned
 	 * @param int $page Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|CompanyDeductionListFactory
+	 * @throws DBError
 	 */
 	function getByCompanyIdAndPayrollRemittanceAgencyId( $company_id, $agency_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
@@ -269,7 +271,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -308,7 +310,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 
 		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -345,7 +347,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 
 		//Debug::Arr($ph, 'Query: '.$query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -380,7 +382,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -415,7 +417,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -442,7 +444,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -477,7 +479,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -512,7 +514,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -547,7 +549,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -594,7 +596,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -629,7 +631,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -684,7 +686,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -896,7 +898,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;

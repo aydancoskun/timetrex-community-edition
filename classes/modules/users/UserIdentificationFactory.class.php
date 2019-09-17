@@ -59,10 +59,14 @@ class UserIdentificationFactory extends Factory {
 											1	=> TTi18n::gettext('Employee Sequence'), //Company specific employee sequence number, primarily for timeclocks. Should be less than 65535.
 											5	=> TTi18n::gettext('Password History'), //Web interface password history
 											10	=> TTi18n::gettext('iButton'),
-											20	=> TTi18n::gettext('USB Fingerprint'),
+											20	=> TTi18n::gettext('USB Fingerprint'), //Biometric Data -- This is purged when employees are terminated.
 											30	=> TTi18n::gettext('Barcode'), //For barcode readers and USB proximity card readers.
 											35	=> TTi18n::gettext('QRcode'), //For cameras to read QR code badges.
 											40	=> TTi18n::gettext('Proximity Card'), //Mainly for proximity cards on timeclocks.
+
+											//
+											//Biometric data -- This is purged when employees are terminated.
+											//
 											70	=> TTi18n::gettext('Face Image (v1)'), //Raw image of cropped face in as high of quality as possible, and cropped 10-20% larger than the face itself.
 											71	=> TTi18n::gettext('Face Image (v2)'), //Raw image of cropped face in as high of quality as possible, and cropped 10-20% larger than the face itself.
 											75	=> TTi18n::gettext('Facial Recognition'), //Luxand v5 SDK templates.
@@ -70,8 +74,13 @@ class UserIdentificationFactory extends Factory {
 											77	=> TTi18n::gettext('Facial Recognition (v3)'), //Luxand v7 SDK templates, App v4.5+
 											78	=> TTi18n::gettext('Facial Recognition (v4)'), //Luxand vX SDK templates, App vX.X+ -- Future use.
 											//79-90 -- Luxand SDK versions.
+
 											100	=> TTi18n::gettext('TimeClock FingerPrint (v9)'), //TimeClocks v9 algo
 											101	=> TTi18n::gettext('TimeClock FingerPrint (v10)'), //TimeClocks v10 algo
+											//
+											//Biometric data -- This is purged when employees are terminated.
+											//
+
 									);
 				break;
 
@@ -87,7 +96,7 @@ class UserIdentificationFactory extends Factory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->user_obj = $ulf->getById( $this->getUser() )->getCurrent();
 
 			return $this->user_obj;
@@ -172,7 +181,7 @@ class UserIdentificationFactory extends Factory {
 					'value' => (string)$value,
 					);
 
-		$uf = TTnew( 'UserFactory' );
+		$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 
 		$query = 'select a.id
 					from '. $this->getTable() .' as a,
@@ -238,7 +247,7 @@ class UserIdentificationFactory extends Factory {
 		//
 		// User
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Invalid Employee')

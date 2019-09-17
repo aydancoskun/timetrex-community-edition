@@ -135,9 +135,8 @@ class AuthorizationFactory extends Factory {
 		return $this->getGenericObject( 'UserListFactory', $this->getCurrentUser(), 'user_obj' );
 	}
 
-	//Stores the current user in memory, so we can determine if its the employee verifying, or a superior.
-
 	/**
+	 * Stores the current user in memory, so we can determine if its the employee verifying, or a superior.
 	 * @return mixed
 	 */
 	function getCurrentUser() {
@@ -172,11 +171,11 @@ class AuthorizationFactory extends Factory {
 					Debug::Text(' Authorizing User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 					Debug::Text(' Object User ID: '. $object_user_id, __FILE__, __LINE__, __METHOD__, 10);
 
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 					$company_id = $ulf->getById( $object_user_id )->getCurrent()->getCompany();
 					Debug::Text(' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 
-					$hlf = TTnew( 'HierarchyListFactory' );
+					$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 					$this->hierarchy_arr = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $company_id, $object_user_id, $this->getObjectType(), FALSE);
 
 					Debug::Arr($this->hierarchy_arr, ' Hierarchy Arr: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -275,7 +274,7 @@ class AuthorizationFactory extends Factory {
 					continue;
 				}
 
-				//Since this loops in reverse, always assume the first element is the parent for cases where a suborindate may be submitting the object (ie: request) and it needs to go to the direct superiors.
+				//Since this loops in reverse, always assume the first element is the parent for cases where a subordinate may be submitting the object (ie: request) and it needs to go to the direct superiors.
 				if ( $next_level == TRUE ) {
 					//Debug::Arr( $level_parent_arr, ' Parents: Level: '. $level, __FILE__, __LINE__, __METHOD__, 10 );
 					$retval = $level_parent_arr;
@@ -293,9 +292,8 @@ class AuthorizationFactory extends Factory {
 		return $retval;
 	}
 
-	//This will return false if it can't find a hierarchy, or if its at the top level (1) and can't find a higher level.
-
 	/**
+	 * This will return false if it can't find a hierarchy, or if its at the top level (1) and can't find a higher level.
 	 * @return bool|int|string
 	 */
 	function getNextHierarchyLevel() {
@@ -329,7 +327,7 @@ class AuthorizationFactory extends Factory {
 	static function getInitialHierarchyLevel( $company_id, $user_id, $hierarchy_type_id ) {
 		$hierarchy_highest_level = 99;
 		if ( $company_id != '' AND $user_id != '' AND $hierarchy_type_id > 0 ) {
-			$hlf = TTnew( 'HierarchyListFactory' );
+			$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 			$hierarchy_arr = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $company_id, $user_id, $hierarchy_type_id, FALSE );
 			if ( isset( $hierarchy_arr ) AND is_array( $hierarchy_arr ) ) {
 				Debug::Arr( $hierarchy_arr, ' aUser ID ' . $user_id . ' Type ID: ' . $hierarchy_type_id . ' Array: ', __FILE__, __LINE__, __METHOD__, 10 );
@@ -484,7 +482,7 @@ class AuthorizationFactory extends Factory {
 			return FALSE;
 		}
 
-		$alf = TTnew( 'AuthorizationListFactory' );
+		$alf = TTnew( 'AuthorizationListFactory' ); /** @var AuthorizationListFactory $alf */
 		$alf->getByObjectTypeAndObjectId( $this->getObjectType(), $this->getObject() );
 		foreach( $alf as $authorization_obj ) {
 			$authorization_obj->setDeleted(TRUE);
@@ -504,9 +502,9 @@ class AuthorizationFactory extends Factory {
 			//Get user_id of object.
 			$this->getObjectHandler()->getByID( $this->getObject() );
 			$this->obj_handler_obj = $this->getObjectHandler()->getCurrent();
-			if ( method_exists( $this->obj_handler_obj, 'setCurrentUser' ) AND $this->obj_handler_obj->getCurrentUser() != $this->getCurrentUser() ) { //Required for authorizing TimeSheets from MyAccount -> TimeSheet Authorization.
-				//$this->obj_handler_obj->setCurrentUser( $this->getCurrentUser() );
-			}
+//			if ( method_exists( $this->obj_handler_obj, 'setCurrentUser' ) AND $this->obj_handler_obj->getCurrentUser() != $this->getCurrentUser() ) { //Required for authorizing TimeSheets from MyAccount -> TimeSheet Authorization.
+//				$this->obj_handler_obj->setCurrentUser( $this->getCurrentUser() );
+//			}
 
 			return $this->obj_handler_obj;
 		}
@@ -569,7 +567,7 @@ class AuthorizationFactory extends Factory {
 			//Email original submittor and all lower level superiors?
 			$user_ids = $this->getHierarchyChildLevelArray();
 
-			if ( strpos( get_class( $this->getObjectHandlerObject() ), 'PayPeriodTimeSheetVerify' ) === 0 ) { //Allow for PayStubListFactoryPlugin to match as well.
+			if ( is_a( $this->getObjectHandlerObject(), 'PayPeriodTimeSheetVerify' ) ) { //is_a() will match on plugin class names too because it also checks the parent class name.
 				//Check to see what type of timesheet verification is required, if its superior only, don't email the employee to avoid confusion.
 				if ( $this->getObjectHandlerObject()->getVerificationType() != 30 ) {
 					$user_ids[] = $object_handler_user_id;
@@ -605,7 +603,7 @@ class AuthorizationFactory extends Factory {
 			//Get user preferences and determine if they accept email notifications.
 			Debug::Arr($user_ids, 'Recipient User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			$uplf = TTnew( 'UserPreferenceListFactory' );
+			$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 			//$uplf->getByUserId( $user_ids );
 			$uplf->getByUserIdAndStatus( $user_ids, 10 ); //Only email ACTIVE employees/supervisors.
 			if ( $uplf->getRecordCount() > 0 ) {
@@ -763,16 +761,15 @@ class AuthorizationFactory extends Factory {
 		return TRUE; //Always return true
 	}
 
-	//Used by Request/TimeSheetVerification/Expense when initially saving a record to notify the immediate superiors, rather than using the message notification.
-
 	/**
+	 * Used by Request/TimeSheetVerification/Expense when initially saving a record to notify the immediate superiors, rather than using the message notification.
 	 * @param string $current_user_id UUID
 	 * @param int $object_type_id
 	 * @param string $object_id UUID
 	 * @return bool
 	 */
 	static function emailAuthorizationOnInitialObjectSave( $current_user_id, $object_type_id, $object_id) {
-		$authorization_obj = TTNew('AuthorizationFactory');
+		$authorization_obj = TTNew('AuthorizationFactory'); /** @var AuthorizationFactory $authorization_obj */
 		$authorization_obj->setObjectType( $object_type_id );
 		$authorization_obj->setObject( $object_id );
 		$authorization_obj->setCurrentUser( $current_user_id );

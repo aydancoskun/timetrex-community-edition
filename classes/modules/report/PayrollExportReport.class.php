@@ -92,9 +92,9 @@ class PayrollExportReport extends TimesheetSummaryReport {
 			case 'export_columns': //Must pass export_type.
 				if ( $params == 'csv_advanced' OR $params = 'va_munis' OR $params = 'meditech' ) {
 					if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
-						$jar = TTNew('JobDetailReport');
+						$jar = TTNew('JobDetailReport'); /** @var JobDetailReport $jar */
 					} else {
-						$jar = TTNew('TimesheetDetailReport');
+						$jar = TTNew('TimesheetDetailReport'); /** @var TimesheetDetailReport $jar */
 					}
 					$jar->setUserObject( $this->getUserObject() );
 
@@ -139,7 +139,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				break;
 			case 'export_policy':
 				$retval = array();
-				$pclf = TTnew( 'PayCodeListFactory' );
+				$pclf = TTnew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $pclf */
 				$pclf->getByCompanyId( $this->getUserObject()->getCompany() );
 				if ( $pclf->getRecordCount() > 0 ) {
 					foreach( $pclf as $pc_obj ) {
@@ -152,7 +152,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$export_type = $this->getOptions('export_type');
 
 				$retval = array();
-				$pclf = TTnew( 'PayCodeListFactory' );
+				$pclf = TTnew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $pclf */
 				$pclf->getByCompanyId( $this->getUserObject()->getCompany() );
 				if ( $pclf->getRecordCount() > 0 ) {
 					foreach( $pclf as $pc_obj ) {
@@ -229,7 +229,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					$retval['-0310-job_item_manual_id'] = TTi18n::gettext('Task: Code');
 				}
 
-				$oflf = TTnew( 'OtherFieldListFactory' );
+				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 
 				//Put a colon or underscore in the name, thats how we know it needs to be replaced.
 
@@ -268,7 +268,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								'-0040-department_manual_id' => TTi18n::gettext('Department: Code'),
 								);
 
-				$oflf = TTnew( 'OtherFieldListFactory' );
+				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 
 				//Put a colon or underscore in the name, thats how we know it needs to be replaced.
 
@@ -339,7 +339,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					$retval['-0310-job_item_manual_id'] = TTi18n::gettext('Task: Code');
 				}
 
-				$oflf = TTnew( 'OtherFieldListFactory' );
+				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 
 				//Put a colon or underscore in the name, thats how we know it needs to be replaced.
 
@@ -381,7 +381,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					$retval['-0310-job_item_manual_id'] = TTi18n::gettext('Task: Code');
 				}
 
-				$oflf = TTnew( 'OtherFieldListFactory' );
+				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 
 				//Put a colon or underscore in the name, thats how we know it needs to be replaced.
 
@@ -455,7 +455,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					$retval['-0310-job_item_manual_id'] = TTi18n::gettext('Task: Code');
 				}
 
-				$oflf = TTnew( 'OtherFieldListFactory' );
+				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 
 				//Put a colon or underscore in the name, thats how we know it needs to be replaced.
 
@@ -482,7 +482,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'PayrollExportReport', 'custom_column' );
@@ -495,13 +495,13 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = Misc::prependArray( $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'PayrollExportReport', 'custom_column' ), parent::_getOptions( $name, $params ) );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'PayrollExportReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::prependArray( Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 ), parent::_getOptions( $name, $params ) );
@@ -512,7 +512,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'PayrollExportReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::prependArray( Misc::addSortPrefix( $report_static_custom_column_labels, 9700 ), parent::_getOptions( $name, $params ) );
@@ -567,8 +567,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				switch( strtolower($export_type) ) {
 					case 'adp':
-						$config['columns'][] = 'default_branch_id';
-						$config['columns'][] = 'default_department_id';
+						$config['columns'][] = 'default_branch';
+						$config['columns'][] = 'default_department';
 
 						if ( isset($setup_data['adp']['company_code']) AND strpos( $setup_data['adp']['company_code'], '_' ) !== FALSE ) {
 							$config['columns'][] = Misc::trimSortPrefix( $setup_data['adp']['company_code'] );
@@ -580,10 +580,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							$config['columns'][] = Misc::trimSortPrefix( $setup_data['adp']['temp_dept'] );
 						}
 						$config['columns'][] = 'employee_number';
-						$config['columns'] += Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
+						$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
 
-						$config['group'][] = 'default_branch_id';
-						$config['group'][] = 'default_department_id';
+						$config['group'][] = 'default_branch';
+						$config['group'][] = 'default_department';
 						if ( isset($setup_data['adp']['company_code']) AND strpos( $setup_data['adp']['company_code'], '_' ) !== FALSE ) {
 							$config['group'][] = Misc::trimSortPrefix( $setup_data['adp']['company_code'] );
 						}
@@ -616,7 +616,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					case 'millenium':
 					case 'ceridian_insync':
 						$config['columns'][] = 'employee_number';
-						$config['columns'] += Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
+						$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
 
 						$config['group'][] = 'employee_number';
 
@@ -668,7 +668,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						$config['columns'][] = 'employee_number';
 						$config['columns'][] = 'last_name';
 						$config['columns'][] = 'first_name';
-						$config['columns'] += Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
+						$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
 
 						$config['group'][] = 'pay_period_end_date';
 						$config['group'][] = 'employee_number';
@@ -680,7 +680,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					case 'chris21':
 						$config['columns'][] = 'pay_period_end_date';
 						$config['columns'][] = 'employee_number';
-						$config['columns'] += Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
+						$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
 
 						$config['group'][] = 'pay_period_end_date';
 						$config['group'][] = 'employee_number';
@@ -688,8 +688,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						$config['sort'][] = array('pay_period_end_date' => 'asc', 'employee_number' => 'asc');
 						break;
 					case 'accero':
-						$config['columns'][] = 'default_branch_id';
-						$config['columns'][] = 'default_department_id';
+						$config['columns'][] = 'default_branch';
+						$config['columns'][] = 'default_department';
 
 						if ( isset($setup_data['accero']['temp_dept']) AND strpos( $setup_data['accero']['temp_dept'], '_' ) !== FALSE ) {
 							$config['columns'][] = Misc::trimSortPrefix( $setup_data['accero']['temp_dept'] );
@@ -697,10 +697,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						//$config['columns'][] = 'pay_period_end_date';
 						$config['columns'][] = 'date_week_end';
 						$config['columns'][] = 'employee_number';
-						$config['columns'] += Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
+						$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
 
-						$config['group'][] = 'default_branch_id';
-						$config['group'][] = 'default_department_id';
+						$config['group'][] = 'default_branch';
+						$config['group'][] = 'default_department';
 						if ( isset($setup_data['accero']['temp_dept']) AND strpos( $setup_data['accero']['temp_dept'], '_' ) !== FALSE ) {
 							$config['group'][] = Misc::trimSortPrefix( $setup_data['accero']['temp_dept'] );
 						}
@@ -719,7 +719,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						$config['columns'][] = 'employee_number';
 						$config['columns'][] = 'last_name';
 						$config['columns'][] = 'first_name';
-						$config['columns'] += Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
+						$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
 
 						$config['group'][] = 'pay_period_end_date';
 						$config['group'][] = 'employee_number';
@@ -737,7 +737,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							$config['columns'][] = $setup_data['sage_50']['customer_name'];
 						}
 
-						$config['columns'] += Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
+						$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
 
 						$config['group'][] = 'pay_period_end_date';
 						$config['group'][] = 'employee_number';
@@ -759,7 +759,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						$config['columns'][] = 'default_branch';
 						$config['columns'][] = 'default_department';
 						$config['columns'][] = 'pay_period';
-						$config['columns'] += Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
+						$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
 
 						$config['group'][] = 'full_name';
 						$config['group'][] = 'employee_number';
@@ -782,9 +782,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 		return $config;
 	}
 
-	//Short circuit this function, as no postprocessing is required for exporting the data.
-
 	/**
+	 * Short circuit this function, as no postprocessing is required for exporting the data.
 	 * @param null $format
 	 * @return bool
 	 */
@@ -916,8 +915,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				unset($rows); //Ignore any existing timesheet summary data, we will be using our own job data below.
 				//Debug::Arr($setup_data, 'ADP Advanced Setup Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-				$config['columns'][] = 'default_branch_id';
-				$config['columns'][] = 'default_department_id';
+				$config['columns'][] = 'default_branch';
+				$config['columns'][] = 'default_department';
 				if ( isset($setup_data[$setup_data['export_type']]['company_code']) AND strpos( $setup_data[$setup_data['export_type']]['company_code'], '_' ) !== FALSE ) {
 					$config['columns'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['company_code'] );
 				}
@@ -942,8 +941,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				}
 				$config['columns'][] = 'employee_number';
 
-				$config['group'][] = 'default_branch_id';
-				$config['group'][] = 'default_department_id';
+				$config['group'][] = 'default_branch';
+				$config['group'][] = 'default_department';
 				if ( isset($setup_data[$setup_data['export_type']]['company_code']) AND strpos( $setup_data[$setup_data['export_type']]['company_code'], '_' ) !== FALSE ) {
 					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['company_code'] );
 				}
@@ -977,8 +976,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				}
 				unset($dynamic_column_names, $dynamic_column_name);
 
-				$config['sort'][] = array( 'default_branch_id' => 'asc');
-				$config['sort'][] = array( 'default_department_id' => 'asc');
+				$config['sort'][] = array( 'default_branch' => 'asc');
+				$config['sort'][] = array( 'default_department' => 'asc');
 				if ( isset($setup_data[$setup_data['export_type']]['company_code']) AND strpos( $setup_data[$setup_data['export_type']]['company_code'], '_' ) !== FALSE ) {
 					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['company_code'] ) => 'asc' );
 				}
@@ -1006,10 +1005,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
 					Debug::Text('Using Job Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
-					$jar = TTNew('JobDetailReport');
+					$jar = TTNew('JobDetailReport'); /** @var JobDetailReport $jar */
 				} else {
 					Debug::Text('Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
-					$jar = TTNew('TimesheetDetailReport');
+					$jar = TTNew('TimesheetDetailReport'); /** @var TimesheetDetailReport $jar */
 				}
 				$jar->setAMFMessageID( $this->getAMFMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
@@ -1191,7 +1190,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				//Debug::Arr($config, 'Job Detail Report Config: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Get job data...
-				$jar = TTNew('JobDetailReport');
+				$jar = TTNew('JobDetailReport'); /** @var JobDetailReport $jar */
 				$jar->setAMFMessageID( $this->getAMFMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
 				$jar->setPermissionObject( $this->getPermissionObject() );
@@ -1520,7 +1519,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 			case 'chris21': //Chris21 Export format.
 				//Get all Absence Policies so we can determine which pay codes are absences.
 				$absence_policy_data = array();
-				$aplf = TTnew( 'AbsencePolicyListFactory' );
+				$aplf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $aplf */
 				$aplf->getByCompanyId( $this->getUserObject()->getCompany() );
 				if ( $aplf->getRecordCount() > 0 ) {
 					foreach( $aplf as $ap_obj ) {
@@ -1576,7 +1575,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				//Get all Absence Policies so we can determine which ones are paid/unpaid.
 				$absence_policy_data = array();
-				$aplf = TTnew( 'AbsencePolicyListFactory' );
+				$aplf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $aplf */
 				$aplf->getByCompanyId( $this->getUserObject()->getCompany() );
 				if ( $aplf->getRecordCount() > 0 ) {
 					foreach( $aplf as $ap_obj ) {
@@ -1636,10 +1635,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				//Get job data...
 				if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
 					Debug::Text('Using Job Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
-					$jar = TTNew('JobDetailReport');
+					$jar = TTNew('JobDetailReport'); /** @var JobDetailReport $jar */
 				} else {
 					Debug::Text('Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
-					$jar = TTNew('TimesheetDetailReport');
+					$jar = TTNew('TimesheetDetailReport'); /** @var TimesheetDetailReport $jar */
 				}
 				$jar->setAMFMessageID( $this->getAMFMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
@@ -2018,10 +2017,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
 					Debug::Text('Using Job Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
-					$jar = TTNew('JobDetailReport');
+					$jar = TTNew('JobDetailReport'); /** @var JobDetailReport $jar */
 				} else {
 					Debug::Text('Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
-					$jar = TTNew('TimesheetDetailReport');
+					$jar = TTNew('TimesheetDetailReport'); /** @var TimesheetDetailReport $jar */
 				}
 				$jar->setAMFMessageID( $this->getAMFMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
@@ -2237,10 +2236,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
 					Debug::Text('Using Job Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
-					$jar = TTNew('JobDetailReport');
+					$jar = TTNew('JobDetailReport'); /** @var JobDetailReport $jar */
 				} else {
 					Debug::Text('Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
-					$jar = TTNew('TimesheetDetailReport');
+					$jar = TTNew('TimesheetDetailReport'); /** @var TimesheetDetailReport $jar */
 				}
 				$jar->setAMFMessageID( $this->getAMFMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
@@ -2453,10 +2452,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				//Get job data...
 				if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
 					Debug::Text('Using Job Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
-					$jar = TTNew('JobDetailReport');
+					$jar = TTNew('JobDetailReport'); /** @var JobDetailReport $jar */
 				} else {
 					Debug::Text('Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
-					$jar = TTNew('TimesheetDetailReport');
+					$jar = TTNew('TimesheetDetailReport'); /** @var TimesheetDetailReport $jar */
 				}
 				$jar->setAMFMessageID( $this->getAMFMessageID() );
 				$jar->setUserObject( $this->getUserObject() );

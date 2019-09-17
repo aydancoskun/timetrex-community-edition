@@ -963,7 +963,7 @@ RequestViewController = RequestViewCommonController.extend( {
 
 	onAvailableBalanceChange: function() {
 		if ( Global.getProductEdition() >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
-			if ( this.edit_view_ui_dic && this.edit_view_ui_dic.absence_policy_id && this.edit_view_ui_dic.absence_policy_id.getValue() != 0 ) {
+			if ( this.edit_view_ui_dic && this.edit_view_ui_dic.absence_policy_id && this.edit_view_ui_dic.request_schedule_status_id.getValue() == 20 && this.edit_view_ui_dic.absence_policy_id.getValue() != TTUUID.zero_id ) {
 				this.getAvailableBalance();
 			} else if ( this.edit_view_ui_dic && this.edit_view_ui_dic.available_balance ) {
 				this.edit_view_ui_dic.available_balance.parents( '.edit-view-form-item-div' ).hide();
@@ -973,12 +973,17 @@ RequestViewController = RequestViewCommonController.extend( {
 
 	//post hook for onSaveResult
 	onSaveDone: function( result ) {
+		var retval;
 		if ( this.is_edit ) {
 			this.onViewClick( this.current_edit_record.id );
-			return false;
+			retval = false;
 		} else {
-			return true;
+			retval = true;
 		}
+		$().TFeedback({
+			source: 'Send'
+		});
+		return retval;
 	},
 
 	uniformVariable: function( records ) {

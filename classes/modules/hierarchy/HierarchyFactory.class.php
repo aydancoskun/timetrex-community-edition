@@ -93,9 +93,9 @@ class HierarchyFactory extends Factory {
 		return TRUE;
 	}
 
-	//Use this for completly editing a row in the tree
-	//Basically "old_id".
 	/**
+	 * Use this for completly editing a row in the tree
+	 * Basically "old_id".
 	 * @return bool|mixed
 	 */
 	function getPreviousUser() {
@@ -173,12 +173,12 @@ class HierarchyFactory extends Factory {
 		}
 
 		//Make sure both user and parent belong to the same company
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->getUser() );
 		$user = $ulf->getIterator()->current();
 		unset($ulf);
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->getParent() );
 		$parent = $ulf->getIterator()->current();
 		unset($ulf);
@@ -280,7 +280,7 @@ class HierarchyFactory extends Factory {
 	/**
 	 * @return bool
 	 */
-	function Delete() {
+	function Delete( $disable_audit_log = FALSE ) {
 		if ( $this->getUser() !== FALSE ) {
 			return TRUE;
 		}

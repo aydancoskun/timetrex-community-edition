@@ -129,7 +129,7 @@ class UserSummaryReport extends Report {
 				break;
 			case 'custom_columns':
 				//Get custom fields for report data.
-				$oflf = TTnew( 'OtherFieldListFactory' );
+				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 				//User and Punch fields conflict as they are merged together in a secondary process.
 				//$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10, 12), array( 10 => '', 12 => 'user_title_' ) );
 				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10, 4, 5, 12, 20, 30), array( 10 => '', 4 => 'branch_', 5 => 'department_', 12 => 'user_title_', 20 => 'job_', 30 => 'job_item_') );
@@ -139,7 +139,7 @@ class UserSummaryReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'UserSummaryReport', 'custom_column' );
@@ -150,13 +150,13 @@ class UserSummaryReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'UserSummaryReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'UserSummaryReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -165,7 +165,7 @@ class UserSummaryReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'UserSummaryReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -842,9 +842,8 @@ class UserSummaryReport extends Report {
 		return $retval;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -876,7 +875,7 @@ class UserSummaryReport extends Report {
 		$include_last_punch_time = ( isset($columns['max_punch_time_stamp']) ) ? TRUE : FALSE;
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, NULL, $include_last_punch_time );
 		Debug::Text(' User Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -916,7 +915,7 @@ class UserSummaryReport extends Report {
 		//Debug::Arr($this->tmp_data['user'], 'TMP User Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user preference data for joining.
-		$uplf = TTnew( 'UserPreferenceListFactory' );
+		$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 		$uplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Preference Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uplf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -925,7 +924,7 @@ class UserSummaryReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
-		$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' );
+		$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' ); /** @var RemittanceDestinationAccountListFactory $rdalf */
 		$rda_filter_data = $filter_data;
 		$rda_filter_data['status_id'] = 10; //Enabled
 		$rda_filter_data['type_id'] = 3000; //EFT payment methods only.
@@ -946,7 +945,7 @@ class UserSummaryReport extends Report {
 		unset( $rdalf, $rda_filter_data, $key, $rda_obj );
 
 
-		$blf = TTnew( 'BranchListFactory' );
+		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text(' Branch Total Rows: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount(), NULL, TTi18n::getText('Retrieving Branches...') );
@@ -957,7 +956,7 @@ class UserSummaryReport extends Report {
 		}
 		//Debug::Arr($this->tmp_data['default_branch'], 'Default Branch Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$dlf = TTnew( 'DepartmentListFactory' );
+		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		$dlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text(' Department Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $dlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Departments...') );
@@ -966,7 +965,7 @@ class UserSummaryReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
-		$utlf = TTnew( 'UserTitleListFactory' );
+		$utlf = TTnew( 'UserTitleListFactory' ); /** @var UserTitleListFactory $utlf */
 		$utlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text(' User Title Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$user_title_column_config = array_merge( (array)Misc::removeKeyPrefix( 'user_title_', (array)$this->getColumnDataConfig() ), array('id' => TRUE ) ); //Always include title_id column so we can merge title data.
@@ -978,7 +977,7 @@ class UserSummaryReport extends Report {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			//Get job data for joining.
-			$jlf = TTnew( 'JobListFactory' );
+			$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 			$jlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			Debug::Text(' Job Total Rows: '. $jlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $jlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Jobs...') );
@@ -991,7 +990,7 @@ class UserSummaryReport extends Report {
 			}
 			unset($jlf, $j_obj, $key);
 
-			$jilf = TTnew( 'JobItemListFactory' );
+			$jilf = TTnew( 'JobItemListFactory' ); /** @var JobItemListFactory $jilf */
 			$jilf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			Debug::Text(' Job Item Total Rows: '. $jilf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $jilf->getRecordCount(), NULL, TTi18n::getText('Retrieving Tasks...') );
@@ -1006,7 +1005,7 @@ class UserSummaryReport extends Report {
 		}
 
 		//Get user wage data for joining.
-		$uwlf = TTnew( 'UserWageListFactory' );
+		$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 		$filter_data['wage_group_id'] = array( TTUUID::getZeroID() ); //Use default wage groups only.
 		$filter_data['permission_children_ids'] = $wage_permission_children_ids;
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
@@ -1034,9 +1033,8 @@ class UserSummaryReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {

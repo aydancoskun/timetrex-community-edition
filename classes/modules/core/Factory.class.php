@@ -120,9 +120,8 @@ abstract class Factory {
 		return $this->progress_bar_obj;
 	}
 
-	//Allow method to pre-populate/overwrite the cache if needed.
-
 	/**
+	 * Allow method to pre-populate/overwrite the cache if needed.
 	 * @param object $obj
 	 * @param string $variable
 	 * @return bool
@@ -141,7 +140,7 @@ abstract class Factory {
 	 * @param string $variable
 	 * @param string $list_factory_method
 	 * @param string $id_method
-	 * @return bool
+	 * @return object|bool
 	 */
 	function getGenericObject( $list_factory, $id, $variable, $list_factory_method = 'getById', $id_method = 'getID' ) {
 		if ( isset($this->$variable) AND is_object( $this->$variable ) AND $id == $this->$variable->$id_method() ) { //Make sure we always compare that the object IDs match.
@@ -158,9 +157,8 @@ abstract class Factory {
 		}
 	}
 
-	//Generic function to return and cache CompanyGenericMap data, this greatly improves performance of CalculatePolicy when many policies exist.
-
 	/**
+	 * Generic function to return and cache CompanyGenericMap data, this greatly improves performance of CalculatePolicy when many policies exist.
 	 * @param string $company_id UUID
 	 * @param int $object_type_id
 	 * @param string $id UUID
@@ -178,10 +176,10 @@ abstract class Factory {
 		}
 	}
 
-	//Generic getter/setter functions that should be used when Validation code is moved from get/set functions to Validate() function.
-
 	/**
+	 * Generic getter/setter functions that should be used when Validation code is moved from get/set functions to Validate() function.
 	 * @param string $name
+	 * @param null $cast
 	 * @return bool|mixed
 	 */
 	function getGenericDataValue( $name, $cast = NULL ) {
@@ -202,6 +200,7 @@ abstract class Factory {
 	/**
 	 * @param string $name
 	 * @param mixed $data
+	 * @param null $cast
 	 * @return bool
 	 */
 	function setGenericDataValue( $name, $data, $cast = NULL ) {
@@ -248,9 +247,8 @@ abstract class Factory {
 		return $value;
 	}
 
-	//Generic getter/setter functions that should be used when Validation code is moved from get/set functions to Validate() function.
-
 	/**
+	 * Generic getter/setter functions that should be used when Validation code is moved from get/set functions to Validate() function.
 	 * @param string $name
 	 * @return bool
 	 */
@@ -377,9 +375,8 @@ abstract class Factory {
 		return FALSE;
 	}
 
-	//Serialize ADODB recordset.
-
 	/**
+	 * Serialize ADODB recordset.
 	 * @param object $rs
 	 * @return string
 	 */
@@ -392,9 +389,8 @@ abstract class Factory {
 		return _rs2serialize( $rs, FALSE, $rs->sql );
 	}
 
-	//UnSerialize ADODB recordset.
-
 	/**
+	 * UnSerialize ADODB recordset.
 	 * @param string $rs
 	 * @return mixed
 	 */
@@ -421,9 +417,9 @@ abstract class Factory {
 		return FALSE;
 	}
 
-	//Generic function get any data from the data array.
-	//Used mainly for the reports that return grouped queries and such.
 	/**
+	 * Generic function get any data from the data array.
+	 * Used mainly for the reports that return grouped queries and such.
 	 * @param string $column
 	 * @return bool|mixed
 	 */
@@ -435,9 +431,8 @@ abstract class Factory {
 		return FALSE;
 	}
 
-	//Print primary columns from object.
-
 	/**
+	 * Print primary columns from object.
 	 * @return bool|string
 	 */
 	function __toString() {
@@ -1206,16 +1201,14 @@ abstract class Factory {
 		}
 	}
 
-	//This function takes plain input from the user and creates a SQL statement for filtering
-	//based on a date range.
-	// Supported Syntax:
-	//					>=01-Jan-09
-	//					<=01-Jan-09
-	//					<01-Jan-09
-	//					>01-Jan-09
-	//					>01-Jan-09 & <10-Jan-09
-	//
 	/**
+	 * This function takes plain input from the user and creates a SQL statement for filtering based on a date range.
+	 * Supported Syntax:
+	 *       >=01-Jan-09
+	 *       <=01-Jan-09
+	 *       <01-Jan-09
+	 *       >01-Jan-09
+	 *       >01-Jan-09 & <10-Jan-09
 	 * @param string $str
 	 * @param string $column
 	 * @param string $format
@@ -1921,9 +1914,8 @@ abstract class Factory {
 		return NULL;
 	}
 
-	//Parses out the exact column name, without any aliases, or = signs in it.
-
 	/**
+	 * Parses out the exact column name, without any aliases, or = signs in it.
 	 * @param string $column
 	 * @return bool|string
 	 */
@@ -2232,11 +2224,10 @@ abstract class Factory {
 		$profiler->startTimer( 'getEmptyRecordSet()' );
 
 		if ( $id == NULL ) {
-//			$id = -1;
-			$id = TTUUID::getNotExistID();
+			$where_clause = 'FALSE'; //Was: TTUUID::getNotExistID(); //Was $id = -1 -- This helps avoid failures in serializable mode as no data is actually selected.
+		} else {
+			$where_clause = 'id = \'' . TTUUID::castUUID( $id ) . '\'';
 		}
-
-		$id = TTUUID::castUUID( $id );
 
 		//Possible errors can happen if $this->data[<invalid_column>] is passed, like what happens with APIPunch when attempting to delete a punch.
 		//Why are we not using '*' for all empty record set queries? Will using * cause more fields to be updated then necessary?
@@ -2254,42 +2245,32 @@ abstract class Factory {
 			$column_str = '*'; //Get empty RS with all columns.
 		}
 
-		try {
-			$query = 'SELECT '. $column_str .' FROM '. $this->table .' WHERE id = \''. $id .'\'';
-			if ( $id == TTUUID::getNotExistID() AND isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] == TRUE ) {
-
-				/*
-				//Try to use Cache Lite instead of ADODB, to avoid cache write errors from causing a transaction rollback. It should be faster too.
-				//However I think there is some issues with storing the record set, as ADODB goes to great lengths to avoid straight serialize/unserialize.
-				$cache_id = 'empty_rs_'. $this->table .'_'. $id;
-				$rs = $this->getCache($cache_id);
-				if ( $rs === FALSE ) {
-					$rs = $this->db->Execute($query);
-					$this->saveCache($rs, $cache_id);
-				}
-				*/
-				$save_error_handlers = $this->db->IgnoreErrors(); //Prevent a cache write error from causing a transaction rollback.
-				try {
-					$rs = $this->db->CacheExecute(604800, $query);
-				} catch (Exception $e) {
-					if ( $e->getCode() == -32000 OR $e->getCode() == -32001 ) { //Cache write error/cache file lock error.
-						//Likely a cache write error occurred, fall back to non-cached query and log this error.
-						Debug::Text('ERROR: Unable to write cache file, likely due to permissions or locking! Code: '. $e->getCode() .' Msg: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
-					}
-
-					//Execute non-cached query
-					try {
-						$rs = $this->db->Execute($query);
-					} catch (Exception $e) {
-						throw new DBError($e);
-					}
-				}
-				$this->db->IgnoreErrors( $save_error_handlers ); //Prevent a cache write error from causing a transaction rollback.
-			} else {
-				$rs = $this->db->Execute($query);
+		$query = 'SELECT '. $column_str .' FROM '. $this->table .' WHERE '. $where_clause;
+		if ( $id == NULL AND isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] == TRUE ) {
+			//Try to use Cache Lite instead of ADODB, to avoid cache write errors from causing a transaction rollback, especially important for serializable transactions. It should be faster too.
+			$cache_id = 'empty_rs_'. $this->table; //No need to add $id to the end as its always NULL here, but we may need to handle different columns that may be passed in with a md5() perhaps?
+			$rs = $this->getCache($cache_id);
+			if ( $rs === FALSE ) {
+				$rs = $this->ExecuteSQL($query);
+				$rs = $this->db->_rs2rs( $rs ); //Needed to include the _fieldObjects property for ADODB.
+				$this->saveCache( $this->serializeRS($rs), $cache_id); //Only run serializeRS() when passing to saveCache() otherwise it corrupts the $rs being returned in this function.
 			}
-		} catch (Exception $e) {
-			throw new DBError($e);
+
+//			try {
+//				$save_error_handlers = $this->db->IgnoreErrors(); //Prevent a cache write error from causing a transaction rollback.
+//				$rs = $this->db->CacheExecute(604800, $query);
+//				$this->db->IgnoreErrors( $save_error_handlers ); //Prevent a cache write error from causing a transaction rollback.
+//			} catch ( Exception $e ) {
+//				if ( $e->getCode() == -32000 OR $e->getCode() == -32001 ) { //Cache write error/cache file lock error.
+//					//Likely a cache write error occurred, fall back to non-cached query and log this error.
+//					Debug::Text('ERROR: Unable to write cache file, likely due to permissions or locking! Code: '. $e->getCode() .' Msg: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
+//				}
+//
+//				//Execute non-cached query
+//				$rs = $this->ExecuteSQL( $query );
+//			}
+		} else {
+			$rs = $this->ExecuteSQL( $query );
 		}
 
 		$profiler->stopTimer( 'getEmptyRecordSet()' );
@@ -2314,14 +2295,11 @@ abstract class Factory {
 		//Add new columns to record set.
 		//Check to make sure the columns exist in the table first though
 		//Classes like station don't have updated_date, so we need to take that in to account.
-		try {
-			$rs = $this->getEmptyRecordSet( $this->getId() );
-			//Set old_data in FactoryListIterator->getCurrent() instead, that way getDataDfifferences() can be used in Validate/preSave functions as well.
-			//$this->old_data = $rs->fields; //Store old data in memory for detailed audit log.
-		} catch (Exception $e) {
-			throw new DBError($e);
-		}
-		if (!$rs) {
+		$rs = $this->getEmptyRecordSet( $this->getId() );
+		//Set old_data in FactoryListIterator->getCurrent() instead, that way getDataDfifferences() can be used in Validate/preSave functions as well.
+		//$this->old_data = $rs->fields; //Store old data in memory for detailed audit log.
+
+		if ( !$rs ) {
 			Debug::text('No Record Found! (ID: '. $this->getID() .') Insert instead?', __FILE__, __LINE__, __METHOD__, 9);
 			//Throw exception?
 		}
@@ -2353,18 +2331,12 @@ abstract class Factory {
 
 		//Debug::Arr($this->data, 'Data Arr', __FILE__, __LINE__, __METHOD__, 10);\
 
-		//ignore_column_list
+		//This prevents SQL errors (ie: NULL columns when they shouldn't be) caused by only certain columns being cached in the empty record set, and therefore being ignored in the INSERT query.
+		$this->ignore_column_list = TRUE;
+		$rs = $this->getEmptyRecordSet();
+		$this->ignore_column_list = FALSE;
 
-		try {
-			//This prevents SQL errors (ie: NULL columns when they shouldn't be) caused by only certain columns being cached in the empty record set, and therefore being ignored in the INSERT query.
-			$this->ignore_column_list = TRUE;
-			$rs = $this->getEmptyRecordSet();
-			$this->ignore_column_list = FALSE;
-		} catch (Exception $e) {
-			throw new DBError($e);
-		}
-
-		if (!$rs) {
+		if ( !$rs ) {
 			Debug::text('ERROR: Unable to get empty record set for insert!', __FILE__, __LINE__, __METHOD__, 9);
 			//Throw exception?
 		}
@@ -2392,9 +2364,11 @@ abstract class Factory {
 	}
 
 	/**
+	 * @param bool $unnest_transactions
 	 * @return mixed
+	 * @throws DBError
 	 */
-	function CommitTransaction() {
+	function CommitTransaction( $unnest_transactions = FALSE ) {
 		if ( $this->db->transOff == 1 ) {
 			Debug::text( 'CommitTransaction(): Final Commit... Transaction: Count: ' . $this->db->transCnt . ' Off: ' . $this->db->transOff . ' OK: ' . (int)$this->db->_transOK, __FILE__, __LINE__, __METHOD__, 9 );
 		} else if ( $this->db->transCnt == 0 ) {
@@ -2402,7 +2376,30 @@ abstract class Factory {
 		} else {
 			Debug::text('CommitTransaction(): Transaction: Count: '. $this->db->transCnt .' Off: '. $this->db->transOff, __FILE__, __LINE__, __METHOD__, 9);
 		}
-		$retval = $this->db->CompleteTrans();
+
+		try {
+			if ( $unnest_transactions == TRUE AND $this->db->_transOK == 0 ) { //Only unnest if the transaction has failed.
+				Debug::text('CommitTransaction(): Unnesting transactions... Count: '. $this->db->transCnt .' Off: '. $this->db->transOff, __FILE__, __LINE__, __METHOD__, 9);
+				do {
+					$retval = $this->db->CompleteTrans();
+				} while( $this->db->transCnt > 0 );
+				Debug::text('CommitTransaction(): Done unnesting transactions... Count: '. $this->db->transCnt .' Off: '. $this->db->transOff, __FILE__, __LINE__, __METHOD__, 9);
+			} else {
+				//throw new Exception( 'could not serialize access due to concurrent' ); //Use only for testing transaction retries on commit failures.
+				$retval = $this->db->CompleteTrans();
+			}
+		} catch ( Exception $e ) {
+			//SQL serialization failures can occur on commit, so make sure we catch those and can trigger a retry.
+			// This is done in Factory->ExecuteSQL() and Factory->CommitTransaction() too.
+			if ( $this->isSQLExceptionRetryable( $e ) == TRUE ) {
+				Debug::Text( 'WARNING: Rethrowing Serialization Exception from commit so it can be caught in an outside TRY block...', __FILE__, __LINE__, __METHOD__, 10 );
+				//Fail transaction, so it can automatically be restarted in the outter retry loop.
+				$this->FailTransaction(); //Don't call Commit after, as that complicates transaction nesting later on.
+				throw $e;
+			} else {
+				throw new DBError( $e );
+			}
+		}
 
 		if ( $retval == FALSE ) { //Check to see if the transaction has failed.
 			//In PostgreSQL, when SESSION/LOCAL variables are set within a transaction that later rollsback, the session variables also rollback. This ensures the timezone still matches what we think it should.
@@ -2417,27 +2414,40 @@ abstract class Factory {
 	 * @return mixed
 	 */
 	function setTransactionMode( $mode = '' ) {
-		Debug::text('setTransactionMode(): Mode: '. $mode, __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text('setTransactionMode(): Mode: '. $mode .' Transaction Count: '. $this->db->transCnt, __FILE__, __LINE__, __METHOD__, 9);
+
+		if ( $mode != '' AND $this->db->transCnt > 0 ) {
+			Debug::text('setTransactionMode(): WARNING: Nested transaction, unlikely to be able to set transaction mode.', __FILE__, __LINE__, __METHOD__, 9);
+		}
+
 		return $this->db->setTransactionMode( $mode );
 	}
 
 	/**
+	 * @param bool $force
 	 * @return string
 	 */
-	function getTransactionMode() {
-		if ( $this->getDatabaseType() == 'mysql' ) {
-			$mode = $this->db->GetOne( 'select @@session.tx_isolation' );
+	function getTransactionMode( $force = FALSE ) {
+		if ( $force == TRUE ) {
+			if ( $this->getDatabaseType() == 'mysql' ) {
+				$mode = $this->db->GetOne( 'select @@session.tx_isolation' );
+			} else {
+				$mode = $this->db->GetOne( 'select current_setting(\'transaction_isolation\')' );
+			}
 		} else {
-			$mode = $this->db->GetOne( 'select current_setting(\'transaction_isolation\')' );
+			if (  isset($this->db->_transmode) ) {
+				$mode = $this->db->_transmode;
+			} else {
+				$mode = 'DEFAULT';
+			}
 		}
 
-		Debug::text('getTransactionMode(): Mode: '. $mode, __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text('getTransactionMode(): Mode: '. $mode .' Force: '. (bool)$force, __FILE__, __LINE__, __METHOD__, 9);
 		return strtoupper( $mode );
 	}
 
-	//Call class specific validation function just before saving.
-
 	/**
+	 * Call class specific validation function just before saving.
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
@@ -2465,9 +2475,8 @@ abstract class Factory {
 		return $this->Validator->isValid();
 	}
 
-	//Call class specific validation function just before saving.
-
 	/**
+	 * Call class specific validation function just before saving.
 	 * @return bool
 	 */
 	function isWarning() {
@@ -2506,9 +2515,8 @@ abstract class Factory {
 		}
 	}
 
-	//Execute SQL queries and handle paging properly for select statements.
-
 	/**
+	 * Execute SQL queries and handle paging properly for select statements.
 	 * @param string $query
 	 * @param array $ph
 	 * @param int $limit Limit the number of records returned
@@ -2524,59 +2532,120 @@ abstract class Factory {
 			}
 
 			//$start_time = microtime(TRUE);
-			if ($limit == NULL) {
-				$this->rs = $this->db->Execute($query, $ph);
+			if ( $limit == NULL ) {
+				$rs = $this->db->Execute( $query, $ph );
 			} else {
-				$this->rs = $this->db->PageExecute($query, (int)$limit, (int)$page, $ph);
+				$rs = $this->db->PageExecute( $query, (int)$limit, (int)$page, $ph );
 			}
 			//$total_time = (microtime(TRUE)-$start_time);
 			//Debug::text('Slow Query Executed in: '. $total_time .'ms. Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		} catch (Exception $e) {
-			if ( $e->getMessage() != '' AND stristr( $e->getMessage(), 'could not serialize' ) !== FALSE ) {
-				Debug::Text('WARNING: Rethrowing Serialization Exception so it can be caught in an outside TRY block...', __FILE__, __LINE__, __METHOD__, 10);
-				//Fail/Commit transaction that failed, so it can automatically be restarted in the outter retry loop.
-				$this->FailTransaction();
-				$this->CommitTransaction();
+
+			//throw new Exception( 'could not serialize access due to concurrent' ); //Use only for testing transaction retries on SQL failures.
+		} catch ( Exception $e ) {
+			if ( $this->isSQLExceptionRetryable( $e ) == TRUE ) { // This is done in Factory->ExecuteSQL() and Factory->CommitTransaction() too.
+				Debug::Text( 'WARNING: Rethrowing Serialization Exception so it can be caught in an outside TRY block...', __FILE__, __LINE__, __METHOD__, 10 );
+				//Fail transaction, so it can automatically be restarted in the outter retry loop.
+				$this->FailTransaction(); //Don't call Commit after, as that complicates transaction nesting later on.
 				throw $e;
 			} else {
 				throw new DBError( $e );
 			}
 		}
 
-		return TRUE;
+		return $rs;
 	}
 
-	//Retry the SQL query for $retry_max_attempts, especially useful when using REPEATABLE READ/SERIALIZABLE transactions.
-	// See APITimeSheet->reCalculateTimeSheet() for an example of how to retry an entire transaction.
 	/**
-	 * @param string $query
-	 * @param array $ph
-	 * @param int $retry_max_attempts
-	 * @param int $sleep
+	 * Determines if a SQL exception is one that can be retried or not.
+	 * @param $e Exception
 	 * @return bool
+	 */
+	function isSQLExceptionRetryable( $e ) {
+		if ( $e instanceof Exception AND $e->getMessage() != ''
+				AND ( stristr( $e->getMessage(), 'could not serialize' ) !== FALSE
+						OR stristr( $e->getMessage(), 'deadlock' ) !== FALSE
+						OR stristr( $e->getMessage(), 'current transaction is aborted' ) !== FALSE ) //There seems to be cases wher the "could not serialize" error is not picked up by PHP and therefore not triggered, so on the next query we get this error instead.
+		) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Accepts a Closure and is retried at set intervals which should be in a transaction.
+	 * @param $transaction_function Closure
+	 * @param int $retry_max_attempts
+	 * @param int $retry_sleep in seconds
+	 * @return mixed
 	 * @throws DBError
 	 */
-	function RetryExecuteSQL( $query, $ph = NULL, $retry_max_attempts = 2, $sleep = 5 ) {
+	function RetryTransaction( $transaction_function, $retry_max_attempts = 4, $retry_sleep = 1 ) { //When changing function definition, also see APIFactory->RetryTransaction()
+		if ( $this->db->transCnt > 0 ) {
+			//This can happen during import validation, because we need to wrap everything in a transaction that will always be rolled back.
+			Debug::text('WARNING: RetryTransaction called from within a transaction, as the entire transaction cant be rolled back max retry attempts will be 1.', __FILE__, __LINE__, __METHOD__, 10);
+			//throw new Exception('ERROR: RetryTransaction cannot be called from within a transaction, as the entire transaction cant be rolled back then...');
+			$retry_max_attempts = 1;
+		}
+
+		if ( $retry_max_attempts < 1 ) { //Make sure max attempts is set to at least 1.
+			$retry_max_attempts = 1;
+		}
+
+		$current_cache_state = $this->cache->_caching;
+
+		$tmp_sleep = ( $retry_sleep * 1000000 );
 		$retry_attempts = 0;
-		do {
+		while ( $retry_attempts < $retry_max_attempts ) {
 			try {
-				$this->rs = $this->db->Execute($query, $ph);
-			} catch (Exception $e) {
-				Debug::text('WARNING: SQL query failed, likely due to transaction isolotion: Retry Attempt: '. $retry_attempts, __FILE__, __LINE__, __METHOD__, 10);
+				//In PostgreSQL, may need to increase "max_pred_locks_per_transaction" setting to avoid transactions waiting on more lock slots to become available.
+				// Can monitor this with: select count(*) from pg_locks where mode = 'SIReadLock';
+
+				unset( $e ); //Clear any exceptions on retry.
+
+				$this->cache->_caching = FALSE; //Disable caching when retrying blocks of transaction, since we can't rollback cached data.
+
+				Debug::text('==================START: TRANSACTION BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10);
+				$retval = $transaction_function(); //This function should call StartTransaction() at the beginning, and CommitTransaction() at the end.
+				Debug::text('==================END: TRANSACTION BLOCK=====================================', __FILE__, __LINE__, __METHOD__, 10);
+
+				$this->cache->_caching = $current_cache_state;
+			} catch ( Exception $e ) {
+				//When we get here, fail transaction should already be called.
+				// But if it hasn't, call it again just in case.
+				if ( $this->db->_transOK == TRUE ) {
+					$this->FailTransaction();
+				}
+				$this->CommitTransaction( TRUE ); //Make sure we fully unnest all transactions so the retry is in a good state that can be fully restarted.
+
+				$random_sleep_interval = ( ceil( ( rand() / getrandmax() ) * ( ( $tmp_sleep * 0.33 ) * 2 ) - ( $tmp_sleep * 0.33 ) ) ); //+/- 33% of the sleep time.
+
+				Debug::text('WARNING: SQL query failed, likely due to transaction isolation: Retry Attempt: '. $retry_attempts .' Sleep: '. ( $tmp_sleep + $random_sleep_interval ) .'('. $tmp_sleep .') Code: '. $e->getCode() .' Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('==================END: TRANSACTION BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10);
+
+				if ( $retry_attempts < ( $retry_max_attempts -1 ) ) { //Don't sleep on the last iteration as its serving no purpose.
+					usleep( $tmp_sleep + $random_sleep_interval );
+				}
+
+				$tmp_sleep = ( $tmp_sleep * 2 ); //Exponential back-off with 25% of retry sleep time as a random value.
 				$retry_attempts++;
-				sleep( $sleep );
+
 				continue;
 			}
 			break;
-		} while ( $retry_attempts <= $retry_max_attempts );
-
-		if ( $retry_max_attempts > 0 AND $retry_attempts == $retry_max_attempts ) { //Allow retry_max_attempst to be set at 0 to prevent any retries and fail without an error.
-			Debug::text('ERROR: SQL query failed after max attempts: '. $retry_attempts, __FILE__, __LINE__, __METHOD__, 10);
-			throw new DBError($e);
 		}
 
-		Debug::text('SUCCESS: SQL query succeeded after attempts: '. $retry_attempts, __FILE__, __LINE__, __METHOD__, 10);
-		return TRUE;
+		if ( isset( $e ) ) { //$retry_attempts >= $retry_max_attempts ) { //Allow retry_max_attempst to be set at 0 to prevent any retries and fail without an error.
+			Debug::text('ERROR: SQL query failed after max attempts: '. $retry_attempts .' Max: '. $retry_max_attempts, __FILE__, __LINE__, __METHOD__, 10);
+			throw new DBError( $e );
+		}
+
+		if ( isset( $retval ) ) {
+			Debug::Arr( $retval, 'Returning Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+			return $retval;
+		}
+
+		return NULL;
 	}
 
 	/**
@@ -2627,9 +2696,9 @@ abstract class Factory {
 		return FALSE;
 	}
 
-	//Determines to insert or update, and does it.
-	//Have this handle created, createdby, updated, updatedby.
 	/**
+	 * Determines to insert or update, and does it.
+	 * Have this handle created, createdby, updated, updatedby.
 	 * @param bool $reset_data
 	 * @param bool $force_lookup
 	 * @return bool|int|string
@@ -2730,12 +2799,7 @@ abstract class Factory {
 		if ( $query != '' OR $query === TRUE ) {
 
 			if ( is_string($query) AND $query != '' ) {
-				try {
-					$this->db->Execute($query);
-				} catch (Exception $e) {
-					//Comment this out to see some errors on MySQL.
-					throw new DBError($e);
-				}
+				$this->ExecuteSQL( $query );
 			}
 
 			if ( method_exists($this, 'addLog') ) {
@@ -2777,31 +2841,29 @@ abstract class Factory {
 	}
 
 	/**
+	 * Deletes the record directly from the database.
 	 * @return bool
 	 * @throws DBError
 	 */
-	function Delete() {
+	function Delete( $disable_audit_log = FALSE ) {
 		Debug::text('Delete: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 9);
 
 		if ( $this->getId() !== FALSE ) {
+			if ( $disable_audit_log == FALSE AND method_exists($this, 'addLog') ) {
+				//In some cases, like deleting users, this function will fail because the user is deleted before they are removed from other
+				//tables like PayPeriodSchedule, so addLog() can't get the user information.
+				global $config_vars;
+				if ( !isset($config_vars['other']['disable_audit_log']) OR $config_vars['other']['disable_audit_log'] != TRUE ) {
+					$this->addLog( 30 ); //30=Delete
+				}
+			}
+
 			$ph = array(
 						'id' => $this->getId(),
 						);
 
 			$query = 'DELETE FROM '. $this->getTable() .' WHERE id = ?';
-
-			try {
-				$this->db->Execute($query, $ph);
-
-				if ( method_exists($this, 'addLog') ) {
-					//In some cases, like deleting users, this function will fail because the user is deleted before they are removed from other
-					//tables like PayPeriodSchedule, so addLog() can't get the user information.
-					$this->addLog( 31 );
-				}
-
-			} catch (Exception $e) {
-				throw new DBError($e);
-			}
+			$this->ExecuteSQL($query, $ph);
 
 			return TRUE;
 		}
@@ -2842,13 +2904,8 @@ abstract class Factory {
 			$ph = array();
 
 			$query = 'DELETE FROM '. $this->getTable() .' WHERE id in ('. $this->getListSQL( $ids, $ph, 'uuid' ) .')';
-
-			try {
-				$this->db->Execute($query, $ph);
-				Debug::text('Bulk Delete Query: '. $query .' Affected Rows: '. $this->db->Affected_Rows() .' IDs: '. count($ph), __FILE__, __LINE__, __METHOD__, 9);
-			} catch (Exception $e) {
-				throw new DBError($e);
-			}
+			$this->ExecuteSQL($query, $ph);
+			Debug::text('Bulk Delete Query: '. $query .' Affected Rows: '. $this->db->Affected_Rows() .' IDs: '. count($ph), __FILE__, __LINE__, __METHOD__, 9);
 
 			return TRUE;
 		}
@@ -2866,7 +2923,7 @@ abstract class Factory {
 			//Run a separate custom query to clear the geocordinates. Do we really want to do this for so many objects though...
 			Debug::text('Address has changed, clear geocordinates!', __FILE__, __LINE__, __METHOD__, 10);
 			$query = 'UPDATE '. $this->getTable() .' SET longitude = NULL, latitude = NULL where id = ?';
-			$this->db->Execute( $query, array( 'id' => $this->getID() ) );
+			$this->ExecuteSQL( $query, array( 'id' => $this->getID() ) );
 
 			return TRUE;
 		}
@@ -2922,9 +2979,8 @@ abstract class Factory {
 		return new FactoryListIterator($this);
 	}
 
-	//Grabs the current object
-
 	/**
+	 * Grabs the current object
 	 * @return mixed
 	 */
 	final function getCurrent() {

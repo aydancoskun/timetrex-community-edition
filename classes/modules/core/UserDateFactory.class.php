@@ -87,7 +87,7 @@ class UserDateFactory extends Factory {
 			//This might happen when the MySQL server is in one timezone (ie: CST) and the pay period
 			//schedule is set to another timezone (ie: PST)
 			//This could severely slow down a lot of operations though, so make this specific to MySQL only.
-			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			$pplf->getByUserIdAndEndDate( $this->getUser(), $this->getDateStamp() );
 			if ( $pplf->getRecordCount() == 1 ) {
 				$pay_period_id = $pplf->getCurrent()->getID();
@@ -175,7 +175,7 @@ class UserDateFactory extends Factory {
 				//Find the employees preferred timezone, base the user date off that instead of the pay period timezone,
 				//as it can be really confusing to the user if they punch in at 10AM on Sept 27th, but it records as Sept 26th because
 				//the PP Schedule timezone is 12hrs different or something.
-				$uplf = TTnew( 'UserPreferenceListFactory' );
+				$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 				$uplf->getByUserID( $user_id );
 				if ( $uplf->getRecordCount() > 0 ) {
 					$timezone = $uplf->getCurrent()->getTimeZone();
@@ -185,7 +185,7 @@ class UserDateFactory extends Factory {
 			$date = TTDate::convertTimeZone( $date, $timezone );
 			//Debug::text(' Using TimeZone: '. $timezone .' Date: '. TTDate::getDate('DATE+TIME', $date) .' ('.$date.')', __FILE__, __LINE__, __METHOD__, 10);
 
-			$udlf = TTnew( 'UserDateListFactory' );
+			$udlf = TTnew( 'UserDateListFactory' ); /** @var UserDateListFactory $udlf */
 			$udlf->getByUserIdAndDate( $user_id, $date );
 			if ( $udlf->getRecordCount() == 1 ) {
 				$id = $udlf->getCurrent()->getId();
@@ -195,7 +195,7 @@ class UserDateFactory extends Factory {
 				Debug::text(' Inserting new UserDate row. User ID: '. $user_id .' Date: '. $date, __FILE__, __LINE__, __METHOD__, 10);
 
 				//Insert new row
-				$udf = TTnew( 'UserDateFactory' );
+				$udf = TTnew( 'UserDateFactory' ); /** @var UserDateFactory $udf */
 				$udf->setUser( $user_id );
 				$udf->setDateStamp( $date );
 				$udf->setPayPeriod();
@@ -232,12 +232,12 @@ class UserDateFactory extends Factory {
 		return FALSE;
 	}
 
-	//This function deletes all rows from other tables that require a user_date row.
-	//We need to keep this in its own function so we can call it BEFORE
-	//actually deleting the user_date row. As we need to have a unique
-	//index on user_id, date_stamp so we never get duplicate rows, essentially making the deleted
-	//column useless.
 	/**
+	 * This function deletes all rows from other tables that require a user_date row.
+	 * We need to keep this in its own function so we can call it BEFORE
+	 * actually deleting the user_date row. As we need to have a unique
+	 * index on user_id, date_stamp so we never get duplicate rows, essentially making the deleted
+	 * column useless.
 	 * @param string $user_date_id UUID
 	 * @return bool
 	 */
@@ -290,7 +290,7 @@ class UserDateFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		// User
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Invalid Employee')
@@ -298,7 +298,7 @@ class UserDateFactory extends Factory {
 		}
 		// Pay Period
 		if ( $this->getPayPeriod() != FALSE ) {
-			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			$this->Validator->isResultSetWithRows(	'pay_period',
 															$pplf->getByID($this->getPayPeriod()),
 															TTi18n::gettext('Invalid Pay Period')
@@ -338,7 +338,7 @@ class UserDateFactory extends Factory {
 
 
 		//Make sure the date isn't BEFORE the first pay period.
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 		$pplf->getByUserID( $this->getUser(), 1, NULL, NULL, array('a.start_date' => 'asc') );
 		if ( $pplf->getRecordCount() > 0 ) {
 			$first_pp_obj = $pplf->getCurrent();
@@ -369,7 +369,7 @@ class UserDateFactory extends Factory {
 		if ( $this->getDeleted() == TRUE ) {
 			//Delete (for real) any already deleted rows in hopes to prevent a
 			//unique index conflict across user_id, date_stamp, deleted
-			$udlf = TTnew( 'UserDateListFactory' );
+			$udlf = TTnew( 'UserDateListFactory' ); /** @var UserDateListFactory $udlf */
 			$udlf->deleteByUserIdAndDateAndDeleted( $this->getUser(), $this->getDateStamp(), TRUE );
 		}
 
@@ -389,7 +389,7 @@ class UserDateFactory extends Factory {
 
 			//Delete schedules assigned to this user date.
 			//Turn off any re-calc's
-			$slf = TTnew( 'ScheduleListFactory' );
+			$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
 			$slf->getByUserDateID( $this->getId() );
 			if ( $slf->getRecordCount() > 0 ) {
 				foreach( $slf as $schedule_obj ) {
@@ -398,7 +398,7 @@ class UserDateFactory extends Factory {
 				}
 			}
 
-			$pclf = TTnew( 'PunchControlListFactory' );
+			$pclf = TTnew( 'PunchControlListFactory' ); /** @var PunchControlListFactory $pclf */
 			$pclf->getByUserDateID( $this->getId() );
 			if ( $pclf->getRecordCount() > 0 ) {
 				foreach( $pclf as $pc_obj ) {
@@ -408,7 +408,7 @@ class UserDateFactory extends Factory {
 			}
 
 			//Delete exceptions
-			$elf = TTnew( 'ExceptionListFactory' );
+			$elf = TTnew( 'ExceptionListFactory' ); /** @var ExceptionListFactory $elf */
 			$elf->getByUserDateID( $this->getId() );
 			if ( $elf->getRecordCount() > 0 ) {
 				foreach( $elf as $e_obj ) {
@@ -418,7 +418,7 @@ class UserDateFactory extends Factory {
 			}
 
 			//Delete user_date_total rows too
-			$udtlf = TTnew( 'UserDateTotalListFactory' );
+			$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 			$udtlf->getByUserDateID( $this->getId() );
 			if ( $udtlf->getRecordCount() > 0 ) {
 				foreach( $udtlf as $udt_obj ) {

@@ -85,7 +85,7 @@
 			a_dropdown_div.append( a_dropdown );
 
 			//Add Self to UI
-			$( 'body' ).append( $( this ) );
+			$( 'body' ).append( $( this ).css('visibility', 'hidden') ); // #2734 - Add to DOM but invisible so code can do calculations, but user does not see flashes.
 
 			a_dropdown.setColumns( [
 				{ name: 'label', index: 'label', label: $.i18n._( 'Column Name' ), width: 100, sortable: false }
@@ -113,6 +113,7 @@
 				} else {
 					$( $$this ).css( 'top', $( parent_awesome_box ).offset().top + 25 );
 				}
+				$( $$this ).css('visibility', 'visible'); // show once all positions and sizes are done calculating and moving.
 			}, 100 );
 
 			$( this ).mouseenter( function() {

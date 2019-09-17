@@ -156,6 +156,10 @@ Wizard = Backbone.View.extend( {
 		}
 
 		LocalCacheData.current_open_wizard_controller = null;
+
+		$().TFeedback({
+			source: this.wizard_id
+		});
 	},
 
 	/**

@@ -100,7 +100,7 @@ class APIUserSkill extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$uslf = TTnew( 'UserSkillListFactory' );
+		$uslf = TTnew( 'UserSkillListFactory' ); /** @var UserSkillListFactory $uslf */
 
 		$uslf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 
@@ -194,7 +194,7 @@ class APIUserSkill extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserSkillListFactory' );
+				$lf = TTnew( 'UserSkillListFactory' ); /** @var UserSkillListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -314,7 +314,7 @@ class APIUserSkill extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserSkillListFactory' );
+				$lf = TTnew( 'UserSkillListFactory' ); /** @var UserSkillListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -419,7 +419,7 @@ class APIUserSkill extends APIFactory {
 
 		$last_used_date = (isset($last_used_date) AND $last_used_date != '') ? TTDate::parseDateTime($last_used_date) : TTDate::getTime() ;
 
-		$usf = TTnew( 'UserSkillFactory' );
+		$usf = TTnew( 'UserSkillFactory' ); /** @var UserSkillFactory $usf */
 
 		$usf->setFirstUsedDate( TTDate::parseDateTime($first_used_date) );
 		$usf->setLastUsedDate( $last_used_date );

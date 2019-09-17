@@ -183,7 +183,7 @@ class KPIGroupFactory extends Factory {
 		//
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'company_id',
 															$clf->getByID($this->getCompany()),
 															TTi18n::gettext('Company is invalid')
@@ -215,7 +215,7 @@ class KPIGroupFactory extends Factory {
 											);
 		} else {
 			if ( $this->isNew() == FALSE ) {
-				$kglf = TTnew('KPIGroupListFactory');
+				$kglf = TTnew('KPIGroupListFactory'); /** @var KPIGroupListFactory $kglf */
 				$nodes = $kglf->getByCompanyIdArray( $this->getCompany() );
 				$children_ids = TTTree::getElementFromNodes( TTTree::flattenArray( TTTree::createNestedArrayWithDepth( $nodes, $this->getId() ) ), 'id' );
 				if ( is_array($children_ids) AND in_array( $this->getParent(), $children_ids) == TRUE ) {
@@ -238,18 +238,16 @@ class KPIGroupFactory extends Factory {
 		return TRUE;
 	}
 
-	//Must be postSave because we need the ID of the object.
-
 	/**
+	 * Must be postSave because we need the ID of the object.
 	 * @return bool
 	 */
 	function postSave() {
-
 		$this->StartTransaction();
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Get parent of this object, and re-parent all groups to it.
-			$kglf = TTnew('KPIGroupListFactory');
+			$kglf = TTnew('KPIGroupListFactory'); /** @var KPIGroupListFactory $kglf */
 			$kglf->getByCompanyIdAndParentId( $this->getCompany(), $this->getId() );
 			if ( $kglf->getRecordCount() > 0 ) {
 				foreach( $kglf as $kg_obj ) {
@@ -262,9 +260,9 @@ class KPIGroupFactory extends Factory {
 			}
 
 			//Get items by group id.
-			$klf = TTnew( 'KPIListFactory' );
-			$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
-			$cgmf = TTnew( 'CompanyGenericMapFactory' );
+			$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
+			$cgmlf = TTnew( 'CompanyGenericMapListFactory' ); /** @var CompanyGenericMapListFactory $cgmlf */
+			$cgmf = TTnew( 'CompanyGenericMapFactory' ); /** @var CompanyGenericMapFactory $cgmf */
 			$klf->getByCompanyIdAndGroupId( $this->getCompany(), $this->getId() );
 			$ids = array();
 			if ( $klf->getRecordCount() > 0 ) {
@@ -277,7 +275,7 @@ class KPIGroupFactory extends Factory {
 			$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 2010, $this->getID() );
 			if ( $cgmlf->getRecordCount() > 0 ) {
 				foreach( $cgmlf as $cgm_obj ) {
-					Debug::text('Deleteing from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Deleting from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 					$cgm_obj->Delete();
 				}
 			}
@@ -298,7 +296,7 @@ class KPIGroupFactory extends Factory {
 					$cgmlf->getByCompanyIDAndObjectTypeAndObjectIDAndMapID($this->getCompany(), 2020, $id, $this->getId());
 					if ( $cgmlf->getRecordCount() > 0 ) {
 						foreach( $cgmlf as $cgm_obj ) {
-							Debug::text('Deleteing from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('Deleting from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 							$cgm_obj->Delete();
 						}
 					}

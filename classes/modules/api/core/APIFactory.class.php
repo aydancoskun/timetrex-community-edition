@@ -80,9 +80,8 @@ abstract class APIFactory {
 		return 1;
 	}
 
-	//Returns the AMF messageID for each individual call.
-
 	/**
+	 * Returns the AMF messageID for each individual call.
 	 * @return bool|null
 	 */
 	function getAMFMessageID() {
@@ -180,9 +179,9 @@ abstract class APIFactory {
 		return FALSE;
 	}
 
-	//Allow storing the main class object persistently in memory, so we can build up other variables to help out things like getOptions()
-	//Mainly used for the APIReport class.
 	/**
+	 * Allow storing the main class object persistently in memory, so we can build up other variables to help out things like getOptions()
+	 * Mainly used for the APIReport class.
 	 * @param object $obj
 	 * @return bool
 	 */
@@ -245,9 +244,9 @@ abstract class APIFactory {
 		return $data;
 	}
 
-	//In cases where data can be displayed in just a list_view (dropdown boxes), ie: branch, department, job, task in In/Out punch view
-	//restrict the dropdown box to just a subset of columns, so not all data is shown.
 	/**
+	 * In cases where data can be displayed in just a list_view (dropdown boxes), ie: branch, department, job, task in In/Out punch view
+	 * restrict the dropdown box to just a subset of columns, so not all data is shown.
 	 * @param array $filter_columns
 	 * @param array $allowed_columns
 	 * @return array|null
@@ -357,6 +356,17 @@ abstract class APIFactory {
 	}
 
 	/**
+	 * Pass-thru to Factory class.
+	 * @param $transaction_function
+	 * @param int $retry_max_attempts
+	 * @param int $retry_sleep
+	 * @return mixed
+	 */
+	function RetryTransaction( $transaction_function, $retry_max_attempts = 4, $retry_sleep = 1 ) {
+		return $this->getMainClassObject()->RetryTransaction( $transaction_function, $retry_max_attempts, $retry_sleep );
+	}
+
+	/**
 	 * @return array
 	 */
 	function getPermissionChildren() {
@@ -371,15 +381,15 @@ abstract class APIFactory {
 		*/
 	}
 
-	//Controls returning information to client in a standard format.
-	//FIXME: Need to return the original request (with any modified values due to restrictions/validation issues)
-	//		 Also need to return paging data variables here too, as JSON can't make multiple calls.
-	//		 In order to do this we need to always return a special data structure that includes this information.
-	//		 static function returnHandler( $retval = TRUE, $args = array( 'code' => FALSE, 'description' => FALSE, 'details' = FALSE, 'validator_stats' => FALSE, 'user_generic_status_batch_id' => FALSE ) ) {
-	//		 The above will require too many changes, just add two more variables at the end, as it will only really be used by API->get*() functions.
-	//FIXME: Use a requestHandler() to handle all input requests, so we can parse out things like validate_only, ignore_warning (for user acknowledgable warnings) and handling all parameter parsing in a central place.
-	//		 static function returnHandler( $retval = TRUE, $code = FALSE, $description = FALSE, $details = FALSE, $validator_stats = FALSE, $user_generic_status_batch_id = FALSE, $request = FALSE, $pager = FALSE ) {
 	/**
+	 * Controls returning information to client in a standard format.
+	 * FIXME: Need to return the original request (with any modified values due to restrictions/validation issues)
+	 *        Also need to return paging data variables here too, as JSON can't make multiple calls.
+	 *        In order to do this we need to always return a special data structure that includes this information.
+	 *        static function returnHandler( $retval = TRUE, $args = array( 'code' => FALSE, 'description' => FALSE, 'details' = FALSE, 'validator_stats' => FALSE, 'user_generic_status_batch_id' => FALSE ) ) {
+	 *        The above will require too many changes, just add two more variables at the end, as it will only really be used by API->get*() functions.
+	 * FIXME: Use a requestHandler() to handle all input requests, so we can parse out things like validate_only, ignore_warning (for user acknowledgable warnings) and handling all parameter parsing in a central place.
+	 *        static function returnHandler( $retval = TRUE, $code = FALSE, $description = FALSE, $details = FALSE, $validator_stats = FALSE, $user_generic_status_batch_id = FALSE, $request = FALSE, $pager = FALSE ) {
 	 * @param bool $retval
 	 * @param bool $code
 	 * @param bool $description
@@ -428,6 +438,14 @@ abstract class APIFactory {
 
 				//Handle progress bar here, make sure they are stopped and if an error occurs display the error.
 				if ( $retval === FALSE ) {
+					//Try to show detailed validation error messages if at all possible.
+					// Check for $details[0] because returnHandlers that lead into this seem to force an array with '0' key as per:
+					//   $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), array( 0 => $validation_obj->getErrorsArray() ), array('total_records' => 1, 'valid_records' => 0 ) );
+					if ( isset( $details ) AND is_array( $details ) AND isset($details[0]) ) {
+						$validator = new Validator();
+						$description .= "<br>\n<br>\n". $validator->getTextErrors( TRUE, $details[0] );
+						unset( $validator );
+					}
 					$this->getProgressBarObject()->error( $this->getAMFMessageID(), $description );
 				} else {
 					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
@@ -501,9 +519,8 @@ abstract class APIFactory {
 		return $retarr;
 	}
 
-	//Bridge to main class getOptions factory.
-
 	/**
+	 * Bridge to main class getOptions factory.
 	 * @param bool $name
 	 * @param string|int $parent
 	 * @return array|bool
@@ -522,9 +539,8 @@ abstract class APIFactory {
 		return FALSE;
 	}
 
-	//Bridge to main class getVariableToFunctionMap factory.
-
 	/**
+	 * Bridge to main class getVariableToFunctionMap factory.
 	 * @param string $name
 	 * @param string|int $parent
 	 * @return array
@@ -533,9 +549,9 @@ abstract class APIFactory {
 		return $this->getMainClassObject()->getVariableToFunctionMap($name, $parent);
 	}
 
-	//Take a API ReturnHandler array and pulls out the Validation errors/warnings to be merged back into another Validator
-	//This is useful for calling one API function from another one when their are sub-classes.
 	/**
+	 * Take a API ReturnHandler array and pulls out the Validation errors/warnings to be merged back into another Validator
+	 * This is useful for calling one API function from another one when their are sub-classes.
 	 * @param $api_retarr
 	 * @param bool $validator_obj
 	 * @return bool|Validator
@@ -642,17 +658,18 @@ abstract class APIFactory {
 	 * @param array $validator_stats
 	 * @param int $key
 	 * @param array|bool $save_result
+	 * @param bool $user_generic_status_batch_id
 	 * @return array
 	 */
-	function handleRecordValidationResults( $validator, $validator_stats, $key, $save_result ) {
+	function handleRecordValidationResults( $validator, $validator_stats, $key, $save_result, $user_generic_status_batch_id = FALSE ) {
 		if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
 			if ( $validator_stats['total_records'] == 1 ) {
-				return $this->returnHandler( $save_result[$key] ); //Single valid record
+				return $this->returnHandler( $save_result[$key], TRUE, FALSE, FALSE, FALSE, $user_generic_status_batch_id ); //Single valid record
 			} else {
-				return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
+				return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats, $user_generic_status_batch_id ); //Multiple valid records
 			}
 		} else {
-			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
+			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats, $user_generic_status_batch_id );
 		}
 	}
 }

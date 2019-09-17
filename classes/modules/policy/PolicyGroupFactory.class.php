@@ -207,7 +207,7 @@ class PolicyGroupFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getUser() {
-		$pgulf = TTnew( 'PolicyGroupUserListFactory' );
+		$pgulf = TTnew( 'PolicyGroupUserListFactory' ); /** @var PolicyGroupUserListFactory $pgulf */
 		$pgulf->getByPolicyGroupId( $this->getId() );
 
 		$list = array();
@@ -235,7 +235,7 @@ class PolicyGroupFactory extends Factory {
 			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$pgulf = TTnew( 'PolicyGroupUserListFactory' );
+				$pgulf = TTnew( 'PolicyGroupUserListFactory' ); /** @var PolicyGroupUserListFactory $pgulf */
 				$pgulf->getByPolicyGroupId( $this->getId() );
 				foreach ($pgulf as $obj) {
 					$id = $obj->getUser();
@@ -255,10 +255,10 @@ class PolicyGroupFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			foreach ($ids as $id) {
 				if ( isset($ids) AND !in_array($id, $tmp_ids) ) {
-					$pguf = TTnew( 'PolicyGroupUserFactory' );
+					$pguf = TTnew( 'PolicyGroupUserFactory' ); /** @var PolicyGroupUserFactory $pguf */
 					$pguf->setPolicyGroup( $this->getId() );
 					$pguf->setUser( $id );
 
@@ -286,7 +286,7 @@ class PolicyGroupFactory extends Factory {
 	 * @return mixed
 	 */
 	function getTotalUsers() {
-		$pgulf = TTnew( 'PolicyGroupUserListFactory' );
+		$pgulf = TTnew( 'PolicyGroupUserListFactory' ); /** @var PolicyGroupUserListFactory $pgulf */
 		return $pgulf->getTotalByPolicyGroupId( $this->getId() );
 	}
 
@@ -459,7 +459,7 @@ class PolicyGroupFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setExceptionPolicyControlID( $value) {
@@ -476,7 +476,7 @@ class PolicyGroupFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -512,7 +512,7 @@ class PolicyGroupFactory extends Factory {
 		}
 		// Exception Policy
 		if ( $this->getExceptionPolicyControlID() !== FALSE AND $this->getExceptionPolicyControlID() != TTUUID::getZeroID() ) {
-			$epclf = TTnew( 'ExceptionPolicyControlListFactory' );
+			$epclf = TTnew( 'ExceptionPolicyControlListFactory' ); /** @var ExceptionPolicyControlListFactory $epclf */
 			$this->Validator->isResultSetWithRows(	'exception_policy',
 															$epclf->getByID($this->getExceptionPolicyControlID()),
 															TTi18n::gettext('Exception Policy is invalid')
@@ -538,18 +538,18 @@ class PolicyGroupFactory extends Factory {
 	function postSave() {
 		if ( $this->getDeleted() == TRUE ) {
 			Debug::Text('UnAssign Policy Group from User Defaults...'. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			$udf = TTnew( 'UserDefaultFactory' );
+			$udf = TTnew( 'UserDefaultFactory' ); /** @var UserDefaultFactory $udf */
 
 			$query = 'update '. $udf->getTable() .' set policy_group_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND policy_group_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 		}
 
 		return TRUE;
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

@@ -137,7 +137,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		if ( is_object($this->accrual_policy_obj) ) {
 			return $this->accrual_policy_obj;
 		} else {
-			$aplf = TTnew( 'AccrualPolicyListFactory' );
+			$aplf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $aplf */
 			$aplf->getById( $this->getAccrualPolicyID() );
 			if ( $aplf->getRecordCount() > 0 ) {
 				$this->accrual_policy_obj = $aplf->getCurrent();
@@ -212,7 +212,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		$value = (int)trim($value);
 		Debug::text('aLength of Service Days: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $value >= 0 ) {
-			$this->setGenericDataValue( 'length_of_service_days', bcmul( $value, $this->length_of_service_multiplier[$this->getLengthOfServiceUnit()], 4) );
+			$this->setGenericDataValue( 'length_of_service_days', (int)$this->Validator->stripNon32bitInteger( bcmul( $value, $this->length_of_service_multiplier[$this->getLengthOfServiceUnit()], 4) ) );
 			return TRUE;
 		}
 		return FALSE;
@@ -296,7 +296,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	 */
 	function setAnnualMaximumTime( $value) {
 		$value = (int)trim($value);
-		return $this->setGenericDataValue( 'annual_maximum_time', $value );
+		return $this->setGenericDataValue( 'annual_maximum_time', (int)$this->Validator->stripNon32bitInteger( $value ) );
 	}
 
 	/**
@@ -312,7 +312,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	 */
 	function setMaximumTime( $value) {
 		$value = (int)trim($value);
-		return $this->setGenericDataValue( 'maximum_time', $value );
+		return $this->setGenericDataValue( 'maximum_time', (int)$this->Validator->stripNon32bitInteger( $value ) );
 	}
 
 	/**
@@ -328,7 +328,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	 */
 	function setRolloverTime( $value) {
 		$value = (int)trim($value);
-		return $this->setGenericDataValue( 'rollover_time', $value );
+		return $this->setGenericDataValue( 'rollover_time', (int)$this->Validator->stripNon32bitInteger( $value ) );
 	}
 
 	/**
@@ -340,7 +340,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		//
 		// Accrual Policy
 		if ( $this->getAccrualPolicy() !== FALSE ) {
-			$aplf = TTnew( 'AccrualPolicyListFactory' );
+			$aplf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $aplf */
 			$this->Validator->isResultSetWithRows(	'accrual_policy',
 															$aplf->getByID($this->getAccrualPolicy()),
 															TTi18n::gettext('Accrual Policy is invalid')

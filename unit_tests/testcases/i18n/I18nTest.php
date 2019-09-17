@@ -74,7 +74,7 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		//$expected_lang_arr = array('en' => 'English', 'da' => 'Danish (UO)', 'de' => 'German (UO)', 'es' => 'Spanish (UO)', 'id' => 'Indonesian (UO)', 'it' => 'Italian (UO)', 'fr' => 'French (UO)', 'pt' => 'Portuguese (UO)', 'ar' => 'Arabic (UO)', 'zh' => 'Chinese (UO)', 'yi' => 'Yiddish (UO)');
 		//$expected_lang_arr = array('en' => 'English', 'da' => 'Dansk (UO)', 'de' => 'Deutsch (UO)', 'es' => 'Español (UO)', 'id' => 'Bahasa Indonesia (UO)', 'it' => 'Italiano (UO)', 'fr' => 'Français (UO)', 'pt' => 'Português (UO)', 'ar' => 'العربية (UO)', 'zh' => '中文 (UO)', 'yi' => 'ייִדיש (UO)');
 		//$expected_lang_arr = array('en' => 'English', 'da' => 'Dansk (UO)', 'de' => 'Deutsch (UO)', 'es' => 'Español (UO)', 'id' => 'Indonesia (UO)', 'it' => 'Italiano (UO)', 'fr' => 'Français (UO)', 'pt' => 'Português (UO)', 'ar' => 'العربية (UO)', 'zh' => '中文 (UO)' );
-		$expected_lang_arr = array( 'en' => 'English', 'de' => 'Deutsch (UO)', 'es' => 'Español (UO)', 'id' => 'Indonesia (UO)', 'fr' => 'Français (UO)' );
+		$expected_lang_arr = array( 'en' => 'English', 'de' => 'Deutsch (UO)', 'es' => 'Español (UO)', 'id' => 'Indonesia (UO)', 'fr' => 'Français (UO)', 'hu' => 'Magyar (UO)' );
 		unset($expected_lang_arr['id']); //It seems Indonesian changes depending on the Ubuntu version, so just ignore it.
 
 		TTi18n::setLocale( 'en_CA' );

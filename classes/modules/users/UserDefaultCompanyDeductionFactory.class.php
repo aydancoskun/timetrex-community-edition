@@ -83,13 +83,13 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Employee Default settings
-		$udlf = TTnew( 'UserDefaultListFactory' );
+		$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 		$this->Validator->isResultSetWithRows(	'user_default',
 														$udlf->getByID($this->getUserDefault()),
 														TTi18n::gettext('Employee Default settings is invalid')
 													);
 		// Deduction
-		$cdlf = TTnew( 'CompanyDeductionListFactory' );
+		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 		$this->Validator->isResultSetWithRows(	'company_deduction',
 														$cdlf->getByID($this->getCompanyDeduction()),
 														TTi18n::gettext('Deduction is invalid')

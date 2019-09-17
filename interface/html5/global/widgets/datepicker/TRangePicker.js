@@ -167,7 +167,7 @@
 		this.getDefaultFormatValue = function() {
 			var val = date_picker_input.val();
 
-			val = Global.strToDate( val ).format( 'YYYYMMDD' );
+			val = Global.strToDate( val ).format( 'YYYY-MM-DD' );
 
 			return val;
 		};

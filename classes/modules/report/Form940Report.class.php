@@ -121,7 +121,7 @@ class Form940Report extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'Form940Report', 'custom_column' );
@@ -132,13 +132,13 @@ class Form940Report extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'Form940Report', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'Form940Report', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -147,7 +147,7 @@ class Form940Report extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'Form940Report', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -541,9 +541,8 @@ class Form940Report extends Report {
 		return $retarr;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -568,8 +567,7 @@ class Form940Report extends Report {
 		//Get remittance agency for joining. Also use this to find the Tax/Deduction records to determine the include/exclude pay stub accounts.
 		$filter_data['type_id'] = array(10, 20); //Federal/State (Need State here to determine if they are a multi-state employer or not.
 		$filter_data['country'] = array('US'); //US Federal
-		/** @var PayrollRemittanceAgencyListFactory $ralf */
-		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ralf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
@@ -579,7 +577,6 @@ class Form940Report extends Report {
 			$form_data['total_payments']['exclude_pay_stub_entry_account'] = array();
 			$form_data['total_payments']['pay_stub_entry_account'] = array();
 			foreach( $ralf as $key => $ra_obj ) {
-				/** @var PayrollRemittanceAgencyFactory $ra_obj */
 				if ( $ra_obj->getStatus() == 10 AND
 						( ( $ra_obj->getType() == 10 AND $ra_obj->parseAgencyID( NULL, 'id') == 10 ) //IRS
 								OR ( $ra_obj->getType() == 20 AND $ra_obj->parseAgencyID( NULL, 'id') == 20 ) //State Unemployment Agency.
@@ -620,7 +617,7 @@ class Form940Report extends Report {
 			Debug::Arr( $form_data['state_total_payments'], ' PSE Accounts for State Total Payments: ', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		$pself = TTnew( 'PayStubEntryListFactory' );
+		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array( 'user_id' => 'asc', 'pay_stub_transaction_date' => 'asc' ) );
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach( $pself as $pse_obj ) {
@@ -820,7 +817,7 @@ class Form940Report extends Report {
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -833,8 +830,7 @@ class Form940Report extends Report {
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get legal entity data for joining.
-		/** @var LegalEntityListFactory $lelf */
-		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Legal Entity Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
@@ -853,9 +849,8 @@ class Form940Report extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {
@@ -923,7 +918,6 @@ class Form940Report extends Report {
 					continue;
 				}
 
-				/** @var LegalEntityFactory $le_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][$legal_entity_id];
 
 				if ( $format == 'efile_xml' ) {

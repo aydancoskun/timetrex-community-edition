@@ -39,11 +39,9 @@
  * @package Core
  */
 class Group {
-	//Usage: $arr2 = Group::GroupBy($arr1, array( 'name' => array('aggregate' => 'count', 'output' => 'MoneyFormat'), array( 'name' => array('aggregate' => 'count', 'output' => 'MoneyFormat') ) );
-	// Aggregate values: 'count', 'sum', 'min', 'max', 'avg'
-	//
-	//
 	/**
+	 * Usage: $arr2 = Group::GroupBy($arr1, array( 'name' => array('aggregate' => 'count', 'output' => 'MoneyFormat'), array( 'name' => array('aggregate' => 'count', 'output' => 'MoneyFormat') ) );
+	 * Aggregate values: 'count', 'sum', 'min', 'max', 'avg'
 	 * @param $array
 	 * @param $cols
 	 * @param bool $subtotal
@@ -162,9 +160,8 @@ class Group {
 		}
 	}
 
-	//Need to use bcmath for large numbers, especially on 32bit PHP installs.
-
 	/**
+	 * Need to use bcmath for large numbers, especially on 32bit PHP installs.
 	 * @param $array
 	 * @return int|string
 	 */

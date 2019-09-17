@@ -454,7 +454,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createPayCode( $company_id, $type, $pay_formula_policy_id = 0 ) {
-		$pcf = TTnew( 'PayCodeFactory' );
+		$pcf = TTnew( 'PayCodeFactory' ); /** @var PayCodeFactory $pcf */
 		$pcf->setCompany( $company_id );
 
 		switch ( $type ) {
@@ -494,7 +494,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createPayFormulaPolicy( $company_id, $type, $accrual_policy_account_id = 0 ) {
-		$pfpf = TTnew( 'PayFormulaPolicyFactory' );
+		$pfpf = TTnew( 'PayFormulaPolicyFactory' ); /** @var PayFormulaPolicyFactory $pfpf */
 		$pfpf->setCompany( $company_id );
 
 		switch ( $type ) {
@@ -556,7 +556,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createContributingShiftPolicy( $company_id, $type, $contributing_pay_code_policy_id, $holiday_policy_id = NULL ) {
-		$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+		$cspf = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $cspf */
 		$cspf->setCompany( $company_id );
 
 		switch ( $type ) {
@@ -2567,7 +2567,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createOverTimePolicy( $company_id, $type, $contributing_shift_policy_id = 0, $pay_code_id = 0 ) {
-		$otpf = TTnew( 'OverTimePolicyFactory' );
+		$otpf = TTnew( 'OverTimePolicyFactory' ); /** @var OverTimePolicyFactory $otpf */
 		$otpf->setCompany( $company_id );
 
 		switch ( $type ) {

@@ -57,7 +57,7 @@ class InstallSchema_1042A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Add calcQuickException cronjob to database.
-		$cjf = TTnew( 'CronJobFactory' );
+		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
 		$cjf->setName('calcQuickExceptions');
 		//This is primarily for Late Starting/Ending Shift, assume a 5 minute grace period, so notifications
 		//can be emailed out as soon as 7 minutes after the hour and every 15 minute intervals thereafter.

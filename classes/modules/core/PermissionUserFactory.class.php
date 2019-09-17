@@ -80,7 +80,7 @@ class PermissionUserFactory extends Factory {
 	 * @return bool
 	 */
 	function isUniqueUser( $id) {
-		$pclf = TTnew( 'PermissionControlListFactory' );
+		$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 
 		$ph = array(
 					'id' => TTUUID::castUUID($id),
@@ -110,16 +110,14 @@ class PermissionUserFactory extends Factory {
 	 */
 	function setUser( $value) {
 		$value = TTUUID::castUUID( $value );
-		/** @var UserListFactory $ulf */
 		if ( $value != TTUUID::getZeroID() ) {
 			return $this->setGenericDataValue( 'user_id', $value );
 		}
 		return FALSE;
 	}
 
-	//This table doesn't have any of these columns, so overload the functions.
-
 	/**
+	 * This table doesn't have any of these columns, so overload the functions.
 	 * @return bool
 	 */
 	function Validate() {
@@ -129,7 +127,7 @@ class PermissionUserFactory extends Factory {
 
 		// Permission Group
 		if ( $this->getPermissionControl() == TTUUID::getZeroID() ) {
-			$pclf = TTnew( 'PermissionControlListFactory' );
+			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 			$this->Validator->isResultSetWithRows( 'permission_control',
 															$pclf->getByID($this->getPermissionControl()),
 															TTi18n::gettext('Permission Group is invalid')
@@ -137,7 +135,7 @@ class PermissionUserFactory extends Factory {
 		}
 		// Employee
 		if ( $this->getUser() !== FALSE AND $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Selected Employee is invalid')

@@ -114,9 +114,8 @@ class Authentication {
 		//return $this->name;
 	}
 
-	//Determine if the session type is for an actual user, so we know if we can create audit logs.
-
 	/**
+	 * Determine if the session type is for an actual user, so we know if we can create audit logs.
 	 * @param bool $type_id
 	 * @return bool
 	 */
@@ -382,7 +381,7 @@ class Authentication {
 		}
 
 		if ( $this->isUser() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByID( $id );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$retval = $ulf->getCurrent();
@@ -390,7 +389,7 @@ class Authentication {
 		}
 
 		if ( $this->getType() === 100 ) {
-			$jalf = TTnew( 'JobApplicantListFactory' );
+			$jalf = TTnew( 'JobApplicantListFactory' ); /** @var JobApplicantListFactory $jalf */
 			$jalf->getByID( $id );
 			if ( $jalf->getRecordCount() == 1 ) {
 				$retval = $jalf->getCurrent();
@@ -472,10 +471,10 @@ class Authentication {
 		return substr_replace( $this->getSessionID(), '...', (int)( strlen( $this->getSessionID() ) / 3 ), (int)( strlen( $this->getSessionID() ) / 3 ) );
 	}
 
-	//#2238 - Encrypt SessionID with private SALT before writing/reading SessionID in database.
-	// This adds an additional protection layer against session stealing if a SQL injection attack is ever discovered.
-	// It prevents someone from being able to enumerate over the SessionIDs in the table and use them for nafarious purposes.
 	/**
+	 * #2238 - Encrypt SessionID with private SALT before writing/reading SessionID in database.
+	 * This adds an additional protection layer against session stealing if a SQL injection attack is ever discovered.
+	 * It prevents someone from being able to enumerate over the SessionIDs in the table and use them for nafarious purposes.
 	 * @param string $session_id UUID
 	 * @return string
 	 */
@@ -715,9 +714,8 @@ class Authentication {
 		}
 	}
 
-	//Allow web server to handle authentication with Basic Auth/LDAP/SSO/AD, etc...
-
 	/**
+	 * Allow web server to handle authentication with Basic Auth/LDAP/SSO/AD, etc...
 	 * @return bool
 	 */
 	function loginHTTPAuthentication() {
@@ -750,7 +748,7 @@ class Authentication {
 	function Login( $user_name, $password, $type = 'USER_NAME' ) {
 		//DO NOT lowercase username, because iButton values are case sensitive.
 		$user_name = html_entity_decode( trim($user_name) );
-		$password = html_entity_decode( $password );
+		$password = html_entity_decode( trim($password) );
 
 		//Checks user_name/password.. However password is blank for iButton/Fingerprints often so we can't check that.
 		if ( $user_name == '' ) {
@@ -986,9 +984,8 @@ class Authentication {
 		return FALSE;
 	}
 
-	//When company status changes, logout all users for the company.
-
 	/**
+	 * When company status changes, logout all users for the company.
 	 * @param string $company_id UUID
 	 * @return bool
 	 * @throws DBError
@@ -1017,9 +1014,8 @@ class Authentication {
 		return TRUE;
 	}
 
-	//When user resets password, logout all sessions for that user.
-
 	/**
+	 * When user resets password, logout all sessions for that user.
 	 * @param string $object_id UUID
 	 * @return bool
 	 * @throws DBError
@@ -1046,20 +1042,25 @@ class Authentication {
 	//Functions to help check crendentials.
 	//
 
+	/**
+	 * @param $user_name
+	 * @param string $type
+	 * @return bool|mixed
+	 */
 	function getCompanyObject( $user_name, $type = 'USER' ) {
 		$type = strtoupper($type);
 		if ( $type == 'USER' ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByUserName( strtolower( $user_name ) );
 		} elseif ( $type == 'JOB_APPLICANT' )  {
-			$ulf = TTnew( 'JobApplicantListFactory' );
+			$ulf = TTnew( 'JobApplicantListFactory' ); /** @var JobApplicantListFactory $ulf */
 			$ulf->getByUserName( $user_name );
 		}
 
 		if ( $ulf->getRecordCount() == 1 ) {
 			$u_obj = $ulf->getCurrent();
 			if ( is_object( $u_obj ) ) {
-				$clf = TTnew( 'CompanyListFactory' );
+				$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 				$clf->getById( $u_obj->getCompany() );
 				if ( $clf->getRecordCount() == 1 ) {
 					return $clf->getCurrent();
@@ -1084,15 +1085,14 @@ class Authentication {
 		return FALSE;
 	}
 
-	//Checks just the username, used in conjunction with HTTP Authentication/SSO.
-
 	/**
+	 * Checks just the username, used in conjunction with HTTP Authentication/SSO.
 	 * @param $user_name
 	 * @return bool
 	 */
 	function checkUsername( $user_name ) {
 		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
 		foreach ($ulf as $user) {
@@ -1116,11 +1116,9 @@ class Authentication {
 	 */
 	function checkPassword( $user_name, $password) {
 		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
-
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
-
-		foreach ($ulf as $user) {
+		foreach ($ulf as $user) { /** @var UserFactory $user */
 			if ( $user->checkPassword($password) ) {
 				$this->setObjectID( $user->getID() );
 				$this->setObject( $user );
@@ -1141,7 +1139,7 @@ class Authentication {
 	 */
 	function checkPhonePassword( $phone_id, $password) {
 		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 		$ulf->getByPhoneIdAndStatus($phone_id, 10 );
 
@@ -1165,7 +1163,7 @@ class Authentication {
 	 * @return bool
 	 */
 	function checkApplicantPassword( $user_name, $password) {
-		$ulf = TTnew( 'JobApplicantListFactory' );
+		$ulf = TTnew( 'JobApplicantListFactory' ); /** @var JobApplicantListFactory $ulf */
 
 		$ulf->getByUserName( $user_name );
 
@@ -1188,7 +1186,7 @@ class Authentication {
 	 * @return bool
 	 */
 	function checkIButton( $id) {
-		$uilf = TTnew( 'UserIdentificationListFactory' );
+		$uilf = TTnew( 'UserIdentificationListFactory' ); /** @var UserIdentificationListFactory $uilf */
 		$uilf->getByTypeIdAndValue(10, $id);
 		if ( $uilf->getRecordCount() > 0 ) {
 			foreach( $uilf as $ui_obj ) {
@@ -1210,7 +1208,7 @@ class Authentication {
 	 */
 	function checkBarcode( $object_id, $employee_number) {
 		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 		$ulf->getByIdAndStatus($object_id, 10 );
 
@@ -1233,7 +1231,7 @@ class Authentication {
 	 * @return bool
 	 */
 	function checkFingerPrint( $id) {
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 		$ulf->getByIdAndStatus($id, 10 );
 
@@ -1257,7 +1255,7 @@ class Authentication {
 	 */
 	function checkClientPC( $user_name) {
 		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 		$ulf->getByUserNameAndStatus(strtolower($user_name), 10 );
 

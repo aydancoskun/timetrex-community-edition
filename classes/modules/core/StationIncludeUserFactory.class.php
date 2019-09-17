@@ -67,7 +67,7 @@ class StationIncludeUserFactory extends Factory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getIncludeUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
@@ -114,7 +114,7 @@ class StationIncludeUserFactory extends Factory {
 											);
 		}
 		// User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'include_user',
 														$ulf->getByID($this->getIncludeUser()),
 														TTi18n::gettext('Selected User is invalid')

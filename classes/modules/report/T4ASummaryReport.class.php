@@ -123,7 +123,7 @@ class T4ASummaryReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'T4ASummaryReport', 'custom_column' );
@@ -134,13 +134,13 @@ class T4ASummaryReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'T4ASummaryReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'T4ASummaryReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -149,7 +149,7 @@ class T4ASummaryReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'T4ASummaryReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -553,9 +553,8 @@ class T4ASummaryReport extends Report {
 		return $retarr;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -565,7 +564,7 @@ class T4ASummaryReport extends Report {
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
 
-		$pself = TTnew( 'PayStubEntryListFactory' );
+		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		if ( $pself->getRecordCount() > 0 ) {
@@ -619,7 +618,7 @@ class T4ASummaryReport extends Report {
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		//Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -631,8 +630,7 @@ class T4ASummaryReport extends Report {
 		}
 
 		//Get legal entity data for joining.
-		/** @var LegalEntityListFactory $lelf */
-		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		//Debug::Text( ' User Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
@@ -652,8 +650,7 @@ class T4ASummaryReport extends Report {
 		$this->tmp_data['remittance_agency'] = array();
 
 		$filter_data['agency_id'] = array('10:CA:00:00:0010'); //CA federal
-		/** @var PayrollRemittanceAgencyListFactory $ralf */
-		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		//Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
@@ -667,9 +664,8 @@ class T4ASummaryReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @param null $format
 	 * @return bool
 	 */
@@ -746,7 +742,7 @@ class T4ASummaryReport extends Report {
 			return FALSE;
 		}
 
-		if ( !isset($setup_data['status_id']) OR $setup_data['status_id'] == 0 ) {
+		if ( !isset( $setup_data['status_id'] ) OR ( is_numeric( $setup_data['status_id'] ) AND $setup_data['status_id'] == 0 ) ) {
 			$setup_data['status_id'] = 'O'; //Original
 		}
 
@@ -776,7 +772,6 @@ class T4ASummaryReport extends Report {
 				$x = 0; //Progress bar only.
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($user_rows), NULL, TTi18n::getText('Generating Forms...') );
 
-				/** @var LegalEntityFactory $legal_entity_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][$legal_entity_id];
 				$company_name = $legal_entity_obj->getTradeName(); //T4As show Operating/Trade name on the forms.
 
@@ -827,7 +822,7 @@ class T4ASummaryReport extends Report {
 						continue;
 					}
 
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 					$ulf->getById( TTUUID::castUUID($row['user_id']) );
 					if ( $ulf->getRecordCount() == 1 ) {
 						$user_obj = $ulf->getCurrent();
@@ -840,7 +835,7 @@ class T4ASummaryReport extends Report {
 						}
 
 						//Determine the province of employment...
-						$cdlf = TTnew( 'CompanyDeductionListFactory' );
+						$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 						if ( isset( $setup_data['tax']['include_pay_stub_entry_account'] ) ) {
 							$cdlf->getByCompanyIDAndUserIdAndCalculationIdAndPayStubEntryAccountID( $current_company->getId(), $user_obj->getId(), 200, $setup_data['tax']['include_pay_stub_entry_account'] );
 							if ( $setup_data['tax']['include_pay_stub_entry_account'] != 0
@@ -1094,7 +1089,11 @@ class T4ASummaryReport extends Report {
 
 	/**
 	 * Formats report data for exporting to TimeTrex payment service.
-	 * @return array
+	 * @param $prae_obj
+	 * @param $pra_obj
+	 * @param $rs_obj
+	 * @param $pra_user_obj
+	 * @return array|bool
 	 */
 	function getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj ) {
 		$output_data = $this->getOutput( 'payment_services' );

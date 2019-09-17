@@ -145,7 +145,7 @@ class APIAbsencePolicy extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'absence_policy', 'view' );
 
-		$blf = TTnew( 'AbsencePolicyListFactory' );
+		$blf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -224,7 +224,7 @@ class APIAbsencePolicy extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'AbsencePolicyListFactory' );
+				$lf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -326,7 +326,7 @@ class APIAbsencePolicy extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'AbsencePolicyListFactory' );
+				$lf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -426,7 +426,7 @@ class APIAbsencePolicy extends APIFactory {
 			return FALSE;
 		}
 
-		$ablf = TTnew( 'AccrualBalanceListFactory' );
+		$ablf = TTnew( 'AccrualBalanceListFactory' ); /** @var AccrualBalanceListFactory $ablf */
 		$ablf->getByUserIdAndAccrualPolicyId( TTUUID::castUUID($user_id), TTUUID::castUUID($accrual_policy_id) );
 		if ( $ablf->getRecordCount() > 0 ) {
 			$accrual_balance = $ablf->getCurrent()->getBalance();
@@ -451,7 +451,7 @@ class APIAbsencePolicy extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		$aplf = TTnew( 'AbsencePolicyListFactory' );
+		$aplf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $aplf */
 		$aplf->getByIdAndCompanyId( $absence_policy_id, $this->getCurrentCompanyObject()->getId() );
 		if ( $aplf->getRecordCount() > 0 ) {
 			$ap_obj = $aplf->getCurrent();
@@ -485,13 +485,13 @@ class APIAbsencePolicy extends APIFactory {
 
 		$epoch = TTDate::parseDateTime( $epoch );
 
-		$aplf = TTnew( 'AbsencePolicyListFactory' );
+		$aplf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $aplf */
 		$aplf->getByIdAndCompanyId( $absence_policy_id, $this->getCurrentCompanyObject()->getId() );
 		if ( $aplf->getRecordCount() > 0 ) {
 			$ap_obj = $aplf->getCurrent();
 			$pfp_obj = $ap_obj->getPayFormulaPolicyObject();
 
-			$prev_aplf = TTnew( 'AbsencePolicyListFactory' );
+			$prev_aplf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $prev_aplf */
 			$prev_aplf->getByIdAndCompanyId( $previous_absence_policy_id, $this->getCurrentCompanyObject()->getId() );
 
 			$accrual_rate = ( is_object( $pfp_obj ) ) ? $pfp_obj->getAccrualRate() : (-1);
@@ -510,19 +510,18 @@ class APIAbsencePolicy extends APIFactory {
 						AND is_object( $pfp_obj ) ) {
 					$pay_stub_entry_account_accrual_id = $ap_obj->getPayCodeObject()->getPayStubEntryAccountObject()->getAccrual();
 
-					$pself = TTnew('PayStubEntryListFactory');
+					$pself = TTnew('PayStubEntryListFactory'); /** @var PayStubEntryListFactory $pself */
 					$pay_stub_entry_account_data = $pself->getLastSumByUserIdAndEntryNameIdAndDate( $user_id, $pay_stub_entry_account_accrual_id, $epoch );
 					if ( isset($pay_stub_entry_account_data['ytd_amount']) AND $pay_stub_entry_account_data['ytd_amount'] !== NULL ) {
-						/** @var PayCodeListFactory $pclf */
-						$pclf = TTnew('PayCodeListFactory');
+						$pclf = TTnew('PayCodeListFactory'); /** @var PayCodeListFactory $pclf */
 						$accrual_account_pay_code_ids = (array)$pclf->getIDSByListFactory( $pclf->getByCompanyIdAndAccrualPayStubEntryAccountID( $this->getCurrentCompanyObject()->getId(), $pay_stub_entry_account_accrual_id) );
 
 						//Get all UserDateTotal records after the last pay stub date, so we can include dollar amounts that havne't appeared on pay stubs yet.
-						$udtlf = TTnew('UserDateTotalListFactory');
+						$udtlf = TTnew('UserDateTotalListFactory'); /** @var UserDateTotalListFactory $udtlf */
 						$udt_sum_arr = $udtlf->getSumByUserIDAndObjectTypeIDAndPayCodeIDAndStartDateAndEndDate( $user_id, 25, $accrual_account_pay_code_ids, TTDate::getBeginDayEpoch( strtotime( $pay_stub_entry_account_data['end_date'] ) + 7200 ), ( time() + ( 86400 * 365 ) ) );
 						Debug::Arr( array( $udt_sum_arr, $accrual_account_pay_code_ids ), 'UDT Sum array.  SRC Object ID: '. $ap_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', TTDate::getBeginDayEpoch( strtotime( $pay_stub_entry_account_data['end_date'] ) + 7200 ) ), __FILE__, __LINE__, __METHOD__, 10);
 
-						$uwlf = TTnew('UserWageListFactory');
+						$uwlf = TTnew('UserWageListFactory'); /** @var UserWageListFactory $uwlf */
 						$uwlf->getByUserIdAndGroupIDAndBeforeDate( $user_id, $pfp_obj->getWageGroup(), $epoch, 1 );
 
 						$dollar_previous_amount = 0;
@@ -571,7 +570,7 @@ class APIAbsencePolicy extends APIFactory {
 				$aplf->getByPolicyGroupUserIdAndAccrualPolicyAccount( $user_id, TTUUID::castUUID( $pfp_obj->getAccrualPolicyAccount() ) );
 				Debug::Text('Accrual Policy Records: '. $aplf->getRecordCount() .' User ID: '. $user_id .' Accrual Policy Account: '. $pfp_obj->getAccrualPolicyAccount(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $aplf->getRecordCount() > 0 ) {
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 					$ulf->getByIDAndCompanyID( $user_id, $this->getCurrentCompanyObject()->getId() );
 					if ( $ulf->getRecordCount() == 1 ) {
 						$u_obj = $ulf->getCurrent();

@@ -411,7 +411,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		all_data.push( data );
 
-		grid.setData( all_data );
+		grid.setData( all_data, false );
 
 		grid.grid.jqGrid( 'setSelection', data.id );
 
@@ -437,7 +437,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			}
 		}
 
-		grid.setData( all_data );
+		grid.setData( all_data, false );
 
 		grid.grid.jqGrid( 'setSelection', all_data[all_data.length - 1].id );
 	},

@@ -123,7 +123,7 @@ class AccrualBalanceSummaryReport extends Report {
 				break;
 			case 'custom_columns':
 				//Get custom fields for report data.
-				$oflf = TTnew( 'OtherFieldListFactory' );
+				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 				//User and Punch fields conflict as they are merged together in a secondary process.
 				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10), array( 10 => '' ) );
 				if ( is_array($other_field_names) ) {
@@ -132,7 +132,7 @@ class AccrualBalanceSummaryReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'AccrualBalanceSummaryReport', 'custom_column' );
@@ -143,13 +143,13 @@ class AccrualBalanceSummaryReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'AccrualBalanceSummaryReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'AccrualBalanceSummaryReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -158,7 +158,7 @@ class AccrualBalanceSummaryReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'AccrualBalanceSummaryReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -190,7 +190,9 @@ class AccrualBalanceSummaryReport extends Report {
 										'-1070-country' => TTi18n::gettext('Country'),
 										'-1080-user_group' => TTi18n::gettext('Employee Group'),
 										'-1090-default_branch' => TTi18n::gettext('Branch'), //abbreviate for space
+										'-1091-default_branch_manual_id' => TTi18n::gettext('Branch Code'),
 										'-1100-default_department' => TTi18n::gettext('Department'), //abbreviate for space
+										'-1101-default_department_manual_id' => TTi18n::gettext('Department Code'),
 
 										'-1110-currency' => TTi18n::gettext('Currency'),
 										'-1112-current_currency' => TTi18n::gettext('Current Currency'),
@@ -468,9 +470,8 @@ class AccrualBalanceSummaryReport extends Report {
 		return $retval;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -495,7 +496,7 @@ class AccrualBalanceSummaryReport extends Report {
 		$accrual_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'accrual', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -511,7 +512,7 @@ class AccrualBalanceSummaryReport extends Report {
 
 		//Get user wage data for joining.
 		$filter_data['wage_group_id'] = array( TTUUID::getZeroID() ); //Use default wage groups only.
-		$uwlf = TTnew( 'UserWageListFactory' );
+		$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -533,7 +534,7 @@ class AccrualBalanceSummaryReport extends Report {
 		//Debug::Arr($this->tmp_data['user_wage'], 'TMP User Wage Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get accrual data for joining .
-		$alf = TTnew( 'AccrualListFactory' );
+		$alf = TTnew( 'AccrualListFactory' ); /** @var AccrualListFactory $alf */
 		$alf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' Accrual Rows: '. $alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $alf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -563,9 +564,8 @@ class AccrualBalanceSummaryReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {

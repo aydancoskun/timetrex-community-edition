@@ -75,7 +75,7 @@ $install_obj = new Install();
 if ( isset( $config_vars['other']['primary_company_id'] ) ) {
 	$company_id = $config_vars['other']['primary_company_id'];
 } else {
-	$company_id = 1;
+	$company_id = NULL;
 }
 
 //The installer already checks the cache directory to make sure its writable, so use that as the upgrade staging directory.

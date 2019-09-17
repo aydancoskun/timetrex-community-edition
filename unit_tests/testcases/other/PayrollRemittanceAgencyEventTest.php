@@ -74,8 +74,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$user_obj->setHireDate( strtotime( '05-Mar-2017' ) ); //Must not be in the future either, otherwise it could cause failures when the date passes into the past.
 		$user_obj->Save( FALSE );
 
-		/** @var RemittanceSourceAccountFactory $rsa_obj */
-		$rsa_obj = TTnew( 'RemittanceSourceAccountFactory' );
+		$rsa_obj = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsa_obj */
 		$rsa_obj->setName( 'Test source account' );
 		$rsa_obj->setLegalEntity( $this->legal_entity_id );
 		$rsa_obj->setCompany( $this->company_id );
@@ -87,8 +86,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$rsa_obj->setCurrency( $currency_id );
 		$rsa_id = $rsa_obj->Save();
 
-		/** @var PayrollRemittanceAgencyFactory $praf */
-		$praf = TTnew( 'PayrollRemittanceAgencyFactory' );
+		$praf = TTnew( 'PayrollRemittanceAgencyFactory' ); /** @var PayrollRemittanceAgencyFactory $praf */
 
 		$praf->setName( 'Testing Agency' );
 		$praf->setLegalEntity( $this->legal_entity_id );
@@ -274,7 +272,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function getUserObject( $user_id ) {
-		$ulf = TTNew( 'UserListFactory' );
+		$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getById( $user_id );
 		if ( $ulf->getRecordCount() > 0 ) {
 			return $ulf->getCurrent();
@@ -293,8 +291,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	 * test the weekly frequency
 	 */
 	function testWeekly() {
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setDayOfWeek( 0 );
 		$praef->setFrequency( 5100 );
@@ -489,7 +486,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testMonthly() {
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 4100 );
 		$praef->setPrimaryDayOfMonth( 10 );
@@ -587,7 +584,6 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	//biweekly frequency is commented out in the factory.
 //	function testBiWeekly() {
-//		/** @var PayrollRemittanceAgencyEventFactory $praef */
 //		$praef = TTnew('PayrollRemittanceAgencyEventFactory');
 //		$praef->setFrequency( 5000 );
 //		$praef->setDayOfWeek(1);
@@ -606,8 +602,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 //	}
 
 	function testAnnual() {
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 2000 );
 		$praef->setPrimaryDayOfMonth( 1 );
@@ -632,7 +627,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Dec-2016  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '01-Dec-2017 12:00PM' ) ) );
 
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 2000 );
 		$praef->setPrimaryDayOfMonth( 12 );
@@ -666,7 +661,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '12-Feb-2015 12:00PM' ) ) );
 
 		//chained test ( like wizard )
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 2000 );
 		$praef->setPrimaryDayOfMonth( 12 );
@@ -715,8 +710,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	function testQuarterlyA() {
 		Debug::Text( 'testQuarterly', __FILE__, __LINE__, __METHOD__, 10 );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 3000 );
 		$praef->setPrimaryDayOfMonth( 1 );
@@ -746,8 +740,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '01-Jan-2017 12:00PM' ) ) );
 
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 3000 );
 		$praef->setPrimaryDayOfMonth( 1 );
@@ -817,8 +810,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	function testQuarterlyB() {
 		Debug::Text( 'testQuarterly', __FILE__, __LINE__, __METHOD__, 10 );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 3000 );
 		$praef->setPrimaryDayOfMonth( 31 );
@@ -877,8 +869,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testSemiWeekly() {
 		//Wednesday, Thursday, Friday = Wednesday. Saturday, Sunday, Monday, Tuesday = Friday
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 64000 );
 		$praef->setEffectiveDate( strtotime( '01-Jan-2017' ) );
@@ -943,8 +934,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testAcceleratedThreshold1() {
 		// 10th and 25th of each month. If transaction date falls between 1-15th of the month, pay by 25th. If it falls between 16th and last day, pay on the 10th of the next month.
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 50000 );
 		$praef->setEffectiveDate( strtotime( '01-Jul-2017' ) );
@@ -1041,7 +1031,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testAcceleratedThreshold2() {
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 51000 );
 		$praef->setEffectiveDate( strtotime( '01-Jul-2017' ) );
@@ -1096,10 +1086,8 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testWeekendAvoidance() {
-		/** @var PayrollRemittanceAgencyListFactory $praf */
-		$praf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$praf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $praf */
 		$praf->getById( $this->agency_id );
-		/** @var PayrollRemittanceAgencyFactory $pra_obj */
 		$pra_obj = $praf->getCurrent();
 
 		$this->assertEquals( TRUE, is_object($pra_obj), 'agency is not an object' );
@@ -1116,8 +1104,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 0 ); //no weekend check.
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 5100 );
 		$praef->setDayOfWeek( 0 );
@@ -1129,8 +1116,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 2 ); //2=Forward
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 5100 );
 		$praef->setDayOfWeek( 0 );
@@ -1142,8 +1128,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 3 ); //3=closest business day
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 5100 );
 		$praef->setDayOfWeek( 0 );
@@ -1155,8 +1140,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 1 ); //1=Backwards
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 5100 );
 		$praef->setDayOfWeek( 0 );
@@ -1168,8 +1152,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testHolidayAvoidance() {
-		/** @var PayrollRemittanceAgencyListFactory $praf */
-		$praf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$praf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $praf */
 		$praf->getById($this->agency_id);
 		$pra_obj = $praf->getCurrent();
 
@@ -1177,8 +1160,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		$holiday_policy_ids = array();
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setId( $praef->getNextInsertId() );
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setType( 'T4' );
@@ -1189,7 +1171,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setEffectiveDate( strtotime( '05-Dec-2017 12:00AM' ) );
 		$praef->save( FALSE );
 
-		$rhf_xmas = TTNew( 'RecurringHolidayFactory' );
+		$rhf_xmas = TTNew( 'RecurringHolidayFactory' ); /** @var RecurringHolidayFactory $rhf_xmas */
 		$rhf_xmas->setCompany( $this->company_id );
 		$rhf_xmas->setName( 'Test - xmas' );
 		$rhf_xmas->setType( 10 );
@@ -1197,8 +1179,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$rhf_xmas->setMonth( 12 );
 		$holiday_policy_ids[] = $rhf_xmas->save();
 
-		/** @var RecurringHolidayFactory $rhf_box */
-		$rhf_box = TTNew( 'RecurringHolidayFactory' );
+		$rhf_box = TTNew( 'RecurringHolidayFactory' ); /** @var RecurringHolidayFactory $rhf_box */
 		$rhf_box->setCompany( $this->company_id );
 		$rhf_box->setName( 'Test - boxerday' );
 		$rhf_box->setType( 10 );
@@ -1218,8 +1199,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 0 ); //1=Backwards
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setType( 10 );
 		$praef->setReminderDays( 2 );
@@ -1233,8 +1213,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 1 ); //1=Backwards
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setType( 10 );
 		$praef->setReminderDays( 2 );
@@ -1248,8 +1227,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 2 ); //1=Backwards
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setType( 10 );
 		$praef->setReminderDays( 2 );
@@ -1263,8 +1241,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 3 ); //1=Backwards
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setType( 10 );
 		$praef->setReminderDays( 2 );
@@ -1280,13 +1257,11 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	function testWeekLongHolidayAvoidance() {
 		$holiday_policy_ids = array();
 
-		/** @var PayrollRemittanceAgencyListFactory $praf */
-		$praf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$praf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $praf */
 		$praf->getById($this->agency_id);
 		$pra_obj = $praf->getCurrent();
 
 
-//		/** @var PayrollRemittanceAgencyEventFactory $praef */
 //		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
 //		$praef->setId( FALSE );
 //		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
@@ -1297,7 +1272,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 //		$praef->setStatus( 10 );
 //		$praef->setEffectiveDate( strtotime( '05-Dec-2017 12:00AM' ) );
 
-		$rhf_xmas = TTNew( 'RecurringHolidayFactory' );
+		$rhf_xmas = TTNew( 'RecurringHolidayFactory' ); /** @var RecurringHolidayFactory $rhf_xmas */
 		$rhf_xmas->setCompany( $this->company_id );
 		$rhf_xmas->setName( 'Test - xmas' );
 		$rhf_xmas->setType( 10 );
@@ -1306,8 +1281,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$rhf_xmas->setAlwaysOnWeekDay( 2 );
 		$holiday_policy_ids[] = $rhf_xmas->save();
 
-		/** @var RecurringHolidayFactory $rhf_box */
-		$rhf_box = TTNew( 'RecurringHolidayFactory' );
+		$rhf_box = TTNew( 'RecurringHolidayFactory' ); /** @var RecurringHolidayFactory $rhf_box */
 		$rhf_box->setCompany( $this->company_id );
 		$rhf_box->setName( 'Test - boxerday' );
 		$rhf_box->setType( 10 );
@@ -1316,7 +1290,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$rhf_box->setAlwaysOnWeekDay( 2 );
 		$holiday_policy_ids[] = $rhf_box->save();
 
-		$rhf_box = TTNew( 'RecurringHolidayFactory' );
+		$rhf_box = TTNew( 'RecurringHolidayFactory' ); /** @var RecurringHolidayFactory $rhf_box */
 		$rhf_box->setCompany( $this->company_id );
 		$rhf_box->setName( 'Test - 27th dec' );
 		$rhf_box->setType( 10 );
@@ -1325,7 +1299,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$rhf_box->setAlwaysOnWeekDay( 2 );
 		$holiday_policy_ids[] = $rhf_box->save();
 
-		$rhf_box = TTNew( 'RecurringHolidayFactory' );
+		$rhf_box = TTNew( 'RecurringHolidayFactory' ); /** @var RecurringHolidayFactory $rhf_box */
 		$rhf_box->setCompany( $this->company_id );
 		$rhf_box->setName( 'Test - 28th dec' );
 		$rhf_box->setType( 10 );
@@ -1334,7 +1308,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$rhf_box->setAlwaysOnWeekDay( 2 );
 		$holiday_policy_ids[] = $rhf_box->save();
 
-		$rhf_box = TTNew( 'RecurringHolidayFactory' );
+		$rhf_box = TTNew( 'RecurringHolidayFactory' ); /** @var RecurringHolidayFactory $rhf_box */
 		$rhf_box->setCompany( $this->company_id );
 		$rhf_box->setName( 'Test - 29th dec' );
 		$rhf_box->setType( 10 );
@@ -1358,8 +1332,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 0 ); //1=none
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setEffectiveDate( strtotime( '05-Dec-2017 12:00AM' ) );
 		$praef->setLastDueDate( strtotime( '05-Dec-2017 12:00AM' ) );
@@ -1378,8 +1351,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 1 ); //1=Backwards
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setEffectiveDate( strtotime( '05-Dec-2017 12:00AM' ) );
 		$praef->setLastDueDate( strtotime( '05-Dec-2017 12:00AM' ) );
@@ -1397,8 +1369,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 2 ); //2=next
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setEffectiveDate( strtotime( '05-Dec-2017 12:00AM' ) );
 		$praef->setLastDueDate( strtotime( '05-Dec-2017 12:00AM' ) );
@@ -1415,8 +1386,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pra_obj->setAlwaysOnWeekDay( 3 ); //closest
 		$pra_obj->save( FALSE );
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setEffectiveDate( strtotime( '05-Dec-2017 12:00AM' ) );
 		$praef->setLastDueDate( strtotime( '05-Dec-2017 12:00AM' ) );
@@ -1433,8 +1403,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testSemiMonthlyFrequency() {
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 4200 );
 
@@ -1629,8 +1598,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testSemiAnnual() {
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 2200 );
 
@@ -1700,8 +1668,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testYearToDate() {
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 2100 );
 
@@ -1782,8 +1749,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testYearToDateB() {
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 2100 );
 
@@ -1819,8 +1785,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 
 	function testEighthMonthly() {
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 63000 );
 
@@ -1968,8 +1933,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testTwiceMonthly() {
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId($this->agency_id);
 		$praef->setFrequency( 61000 );
 
@@ -2243,13 +2207,11 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testPayPeriodA() {
-		/** @var PayPeriodScheduleFactory $ppsf */
 		$test_start_date = strtotime( '01-Jan-2017 12:00PM' ); //should be day before first pay perdio start date.
 		$ppsf_id = $this->setupPayPeriodTest($test_start_date);
 
 		$this->assertEquals( TRUE, TTUUID::isUUID($ppsf_id), 'Pay period schedule must be an object.' );
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setId( $praef->getNextInsertId() );
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setStatus( 10 );
@@ -2349,13 +2311,11 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testPayPeriodB() {
-		/** @var PayPeriodScheduleFactory $ppsf */
 		$test_start_date = strtotime( '01-Jan-2017 12:00PM' ); //should be day before first pay perdio start date.
 		$ppsf_id = $this->setupPayPeriodTest($test_start_date);
 
 		$this->assertEquals( TRUE, TTUUID::isUUID($ppsf_id), 'Pay period schedule must be an object.' );
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setId( $praef->getNextInsertId() );
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setStatus( 10 );
@@ -2455,13 +2415,11 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testPayPeriodC() {
-		/** @var PayPeriodScheduleFactory $ppsf */
 		$test_start_date = strtotime( '01-Jan-2017 12:00PM' ); //should be day before first pay perdio start date.
 		$ppsf_id = $this->setupPayPeriodTest($test_start_date);
 
 		$this->assertEquals( TRUE, TTUUID::isUUID($ppsf_id), 'Pay period schedule must be an object.' );
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setId( $praef->getNextInsertId() );
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setStatus( 10 );
@@ -2523,7 +2481,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	function testMonthlyQuarterExceptions() {
 		//US - Monthly (Quarter Exceptions)
 		//Due the 15th day of the month following the monthly withholding period, except for March, June, September and December; then due the last day of the month following the withholding period.
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 60000 );
 
@@ -2684,7 +2642,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//As a quarter-monthly filer, you are required to pay at least 90 percent of the actual tax due within three banking day following the end
 		//of the quarter-monthly period.
 
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 62000 );
 
@@ -2778,7 +2736,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testUSQuarterly() {
 		// (April 30, July 31, and October 31).
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 59000 );
 
@@ -2885,7 +2843,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testUSMonthlyExcludeLastMOQ() {
 		// (April 30, July 31, and October 31).
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 60100 );
 
@@ -3062,8 +3020,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 			$user_obj->Save( FALSE );
 		}
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setDueDateDelayDays( 10 );
 		$praef->setStatus( 10 ); //enabled
@@ -3145,8 +3102,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		}
 
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setDueDateDelayDays( 10 );
 		$praef->setStatus( 10 ); //enabled
@@ -3259,8 +3215,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 			$user_obj->Save( FALSE );
 		}
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setDueDateDelayDays( 10 );
 		$praef->setStatus( 10 ); //enabled
@@ -3336,8 +3291,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		}
 
 
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setDueDateDelayDays( 10 );
 		$praef->setStatus( 10 ); //enabled
@@ -3433,15 +3387,13 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testOnTerminationByPayPeriod() {
 		global $dd;
-		/** @var PayPeriodScheduleFactory $ppsf */
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
 
 		$test_start_date = strtotime( '01-Jan-2017 12:00PM' ); //should be day before first pay perdio start date.
 		$ppsf_id = $this->setupPayPeriodTest($test_start_date);
 
 		$this->assertEquals( TRUE, TTUUID::isUUID($ppsf_id), 'Pay period schedule id must be a UUID.' );
 
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 90310 ); //On Hire Event Frequency
 		$praef->setDueDateDelayDays( 10 );
@@ -3552,8 +3504,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	//testing that recalc is happening properly on save.
 	function testPreSave() {
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 4100 ); //monthly
 		$praef->setPrimaryDayOfMonth( 10 );
@@ -3614,8 +3565,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testReminderDays() {
-		/** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 4100 ); //monthly
 		$praef->setPrimaryDayOfMonth( 10 );
@@ -3633,7 +3583,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		}
 		$this->assertEquals( date( 'r', $praef->getNextReminderDate() ), date( 'r', strtotime( '10-Jan-2016 12:00PM' ) ) );
 
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 4100 ); //monthly
 		$praef->setPrimaryDayOfMonth( 10 );
@@ -3651,7 +3601,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		}
 		$this->assertEquals( date( 'r', $praef->getNextReminderDate() ), date( 'r', strtotime( '07-Jan-2016 12:00PM' ) ) );
 
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 4100 ); //monthly
 		$praef->setPrimaryDayOfMonth( 10 );
@@ -3669,7 +3619,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		}
 		$this->assertEquals( date( 'r', $praef->getNextReminderDate() ), date( 'r', strtotime( '05-Jan-2016 12:00PM' ) ) );
 
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 4100 ); //monthly
 		$praef->setPrimaryDayOfMonth( 10 );
@@ -3688,7 +3638,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $praef->getNextReminderDate(TRUE) ), date( 'r', strtotime( '15-Jan-2016 12:00PM' ) ) );
 
 		//Make sure you test the case where this is no due date, and therefore no reminder date.
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 4100 ); //monthly
 		$praef->setPrimaryDayOfMonth( 10 );
@@ -3706,7 +3656,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 
 		//Make sure you test the case where this is no due date, and therefore no reminder date.
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 1000 ); //each pay period (with no pay period set)
 		$praef->setDueDateDelayDays( 0 );

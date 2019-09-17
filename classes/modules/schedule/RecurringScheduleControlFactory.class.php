@@ -282,7 +282,7 @@ class RecurringScheduleControlFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getUser() {
-		$rsulf = TTnew( 'RecurringScheduleUserListFactory' );
+		$rsulf = TTnew( 'RecurringScheduleUserListFactory' ); /** @var RecurringScheduleUserListFactory $rsulf */
 		$rsulf->getByRecurringScheduleControlId( $this->getId() );
 		$list = array();
 		foreach ($rsulf as $obj) {
@@ -297,10 +297,10 @@ class RecurringScheduleControlFactory extends Factory {
 	}
 
 	/**
-	 * @param string $ids UUID
+	 * @param string|string[] $ids UUID
 	 * @return bool
 	 */
-	function setUser( $ids) {
+	function setUser( $ids ) {
 		if ( !is_array($ids) ) {
 			global $current_user;
 			if ( $ids == '' AND ( getTTProductEdition() == TT_PRODUCT_COMMUNITY OR $current_user->getCompanyObject()->getProductEdition() == 10 ) ) {
@@ -317,7 +317,7 @@ class RecurringScheduleControlFactory extends Factory {
 			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$rsulf = TTnew( 'RecurringScheduleUserListFactory' );
+				$rsulf = TTnew( 'RecurringScheduleUserListFactory' ); /** @var RecurringScheduleUserListFactory $rsulf */
 				$rsulf->getByRecurringScheduleControlId( $this->getId() );
 				foreach ($rsulf as $obj) {
 					$id = $obj->getUser();
@@ -338,7 +338,7 @@ class RecurringScheduleControlFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			foreach ($ids as $id) {
 				if ( $id === 0 ) {
 					$id = TTUUID::getZeroID();
@@ -357,7 +357,7 @@ class RecurringScheduleControlFactory extends Factory {
 						}
 					}
 
-					$rsuf = TTnew( 'RecurringScheduleUserFactory' );
+					$rsuf = TTnew( 'RecurringScheduleUserFactory' ); /** @var RecurringScheduleUserFactory $rsuf */
 					$rsuf->setRecurringScheduleControl( $this->getId() );
 					$rsuf->setUser( $id );
 
@@ -444,14 +444,14 @@ class RecurringScheduleControlFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
 				 									);
 		// Recurring Schedule Template
 		if ( $this->getRecurringScheduleTemplateControl() !== FALSE ) {
-			$rstclf = TTnew( 'RecurringScheduleTemplateControlListFactory' );
+			$rstclf = TTnew( 'RecurringScheduleTemplateControlListFactory' ); /** @var RecurringScheduleTemplateControlListFactory $rstclf */
 			$this->Validator->isResultSetWithRows(	'recurring_schedule_template_control_id',
 															$rstclf->getByID($this->getRecurringScheduleTemplateControl()),
 															TTi18n::gettext('Recurring Schedule Template is invalid')
@@ -548,7 +548,7 @@ class RecurringScheduleControlFactory extends Factory {
 			$maximum_end_date = $this->getEndDate();
 		}
 
-		$rsf = TTnew('RecurringScheduleFactory');
+		$rsf = TTnew('RecurringScheduleFactory'); /** @var RecurringScheduleFactory $rsf */
 		$rsf->StartTransaction();
 		$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $this->getID(), ( $current_epoch - (86400 * 720) ), ( $current_epoch + (86400 * 720) ) );
 		if ( $this->getDeleted() == FALSE ) {
@@ -567,7 +567,7 @@ class RecurringScheduleControlFactory extends Factory {
 			}
 
 			if ( is_array( $user_ids ) AND count( $user_ids ) > 0 ) {
-				$rsclf = TTnew( 'RecurringScheduleControlListFactory' );
+				$rsclf = TTnew( 'RecurringScheduleControlListFactory' ); /** @var RecurringScheduleControlListFactory $rsclf */
 				$rsclf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'user_id' => $user_ids ) );
 				if ( $rsclf->getRecordCount() > 0 ) {
 					foreach( $rsclf as $rsc_obj ) {

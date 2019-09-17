@@ -55,7 +55,7 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -114,7 +114,7 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 							b.company_id = ?
 							AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -157,7 +157,7 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 							AND a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND a.deleted = 0
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -200,7 +200,7 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 							AND a.message_sender_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND a.deleted = 0
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -250,7 +250,7 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 							AND a.message_sender_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND a.deleted = 0
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

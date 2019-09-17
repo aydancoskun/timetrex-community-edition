@@ -55,7 +55,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -114,7 +114,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 							b.company_id = ?
 							AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -150,7 +150,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 							AND a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND a.deleted = 0
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -189,7 +189,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 							AND b.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND ( b.deleted = 0 )
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -241,7 +241,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 							AND a.user_id != ?
 							AND ( b.deleted = 0 AND c.deleted = 0 )
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -284,7 +284,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 							AND a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
 							AND a.deleted = 0
 					';
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

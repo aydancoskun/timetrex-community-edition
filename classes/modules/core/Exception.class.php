@@ -59,7 +59,7 @@ class DBError extends Exception {
 		//print_r($e);
 		//adodb_pr($e);
 
-		Debug::Text('Begin Exception...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Begin Exception... [ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '. getmypid() .') ]', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr( Debug::backTrace(), ' BackTrace: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Log database error
@@ -123,7 +123,7 @@ class DBError extends Exception {
 							$description = TTi18n::getText('%1 has detected invalid UTF8 characters, if you are attempting to use non-english characters, they may be invalid.', array( APPLICATION_NAME ) );
 							break;
 						case 'dbserialize':
-							$description = TTi18n::getText('%1 has detected a duplicate request running at the exact same time, please try your request again in a couple minutes.', array( APPLICATION_NAME ) );
+							$description = TTi18n::getText('%1 has detected a duplicate request running at the exact same time, please try your request again.', array( APPLICATION_NAME ) );
 							break;
 						default:
 							$description = TTi18n::getText('%1 is currently undergoing maintenance. We\'re sorry for any inconvenience this may cause. Please try again in 15 minutes.', array( APPLICATION_NAME ) );
@@ -142,7 +142,7 @@ class DBError extends Exception {
 							$description = TTi18n::getText('%1 has detected invalid UTF8 characters, if you are attempting to use non-english characters, they may be invalid.', array( APPLICATION_NAME ) );
 							break;
 						case 'dbserialize':
-							$description = TTi18n::getText('%1 has detected a duplicate request running at the exact same time, please try your request again in a couple minutes.', array( APPLICATION_NAME ) );
+							$description = TTi18n::getText('%1 has detected a duplicate request running at the exact same time, please try your request again.', array( APPLICATION_NAME ) );
 							break;
 						case 'dbnospaceondevice':
 							$description = TTi18n::getText('%1 has detected a database error, please contact technical support immediately.', array( APPLICATION_NAME ) );
@@ -179,6 +179,8 @@ class DBError extends Exception {
 				exit;
 			}
 		}
+
+		return TRUE;
 	}
 }
 

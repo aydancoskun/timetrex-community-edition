@@ -55,7 +55,7 @@ class ImportPayPeriod extends Import {
 		$retval = NULL;
 		switch( $name ) {
 			case 'columns':
-				$ppf = TTNew('PayPeriodFactory');
+				$ppf = TTNew('PayPeriodFactory'); /** @var PayPeriodFactory $ppf */
 				$retval = Misc::arrayIntersectByKey( array('pay_period_schedule', 'start_date', 'end_date', 'transaction_date'), Misc::trimSortPrefix( $ppf->getOptions('columns') ) );
 				break;
 			case 'column_aliases':
@@ -70,7 +70,7 @@ class ImportPayPeriod extends Import {
 								);
 				break;
 			case 'parse_hint':
-				$upf = TTnew('UserPreferenceFactory');
+				$upf = TTnew('UserPreferenceFactory'); /** @var UserPreferenceFactory $upf */
 
 				$retval = array(
 								'start_date' => $upf->getOptions('date_format'),
@@ -121,14 +121,15 @@ class ImportPayPeriod extends Import {
 	//
 	// Generic parser functions.
 	//
+
 	/**
 	 * @return bool
 	 */
 	function getPayPeriodScheduleOptions() {
 		//Get job titles
-		$ppslf = TTNew('PayPeriodScheduleListFactory');
+		$ppslf = TTNew('PayPeriodScheduleListFactory'); /** @var PayPeriodScheduleListFactory $ppslf */
 		$ppslf->getByCompanyId( $this->company_id );
-		$this->pay_period_schedule_options = (array)$ppslf->getArrayByListFactory( $ppslf, FALSE, TRUE );
+		$this->pay_period_schedule_options = (array)$ppslf->getArrayByListFactory( $ppslf, FALSE );
 		unset($ppslf);
 
 		return TRUE;

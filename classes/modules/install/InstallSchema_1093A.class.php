@@ -54,7 +54,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 	 * @return int
 	 */
 	function getLastTransactionNumber( $company_id ) {
-		$ugdlf = TTnew( 'UserGenericDataListFactory' );
+		$ugdlf = TTnew( 'UserGenericDataListFactory' ); /** @var UserGenericDataListFactory $ugdlf */
 		$ugdlf->getByCompanyIdAndScriptAndDefault( $company_id, 'PayStubFactory', TRUE );
 		if ( $ugdlf->getRecordCount() > 0 ) {
 			$ugd_obj = $ugdlf->getCurrent();
@@ -85,24 +85,22 @@ class InstallSchema_1093A extends InstallSchema_Base {
 			}
 		}
 
-		/** @var CompanyListFactory $clf */
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->StartTransaction();
 		$clf->getAll( NULL, NULL, NULL, array('created_date' => 'asc' ) );
 		Debug::Text( 'Get all companies. Found: ' . $clf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $clf->getRecordCount() > 0 ) {
-			/** @var CompanyFactory $cf */
 			foreach ( $clf as $cf ) {
 				Debug::text( 'Processing company: ' . $cf->getId() .' Name: '. $cf->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 				//echo 'Processing company: ' . $cf->getId() .' Name: '. $cf->getName() ."\n";
 
 				//Setup new permissions.
-				$pclf = TTnew( 'PermissionControlListFactory' );
+				$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 				$pclf->getByCompanyId( $cf->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Force order to prevent references to columns that haven't been created yet.
 				if ( $pclf->getRecordCount() > 0 ) {
 					foreach( $pclf as $pc_obj ) {
 						Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
-						$plf = TTnew( 'PermissionListFactory' );
+						$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $cf->getId(), $pc_obj->getId(), 'company', 'edit_own', 1 ); //Only return records where permission is ALLOWED.
 						if ( $plf->getRecordCount() > 0 ) {
 							Debug::text('Found permission group with over_time_policy, add enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
@@ -195,8 +193,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 				 */
 
 
-				/** @var LegalEntityFactory $lef */
-				$lef = TTnew( 'LegalEntityFactory' );
+				$lef = TTnew( 'LegalEntityFactory' ); /** @var LegalEntityFactory $lef */
 				$lef->setCompany( $cf->getId() );
 				$lef->setStatus( 10 ); //set status to active.
 				$lef->setType( 10 ); //defaulting to corporation.
@@ -210,7 +207,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 				$lef->setPostalCode( $cf->getPostalCode() );
 				$lef->setWorkPhone( $cf->getWorkPhone() );
 				$lef->setFaxPhone( $cf->getFaxPhone() );
-				$lef->getEnableAddRemittanceSource( FALSE ); //Don't create default remittance source accounts as they will be created below instead.
+				$lef->setEnableAddRemittanceSource( FALSE ); //Don't create default remittance source accounts as they will be created below instead.
 				if ( $lef->isValid() ) {
 					$legal_entity_id = $lef->save();
 					Debug::Text( '  Legal Entity: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -234,8 +231,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 
 					$currency_to_eft_source_account_map = array();
 					$currency_to_check_source_account_map = array();
-					/** @var CurrencyListFactory $clf */
-					$currency_lf = TTnew( 'CurrencyListFactory' );
+					$currency_lf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $currency_lf */
 					$currency_lf->getByCompanyId( $cf->getId() );
 					Debug::Text( '  Get all currencies. Found: ' . $clf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $currency_lf->getRecordCount() > 0 ) {
@@ -243,7 +239,6 @@ class InstallSchema_1093A extends InstallSchema_Base {
 						$user_bank_account_rs = $this->getDatabaseConnection()->Execute( $query );
 						Debug::Text( '    User Bank Total Records: ' . $user_bank_account_rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 
-						/** @var CurrencyFactory $currency_obj */
 						foreach ( $currency_lf as $currency_obj ) {
 							Debug::Text( '     Currency: ' . $currency_obj->getISOCode() . ' ID: ' . $currency_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 							if ( $currency_obj->getDefault() == TRUE ) {
@@ -253,8 +248,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 								Debug::Text( '    Get company bank accounts. Found: ' . $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 								if ( $rs->RecordCount() > 0 ) {
 									foreach ( $rs as $bank_row ) {
-										/** @var RemittanceSourceAccountFactory $rsaf */
-										$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+										$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */
 
 										Debug::Text( '    Processing Bank Account. institution: ' . $bank_row['institution'] . ' transit: ' . $bank_row['transit'] . ' ID: ' . $bank_row['id'], __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -326,7 +320,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 							}
 
 							//Always create a CHECK type source account so employees without bank accounts can use it below.
-							$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+							$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */
 							$rsaf->setType( 2000 ); //checking
 							$rsaf->setStatus( 10 ); //default to active
 							$rsaf->setLegalEntity( $legal_entity_id );
@@ -368,11 +362,9 @@ class InstallSchema_1093A extends InstallSchema_Base {
 						if ( $user_bank_account_rs->RecordCount() > 0 ) {
 							foreach ( $user_bank_account_rs as $bank_row ) {
 
-								/** @var UserListFactory $ulf */
-								$ulf = TTnew( 'UserListFactory' );
+								$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 								$ulf->getById( $bank_row['user_id'] );
 								if ( $ulf->getRecordCount() === 1 ) {
-									/** @var UserFactory $user_obj */
 									$user_obj = $ulf->getCurrent();
 
 									if ( isset($currency_to_eft_source_account_map[$user_obj->getCurrencyObject()->getId()])) {
@@ -385,8 +377,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 											}
 										}
 
-										/** @var RemittanceDestinationAccountFactory $rdaf */
-										$rdaf = TTnew( 'RemittanceDestinationAccountFactory' );
+										$rdaf = TTnew( 'RemittanceDestinationAccountFactory' ); /** @var RemittanceDestinationAccountFactory $rdaf */
 										$rdaf->setRemittanceSourceAccount( $currency_to_eft_source_account_map[$user_obj->getCurrencyObject()->getId()] );
 										$rdaf->setUser( $bank_row['user_id'] ); // DO NOT CAST! This is before we switch to UUID.
 										$rdaf->setStatus( 10 ); //default to enabled.
@@ -428,7 +419,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 					$rs = $this->getDatabaseConnection()->Execute( $sql );
 					foreach ( $rs as $user_row ) {
 						if ( isset( $currency_to_check_source_account_map[$user_row['currency_id']] ) ) {
-							$rdaf = TTnew( 'RemittanceDestinationAccountFactory' );
+							$rdaf = TTnew( 'RemittanceDestinationAccountFactory' ); /** @var RemittanceDestinationAccountFactory $rdaf */
 							$rdaf->setRemittanceSourceAccount( $currency_to_check_source_account_map[$user_row['currency_id']] );
 							$rdaf->setUser( $user_row['id'] ); // DO NOT CAST! This is before we switch to UUID.
 							$rdaf->setStatus( 10 ); //default to enabled.
@@ -456,7 +447,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 
 
 					//Pick a oldest user from the highest permission level to use as the payroll contact, as we really have no guaranteed way to know who to use otherwise.
-					$pclf = TTnew( 'PermissionControlListFactory' );
+					$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 					$pclf->getByCompanyId( $cf->getId(), NULL, NULL, NULL, array('level' => 'desc') ); //Force order to prevent references to columns that haven't been created yet.
 					if ( $pclf->getRecordCount() > 0 ) {
 						Debug::Text( '  Found Permission Control records: ' . $pclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -477,16 +468,16 @@ class InstallSchema_1093A extends InstallSchema_Base {
 					unset( $pclf, $pc_obj, $permission_control_user_ids );
 
 					//Create default remittance agencies.
-					$sp = TTNew( 'SetupPresets' );
+					$sp = TTNew( 'SetupPresets' ); /** @var SetupPresets $sp */
 					$sp->setCompany( $cf->getID() );
 					$sp->setUser( $admin_user_id );
 
 					//Go through all CompanyDeductions and match them to a remittance agency. Then use that list of extract out country/province pairs for SetupPresets.
 					//  Do it this way instead of using country/province fields from the CompanyDeductions, as things like UI don't them specified, and for states without income tax, they won't be created from that either.
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyId( $cf->getId(), NULL, array('calculation_id' => 'desc', 'country' => 'asc', 'province' => 'asc' ) );
 					if ( $cdlf->getRecordCount() ) {
-						$ra_obj = TTnew('PayrollRemittanceAgencyFactory');
+						$ra_obj = TTnew('PayrollRemittanceAgencyFactory'); /** @var PayrollRemittanceAgencyFactory $ra_obj */
 						$processed_agency_countries = array();
 						$processed_agency_provinces = array();
 						foreach ( $cdlf as $cd_obj ) {
@@ -520,7 +511,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 
 					//Assign Tax/Deductions to above created legal entity and remittance agencies.
 					//  This should happen after the remittance source accounts are created, so they can be used by the agencies.
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyId( $cf->getId() );
 					if ( $cdlf->getRecordCount() ) {
 						foreach ( $cdlf as $cd_obj ) {
@@ -539,7 +530,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 					//Loop over remittance agencies and add the Business Number from the Company record into the agency record for just federal agencies.
 					if ( $cf->getBusinessNumber() != '' ) {
 						Debug::Text( '  Company business number is specified, try copying it to remittance agencies...', __FILE__, __LINE__, __METHOD__, 10 );
-						$pralf = TTNew( 'PayrollRemittanceAgencyListFactory' );
+						$pralf = TTNew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $pralf */
 						$pralf->getByCompanyId( $cf->getId() );
 						if ( $pralf->getRecordCount() > 0 ) {
 							foreach ( $pralf as $pra_obj ) {
@@ -571,7 +562,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 			}
 		}
 
-		$cjf = TTnew( 'CronJobFactory' );
+		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
 		$cjf->setName('RemittanceAgencyEvent');
 		$cjf->setMinute(0); //Random time once a day for load balancing
 		$cjf->setHour('*'); //Random time once a day for load balancing

@@ -66,7 +66,7 @@ class APIUserGenericStatus extends APIFactory {
 
 			$batch_id = $data['filter_data']['batch_id'];
 
-			$ugslf = TTnew( 'UserGenericStatusListFactory' );
+			$ugslf = TTnew( 'UserGenericStatusListFactory' ); /** @var UserGenericStatusListFactory $ugslf */
 			$ugslf->getByUserIdAndBatchId( $user_id, $batch_id, $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 
 			Debug::Text('Record Count: '. $ugslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -131,7 +131,7 @@ class APIUserGenericStatus extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserGenericStatusListFactory' );
+				$lf = TTnew( 'UserGenericStatusListFactory' ); /** @var UserGenericStatusListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -198,7 +198,7 @@ class APIUserGenericStatus extends APIFactory {
 	function getUserGenericStatusCountArray( $user_id, $batch_id) {
 		$user_id = $this->getCurrentUserObject()->getId();
 		if ( $batch_id != '' ) {
-			$ugslf = TTnew( 'UserGenericStatusListFactory' );
+			$ugslf = TTnew( 'UserGenericStatusListFactory' ); /** @var UserGenericStatusListFactory $ugslf */
 			$status_count_arr = $ugslf->getStatusCountArrayByUserIdAndBatchId( $user_id, $batch_id );
 
 			return $this->returnHandler( $status_count_arr );

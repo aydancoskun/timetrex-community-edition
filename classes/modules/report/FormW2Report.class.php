@@ -136,7 +136,7 @@ class FormW2Report extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'FormW2Report', 'custom_column' );
@@ -147,13 +147,13 @@ class FormW2Report extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'FormW2Report', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'FormW2Report', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -162,7 +162,7 @@ class FormW2Report extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'FormW2Report', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -608,9 +608,8 @@ class FormW2Report extends Report {
 		return $retarr;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -626,7 +625,7 @@ class FormW2Report extends Report {
 		//Figure out state/locality wages/taxes.
 		//  Make sure state tax/deduction records come before district so they can be matched.
 		//
-		$cdlf = TTnew( 'CompanyDeductionListFactory' );
+		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10, 20), 10, NULL, array( 'calculation_id' => 'asc', 'calculation_order' => 'asc' ) );
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach( $cdlf as $cd_obj ) {
@@ -635,7 +634,7 @@ class FormW2Report extends Report {
 					$tax_deductions[$cd_obj->getId()] = $cd_obj;
 
 					//Need to determine start/end dates for each CompanyDeduction/User pair, so we can break down total wages earned in the date ranges.
-					$udlf = TTnew( 'UserDeductionListFactory' );
+					$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 					$udlf->getByCompanyIdAndCompanyDeductionId( $cd_obj->getCompany(), $cd_obj->getId() );
 					if ( $udlf->getRecordCount() > 0 ) {
 						foreach( $udlf as $ud_obj ) {
@@ -654,7 +653,7 @@ class FormW2Report extends Report {
 
 		//Get users assigned to Box 13b (Retirement Plan) tax/deductions.
 		if ( isset($form_data['l13b']['company_deduction']) ) {
-			$udlf = TTnew( 'UserDeductionListFactory' );
+			$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 			$udlf->getByCompanyIdAndCompanyDeductionId( $this->getUserObject()->getCompany(), $form_data['l13b']['company_deduction'] );
 			if ($udlf->getRecordCount() > 0 ) {
 				foreach( $udlf as $ud_obj ) {
@@ -668,7 +667,7 @@ class FormW2Report extends Report {
 		unset( $udlf, $ud_obj);
 
 
-		$pself = TTnew( 'PayStubEntryListFactory' );
+		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		if ( $pself->getRecordCount() > 0 ) {
@@ -837,7 +836,7 @@ class FormW2Report extends Report {
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Employee Data...' ) );
@@ -850,8 +849,7 @@ class FormW2Report extends Report {
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get legal entity data for joining.
-		/** @var LegalEntityListFactory $lelf */
-		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Legal Entity Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
@@ -870,14 +868,12 @@ class FormW2Report extends Report {
 		//Get remittance agency for joining.
 		$filter_data['type_id'] = array(10, 20, 30); //federal, state and local/city.
 		$filter_data['country'] = array('US'); //US federal
-		/** @var PayrollRemittanceAgencyListFactory $ralf */
-		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
 		if ( $ralf->getRecordCount() > 0 ) {
 			foreach ( $ralf as $key => $ra_obj ) {
-				/** @var PayrollRemittanceAgencyFactory $ra_obj */
 				if ( $ra_obj->parseAgencyID( NULL, 'id') == 10 ) {
 					if ( in_array( $ra_obj->getType(), array(10, 20) ) ) {
 						$province_id = ( $ra_obj->getType() == 10 ) ? '00' : $ra_obj->getProvince();
@@ -1000,7 +996,6 @@ class FormW2Report extends Report {
 				$x = 0; //Progress bar only.
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($user_rows), NULL, TTi18n::getText('Generating Forms...') );
 
-				/** @var LegalEntityFactory $le_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][$legal_entity_id];
 
 				if ( is_object( $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ]['00'] ]) ) {
@@ -1099,7 +1094,7 @@ class FormW2Report extends Report {
 							continue;
 						}
 
-						$ulf = TTnew( 'UserListFactory' );
+						$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 						$ulf->getById( TTUUID::castUUID( $user_id ) );
 						if ( $ulf->getRecordCount() == 1 ) {
 							$user_obj = $ulf->getCurrent();
@@ -1388,9 +1383,8 @@ class FormW2Report extends Report {
 		return FALSE;
 	}
 
-	//Short circuit this function, as no postprocessing is required for exporting the data.
-
 	/**
+	 * Short circuit this function, as no postprocessing is required for exporting the data.
 	 * @param null $format
 	 * @return bool
 	 */

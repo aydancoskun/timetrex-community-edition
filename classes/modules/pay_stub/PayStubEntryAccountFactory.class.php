@@ -73,8 +73,15 @@ class PayStubEntryAccountFactory extends Factory {
 				break;
 			case 'accrual_type':
 				$retval = array(
-										10 => TTi18n::gettext('Earning Subtracts, Deduction Adds'),
-										20 => TTi18n::gettext('Earning Adds, Deduction Subtracts'),
+										//May need to add 6 more options here for every permutation of Add/Subtract across just ER Ded and Misc. Since Earning & ER Deduction should always be opposite.
+										10 => TTi18n::gettext('Earning/Misc Subtracts, EE/ER Deduction Adds'),
+										//12 => TTi18n::gettext('Earning/ER Deduction Subtracts, EE Deduction/Misc Adds'),
+										//14 => TTi18n::gettext('Earning/ER Deduction/Misc Subtracts, EE Deduction Adds'),
+										//16 => TTi18n::gettext('Earning Subtracts, EE & ER Deduction/Misc Adds'),
+										20 => TTi18n::gettext('Earning/Misc Adds, EE/ER Deduction Subtracts'),
+										//22 => TTi18n::gettext('Earning/ER Deduction Adds, EE Deduction/Misc Subtracts'),
+										//24 => TTi18n::gettext('Earning/ER Deduction/Misc Adds, EE Subtracts'),
+										//26 => TTi18n::gettext('Earning Adds, EE & ER Deduction/Misc Subtracts'),
 									);
 				break;
 			case 'type_calculation_order':
@@ -195,9 +202,9 @@ class PayStubEntryAccountFactory extends Factory {
 		return $this->setGenericDataValue( 'status_id', $value );
 	}
 
-	//Returns the order in which accounts should be calculated
-	//given a circular dependency scenario
 	/**
+	 * Returns the order in which accounts should be calculated
+	 * given a circular dependency scenario
 	 * @return bool
 	 */
 	function getTypeCalculationOrder() {
@@ -253,7 +260,7 @@ class PayStubEntryAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function getCurrentType( $id ) {
-		$psealf = TTNew('PayStubEntryAccountListFactory');
+		$psealf = TTNew('PayStubEntryAccountListFactory'); /** @var PayStubEntryAccountListFactory $psealf */
 		$psealf->getByIdAndCompanyId( $id, $this->getCompany() );
 		if ( $psealf->getRecordCount() == 1 ) {
 			$retval = $psealf->getCurrent()->getType();
@@ -426,7 +433,7 @@ class PayStubEntryAccountFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -505,12 +512,12 @@ class PayStubEntryAccountFactory extends Factory {
 		}
 		// Accrual Account
 		if ( $this->getAccrual() !== FALSE AND $this->getAccrual() != TTUUID::getZeroID() ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$psealf->getByID($this->getAccrual());
 			if ( $psealf->getRecordCount() > 0 ) {
 				if ( $psealf->getCurrent()->getType() != 50 ) {
 					//Reset Result set so an error occurs.
-					$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+					$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 				}
 			}
 			$this->Validator->isResultSetWithRows(	'accrual_pay_stub_entry_account_id',
@@ -547,7 +554,7 @@ class PayStubEntryAccountFactory extends Factory {
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
 			// The isInUse() check in preSave() already looks for pay stubs, pay stub amendments, and if those exist it should never get here.
-			$pclf = TTnew( 'PayCodeListFactory' );
+			$pclf = TTnew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $pclf */
 			$pclf->getByCompanyIdAndPayStubEntryAccountID( $this->getCompany(), $this->getId(), 1 );
 			if ( $pclf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',
@@ -555,7 +562,7 @@ class PayStubEntryAccountFactory extends Factory {
 										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by pay codes' ) );
 			}
 
-			$cdlf = TTnew( 'CompanyDeductionListFactory' );
+			$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 			$cdlf->getByCompanyIdAndPayStubEntryAccountId( $this->getCompany(), $this->getId(), 1 );
 			if ( $cdlf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',
@@ -566,13 +573,13 @@ class PayStubEntryAccountFactory extends Factory {
 
 		//Make sure PS order is correct, in that types can't be separated by total or accrual accounts.
 		if ( $this->getDeleted() == FALSE AND $this->getOrder() != '' AND $this->Validator->isError('ps_order') == FALSE ) {
-			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 			$pseallf->getByCompanyId( $this->getCompany() );
 			if ( $pseallf->getRecordCount() > 0 ) {
 				$pseal_obj = $pseallf->getCurrent();
 
 				$psea_map = array();
-				$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+				$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 				$psealf->getByCompanyIdAndTypeId( $this->getCompany(), 40 );
 				if ( $psealf->getRecordCount() > 0 ) {
 					foreach ( $psealf as $psea_obj ) {
@@ -628,7 +635,7 @@ class PayStubEntryAccountFactory extends Factory {
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $src_ids UUID
+	 * @param string[] $src_ids UUID
 	 * @param string $dst_id UUID
 	 * @param int $effective_date EPOCH
 	 * @return bool
@@ -645,13 +652,13 @@ class PayStubEntryAccountFactory extends Factory {
 
 		$current_epoch = time();
 
-		$pself = TTNew('PayStubEntryListFactory');
+		$pself = TTNew('PayStubEntryListFactory'); /** @var PayStubEntryListFactory $pself */
 
 		//Loop over just ACTIVE employees.
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 
 		//Get names of all Pay Stub Accounts
-		$psealf = TTNew('PayStubEntryAccountListFactory');
+		$psealf = TTNew('PayStubEntryAccountListFactory'); /** @var PayStubEntryAccountListFactory $psealf */
 		$psealf->getByCompanyId( $company_id );
 		$pay_stub_account_arr = $psealf->getArrayByListFactory( $psealf, FALSE );
 
@@ -680,7 +687,7 @@ class PayStubEntryAccountFactory extends Factory {
 						Debug::Text('Description: From: '. $from_description.' To: '. $to_description, __FILE__, __LINE__, __METHOD__, 10);
 
 						//Create Pay Stub Amendments to reduce current values to 0.
-						$psaf = TTNew('PayStubAmendmentFactory');
+						$psaf = TTNew('PayStubAmendmentFactory'); /** @var PayStubAmendmentFactory $psaf */
 						$psaf->setStatus( 50 );
 						$psaf->setType( 10 );
 						$psaf->setUser( $u_obj->getID() );
@@ -693,7 +700,7 @@ class PayStubEntryAccountFactory extends Factory {
 						}
 
 						//Create Pay Stub Amendments to copy amounts to new dst_id
-						$psaf = TTNew('PayStubAmendmentFactory');
+						$psaf = TTNew('PayStubAmendmentFactory'); /** @var PayStubAmendmentFactory $psaf */
 						$psaf->setStatus( 50 );
 						$psaf->setType( 10 );
 						$psaf->setUser( $u_obj->getID() );

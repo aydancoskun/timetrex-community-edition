@@ -251,6 +251,8 @@ class EFT {
 		if ( isset($this->header_data['business_number']) ) {
 			return $this->header_data['business_number'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -274,6 +276,8 @@ class EFT {
 		if ( isset($this->header_data['originator_id']) ) {
 			return $this->header_data['originator_id'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -298,6 +302,8 @@ class EFT {
 		if ( isset($this->header_data['originator_short_name']) ) {
 			return $this->header_data['originator_short_name'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -322,6 +328,8 @@ class EFT {
 		if ( isset($this->header_data['file_creation_number']) ) {
 			return $this->header_data['file_creation_number'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -345,6 +353,8 @@ class EFT {
 		if ( isset($this->header_data['initial_entry_number']) ) {
 			return $this->header_data['initial_entry_number'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -368,6 +378,8 @@ class EFT {
 		if ( isset($this->header_data['file_creation_date']) ) {
 			return $this->header_data['file_creation_date'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -391,6 +403,8 @@ class EFT {
 		if ( isset($this->header_data['data_center']) ) {
 			return $this->header_data['data_center'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -414,6 +428,8 @@ class EFT {
 		if ( isset($this->header_data['data_center_name']) ) {
 			return $this->header_data['data_center_name'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -438,6 +454,8 @@ class EFT {
 		if ( isset($this->header_data['currency_iso_code']) ) {
 			return $this->header_data['currency_iso_code'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -455,10 +473,8 @@ class EFT {
 		return FALSE;
 	}
 
-	//
-	//See similar function in EFT_Record class.
-	//
 	/**
+	 * See similar function in EFT_Record class.
 	 * @return bool
 	 */
 	function getBatchBusinessNumber() {
@@ -486,9 +502,8 @@ class EFT {
 		return FALSE;
 	}
 
-	//See similar function in EFT_Record class.
-
 	/**
+	 * See similar function in EFT_Record class.
 	 * @return string
 	 */
 	function getBatchServiceCode() {
@@ -539,11 +554,9 @@ class EFT {
 
 		return FALSE;
 	}
-	//
-	//See similar function in EFT_Record class.
-	//
 
 	/**
+	 * See similar function in EFT_Record class.
 	 * @param $key
 	 * @return bool
 	 */
@@ -685,6 +698,7 @@ class EFT {
 	/**
 	 * @param $line
 	 * @param $length
+	 * @param bool $include_line_ending
 	 * @return string
 	 */
 	function padLine( $line, $length, $include_line_ending = TRUE ) {
@@ -924,10 +938,8 @@ class EFT_record extends EFT {
 		return FALSE;
 	}
 
-	//
-	//ACH Only, helps set the batches based on different criteria.
-	//
 	/**
+	 * ACH Only, helps set the batches based on different criteria.
 	 * @return bool
 	 */
 	function getBusinessNumber() {
@@ -1010,12 +1022,9 @@ class EFT_record extends EFT {
 	function getBatchKey() {
 		return trim( $this->getBusinessNumber().$this->getServiceCode().$this->getEntryDescription().$this->getDueDate() );
 	}
-	//
-	//ACH Only, helps set the batches based on different criteria.
-	//
-
 
 	/**
+	 * ACH Only, helps set the batches based on different criteria.
 	 * @return bool
 	 */
 	function getInstitution() {

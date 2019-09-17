@@ -141,29 +141,32 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 
 	buildCurrentStepData: function() {
 		var $this = this;
+
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
-		var api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
-		switch ( this.current_step ) {
-			case 2:
-				if ( current_step_data.pay_period_id ) {
-					var pay_period_ids = current_step_data.pay_period_id;
-					pay_period_ids = Global.array_unique( pay_period_ids );
 
-					if ( current_step_data ) {
-						current_step_ui.pay_period_id.setValue( pay_period_ids );
+		if ( current_step_data && current_step_ui ) {
+			switch ( this.current_step ) {
+				case 2:
+					if ( current_step_data.pay_period_id ) {
+						var pay_period_ids = current_step_data.pay_period_id;
+						pay_period_ids = Global.array_unique( pay_period_ids );
+
+						if ( current_step_data ) {
+							current_step_ui.pay_period_id.setValue( pay_period_ids );
+						}
+						$this.setPayRun( pay_period_ids );
 					}
-					$this.setPayRun( pay_period_ids );
-				}
-				this.onPayPeriodChange();
-				break;
-			case 3:
-				if ( current_step_data.user_id ) {
-					var user_ids = current_step_data.user_id;
-					user_ids = Global.array_unique( user_ids );
-					current_step_ui.user_id.setValue( user_ids );
-				}
-				break;
+					this.onPayPeriodChange();
+					break;
+				case 3:
+					if ( current_step_data.user_id ) {
+						var user_ids = current_step_data.user_id;
+						user_ids = Global.array_unique( user_ids );
+						current_step_ui.user_id.setValue( user_ids );
+					}
+					break;
+			}
 		}
 	},
 

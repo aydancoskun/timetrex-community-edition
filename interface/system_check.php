@@ -51,7 +51,7 @@ if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other
 
 //Confirm database connection is up and maintenance jobs have run recently...
 if ( PRODUCTION == TRUE ) {
-	$cjlf = TTnew( 'CronJobListFactory' );
+	$cjlf = TTnew( 'CronJobListFactory' ); /** @var CronJobListFactory $cjlf */
 	$cjlf->getMostRecentlyRun();
 	if ( $cjlf->getRecordCount() > 0 ) {
 		$last_run_date_diff = time()-$cjlf->getCurrent()->getLastRunDate();
@@ -65,7 +65,7 @@ if ( PRODUCTION == TRUE ) {
 //If caching is enabled, make sure cache directory exists and is writeable.
 if ( isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] == TRUE ) {
 	if ( isset($config_vars['cache']['redis_host']) AND $config_vars['cache']['redis_host'] != '' ) {
-		$tmp_f = TTnew('SystemSettingFactory');
+		$tmp_f = TTnew('SystemSettingFactory'); /** @var SystemSettingFactory $tmp_f */
 		$random_value = sha1( time() );
 		$tmp_f->saveCache( $random_value, 'system_check' );
 		$result = $tmp_f->getCache( 'system_check' );

@@ -165,10 +165,6 @@ class APIInstall extends APIFactory {
 					'check_php_cli_binary' => $install_obj->checkPHPCLIBinary(),
 					'php_cli' => $install_obj->getPHPCLI()
 				);
-				$retval['cli_requirements'] = array(
-					'check_php_cli_requirements' => $install_obj->checkPHPCLIRequirements(),
-					'php_cli_requirements_command' => $install_obj->getPHPCLIRequirementsCommand()
-				);
 
 				$retval['config_file'] = $install_obj->checkWritableConfigFile();
 
@@ -208,9 +204,18 @@ class APIInstall extends APIFactory {
 				$retval['file_permission'] = $install_obj->checkFilePermissions();
 				$retval['file_checksums'] = $install_obj->checkFileChecksums();
 
-				$extended_error_messages = $install_obj->getExtendedErrorMessage();
+				$retval['cli_requirements']['php_cli_requirements_command'] = $install_obj->getPHPCLIRequirementsCommand();
 
-				if ( is_array($extended_error_messages) AND count( $extended_error_messages ) > 0 ) {
+				//If there are failed requirements, don't bother checking CLI requirements, as those will almost certainly fail as well since it checks the same things.
+				//This prevents the CLI requirements from always appearing as failed when something else unrelated (ie: Not Writable Log Dir) fails.
+				if ( $install_obj->checkAllRequirements( FALSE, array('php_cli_requirements') ) == 0 ) {
+					$retval['cli_requirements']['check_php_cli_requirements'] = $install_obj->checkPHPCLIRequirements();
+					$extended_error_messages = $install_obj->getExtendedErrorMessage();
+				} else {
+					$retval['cli_requirements']['check_php_cli_requirements'] = 0;
+				}
+
+				if ( isset($extended_error_messages) AND is_array($extended_error_messages) AND count( $extended_error_messages ) > 0 ) {
 					$retval['extended_error_messages'] = $extended_error_messages;
 				} else {
 					$retval['extended_error_messages'] = array();
@@ -467,7 +472,7 @@ class APIInstall extends APIFactory {
 			if ( $install_obj->checkDatabaseExists( $config_vars['database']['database_name'] ) == TRUE ) {
 				if ( $install_obj->checkTableExists( 'company' ) == TRUE ) {
 					//Table could be created, but check to make sure a company actually exists too.
-					$clf = TTnew( 'CompanyListFactory' );
+					$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 					$clf->getAll();
 					if ( $clf->getRecordCount() >= 1 ) {
 						$install_obj->setIsUpgrade( TRUE );
@@ -523,7 +528,7 @@ class APIInstall extends APIFactory {
 			if ( $install_obj->checkDatabaseExists( $config_vars['database']['database_name'] ) == TRUE ) {
 				if ( $install_obj->checkTableExists( 'company' ) == TRUE ) {
 					//Table could be created, but check to make sure a company actually exists too.
-					$clf = TTnew( 'CompanyListFactory' );
+					$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 					$clf->getAll();
 					if ( $clf->getRecordCount() >= 1 ) {
 						$install_obj->setIsUpgrade( TRUE );
@@ -718,7 +723,7 @@ class APIInstall extends APIFactory {
 				'cache_dir' => $config_vars['cache']['dir'],
 			);
 
-			$upf = TTNew('UserPreferenceFactory');
+			$upf = TTNew('UserPreferenceFactory'); /** @var UserPreferenceFactory $upf */
 
 			$retval['time_zone'] = TTDate::detectSystemTimeZone(); //This is only used during initial install and not upgrades.
 			$retval['time_zone_options'] = Misc::trimSortPrefix( $upf->getOptions('time_zone') );
@@ -739,8 +744,8 @@ class APIInstall extends APIFactory {
 	function getCompany( $company_id = NULL ) {
 		$install_obj = new Install();
 		if ( $install_obj->isInstallMode() == TRUE  ) {
-			$cf = TTnew( 'CompanyFactory' );
-			$clf = TTnew( 'CompanyListFactory' );
+			$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 
 			$company_data = array();
 			if ( isset( $company_id ) AND $company_id != '' ) {
@@ -792,8 +797,8 @@ class APIInstall extends APIFactory {
 
 		$install_obj = new Install();
 		if ( $install_obj->isInstallMode() == TRUE ) {
-			$cf = TTnew( 'CompanyFactory' );
-			$clf = TTnew( 'CompanyListFactory' );
+			$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			if ( isset( $company_data['company_id'] ) AND $company_data['company_id'] != ''  ) {
 				$clf->getById( $company_data['company_id'] );
 				if ( $clf->getRecordCount() == 1 ) {
@@ -827,7 +832,7 @@ class APIInstall extends APIFactory {
 				$cf->Save( FALSE );
 				$company_id = $cf->getId();
 				unset( $cf );
-				$install_obj->writeConfigFile( array( 'other' => array( 'primary_company_id' => $company_id ) ) );
+				$install_obj->writeConfigFile( array( 'other' => array( 'primary_company_id' => (string)$company_id ) ) );
 
 				return $this->returnHandler( $company_id );
 
@@ -857,7 +862,7 @@ class APIInstall extends APIFactory {
 			}
 
 			if ( isset($user_id) AND $user_id != '' ) {
-				$ulf = TTnew('UserListFactory');
+				$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 				$ulf->getById( $user_id );
 				if ( $ulf->getRecordCount() == 1 ) {
 					$uf = $ulf->getCurrent();
@@ -887,8 +892,8 @@ class APIInstall extends APIFactory {
 	function setUser( $user_data, $external_installer = 0 ) {
 		$install_obj = new Install();
 		if ( $install_obj->isInstallMode() == TRUE ) {
-			$uf = TTnew( 'UserFactory' );
-			$ulf = TTnew( 'UserListFactory' );
+			$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			if ( isset( $user_data['user_id'] ) AND $user_data['user_id'] != ''  ) {
 				$ulf->getByIdAndCompanyId( $user_data['user_id'], $user_data['company_id'] );
 				if ( $ulf->getRecordCount() == 1 ) {
@@ -899,7 +904,7 @@ class APIInstall extends APIFactory {
 			}
 
 			//Grab first legal entity associated with this company.
-			$lef = TTnew('LegalEntityListFactory');
+			$lef = TTnew('LegalEntityListFactory'); /** @var LegalEntityListFactory $lef */
 			$lef->getByCompanyId( $user_data['company_id'] );
 			if ( $lef->getRecordCount() > 0 ) {
 				$le_obj = $lef->getCurrent();
@@ -940,7 +945,7 @@ class APIInstall extends APIFactory {
 			}
 
 			//Get Permission Control with highest level, assume its for Administrators and use it.
-			$pclf = TTnew( 'PermissionControlListFactory' );
+			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 			$pclf->getByCompanyId( $user_data['company_id'], NULL, NULL, NULL, array('level' => 'desc' ) );
 			if ( $pclf->getRecordCount() > 0 ) {
 				$pc_obj = $pclf->getCurrent();
@@ -954,7 +959,7 @@ class APIInstall extends APIFactory {
 				$user_id = $uf->getId();
 				$uf->Save( TRUE, TRUE );
 				//Assign this user as admin/support/billing contact for now.
-				$clf = TTnew( 'CompanyListFactory' );
+				$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 				$clf->getById( $user_data['company_id'] );
 				if ( $clf->getRecordCount() == 1 ) {
 					$c_obj = $clf->getCurrent();
@@ -1007,7 +1012,7 @@ class APIInstall extends APIFactory {
 
 		Debug::Arr($country, 'bCountry: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$cf = TTnew( 'CompanyFactory' );
+		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 
 		$province_arr = $cf->getOptions('province');
 

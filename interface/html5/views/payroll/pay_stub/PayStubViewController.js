@@ -1176,10 +1176,10 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 
-				if ( !isNaN( parseFloat( data['pay_stub_amendment_id'] ) ) && parseFloat( data['pay_stub_amendment_id'] ) > 0 ) {
+				if ( TTUUID.isUUID( data['pay_stub_amendment_id'] ) && data['pay_stub_amendment_id'] != TTUUID.zero_id ) {
 					pay_stub_amendment_id = data['pay_stub_amendment_id'];
 				}
-				if ( !isNaN( parseFloat( data['user_expense_id'] ) ) && parseFloat( data['user_expense_id'] ) > 0 ) {
+				if ( TTUUID.isUUID( data['user_expense_id'] ) && data['user_expense_id'] != TTUUID.zero_id ) {
 					user_expense_id = data['user_expense_id'];
 				}
 
@@ -1318,19 +1318,19 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_ytd_amount_text.attr( 'user_expense_id', user_expense_id );
 //				}
 
-				if ( parseInt( data['ytd_amount'] ) > 0 ) {
+				if ( parseFloat( data['ytd_amount'] ) != 0 ) {
 
 				} else if ( pay_stub_status_id == 40 || pay_stub_status_id == 100 || data.total_row === true ) {
 					form_item_ytd_amount_text.text( '-' );
 				}
 
-				if ( parseInt( data.rate ) > 0 && !$this.parent_controller.copied_record_id ) {
+				if ( data.rate && parseFloat( data.rate ) != 0 && !$this.parent_controller.copied_record_id ) {
 					form_item_amount_input.setReadOnly( true );
 				} else if ( pay_stub_status_id == 40 || pay_stub_status_id == 100 || data.total_row === true ) {
 					form_item_rate_text.text( '-' );
 				}
 
-				if ( parseInt( data.units ) > 0 && !$this.parent_controller.copied_record_id ) {
+				if ( data.units && parseFloat( data.units ) != 0 && !$this.parent_controller.copied_record_id ) {
 					form_item_amount_input.setReadOnly( true );
 				} else if ( pay_stub_status_id == 40 || pay_stub_status_id == 100 || data.total_row === true ) {
 					form_item_units_text.text( '-' );
@@ -2686,14 +2686,19 @@ PayStubViewController = BaseViewController.extend( {
 
 			if ( TTUUID.isUUID( remove_id ) ) {
 				this.delete_transaction_ids.push( remove_id );
+			} else {
+				// only remove the row if it was a new row, existing rows (in db) must only be hidden, not removed.
+				this.rows_widgets_array.splice( index, 1 );
 			}
 
+			// hide the row from user view, so we can still query the data during the save operation (api still needs it to know what to delete).
 			row.hide();
+
 			//count transaction rows.
 			var trows = $( '.paystub_transaction_row:visible' ).length;
 
-			this.rows_widgets_array.splice( index, 1 );
 			if ( trows == 0 ) {
+				// if all rows removed, make sure we add a blank row in again.
 				this.insideTransactionEditorAddRow( {}, index );
 			}
 
@@ -3268,6 +3273,10 @@ PayStubViewController = BaseViewController.extend( {
 			case ContextMenuIconName.view:
 				post_data = { 0: args, 1: false, 2: 'pdf', 3: true };
 				this.doFormIFrameCall( post_data );
+				$().TFeedback({
+					source: 'View', // viewId GovernmentDocument will be prepended in TFeedback functions.
+					delay: 5000
+				});
 				break;
 			case ContextMenuIconName.employee_pay_stubs:
 				post_data = { 0: args, 1: false, 2: 'pdf', 3: true };

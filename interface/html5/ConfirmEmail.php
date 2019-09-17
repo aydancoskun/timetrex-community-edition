@@ -48,7 +48,7 @@ $action = Misc::findSubmitButton();
 Debug::Text('Action: '. $action, __FILE__, __LINE__, __METHOD__, 10);
 switch ($action) {
 	case 'confirm_email':
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getByEmailIsValidKey( $key );
 		if ( $ulf->getRecordCount() == 1 ) {
 			Debug::Text('FOUND Email Validation key! Email: '. $email, __FILE__, __LINE__, __METHOD__, 10);

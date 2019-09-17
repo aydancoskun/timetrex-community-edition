@@ -317,7 +317,7 @@ class UserReportDataFactory extends Factory {
 			//
 
 			// Company
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows(			'company',
 															  $clf->getByID($this->getCompany()),
 															  TTi18n::gettext('Invalid Company')
@@ -325,7 +325,7 @@ class UserReportDataFactory extends Factory {
 
 			// User must always be specified, don't allow a zero UUID either.
 			if ( $this->getUser() !== FALSE ) {
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$this->Validator->isResultSetWithRows( 'user',
 													   $ulf->getByID( $this->getUser() ),
 													   TTi18n::gettext( 'Invalid Employee' )
@@ -379,7 +379,7 @@ class UserReportDataFactory extends Factory {
 	function preSave() {
 		if ( $this->getDefault() == TRUE ) {
 			//Remove default flag from all other entries.
-			$urdlf = TTnew( 'UserReportDataListFactory' );
+			$urdlf = TTnew( 'UserReportDataListFactory' ); /** @var UserReportDataListFactory $urdlf */
 			if ( $this->getUser() == TTUUID::getZeroID() OR $this->getUser() == '' ) {
 				$urdlf->getByCompanyIdAndScriptAndDefault( $this->getCompany(), $this->getScript(), TRUE );
 			} else {
@@ -409,9 +409,8 @@ class UserReportDataFactory extends Factory {
 		return str_replace('//', '/', $script_name);
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
 	 * @param $data
 	 * @return bool
 	 */

@@ -66,7 +66,7 @@ class ImportUser extends Import {
 			case 'columns':
 				global $current_company;
 
-				$uf = TTNew('UserFactory');
+				$uf = TTNew('UserFactory'); /** @var UserFactory $uf */
 				$retval = $uf->getOptions('columns');
 
 				$retval['-1025-password'] = TTi18n::getText('Password');
@@ -85,7 +85,7 @@ class ImportUser extends Import {
 
 				if ( is_object( $current_company )	) {
 					//Get custom fields for import data.
-					$oflf = TTnew( 'OtherFieldListFactory' );
+					$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 					$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $current_company->getID(), array(10), array( 10 => '' ) );
 					if ( is_array($other_field_names) ) {
 						$retval = array_merge( (array)$retval, (array)$other_field_names );
@@ -129,7 +129,7 @@ class ImportUser extends Import {
 								);
 				break;
 			case 'parse_hint':
-				$upf = TTnew('UserPreferenceFactory');
+				$upf = TTnew('UserPreferenceFactory'); /** @var UserPreferenceFactory $upf */
 
 				$retval = array(
 								'default_branch' => array(
@@ -221,7 +221,7 @@ class ImportUser extends Import {
 			$default_data = $this->getObject()->stripReturnHandler( $this->getObject()->getUserDefaultData() );
 			//Debug::Arr($default_data, 'Default Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			$uf = TTnew('UserFactory');
+			$uf = TTnew('UserFactory'); /** @var UserFactory $uf */
 
 			if ( !is_array($default_data) ) {
 				$default_data['status_id'] = 10; //Active
@@ -288,6 +288,7 @@ class ImportUser extends Import {
 	//
 	// Generic parser functions.
 	//
+
 	/**
 	 * @param $input
 	 * @param null $default_value
@@ -323,7 +324,7 @@ class ImportUser extends Import {
 	 */
 	function getPermissionControlOptions() {
 		//Get job titles
-		$pglf = TTNew('PermissionControlListFactory');
+		$pglf = TTNew('PermissionControlListFactory'); /** @var PermissionControlListFactory $pglf */
 		$pglf->getByCompanyId( $this->company_id );
 		$this->permission_control_options = (array)$pglf->getArrayByListFactory( $pglf, FALSE, FALSE ); //Include include in the name level, as it causes problems with exact matching.
 		unset($pglf);
@@ -359,9 +360,9 @@ class ImportUser extends Import {
 	 */
 	function getPolicyGroupOptions() {
 		//Get job titles
-		$pglf = TTNew('PolicyGroupListFactory');
+		$pglf = TTNew('PolicyGroupListFactory'); /** @var PolicyGroupListFactory $pglf */
 		$pglf->getByCompanyId( $this->company_id );
-		$this->policy_group_options = (array)$pglf->getArrayByListFactory( $pglf, FALSE, TRUE );
+		$this->policy_group_options = (array)$pglf->getArrayByListFactory( $pglf, FALSE );
 		unset($pglf);
 
 		return TRUE;
@@ -395,9 +396,9 @@ class ImportUser extends Import {
 	 */
 	function getPayPeriodScheduleOptions() {
 		//Get job titles
-		$pglf = TTNew('PayPeriodScheduleListFactory');
+		$pglf = TTNew('PayPeriodScheduleListFactory'); /** @var PayPeriodScheduleListFactory $pglf */
 		$pglf->getByCompanyId( $this->company_id );
-		$this->pay_period_schedule_options = (array)$pglf->getArrayByListFactory( $pglf, FALSE, TRUE );
+		$this->pay_period_schedule_options = (array)$pglf->getArrayByListFactory( $pglf, FALSE );
 		unset($pglf);
 
 		return TRUE;
@@ -431,9 +432,9 @@ class ImportUser extends Import {
 	 */
 	function getUserTitleOptions() {
 		//Get job titles
-		$utlf = TTNew('UserTitleListFactory');
+		$utlf = TTNew('UserTitleListFactory'); /** @var UserTitleListFactory $utlf */
 		$utlf->getByCompanyId( $this->company_id );
-		$this->title_options = (array)$utlf->getArrayByListFactory( $utlf, FALSE, TRUE );
+		$this->title_options = (array)$utlf->getArrayByListFactory( $utlf, FALSE );
 		unset($utlf);
 
 		return TRUE;
@@ -457,7 +458,7 @@ class ImportUser extends Import {
 		$retval = $this->findClosestMatch( $input, $this->title_options );
 		if ( $retval === FALSE ) {
 			if ( $this->getImportOptions('create_title') == TRUE ) {
-				$utf = TTnew('UserTitleFactory');
+				$utf = TTnew('UserTitleFactory'); /** @var UserTitleFactory $utf */
 				$utf->setCompany(  $this->company_id );
 				$utf->setName( $input );
 
@@ -522,9 +523,9 @@ class ImportUser extends Import {
 	 */
 	function getUserGroupOptions() {
 		//Get groups
-		$uglf = TTNew('UserGroupListFactory');
+		$uglf = TTNew('UserGroupListFactory'); /** @var UserGroupListFactory $uglf */
 		$uglf->getByCompanyId( $this->company_id );
-		$this->user_group_options = (array)$uglf->getArrayByListFactory( $uglf, FALSE, TRUE );
+		$this->user_group_options = (array)$uglf->getArrayByListFactory( $uglf, FALSE );
 		unset($uglf);
 
 		return TRUE;
@@ -559,7 +560,7 @@ class ImportUser extends Import {
 
 		if ( $retval === FALSE ) {
 			if ( $this->getImportOptions('create_group') == TRUE ) {
-				$ugf = TTnew('UserGroupFactory');
+				$ugf = TTnew('UserGroupFactory'); /** @var UserGroupFactory $ugf */
 				$ugf->setCompany( $this->company_id );
 				$ugf->setParent( TTUUID::getZeroID() );
 				$ugf->setName( $input );
@@ -585,9 +586,9 @@ class ImportUser extends Import {
 	 */
 	function getEthnicGroupOptions() {
 		//Get groups
-		$uglf = TTNew('EthnicGroupListFactory');
+		$uglf = TTNew('EthnicGroupListFactory'); /** @var EthnicGroupListFactory $uglf */
 		$uglf->getByCompanyId( $this->company_id );
-		$this->ethnic_group_options = (array)$uglf->getArrayByListFactory( $uglf, FALSE, TRUE );
+		$this->ethnic_group_options = (array)$uglf->getArrayByListFactory( $uglf, FALSE );
 		unset($uglf);
 
 		return TRUE;
@@ -612,7 +613,7 @@ class ImportUser extends Import {
 
 		if ( $retval === FALSE ) {
 			if ( $this->getImportOptions('create_ethnic_group') == TRUE ) {
-				$egf = TTnew('EthnicGroupFactory');
+				$egf = TTnew('EthnicGroupFactory'); /** @var EthnicGroupFactory $egf */
 				$egf->setCompany( $this->company_id );
 				$egf->setName( $input );
 
@@ -637,7 +638,7 @@ class ImportUser extends Import {
 	 */
 	function getHierarchyControlOptions() {
 		//Get job titles
-		$hclf = TTNew('HierarchyControlListFactory');
+		$hclf = TTNew('HierarchyControlListFactory'); /** @var HierarchyControlListFactory $hclf */
 		$hclf->getObjectTypeAppendedListByCompanyID( $this->company_id );
 		$this->hierarchy_control_options = (array)$hclf->getArrayByListFactory( $hclf, TRUE, FALSE, TRUE );
 		unset($hclf);

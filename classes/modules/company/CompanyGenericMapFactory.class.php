@@ -255,6 +255,7 @@ class CompanyGenericMapFactory extends Factory {
 		if ( !is_array($ids) AND TTUUID::isUUID( $ids ) ) {
 			$ids = array($ids);
 		}
+
 		//Debug::Arr($ids, 'Object Type ID: '. $object_type_id .' Object ID: '. $object_id .' IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
 			$ids = array_unique( $ids ); //Make sure the IDs are unique to help avoid duplicates.
@@ -262,7 +263,7 @@ class CompanyGenericMapFactory extends Factory {
 			$tmp_ids = array();
 			if ( $is_new == FALSE ) {
 				//If needed, delete mappings first.
-				$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
+				$cgmlf = TTnew( 'CompanyGenericMapListFactory' ); /** @var CompanyGenericMapListFactory $cgmlf */
 				$cgmlf->getByCompanyIDAndObjectTypeAndObjectID( $company_id, $object_type_id, $object_id );
 				foreach ($cgmlf as $obj) {
 					$id = $obj->getMapID();
@@ -284,8 +285,7 @@ class CompanyGenericMapFactory extends Factory {
 			foreach ($ids as $id) {
 				//if ( $id !== FALSE AND ( $relaxed_range == TRUE OR ( $relaxed_range == FALSE AND ( $id == -1 OR $id > 0 ) ) ) AND !in_array($id, $tmp_ids) ) {
 				if ( $id !== FALSE AND ( $relaxed_range == TRUE OR ( $relaxed_range == FALSE AND ( TTUUID::isUUID( $id ) AND ( $id == TTUUID::getNotExistID() OR $id != TTUUID::getZeroID() ) ) ) ) AND !in_array($id, $tmp_ids) ) {
-					/** @var CompanyGenericMapFactory $cgmf */
-					$cgmf = TTnew( 'CompanyGenericMapFactory' );
+					$cgmf = TTnew( 'CompanyGenericMapFactory' ); /** @var CompanyGenericMapFactory $cgmf */
 					$cgmf->setCompany( $company_id );
 					$cgmf->setObjectType( $object_type_id );
 					$cgmf->setObjectID( $object_id );
@@ -312,7 +312,7 @@ class CompanyGenericMapFactory extends Factory {
 		//
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'company',
 															$clf->getByID($this->getCompany()),
 															TTi18n::gettext('Company is invalid')
@@ -349,9 +349,8 @@ class CompanyGenericMapFactory extends Factory {
 		return TRUE;
 	}
 
-	//This table doesn't have any of these columns, so overload the functions.
-
 	/**
+	 * This table doesn't have any of these columns, so overload the functions.
 	 * @return bool
 	 */
 	function getDeleted() {
@@ -465,6 +464,7 @@ class CompanyGenericMapFactory extends Factory {
 		if ( $this->getObjectType() > 0 ) {
 			$description = TTi18n::getText('Generic Object Mapping');
 			switch( $this->getObjectType() ) {
+				case 100:
 				case 110:
 				case 120:
 				case 130:
@@ -476,64 +476,71 @@ class CompanyGenericMapFactory extends Factory {
 				case 190:
 				case 200:
 					switch( $this->getObjectType() )  {
+						case 100:
+							$lf = TTnew( 'RegularTimePolicyListFactory' ); /** @var RegularTimePolicyListFactory $lf */
+							$lf->getById( $this->getMapId() );
+							if ( $lf->getRecordCount() > 0 ) {
+								$description = TTi18n::getText('Regular Time Policy').': '. $lf->getCurrent()->getName();
+							}
+							break;
 						case 110:
-							$lf = TTnew( 'OverTimePolicyListFactory' );
+							$lf = TTnew( 'OverTimePolicyListFactory' ); /** @var OverTimePolicyListFactory $lf */
 							$lf->getById( $this->getMapId() );
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Overtime Policy').': '. $lf->getCurrent()->getName();
 							}
 							break;
 						case 120:
-							$lf = TTnew( 'PremiumPolicyListFactory' );
+							$lf = TTnew( 'PremiumPolicyListFactory' ); /** @var PremiumPolicyListFactory $lf */
 							$lf->getById( $this->getMapId() );
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Premium Policy').': '. $lf->getCurrent()->getName();
 							}
 							break;
 						case 130:
-							$lf = TTnew( 'RoundIntervalPolicyListFactory' );
+							$lf = TTnew( 'RoundIntervalPolicyListFactory' ); /** @var RoundIntervalPolicyListFactory $lf */
 							$lf->getById( $this->getMapId() );
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Rounding Policy').': '. $lf->getCurrent()->getName();
 							}
 							break;
 						case 140:
-							$lf = TTnew( 'AccrualPolicyListFactory' );
+							$lf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $lf */
 							$lf->getById( $this->getMapId() );
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Accrual Policy').': '. $lf->getCurrent()->getName();
 							}
 							break;
 						case 150:
-							$lf = TTnew( 'MealPolicyListFactory' );
+							$lf = TTnew( 'MealPolicyListFactory' ); /** @var MealPolicyListFactory $lf */
 							$lf->getById( $this->getMapId() );
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Meal Policy').': '. $lf->getCurrent()->getName();
 							}
 							break;
 						case 160:
-							$lf = TTnew( 'BreakPolicyListFactory' );
+							$lf = TTnew( 'BreakPolicyListFactory' ); /** @var BreakPolicyListFactory $lf */
 							$lf->getById( $this->getMapId() );
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Break Policy').': '. $lf->getCurrent()->getName();
 							}
 							break;
 						case 170:
-							$lf = TTnew( 'AbsencePolicyListFactory' );
+							$lf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $lf */
 							$lf->getById( $this->getMapId() );
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Absence Policy').': '. $lf->getCurrent()->getName();
 							}
 							break;
 						case 180:
-							$lf = TTnew( 'HolidayPolicyListFactory' );
+							$lf = TTnew( 'HolidayPolicyListFactory' ); /** @var HolidayPolicyListFactory $lf */
 							$lf->getById( $this->getMapId() );
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Holiday Policy').': '. $lf->getCurrent()->getName();
 							}
 							break;
 						case 190: //Not handled with generic mapping currently.
-							$lf = TTnew( 'ExceptionPolicyListFactory' );
+							$lf = TTnew( 'ExceptionPolicyListFactory' ); /** @var ExceptionPolicyListFactory $lf */
 							$lf->getById( $this->getMapId() );
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Exception Policy').': '. $lf->getCurrent()->getName();
@@ -541,7 +548,7 @@ class CompanyGenericMapFactory extends Factory {
 
 							break;
 						case 200:
-							$lf = TTnew( 'ExpensePolicyListFactory' );
+							$lf = TTnew( 'ExpensePolicyListFactory' ); /** @var ExpensePolicyListFactory $lf */
 							$lf->getById( $this->getMapID() );
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Expense Policy').': '. $lf->getCurrent()->getName();
@@ -553,7 +560,7 @@ class CompanyGenericMapFactory extends Factory {
 					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, 'policy_group' );
 					break;
 				case 300:
-					$lf = TTnew( 'ExpensePolicyListFactory' );
+					$lf = TTnew( 'ExpensePolicyListFactory' ); /** @var ExpensePolicyListFactory $lf */
 					$lf->getById( $this->getMapID() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = TTi18n::getText('Expense Policy').': '. $lf->getCurrent()->getName();
@@ -562,7 +569,7 @@ class CompanyGenericMapFactory extends Factory {
 					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, 'expense_policy' );
 					break;
 				case 165:
-					$lf = TTnew( 'BreakPolicyListFactory' );
+					$lf = TTnew( 'BreakPolicyListFactory' ); /** @var BreakPolicyListFactory $lf */
 					$lf->getById( $this->getMapId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = TTi18n::getText('Break Policy').': '. $lf->getCurrent()->getName();
@@ -573,7 +580,7 @@ class CompanyGenericMapFactory extends Factory {
 					break;
 				//Job user mapping
 				case 1010: //'job_user_branch',
-					$lf = TTnew( 'BranchListFactory' );
+					$lf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $lf */
 					$lf->getById( $this->getMapId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = TTi18n::getText('Branch').': '. $lf->getCurrent()->getName();
@@ -583,7 +590,7 @@ class CompanyGenericMapFactory extends Factory {
 					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, 'job_user_branch' );
 					break;
 				case 1020: // => 'job_user_department',
-					$lf = TTnew( 'DepartmentListFactory' );
+					$lf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $lf */
 					$lf->getById( $this->getMapId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = TTi18n::getText('Department').': '. $lf->getCurrent()->getName();
@@ -593,7 +600,7 @@ class CompanyGenericMapFactory extends Factory {
 					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, 'job_user_department' );
 					break;
 				case 1030: // => 'job_user_group',
-					$lf = TTnew( 'UserGroupListFactory' );
+					$lf = TTnew( 'UserGroupListFactory' ); /** @var UserGroupListFactory $lf */
 					$lf->getById( $this->getMapId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = TTi18n::getText('Employee Group').': '. $lf->getCurrent()->getName();
@@ -603,7 +610,7 @@ class CompanyGenericMapFactory extends Factory {
 					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, 'job_user_group' );
 					break;
 				case 1090:
-					$lf = TTnew( 'QualificationGroupListFactory' );
+					$lf = TTnew( 'QualificationGroupListFactory' ); /** @var QualificationGroupListFactory $lf */
 					$lf->getById( $this->getMapId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = TTi18n::getText('Qualification Group').': '. $lf->getCurrent()->getName();
@@ -622,7 +629,7 @@ class CompanyGenericMapFactory extends Factory {
 							$table_name = 'kpi';
 							break;
 					}
-					$lf = TTnew( 'KPIGroupListFactory' );
+					$lf = TTnew( 'KPIGroupListFactory' ); /** @var KPIGroupListFactory $lf */
 					$lf->getById( $this->getMapId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = TTi18n::getText('KPI Group').': '. $lf->getCurrent()->getName();
@@ -649,7 +656,7 @@ class CompanyGenericMapFactory extends Factory {
 							break;
 					}
 
-					$lf = TTnew( 'UserListFactory' );
+					$lf = TTnew( 'UserListFactory' ); /** @var UserListFactory $lf */
 					$lf->getById( $this->getMapId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = $type.' '. TTi18n::getText('Employee').': '. $lf->getCurrent()->getFullName();
@@ -660,7 +667,7 @@ class CompanyGenericMapFactory extends Factory {
 					break;
 				//Job task mapping
 				case 1060: // => 'job_job_item_group',
-					$lf = TTnew( 'JobItemGroupListFactory' );
+					$lf = TTnew( 'JobItemGroupListFactory' ); /** @var JobItemGroupListFactory $lf */
 					$lf->getById( $this->getMapId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = TTi18n::getText('Task Group').': '. $lf->getCurrent()->getName();
@@ -682,7 +689,7 @@ class CompanyGenericMapFactory extends Factory {
 							break;
 					}
 
-					$lf = TTnew( 'JobItemListFactory' );
+					$lf = TTnew( 'JobItemListFactory' ); /** @var JobItemListFactory $lf */
 					$lf->getById( $this->getMapId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = $type.' '. TTi18n::getText('Task').': '. $lf->getCurrent()->getName();
@@ -694,7 +701,7 @@ class CompanyGenericMapFactory extends Factory {
 				case 3010: // => 'payment_gateway_credit_card_type',
 					$table_name = 'payment_gateway_credit_card_type';
 
-					$cpf = TTnew( 'ClientPaymentFactory' );
+					$cpf = TTnew( 'ClientPaymentFactory' ); /** @var ClientPaymentFactory $cpf */
 					$description = TTi18n::getText('Credit Card Type').': '. Option::getByKey( $this->getMapId(), $cpf->getOptions('credit_card_type') );
 
 					Debug::text('Action: '. $log_action .' MapID: '. $this->getMapID() .' ObjectID: '. $this->getObjectID() .' Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
@@ -703,7 +710,7 @@ class CompanyGenericMapFactory extends Factory {
 				case 3020: // => 'payment_gateway_bank_account_type',
 					$table_name = 'payment_gateway_bank_account_type';
 
-					$cpf = TTnew( 'ClientPaymentFactory' );
+					$cpf = TTnew( 'ClientPaymentFactory' ); /** @var ClientPaymentFactory $cpf */
 					$description = TTi18n::getText('Bank Account Type').': '. Option::getByKey( $this->getMapId(), $cpf->getOptions('bank_account_type') );
 
 					Debug::text('Action: '. $log_action .' MapID: '. $this->getMapID() .' ObjectID: '. $this->getObjectID() .' Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
@@ -713,7 +720,7 @@ class CompanyGenericMapFactory extends Factory {
 				case 4010:
 				case 4020:
 				case 4030:
-					$lf = TTnew( 'GEOFenceListFactory' );
+					$lf = TTnew( 'GEOFenceListFactory' ); /** @var GEOFenceListFactory $lf */
 					$lf->getById( $this->getMapID() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = TTi18n::getText('GEO Fence').': '. $lf->getCurrent()->getName();

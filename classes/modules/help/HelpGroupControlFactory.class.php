@@ -78,7 +78,7 @@ class HelpGroupControlFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getHelp() {
-		$hglf = TTnew( 'HelpGroupListFactory' );
+		$hglf = TTnew( 'HelpGroupListFactory' ); /** @var HelpGroupListFactory $hglf */
 		$hglf->getByHelpGroupControlId( $this->getId() );
 		foreach ($hglf as $help_group_obj) {
 			$help_list[] = $help_group_obj->getHelp();
@@ -97,7 +97,7 @@ class HelpGroupControlFactory extends Factory {
 	 */
 	function setHelp( $ids) {
 		//If needed, delete mappings first.
-		$hglf = TTnew( 'HelpGroupListFactory' );
+		$hglf = TTnew( 'HelpGroupListFactory' ); /** @var HelpGroupListFactory $hglf */
 		$hglf->getByHelpGroupControlId( $this->getId() );
 
 		$help_ids = array();
@@ -112,7 +112,7 @@ class HelpGroupControlFactory extends Factory {
 		if (is_array($ids) AND count($ids) > 0) {
 
 			//Insert new mappings.
-			$hgf = TTnew( 'HelpGroupFactory' );
+			$hgf = TTnew( 'HelpGroupFactory' ); /** @var HelpGroupFactory $hgf */
 			$i = 0;
 			foreach ($ids as $id) {
 				//if ( !in_array($id, $help_ids) ) {
@@ -137,7 +137,6 @@ class HelpGroupControlFactory extends Factory {
 	}
 
 	/**
-	 * @param string $ids UUID
 	 * @return bool
 	 */
 	function Validate() {

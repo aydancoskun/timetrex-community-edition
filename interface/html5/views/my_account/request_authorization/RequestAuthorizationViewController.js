@@ -582,7 +582,13 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 						var retval = result.getResult();
 						if ( retval != false ) {
 							$this.is_changed = false;
-							$this.onRightArrowClick( $this.search( false ) ); //Don't call setDefaultMenu() as it causes flashing of icons.
+							$this.onRightArrowClick( function() {
+								// Note: if side effects occur here, previously the search(false) function was accidentally called as a evaluated param (run each time, parallel), rather than callback (run at the end, on last record)
+								$this.search();
+								$().TFeedback({
+									source: 'Authorize'
+								});
+							} );
 						} else {
 							$this.setErrorMenu();
 							$this.setErrorTips( result, true );
@@ -597,7 +603,12 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		var $this = this;
 
 		function doNext() {
-			$this.onRightArrowClick( function() { $this.search(); } );
+			$this.onRightArrowClick( function() {
+				$this.search();
+				$().TFeedback({
+					source: 'Pass'
+				});
+			} );
 		}
 
 		if ( this.is_changed ) {
@@ -627,7 +638,12 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 
 			$this.authorization_api['setAuthorization']( [filter], {
 				onResult: function( res ) {
-					$this.onRightArrowClick( function() { $this.search(); } );
+					$this.onRightArrowClick( function() {
+						$this.search();
+						$().TFeedback({
+							source: 'Decline'
+						});
+					} );
 				}
 			} );
 		}

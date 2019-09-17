@@ -57,6 +57,8 @@ class CalculatePayStub extends PayStubFactory {
 		if ( isset($this->data['user_id']) ) {
 			return $this->data['user_id'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -66,7 +68,7 @@ class CalculatePayStub extends PayStubFactory {
 	function setUser( $id) {
 		$id = trim($id);
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 		if ( $id == TTUUID::getZeroID()
 				OR $this->Validator->isResultSetWithRows(	'user',
@@ -99,7 +101,7 @@ class CalculatePayStub extends PayStubFactory {
 	function setPayPeriod( $id) {
 		$id = TTUUID::castUUID($id);
 
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 
 		if (  $this->Validator->isResultSetWithRows(	'pay_period',
 														$pplf->getByID($id),
@@ -241,7 +243,7 @@ class CalculatePayStub extends PayStubFactory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() > 0 ) {
 				$this->user_obj = $ulf->getCurrent();
@@ -260,7 +262,7 @@ class CalculatePayStub extends PayStubFactory {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
 		} else {
-			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 			$pseallf->getByCompanyId( $this->getUserObject()->getCompany() );
 			if ( $pseallf->getRecordCount() > 0 ) {
 				$this->pay_stub_entry_account_link_obj = $pseallf->getCurrent();
@@ -278,7 +280,7 @@ class CalculatePayStub extends PayStubFactory {
 		if ( is_object($this->pay_period_obj) ) {
 			return $this->pay_period_obj;
 		} else {
-			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			//$this->pay_period_obj = $pplf->getById( $this->getPayPeriod() )->getCurrent();
 			$pplf->getById( $this->getPayPeriod() );
 			if ( $pplf->getRecordCount() > 0 ) {
@@ -298,7 +300,7 @@ class CalculatePayStub extends PayStubFactory {
 		if ( is_object($this->pay_period_schedule_obj) ) {
 			return $this->pay_period_schedule_obj;
 		} else {
-			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+			$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 			$this->pay_period_schedule_obj = $ppslf->getById( $this->getPayPeriodObject()->getPayPeriodSchedule() )->getCurrent();
 
 			return $this->pay_period_schedule_obj;
@@ -327,7 +329,7 @@ class CalculatePayStub extends PayStubFactory {
 			//Debug::text('Returning Cached data...', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->pay_stub_entry_accounts_type_obj;
 		} else {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->pay_stub_entry_accounts_type_obj = $psealf->getByTypeArrayByCompanyIdAndStatusId( $this->getUserObject()->getCompany(), 10 );
 
 			if ( is_array( $this->pay_stub_entry_accounts_type_obj ) ) {
@@ -368,12 +370,14 @@ class CalculatePayStub extends PayStubFactory {
 		//Debug::Arr($type_map_arr, 'PS Account Type Map Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( !is_object($obj) ) {
+			Debug::text('ERROR! Object not specified!', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
 		$arr = array();
-		if ( get_class($obj) == 'UserDeductionListFactory' ) {
+		if ( is_a( $obj, 'UserDeductionFactory' ) ) {
 			if ( !is_object( $obj->getCompanyDeductionObject() ) ) {
+				Debug::text('ERROR! Unable to get CompanyDeduction Object!', __FILE__, __LINE__, __METHOD__, 10);
 				return FALSE;
 			}
 
@@ -437,7 +441,7 @@ class CalculatePayStub extends PayStubFactory {
 			$arr['affect_accounts'] = $obj->getCompanyDeductionObject()->getPayStubEntryAccount();
 
 			return $arr;
-		} elseif ( get_class($obj) == 'PayStubAmendmentListFactory' ) {
+		} elseif ( is_a( $obj, 'PayStubAmendmentFactory' ) ) {
 			$arr['type'] = get_class( $obj );
 			$arr['obj_id'] = $obj->getId();
 			$arr['id'] = substr($arr['type'], 0, 1).$obj->getId();
@@ -453,7 +457,7 @@ class CalculatePayStub extends PayStubFactory {
 			}
 
 			return $arr;
-		} elseif ( get_class($obj) == 'UserExpenseListFactory' AND is_object( $obj->getExpensePolicyObject() ) AND is_object( $obj->getExpensePolicyObject()->getPayStubEntryNameObject() ) ) {
+		} elseif ( is_a( $obj, 'UserExpenseFactory' ) AND is_object( $obj->getExpensePolicyObject() ) AND is_object( $obj->getExpensePolicyObject()->getPayStubEntryNameObject() ) ) {
 			$arr['type'] = get_class( $obj );
 			$arr['obj_id'] = $obj->getId();
 			$arr['id'] = 'E'.$obj->getId();
@@ -464,6 +468,8 @@ class CalculatePayStub extends PayStubFactory {
 			$arr['require_accounts'][] = NULL;
 
 			return $arr;
+		} else {
+			Debug::text('ERROR! Unrecognized object: '. get_class($obj), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;
@@ -523,7 +529,7 @@ class CalculatePayStub extends PayStubFactory {
 		if ( is_object($uelf) ) {
 			if ( $uelf->getRecordCount() > 0 ) {
 				foreach ( $uelf as $ue_obj ) {
-					Debug::text('User Expense ID: '. $ue_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('User Expense ID: '. $ue_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 					$global_id = 'E' . $ue_obj->getId();
 					$deduction_order_arr[$global_id] = $this->getDeductionObjectArrayForSorting( $ue_obj );
 
@@ -611,7 +617,7 @@ class CalculatePayStub extends PayStubFactory {
 
 		$generic_queue_status_label = $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Pay Stub');
 
-		$pay_stub = TTnew( 'PayStubFactory' );
+		$pay_stub = TTnew( 'PayStubFactory' ); /** @var PayStubFactory $pay_stub */
 		$pay_stub->StartTransaction();
 
 		$old_pay_stub_id = NULL;
@@ -627,7 +633,7 @@ class CalculatePayStub extends PayStubFactory {
 			}
 
 			//Check for current pay stub ID so we can compare against it.
-			$pslf = TTnew( 'PayStubListFactory' );
+			$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 			$pslf->getByUserIdAndPayPeriodId( $this->getUser(), $this->getPayPeriod() );
 			if ( $pslf->getRecordCount() > 0 ) {
 				$old_pay_stub_id = $pslf->getCurrent()->getId();
@@ -747,8 +753,7 @@ class CalculatePayStub extends PayStubFactory {
 		}
 
 		//Get all PS amendments and Tax / Deductions so we can determine the proper order to calculate them in.
-		$psalf = TTnew( 'PayStubAmendmentListFactory' );
-		//$psalf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+		$psalf = TTnew( 'PayStubAmendmentListFactory' ); /** @var PayStubAmendmentListFactory $psalf */
 		if ( $this->getEnableCorrection() == TRUE ) { //When doing post-adjustment carry-forward, we need to take into account already paid amendments, otherwise the differeces will always be incorrect.
 			$pay_stub_amendment_status_ids = array(50, 52, 55); //50=Active, 52=In Use, 55=Paid
 		} else {
@@ -757,12 +762,13 @@ class CalculatePayStub extends PayStubFactory {
 		$psalf->getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDate( $this->getUser(), TRUE, $pay_stub_amendment_status_ids, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
 		unset($pay_stub_amendment_status_ids);
 
-		$udlf = TTnew( 'UserDeductionListFactory' );
+		$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 		$udlf->getByCompanyIdAndUserId( $this->getUserObject()->getCompany(), $this->getUserObject()->getId() );
+		Debug::text('Total PayStubAmendments: '. $psalf->getRecordCount() .' UserDeductions: '. $udlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		//Only include expenses when calculating in-cycle payroll runs, as we currently can't tell if they have already been included on a pay stub or not.
 		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE AND $this->getType() == 10 AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
-			$uelf = TTnew( 'UserExpenseListFactory' );
+			$uelf = TTnew( 'UserExpenseListFactory' ); /** @var UserExpenseListFactory $uelf */
 			//$uelf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
 			if ( $this->getEnableCorrection() == TRUE ) { //When doing post-adjustment carry-forward, we need to take into account already paid expenses, otherwise the differeces will always be incorrect.
 				$user_expense_status_ids = array(30, 35, 40, 50); //30=Active, 35=In Use, 40=Paid/Reimbursed, 50=Authorized
@@ -775,6 +781,17 @@ class CalculatePayStub extends PayStubFactory {
 			Debug::text('Total User Expenses: '. $uelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			$uelf = FALSE;
+		}
+
+		//Ensure that the employee was hired before the end day of the pay period. Especially important if they are using Tax/Deductions to affect earnings to prevent the employee from being paid before their hire date. (This used to checked below with the CompanyDeduction criteria)
+		//Make sure we don't try to generate a pay stub before the employees hire date, since we don't calculate Tax/Deduction before their hire date anyways (similar check below), this could result in just earnings and no tax deductions.
+		// This can occur when a user tries to terminate an employee, generate an ROE, then immediately re-hire an employee a few days later, then generate pay stubs for the prior pay pay period (the employees last pay period).
+		// Essentially they are doing it out of order, they should terminate the employee, generate the final pay stub, generate the ROE, close the pay period, then re-hire the employee.
+		if ( $this->getEnableCorrection() == FALSE AND ( $this->getUserObject()->getHireDate() != '' AND TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) > TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getEndDate() ) ) ) {
+			$pay_stub->Validator->isTRUE(	'hire_date',
+											 FALSE,
+											 TTi18n::gettext('Employee was hired after this pay period already ended, check hire date' ) // Employee Hire Date is after Pay Period End Date
+			);
 		}
 
 		$deduction_order_arr = $this->getOrderedDeductionAndPSAmendment( $udlf, $psalf, $uelf );
@@ -801,13 +818,11 @@ class CalculatePayStub extends PayStubFactory {
 							);
 						}
 
-						//Ensure that the employee was hired before the end day of the pay period. Especially important if they are using Tax/Deductions to affect earnings to prevent the employee from being paid before their hire date.
 						//Determine if this deduction is valid based on start/end dates.
 						//Determine if this deduction is valid based on min/max length of service.
 						//Determine if this deduction is valid based on min/max user age.
 						//Determine if the Payroll Run Type matches.
-						if ( ( $this->getUserObject()->getHireDate() == '' OR ( TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) <= TTDate::getMiddleDayEpoch( $pay_stub->getPayPeriodObject()->getEndDate() ) ) )
-								AND $ud_obj->getCompanyDeductionObject()->isActiveDate( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
+						if ( $ud_obj->getCompanyDeductionObject()->isActiveDate( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->isActiveLengthOfService( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getPayPeriodObject()->getStartDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->isActiveUserAge( $this->getUserObject()->getBirthDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->inApplyFrequencyWindow( $pay_stub->getPayPeriodObject()->getStartDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getHireDate(), $this->getUserObject()->getTerminationDate(), $this->getUserObject()->getBirthDate() ) == TRUE
@@ -822,6 +837,8 @@ class CalculatePayStub extends PayStubFactory {
 							} else {
 								Debug::text('Amount is 0, skipping...', __FILE__, __LINE__, __METHOD__, 10);
 							}
+						} else {
+							Debug::text('Eligibility criteria not met, skipping...', __FILE__, __LINE__, __METHOD__, 10);
 						}
 						unset($amount, $ud_obj);
 					} elseif ( $data_arr['type'] == 'PayStubAmendmentListFactory' ) {
@@ -850,11 +867,13 @@ class CalculatePayStub extends PayStubFactory {
 							Debug::text('bUser Expense Amount is not set...', __FILE__, __LINE__, __METHOD__, 10);
 						}
 						unset($amount, $ue_obj);
+					} else {
+						Debug::text('  ERROR: PS Amendment/Deduction object type not recognized!', __FILE__, __LINE__, __METHOD__, 10);
 					}
+				} else {
+					Debug::text('  ERROR: PS Amendment/Deduction object not found, or not an object! ', __FILE__, __LINE__, __METHOD__, 10);
 				}
-
 			}
-
 		}
 		unset($deduction_order_arr, $calculation_order, $data_arr);
 
@@ -885,7 +904,7 @@ class CalculatePayStub extends PayStubFactory {
 					//TimeTrex wouldn't delete these temporary pay stubs.
 					//Moving this code outside that IF statement so it only depends on EnableCorrection()
 					//to be TRUE should fix that issue.
-					$pslf = TTnew( 'PayStubListFactory' );
+					$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 					$pslf->getById( $pay_stub_id );
 					if ( $pslf->getRecordCount() > 0 ) {
 						$tmp_ps_obj = $pslf->getCurrent();

@@ -104,7 +104,7 @@ class APIAbout extends APIFactory {
 		} else {
 			$begin_month_epoch = TTDate::getBeginMonthEpoch( ( TTDate::getBeginMonthEpoch( time() ) - 86400 ) );
 		}
-		$cuclf = TTnew( 'CompanyUserCountListFactory' );
+		$cuclf = TTnew( 'CompanyUserCountListFactory' ); /** @var CompanyUserCountListFactory $cuclf */
 		if ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] AND $all_companies == TRUE ) {
 			$cuclf->getTotalMonthlyMinAvgMaxByCompanyStatusAndStartDateAndEndDate( 10, $begin_month_epoch, TTDate::getEndMonthEpoch( time() ), NULL, NULL, NULL, array('date_stamp' => 'desc') );
 		} else {
@@ -128,7 +128,7 @@ class APIAbout extends APIFactory {
 			$data['user_counts'] = array();
 		}
 
-		$cjlf = TTnew( 'CronJobListFactory' );
+		$cjlf = TTnew( 'CronJobListFactory' ); /** @var CronJobListFactory $cjlf */
 		$cjlf->getMostRecentlyRun();
 		if ( $cjlf->getRecordCount() > 0 ) {
 			$cj_obj = $cjlf->getCurrent();

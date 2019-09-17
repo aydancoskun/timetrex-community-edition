@@ -151,7 +151,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function deleteUserWage( $user_id ) {
-		$uwlf = TTnew( 'UserWageListFactory' );
+		$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 		$uwlf->getByUserId( $user_id );
 		if ( $uwlf->getRecordCount() > 0 ) {
 			foreach ($uwlf as $uw_obj ) {
@@ -165,7 +165,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createUserSalaryWage( $user_id, $rate, $effective_date, $wage_group_id = 0 ) {
-		$uwf = TTnew( 'UserWageFactory' );
+		$uwf = TTnew( 'UserWageFactory' ); /** @var UserWageFactory $uwf */
 
 		$uwf->setUser( $user_id );
 		$uwf->setWageGroup( $wage_group_id );

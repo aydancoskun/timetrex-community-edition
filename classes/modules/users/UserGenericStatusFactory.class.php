@@ -272,7 +272,7 @@ class UserGenericStatusFactory extends Factory {
 			Debug::Arr($this->queue, 'Generic Status Queue', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $this->queue as $key => $queue_data ) {
 
-				$ugsf = TTnew( 'UserGenericStatusFactory' );
+				$ugsf = TTnew( 'UserGenericStatusFactory' ); /** @var UserGenericStatusFactory $ugsf */
 				$ugsf->setUser( $this->getUser() );
 				if ( TTUUID::isUUID( $this->getBatchId() ) AND $this->getBatchID() != TTUUID::getZeroID() AND $this->getBatchID() != TTUUID::getNotExistID() ) {
 					$ugsf->setBatchID( $this->getBatchID() );
@@ -329,7 +329,7 @@ class UserGenericStatusFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'user',
 														$ulf->getByID($this->getUser()),
 														TTi18n::gettext('Invalid Employee')

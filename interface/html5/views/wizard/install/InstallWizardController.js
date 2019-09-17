@@ -437,12 +437,6 @@ InstallWizardController = BaseWizardController.extend( {
 					form_item_input.TText( { field: 'json' } );
 					this.addEditFieldToColumn( $.i18n._( 'JSON Enabled' ), form_item_input, requirements_column2, '', null, true, true );
 
-					// if ( stepData.tt_product_edition >= 20 ) {
-					// 	form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-					// 	form_item_input.TText( {field: 'mcrypt'} );
-					// 	this.addEditFieldToColumn( $.i18n._( 'MCRYPT Enabled' ), form_item_input, requirements_column2, '', null, true, true );
-					// }
-
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( { field: 'simplexml' } );
 					this.addEditFieldToColumn( $.i18n._( 'SimpleXML Enabled' ), form_item_input, requirements_column2, '', null, true, true );
@@ -505,10 +499,6 @@ InstallWizardController = BaseWizardController.extend( {
 					this.addEditFieldToColumn( $.i18n._( 'PHP CLI Executable' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-					form_item_input.TText( { field: 'cli_requirements' } );
-					this.addEditFieldToColumn( $.i18n._( 'PHP CLI Requirements' ), form_item_input, requirements_column2, '', null, true, true );
-
-					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( { field: 'config_file' } );
 					this.addEditFieldToColumn( $.i18n._( 'Writable' ) + ' ' + $.i18n._( stepData.application_name ) + ' ' + $.i18n._( 'Configuration File' ) + '<br>' + '(timetrex.ini.php)', form_item_input, requirements_column2, '', null, true, true );
 
@@ -544,6 +534,10 @@ InstallWizardController = BaseWizardController.extend( {
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( { field: 'file_checksums' } );
 					this.addEditFieldToColumn( $.i18n._( 'File CheckSums' ), form_item_input, requirements_column2, '', null, true, true );
+
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( { field: 'cli_requirements' } );
+					this.addEditFieldToColumn( $.i18n._( 'PHP CLI Requirements' ), form_item_input, requirements_column2, '', null, true, true );
 				}
 
 				// forth column
@@ -1312,15 +1306,18 @@ InstallWizardController = BaseWizardController.extend( {
 			case 'requirements':
 				for ( var key in widgets ) {
 					var edit_view_form_item_dic = $( this.edit_view_form_item_dic[key] );
+
 					if ( stepData[key] == 0 ) {
 					} else {
 						edit_view_form_item_dic.show();
 					}
+
 					var widget = widgets[key];
 					widget.removeClass( 't-text' );
 					widget.removeClass( 'dataError' );
 					widget.removeClass( 'dataWarning' );
 					widget.addClass( 'custom-t-text' );
+
 					switch ( key ) {
 						case 'timetrex_version':
 							if ( stepData[key].check_timetrex_version == 0 ) {
@@ -1488,14 +1485,6 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.addClass( 'dataError' );
 							}
 							break;
-						case 'disabled_functions':
-							if ( stepData[key].check_disabled_functions == 0 ) {
-								widget.html( $.i18n._( 'OK' ) );
-							} else if ( stepData[key].check_disabled_functions == 1 ) {
-								widget.html( $.i18n._( 'Critical functions disabled: ' + stepData[key].disabled_function_list + '. (Please enable them in php.ini)' ) );
-								widget.addClass( 'dataError' );
-							}
-							break;
 						case 'allow_fopen_url':
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
@@ -1533,12 +1522,21 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.addClass( 'dataError' );
 							}
 							break;
+						case 'disabled_functions':
+							if ( stepData[key].check_disabled_functions == 0 ) {
+								widget.html( $.i18n._( 'OK' ) );
+								edit_view_form_item_dic.hide();
+							} else if ( stepData[key].check_disabled_functions == 1 ) {
+								widget.html( $.i18n._( 'Critical functions disabled: ' + stepData[key].disabled_function_list + '. (Please enable them in php.ini)' ) );
+								widget.addClass( 'dataError' );
+							}
+							break;
 						case 'base_url':
 							if ( stepData[key].check_base_url == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( key + ' ' + $.i18n._( 'in' ) + ' timetrex.ini.php' + $.i18n._( 'is incorrect, perhaps it should be' ) + ' ' + stepData[key].recommended_base_url + ' ' + $.i18n._( 'instead' ) );
+								widget.html( key + ' ' + $.i18n._( 'in' ) + ' timetrex.ini.php ' + $.i18n._( 'is incorrect, perhaps it should be' ) + ' ' + stepData[key].recommended_base_url + ' ' + $.i18n._( 'instead' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1565,7 +1563,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._( 'PHP CLI requirements failed while executing' ) + '<br>'
+								widget.html( $.i18n._( 'PHP CLI requirements failed while executing' ) + ':<br>'
 										+ stepData[key].php_cli_requirements_command + '<br>'
 										+ $.i18n._( 'Likely caused by having two PHP.INI files with different settings.' )
 								);

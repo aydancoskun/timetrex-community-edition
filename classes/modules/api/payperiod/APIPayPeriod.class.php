@@ -101,7 +101,7 @@ class APIPayPeriod extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_period_schedule', 'view' );
 
-		$blf = TTnew( 'PayPeriodListFactory' );
+		$blf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -190,7 +190,7 @@ class APIPayPeriod extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayPeriodListFactory' );
+				$lf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -303,7 +303,7 @@ class APIPayPeriod extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayPeriodListFactory' );
+				$lf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -376,7 +376,7 @@ class APIPayPeriod extends APIFactory {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($pay_period_ids) );
 
 		foreach( $pay_period_ids as $key => $pay_period_id ) {
-			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			$pplf->getByIdAndCompanyId($pay_period_id, $this->getCurrentCompanyObject()->getId() );
 			if ( $pplf->getRecordCount() == 1  ) {
 				$pay_period_obj = $pplf->getCurrent();
@@ -405,7 +405,7 @@ class APIPayPeriod extends APIFactory {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($pay_period_ids) );
 
 		foreach( $pay_period_ids as $key => $pay_period_id ) {
-			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			$pplf->getByIdAndCompanyId($pay_period_id, $this->getCurrentCompanyObject()->getId() );
 			if ( $pplf->getRecordCount() == 1  ) {
 				$pay_period_obj = $pplf->getCurrent();

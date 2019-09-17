@@ -54,7 +54,7 @@ class Permission {
 			return $this->cached_permissions[$user_id][$company_id];
 		}
 
-		$plf = TTnew( 'PermissionListFactory' );
+		$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 
 		$cache_id = 'permission_all'.$user_id.$company_id;
 		$perm_arr = $plf->getCache($cache_id);
@@ -169,7 +169,7 @@ class Permission {
 	function PermissionDenied( $result = FALSE, $description = 'Permission Denied' ) {
 		if ( $result !== TRUE ) {
 			Debug::Text('Permission Denied! Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
-			$af = TTnew('APIPermission');
+			$af = TTnew('APIPermission'); /** @var APIPermission $af */
 			return $af->returnHandler( FALSE, 'PERMISSION', $description );
 		}
 
@@ -199,14 +199,13 @@ class Permission {
 			$company_id = $current_company->getId();
 		}
 
-		$plf = TTnew( 'PermissionListFactory' );
+		$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 
 		return $plf->getBySectionAndNameAndUserIdAndCompanyId($section, $name, $user_id, $company_id)->getCurrent();
 	}
 
-	//Checks if the row_object_id is created by the current user
-
 	/**
+	 * Checks if the row_object_id is created by the current user
 	 * @param $object_created_by
 	 * @param null $object_assigned_to
 	 * @param string $current_user_id UUID
@@ -232,9 +231,8 @@ class Permission {
 		return FALSE;
 	}
 
-	//Checks if the row_object_id is in the src_object_list array,
-
 	/**
+	 * Checks if the row_object_id is in the src_object_list array,
 	 * @param string $row_object_id UUID
 	 * @param $src_object_list
 	 * @param string $current_user_id UUID
@@ -282,6 +280,8 @@ class Permission {
 	/**
 	 * @param string $id UUID
 	 * @param $inner_column
+	 * @param bool $append_comma
+	 * @param null $special_child_id
 	 * @return string
 	 */
 	static function getPermissionIsChildIsOwnerSQL( $id, $inner_column, $append_comma = TRUE, $special_child_id = NULL ) {
@@ -429,7 +429,7 @@ class Permission {
 			return $this->cached_permission_children_ids[$company_id][$user_id];
 		} else {
 			Debug::Text('  Getting hierarchy children for User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-			$hlf = TTnew( 'HierarchyListFactory' );
+			$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 			$this->cached_permission_children_ids[$company_id][$user_id] = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $company_id, $user_id, 100 );
 			//Debug::Arr($this->cached_permission_children_ids[$company_id][$user_id], 'Permission Child IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 

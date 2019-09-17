@@ -101,7 +101,7 @@ class SetupPresets extends Factory {
 	function createPayStubAccount( $data ) {
 		if ( is_array( $data ) ) {
 
-			$pseaf = TTnew( 'PayStubEntryAccountFactory' );
+			$pseaf = TTnew( 'PayStubEntryAccountFactory' ); /** @var PayStubEntryAccountFactory $pseaf */
 			$pseaf->setObjectFromArray( $data );
 			if ( $pseaf->isValid() ) {
 				return $pseaf->Save();
@@ -111,10 +111,10 @@ class SetupPresets extends Factory {
 		return FALSE;
 	}
 
-	//Need to be able to add just global accounts, or country specific accounts, or just province specific accounts,
-	//So this function should be called with once with no arguments, once for the country, and once for each province.
-	//ie: PayStubAccounts(), PayStubAccounts( 'ca' ), PayStubAccounts( 'ca', 'bc' )
 	/**
+	 * Need to be able to add just global accounts, or country specific accounts, or just province specific accounts,
+	 * So this function should be called with once with no arguments, once for the country, and once for each province.
+	 * ie: PayStubAccounts(), PayStubAccounts( 'ca' ), PayStubAccounts( 'ca', 'bc' )
 	 * @param null $country
 	 * @param null $province
 	 * @param null $district
@@ -122,8 +122,6 @@ class SetupPresets extends Factory {
 	 * @return bool
 	 */
 	function PayStubAccounts( $country = NULL, $province = NULL, $district = NULL, $industry = NULL ) {
-		global $config_vars;
-
 		$country = strtolower( $country );
 		$province = strtolower( $province );
 
@@ -136,12 +134,12 @@ class SetupPresets extends Factory {
 		}
 
 		//See if accounts are already linked
-		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 		$pseallf->getByCompanyId( $this->getCompany() );
 		if ( $pseallf->getRecordCount() > 0 ) {
 			$psealf = $pseallf->getCurrent();
 		} else {
-			$psealf = TTnew( 'PayStubEntryAccountLinkFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountLinkFactory' ); /** @var PayStubEntryAccountLinkFactory $psealf */
 			$psealf->setCompany( $this->getCompany() );
 		}
 
@@ -1884,17 +1882,16 @@ class SetupPresets extends Factory {
 		return TRUE;
 	}
 
-	// NOTE: This is duplicated in Report class. If you change it here, change it there too.
-
 	/**
+	 * NOTE: This is duplicated in Report class. If you change it here, change it there too.
 	 * @param string $company_id UUID
 	 * @param object $report_obj
 	 * @param $data
 	 * @return bool
 	 */
 	function createUserReportData( $company_id, $report_obj, $data ) {
-		$urdf = TTnew( 'UserReportDataFactory' );
-		$urdlf = TTnew( 'UserReportDataListFactory' );
+		$urdf = TTnew( 'UserReportDataFactory' ); /** @var UserReportDataFactory $urdf */
+		$urdlf = TTnew( 'UserReportDataListFactory' ); /** @var UserReportDataListFactory $urdlf */
 		$urdlf->getByCompanyIdAndScriptAndDefault( $company_id, get_class( $report_obj ) );
 		if ( $urdlf->getRecordCount() > 0 ) {
 			$urdf->setID( $urdlf->getCurrent()->getID() );
@@ -2156,13 +2153,13 @@ class SetupPresets extends Factory {
 					);
 					Debug::Arr( $form_roe_config, 'ROE TaxForm Config: ' . $country, __FILE__, __LINE__, __METHOD__, 10 );
 
-					$ugdlf = TTnew( 'UserGenericDataListFactory' );
+					$ugdlf = TTnew( 'UserGenericDataListFactory' ); /** @var UserGenericDataListFactory $ugdlf */
 					$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getCompanyObject()->getId(), 'roe', TRUE );
 					if ( $ugdlf->getRecordCount() == 1 ) {
 						$ugdf = $ugdlf->getCurrent();
 						//Debug::Arr($ugdf->data, 'Found Existing UserGenericData recods: '. $ugdlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 					} else {
-						$ugdf = TTnew( 'UserGenericDataFactory' );
+						$ugdf = TTnew( 'UserGenericDataFactory' ); /** @var UserGenericDataFactory $ugdf */
 						$ugdf->setCompany( $this->getCompanyObject()->getId() );
 						$ugdf->setUser( TTUUID::getZeroID() );
 						$ugdf->setDefault( TRUE );
@@ -2418,7 +2415,7 @@ class SetupPresets extends Factory {
 	function createCompanyDeduction( $data ) {
 		if ( is_array( $data ) ) {
 
-			$cdf = TTnew( 'CompanyDeductionFactory' );
+			$cdf = TTnew( 'CompanyDeductionFactory' ); /** @var CompanyDeductionFactory $cdf */
 
 			$data['id'] = $cdf->getNextInsertId();
 
@@ -2433,11 +2430,10 @@ class SetupPresets extends Factory {
 
 	/**
 	 * @param int $type_id
-	 * @param $name
 	 * @return bool
 	 */
 	function getPayStubEntryAccountByCompanyIDAndType( $type_id ) {
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+		$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 		$psealf->getByCompanyIdAndType( $this->getCompany(), $type_id );
 		if ( $psealf->getRecordCount() > 0 ) {
 			return $psealf->getCurrent()->getId();
@@ -2452,7 +2448,7 @@ class SetupPresets extends Factory {
 	 * @return bool
 	 */
 	function getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $type_id, $name ) {
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+		$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 		$psealf->getByCompanyIdAndTypeAndFuzzyName( $this->getCompany(), $type_id, $name );
 		if ( $psealf->getRecordCount() > 0 ) {
 			return $psealf->getCurrent()->getId();
@@ -2468,7 +2464,7 @@ class SetupPresets extends Factory {
 	function createPayrollRemittanceAgency( $data ) {
 		if ( is_array( $data ) ) {
 
-			$praf = TTnew( 'PayrollRemittanceAgencyFactory' );
+			$praf = TTnew( 'PayrollRemittanceAgencyFactory' ); /** @var PayrollRemittanceAgencyFactory $praf */
 
 			$data['id'] = $praf->getNextInsertId();
 
@@ -2487,7 +2483,7 @@ class SetupPresets extends Factory {
 	 * @return bool
 	 */
 	function getPayrollRemittanceAgencyByLegalEntityAndAgencyID( $legal_entity_id, $agency_id ) {
-		$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $pralf */
 		$pralf->getByLegalEntityIdAndAgencyIDAndCompanyId( $legal_entity_id, $agency_id, $this->getCompany() );
 		Debug::text( 'Searching Agency based on Agency ID: ' . $agency_id . ' Legal Entity ID: ' . $legal_entity_id . ' Found: ' . (int)$pralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $pralf->getRecordCount() > 0 ) {
@@ -2511,12 +2507,12 @@ class SetupPresets extends Factory {
 		$country = strtolower( $country );
 		$province = strtolower( $province );
 
-		$praf = TTnew( 'PayrollRemittanceAgencyFactory' );
+		$praf = TTnew( 'PayrollRemittanceAgencyFactory' ); /** @var PayrollRemittanceAgencyFactory $praf */
 		$praf->StartTransaction();
 
 		Debug::text( 'Country: ' . $country . ' Province: ' . $province, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		if ( is_array( $legal_entity_id ) OR
 				( TTUUID::isUUID( $legal_entity_id ) AND $legal_entity_id != TTUUID::getZeroID() AND $legal_entity_id != TTUUID::getNotExistID() ) ) {
 			Debug::text( '  Single Legal Entity ID: ' . implode(',', (array)$legal_entity_id ), __FILE__, __LINE__, __METHOD__, 10 );
@@ -2531,7 +2527,7 @@ class SetupPresets extends Factory {
 			foreach ( $lelf as $le_obj ) {
 				//Determine Source Account to use, if EFT exists, use it.
 				$remittance_source_account_id = TTUUID::getZeroID();
-				$rsalf = TTnew( 'RemittanceSourceAccountListFactory' );
+				$rsalf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $rsalf */
 				$rsalf->getByLegalEntityId( $le_obj->getId(), NULL, array('type_id' => 'DESC') );  //Order EFT first.
 				if ( $rsalf->getRecordCount() > 0 ) {
 					$remittance_source_account_id = $rsalf->getCurrent()->getId();
@@ -2681,7 +2677,7 @@ class SetupPresets extends Factory {
 	 */
 	function createPayrollRemittanceAgencyEvent( $data ) {
 		if ( is_array( $data ) ) {
-			$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+			$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 
 			$data['id'] = $praef->getNextInsertId();
 
@@ -2701,10 +2697,10 @@ class SetupPresets extends Factory {
 	function createRemittanceAgencyEvents( $id ) {
 		global $config_vars;
 
-		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' );
+		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->StartTransaction();
 
-		$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $pralf */
 		$pralf->getByIdAndCompanyId( $id, $this->getCompany() );
 		if ( $pralf->getRecordCount() > 0 ) {
 			$agency_events_arr = array();
@@ -2713,7 +2709,7 @@ class SetupPresets extends Factory {
 
 			//Check to see if installer is enabled (performing an upgrade), or if they pay stubs.
 			if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 AND is_object( $this->getUserObject() )  ) {
-				$pslf = TTnew('PayStubListFactory');
+				$pslf = TTnew('PayStubListFactory'); /** @var PayStubListFactory $pslf */
 				$pslf->getByCompanyId( $this->getUserObject()->getCompany(), 1 ); //Limit=1
 				if ( $pslf->getRecordCount() == 0 ) {
 					Debug::Text( '  WARNING: No pay stubs created, not setting event reminder user...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -2777,7 +2773,7 @@ class SetupPresets extends Factory {
 		//Additional Information: http://www.payroll-taxes.com/state-tax.htm
 		//
 		//Get PayStub Link accounts
-		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 		$pseallf->getByCompanyId( $this->getCompany() );
 		if ( $pseallf->getRecordCount() > 0 ) {
 			$psea_obj = $pseallf->getCurrent();
@@ -2791,10 +2787,10 @@ class SetupPresets extends Factory {
 		$pd_obj = new PayrollDeduction( $country, $province );
 		$pd_obj->setDate( time() );
 
-		$cdf = TTnew( 'CompanyDeductionFactory' );
+		$cdf = TTnew( 'CompanyDeductionFactory' ); /** @var CompanyDeductionFactory $cdf */
 		$cdf->StartTransaction();
 
-		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		if ( is_array( $legal_entity_id ) OR
 				( TTUUID::isUUID( $legal_entity_id ) AND $legal_entity_id != TTUUID::getZeroID() AND $legal_entity_id != TTUUID::getNotExistID() ) ) {
 			Debug::text( '  Single Legal Entity ID: ' . implode(',', (array)$legal_entity_id ), __FILE__, __LINE__, __METHOD__, 10 );
@@ -5201,7 +5197,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$rhlf = TTnew( 'RecurringHolidayListFactory' );
+		$rhlf = TTnew( 'RecurringHolidayListFactory' ); /** @var RecurringHolidayListFactory $rhlf */
 		$rhlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $rhlf->getRecordCount() > 0 ) {
 			$retarr = array();
@@ -5215,6 +5211,11 @@ class SetupPresets extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @param $name
+	 * @param null $prefix
+	 * @return array|bool
+	 */
 	function getRecurringHolidayByCompanyIDAndNameAndPrefix( $name, $prefix = NULL ) {
 		$name_with_prefix = strtoupper( $prefix ) . ' - ' . $name;
 
@@ -5230,6 +5231,12 @@ class SetupPresets extends Factory {
 		return $retval;
 	}
 
+	/**
+	 * @param null $country
+	 * @param null $province
+	 * @param null $type_id
+	 * @return array
+	 */
 	function RecurringHolidaysByRegion( $country = NULL, $province = NULL, $type_id = NULL ) {
 		$country = strtolower( $country );
 		$province = strtolower( $province );
@@ -5793,7 +5800,7 @@ class SetupPresets extends Factory {
 	function createRecurringHoliday( $data ) {
 		if ( is_array( $data ) ) {
 
-			$rhf = TTnew( 'RecurringHolidayFactory' );
+			$rhf = TTnew( 'RecurringHolidayFactory' ); /** @var RecurringHolidayFactory $rhf */
 			$rhf->setObjectFromArray( $data );
 			if ( $rhf->isValid() ) {
 				return $rhf->Save();
@@ -7601,7 +7608,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$rtplf = TTnew( 'RegularTimePolicyListFactory' );
+		$rtplf = TTnew( 'RegularTimePolicyListFactory' ); /** @var RegularTimePolicyListFactory $rtplf */
 		$rtplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $rtplf->getRecordCount() > 0 ) {
 			$retarr = array();
@@ -7621,7 +7628,7 @@ class SetupPresets extends Factory {
 	 */
 	function createRegularTimePolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$rtpf = TTnew( 'RegularTimePolicyFactory' );
+			$rtpf = TTnew( 'RegularTimePolicyFactory' ); /** @var RegularTimePolicyFactory $rtpf */
 			$rtpf->setObjectFromArray( $data );
 			if ( $rtpf->isValid() ) {
 				return $rtpf->Save();
@@ -7666,7 +7673,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$otplf = TTnew( 'OverTimePolicyListFactory' );
+		$otplf = TTnew( 'OverTimePolicyListFactory' ); /** @var OverTimePolicyListFactory $otplf */
 		$otplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $otplf->getRecordCount() > 0 ) {
 			$retarr = array();
@@ -7687,7 +7694,7 @@ class SetupPresets extends Factory {
 	function createOverTimePolicy( $data ) {
 		if ( is_array( $data ) ) {
 
-			$otpf = TTnew( 'OverTimePolicyFactory' );
+			$otpf = TTnew( 'OverTimePolicyFactory' ); /** @var OverTimePolicyFactory $otpf */
 			$otpf->setObjectFromArray( $data );
 			if ( $otpf->isValid() ) {
 				return $otpf->Save();
@@ -7940,7 +7947,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$eplf = TTnew( 'ExceptionPolicyControlListFactory' );
+		$eplf = TTnew( 'ExceptionPolicyControlListFactory' ); /** @var ExceptionPolicyControlListFactory $eplf */
 		$eplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $eplf->getRecordCount() > 0 ) {
 			return $eplf->getCurrent()->getID();
@@ -7955,12 +7962,12 @@ class SetupPresets extends Factory {
 	 */
 	function createExceptionPolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$epcf = TTnew( 'ExceptionPolicyControlFactory' );
+			$epcf = TTnew( 'ExceptionPolicyControlFactory' ); /** @var ExceptionPolicyControlFactory $epcf */
 			$epcf->setObjectFromArray( $data );
 			if ( $epcf->isValid() ) {
 				$control_id = $epcf->Save();
 				if ( TTUUID::isUUID( $control_id ) AND $control_id != TTUUID::getZeroID() AND $control_id != TTUUID::getNotExistID() ) {
-					$epf = TTnew( 'ExceptionPolicyFactory' );
+					$epf = TTnew( 'ExceptionPolicyFactory' ); /** @var ExceptionPolicyFactory $epf */
 
 					$data = $epf->getExceptionTypeDefaultValues( NULL, $this->getCompanyObject()->getProductEdition() );
 					if ( is_array( $data ) ) {
@@ -8021,7 +8028,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$mplf = TTnew( 'MealPolicyListFactory' );
+		$mplf = TTnew( 'MealPolicyListFactory' ); /** @var MealPolicyListFactory $mplf */
 		$mplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $mplf->getRecordCount() > 0 ) {
 			return $mplf->getCurrent()->getId();
@@ -8036,7 +8043,7 @@ class SetupPresets extends Factory {
 	 */
 	function createMealPolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$mpf = TTnew( 'MealPolicyFactory' );
+			$mpf = TTnew( 'MealPolicyFactory' ); /** @var MealPolicyFactory $mpf */
 			$mpf->setObjectFromArray( $data );
 			if ( $mpf->isValid() ) {
 				return $mpf->Save();
@@ -8114,7 +8121,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$bplf = TTnew( 'BreakPolicyListFactory' );
+		$bplf = TTnew( 'BreakPolicyListFactory' ); /** @var BreakPolicyListFactory $bplf */
 		$bplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $bplf->getRecordCount() > 0 ) {
 			return $bplf->getCurrent()->getId();
@@ -8129,7 +8136,7 @@ class SetupPresets extends Factory {
 	 */
 	function createBreakPolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$bpf = TTnew( 'BreakPolicyFactory' );
+			$bpf = TTnew( 'BreakPolicyFactory' ); /** @var BreakPolicyFactory $bpf */
 			$bpf->setObjectFromArray( $data );
 			if ( $bpf->isValid() ) {
 				return $bpf->Save();
@@ -8197,7 +8204,7 @@ class SetupPresets extends Factory {
 	 */
 	function createSchedulePolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$spf = TTnew( 'SchedulePolicyFactory' );
+			$spf = TTnew( 'SchedulePolicyFactory' ); /** @var SchedulePolicyFactory $spf */
 			$data['id'] = $spf->getNextInsertId();
 
 			$spf->setObjectFromArray( $data );
@@ -8285,7 +8292,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$apalf = TTnew( 'AccrualPolicyAccountListFactory' );
+		$apalf = TTnew( 'AccrualPolicyAccountListFactory' ); /** @var AccrualPolicyAccountListFactory $apalf */
 		$apalf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $apalf->getRecordCount() > 0 ) {
 			return $apalf->getCurrent()->getId();
@@ -8300,7 +8307,7 @@ class SetupPresets extends Factory {
 	 */
 	function createAccrualPolicyAccount( $data ) {
 		if ( is_array( $data ) ) {
-			$apaf = TTnew( 'AccrualPolicyAccountFactory' );
+			$apaf = TTnew( 'AccrualPolicyAccountFactory' ); /** @var AccrualPolicyAccountFactory $apaf */
 			$apaf->setObjectFromArray( $data );
 			if ( $apaf->isValid() ) {
 				return $apaf->Save();
@@ -8320,7 +8327,7 @@ class SetupPresets extends Factory {
 				'type_id' => array($type_id),
 				'name'    => $name,
 		);
-		$acplf = TTnew( 'AccrualPolicyListFactory' );
+		$acplf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $acplf */
 		$acplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $acplf->getRecordCount() > 0 ) {
 			return $acplf->getCurrent()->getId();
@@ -8335,7 +8342,7 @@ class SetupPresets extends Factory {
 	 */
 	function createAccrualPolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$apf = TTnew( 'AccrualPolicyFactory' );
+			$apf = TTnew( 'AccrualPolicyFactory' ); /** @var AccrualPolicyFactory $apf */
 			$apf->setObjectFromArray( $data );
 			if ( $apf->isValid() ) {
 				return $apf->Save();
@@ -8351,7 +8358,7 @@ class SetupPresets extends Factory {
 	 */
 	function createAccrualPolicyMilestone( $data ) {
 		if ( is_array( $data ) ) {
-			$apmf = TTnew( 'AccrualPolicyMilestoneFactory' );
+			$apmf = TTnew( 'AccrualPolicyMilestoneFactory' ); /** @var AccrualPolicyMilestoneFactory $apmf */
 			$apmf->setObjectFromArray( $data );
 			if ( $apmf->isValid() ) {
 				return $apmf->Save();
@@ -8825,7 +8832,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$aplf = TTnew( 'AbsencePolicyListFactory' );
+		$aplf = TTnew( 'AbsencePolicyListFactory' ); /** @var AbsencePolicyListFactory $aplf */
 		$aplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $aplf->getRecordCount() > 0 ) {
 			$retarr = array();
@@ -8845,7 +8852,7 @@ class SetupPresets extends Factory {
 	 */
 	function createAbsencePolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$apf = TTnew( 'AbsencePolicyFactory' );
+			$apf = TTnew( 'AbsencePolicyFactory' ); /** @var AbsencePolicyFactory $apf */
 			$apf->setObjectFromArray( $data );
 			if ( $apf->isValid() ) {
 				return $apf->Save();
@@ -8961,7 +8968,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$lf = TTnew( 'PayFormulaPolicyListFactory' );
+		$lf = TTnew( 'PayFormulaPolicyListFactory' ); /** @var PayFormulaPolicyListFactory $lf */
 		$lf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $lf->getRecordCount() > 0 ) {
 			foreach ( $lf as $obj ) {
@@ -8978,7 +8985,7 @@ class SetupPresets extends Factory {
 	 */
 	function createPayFormulaPolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$f = TTnew( 'PayFormulaPolicyFactory' );
+			$f = TTnew( 'PayFormulaPolicyFactory' ); /** @var PayFormulaPolicyFactory $f */
 			$f->setObjectFromArray( $data );
 			if ( $f->isValid() ) {
 				return $f->Save();
@@ -9150,7 +9157,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$lf = TTnew( 'PayCodeListFactory' );
+		$lf = TTnew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $lf */
 		$lf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $lf->getRecordCount() > 0 ) {
 			$retarr = array();
@@ -9171,7 +9178,7 @@ class SetupPresets extends Factory {
 	 */
 	function createPayCode( $data ) {
 		if ( is_array( $data ) ) {
-			$f = TTnew( 'PayCodeFactory' );
+			$f = TTnew( 'PayCodeFactory' ); /** @var PayCodeFactory $f */
 			$f->setObjectFromArray( $data );
 			if ( $f->isValid() ) {
 				return $f->Save();
@@ -9432,7 +9439,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$lf = TTnew( 'ContributingPayCodePolicyListFactory' );
+		$lf = TTnew( 'ContributingPayCodePolicyListFactory' ); /** @var ContributingPayCodePolicyListFactory $lf */
 		$lf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $lf->getRecordCount() > 0 ) {
 			$retarr = array();
@@ -9453,7 +9460,7 @@ class SetupPresets extends Factory {
 	 */
 	function createContributingPayCodePolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$f = TTnew( 'ContributingPayCodePolicyFactory' );
+			$f = TTnew( 'ContributingPayCodePolicyFactory' ); /** @var ContributingPayCodePolicyFactory $f */
 			$data['id'] = $f->getNextInsertId();
 
 			$f->setObjectFromArray( $data );
@@ -9649,7 +9656,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$lf = TTnew( 'ContributingShiftPolicyListFactory' );
+		$lf = TTnew( 'ContributingShiftPolicyListFactory' ); /** @var ContributingShiftPolicyListFactory $lf */
 		$lf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $lf->getRecordCount() > 0 ) {
 			$retarr = array();
@@ -9670,7 +9677,7 @@ class SetupPresets extends Factory {
 	 */
 	function createContributingShiftPolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$f = TTnew( 'ContributingShiftPolicyFactory' );
+			$f = TTnew( 'ContributingShiftPolicyFactory' ); /** @var ContributingShiftPolicyFactory $f */
 			$data['id'] = $f->getNextInsertId();
 
 			$f->setObjectFromArray( $data );
@@ -9797,7 +9804,7 @@ class SetupPresets extends Factory {
 		$filter_data = array(
 				'name' => $name,
 		);
-		$hplf = TTnew( 'HolidayPolicyListFactory' );
+		$hplf = TTnew( 'HolidayPolicyListFactory' ); /** @var HolidayPolicyListFactory $hplf */
 		$hplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $hplf->getRecordCount() > 0 ) {
 			return $hplf->getCurrent()->getId();
@@ -9812,7 +9819,7 @@ class SetupPresets extends Factory {
 	 */
 	function createHolidayPolicy( $data ) {
 		if ( is_array( $data ) ) {
-			$hpf = TTnew( 'HolidayPolicyFactory' );
+			$hpf = TTnew( 'HolidayPolicyFactory' ); /** @var HolidayPolicyFactory $hpf */
 			$data['id'] = $hpf->getNextInsertId();
 
 			if ( isset( $data['absence_policy_id'] ) AND is_array( $data['absence_policy_id'] ) ) {
@@ -10324,7 +10331,7 @@ class SetupPresets extends Factory {
 	 */
 	function createPolicyGroup( $data ) {
 		if ( is_array( $data ) ) {
-			$pgf = TTnew( 'PolicyGroupFactory' );
+			$pgf = TTnew( 'PolicyGroupFactory' ); /** @var PolicyGroupFactory $pgf */
 			$data['id'] = $pgf->getNextInsertId();
 			$pgf->setObjectFromArray( $data );
 			if ( $pgf->isValid() ) {
@@ -10452,7 +10459,7 @@ class SetupPresets extends Factory {
 		//This must be called before UserDefaults.
 		Debug::text( 'Adding Preset Permission Groups', __FILE__, __LINE__, __METHOD__, 9 );
 
-		$pf = TTnew( 'PermissionFactory' );
+		$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 		$pf->StartTransaction();
 
 		$preset_flags = array_keys( $pf->getOptions( 'preset_flags' ) );
@@ -10460,7 +10467,7 @@ class SetupPresets extends Factory {
 		unset( $preset_options[40] ); //Remove Administration presets, as they should already exist.
 		$preset_level_options = $pf->getOptions( 'preset_level' );
 		foreach ( $preset_options as $preset_id => $preset_name ) {
-			$pcf = TTnew( 'PermissionControlFactory' );
+			$pcf = TTnew( 'PermissionControlFactory' ); /** @var PermissionControlFactory $pcf */
 			$pcf->setCompany( $this->getCompanyObject()->getID() );
 			$pcf->setName( $preset_name );
 			$pcf->setDescription( '' );
@@ -10485,7 +10492,7 @@ class SetupPresets extends Factory {
 			if ( is_object( $this->getCompanyObject()->getUserDefaultObject() ) ) {
 				$udf = $this->getCompanyObject()->getUserDefaultObject();
 			} else {
-				$udf = TTnew( 'UserDefaultFactory' );
+				$udf = TTnew( 'UserDefaultFactory' ); /** @var UserDefaultFactory $udf */
 			}
 			$udf->setCompany( $this->getCompanyObject()->getID() );
 			$udf->setLegalEntity( $legal_entity_id );
@@ -10512,35 +10519,39 @@ class SetupPresets extends Factory {
 				$udf->setDistanceFormat( 10 );
 			}
 
+			if ( strtoupper( $udf->getCountry() ) == 'US' ) {
+				$udf->setDistanceFormat( 20 ); //20=Miles.
+			}
+
 			//Get Pay Period Schedule
-			$ppslf = TTNew( 'PayPeriodScheduleListFactory' );
+			$ppslf = TTNew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 			$ppslf->getByCompanyId( $this->getCompanyObject()->getID() );
 			if ( $ppslf->getRecordCount() > 0 ) {
 				$udf->setPayPeriodSchedule( $ppslf->getCurrent()->getID() );
 			}
 
 			//Get Policy Group
-			$pglf = TTNew( 'PolicyGroupListFactory' );
+			$pglf = TTNew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$pglf->getByCompanyId( $this->getCompanyObject()->getID() );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$udf->setPolicyGroup( $pglf->getCurrent()->getID() );
 			}
 
 			//Permissions
-			$pclf = TTnew( 'PermissionControlListFactory' );
+			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 			$pclf->getByCompanyIdAndLevel( $this->getCompanyObject()->getID(), 1 );
 			if ( $pclf->getRecordCount() > 0 ) {
 				$udf->setPermissionControl( $pclf->getCurrent()->getID() );
 			}
 
 			//Currency
-			$clf = TTNew( 'CurrencyListFactory' );
+			$clf = TTNew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $clf */
 			$clf->getByCompanyIdAndDefault( $this->getCompany(), TRUE );
 			if ( $clf->getRecordCount() > 0 ) {
 				$udf->setCurrency( $clf->getCurrent()->getID() );
 			}
 
-			$upf = TTnew( 'UserPreferenceFactory' );
+			$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 			$udf->setTimeZone( $upf->getLocationTimeZone( $this->getCompanyObject()->getCountry(), $this->getCompanyObject()->getProvince(), $this->getCompanyObject()->getWorkPhone() ) );
 			Debug::text( 'Time Zone: ' . $udf->getTimeZone(), __FILE__, __LINE__, __METHOD__, 9 );
 

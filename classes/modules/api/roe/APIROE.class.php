@@ -132,7 +132,7 @@ class APIROE extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'roe', 'view' );
 
-		$rlf = TTnew( 'ROEListFactory' );
+		$rlf = TTnew( 'ROEListFactory' ); /** @var ROEListFactory $rlf */
 		$rlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $rlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $rlf->getRecordCount() > 0 ) {
@@ -220,7 +220,7 @@ class APIROE extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'ROEListFactory' );
+				$lf = TTnew( 'ROEListFactory' ); /** @var ROEListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -304,7 +304,7 @@ class APIROE extends APIFactory {
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 			if ( UserGenericStatusFactory::isStaticQueue() == TRUE ) {
-				$ugsf = TTnew( 'UserGenericStatusFactory' );
+				$ugsf = TTnew( 'UserGenericStatusFactory' ); /** @var UserGenericStatusFactory $ugsf */
 				$ugsf->setUser( $this->getCurrentUserObject()->getId() );
 				$ugsf->setBatchID( $ugsf->getNextBatchId() );
 				$ugsf->setQueue( UserGenericStatusFactory::getStaticQueue() );
@@ -315,15 +315,7 @@ class APIROE extends APIFactory {
 			}
 			unset($ugsf);
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key], TRUE, FALSE, FALSE, FALSE, $user_generic_status_batch_id ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats, $user_generic_status_batch_id ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats, $user_generic_status_batch_id );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result, $user_generic_status_batch_id );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -359,7 +351,7 @@ class APIROE extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'ROEListFactory' );
+				$lf = TTnew( 'ROEListFactory' ); /** @var ROEListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

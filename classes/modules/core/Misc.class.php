@@ -91,9 +91,9 @@ class Misc {
 		}
 	}
 
-	//This function totals arrays where the data wanting to be totaled is deep in a multi-dimentional array.
-	//Usually a row array just before its passed to smarty.
 	/**
+	 * This function totals arrays where the data wanting to be totaled is deep in a multi-dimentional array.
+	 * Usually a row array just before its passed to smarty.
 	 * @param $array
 	 * @param null $element
 	 * @param null $decimals
@@ -150,9 +150,9 @@ class Misc {
 		return $retarr;
 	}
 
-	//This function is similar to a SQL group by clause, only its done on a AssocArray
-	//Pass it a row array just before you send it to smarty.
 	/**
+	 * This function is similar to a SQL group by clause, only its done on a AssocArray
+	 * Pass it a row array just before you send it to smarty.
 	 * @param $array
 	 * @param $group_by_elements
 	 * @param array $ignore_elements
@@ -503,9 +503,8 @@ class Misc {
 		return NULL;
 	}
 
-	//This only merges arrays where the array keys must already exist.
-
 	/**
+	 * This only merges arrays where the array keys must already exist.
 	 * @param array $array1
 	 * @param array $array2
 	 * @return array
@@ -524,9 +523,8 @@ class Misc {
 		return $merged;
 	}
 
-	//Merges arrays with overwriting whereas PHP standard array_merge_recursive does not overwrites but combines.
-
 	/**
+	 * Merges arrays with overwriting whereas PHP standard array_merge_recursive does not overwrites but combines.
 	 * @param array $array1
 	 * @param array $array2
 	 * @return array
@@ -595,9 +593,8 @@ class Misc {
 		return array_intersect_key( $array, array_unique( array_map('strtolower', $array) ) );
 	}
 
-	//Adds prefix to all array keys, mainly for reportings and joining array data together to avoid conflicting keys.
-
 	/**
+	 * Adds prefix to all array keys, mainly for reportings and joining array data together to avoid conflicting keys.
 	 * @param $prefix
 	 * @param $arr
 	 * @param null $ignore_elements
@@ -623,9 +620,9 @@ class Misc {
 		// Instead just return the original variable that was passed in (likely NULL)
 		return $arr;
 	}
-	//Removes prefix to all array keys, mainly for reportings and joining array data together to avoid conflicting keys.
 
 	/**
+	 * Removes prefix to all array keys, mainly for reportings and joining array data together to avoid conflicting keys.
 	 * @param $prefix
 	 * @param $arr
 	 * @param null $ignore_elements
@@ -650,9 +647,8 @@ class Misc {
 		return FALSE;
 	}
 
-	//Adds sort prefixes to an array maintaining the original order. Primarily used because Flex likes to reorded arrays with string keys.
-
 	/**
+	 * Adds sort prefixes to an array maintaining the original order. Primarily used because Flex likes to reorded arrays with string keys.
 	 * @param $arr
 	 * @param int $begin_counter
 	 * @return array|bool
@@ -678,9 +674,8 @@ class Misc {
 		return FALSE;
 	}
 
-	//Removes sort prefixes from an array.
-
 	/**
+	 * Removes sort prefixes from an array.
 	 * @param $value
 	 * @param bool $trim_arr_value
 	 * @return array|mixed
@@ -739,9 +734,8 @@ class Misc {
 		return TRUE;
 	}
 
-	//This function helps sending binary data to the client for saving/viewing as a file.
-
 	/**
+	 * This function helps sending binary data to the client for saving/viewing as a file.
 	 * @param $file_name
 	 * @param $type
 	 * @param $data
@@ -810,9 +804,8 @@ class Misc {
 		return number_format( (float)$value, 2, TTi18n::getDecimalSymbol(), $thousand_sep );
 	}
 
-	//Removes vowels from the string always keeping the first and last letter.
-
 	/**
+	 * Removes vowels from the string always keeping the first and last letter.
 	 * @param $str
 	 * @return bool|string
 	 */
@@ -915,9 +908,8 @@ class Misc {
 		return str_replace('.', '', number_format( $value, 2, '.', '') );
 	}
 
-	//Encode integer to a alphanumeric value that is reversible.
-
 	/**
+	 * Encode integer to a alphanumeric value that is reversible.
 	 * @param $int
 	 * @return string
 	 */
@@ -964,9 +956,10 @@ class Misc {
 		return $percent;
 	}
 
-	//Takes an array with columns, and a 2nd array with column names to sum.
+	//
 
 	/**
+	 * Takes an array with columns, and a 2nd array with column names to sum.
 	 * @param $data
 	 * @param $sum_elements
 	 * @return bool|int|string
@@ -1076,9 +1069,8 @@ class Misc {
 		return ( $coord + $adjust_coord );
 	}
 
-	// Static class, static function. avoid PHP strict error.
-
 	/**
+	 * Static class, static function. avoid PHP strict error.
 	 * @param $file_name
 	 * @param $num
 	 * @param bool $print_text
@@ -1484,9 +1476,9 @@ class Misc {
 		return FALSE;
 	}
 
-	//This function is used to quickly preset array key => value pairs so we don't
-	//have to have so many isset() checks throughout the code.
 	/**
+	 * This function is used to quickly preset array key => value pairs so we don't
+	 * have to have so many isset() checks throughout the code.
 	 * @param $arr
 	 * @param $keys
 	 * @param null $preset_value
@@ -1577,19 +1569,26 @@ class Misc {
 	 * @param $file
 	 * @return int
 	 */
-	static function countLinesInFile( $file ) {
-		ini_set('auto_detect_line_endings', TRUE); //PHP can have problems detecting MAC line endings in some case, this should help solve that.
+	static function countLinesInFile( $file, $skip_blank_lines = TRUE ) {
+		ini_set('auto_detect_line_endings', TRUE); //PHP can have problems detecting Mac/OSX line endings in some case, this should help solve that.
 
 		$line_count = 0;
+		$skipped_lines = 0;
 		$handle = fopen($file, 'r');
 		while( !feof($handle) ) {
 			$line = fgets($handle, 4096);
-			$line_count = ( $line_count + substr_count( $line, "\n" ) );
+			if ( $skip_blank_lines == TRUE AND $line != '' AND ( trim($line) == '' OR trim($line, ',') == "\n" ) ) { //Ignore lines that are all commas (ie: ",,,,,,,") which can often happen at the end of a CSV file that rows were deleted from.
+				$skipped_lines++;
+			} else {
+				$line_count += substr_count( $line, "\n" );
+			}
 		}
 
 		fclose($handle);
 
 		ini_set('auto_detect_line_endings', FALSE);
+
+		Debug::text('File has total lines: '. $line_count .' Blank Lines: '. $skipped_lines, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $line_count;
 	}
@@ -1914,9 +1913,8 @@ class Misc {
 		return $retval;
 	}
 
-	//Uses the internal array pointer to get array neighnors.
-
 	/**
+	 * Uses the internal array pointer to get array neighnors.
 	 * @param $arr
 	 * @param $key
 	 * @param string $neighbor
@@ -2056,6 +2054,8 @@ class Misc {
 				}
 			} else {
 				Debug::Text( 'ERROR: Download directory/file not writable, likely permission problem?: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
+
+				return FALSE;
 			}
 		} else {
 			Debug::Text( 'Using PHP streams for HTTP...', __FILE__, __LINE__, __METHOD__, 10);
@@ -2127,9 +2127,9 @@ class Misc {
 		return $local_part;
 	}
 
-	//Checks if the domain the user is seeing in their browser matches the configured domain that should be used.
-	//If not we can then do a redirect.
 	/**
+	 * Checks if the domain the user is seeing in their browser matches the configured domain that should be used.
+	 * If not we can then do a redirect.
 	 * @return bool
 	 */
 	static function checkValidDomain() {
@@ -2155,7 +2155,7 @@ class Misc {
 					$redirect_url = Misc::getURLProtocol() .'://'. Misc::getHostName() . Environment::getDefaultInterfaceBaseURL();
 					Debug::Text( 'Web Server Hostname: '. $host_name .' does not match .ini specified hostname: '. $config_vars['other']['hostname'] .' Redirect: '. $redirect_url, __FILE__, __LINE__, __METHOD__, 10);
 
-					$rl = TTNew('RateLimit');
+					$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 					$rl->setID( 'authentication_'. Misc::getRemoteIPAddress() );
 					$rl->setAllowedCalls( 5 );
 					$rl->setTimeFrame( 60 ); //1 minute
@@ -2178,9 +2178,8 @@ class Misc {
 		return TRUE;
 	}
 
-	//Checks refer to help mitigate CSRF attacks.
-
 	/**
+	 * Checks refer to help mitigate CSRF attacks.
 	 * @param bool $referer
 	 * @return bool
 	 */
@@ -2378,9 +2377,8 @@ class Misc {
 		return FALSE;
 	}
 
-	//Converts a number between 0 and 25 to the corresponding letter.
-
 	/**
+	 * Converts a number between 0 and 25 to the corresponding letter.
 	 * @param $number
 	 * @return bool|string
 	 */
@@ -2587,6 +2585,11 @@ class Misc {
 		return $result;
 	}
 
+	/**
+	 * @param $path
+	 * @param int $recurse_parent_levels
+	 * @return bool
+	 */
 	static function deleteEmptyDirectory( $path, $recurse_parent_levels = 0 ) {
 		if ( $path == '' ) {
 			Debug::Text('Path is empty: '. $path, __FILE__, __LINE__, __METHOD__, 10);
@@ -2869,12 +2872,11 @@ class Misc {
 		return $email;
 	}
 
-	//Parses an RFC822 Email Address ( "John Doe" <john.doe@mydomain.com> ) into its separate components.
-
 	/**
+	 * Parses an RFC822 Email Address ( "John Doe" <john.doe@mydomain.com> ) into its separate components.
 	 * @param $input
 	 * @param bool $return_just_key
-	 * @return bool
+	 * @return array|bool
 	 */
 	static function parseRFC822EmailAddress( $input, $return_just_key = FALSE) {
 		if ( strstr( $input, '<>' ) !== FALSE ) { //Check for <> together, as that means no email address is specified.
@@ -3002,6 +3004,9 @@ class Misc {
 		return $retval;
 	}
 
+	/**
+	 * @return bool
+	 */
 	static function isCurrentOSUserRoot() {
 		$user = self::getCurrentOSUser();
 		if ( $user == 'root' ) {
@@ -3011,6 +3016,9 @@ class Misc {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	static function getCurrentOSUser() {
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			if ( function_exists('posix_geteuid') AND function_exists('posix_getpwuid') ) {
@@ -3026,6 +3034,10 @@ class Misc {
 		return FALSE;
 	}
 
+	/**
+	 * @param $uid
+	 * @return bool
+	 */
 	static function setProcessUID( $uid ) {
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			if ( function_exists( 'posix_setuid' ) ) {
@@ -3041,6 +3053,9 @@ class Misc {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	static function findWebServerOSUser() {
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			if ( function_exists( 'posix_getpwnam' ) ) {
@@ -3113,7 +3128,7 @@ class Misc {
 
 		//Expand the country code to the full country name?
 		if ( strlen($country) == 2 ) {
-			$cf = TTnew('CompanyFactory');
+			$cf = TTnew('CompanyFactory'); /** @var CompanyFactory $cf */
 
 			$long_country = Option::getByKey($country, $cf->getOptions('country') );
 			if ( $long_country != '' ) {
@@ -3137,6 +3152,7 @@ class Misc {
 	 * @param $email
 	 * @param bool $check_dns
 	 * @param bool $error_level
+	 * @param bool $return_raw_result
 	 * @return bool
 	 */
 	static function isEmail( $email, $check_dns = TRUE, $error_level = TRUE, $return_raw_result = FALSE ) {
@@ -3156,142 +3172,6 @@ class Misc {
 
 			return FALSE;
 		}
-	}
-
-	/**
-	 * @param $password
-	 * @return int
-	 */
-	static function getPasswordStrength( $password ) {
-		if ( strlen( $password ) == 0 ) {
-			return 1;
-		}
-
-		$strength = 0;
-
-		//get the length of the password
-		$length = strlen($password);
-
-		//check if password is not all lower case
-		if ( strtolower($password) != $password ) {
-			$strength++;
-		}
-
-		//check if password is not all upper case
-		if ( strtoupper($password) != $password ) {
-			$strength++;
-		}
-
-		//check string length is 6-9 chars
-		if ( $length >= 6 AND $length <= 9 ) {
-			$strength++;
-		}
-
-		//check if length is 10-15 chars
-		if ( $length >= 10 AND $length <= 15 ) {
-			$strength += 2;
-		}
-
-		//check if length greater than 15 chars
-		if ( $length > 15 ) {
-			$strength += 3;
-		}
-
-		$duplicate_chars = 1;
-		$consecutive_chars = 1;
-		$char_arr = str_split( strtolower($password) );
-		$prev_char_int = ord($char_arr[0]);
-		foreach( $char_arr as $char ) {
-			$curr_char_int = ord($char);
-			$char_int_diff = abs($prev_char_int - $curr_char_int);
-			if ( $char_int_diff == 0 ) { //Duplicate
-				$duplicate_chars++;
-			} elseif ( $char_int_diff == 1 OR $char_int_diff == -1 ) { //Consecutive
-				$consecutive_chars++;
-			}
-			$prev_char_int = $curr_char_int;
-		}
-		$duplicate_percent = ( ( $duplicate_chars / strlen($password) ) * 100 );
-		$consecutive_percent = ( ( $consecutive_chars / strlen($password) ) * 100 );
-		if ( $duplicate_percent <= 25 ) {
-			$strength++;
-		}
-		if ( $consecutive_percent <= 25 ) {
-			$strength++;
-		}
-
-		//get the numbers in the password
-		preg_match_all('/[0-9]/', $password, $numbers);
-		//Prevent the addition of a single number to the beginning/end of the password from increasing the strength.
-		if ( is_numeric( substr( $password, 0, 1) ) == TRUE ) {
-			array_pop( $numbers[0] );
-		}
-		if ( is_numeric( substr( $password, -1, 1) ) == TRUE ) {
-			array_pop( $numbers[0] );
-		}
-		$strength += ( count( $numbers[0] ) * 2 );
-
-		//check for special chars
-		preg_match_all('/[|!@#$%&*\/=?,;.:\-_+~^\\\]/', $password, $specialchars);
-		$strength += ( count($specialchars[0]) * 3 );
-
-		//get the number of unique chars
-		$chars = str_split($password);
-		$num_unique_chars = count( array_unique($chars) );
-		$unique_percent = ( ( $num_unique_chars / strlen($password) ) * 100 );
-
-		$strength += ( $num_unique_chars * 2 );
-
-
-		//If the password consists of duplicate or consecutive chars, make it the lowest strength.
-		//This should help prevent 12345, or abcde passwords.
-		if ( $unique_percent <= 20 ) {
-			$strength = 1;
-		}
-		if ( $duplicate_percent >= 50 ) {
-			$strength = 1;
-		}
-		if ( $consecutive_percent >= 60 ) {
-			$strength = 1;
-		}
-		Debug::Text('Duplicate: Chars: '. $duplicate_chars .' Percent: '. $duplicate_percent  .' Consec: Chars: '. $consecutive_chars .' Percent: '. $consecutive_percent .' Unique: Chars: '. $num_unique_chars .' Percent: '. $unique_percent, __FILE__, __LINE__, __METHOD__, 10);
-
-		//Check for dictionary word, if its just a dictionary word make it the lowest strength.
-		if ( function_exists( 'pspell_new' ) ) {
-			//If no aspell dictionary is installed, you might see: WARNING(2): pspell_new(): PSPELL couldn't open the dictionary. reason: No word lists can be found for the language "en".
-			//  On Centos this can fixed by: yum install aspell-en
-			$pspell_config = @pspell_config_create( 'en' );
-			$pspell_link = @pspell_new_config( $pspell_config );
-			if ( $pspell_link != FALSE ) {
-				if ( pspell_check( $pspell_link, $password ) !== FALSE ) {
-					Debug::Text( 'Matches dictionary word exactly: ' . $password, __FILE__, __LINE__, __METHOD__, 10 );
-					$strength = 1;
-				}
-				if ( pspell_check( $pspell_link, substr( $password, 1 ) ) !== FALSE ) {
-					Debug::Text( 'Matches dictionary word after 1st char is dropped: ' . $password, __FILE__, __LINE__, __METHOD__, 10 );
-					$strength = 1;
-				}
-				if ( pspell_check( $pspell_link, substr( $password, 0, -1 ) ) !== FALSE ) {
-					Debug::Text( 'Matches dictionary word after last char is dropped: ' . $password, __FILE__, __LINE__, __METHOD__, 10 );
-					$strength = 1;
-				}
-				if ( pspell_check( $pspell_link, substr( substr( $password, 1 ), 0, -1 ) ) !== FALSE ) {
-					Debug::Text( 'Matches dictionary word after first and last char is dropped: ' . $password, __FILE__, __LINE__, __METHOD__, 10 );
-					$strength = 1;
-				}
-			} else {
-				Debug::Text('WARNING: pspell extension is installed but not functioning, is a dictionary installed?', __FILE__, __LINE__, __METHOD__, 10);
-			}
-		} else {
-			Debug::Text('WARNING: pspell extension is not enabled...', __FILE__, __LINE__, __METHOD__, 10);
-		}
-
-		//strength is a number 1-10;
-		$strength = $strength > 99 ? 99 : $strength;
-		$strength = floor( ( ( $strength / 10 ) + 1 ) );
-
-		Debug::Text('Strength: '. $strength, __FILE__, __LINE__, __METHOD__, 10);
-		return $strength;
 	}
 
 	/**
@@ -3495,10 +3375,10 @@ class Misc {
 		return $retval;
 	}
 
-	//Take an amount and a distribution array of key => value pairs, value being a decimal percent (ie: 0.50 for 50%)
-	//return an array with the same keys and resulting distribution between them.
-	//Adding any remainder to the last key is the fastest.
 	/**
+	 * Take an amount and a distribution array of key => value pairs, value being a decimal percent (ie: 0.50 for 50%)
+	 * return an array with the same keys and resulting distribution between them.
+	 * Adding any remainder to the last key is the fastest.
 	 * @param $amount
 	 * @param $percent_arr
 	 * @param string $remainder_operation
@@ -3539,9 +3419,8 @@ class Misc {
 		return FALSE;
 	}
 
-	//Change the case of all values in an array
-
 	/**
+	 * Change the case of all values in an array
 	 * @param $input
 	 * @param int $case
 	 * @return array|bool
@@ -3695,10 +3574,10 @@ class Misc {
 		return implode(' ', $version_string );
 	}
 
-	//Removes the word "the" from the beginning of strings and optionally places it at the end.
-	//Primarily for client/company names like: The XYZ Company -> XYZ Company, The
-	//Should often be used to sanitize metaphones.
 	/**
+	 * Removes the word "the" from the beginning of strings and optionally places it at the end.
+	 * Primarily for client/company names like: The XYZ Company -> XYZ Company, The
+	 * Should often be used to sanitize metaphones.
 	 * @param $str
 	 * @param bool $add_to_end
 	 * @return bool|string
@@ -3715,9 +3594,9 @@ class Misc {
 		return $str;
 	}
 
-	//Remove any HTML special char (before its encoded) from the string
-	//Useful for things like government forms submitted in XML.
 	/**
+	 * Remove any HTML special char (before its encoded) from the string
+	 * Useful for things like government forms submitted in XML.
 	 * @param $str
 	 * @return mixed
 	 */
@@ -3762,6 +3641,7 @@ class Misc {
 	 * @param bool $province
 	 * @param bool $postal_code
 	 * @param bool $country
+	 * @param bool $condensed
 	 * @return string
 	 */
 	static function formatAddress( $name, $address1 = FALSE, $address2 = FALSE, $city = FALSE, $province = FALSE, $postal_code = FALSE, $country = FALSE, $condensed = FALSE ) {
@@ -3854,7 +3734,7 @@ class Misc {
 	 * @param $file_array
 	 * @param bool $zip_file_name
 	 * @param bool $ignore_single_file
-	 * @return array
+	 * @return array|bool
 	 */
 	static function zip( $file_array, $zip_file_name = FALSE, $ignore_single_file = FALSE ) {
 		if ( !is_array( $file_array ) OR count( $file_array ) == 0 ) {
@@ -3898,6 +3778,8 @@ class Misc {
 				return FALSE; //No ZIP files to return...
 			}
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -3964,6 +3846,55 @@ class Misc {
 
 		$retval = bcsub( $limit, $tmp_amount );
 		return $retval;
+	}
+
+	/**
+	 * Generic Retry handler with closures.
+	 * @param $function Closure
+	 * @param int $retry_max_attempts
+	 * @param int $retry_sleep
+	 * @return mixed
+	 * @throws Exception
+	 */
+	function Retry( $function, $retry_max_attempts = 3, $retry_sleep = 1 ) { //When changing function definition, also see APIFactory->RetryTransaction()
+		$tmp_sleep = ( $retry_sleep * 1000000 );
+		$retry_attempts = 0;
+		while ( $retry_attempts < $retry_max_attempts ) {
+			try {
+				unset( $e ); //Clear any exceptions on retry.
+
+				Debug::text('==================START: RETRY BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10);
+				$retval = $function(); //This function should call StartTransaction() at the beginning, and CommitTransaction() at the end.
+				Debug::text('==================END: RETRY BLOCK=====================================', __FILE__, __LINE__, __METHOD__, 10);
+			} catch ( Exception $e ) {
+				$random_sleep_interval = ( ceil( ( rand() / getrandmax() ) * ( ( $tmp_sleep * 0.33 ) * 2 ) - ( $tmp_sleep * 0.33 ) ) ); //+/- 33% of the sleep time.
+
+				Debug::text('WARNING: Retry block failed: Retry Attempt: '. $retry_attempts .' Sleep: '. ( $tmp_sleep + $random_sleep_interval ) .'('. $tmp_sleep .') Code: '. $e->getCode() .' Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('==================END: RETRY BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10);
+
+				if ( $retry_attempts < ( $retry_max_attempts -1 ) ) { //Don't sleep on the last iteration as its serving no purpose.
+					usleep( $tmp_sleep + $random_sleep_interval );
+				}
+
+				$tmp_sleep = ( $tmp_sleep * 2 ); //Exponential back-off with 25% of retry sleep time as a random value.
+				$retry_attempts++;
+
+				continue;
+			}
+			break;
+		}
+
+		if ( isset( $e ) ) { //$retry_attempts >= $retry_max_attempts ) { //Allow retry_max_attempst to be set at 0 to prevent any retries and fail without an error.
+			Debug::text('ERROR: RETRY block failed after max attempts: '. $retry_attempts .' Max: '. $retry_max_attempts, __FILE__, __LINE__, __METHOD__, 10);
+			throw $e;
+		}
+
+		if ( isset( $retval ) ) {
+			Debug::Arr( $retval, 'Returning Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+			return $retval;
+		}
+
+		return NULL;
 	}
 }
 ?>

@@ -84,9 +84,8 @@ class RateLimit {
 		return FALSE;
 	}
 
-	//Define the number of calls to check() allowed over a given time frame.
-
 	/**
+	 * Define the number of calls to check() allowed over a given time frame.
 	 * @return int
 	 */
 	function getAllowedCalls() {

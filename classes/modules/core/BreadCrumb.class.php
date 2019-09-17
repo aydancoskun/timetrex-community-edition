@@ -170,7 +170,7 @@ class BreadCrumb {
 	static function Delete( $user_id = NULL) {
 		global $db, $current_user;
 
-		if ( empty($user_id) OR $document_id == TTUUID::getZeroID() ) {
+		if ( empty($user_id) OR $user_id == TTUUID::getZeroID() ) {
 			if ( is_object($current_user) ) {
 				$user_id = $current_user->getId();
 			} else {
@@ -194,9 +194,8 @@ class BreadCrumb {
 		return TRUE;
 	}
 
-	//Used to return to the last URL the user visited.
-
 	/**
+	 * Used to return to the last URL the user visited.
 	 * @param int $num
 	 * @return mixed
 	 */

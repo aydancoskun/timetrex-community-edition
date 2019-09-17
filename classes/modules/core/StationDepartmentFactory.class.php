@@ -67,7 +67,7 @@ class StationDepartmentFactory extends Factory {
 		if ( is_object($this->department_obj) ) {
 			return $this->department_obj;
 		} else {
-			$dlf = TTnew( 'DepartmentListFactory' );
+			$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 			$dlf->getById( $this->getDepartment() );
 			if ( $dlf->getRecordCount() == 1 ) {
 				$this->department_obj = $dlf->getCurrent();
@@ -113,7 +113,7 @@ class StationDepartmentFactory extends Factory {
 											);
 		}
 		// Department
-		$dlf = TTnew( 'DepartmentListFactory' );
+		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		$this->Validator->isResultSetWithRows(	'department',
 														$dlf->getByID($this->getDepartment()),
 														TTi18n::gettext('Selected Department is invalid')
@@ -125,9 +125,8 @@ class StationDepartmentFactory extends Factory {
 		return TRUE;
 	}
 
-	//This table doesn't have any of these columns, so overload the functions.
-
 	/**
+	 * This table doesn't have any of these columns, so overload the functions.
 	 * @return bool
 	 */
 	function getDeleted() {

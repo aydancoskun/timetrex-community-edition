@@ -53,6 +53,7 @@ class APIUserReportData extends APIFactory {
 	/**
 	 * Get user data for one or more users.
 	 * @param array $data filter data
+	 * @param bool $disable_paging
 	 * @return array
 	 */
 	function getUserReportData( $data = NULL, $disable_paging = FALSE ) {
@@ -70,7 +71,7 @@ class APIUserReportData extends APIFactory {
 
 		Debug::Arr($data, 'Getting User Report Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$ugdlf = TTnew( 'UserReportDataListFactory' );
+		$ugdlf = TTnew( 'UserReportDataListFactory' ); /** @var UserReportDataListFactory $ugdlf */
 		$ugdlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $ugdlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ugdlf->getRecordCount() > 0 ) {
@@ -127,7 +128,7 @@ class APIUserReportData extends APIFactory {
 				}
 
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserReportDataListFactory' );
+				$lf = TTnew( 'UserReportDataListFactory' ); /** @var UserReportDataListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) ) {
 					//Modifying existing object.
@@ -226,7 +227,7 @@ class APIUserReportData extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserReportDataListFactory' );
+				$lf = TTnew( 'UserReportDataListFactory' ); /** @var UserReportDataListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -313,7 +314,7 @@ class APIUserReportData extends APIFactory {
 				//Should we always disable the default setting?
 				//Should we copy any schedules that go along with each saved report? This could cause a lot of issues with mass emails being sent out without intention.
 
-				$urdf = TTnew('UserReportDataFactory');
+				$urdf = TTnew('UserReportDataFactory'); /** @var UserReportDataFactory $urdf */
 
 				//Copy to destination users.
 				if ( is_array($destination_user_ids) ) {
@@ -321,7 +322,7 @@ class APIUserReportData extends APIFactory {
 						$dst_rows[$x] = $src_rows[$key];
 						$dst_rows[$x]['user_id'] = $destination_user_id;
 
-						$ulf = TTnew('UserListFactory');
+						$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 						$ulf->getByIdAndCompanyId( $destination_user_id, $this->getCurrentUserObject()->getCompany() );
 						if ( $ulf->getRecordCount() == 1 ) {
 							TTLog::addEntry( TTUUID::castUUID( $row['id'] ), 500, TTi18n::getText('Shared report with').': '. $ulf->getCurrent()->getFullName( FALSE, TRUE ), NULL, $urdf->getTable() );

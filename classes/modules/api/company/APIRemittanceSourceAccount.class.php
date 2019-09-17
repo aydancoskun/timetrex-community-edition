@@ -82,7 +82,7 @@ class APIRemittanceSourceAccount extends APIFactory {
 		);
 
 		//Get New Hire Defaults.
-		$udlf = TTnew( 'UserDefaultListFactory' );
+		$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 		$udlf->getByCompanyId( $company_obj->getId() );
 		if ( $udlf->getRecordCount() > 0 ) {
 			Debug::Text('Using User Defaults, as they exist...', __FILE__, __LINE__, __METHOD__, 10);
@@ -119,7 +119,7 @@ class APIRemittanceSourceAccount extends APIFactory {
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
 
-		$blf = TTnew( 'RemittanceSourceAccountListFactory' );
+		$blf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -195,8 +195,7 @@ class APIRemittanceSourceAccount extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				/** @var RemittanceSourceAccountListFactory $lf */
-				$lf = TTnew( 'RemittanceSourceAccountListFactory' );
+				$lf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -302,7 +301,7 @@ class APIRemittanceSourceAccount extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'RemittanceSourceAccountListFactory' );
+				$lf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -395,6 +394,7 @@ class APIRemittanceSourceAccount extends APIFactory {
 	/**
 	 * Download a test file for $0.01 post dated for 2 days in the future for each provided source account ID.
 	 * @param $ids
+	 * @return array|bool
 	 */
 	function testExport( $ids ) {
 		require_once( Environment::getBasePath() . '/classes/ChequeForms/ChequeForms.class.php' );
@@ -404,24 +404,20 @@ class APIRemittanceSourceAccount extends APIFactory {
 				'id' => $ids,
 		);
 
-		/** @var RemittanceSourceAccountListFactory $rsalf */
-		$rsalf = TTnew('RemittanceSourceAccountListFactory');
+		$rsalf = TTnew('RemittanceSourceAccountListFactory'); /** @var RemittanceSourceAccountListFactory $rsalf */
 		$rsalf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $filter_data );
 
-		/** @var RemittanceSourceAccountFactory $rsaf */
 		foreach ( $rsalf as $rs_obj ) {
-			/** @var PayStubTransactionFactory $pstf */
-			$pstf = TTnew('PayStubTransactionFactory');
+			$pstf = TTnew('PayStubTransactionFactory'); /** @var PayStubTransactionFactory $pstf */
 			$pstf->setAmount( 0.01 );
 			$pstf->setCurrency( $rs_obj->getCurrency() );
 			$pstf->setType( $rs_obj->getType() );
 			$pstf->setRemittanceSourceAccount( $rs_obj->getId() );
 
-			/** @var PayStubFactory $ps_obj */
-			$ps_obj = TTnew('PayStubFactory');
+			$ps_obj = TTnew('PayStubFactory'); /** @var PayStubFactory $ps_obj */
 			$ps_obj->setTransactionDate ( TTDate::getBeginDayEpoch(time()) );
-			$ps_obj->setStartDate( mktime(0,0,0, TTDate::getMonth(time()), TTDate::getDayOfMonth( TTDate::incrementDate( time(), -14, 'day'), TTDate::getYear(time())) ) );
-			$ps_obj->setEndDate( mktime(0,0,0, TTDate::getMonth(time()), TTDate::getDayOfMonth( TTDate::incrementDate( time(), -1, 'day'), TTDate::getYear(time())) ) );
+			$ps_obj->setStartDate( mktime(0, 0, 0, TTDate::getMonth(time()), TTDate::getDayOfMonth( TTDate::incrementDate( time(), -14, 'day') ), TTDate::getYear( time() ) ) );
+			$ps_obj->setEndDate( mktime(0, 0, 0, TTDate::getMonth(time()), TTDate::getDayOfMonth( TTDate::incrementDate( time(), -1, 'day') ), TTDate::getYear( time() ) ) );
 			$ps_obj->setCurrency( $rs_obj->getCurrency() );
 
 			//This mirrors PayStubTransaction::exportPayStubTransaction()
@@ -444,7 +440,7 @@ class APIRemittanceSourceAccount extends APIFactory {
 				$data_format_types = $rs_obj->getOptions('data_format_check_form');
 
 				$data_format_type_id = $rs_obj->getDataFormat();
-				$check_file_obj = TTnew('ChequeForms');
+				$check_file_obj = TTnew('ChequeForms'); /** @var ChequeForms $check_file_obj */
 				$check_obj = $check_file_obj->getFormObject( strtoupper( $data_format_types[$data_format_type_id] ) );
 //				if ( PRODUCTION == FALSE AND Debug::getEnable() == TRUE ) {
 //					$check_obj->setDebug( TRUE );
@@ -471,6 +467,10 @@ class APIRemittanceSourceAccount extends APIFactory {
 	}
 
 
+	/**
+	 * @param $id
+	 * @return bool
+	 */
 	function deleteImage( $id ) {
 		//permissions match setRemittanceSourceAccount()
 		if ( !$this->getPermissionObject()->Check('remittance_source_account', 'enabled')
@@ -481,14 +481,15 @@ class APIRemittanceSourceAccount extends APIFactory {
 
 		$result = $this->stripReturnHandler( $this->getRemittanceSourceAccount( array('filter_data' => array( 'id' => $id ) ) ) );
 		if ( isset($result[0]) AND count($result[0]) > 0 ) {
-			/** @var RemittanceSourceAccountFactory $uf */
-			$uf = TTnew( 'RemittanceSourceAccountFactory' );
+			$uf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $uf */
 			$file_name = $uf->getSignatureFileName( $this->current_company->getId(), $id );
 
 			if ( file_exists($file_name) ) {
 				unlink($file_name);
 			}
 		}
+
+		return $this->returnHandler( TRUE );
 	}
 }
 ?>

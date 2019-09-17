@@ -76,7 +76,7 @@ class InstallSchema_1070A extends InstallSchema_Base {
 		}
 
 		//Handle new permissions.
-		$clf = TTNew('CompanyListFactory');
+		$clf = TTNew('CompanyListFactory'); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			$x = 0;
@@ -92,7 +92,7 @@ class InstallSchema_1070A extends InstallSchema_Base {
 					$preset_options = $pf->getOptions('preset');
 					$preset_level_options = $pf->getOptions('preset_level');
 
-					$pcf = TTnew( 'PermissionControlFactory' );
+					$pcf = TTnew( 'PermissionControlFactory' ); /** @var PermissionControlFactory $pcf */
 					$pcf->setCompany( $company_obj->getID() ); //Regular Employee (Manual TimeSheet)
 					$pcf->setName( $preset_options[14] );
 					$pcf->setDescription( '' );
@@ -116,7 +116,7 @@ class InstallSchema_1070A extends InstallSchema_Base {
 						}
 
 						//Add punch_timesheet to all existing permission groups.
-						$plf = TTnew( 'PermissionListFactory' );
+						$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_obj->getId(), $pc_obj->getId(), 'punch', 'add', 1 ); //Only return records where permission is ALLOWED.
 						if ( $plf->getRecordCount() > 0 ) {
 							Debug::text( '  Found permission group with punch,add, add punch_timesheet: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
@@ -131,7 +131,7 @@ class InstallSchema_1070A extends InstallSchema_Base {
 
 						if ( $company_obj->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 							//Add manual_timesheet to all existing permission groups. Since in theory any regular employee could have manual timesheet mode enabled, all supervisors need to have it enabled too.
-							$plf = TTnew( 'PermissionListFactory' );
+							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_obj->getId(), $pc_obj->getId(), 'punch', 'edit_child', 1 ); //Only return records where permission is ALLOWED.
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text( '  Found permission group with punch,edit_child, adding manual_timesheet: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
@@ -147,7 +147,7 @@ class InstallSchema_1070A extends InstallSchema_Base {
 
 						if ( $company_obj->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 							//Add request,add_advanced to all existing permission groups by default.
-							$plf = TTnew( 'PermissionListFactory' );
+							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_obj->getId(), $pc_obj->getId(), 'request', 'add', 1 ); //Only return records where permission is ALLOWED.
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text( '  Found permission group with request,add, adding add_advanced: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
@@ -163,7 +163,7 @@ class InstallSchema_1070A extends InstallSchema_Base {
 							//
 							//Add government_document,view_own to all existing permission groups by default.
 							//
-							$plf = TTnew( 'PermissionListFactory' );
+							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_obj->getId(), $pc_obj->getId(), 'pay_stub', 'view_own', 1 ); //Only return records where permission is ALLOWED.
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text( '  Found permission group with request,add, adding add_advanced: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
@@ -176,7 +176,7 @@ class InstallSchema_1070A extends InstallSchema_Base {
 								Debug::text( '  Permission group does NOT have request,add enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 							}
 
-							$plf = TTnew( 'PermissionListFactory' );
+							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_obj->getId(), $pc_obj->getId(), 'pay_stub', array( 'add', 'edit', 'delete'), 1 ); //Only return records where permission is ALLOWED.
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text( '  Found permission group with request,add, adding add_advanced: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );

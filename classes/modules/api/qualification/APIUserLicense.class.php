@@ -100,7 +100,7 @@ class APIUserLicense extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$ullf = TTnew( 'UserLicenseListFactory' );
+		$ullf = TTnew( 'UserLicenseListFactory' ); /** @var UserLicenseListFactory $ullf */
 
 		$ullf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 
@@ -194,7 +194,7 @@ class APIUserLicense extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserLicenseListFactory' );
+				$lf = TTnew( 'UserLicenseListFactory' ); /** @var UserLicenseListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -314,7 +314,7 @@ class APIUserLicense extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserLicenseListFactory' );
+				$lf = TTnew( 'UserLicenseListFactory' ); /** @var UserLicenseListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

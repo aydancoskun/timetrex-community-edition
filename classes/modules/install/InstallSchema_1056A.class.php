@@ -56,20 +56,20 @@ class InstallSchema_1056A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Make sure Medicare Employer uses the same include/exclude accounts as Medicare Employee.
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj ) {
 				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 				if ( $c_obj->getStatus() != 30 ) {
-					$ppslf = TTNew('PayPeriodScheduleListFactory');
+					$ppslf = TTNew('PayPeriodScheduleListFactory'); /** @var PayPeriodScheduleListFactory $ppslf */
 					$ppslf->getByCompanyID( $c_obj->getId() );
 					if ( $ppslf->getRecordCount() > 0 ) {
 						$minimum_time_between_shifts = $ppslf->getCurrent()->getNewDayTriggerTime();
 					}
 
 					if ( isset($minimum_time_between_shifts) ) {
-						$pplf = TTNew('PremiumPolicyListFactory');
+						$pplf = TTNew('PremiumPolicyListFactory'); /** @var PremiumPolicyListFactory $pplf */
 						$pplf->getAPISearchByCompanyIdAndArrayCriteria( $c_obj->getID(), array('type_id' => 50) );
 						if ( $pplf->getRecordCount() > 0 ) {
 							foreach( $pplf as $pp_obj ) {

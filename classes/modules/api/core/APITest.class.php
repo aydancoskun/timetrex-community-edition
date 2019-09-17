@@ -93,9 +93,8 @@ class APITest extends APIFactory {
 
 	}
 
-	//Return large dataset to test performance.
-
 	/**
+	 * Return large dataset to test performance.
 	 * @param int $max_size
 	 * @param int $delay
 	 * @param string $progress_bar_id UUID
@@ -123,9 +122,8 @@ class APITest extends APIFactory {
 		return $retarr;
 	}
 
-	//Date test, since Flex doesn't handle timezones very well, run tests to ensure things are working correctly.
-
 	/**
+	 * Date test, since Flex doesn't handle timezones very well, run tests to ensure things are working correctly.
 	 * @param int $test
 	 * @return array
 	 */

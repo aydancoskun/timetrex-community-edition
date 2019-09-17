@@ -55,7 +55,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -124,7 +124,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit);
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit);
 
 		return $this;
 	}
@@ -160,7 +160,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit);
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit);
 
 		return $this;
 	}
@@ -201,7 +201,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -245,7 +245,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -279,7 +279,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -326,7 +326,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= $this->getSortSQL( $order, $strict );
 
 		//This supports a list of IDs, so we need to make sure paging is also available.
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -379,7 +379,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= $this->getSortSQL( $order, $strict );
 
 		//This supports a list of IDs, so we need to make sure paging is also available.
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -547,7 +547,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10 );
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -748,7 +748,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10 );
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

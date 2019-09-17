@@ -93,8 +93,8 @@ class APIException extends APIFactory {
 
 		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
 				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child') ) ) {
-			//return $this->getPermissionObject()->PermissionDenied();
-			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
+			return $this->getPermissionObject()->PermissionDenied(); //If they don't have permissions to view punches/timesheets, what good is it to show them exceptions?
+			//$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
@@ -104,7 +104,7 @@ class APIException extends APIFactory {
 			$data['filter_data']['pay_period_status_id'] = array(10, 12, 30); //All but closed
 		}
 
-		$blf = TTnew( 'ExceptionListFactory' );
+		$blf = TTnew( 'ExceptionListFactory' ); /** @var ExceptionListFactory $blf */
 
 		$type_ids = Misc::trimSortPrefix( $blf->getOptions('type') );
 		if ( !isset($data['filter_data']['show_pre_mature']) OR ( isset($data['filter_data']['show_pre_mature']) AND $data['filter_data']['show_pre_mature'] == FALSE ) ) {

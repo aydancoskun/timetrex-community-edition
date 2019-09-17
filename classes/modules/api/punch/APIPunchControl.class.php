@@ -86,7 +86,7 @@ class APIPunchControl extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
 
-		$blf = TTnew( 'PunchControlListFactory' );
+		$blf = TTnew( 'PunchControlListFactory' ); /** @var PunchControlListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -162,7 +162,7 @@ class APIPunchControl extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PunchControlListFactory' );
+				$lf = TTnew( 'PunchControlListFactory' ); /** @var PunchControlListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -278,7 +278,7 @@ class APIPunchControl extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PunchControlListFactory' );
+				$lf = TTnew( 'PunchControlListFactory' ); /** @var PunchControlListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -384,7 +384,8 @@ class APIPunchControl extends APIFactory {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
-		return $this->returnHandler( PunchControlFactory::dragNdropPunch( $this->getCurrentCompanyObject()->getId(), $src_punch_id, $dst_punch_id, $dst_status_id, $position, $action, $dst_date ) );
+		$pcf = TTnew('PunchControlFactory'); /** @var PunchControlFactory $pcf */
+		return $this->returnHandler( $pcf->dragNdropPunch( $this->getCurrentCompanyObject()->getId(), $src_punch_id, $dst_punch_id, $dst_status_id, $position, $action, $dst_date ) );
 	}
 }
 ?>

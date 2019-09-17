@@ -192,7 +192,7 @@ class DepartmentFactory extends Factory {
 			$company_id = $this->getCompany();
 		}
 
-		$dlf = TTnew( 'DepartmentListFactory' );
+		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		$dlf->getHighestManualIDByCompanyId( $company_id );
 		if ( $dlf->getRecordCount() > 0 ) {
 			$next_available_manual_id = ( $dlf->getCurrent()->getManualId() + 1 );
@@ -301,7 +301,7 @@ class DepartmentFactory extends Factory {
 	 */
 	function getBranch() {
 		$branch_list = array();
-		$dblf = TTnew( 'DepartmentBranchListFactory' );
+		$dblf = TTnew( 'DepartmentBranchListFactory' ); /** @var DepartmentBranchListFactory $dblf */
 		$dblf->getByDepartmentId( $this->getId() );
 		foreach ($dblf as $department_branch) {
 			$branch_list[] = $department_branch->getBranch();
@@ -321,7 +321,7 @@ class DepartmentFactory extends Factory {
 	function setBranch( $ids) {
 		if (is_array($ids) AND count($ids) > 0) {
 			//If needed, delete mappings first.
-			$dblf = TTnew( 'DepartmentBranchListFactory' );
+			$dblf = TTnew( 'DepartmentBranchListFactory' ); /** @var DepartmentBranchListFactory $dblf */
 			$dblf->getByDepartmentId( $this->getId() );
 
 			$branch_ids = array();
@@ -341,7 +341,7 @@ class DepartmentFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$dbf = TTnew( 'DepartmentBranchFactory' );
+			$dbf = TTnew( 'DepartmentBranchFactory' ); /** @var DepartmentBranchFactory $dbf */
 			foreach ($ids as $id) {
 				if ( !in_array($id, $branch_ids) ) {
 					$dbf->setDepartment( $this->getId() );
@@ -493,7 +493,7 @@ class DepartmentFactory extends Factory {
 		//
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'company',
 															$clf->getByID($this->getCompany()),
 															TTi18n::gettext('Company is invalid')
@@ -623,54 +623,54 @@ class DepartmentFactory extends Factory {
 		if ( $this->getDeleted() == TRUE ) {
 			Debug::Text('UnAssign Hours from Department: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			//Unassign hours from this department.
-			$pcf = TTnew( 'PunchControlFactory' );
-			$udtf = TTnew( 'UserDateTotalFactory' );
-			$uf = TTnew( 'UserFactory' );
-			$sf = TTnew( 'StationFactory' );
-			$sdf = TTnew( 'StationDepartmentFactory' );
-			$sf_b = TTnew( 'ScheduleFactory' );
-			$udf = TTnew( 'UserDefaultFactory' );
-			$rstf = TTnew( 'RecurringScheduleTemplateFactory' );
-			$rsf = TTnew( 'RecurringScheduleFactory' );
+			$pcf = TTnew( 'PunchControlFactory' ); /** @var PunchControlFactory $pcf */
+			$udtf = TTnew( 'UserDateTotalFactory' ); /** @var UserDateTotalFactory $udtf */
+			$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
+			$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
+			$sdf = TTnew( 'StationDepartmentFactory' ); /** @var StationDepartmentFactory $sdf */
+			$sf_b = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf_b */
+			$udf = TTnew( 'UserDefaultFactory' ); /** @var UserDefaultFactory $udf */
+			$rstf = TTnew( 'RecurringScheduleTemplateFactory' ); /** @var RecurringScheduleTemplateFactory $rstf */
+			$rsf = TTnew( 'RecurringScheduleFactory' ); /** @var RecurringScheduleFactory $rsf */
 
 			$query = 'update '. $pcf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $udtf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $sf_b->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $uf->getTable() .' set default_department_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND default_department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $udf->getTable() .' set default_department_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND default_department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $sf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'delete from '. $sdf->getTable() .' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $rstf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $rsf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-				$jf = TTNew('JobFactory');
+				$jf = TTNew('JobFactory'); /** @var JobFactory $jf */
 				$query = 'update '. $jf->getTable() .' set department_id = \''. TTUUID::getZeroID() .'\' where department_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-				$this->db->Execute($query);
+				$this->ExecuteSQL($query);
 
 				//Job employee criteria
-				$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
+				$cgmlf = TTnew( 'CompanyGenericMapListFactory' ); /** @var CompanyGenericMapListFactory $cgmlf */
 				$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 1020, $this->getID() );
 				if ( $cgmlf->getRecordCount() > 0 ) {
 					foreach( $cgmlf as $cgm_obj ) {
-						Debug::text('Deleteing from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Deleting from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 						$cgm_obj->Delete();
 					}
 				}
@@ -683,9 +683,9 @@ class DepartmentFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

@@ -108,7 +108,7 @@ class APIMealPolicy extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'meal_policy', 'view' );
 
-		$blf = TTnew( 'MealPolicyListFactory' );
+		$blf = TTnew( 'MealPolicyListFactory' ); /** @var MealPolicyListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -187,7 +187,7 @@ class APIMealPolicy extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'MealPolicyListFactory' );
+				$lf = TTnew( 'MealPolicyListFactory' ); /** @var MealPolicyListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -289,7 +289,7 @@ class APIMealPolicy extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'MealPolicyListFactory' );
+				$lf = TTnew( 'MealPolicyListFactory' ); /** @var MealPolicyListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

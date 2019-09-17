@@ -100,9 +100,9 @@ class TTPDF extends tcpdf {
 		return TRUE;
 	}
 
-	//TCPDF oddly enough defines standard header/footers, instead of disabling them
-	//in every script, just override them as blank here.
 	/**
+	 * TCPDF oddly enough defines standard header/footers, instead of disabling them
+	 * in every script, just override them as blank here.
 	 * @return bool
 	 */
 	function header() {

@@ -36,11 +36,10 @@
 
 
 /**
+ * THIS IS THE SCHEMA VERSION THAT SWITCHES TO UUIDs.
  * @package Modules\Install
  */
 class InstallSchema_1100A extends InstallSchema_Base {
-
-	//THIS IS THE SCHEMA VERSION THAT SWITCHES TO UUIDs.
 
 	/**
 	 * @return bool
@@ -122,6 +121,11 @@ class InstallSchema_1100A extends InstallSchema_Base {
 		return TRUE;
 	}
 
+	/**
+	 * @param $data
+	 * @param $script
+	 * @return array
+	 */
 	function convertUserGenericData( $data, $script ) {
 		if ( !is_array( $data ) ) {
 			return $data;
@@ -157,6 +161,11 @@ class InstallSchema_1100A extends InstallSchema_Base {
 		return $data;
 	}
 
+	/**
+	 * @param $data
+	 * @param $script
+	 * @return mixed
+	 */
 	function convertUserReportData( $data, $script ) {
 		//Debug::Arr( $data,'+++ pre conversion data (possibly recursive) ', __FILE__, __LINE__, __METHOD__, 9 );
 		$config_fields_to_convert = array(

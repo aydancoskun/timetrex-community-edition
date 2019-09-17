@@ -58,8 +58,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '11.5.0' );
-define('APPLICATION_VERSION_DATE', 1551427200 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("01-Mar-2019")."\n\n";'
+define('APPLICATION_VERSION', '11.5.2' );
+define('APPLICATION_VERSION_DATE', 1559890800 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("07-Jun-2019")."\n\n";'
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
 	define('OPERATING_SYSTEM', 'WIN' );
@@ -100,14 +100,14 @@ if ( isset($config_vars['debug']['production']) AND $config_vars['debug']['produ
 } else {
 	define('PRODUCTION', FALSE);
 }
-																																																							//**REMOVING OR CHANGING THIS APPLICATION NAME AND ORGANIZATION URL IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
-																																																							define('APPLICATION_NAME', (PRODUCTION == FALSE) ? 'TimeTrex-Debug' : 'TimeTrex'); define('ORGANIZATION_NAME', 'TimeTrex'); define('ORGANIZATION_URL', 'www.TimeTrex.com');
+
 if ( isset($config_vars['other']['demo_mode']) AND $config_vars['other']['demo_mode'] == 1 ) {
 	define('DEMO_MODE', TRUE);
 } else {
 	define('DEMO_MODE', FALSE);
 }
-
+																																																																//**REMOVING OR CHANGING THIS APPLICATION NAME AND ORGANIZATION URL IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
+																																																																define('APPLICATION_NAME', (PRODUCTION == FALSE AND DEMO_MODE == FALSE) ? 'TimeTrex-Debug' : 'TimeTrex'); define('ORGANIZATION_NAME', 'TimeTrex'); define('ORGANIZATION_URL', 'www.TimeTrex.com');
 if ( isset($config_vars['other']['deployment_on_demand']) AND $config_vars['other']['deployment_on_demand'] == 1 ) {
 	define('DEPLOYMENT_ON_DEMAND', TRUE);
 } else {
@@ -376,7 +376,7 @@ set_include_path(
 require_once(Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'core'. DIRECTORY_SEPARATOR .'Exception.class.php');
 require_once(Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'core'. DIRECTORY_SEPARATOR .'Debug.class.php');
 																																																							//**REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
-																																																							if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" class="footerLink" target="_blank">AGPLv3.</a>' ); } else { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. All Rights Reserved.' ); }
+																																																							if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" class="footerLink" target="_blank">AGPLv3.</a>' ); } else { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>.' ); }
 Debug::setEnable( (bool)$config_vars['debug']['enable'] );
 Debug::setEnableDisplay( (bool)$config_vars['debug']['enable_display'] );
 Debug::setBufferOutput( (bool)$config_vars['debug']['buffer_output'] );

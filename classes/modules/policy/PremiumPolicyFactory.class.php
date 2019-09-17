@@ -926,7 +926,7 @@ class PremiumPolicyFactory extends Factory {
 				AND isset($this->branch_map[$this->getId()]) ) {
 			return $this->branch_map[$this->getId()];
 		} else {
-			$lf = TTnew( 'PremiumPolicyBranchListFactory' );
+			$lf = TTnew( 'PremiumPolicyBranchListFactory' ); /** @var PremiumPolicyBranchListFactory $lf */
 			$lf->getByPremiumPolicyId( $this->getId() );
 			$list = array();
 			foreach ($lf as $obj) {
@@ -954,7 +954,7 @@ class PremiumPolicyFactory extends Factory {
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'PremiumPolicyBranchListFactory' );
+				$lf_a = TTnew( 'PremiumPolicyBranchListFactory' ); /** @var PremiumPolicyBranchListFactory $lf_a */
 				$lf_a->getByPremiumPolicyId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -975,13 +975,13 @@ class PremiumPolicyFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'BranchListFactory' );
+			$lf_b = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $lf_b */
 
 			foreach ($ids as $id) {
 				if ( isset($ids)
 						AND TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID()
 						AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'PremiumPolicyBranchFactory' );
+					$f = TTnew( 'PremiumPolicyBranchFactory' ); /** @var PremiumPolicyBranchFactory $f */
 					$f->setPremiumPolicy( $this->getId() );
 					$f->setBranch( $id );
 
@@ -1040,7 +1040,7 @@ class PremiumPolicyFactory extends Factory {
 		if ( TTUUID::isUUID( $this->getId() ) AND  $this->getId() != TTUUID::getNotExistID() AND $this->getId() != TTUUID::getZeroID() AND isset($this->department_map[$this->getId()]) ) {
 			return $this->department_map[$this->getId()];
 		} else {
-			$lf = TTnew( 'PremiumPolicyDepartmentListFactory' );
+			$lf = TTnew( 'PremiumPolicyDepartmentListFactory' ); /** @var PremiumPolicyDepartmentListFactory $lf */
 			$lf->getByPremiumPolicyId( $this->getId() );
 			$list = array();
 			foreach ($lf as $obj) {
@@ -1066,7 +1066,7 @@ class PremiumPolicyFactory extends Factory {
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'PremiumPolicyDepartmentListFactory' );
+				$lf_a = TTnew( 'PremiumPolicyDepartmentListFactory' ); /** @var PremiumPolicyDepartmentListFactory $lf_a */
 				$lf_a->getByPremiumPolicyId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -1087,13 +1087,13 @@ class PremiumPolicyFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'DepartmentListFactory' );
+			$lf_b = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $lf_b */
 
 			foreach ($ids as $id) {
 				if ( isset($ids)
 						AND TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID()
 						AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'PremiumPolicyDepartmentFactory' );
+					$f = TTnew( 'PremiumPolicyDepartmentFactory' ); /** @var PremiumPolicyDepartmentFactory $f */
 					$f->setPremiumPolicy( $this->getId() );
 					$f->setDepartment( $id );
 
@@ -1141,7 +1141,7 @@ class PremiumPolicyFactory extends Factory {
 		if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID() AND isset($this->job_group_map[$this->getId()]) ) {
 			return $this->job_group_map[$this->getId()];
 		} else {
-			$lf = TTnew( 'PremiumPolicyJobGroupListFactory' );
+			$lf = TTnew( 'PremiumPolicyJobGroupListFactory' ); /** @var PremiumPolicyJobGroupListFactory $lf */
 			$lf->getByPremiumPolicyId( $this->getId() );
 			$list = array();
 			foreach ($lf as $obj) {
@@ -1172,7 +1172,7 @@ class PremiumPolicyFactory extends Factory {
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'PremiumPolicyJobGroupListFactory' );
+				$lf_a = TTnew( 'PremiumPolicyJobGroupListFactory' ); /** @var PremiumPolicyJobGroupListFactory $lf_a */
 				$lf_a->getByPremiumPolicyId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -1193,13 +1193,13 @@ class PremiumPolicyFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'JobGroupListFactory' );
+			$lf_b = TTnew( 'JobGroupListFactory' ); /** @var JobGroupListFactory $lf_b */
 
 			foreach ($ids as $id) {
 				if ( isset($ids)
 						AND TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID()
 						AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'PremiumPolicyJobGroupFactory' );
+					$f = TTnew( 'PremiumPolicyJobGroupFactory' ); /** @var PremiumPolicyJobGroupFactory $f */
 					$f->setPremiumPolicy( $this->getId() );
 					$f->setJobGroup( $id );
 
@@ -1263,7 +1263,7 @@ class PremiumPolicyFactory extends Factory {
 				AND isset($this->job_map[$this->getId()]) ) {
 			return $this->job_map[$this->getId()];
 		} else {
-			$lf = TTnew( 'PremiumPolicyJobListFactory' );
+			$lf = TTnew( 'PremiumPolicyJobListFactory' ); /** @var PremiumPolicyJobListFactory $lf */
 			$lf->getByPremiumPolicyId( $this->getId() );
 			$list = array();
 			foreach ($lf as $obj) {
@@ -1294,7 +1294,7 @@ class PremiumPolicyFactory extends Factory {
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'PremiumPolicyJobListFactory' );
+				$lf_a = TTnew( 'PremiumPolicyJobListFactory' ); /** @var PremiumPolicyJobListFactory $lf_a */
 				$lf_a->getByPremiumPolicyId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -1315,11 +1315,11 @@ class PremiumPolicyFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'JobListFactory' );
+			$lf_b = TTnew( 'JobListFactory' ); /** @var JobListFactory $lf_b */
 
 			foreach ($ids as $id) {
 				if ( isset($ids) AND TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'PremiumPolicyJobFactory' );
+					$f = TTnew( 'PremiumPolicyJobFactory' ); /** @var PremiumPolicyJobFactory $f */
 					$f->setPremiumPolicy( $this->getId() );
 					$f->setJob( $id );
 
@@ -1382,7 +1382,7 @@ class PremiumPolicyFactory extends Factory {
 		if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID() AND isset($this->job_item_group_map[$this->getId()]) ) {
 			return $this->job_item_group_map[$this->getId()];
 		} else {
-			$lf = TTnew( 'PremiumPolicyJobItemGroupListFactory' );
+			$lf = TTnew( 'PremiumPolicyJobItemGroupListFactory' ); /** @var PremiumPolicyJobItemGroupListFactory $lf */
 			$lf->getByPremiumPolicyId( $this->getId() );
 			$list = array();
 			foreach ($lf as $obj) {
@@ -1413,7 +1413,7 @@ class PremiumPolicyFactory extends Factory {
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'PremiumPolicyJobItemGroupListFactory' );
+				$lf_a = TTnew( 'PremiumPolicyJobItemGroupListFactory' ); /** @var PremiumPolicyJobItemGroupListFactory $lf_a */
 				$lf_a->getByPremiumPolicyId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -1434,11 +1434,11 @@ class PremiumPolicyFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'JobItemGroupListFactory' );
+			$lf_b = TTnew( 'JobItemGroupListFactory' ); /** @var JobItemGroupListFactory $lf_b */
 
 			foreach ($ids as $id) {
 				if ( isset($ids) AND TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'PremiumPolicyJobItemGroupFactory' );
+					$f = TTnew( 'PremiumPolicyJobItemGroupFactory' ); /** @var PremiumPolicyJobItemGroupFactory $f */
 					$f->setPremiumPolicy( $this->getId() );
 					$f->setJobItemGroup( $id );
 
@@ -1486,7 +1486,7 @@ class PremiumPolicyFactory extends Factory {
 		if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID() AND isset($this->job_item_map[$this->getId()]) ) {
 			return $this->job_item_map[$this->getId()];
 		} else {
-			$lf = TTnew( 'PremiumPolicyJobItemListFactory' );
+			$lf = TTnew( 'PremiumPolicyJobItemListFactory' ); /** @var PremiumPolicyJobItemListFactory $lf */
 			$lf->getByPremiumPolicyId( $this->getId() );
 			$list = array();
 			foreach ($lf as $obj) {
@@ -1517,7 +1517,7 @@ class PremiumPolicyFactory extends Factory {
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$lf_a = TTnew( 'PremiumPolicyJobItemListFactory' );
+				$lf_a = TTnew( 'PremiumPolicyJobItemListFactory' ); /** @var PremiumPolicyJobItemListFactory $lf_a */
 				$lf_a->getByPremiumPolicyId( $this->getId() );
 
 				foreach ($lf_a as $obj) {
@@ -1538,11 +1538,11 @@ class PremiumPolicyFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$lf_b = TTnew( 'JobItemListFactory' );
+			$lf_b = TTnew( 'JobItemListFactory' ); /** @var JobItemListFactory $lf_b */
 
 			foreach ($ids as $id) {
 				if ( isset($ids) AND TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() AND !in_array($id, $tmp_ids) ) {
-					$f = TTnew( 'PremiumPolicyJobItemFactory' );
+					$f = TTnew( 'PremiumPolicyJobItemFactory' ); /** @var PremiumPolicyJobItemFactory $f */
 					$f->setPremiumPolicy( $this->getId() );
 					$f->setJobItem( $id );
 
@@ -1611,9 +1611,9 @@ class PremiumPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	//Check if this premium policy is restricted by time.
-	//If its not, we can apply it to non-punched hours.
 	/**
+	 * Check if this premium policy is restricted by time.
+	 * If its not, we can apply it to non-punched hours.
 	 * @return bool
 	 */
 	function isTimeRestricted() {
@@ -1718,9 +1718,8 @@ class PremiumPolicyFactory extends Factory {
 		return $retval;
 	}
 
-	//Check if this time is within the start/end time.
-
 	/**
+	 * Check if this time is within the start/end time.
 	 * @param int $in_epoch EPOCH
 	 * @param int $out_epoch EPOCH
 	 * @param object $calculate_policy_obj
@@ -1809,9 +1808,10 @@ class PremiumPolicyFactory extends Factory {
 		return FALSE;
 	}
 */
-	//Check if this date is within the effective date range
-	//Need to take into account shifts that span midnight too.
+
 	/**
+	 * Check if this date is within the effective date range
+	 * Need to take into account shifts that span midnight too.
 	 * @param int $epoch EPOCH
 	 * @param int $maximum_shift_time
 	 * @return bool
@@ -1832,9 +1832,8 @@ class PremiumPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	//Check if this day of the week is active
-
 	/**
+	 * Check if this day of the week is active
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
@@ -1892,7 +1891,7 @@ class PremiumPolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -1936,7 +1935,7 @@ class PremiumPolicyFactory extends Factory {
 		}
 		// Contributing Shift Policy
 		if ( $this->getContributingShiftPolicy() !== FALSE ) {
-			$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+			$csplf = TTnew( 'ContributingShiftPolicyListFactory' ); /** @var ContributingShiftPolicyListFactory $csplf */
 			$this->Validator->isResultSetWithRows(	'contributing_shift_policy_id',
 															$csplf->getByID($this->getContributingShiftPolicy()),
 															TTi18n::gettext('Contributing Shift Policy is invalid')
@@ -2065,7 +2064,7 @@ class PremiumPolicyFactory extends Factory {
 		}
 		// Pay Code
 		if ( $this->getPayCode() !== FALSE AND $this->getPayCode() != TTUUID::getZeroID() ) {
-			$pclf = TTnew( 'PayCodeListFactory' );
+			$pclf = TTnew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $pclf */
 			$this->Validator->isResultSetWithRows(	'pay_code_id',
 															$pclf->getById($this->getPayCode()),
 															TTi18n::gettext('Invalid Pay Code')
@@ -2073,7 +2072,7 @@ class PremiumPolicyFactory extends Factory {
 		}
 		// Pay Formula Policy
 		if ( $this->getPayFormulaPolicy() !== FALSE AND $this->getPayFormulaPolicy() != TTUUID::getZeroID() ) {
-			$pfplf = TTnew( 'PayFormulaPolicyListFactory' );
+			$pfplf = TTnew( 'PayFormulaPolicyListFactory' ); /** @var PayFormulaPolicyListFactory $pfplf */
 			$this->Validator->isResultSetWithRows(	'pay_formula_policy_id',
 															$pfplf->getByID($this->getPayFormulaPolicy()),
 															TTi18n::gettext('Pay Formula Policy is invalid')
@@ -2148,7 +2147,7 @@ class PremiumPolicyFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('premium_policy' => $this->getId() ), 1 );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',

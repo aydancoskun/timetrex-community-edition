@@ -274,9 +274,9 @@ class CronJobFactory extends Factory {
 		return Misc::isSystemLoadValid();
 	}
 
-	//Check if job is scheduled to run right NOW.
-	//If the job has missed a run, it will run immediately.
 	/**
+	 * Check if job is scheduled to run right NOW.
+	 * If the job has missed a run, it will run immediately.
 	 * @param int $epoch EPOCH
 	 * @param int $last_run_date EPOCH
 	 * @return bool
@@ -296,9 +296,8 @@ class CronJobFactory extends Factory {
 		return Cron::isScheduledToRun( $this->getMinute(), $this->getHour(), $this->getDayOfMonth(), $this->getMonth(), $this->getDayOfWeek(), $epoch, $last_run_date );
 	}
 
-	//Executes the CronJob
-
 	/**
+	 * Executes the CronJob
 	 * @param null $php_cli
 	 * @param null $dir
 	 * @return bool

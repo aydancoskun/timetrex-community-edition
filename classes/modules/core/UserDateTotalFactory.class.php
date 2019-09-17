@@ -248,7 +248,7 @@ class UserDateTotalFactory extends Factory {
 	}
 
 	/**
-	 * @return bool
+	 * @return object|bool
 	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
@@ -407,6 +407,8 @@ class UserDateTotalFactory extends Factory {
 		} elseif ( $this->getObjectType() == 50 ) {
 			return 30;
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -449,25 +451,25 @@ class UserDateTotalFactory extends Factory {
 		//Debug::Text('Object Type: '. $object_type_id, __FILE__, __LINE__, __METHOD__, 10);
 		switch ( $object_type_id ) {
 			case 20:
-				$lf = TTNew('RegularTimePolicyListFactory');
+				$lf = TTNew('RegularTimePolicyListFactory'); /** @var RegularTimePolicyListFactory $lf */
 				break;
 			case 30:
-				$lf = TTNew('OverTimePolicyListFactory');
+				$lf = TTNew('OverTimePolicyListFactory'); /** @var OverTimePolicyListFactory $lf */
 				break;
 			case 40:
-				$lf = TTNew('PremiumPolicyListFactory');
+				$lf = TTNew('PremiumPolicyListFactory'); /** @var PremiumPolicyListFactory $lf */
 				break;
 			case 25:
 			case 50:
-				$lf = TTNew('AbsencePolicyListFactory');
+				$lf = TTNew('AbsencePolicyListFactory'); /** @var AbsencePolicyListFactory $lf */
 				break;
 			case 100:
 			case 101:
-				$lf = TTNew('MealPolicyListFactory');
+				$lf = TTNew('MealPolicyListFactory'); /** @var MealPolicyListFactory $lf */
 				break;
 			case 110:
 			case 111:
-				$lf = TTNew('BreakPolicyListFactory');
+				$lf = TTNew('BreakPolicyListFactory'); /** @var BreakPolicyListFactory $lf */
 				break;
 			default:
 				$lf = FALSE;
@@ -517,7 +519,7 @@ class UserDateTotalFactory extends Factory {
 		//However we have to setSourceObject *after* setPayCode(), otherwise there is potential for the wrong pay code to be used.
 		if ( $value != TTUUID::getZeroID() ) {
 			if ( $this->getObjectType() == 50 ) {
-				$lf = TTNew('AbsencePolicyListFactory');
+				$lf = TTNew('AbsencePolicyListFactory'); /** @var AbsencePolicyListFactory $lf */
 			} else {
 				$lf = NULL;
 			}
@@ -551,9 +553,8 @@ class UserDateTotalFactory extends Factory {
 		return $this->setGenericDataValue( 'pay_code_id', $value );
 	}
 
-	//Returns an array of time categories that the object_type fits in.
-
 	/**
+	 * Returns an array of time categories that the object_type fits in.
 	 * @param bool $include_total
 	 * @param bool $report_columns
 	 * @return array
@@ -772,7 +773,7 @@ class UserDateTotalFactory extends Factory {
 
 	/**
 	 * @param bool $raw
-	 * @return bool
+	 * @return int|bool
 	 */
 	function getStartTimeStamp( $raw = FALSE ) {
 		$value = $this->getGenericDataValue( 'start_time_stamp' );
@@ -915,7 +916,7 @@ class UserDateTotalFactory extends Factory {
 		$id = trim($id);
 
 		//Debug::Text('Currency ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		$culf = TTnew( 'CurrencyListFactory' );
+		$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 		$old_currency_id = $this->getCurrency();
 		if ( is_object($culf->getByID($id)) ) {
 			$rs = $culf->getByID($id);
@@ -926,7 +927,7 @@ class UserDateTotalFactory extends Factory {
 					AND $culf->getRecordCount() == 1
 					AND TTDate::isValidDate( $this->getDateStamp() ) == TRUE
 					AND ( $this->isNew() OR $old_currency_id != $id ) ) {
-					$crlf = TTnew( 'CurrencyRateListFactory' );
+					$crlf = TTnew( 'CurrencyRateListFactory' ); /** @var CurrencyRateListFactory $crlf */
 					$crlf->getByCurrencyIdAndDateStamp( $id, $this->getDateStamp() );
 					if ( $crlf->getRecordCount() > 0 ) {
 						$this->setCurrencyRate( $crlf->getCurrent()->getReverseConversionRate() );
@@ -960,9 +961,8 @@ class UserDateTotalFactory extends Factory {
 		return $this->setGenericDataValue( 'currency_rate', $value );
 	}
 
-	//This the base hourly rate used to obtain the final hourly rate from. Primarily used for FLSA calculations when adding overtime wages.
-
 	/**
+	 * This the base hourly rate used to obtain the final hourly rate from. Primarily used for FLSA calculations when adding overtime wages.
 	 * @return bool|mixed
 	 */
 	function getBaseHourlyRate() {
@@ -979,7 +979,7 @@ class UserDateTotalFactory extends Factory {
 		}
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-		return $this->setGenericDataValue( 'base_hourly_rate', number_format( $value, 4, '.', '' ) );//Always make sure there are 4 decimal places.
+		return $this->setGenericDataValue( 'base_hourly_rate', number_format( (float)$value, 4, '.', '' ) );//Always make sure there are 4 decimal places.
 	}
 
 	/**
@@ -999,7 +999,7 @@ class UserDateTotalFactory extends Factory {
 		}
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-		return $this->setGenericDataValue( 'hourly_rate', number_format( $value, 4, '.', '' ) );//Always make sure there are 4 decimal places.
+		return $this->setGenericDataValue( 'hourly_rate', number_format( (float)$value, 4, '.', '' ) ); //Always make sure there are 4 decimal places.
 	}
 
 	/**
@@ -1049,7 +1049,7 @@ class UserDateTotalFactory extends Factory {
 		}
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
-		return $this->setGenericDataValue( 'hourly_rate_with_burden', number_format( $value, 4, '.', '' ) );//Always make sure there are 4 decimal places.
+		return $this->setGenericDataValue( 'hourly_rate_with_burden', number_format( (float)$value, 4, '.', '' ) );//Always make sure there are 4 decimal places.
 	}
 
 	/**
@@ -1144,7 +1144,7 @@ class UserDateTotalFactory extends Factory {
 				break;
 			case 50:
 				//Absence taken time use the policy name, *not* pay code name.
-				$lf = TTNew('AbsencePolicyListFactory');
+				$lf = TTNew('AbsencePolicyListFactory'); /** @var AbsencePolicyListFactory $lf */
 				$lf->getByID( $this->getSourceObject() );
 				if ( $lf->getRecordCount() == 1 ) {
 					$name = $lf->getCurrent()->getName();
@@ -1375,7 +1375,7 @@ class UserDateTotalFactory extends Factory {
 
 		//$this->deleteSystemTotalTime(); //Handled in calculatePolicy now.
 
-		$cp = TTNew('CalculatePolicy');
+		$cp = TTNew('CalculatePolicy'); /** @var CalculatePolicy $cp */
 		$cp->setFlag( 'exception', $this->getEnableCalcException() );
 		$cp->setFlag( 'exception_premature', $this->getEnablePreMatureException() );
 		$cp->setUserObject( $this->getUserObject() );
@@ -1419,7 +1419,7 @@ class UserDateTotalFactory extends Factory {
 		}
 		Debug::Arr($date_stamps, 'bDate Stamps: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$cp = TTNew('CalculatePolicy');
+		$cp = TTNew('CalculatePolicy'); /** @var CalculatePolicy $cp */
 
 		$cp->setFlag( 'exception', $enable_exception );
 		$cp->setFlag( 'exception_premature', $enable_premature_exceptions );
@@ -1443,7 +1443,7 @@ class UserDateTotalFactory extends Factory {
 
 
 		if ( $this->Validator->getValidateOnly() == FALSE OR $this->getUser() !== FALSE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows( 'user',
 												   $ulf->getByID( $this->getUser() ),
 												   TTi18n::gettext( 'Invalid Employee' )
@@ -1452,7 +1452,7 @@ class UserDateTotalFactory extends Factory {
 
 		// Pay Period
 		if ( $this->getPayPeriod() !== FALSE AND $this->getPayPeriod() != TTUUID::getZeroID() ) {
-			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			$this->Validator->isResultSetWithRows( 'pay_period',
 												   $pplf->getByID( $this->getPayPeriod() ),
 												   TTi18n::gettext( 'Invalid Pay Period' )
@@ -1477,7 +1477,7 @@ class UserDateTotalFactory extends Factory {
 
 		// Punch Control ID
 		if ( $this->getPunchControlID() !== FALSE AND $this->getPunchControlID() != TTUUID::getZeroID() ) {
-			$pclf = TTnew( 'PunchControlListFactory' );
+			$pclf = TTnew( 'PunchControlListFactory' ); /** @var PunchControlListFactory $pclf */
 			$this->Validator->isResultSetWithRows( 'punch_control_id',
 												   $pclf->getByID( $this->getPunchControlID() ),
 												   TTi18n::gettext( 'Invalid Punch Control ID' )
@@ -1501,7 +1501,7 @@ class UserDateTotalFactory extends Factory {
 		}
 		// Pay Code
 		if ( $this->getPayCode() !== FALSE AND $this->getPayCode() != TTUUID::getZeroID() ) {
-			$lf = TTNew( 'PayCodeListFactory' );
+			$lf = TTNew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $lf */
 			$this->Validator->isResultSetWithRows( 'pay_code_id',
 												   $lf->getByID( $this->getPayCode() ),
 												   TTi18n::gettext( 'Invalid Pay Code' )
@@ -1509,7 +1509,7 @@ class UserDateTotalFactory extends Factory {
 		}
 		// Branch
 		if ( $this->getBranch() !== FALSE AND $this->getBranch() != TTUUID::getZeroID() ) {
-			$blf = TTnew( 'BranchListFactory' );
+			$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 			$this->Validator->isResultSetWithRows( 'branch_id',
 												   $blf->getByID( $this->getBranch() ),
 												   TTi18n::gettext( 'Branch does not exist' )
@@ -1517,7 +1517,7 @@ class UserDateTotalFactory extends Factory {
 		}
 		// Department
 		if ( $this->getDepartment() !== FALSE AND $this->getDepartment() != TTUUID::getZeroID() ) {
-			$dlf = TTnew( 'DepartmentListFactory' );
+			$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 			$this->Validator->isResultSetWithRows( 'department_id',
 												   $dlf->getByID( $this->getDepartment() ),
 												   TTi18n::gettext( 'Department does not exist' )
@@ -1527,7 +1527,7 @@ class UserDateTotalFactory extends Factory {
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			// Job
 			if ( $this->getJob() !== FALSE AND $this->getJob() != TTUUID::getZeroID() ) {
-				$jlf = TTnew( 'JobListFactory' );
+				$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 				$this->Validator->isResultSetWithRows( 'job_id',
 													   $jlf->getByID( $this->getJob() ),
 													   TTi18n::gettext( 'Job does not exist' )
@@ -1535,7 +1535,7 @@ class UserDateTotalFactory extends Factory {
 			}
 			// Job Item
 			if ( $this->getJobItem() !== FALSE AND $this->getJobItem() != TTUUID::getZeroID() ) {
-				$jilf = TTnew( 'JobItemListFactory' );
+				$jilf = TTnew( 'JobItemListFactory' ); /** @var JobItemListFactory $jilf */
 				$this->Validator->isResultSetWithRows( 'job_item_id',
 													   $jilf->getByID( $this->getJobItem() ),
 													   TTi18n::gettext( 'Job Item does not exist' )
@@ -1599,7 +1599,7 @@ class UserDateTotalFactory extends Factory {
 												);
 		// Currency
 		if ( $this->getCurrency() !== FALSE AND $this->getCurrency() != TTUUID::getZeroId() ) {
-			$culf = TTnew( 'CurrencyListFactory' );
+			$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 			$this->Validator->isResultSetWithRows( 'currency',
 												   $culf->getByID( $this->getCurrency() ),
 												   TTi18n::gettext( 'Invalid Currency' )
@@ -1738,7 +1738,7 @@ class UserDateTotalFactory extends Factory {
 			// Only do this when creating a new record, as the user may have had entries made then later have the absence policy disabled from the policy group.
 			//   In that case it would cause this record from not being saved properly then and possibly prevent recalculations from finishing.
 			if ( $this->getObjectType() == 50 AND $this->getSourceObject() != '' AND is_object( $this->getUserObject() ) ) {
-				$pglf = TTNew( 'PolicyGroupListFactory' );
+				$pglf = TTNew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 				$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array('user_id' => array( $this->getUser() ), 'absence_policy' => array( $this->getSourceObject() ) ) );
 				if ( $pglf->getRecordCount() == 0 ) {
 					$this->Validator->isTRUE( 'absence_policy_id',
@@ -1795,7 +1795,7 @@ class UserDateTotalFactory extends Factory {
 				AND is_object( $this->getUserObject() ) ) {
 			//Debug::text('Checking for already existing overridden entries ... User ID: '. $this->getUser() .' DateStamp: '. $this->getDateStamp() .' Object Type ID: '. $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
 
-			$udtlf = TTnew( 'UserDateTotalListFactory' );
+			$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 			if ( ( $this->getObjectType() == 5 OR $this->getObjectType() == 10 OR $this->getObjectType() == 20 )
 					AND TTUUID::isUUID( $this->getPunchControlID() ) AND $this->getPunchControlID() != TTUUID::getZeroID() AND $this->getPunchControlID() != TTUUID::getNotExistID() ) {
 				$udtlf->getByUserIdAndDateStampAndObjectTypeAndPunchControlIdAndOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getPunchControlID(), TRUE );
@@ -1846,7 +1846,7 @@ class UserDateTotalFactory extends Factory {
 					AND is_object( $this->getPayPeriodObject()->getPayPeriodScheduleObject() )
 					AND $this->getPayPeriodObject()->getPayPeriodScheduleObject()->getTimeSheetVerifyType() != 10 ) {
 				//Find out if timesheet is verified or not.
-				$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+				$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $pptsvlf */
 				$pptsvlf->getByPayPeriodIdAndUserId( $this->getPayPeriod(), $this->getUser() );
 				if ( $pptsvlf->getRecordCount() > 0 ) {
 					//Pay period is verified, delete all records and make log entry.
@@ -1909,7 +1909,7 @@ class UserDateTotalFactory extends Factory {
 					AND is_object( $this->getPayPeriodObject()->getPayPeriodScheduleObject() )
 					AND $this->getPayPeriodObject()->getPayPeriodScheduleObject()->getTimeSheetVerifyType() != 10 ) {
 				//Find out if timesheet is verified or not.
-				$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+				$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $pptsvlf */
 				$pptsvlf->getByPayPeriodIdAndUserId( $this->getPayPeriod(), $this->getUser() );
 				if ( $pptsvlf->getRecordCount() > 0 ) {
 					//Pay period is verified, delete all records and make log entry.
@@ -1958,9 +1958,8 @@ class UserDateTotalFactory extends Factory {
 		}
 	}
 
-	//Takes UserDateTotal rows, and calculate the accumlated time sections
-
 	/**
+	 * Takes UserDateTotal rows, and calculate the accumlated time sections
 	 * @param $data
 	 * @param bool $include_daily_totals
 	 * @return array|bool
@@ -2271,7 +2270,7 @@ class UserDateTotalFactory extends Factory {
 	 * @return array
 	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
-		$uf = TTnew( 'UserFactory' );
+		$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -2355,6 +2354,8 @@ class UserDateTotalFactory extends Factory {
 				return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Accumulated Time') .' - '. TTi18n::getText('Date') .': '. TTDate::getDate('DATE', $this->getDateStamp() ). ' '. TTi18n::getText('Total Time') .': '. TTDate::getTimeUnit( $this->getTotalTime() ), NULL, $this->getTable(), $this );
 			}
 		}
+
+		return FALSE;
 	}
 }
 ?>

@@ -81,14 +81,14 @@ class PolicyGroupAccrualPolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Policy Group
-		$pglf = TTnew( 'PolicyGroupListFactory' );
+		$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 		$this->Validator->isResultSetWithRows(	'policy_group',
 														$pglf->getByID($this->getPolicyGroup()),
 														TTi18n::gettext('Policy Group is invalid')
 													);
 		// Accrual Policy
 		if ( $this->getAccrualPolicy() != TTUUID::getZeroID() ) {
-			$aplf = TTnew( 'AccrualPolicyListFactory' );
+			$aplf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $aplf */
 			$this->Validator->isResultSetWithRows(	'over_time_policy',
 														$aplf->getByID($this->getAccrualPolicy()),
 														TTi18n::gettext('Selected Accrual Policy is invalid')

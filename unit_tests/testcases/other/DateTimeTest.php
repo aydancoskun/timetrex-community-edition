@@ -1210,6 +1210,85 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $dates['end_date'], (int)1262332799 );
 	}
 
+	function test_getEndWeekEpoch() {
+		TTDate::setTimeZone('PST8PDT'); //Force to timezone with DST.
+
+		$this->assertEquals( strtotime('11-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('11-May-2019 12:00AM'), 0 ) ); //Week starts on Sunday
+		$this->assertEquals( strtotime('18-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('12-May-2019 12:00AM'), 0 ) ); //Week starts on Sunday
+		$this->assertEquals( strtotime('18-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('13-May-2019 12:00AM'), 0 ) ); //Week starts on Sunday
+		$this->assertEquals( strtotime('18-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('14-May-2019 12:00AM'), 0 ) ); //Week starts on Sunday
+		$this->assertEquals( strtotime('18-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('15-May-2019 12:00AM'), 0 ) ); //Week starts on Sunday
+		$this->assertEquals( strtotime('18-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('16-May-2019 12:00AM'), 0 ) ); //Week starts on Sunday
+		$this->assertEquals( strtotime('18-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('17-May-2019 12:00AM'), 0 ) ); //Week starts on Sunday
+		$this->assertEquals( strtotime('18-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('18-May-2019 12:00AM'), 0 ) ); //Week starts on Sunday
+		$this->assertEquals( strtotime('25-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('19-May-2019 12:00AM'), 0 ) ); //Week starts on Sunday
+
+		$this->assertEquals( strtotime('12-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('12-May-2019 12:00AM'), 1 ) ); //Week starts on Monday
+		$this->assertEquals( strtotime('19-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('13-May-2019 12:00AM'), 1 ) ); //Week starts on Monday
+		$this->assertEquals( strtotime('19-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('14-May-2019 12:00AM'), 1 ) ); //Week starts on Monday
+		$this->assertEquals( strtotime('19-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('15-May-2019 12:00AM'), 1 ) ); //Week starts on Monday
+		$this->assertEquals( strtotime('19-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('16-May-2019 12:00AM'), 1 ) ); //Week starts on Monday
+		$this->assertEquals( strtotime('19-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('17-May-2019 12:00AM'), 1 ) ); //Week starts on Monday
+		$this->assertEquals( strtotime('19-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('18-May-2019 12:00AM'), 1 ) ); //Week starts on Monday
+		$this->assertEquals( strtotime('19-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('19-May-2019 12:00AM'), 1 ) ); //Week starts on Monday
+		$this->assertEquals( strtotime('26-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('20-May-2019 12:00AM'), 1 ) ); //Week starts on Monday
+
+		$this->assertEquals( strtotime('13-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('13-May-2019 12:00AM'), 2 ) ); //Week starts on Tuesday
+		$this->assertEquals( strtotime('20-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('14-May-2019 12:00AM'), 2 ) ); //Week starts on Tuesday
+		$this->assertEquals( strtotime('20-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('15-May-2019 12:00AM'), 2 ) ); //Week starts on Tuesday
+		$this->assertEquals( strtotime('20-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('16-May-2019 12:00AM'), 2 ) ); //Week starts on Tuesday
+		$this->assertEquals( strtotime('20-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('17-May-2019 12:00AM'), 2 ) ); //Week starts on Tuesday
+		$this->assertEquals( strtotime('20-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('18-May-2019 12:00AM'), 2 ) ); //Week starts on Tuesday
+		$this->assertEquals( strtotime('20-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('19-May-2019 12:00AM'), 2 ) ); //Week starts on Tuesday
+		$this->assertEquals( strtotime('20-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('20-May-2019 12:00AM'), 2 ) ); //Week starts on Tuesday
+		$this->assertEquals( strtotime('27-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('21-May-2019 12:00AM'), 2 ) ); //Week starts on Tuesday
+
+		$this->assertEquals( strtotime('14-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('14-May-2019 12:00AM'), 3 ) ); //Week starts on Wednesday
+		$this->assertEquals( strtotime('21-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('15-May-2019 12:00AM'), 3 ) ); //Week starts on Wednesday
+		$this->assertEquals( strtotime('21-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('16-May-2019 12:00AM'), 3 ) ); //Week starts on Wednesday
+		$this->assertEquals( strtotime('21-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('17-May-2019 12:00AM'), 3 ) ); //Week starts on Wednesday
+		$this->assertEquals( strtotime('21-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('18-May-2019 12:00AM'), 3 ) ); //Week starts on Wednesday
+		$this->assertEquals( strtotime('21-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('19-May-2019 12:00AM'), 3 ) ); //Week starts on Wednesday
+		$this->assertEquals( strtotime('21-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('20-May-2019 12:00AM'), 3 ) ); //Week starts on Wednesday
+		$this->assertEquals( strtotime('21-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('21-May-2019 12:00AM'), 3 ) ); //Week starts on Wednesday
+		$this->assertEquals( strtotime('28-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('22-May-2019 12:00AM'), 3 ) ); //Week starts on Wednesday
+
+		$this->assertEquals( strtotime('17-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('17-May-2019 12:00AM'), 6 ) ); //Week starts on Saturday
+		$this->assertEquals( strtotime('24-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('18-May-2019 12:00AM'), 6 ) ); //Week starts on Saturday
+		$this->assertEquals( strtotime('24-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('19-May-2019 12:00AM'), 6 ) ); //Week starts on Saturday
+		$this->assertEquals( strtotime('24-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('20-May-2019 12:00AM'), 6 ) ); //Week starts on Saturday
+		$this->assertEquals( strtotime('24-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('21-May-2019 12:00AM'), 6 ) ); //Week starts on Saturday
+		$this->assertEquals( strtotime('24-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('22-May-2019 12:00AM'), 6 ) ); //Week starts on Saturday
+		$this->assertEquals( strtotime('24-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('23-May-2019 12:00AM'), 6 ) ); //Week starts on Saturday
+		$this->assertEquals( strtotime('24-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('24-May-2019 12:00AM'), 6 ) ); //Week starts on Saturday
+		$this->assertEquals( strtotime('31-May-2019 11:59:59PM'), TTDate::getEndWeekEpoch( strtotime('25-May-2019 12:00AM'), 6 ) ); //Week starts on Saturday
+	}
+
+	function test_getYearQuarters() {
+		$quarters = TTDate::getYearQuarters( strtotime('01-Jan-2019') );
+		$this->assertEquals( 4, count($quarters) );
+		$this->assertEquals( strtotime('01-Jan-2019 12:00AM'), $quarters[1]['start'] );
+		$this->assertEquals( strtotime('31-Mar-2019 11:59:59PM'), $quarters[1]['end'] );
+		$this->assertEquals( strtotime('01-Apr-2019 12:00AM'), $quarters[2]['start'] );
+		$this->assertEquals( strtotime('30-Jun-2019 11:59:59PM'), $quarters[2]['end'] );
+		$this->assertEquals( strtotime('01-Jul-2019 12:00AM'), $quarters[3]['start'] );
+		$this->assertEquals( strtotime('30-Sep-2019 11:59:59PM'), $quarters[3]['end'] );
+		$this->assertEquals( strtotime('01-Oct-2019 12:00AM'), $quarters[4]['start'] );
+		$this->assertEquals( strtotime('31-Dec-2019 11:59:59PM'), $quarters[4]['end'] );
+
+
+		$quarters = TTDate::getYearQuarters( strtotime('01-Jan-2019'), 1 );
+		$this->assertEquals( 2, count($quarters) );
+		$this->assertEquals( strtotime('01-Jan-2019 12:00AM'), $quarters['start'] );
+		$this->assertEquals( strtotime('31-Mar-2019 11:59:59PM'), $quarters['end'] );
+
+
+		$quarters = TTDate::getYearQuarters( strtotime('01-Jan-2019'), 2 );
+		$this->assertEquals( 2, count($quarters) );
+		$this->assertEquals( strtotime('01-Apr-2019 12:00AM'), $quarters['start'] );
+		$this->assertEquals( strtotime('30-Jun-2019 11:59:59PM'), $quarters['end'] );
+	}
+
 	function test_DST() {
 		TTDate::setTimeZone('PST8PDT'); //Force to timezone with DST.
 
@@ -1435,7 +1514,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testReportDatesA() {
-		$uf = TTnew('UserFactory');
+		$uf = TTnew('UserFactory'); /** @var UserFactory $uf */
 		$uf->getUserPreferenceObject()->setDateFormat('m-d-y');
 
 		$pre_process_dates = TTDate::getReportDates( NULL, strtotime('03-Mar-2015 08:00AM'), FALSE, $uf ); //Sortable dates
@@ -2023,7 +2102,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testLocationTimeZone() {
-		$upf = TTnew( 'UserPreferenceFactory' );
+		$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 
 		$this->assertEquals( $upf->getLocationTimeZone( 'CA', 'BC' ), 'PST8PDT' );
 
@@ -2046,9 +2125,9 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 	function testISODateParsing() {
 		TTDate::setTimeZone('EST5EDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
-		$this->assertEquals( TTDate::getISODateStamp( strtotime( '31-Jan-2019') ), '20190131' );
+		$this->assertEquals( TTDate::getISODateStamp( strtotime( '31-Jan-2019') ), '2019-01-31' );
 		$test_date = strtotime( TTDate::getISODateStamp( strtotime( '31-Jan-2019') ) );
-		$this->assertEquals( TTDate::getISODateStamp( $test_date ), '20190131' );
+		$this->assertEquals( TTDate::getISODateStamp( $test_date ), '2019-01-31' );
 
 		$test_date = TTDate::getISODateStamp( strtotime( '31-Jan-2019') ); //As if we are passing a string date through an API
 		TTDate::setTimeZone('PST8PDT', TRUE); //Change timezone to something different as its an API server.

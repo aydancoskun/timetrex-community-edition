@@ -82,7 +82,7 @@ switch ($object_type) {
 		Debug::Text('Document...', __FILE__, __LINE__, __METHOD__, 10);
 
 		//RateLimit failed download attempts to prevent brute force.
-		$rl = TTNew('RateLimit');
+		$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 		$rl->setID( 'document_'. Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 25 );
 		$rl->setTimeFrame( 900 ); //15 minutes
@@ -101,7 +101,7 @@ switch ($object_type) {
 				}
 
 				//Make sure user has access to this document first, before checking for any revisions.
-				$api_f = TTNew('APIDocument');
+				$api_f = TTNew('APIDocument'); /** @var APIDocument $api_f */
 				$result = $api_f->stripReturnHandler( $api_f->getDocument( $filter_data ) );
 				if ( isset($result[0]) AND count($result[0]) > 0 ) {
 					$parent_id = $result[0]['id'];
@@ -113,7 +113,7 @@ switch ($object_type) {
 						$private_allowed = $permission->Check('document', 'view_private');
 					}
 
-					$drlf = TTnew( 'DocumentRevisionListFactory' );
+					$drlf = TTnew( 'DocumentRevisionListFactory' ); /** @var DocumentRevisionListFactory $drlf */
 					$drlf->getByCompanyIdAndIdAndDocumentIdAndPrivateAllowed( $current_company->getId(), $object_id, $parent_id, $private_allowed );
 					Debug::Text('Record Count: '. $drlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 					if ( $drlf->getRecordCount() == 1 ) {
@@ -153,7 +153,7 @@ switch ($object_type) {
 		Debug::Text('Client Payment Signature...', __FILE__, __LINE__, __METHOD__, 10);
 
 		//RateLimit failed download attempts to prevent brute force.
-		$rl = TTNew('RateLimit');
+		$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 		$rl->setID( 'document_'. Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 25 );
 		$rl->setTimeFrame( 900 ); //15 minutes
@@ -161,7 +161,7 @@ switch ($object_type) {
 			Debug::Text('Excessive document download attempts... Preventing downloads from: '. Misc::getRemoteIPAddress() .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
 			sleep(5); //Excessive download attempts, sleep longer.
 		} else {
-			$cplf = TTnew( 'ClientPaymentListFactory' );
+			$cplf = TTnew( 'ClientPaymentListFactory' ); /** @var ClientPaymentListFactory $cplf */
 			$cplf->getByIdAndClientId($object_id, $parent_id);
 			if ( $cplf->getRecordCount() == 1 ) {
 				//echo "File Name: $file_name<br>\n";
@@ -186,7 +186,7 @@ switch ($object_type) {
 	case 'invoice_config':
 		Debug::Text('Invoice Config...', __FILE__, __LINE__, __METHOD__, 10);
 
-		$icf = TTNew('InvoiceConfigFactory');
+		$icf = TTNew('InvoiceConfigFactory'); /** @var InvoiceConfigFactory $icf */
 		$file_name = $icf->getLogoFileName( $current_company->getId() );
 		Debug::Text('File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 		if ( file_exists($file_name) ) {
@@ -201,7 +201,7 @@ switch ($object_type) {
 		Debug::Text('Company Logo...', __FILE__, __LINE__, __METHOD__, 10);
 		header_remove('Expires'); //Allow caching.
 
-		$cf = TTnew( 'CompanyFactory' );
+		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 		$file_name = $cf->getLogoFileName( $current_company->getId() );
 		Debug::Text('File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $file_name != '' AND file_exists($file_name) ) {
@@ -216,7 +216,7 @@ switch ($object_type) {
 		Debug::Text('Legal Entity Logo ['. $object_id .']...', __FILE__, __LINE__, __METHOD__, 10);
 		header_remove('Expires'); //Allow caching.
 
-		$lef = TTnew( 'LegalEntityFactory' );
+		$lef = TTnew( 'LegalEntityFactory' ); /** @var LegalEntityFactory $lef */
 		$file_name = $lef->getLogoFileName( $object_id );
 		Debug::Text('File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $file_name != '' AND file_exists($file_name) ) {
@@ -231,7 +231,7 @@ switch ($object_type) {
 		Debug::Text('Primary Company Logo...', __FILE__, __LINE__, __METHOD__, 10);
 		header_remove('Expires'); //Allow caching.
 
-		$cf = TTnew( 'CompanyFactory' );
+		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 		$file_name = $cf->getLogoFileName( PRIMARY_COMPANY_ID, TRUE, TRUE );
 		Debug::Text('File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $file_name != '' AND file_exists($file_name) ) {
@@ -246,7 +246,7 @@ switch ($object_type) {
 		Debug::Text('User Photo...', __FILE__, __LINE__, __METHOD__, 10);
 
 		//RateLimit failed download attempts to prevent brute force.
-		$rl = TTNew('RateLimit');
+		$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 		$rl->setID( 'user_photo_'. Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 25 );
 		$rl->setTimeFrame( 900 ); //15 minutes
@@ -258,10 +258,10 @@ switch ($object_type) {
 					OR $permission->Check('user', 'view_own')
 					OR $permission->Check('user', 'view_child') ) {
 
-				$api_f = TTNew('APIUser');
+				$api_f = TTNew('APIUser'); /** @var APIUser $api_f */
 				$result = $api_f->stripReturnHandler( $api_f->getUser( array('filter_data' => array( 'id' => $object_id ) ) ) );
 				if ( isset($result[0]) AND count($result[0]) > 0 ) {
-					$uf = TTnew( 'UserFactory' );
+					$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 					$file_name = $uf->getPhotoFileName( $current_company->getId(), $object_id );
 					Debug::Text('File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 					if ( $file_name != '' AND file_exists($file_name) ) {
@@ -287,7 +287,7 @@ switch ($object_type) {
 		Debug::Text('Remittance Source Account Signature...', __FILE__, __LINE__, __METHOD__, 10);
 
 		//RateLimit failed download attempts to prevent brute force.
-		$rl = TTNew('RateLimit');
+		$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 		$rl->setID( 'remittance_source_account_'. Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 25 );
 		$rl->setTimeFrame( 900 ); //15 minutes
@@ -299,10 +299,10 @@ switch ($object_type) {
 					OR $permission->Check('remittance_source_account', 'view_own')
 					OR $permission->Check('remittance_source_account', 'view_child') ) {
 
-				$api_f = TTNew('APIRemittanceSourceAccount');
+				$api_f = TTNew('APIRemittanceSourceAccount'); /** @var APIRemittanceSourceAccount $api_f */
 				$result = $api_f->stripReturnHandler( $api_f->getRemittanceSourceAccount( array('filter_data' => array( 'id' => $object_id ) ) ) );
 				if ( isset($result[0]) AND count($result[0]) > 0 ) {
-					$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+					$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */
 					$file_name = $rsaf->getSignatureFileName( $current_company->getId(), $object_id );
 					Debug::Text('File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 					if ( $file_name != '' AND file_exists($file_name) ) {
@@ -327,7 +327,7 @@ switch ($object_type) {
 	case 'government_document':
 		Debug::Text('Government Document...', __FILE__, __LINE__, __METHOD__, 10);
 		//RateLimit failed download attempts to prevent brute force.
-		$rl = TTNew('RateLimit');
+		$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 		$rl->setID( 'document_'. Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 25 );
 		$rl->setTimeFrame( 900 ); //15 minutes
@@ -339,8 +339,7 @@ switch ($object_type) {
 					OR $permission->Check( 'government_document', 'view_own' )
 					OR $permission->Check( 'government_document', 'view_child' ) ) {
 
-				/** @var APIGovernmentDocument $api_f */
-				$api_f = TTNew( 'APIGovernmentDocument' );
+				$api_f = TTNew( 'APIGovernmentDocument' ); /** @var APIGovernmentDocument $api_f */
 				$result = $api_f->stripReturnHandler( $api_f->getGovernmentDocument( array('filter_data' => array('id' => $object_id)) ) );
 
 				if ( isset( $result ) AND is_array($result)  AND count( $result ) > 0 ) {
@@ -348,8 +347,7 @@ switch ($object_type) {
 
 					$files = array();
 					foreach ( $result as $doc ) {
-						/** @var GovernmentDocumentFactory $gf */
-						$gf = TTnew( 'GovernmentDocumentFactory' );
+						$gf = TTnew( 'GovernmentDocumentFactory' ); /** @var GovernmentDocumentFactory $gf */
 						$file_name = $gf->getFileName( $current_company->getId(), $doc['type_id'], $doc['user_id'], $doc['id'] );
 						if ( $file_name != '' AND file_exists( $file_name ) ) {
 							$file = array();
@@ -385,7 +383,7 @@ switch ($object_type) {
 		Debug::Text('Punch Image...', __FILE__, __LINE__, __METHOD__, 10);
 
 		//RateLimit failed download attempts to prevent brute force.
-		$rl = TTNew('RateLimit');
+		$rl = TTNew('RateLimit'); /** @var RateLimit $rl */
 		$rl->setID( 'punch_image_'. Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 25 );
 		$rl->setTimeFrame( 900 ); //15 minutes
@@ -397,10 +395,10 @@ switch ($object_type) {
 					OR $permission->Check('punch', 'view_own')
 					OR $permission->Check('punch', 'view_child') ) {
 
-				$api_f = TTNew('APIPunch');
+				$api_f = TTNew('APIPunch'); /** @var APIPunch $api_f */
 				$result = $api_f->stripReturnHandler( $api_f->getPunch( array('filter_data' => array( 'id' => $object_id ) ) ) );
 				if ( isset($result[0]) AND count($result[0]) > 0 ) {
-					$pf = TTnew( 'PunchFactory' );
+					$pf = TTnew( 'PunchFactory' ); /** @var PunchFactory $pf */
 					$file_name = $pf->getImageFileName( $current_company->getId(), $parent_id, $object_id );
 					Debug::Text('File Name: '. $file_name .' Company ID: '. $current_company->getId() .' User ID: '. $parent_id, __FILE__, __LINE__, __METHOD__, 10);
 					if ( $file_name != '' AND file_exists($file_name) ) {

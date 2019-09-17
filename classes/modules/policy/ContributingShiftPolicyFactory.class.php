@@ -966,9 +966,9 @@ class ContributingShiftPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	//Check if this premium policy is restricted by time.
-	//If its not, we can apply it to non-punched hours.
 	/**
+	 * Check if this premium policy is restricted by time.
+	 * If its not, we can apply it to non-punched hours.
 	 * @return bool
 	 */
 	function isTimeRestricted() {
@@ -1104,9 +1104,8 @@ class ContributingShiftPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	//Check if this time is within the start/end time.
-
 	/**
+	 * Check if this time is within the start/end time.
 	 * @param int $in_epoch EPOCH
 	 * @param int $out_epoch EPOCH
 	 * @param null $udt_key
@@ -1260,9 +1259,8 @@ class ContributingShiftPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	//Check if this date is within the effective date range
-
 	/**
+	 * Check if this date is within the effective date range
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
@@ -1283,9 +1281,8 @@ class ContributingShiftPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	//Check if this day of the week is active
-
 	/**
+	 * Check if this day of the week is active
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
@@ -1519,7 +1516,7 @@ class ContributingShiftPolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -1557,7 +1554,7 @@ class ContributingShiftPolicyFactory extends Factory {
 		}
 		// Contributing Pay Code Policy
 		if ( $this->getContributingPayCodePolicy() !== FALSE ) {
-			$cpcplf = TTnew( 'ContributingPayCodePolicyListFactory' );
+			$cpcplf = TTnew( 'ContributingPayCodePolicyListFactory' ); /** @var ContributingPayCodePolicyListFactory $cpcplf */
 			$this->Validator->isResultSetWithRows(	'contributing_pay_code_policy_id',
 															$cpcplf->getByID($this->getContributingPayCodePolicy()),
 															TTi18n::gettext('Contributing Pay Code Policy is invalid')
@@ -1681,7 +1678,7 @@ class ContributingShiftPolicyFactory extends Factory {
 		// ABOVE: Validation code moved from set*() functions.
 		//
 		if ( $this->getDeleted() == TRUE ) {
-			$rtplf = TTNew('RegularTimePolicyListFactory');
+			$rtplf = TTNew('RegularTimePolicyListFactory'); /** @var RegularTimePolicyListFactory $rtplf */
 			$rtplf->getByCompanyIdAndContributingShiftPolicyId( $this->getCompany(), $this->getId() );
 			if ( $rtplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -1689,7 +1686,7 @@ class ContributingShiftPolicyFactory extends Factory {
 											TTi18n::gettext('This contributing shift policy is currently in use') .' '. TTi18n::gettext('by regular time policies') );
 			}
 
-			$otplf = TTNew('OverTimePolicyListFactory');
+			$otplf = TTNew('OverTimePolicyListFactory'); /** @var OverTimePolicyListFactory $otplf */
 			$otplf->getByCompanyIdAndContributingShiftPolicyId( $this->getCompany(), $this->getId() );
 			if ( $otplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -1697,7 +1694,7 @@ class ContributingShiftPolicyFactory extends Factory {
 											TTi18n::gettext('This contributing shift policy is currently in use') .' '. TTi18n::gettext('by overtime policies') );
 			}
 
-			$pplf = TTNew('PremiumPolicyListFactory');
+			$pplf = TTNew('PremiumPolicyListFactory'); /** @var PremiumPolicyListFactory $pplf */
 			$pplf->getByCompanyIdAndContributingShiftPolicyId( $this->getCompany(), $this->getId() );
 			if ( $pplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -1705,7 +1702,7 @@ class ContributingShiftPolicyFactory extends Factory {
 											TTi18n::gettext('This contributing shift policy is currently in use') .' '. TTi18n::gettext('by premium policies') );
 			}
 
-			$hplf = TTNew('HolidayPolicyListFactory');
+			$hplf = TTNew('HolidayPolicyListFactory'); /** @var HolidayPolicyListFactory $hplf */
 			$hplf->getByCompanyIdAndContributingShiftPolicyId( $this->getCompany(), $this->getId() );
 			if ( $hplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -1713,7 +1710,7 @@ class ContributingShiftPolicyFactory extends Factory {
 											 TTi18n::gettext('This contributing shift policy is currently in use') .' '. TTi18n::gettext('by holiday policies') );
 			}
 
-			$aplf = TTNew('AccrualPolicyListFactory');
+			$aplf = TTNew('AccrualPolicyListFactory'); /** @var AccrualPolicyListFactory $aplf */
 			$aplf->getByCompanyIdAndContributingShiftPolicyId( $this->getCompany(), $this->getId() );
 			if ( $aplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -1721,7 +1718,7 @@ class ContributingShiftPolicyFactory extends Factory {
 											 TTi18n::gettext('This contributing shift policy is currently in use') .' '. TTi18n::gettext('by accrual policies') );
 			}
 
-			$pfplf = TTNew('PayFormulaPolicyListFactory');
+			$pfplf = TTNew('PayFormulaPolicyListFactory'); /** @var PayFormulaPolicyListFactory $pfplf */
 			$pfplf->getByCompanyIdAndContributingShiftPolicyId( $this->getCompany(), $this->getId() );
 			if ( $pfplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',

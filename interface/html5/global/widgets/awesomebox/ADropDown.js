@@ -661,17 +661,19 @@
 
 			secondary_grid.setGridColumnsWidth( colModel );
 
-			var total_headers_width = 0;
-			for ( var i = 0; i < colModel.length; i++ ) {
-				total_headers_width += colModel[i].widthOrg + 1; //collect the (calculated) column widths (+1 for border
-			}
-
-			var width = 200
+			var width = 200;
 			var offset = 28;
 			//awesomeboxes with more than 1 column need to adjust for td borders.
 
-			if ( colModel[0].name == 'cb' ) {
-				offset += 2;
+			var total_headers_width = 0;
+			if ( colModel ) {
+				for ( var i = 0; i < colModel.length; i++ ) {
+					total_headers_width += colModel[i].widthOrg + 1; //collect the (calculated) column widths (+1 for border
+				}
+
+				if ( colModel[0].name == 'cb' ) {
+					offset += 2;
+				}
 			}
 
 			if ( tree_mode ) {

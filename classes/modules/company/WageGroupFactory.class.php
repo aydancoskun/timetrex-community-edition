@@ -169,7 +169,7 @@ class WageGroupFactory extends Factory {
 		//
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID()  ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'company',
 															$clf->getByID($this->getCompany()),
 															TTi18n::gettext('Company is invalid')
@@ -193,7 +193,7 @@ class WageGroupFactory extends Factory {
 		//
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no wage entries using this wage group.
-			$uwlf = TTnew( 'UserWageListFactory' );
+			$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 			$uwlf->getByWageGroupIDAndCompanyId( $this->getID(), $this->getCompany() );
 			if ( $uwlf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',

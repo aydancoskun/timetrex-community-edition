@@ -57,7 +57,7 @@ class APIPermission extends APIFactory {
 		global $current_company;
 		$company_id = TTUUID::castUUID($current_company->getId());
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		return $ulf->getUniqueCountryByCompanyId( $company_id );
 	}
 
@@ -129,7 +129,7 @@ class APIPermission extends APIFactory {
 	 * @return array|bool
 	 */
 	function filterPresetPermissions( $preset, $filter_sections = FALSE, $filter_permissions = FALSE ) {
-		$pf = TTNew('PermissionFactory');
+		$pf = TTNew('PermissionFactory'); /** @var PermissionFactory $pf */
 		return $this->returnHandler( $pf->filterPresetPermissions( $preset, $filter_sections, $filter_permissions ) );
 	}
 }

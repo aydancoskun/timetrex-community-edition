@@ -100,7 +100,7 @@ class APIUserMembership extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$umlf = TTnew( 'UserMembershipListFactory' );
+		$umlf = TTnew( 'UserMembershipListFactory' ); /** @var UserMembershipListFactory $umlf */
 
 		$umlf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 
@@ -193,7 +193,7 @@ class APIUserMembership extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserMembershipListFactory' );
+				$lf = TTnew( 'UserMembershipListFactory' ); /** @var UserMembershipListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -313,7 +313,7 @@ class APIUserMembership extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserMembershipListFactory' );
+				$lf = TTnew( 'UserMembershipListFactory' ); /** @var UserMembershipListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

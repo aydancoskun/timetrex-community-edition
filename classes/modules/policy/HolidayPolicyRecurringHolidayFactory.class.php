@@ -51,7 +51,7 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 		if ( is_object($this->recurring_holiday_obj) ) {
 			return $this->recurring_holiday_obj;
 		} else {
-			$lf = TTnew( 'RecurringHolidayListFactory' );
+			$lf = TTnew( 'RecurringHolidayListFactory' ); /** @var RecurringHolidayListFactory $lf */
 			$lf->getById( $this->getRecurringHoliday() );
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->recurring_holiday_obj = $lf->getCurrent();
@@ -104,7 +104,7 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 
 		// Holiday Policy
 		if ( $this->getHolidayPolicy() == '' OR $this->getHolidayPolicy() == TTUUID::getZeroID() ) {
-			$hplf = TTnew( 'HolidayPolicyListFactory' );
+			$hplf = TTnew( 'HolidayPolicyListFactory' ); /** @var HolidayPolicyListFactory $hplf */
 			$this->Validator->isResultSetWithRows(	'holiday_policy',
 													  $hplf->getByID($this->getHolidayPolicy()),
 													  TTi18n::gettext('Invalid Holiday Policy')
@@ -112,7 +112,7 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 		}
 
 		// Selected Recurring Holiday
-		$rhlf = TTnew( 'RecurringHolidayListFactory' );
+		$rhlf = TTnew( 'RecurringHolidayListFactory' ); /** @var RecurringHolidayListFactory $rhlf */
 		$this->Validator->isResultSetWithRows(	'recurring_holiday',
 														$rhlf->getByID($this->getRecurringHoliday()),
 														TTi18n::gettext('Selected Recurring Holiday is invalid')
@@ -242,6 +242,8 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 		if ( is_object($obj) ) {
 			return TTLog::addEntry( $this->getHolidayPolicy(), $log_action, TTi18n::getText('Recurring Holiday').': '. $obj->getName(), NULL, $this->getTable() );
 		}
+
+		return FALSE;
 	}
 }
 ?>

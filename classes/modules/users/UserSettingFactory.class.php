@@ -190,7 +190,7 @@ class UserSettingFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'user_id',
 														$ulf->getByID($this->getUser()),
 														TTi18n::gettext('Invalid Employee')
@@ -357,7 +357,7 @@ class UserSettingFactory extends Factory {
 		Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		$usf->setObjectFromArray( $row );
 		if ( $usf->isValid() ) {
-			$usf->Save();
+			return $usf->Save();
 		}
 
 		return FALSE;

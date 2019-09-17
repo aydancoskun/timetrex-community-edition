@@ -583,6 +583,13 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		form_item_input.TCheckbox( { field: 'enable_recalculate_dates' } );
 		this.addEditFieldToColumn( $.i18n._( 'Recalculate Dates' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
+		// Recalculate Dates From
+		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+		form_item_input.TDatePicker( {
+			field: 'recalculate_date'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Recalculate Dates From' ), form_item_input, tab_payroll_remittance_agency_event_column_1 );
+
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'start_date' } );

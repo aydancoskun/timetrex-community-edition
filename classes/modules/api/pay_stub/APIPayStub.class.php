@@ -78,7 +78,7 @@ class APIPayStub extends APIFactory {
 		Debug::Text('Getting pay stub entry default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get earliest OPEN pay period.
-		$pplf = TTNew('PayPeriodListFactory');
+		$pplf = TTNew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 		$pplf->getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $company_obj->getId(), NULL, time() );
 		if ( $pplf->getRecordCount() > 0 ) {
 			$pp_obj = $pplf->getCurrent();
@@ -148,7 +148,7 @@ class APIPayStub extends APIFactory {
 			Debug::setVerbosity(10);
 
 			if ( isset($data['filter_data']['time_period']) AND is_array($data['filter_data']['time_period']) ) {
-				$report_obj = TTnew('Report');
+				$report_obj = TTnew('Report'); /** @var Report $report_obj */
 				$report_obj->setUserObject( $this->getCurrentUserObject() );
 				$report_obj->setPermissionObject( $this->getPermissionObject() );
 				Debug::Text('Found TimePeriod...', __FILE__, __LINE__, __METHOD__, 10);
@@ -167,13 +167,11 @@ class APIPayStub extends APIFactory {
 			//Specific sort order to ensure consistent transaction order in the EFT files. Keep in mind exportPayStubTransaction() sorts the transactions again too, but this helps.
 			$data['filter_sort'] = array( 'lef.id' => 'asc', 'rsaf.id' => 'asc', 'psf.transaction_date' => 'asc', 'destination_user_last_name' => 'asc', 'destination_user_first_name' => 'asc', 'rdaf.id' => 'asc' );
 
-			/** @var PayStubTransactionListFactory $pslf */
-			$pslf = TTnew( 'PayStubTransactionListFactory' );
+			$pslf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pslf */
 			$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentUserObject()->getCompany(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 			Debug::Text( 'PSTLF Record Count: ' . $pslf->getRecordCount() . ' Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
 		} else {
-			/** @var PayStubListFactory $pslf */
-			$pslf = TTnew( 'PayStubListFactory' );
+			$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 			$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 			Debug::Text( 'PSLF Record Count: ' . $pslf->getRecordCount() . ' Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
 		}
@@ -243,6 +241,8 @@ class APIPayStub extends APIFactory {
 
 			return $this->returnHandler( TRUE ); //No records returned.
 		}
+
+		return $this->returnHandler( FALSE );
 	}
 
 	/**
@@ -310,8 +310,7 @@ class APIPayStub extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				/** @var PayStubListFactory $lf */
-				$lf = TTnew( 'PayStubListFactory' );
+				$lf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -329,17 +328,7 @@ class APIPayStub extends APIFactory {
 
 							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
-
-							//Check to see if the transaction date changed, so we can trigger setEnableCalcYTD().
-							$lf_arr = $lf->getObjectAsArray();
-							if ( isset($lf_arr['transaction_date']) AND isset($row['transaction_date'])
-									AND $lf_arr['transaction_date'] != $row['transaction_date']
-									AND TTDate::getYear( TTDate::parseDateTime( $lf_arr['transaction_date'] ) ) != TTDate::getYear( TTDate::parseDateTime( $row['transaction_date'] ) ) ) {
-								Debug::Text( 'Transaction date changed to a different year, recalculate YTD amounts... Prev: '.$lf_arr['transaction_date'] .' New: '. $row['transaction_date'], __FILE__, __LINE__, __METHOD__, 10);
-								$set_enable_calc_ytd = TRUE;
-							}
-							$row = array_merge( $lf_arr, $row );
-							unset($lf_arr);
+							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
 						}
@@ -362,14 +351,6 @@ class APIPayStub extends APIFactory {
 					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$lf->setObjectFromArray( $row );
-
-					//If the user is changing the Transaction Date between years, make sure we always recalc the current pay stub YTD amount.
-					// ie: Changing it from Dec 31st to January 1st, or vice versa makes the YTD amount reset.
-					// This must go above processEntries() so it can be disabled by it if needed.
-					if ( isset($set_enable_calc_ytd) AND $set_enable_calc_ytd == TRUE ) {
-						$lf->setEnableCalcCurrentYTD( TRUE );
-						$lf->setEnableCalcYTD( TRUE );
-					}
 
 					if ( ( isset( $row['entries'] ) AND is_array( $row['entries'] ) AND count( $row['entries'] ) > 0 ) ) {
 						Debug::Text( ' Found modified entries!', __FILE__, __LINE__, __METHOD__, 10 );
@@ -402,15 +383,15 @@ class APIPayStub extends APIFactory {
 
 								//Populate $pay_stub_entry_obj so we can find validation errors before postSave() is called.
 								if ( isset($pay_stub_entry['id']) AND $pay_stub_entry['id'] != '' AND TTUUID::isUUID( $pay_stub_entry['id'] ) ) {
-									$pself = TTnew( 'PayStubEntryListFactory' );
+									$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 									$pself->getById( $pay_stub_entry['id'] );
 									if ( $pself->getRecordCount() > 0 ) {
 										$pay_stub_entry_obj = $pself->getCurrent();
 									} else {
-										$pay_stub_entry_obj = TTnew( 'PayStubEntryListFactory' );
+										$pay_stub_entry_obj = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pay_stub_entry_obj */
 									}
 								} else {
-									$pay_stub_entry_obj = TTnew( 'PayStubEntryListFactory' );
+									$pay_stub_entry_obj = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pay_stub_entry_obj */
 									//$pay_stub_entry_obj->setPayStub( $lf->getId() ); //Don't set this here as it will cause validation failures. Its handled in addEntry instead.
 								}
 
@@ -456,7 +437,7 @@ class APIPayStub extends APIFactory {
 
 									$ytd_adjustment = FALSE;
 									if ( TTUUID::isUUID( $pay_stub_entry['pay_stub_amendment_id'] ) AND $pay_stub_entry['pay_stub_amendment_id'] != TTUUID::getZeroID() AND $pay_stub_entry['pay_stub_amendment_id'] != TTUUID::getNotExistID() ) {
-										$psamlf = TTNew( 'PayStubAmendmentListFactory' );
+										$psamlf = TTNew( 'PayStubAmendmentListFactory' ); /** @var PayStubAmendmentListFactory $psamlf */
 										$psamlf->getByIdAndCompanyId( TTUUID::castUUID($pay_stub_entry['pay_stub_amendment_id']), $this->getCurrentCompanyObject()->getId() );
 										if ( $psamlf->getRecordCount() > 0 ) {
 											$ytd_adjustment = $psamlf->getCurrent()->getYTDAdjustment();
@@ -511,16 +492,14 @@ class APIPayStub extends APIFactory {
 
 								if ( isset( $pay_stub_transaction['id'] )
 										AND TTUUID::isUUID( $pay_stub_transaction['id'] ) AND $pay_stub_transaction['id'] != TTUUID::getZeroID() AND $pay_stub_transaction['id'] != TTUUID::getNotExistID() ) {
-									/** @var PayStubTransactionListFactory $pstlf */
-									$pstlf = TTnew( 'PayStubTransactionListFactory' );
+									$pstlf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pstlf */
 									$pstlf->getByIdAndCompanyId( $pay_stub_transaction['id'], $this->getCurrentCompanyObject()->getId() );
 									if ( $pstlf->getRecordCount() > 0 ) {
 										$pst_obj = $pstlf->getCurrent();
 									}
 									unset( $pstlf );
 								} else {
-									/** @var PayStubTransactionFactory $pst_obj */
-									$pst_obj = TTnew('PayStubTransactionFactory');
+									$pst_obj = TTnew('PayStubTransactionFactory'); /** @var PayStubTransactionFactory $pst_obj */
 									//$pst_obj->setPayStub( $lf->getId() ); //Don't set this here as it will cause validation failures. Its handled in addTransaction() instead.
 								}
 
@@ -663,7 +642,7 @@ class APIPayStub extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayStubListFactory' );
+				$lf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -762,136 +741,132 @@ class APIPayStub extends APIFactory {
 			$type_id = 10;
 		}
 
-		foreach($pay_period_ids as $pay_period_id) {
-			Debug::text('Pay Period ID: '. $pay_period_id, __FILE__, __LINE__, __METHOD__, 10);
-
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
+		$pplf->getByIdAndCompanyId( $pay_period_ids, $this->getCurrentCompanyObject()->getId(), NULL, array( 'start_date' => 'asc' ) ); //Make sure pay periods are ordered by start date asc so they are calculated in order if the user happens to calculate multiple pay periods over a long period of time.
+		foreach ( $pplf as $pay_period_obj ) { /** @var PayPeriodFactory $pay_period_obj */
 			$epoch = TTDate::getTime();
 
-			$pplf = TTnew( 'PayPeriodListFactory' );
-			$pplf->getByIdAndCompanyId($pay_period_id, $this->getCurrentCompanyObject()->getId() );
-			foreach ($pplf as $pay_period_obj) {
-				Debug::text('Pay Period Schedule ID: '. $pay_period_obj->getPayPeriodSchedule(), __FILE__, __LINE__, __METHOD__, 10);
-				if ( $pay_period_obj->isPreviousPayPeriodClosed() == TRUE ) {
-					$pslf = TTnew( 'PayStubListFactory' );
+			Debug::text('Pay Period ID: '. $pay_period_obj->getID() .' Schedule ID: '. $pay_period_obj->getPayPeriodSchedule() .' Start Date: '. TTDate::getDate( 'DATE', $pay_period_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
+			if ( $pay_period_obj->isPreviousPayPeriodClosed() == TRUE ) {
+				$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 
-					if ( (int)$run_id == 0 ) {
-						$run_id = PayStubListFactory::getCurrentPayRun( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getId() );
-					}
-					Debug::text('  Using Run ID: '. $run_id, __FILE__, __LINE__, __METHOD__, 10);
+				if ( (int)$run_id == 0 ) {
+					$run_id = PayStubListFactory::getCurrentPayRun( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getId() );
+				}
+				Debug::text('  Using Run ID: '. $run_id, __FILE__, __LINE__, __METHOD__, 10);
 
-					//Check to make sure pay stubs with a transaction date before today are not open, as that can cause the payroll run number to be incorrectly determined on its own.
-					$open_pay_stub_transaction_date = ( TTDate::getMiddleDayEpoch( $epoch ) >= TTDate::getMiddleDayEpoch( $pay_period_obj->getTransactionDate() ) ) ? $pay_period_obj->getTransactionDate() : TTDate::getBeginDayEpoch( $epoch );
-					$pslf->getByCompanyIdAndPayPeriodIdAndStatusIdAndTransactionDateBeforeDate( $this->getCurrentCompanyObject()->getId(), $pay_period_id, array(25), $open_pay_stub_transaction_date, 1 );
+				//Check to make sure pay stubs with a transaction date before today are not open, as that can cause the payroll run number to be incorrectly determined on its own.
+				$open_pay_stub_transaction_date = ( TTDate::getMiddleDayEpoch( $epoch ) >= TTDate::getMiddleDayEpoch( $pay_period_obj->getTransactionDate() ) ) ? $pay_period_obj->getTransactionDate() : TTDate::getBeginDayEpoch( $epoch );
+				$pslf->getByCompanyIdAndPayPeriodIdAndStatusIdAndTransactionDateBeforeDate( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getID(), array(25), $open_pay_stub_transaction_date, 1 );
+				if ( $pslf->getRecordCount() > 0 ) {
+					UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Pay Stubs with a transaction date before today are still OPEN, all pay stubs must be PAID on or before their transaction date'), NULL );
+					continue;
+				}
+				unset($open_pay_stub_transaction_date);
+
+				if ( $run_id > 1 ) { //Check to make sure prior payroll runs are marked as PAID.
+					$pslf->getByCompanyIdAndPayPeriodIdAndStatusIdAndNotRun( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getId(), array(10, 20, 25, 30), $run_id, 1 ); //Only need to return 1 record.
 					if ( $pslf->getRecordCount() > 0 ) {
-						UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Pay Stubs with a transaction date before today are still OPEN, all pay stubs must be PAID on or before their transaction date'), NULL );
+						$tmp_pay_stub_obj = $pslf->getCurrent();
+						Debug::text('Pay Stub ID: '. $tmp_pay_stub_obj->getID() .' Run: '. $tmp_pay_stub_obj->getRun() .' Transaction Date: '. TTDate::getDate('DATE', $tmp_pay_stub_obj->getTransactionDate() ), __FILE__, __LINE__, __METHOD__, 10);
+						UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Payroll Run #%1 of Pay Period %2 is still OPEN, all pay stubs must be PAID before starting a new payroll run.', array( $tmp_pay_stub_obj->getRun(), TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ) ) ), NULL );
+						unset($tmp_pay_stub_obj);
 						continue;
 					}
-					unset($open_pay_stub_transaction_date);
-
-					if ( $run_id > 1 ) { //Check to make sure prior payroll runs are marked as PAID.
-						$pslf->getByCompanyIdAndPayPeriodIdAndStatusIdAndNotRun( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getId(), array(10, 20, 25, 30), $run_id, 1 ); //Only need to return 1 record.
-						if ( $pslf->getRecordCount() > 0 ) {
-							$tmp_pay_stub_obj = $pslf->getCurrent();
-							Debug::text('Pay Stub ID: '. $tmp_pay_stub_obj->getID() .' Run: '. $tmp_pay_stub_obj->getRun() .' Transaction Date: '. TTDate::getDate('DATE', $tmp_pay_stub_obj->getTransactionDate() ), __FILE__, __LINE__, __METHOD__, 10);
-							UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Payroll Run #%1 of Pay Period %2 is still OPEN, all pay stubs must be PAID before starting a new payroll run.', array( $tmp_pay_stub_obj->getRun(), TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ) ) ), NULL );
-							unset($tmp_pay_stub_obj);
-							continue;
-						}
-					}
-					unset($pslf);
-
-					//Grab all users for pay period
-					$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
-					if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( TTUUID::getNotExistID(), $user_ids ) ) {
-						Debug::text('Generating pay stubs for specific users...', __FILE__, __LINE__, __METHOD__, 10);
-
-						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Company Pay Stubs for Pay Period').': '. TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ), $this->getCurrentUserObject()->getId(), 'pay_stub' ); //Notice
-						$ppsulf->getByCompanyIDAndPayPeriodScheduleIdAndUserID( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getPayPeriodSchedule(), $user_ids );
-					} else {
-						Debug::text('Generating pay stubs for all users...', __FILE__, __LINE__, __METHOD__, 10);
-						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Employee Pay Stub for Pay Period').': '. TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ), $this->getCurrentUserObject()->getId(), 'pay_stub' );
-						$ppsulf->getByCompanyIDAndPayPeriodScheduleId( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getPayPeriodSchedule() );
-					}
-					$total_pay_stubs = $ppsulf->getRecordCount();
-
-					if ( $total_pay_stubs > 0 ) {
-						$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_pay_stubs, NULL, TTi18n::getText('Generating Paystubs...') );
-
-						//FIXME: If a pay stub already exists, it is deleted first, but then if the new pay stub fails to generate, the original one is
-						//  still deleted, so that can catch some people off guard if they don't fix the problem and re-generate the paystubs again.
-						//  This can be useful in some cases though, as the opposite problem may arise.
-
-						//Delete existing pay stub. Make sure we only
-						//delete pay stubs that are the same as what we're creating.
-						$pslf = TTnew( 'PayStubListFactory' );
-						$pslf->getByCompanyIdAndPayPeriodIdAndRun( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getId(), $run_id );
-						foreach ( $pslf as $pay_stub_obj ) {
-							if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( TTUUID::getNotExistID(), $user_ids ) AND in_array( $pay_stub_obj->getUser(), $user_ids ) == FALSE ) {
-								continue; //Only generating pay stubs for individual employees, skip ones not in the list.
-							}
-							Debug::text('Existing Pay Stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-
-							//Check PS End Date to match with PP End Date
-							//So if an ROE was generated, it won't get deleted when they generate all other Pay Stubs later on.
-							//Unless the ROE used the exact same dates as the pay period? To avoid this, only delete pay stubs for employees with no termination date, or with a termination date after the pay period start date.
-							if ( $pay_stub_obj->getStatus() <= 25
-									AND $pay_stub_obj->getTainted() === FALSE
-									AND TTDate::getMiddleDayEpoch( $pay_stub_obj->getEndDate() ) == TTDate::getMiddleDayEpoch( $pay_period_obj->getEndDate() )
-									AND ( is_object( $pay_stub_obj->getUserObject() ) AND ( $pay_stub_obj->getUserObject()->getTerminationDate() == '' OR TTDate::getMiddleDayEpoch( $pay_stub_obj->getUserObject()->getTerminationDate() ) >= TTDate::getMiddleDayEpoch( $pay_period_obj->getStartDate() ) ) ) ) {
-								Debug::text('Deleting pay stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-								$pay_stub_obj->setDeleted( TRUE );
-								if ( $pay_stub_obj->isValid() == TRUE ) { //Make sure we validate on delete, in case there are paid transactions.
-									$pay_stub_obj->Save();
-								} else {
-									Debug::text('ERROR: Unable to delete old pay stub to regenerate it...', __FILE__, __LINE__, __METHOD__, 10);
-								}
-							} else {
-								Debug::text('Pay stub does not need regenerating, or it is LOCKED! ID: '. $pay_stub_obj->getID() .' Status: '. $pay_stub_obj->getStatus() .' Tainted: '. (int)$pay_stub_obj->getTainted() .' Pay Stub End Date: '. $pay_stub_obj->getEndDate() .' Pay Period End Date: '. $pay_period_obj->getEndDate(), __FILE__, __LINE__, __METHOD__, 10);
-							}
-						}
-
-						$i = 1;
-						foreach ($ppsulf as $pay_period_schdule_user_obj) {
-							Debug::text('Pay Period User ID: '. $pay_period_schdule_user_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
-							Debug::text('Total Pay Stubs: '. $total_pay_stubs .' - '. ceil( 1 / (100 / $total_pay_stubs) ), __FILE__, __LINE__, __METHOD__, 10);
-
-							$profiler->startTimer( 'Calculating Pay Stub' );
-							//Calc paystubs.
-							$cps = new CalculatePayStub();
-							$cps->setEnableCorrection( (bool)$enable_correction );
-							$cps->setUser( $pay_period_schdule_user_obj->getUser() );
-							$cps->setPayPeriod( $pay_period_obj->getId() );
-							$cps->setType( $type_id );
-							$cps->setRun( $run_id );
-							if ( $transaction_date != '' ) {
-								$cps->setTransactionDate( TTDate::parseDateTime( $transaction_date ) );
-							}
-							$cps->calculate();
-							unset($cps);
-							$profiler->stopTimer( 'Calculating Pay Stub' );
-
-							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
-
-							//sleep(1); /////////////////////////////// FOR TESTING ONLY //////////////////
-
-							$i++;
-						}
-						unset($ppsulf);
-
-						$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
-
-					} else {
-						Debug::text('ERROR: User not assigned to pay period schedule...', __FILE__, __LINE__, __METHOD__, 10);
-						UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Unable to generate pay stub(s), employee(s) may not be assigned to a pay period schedule.' ), NULL );
-					}
-				} else {
-					UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Pay period prior to %1 is not closed, please close all previous pay periods and try again...', array( TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ) ) ), NULL );
 				}
+				unset($pslf);
+
+				//Grab all users for pay period
+				$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' ); /** @var PayPeriodScheduleUserListFactory $ppsulf */
+				if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( TTUUID::getNotExistID(), $user_ids ) ) {
+					Debug::text('Generating pay stubs for specific users...', __FILE__, __LINE__, __METHOD__, 10);
+
+					TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Company Pay Stubs for Pay Period').': '. TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ), $this->getCurrentUserObject()->getId(), 'pay_stub' ); //Notice
+					$ppsulf->getByCompanyIDAndPayPeriodScheduleIdAndUserID( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getPayPeriodSchedule(), $user_ids );
+				} else {
+					Debug::text('Generating pay stubs for all users...', __FILE__, __LINE__, __METHOD__, 10);
+					TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Employee Pay Stub for Pay Period').': '. TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ), $this->getCurrentUserObject()->getId(), 'pay_stub' );
+					$ppsulf->getByCompanyIDAndPayPeriodScheduleId( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getPayPeriodSchedule() );
+				}
+				$total_pay_stubs = $ppsulf->getRecordCount();
+
+				if ( $total_pay_stubs > 0 ) {
+					$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_pay_stubs, NULL, TTi18n::getText('Generating Paystubs...') );
+
+					//FIXME: If a pay stub already exists, it is deleted first, but then if the new pay stub fails to generate, the original one is
+					//  still deleted, so that can catch some people off guard if they don't fix the problem and re-generate the paystubs again.
+					//  This can be useful in some cases though, as the opposite problem may arise.
+
+					//Delete existing pay stub. Make sure we only
+					//delete pay stubs that are the same as what we're creating.
+					$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
+					$pslf->getByCompanyIdAndPayPeriodIdAndRun( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getId(), $run_id );
+					foreach ( $pslf as $pay_stub_obj ) {
+						if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( TTUUID::getNotExistID(), $user_ids ) AND in_array( $pay_stub_obj->getUser(), $user_ids ) == FALSE ) {
+							continue; //Only generating pay stubs for individual employees, skip ones not in the list.
+						}
+						Debug::text('Existing Pay Stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+
+						//Check PS End Date to match with PP End Date
+						//So if an ROE was generated, it won't get deleted when they generate all other Pay Stubs later on.
+						//Unless the ROE used the exact same dates as the pay period? To avoid this, only delete pay stubs for employees with no termination date, or with a termination date after the pay period start date.
+						if ( $pay_stub_obj->getStatus() <= 25
+								AND $pay_stub_obj->getTainted() === FALSE
+								AND TTDate::getMiddleDayEpoch( $pay_stub_obj->getEndDate() ) == TTDate::getMiddleDayEpoch( $pay_period_obj->getEndDate() )
+								AND ( is_object( $pay_stub_obj->getUserObject() ) AND ( $pay_stub_obj->getUserObject()->getTerminationDate() == '' OR TTDate::getMiddleDayEpoch( $pay_stub_obj->getUserObject()->getTerminationDate() ) >= TTDate::getMiddleDayEpoch( $pay_period_obj->getStartDate() ) ) ) ) {
+							Debug::text('Deleting pay stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+							$pay_stub_obj->setDeleted( TRUE );
+							if ( $pay_stub_obj->isValid() == TRUE ) { //Make sure we validate on delete, in case there are paid transactions.
+								$pay_stub_obj->Save();
+							} else {
+								Debug::text('ERROR: Unable to delete old pay stub to regenerate it...', __FILE__, __LINE__, __METHOD__, 10);
+							}
+						} else {
+							Debug::text('Pay stub does not need regenerating, or it is LOCKED! ID: '. $pay_stub_obj->getID() .' Status: '. $pay_stub_obj->getStatus() .' Tainted: '. (int)$pay_stub_obj->getTainted() .' Pay Stub End Date: '. $pay_stub_obj->getEndDate() .' Pay Period End Date: '. $pay_period_obj->getEndDate(), __FILE__, __LINE__, __METHOD__, 10);
+						}
+					}
+
+					$i = 1;
+					foreach ($ppsulf as $pay_period_schdule_user_obj) {
+						Debug::text('Pay Period User ID: '. $pay_period_schdule_user_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Total Pay Stubs: '. $total_pay_stubs .' - '. ceil( 1 / (100 / $total_pay_stubs) ), __FILE__, __LINE__, __METHOD__, 10);
+
+						$profiler->startTimer( 'Calculating Pay Stub' );
+						//Calc paystubs.
+						$cps = new CalculatePayStub();
+						$cps->setEnableCorrection( (bool)$enable_correction );
+						$cps->setUser( $pay_period_schdule_user_obj->getUser() );
+						$cps->setPayPeriod( $pay_period_obj->getId() );
+						$cps->setType( $type_id );
+						$cps->setRun( $run_id );
+						if ( $transaction_date != '' ) {
+							$cps->setTransactionDate( TTDate::parseDateTime( $transaction_date ) );
+						}
+						$cps->calculate();
+						unset($cps);
+						$profiler->stopTimer( 'Calculating Pay Stub' );
+
+						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+
+						//sleep(1); /////////////////////////////// FOR TESTING ONLY //////////////////
+
+						$i++;
+					}
+					unset($ppsulf);
+
+					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+
+				} else {
+					Debug::text('ERROR: User not assigned to pay period schedule...', __FILE__, __LINE__, __METHOD__, 10);
+					UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Unable to generate pay stub(s), employee(s) may not be assigned to a pay period schedule.' ), NULL );
+				}
+			} else {
+				UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Pay period prior to %1 is not closed, please close all previous pay periods and try again...', array( TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ) ) ), NULL );
 			}
 		}
 
 		if ( UserGenericStatusFactory::isStaticQueue() == TRUE ) {
-			$ugsf = TTnew( 'UserGenericStatusFactory' );
+			$ugsf = TTnew( 'UserGenericStatusFactory' ); /** @var UserGenericStatusFactory $ugsf */
 			$ugsf->setUser( $this->getCurrentUserObject()->getId() );
 			$ugsf->setBatchID( $ugsf->getNextBatchId() );
 			$ugsf->setQueue( UserGenericStatusFactory::getStaticQueue() );

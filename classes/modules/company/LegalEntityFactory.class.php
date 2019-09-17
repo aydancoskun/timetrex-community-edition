@@ -556,6 +556,7 @@ class LegalEntityFactory extends Factory {
 
 	/**
 	 * Get a secure version of the PaymentServicesAPIKey
+	 * @param null $value
 	 * @return bool|string
 	 */
 	function getSecurePaymentServicesAPIKey( $value = NULL ) {
@@ -616,6 +617,7 @@ class LegalEntityFactory extends Factory {
 
 	/**
 	 * @param null $legal_entity_id
+	 * @param bool $include_default_logo
 	 * @return string
 	 */
 	function getLogoFileName( $legal_entity_id = NULL, $include_default_logo = TRUE ) {
@@ -688,7 +690,7 @@ class LegalEntityFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company_id',
 												  $clf->getByID($this->getCompany()),
 												  TTi18n::gettext('Company is invalid')
@@ -814,7 +816,7 @@ class LegalEntityFactory extends Factory {
 			}
 		}
 		// Province
-		$cf = TTnew( 'CompanyFactory' );
+		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 		if ( $this->getCountry() != FALSE  ) {
 			$options_arr = $cf->getOptions('province');
 			if ( isset($options_arr[$this->getCountry()]) ) {
@@ -942,7 +944,7 @@ class LegalEntityFactory extends Factory {
 		}
 
 		if ( $this->getDeleted() == TRUE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByLegalEntityIdAndCompanyId( $this->getId(), $this->getCompany() );
 			if ( $ulf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -950,7 +952,7 @@ class LegalEntityFactory extends Factory {
 					TTi18n::gettext('This legal entity is currently in use by employees') );
 			}
 
-			$praf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+			$praf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $praf */
 			$praf->getByLegalEntityIdAndCompanyId( $this->getId(), $this->getCompany() );
 			if ( $praf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -958,7 +960,7 @@ class LegalEntityFactory extends Factory {
 					TTi18n::gettext('This legal entity is currently in use by payroll remittance agency') );
 			}
 
-			$rsaf = TTnew( 'RemittanceSourceAccountListFactory' );
+			$rsaf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $rsaf */
 			$rsaf->getByLegalEntityIdAndCompanyId( $this->getId(), $this->getCompany() );
 			if ( $rsaf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -979,6 +981,9 @@ class LegalEntityFactory extends Factory {
 		return TRUE;
 	}
 
+	/**
+	 * @return TimeTrexPaymentServices
+	 */
 	function getPaymentServicesAPIObject() {
 		require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR . 'other' . DIRECTORY_SEPARATOR . 'TimeTrexPaymentServices.class.php' );
 		$tt_ps_api = new TimeTrexPaymentServices( $this->getPaymentServicesUserName(), $this->getPaymentServicesAPIKey() ); //Username and API Key
@@ -986,6 +991,9 @@ class LegalEntityFactory extends Factory {
 		return $tt_ps_api;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function checkPaymentServicesCredentials() {
 		if ( PRODUCTION == FALSE ) {
 			return TRUE;
@@ -1087,7 +1095,7 @@ class LegalEntityFactory extends Factory {
 			if ( $this->getEnableAddRemittanceSource() == TRUE ) {
 				Debug::Text('Adding default source account...', __FILE__, __LINE__, __METHOD__, 10);
 				//Create a Check Remittance Source account for each legal entity by default.
-				$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+				$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */
 				$rsaf->setLegalEntity( $this->getId() );
 				$rsaf->setStatus( 10 ); //Enabled
 				$rsaf->setCurrency( $this->getCompanyObject()->getDefaultCurrency() );
@@ -1105,7 +1113,7 @@ class LegalEntityFactory extends Factory {
 			if ( $this->getEnableAddPresets() == TRUE ) {
 				Debug::Text('Adding presets...', __FILE__, __LINE__, __METHOD__, 10);
 
-				$sp = TTNew( 'SetupPresets' );
+				$sp = TTNew( 'SetupPresets' ); /** @var SetupPresets $sp */
 				$sp->setCompany( $this->getCompany() );
 				$sp->setUser( $this->getCreatedBy() );
 
@@ -1142,7 +1150,7 @@ class LegalEntityFactory extends Factory {
 								Debug::Text( 'Creating new user success! Username: ' . $user_retval['user_name'] . ' API Key: ' . $user_retval['api_key'], __FILE__, __LINE__, __METHOD__, 10 );
 
 								//Update UserName/API Key
-								$lelf = TTNew( 'LegalEntityListFactory' );
+								$lelf = TTNew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 								$lelf->getByIdAndCompanyId( $this->getId(), $this->getCompany() );
 								if ( $lelf->getRecordCount() == 1 ) {
 									$lef = $lelf->getCurrent();

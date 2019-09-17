@@ -139,7 +139,7 @@ class Form1099MiscReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'Form1099MiscReport', 'custom_column' );
@@ -150,13 +150,13 @@ class Form1099MiscReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'Form1099MiscReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'Form1099MiscReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -165,7 +165,7 @@ class Form1099MiscReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'Form1099MiscReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -517,9 +517,8 @@ class Form1099MiscReport extends Report {
 		return $retarr;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -535,14 +534,14 @@ class Form1099MiscReport extends Report {
 		//
 		//Figure out state/locality wages/taxes.
 		//
-		$cdlf = TTnew( 'CompanyDeductionListFactory' );
+		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10, 20), 10 );
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach( $cdlf as $cd_obj ) {
 				$tax_deductions[$cd_obj->getId()] = $cd_obj;
 
 				//Need to determine start/end dates for each CompanyDeduction/User pair, so we can break down total wages earned in the date ranges.
-				$udlf = TTnew( 'UserDeductionListFactory' );
+				$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 				$udlf->getByCompanyIdAndCompanyDeductionId( $cd_obj->getCompany(), $cd_obj->getId() );
 				if ( $udlf->getRecordCount() > 0 ) {
 					foreach( $udlf as $ud_obj ) {
@@ -558,7 +557,7 @@ class Form1099MiscReport extends Report {
 			Debug::Text('No Tax Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		$pself = TTnew( 'PayStubEntryListFactory' );
+		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		if ( $pself->getRecordCount() > 0 ) {
@@ -666,7 +665,7 @@ class Form1099MiscReport extends Report {
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -678,8 +677,7 @@ class Form1099MiscReport extends Report {
 		}
 
 		//Get legal entity data for joining.
-		/** @var LegalEntityListFactory $lelf */
-		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Legal Entity Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
@@ -699,14 +697,12 @@ class Form1099MiscReport extends Report {
 		//$ulf = TTnew( 'UserListFactory' );
 		$filter_data['type_id'] = array(10, 20); //federal and state
 		$filter_data['country'] = array('US'); //US federal
-		/** @var PayrollRemittanceAgencyListFactory $ralf */
-		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
 		if ( $ralf->getRecordCount() > 0 ) {
 			foreach ( $ralf as $key => $ra_obj ) {
-				/** @var PayrollRemittanceAgencyFactory $ra_obj */
 				if ( $ra_obj->parseAgencyID( NULL, 'id') == 10 ) {
 					$province_id = ( $ra_obj->getType() == 20 ) ? $ra_obj->getProvince() : '00';
 					$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$province_id] = $ra_obj;
@@ -782,7 +778,7 @@ class Form1099MiscReport extends Report {
 
 	/**
 	 * @param null $format
-	 * @return bool
+	 * @return array|bool
 	 */
 	function _outputPDFForm( $format = NULL ) {
 		$file_arr = array();
@@ -823,7 +819,6 @@ class Form1099MiscReport extends Report {
 				$x = 0; //Progress bar only.
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($user_rows), NULL, TTi18n::getText('Generating Forms...') );
 
-				/** @var LegalEntityFactory $le_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
 
 				$f1099m = $this->getF1099MiscObject();
@@ -849,7 +844,7 @@ class Form1099MiscReport extends Report {
 							continue;
 						}
 
-						$ulf = TTnew( 'UserListFactory' );
+						$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 						$ulf->getById( TTUUID::castUUID( $user_id ) );
 						if ( $ulf->getRecordCount() == 1 ) {
 							$user_obj = $ulf->getCurrent();
@@ -964,9 +959,8 @@ class Form1099MiscReport extends Report {
 		return FALSE;
 	}
 
-	//Short circuit this function, as no postprocessing is required for exporting the data.
-
 	/**
+	 * Short circuit this function, as no postprocessing is required for exporting the data.
 	 * @param null $format
 	 * @return bool
 	 */

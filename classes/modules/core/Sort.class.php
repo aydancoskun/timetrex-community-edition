@@ -93,9 +93,9 @@ class Sort {
 		return $data;
 	}
 
-	//Usage: $arr2 = Sort::arrayMultiSort($arr1, array( 'name' => array(SORT_DESC, SORT_REGULAR), 'cat' => SORT_ASC ) );
-	//Case insensitive sorting.
 	/**
+	 * Usage: $arr2 = Sort::arrayMultiSort($arr1, array( 'name' => array(SORT_DESC, SORT_REGULAR), 'cat' => SORT_ASC ) );
+	 * Case insensitive sorting.
 	 * @param $array
 	 * @param $cols
 	 * @return array|bool

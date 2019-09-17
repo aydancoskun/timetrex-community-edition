@@ -55,7 +55,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -130,7 +130,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -174,7 +174,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -217,7 +217,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
 
 		return $this;
 	}
@@ -262,7 +262,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
 
 		return $this;
 	}
@@ -304,7 +304,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -346,7 +346,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -392,7 +392,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -454,7 +454,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -546,7 +546,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

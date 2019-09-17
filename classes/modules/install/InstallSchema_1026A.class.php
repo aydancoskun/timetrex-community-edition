@@ -60,7 +60,7 @@ class InstallSchema_1026A extends InstallSchema_Base {
 
 		//Find out if they have both TimeClocks and FingerPrint stations. If they do
 		//we need to copy the fingerprint data to both types of UserIdentification rows.
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 
 		$clf->StartTransaction();
@@ -69,7 +69,7 @@ class InstallSchema_1026A extends InstallSchema_Base {
 
 			$max_templates = 4;
 
-			$slf = TTnew( 'StationListFactory' );
+			$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 			$slf->getByCompanyIdAndTypeId( $c_obj->getId(), array(30, 40, 50, 100, 110) );
 			if ( $slf->getRecordCount() > 0 ) {
 				$slf_tmp1 = $slf->getByCompanyIdAndTypeId( $c_obj->getId(), array(50) );
@@ -88,7 +88,7 @@ class InstallSchema_1026A extends InstallSchema_Base {
 				unset($slf_tmp3);
 
 				//Loop through each user copying their data to the UserIdenfification Table.
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$ulf->getByCompanyID( $c_obj->getId() );
 				if ( $ulf->getRecordCount() > 0 ) {
 					foreach( $ulf as $u_obj ) {
@@ -96,7 +96,7 @@ class InstallSchema_1026A extends InstallSchema_Base {
 						//if ( $u_obj->getIButtonID() != '' ) {
 						if ( $u_obj->getColumn('ibutton_id') != '' ) {
 							Debug::text('	 Converting iButton...', __FILE__, __LINE__, __METHOD__, 9);
-							$uif = TTnew( 'UserIdentificationFactory' );
+							$uif = TTnew( 'UserIdentificationFactory' ); /** @var UserIdentificationFactory $uif */
 							$uif->setUser( $u_obj->getId() );
 							$uif->setType( 10 ); //10=iButton
 							$uif->setNumber( 0 );
@@ -110,7 +110,7 @@ class InstallSchema_1026A extends InstallSchema_Base {
 						//if ( $u_obj->getRFID() != '' ) {
 						if ( $u_obj->getColumn('rf_id') ) {
 							Debug::text('	 Converting RFID...', __FILE__, __LINE__, __METHOD__, 9);
-							$uif = TTnew( 'UserIdentificationFactory' );
+							$uif = TTnew( 'UserIdentificationFactory' ); /** @var UserIdentificationFactory $uif */
 							$uif->setUser( $u_obj->getId() );
 							$uif->setType( 40 ); //40=Proximity
 							$uif->setNumber( 0 );
@@ -123,7 +123,7 @@ class InstallSchema_1026A extends InstallSchema_Base {
 
 						if ( $barcode_stations > 0 AND $u_obj->getEmployeeNumber() != '' ) {
 							Debug::text('	 Converting EmployeeNumber...', __FILE__, __LINE__, __METHOD__, 9);
-							$uif = TTnew( 'UserIdentificationFactory' );
+							$uif = TTnew( 'UserIdentificationFactory' ); /** @var UserIdentificationFactory $uif */
 							$uif->setUser( $u_obj->getId() );
 							$uif->setType( 30 ); //30=Barcode
 							$uif->setNumber( 0 );
@@ -143,7 +143,7 @@ class InstallSchema_1026A extends InstallSchema_Base {
 								if ( $u_obj->getColumn( $get_fingerprint_function ) != '' AND substr( $u_obj->getColumn( $get_fingerprint_function ), 0, 4) == 'p/8B' ) {
 									Debug::text('	 Converting Griaule FingerPrint: '. $t, __FILE__, __LINE__, __METHOD__, 9);
 
-									$uif = TTnew( 'UserIdentificationFactory' );
+									$uif = TTnew( 'UserIdentificationFactory' ); /** @var UserIdentificationFactory $uif */
 									$uif->setUser( $u_obj->getId() );
 									$uif->setType( 20 ); //20=Griaule, 100=ZK
 									$uif->setNumber( ($t * 10) );
@@ -165,7 +165,7 @@ class InstallSchema_1026A extends InstallSchema_Base {
 								//if ( $u_obj->$get_fingerprint_function() != '' AND substr($u_obj->$get_fingerprint_function(), 0, 3) == 'oco' ) {
 								if ( $u_obj->getColumn( $get_fingerprint_function ) != '' AND substr( $u_obj->getColumn( $get_fingerprint_function ), 0, 3) == 'oco' ) {
 									Debug::text('	 Converting ZK FingerPrint: '. $t, __FILE__, __LINE__, __METHOD__, 9);
-									$uif = TTnew( 'UserIdentificationFactory' );
+									$uif = TTnew( 'UserIdentificationFactory' ); /** @var UserIdentificationFactory $uif */
 									$uif->setUser( $u_obj->getId() );
 									$uif->setType( 100 ); //20=Griaule, 100=ZK
 									$uif->setNumber( $t );

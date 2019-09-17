@@ -71,29 +71,37 @@ class Redis_Cache_Lite extends Cache_Lite {
 				$config_vars['database']['persistent_connections'] = FALSE;
 			}
 
-			$this->_redisHostConn[$key] = new Redis();
+			if ( extension_loaded('redis') ) { //Make sure REDIS PHP extension is enabled to avoid PHP FATAL error.
+				$this->_redisHostConn[ $key ] = new Redis();
 
-			//Try with 2 second timeout, we don't want redis to block requests if its down.
-			if ( $config_vars['database']['persistent_connections'] == TRUE ) {
-				$connection_retval = $this->_redisHostConn[$key]->pconnect( trim( $this->_redisHostHost[$key] ), NULL, 2 );
-			} else {
-				$connection_retval = $this->_redisHostConn[$key]->connect( trim( $this->_redisHostHost[$key] ), NULL, 2 );
-			}
-
-			if ( $connection_retval === TRUE ) {
-				if ( isset($this->_redisDB) AND $this->_redisDB != '' ) {
-					if ( $this->_redisHostConn[$key]->select( $this->_redisDB ) === FALSE ) {
-						//return $this->raiseError('Cache_Lite : Unable to switch redis DB to: '. $this->_redisDB, -2);  //In order to catch these we need to include PEAR.php all the time.
-						return FALSE;
-					}
-					//else {
-					//	Debug::text('Switched REDIS DB to: '. $this->_redisDB, __FILE__, __LINE__, __METHOD__, 10);
-					//}
+				//Try with 2 second timeout, we don't want redis to block requests if its down.
+				if ( $config_vars['database']['persistent_connections'] == TRUE ) {
+					$connection_retval = $this->_redisHostConn[ $key ]->pconnect( trim( $this->_redisHostHost[ $key ] ), NULL, 2 );
+				} else {
+					$connection_retval = $this->_redisHostConn[ $key ]->connect( trim( $this->_redisHostHost[ $key ] ), NULL, 2 );
 				}
-				return $this->_redisHostConn[$key];
+
+				if ( $connection_retval === TRUE ) {
+					if ( isset( $this->_redisDB ) AND $this->_redisDB != '' ) {
+						if ( $this->_redisHostConn[ $key ]->select( $this->_redisDB ) === FALSE ) {
+							//return $this->raiseError('Cache_Lite : Unable to switch redis DB to: '. $this->_redisDB, -2);  //In order to catch these we need to include PEAR.php all the time.
+							return FALSE;
+						}
+						//else {
+						//	Debug::text('Switched REDIS DB to: '. $this->_redisDB, __FILE__, __LINE__, __METHOD__, 10);
+						//}
+					}
+
+					return $this->_redisHostConn[ $key ];
+				} else {
+					$this->_redisHostConn[ $key ] = FALSE; //Prevent further connections from timing out during this request...
+					Debug::Text( 'Error connecting to the Redis database! (a) Host: ' . $this->_redisHostHost[ $key ], __FILE__, __LINE__, __METHOD__, 1 );
+				}
 			} else {
 				$this->_redisHostConn[$key] = FALSE; //Prevent further connections from timing out during this request...
-				Debug::Text( 'Error connecting to the Redis database! (a) Host: '. $this->_redisHostHost[$key], __FILE__, __LINE__, __METHOD__, 1);
+				Debug::Text( 'REDIS PHP extension is not installed/enabled!', __FILE__, __LINE__, __METHOD__, 1);
+				unset($e);
+				//throw new DBError($e);
 			}
 		} catch (Exception $e) {
 			$this->_redisHostConn[$key] = FALSE; //Prevent further connections from timing out during this request...
@@ -126,6 +134,8 @@ class Redis_Cache_Lite extends Cache_Lite {
 
 			return $this->redisConnect( 'master' );
 		}
+
+		return FALSE;
 	}
 
 	/**

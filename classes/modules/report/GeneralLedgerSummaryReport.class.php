@@ -133,7 +133,7 @@ class GeneralLedgerSummaryReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'GeneralLedgerSummaryReport', 'custom_column' );
@@ -144,13 +144,13 @@ class GeneralLedgerSummaryReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'GeneralLedgerSummaryReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'GeneralLedgerSummaryReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -159,7 +159,7 @@ class GeneralLedgerSummaryReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'GeneralLedgerSummaryReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -222,7 +222,7 @@ class GeneralLedgerSummaryReport extends Report {
 				//Get all pay stub accounts
 				$retval = array();
 
-				$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+				$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 				$psealf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), 10, array(10, 20, 30, 40, 50, 60, 65, 80) );
 				if ( $psealf->getRecordCount() > 0 ) {
 					$type_options  = $psealf->getOptions('type');
@@ -511,22 +511,15 @@ class GeneralLedgerSummaryReport extends Report {
 		return FALSE;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array('pay_stub_entry' => array(), 'user_date_total' => array(), 'pay_period_total' => array(), 'pay_period_distribution' => array(), 'user' => array() );
 
-		//Don't need to process data unless we're preparing the report.
-		$psf = TTnew( 'PayStubFactory' );
-		$export_type_options = Misc::trimSortPrefix( $psf->getOptions('export_type') );
-		if ( isset($export_type_options[$format]) ) {
-			Debug::Text('Skipping data retrieval for format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
-			return TRUE;
-		}
+		$psf = TTnew( 'PayStubFactory' ); /** @var PayStubFactory $psf */
 
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
@@ -540,7 +533,7 @@ class GeneralLedgerSummaryReport extends Report {
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		$this->enable_time_based_distribution = FALSE;
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+		$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 		$psealf->getByCompanyId( $this->getUserObject()->getCompany() );
 		$psea_arr = array();
 		if ( $psealf->getRecordCount() > 0 ) {
@@ -557,7 +550,7 @@ class GeneralLedgerSummaryReport extends Report {
 		}
 		Debug::Text(' Time Based Distribution: '. (int)$this->enable_time_based_distribution, __FILE__, __LINE__, __METHOD__, 10);
 
-		$crlf = TTnew( 'CurrencyListFactory' );
+		$crlf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $crlf */
 		$crlf->getByCompanyId( $this->getUserObject()->getCompany() );
 
 		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
@@ -566,7 +559,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 		//Get total time for each filtered employee in each filtered pay period. DO NOT filter by anything else, as we need the overall total time worked always.
 		if ( $this->enable_time_based_distribution == TRUE ) {
-			$udtlf = TTnew( 'UserDateTotalListFactory' );
+			$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 			$udtlf->getGeneralLedgerReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			Debug::Text(' User Date Total Rows: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $udtlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Punch Data...') );
@@ -610,7 +603,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 		$pay_stub_account_columns = Misc::trimSortPrefix( $this->getOptions('pay_stub_account_amount_columns') );
 
-		$pself = TTnew( 'PayStubEntryListFactory' );
+		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIGeneralLedgerReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		Debug::Text(' PSE Total Rows: '. $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -723,7 +716,7 @@ class GeneralLedgerSummaryReport extends Report {
 		}
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -747,15 +740,14 @@ class GeneralLedgerSummaryReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
-		$blf = TTnew( 'BranchListFactory' );
+		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		//Get Branch ID to Branch Code mapping
 		$branch_code_map = array( TTUUID::getZeroID() => TTUUID::getZeroID() );
 		$blf->getByCompanyId( $this->getUserObject()->getCompany() );
@@ -765,7 +757,7 @@ class GeneralLedgerSummaryReport extends Report {
 			}
 		}
 
-		$dlf = TTnew( 'DepartmentListFactory' );
+		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		//Get Department ID to Branch Code mapping
 		$department_code_map = array(TTUUID::getZeroID() => TTUUID::getZeroID());
 		$dlf->getByCompanyId( $this->getUserObject()->getCompany() );
@@ -775,7 +767,7 @@ class GeneralLedgerSummaryReport extends Report {
 			}
 		}
 
-		$utlf = TTnew( 'UserTitleListFactory' );
+		$utlf = TTnew( 'UserTitleListFactory' ); /** @var UserTitleListFactory $utlf */
 		//Get Title mapping
 		$utlf->getByCompanyId( $this->getUserObject()->getCompany() );
 		$title_code_map = array(TTUUID::getZeroID() => TTUUID::getZeroID());
@@ -788,7 +780,7 @@ class GeneralLedgerSummaryReport extends Report {
 		$job_code_map = array(TTUUID::getZeroID() => TTUUID::getZeroID()); //Make sure this always exists to prevent PHP warnings.
 		$job_item_code_map = array(TTUUID::getZeroID() => TTUUID::getZeroID()); //Make sure this always exists to prevent PHP warnings.
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$jlf = TTnew( 'JobListFactory' );
+			$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 			//Get Job ID to Job Code mapping
 			$jlf->getByCompanyId( $this->getUserObject()->getCompany() );
 			if ( $jlf->getRecordCount() > 0 ) {
@@ -797,7 +789,7 @@ class GeneralLedgerSummaryReport extends Report {
 				}
 			}
 
-			$jilf = TTnew( 'JobItemListFactory' );
+			$jilf = TTnew( 'JobItemListFactory' ); /** @var JobItemListFactory $jilf */
 			//Get Job ID to Job Code mapping
 			$jilf->getByCompanyId( $this->getUserObject()->getCompany() );
 			if ( $jilf->getRecordCount() > 0 ) {
@@ -1029,9 +1021,8 @@ class GeneralLedgerSummaryReport extends Report {
 		return FALSE;
 	}
 
-	//Checks to see if a GL Account contains any "Punch" variables, and expands based on them.
-
 	/**
+	 * Checks to see if a GL Account contains any "Punch" variables, and expands based on them.
 	 * @param $psen_data
 	 * @param $distribution_arr
 	 * @param $branch_code_map
@@ -1045,27 +1036,29 @@ class GeneralLedgerSummaryReport extends Report {
 		//Debug::Arr($psen_data, 'PSEN Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($distribution_arr, 'Distribution Arr ', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( strpos( $psen_data['account'], 'punch' ) !== FALSE ) {
-			//Expand account based on percent distribution.
-			Debug::Text('Found punch distribution variables...', __FILE__, __LINE__, __METHOD__, 10);
-			$retarr = array();
-			if ( is_array($distribution_arr) AND count($distribution_arr) > 0 ) {
-				$retarr = array_merge(
-									$this->calcPercentDistribution( 'credit', $psen_data, $distribution_arr, $branch_code_map, $department_code_map, $job_code_map, $job_item_code_map, $replace_arr ),
-									$this->calcPercentDistribution( 'debit', $psen_data, $distribution_arr, $branch_code_map, $department_code_map, $job_code_map, $job_item_code_map, $replace_arr )
-									);
+		if ( isset( $psen_data['account'] ) ) {
+			if ( strpos( $psen_data['account'], 'punch' ) !== FALSE ) {
+				//Expand account based on percent distribution.
+				Debug::Text( 'Found punch distribution variables...', __FILE__, __LINE__, __METHOD__, 10 );
+				$retarr = array();
+				if ( is_array( $distribution_arr ) AND count( $distribution_arr ) > 0 ) {
+					$retarr = array_merge(
+							$this->calcPercentDistribution( 'credit', $psen_data, $distribution_arr, $branch_code_map, $department_code_map, $job_code_map, $job_item_code_map, $replace_arr ),
+							$this->calcPercentDistribution( 'debit', $psen_data, $distribution_arr, $branch_code_map, $department_code_map, $job_code_map, $job_item_code_map, $replace_arr )
+					);
+				} else {
+					Debug::Text( '  No distribution data, available...', __FILE__, __LINE__, __METHOD__, 10 );
+					//Still need to replace the variables.
+					$psen_data['account'] = $this->replaceGLAccountVariables( $psen_data['account'], $replace_arr );
+					$retarr = array( 0 => $psen_data );
+				}
+
+				//Debug::Arr($retarr, 'Expanded GL Rows RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
+				return $retarr;
 			} else {
-				Debug::Text('  No distribution data, available...', __FILE__, __LINE__, __METHOD__, 10);
 				//Still need to replace the variables.
 				$psen_data['account'] = $this->replaceGLAccountVariables( $psen_data['account'], $replace_arr );
-				$retarr = array( 0 => $psen_data );
 			}
-
-			//Debug::Arr($retarr, 'Expanded GL Rows RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
-			return $retarr;
-		} else {
-			//Still need to replace the variables.
-			$psen_data['account'] = $this->replaceGLAccountVariables( $psen_data['account'], $replace_arr );
 		}
 
 		return array( 0 => $psen_data );
@@ -1315,7 +1308,7 @@ class GeneralLedgerSummaryReport extends Report {
 	 * @return array|bool
 	 */
 	function _output( $format = NULL ) {
-		$psf = TTnew( 'PayStubFactory' );
+		$psf = TTnew( 'PayStubFactory' ); /** @var PayStubFactory $psf */
 		$export_type_options = Misc::trimSortPrefix( $psf->getOptions('export_general_ledger') );
 		Debug::Arr($export_type_options, 'Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 		if ( isset($export_type_options[$format]) ) {

@@ -94,7 +94,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$this->policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $this->policy_ids['pay_formula_policy'][100] ); //Regular
 
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
-		$ulf = TTnew('UserListFactory');
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 		$this->user_obj = $ulf->getById( $this->user_id)->getCurrent();
 
 
@@ -263,7 +263,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createMealPolicy( $type_id ) {
-		$mpf = TTnew( 'MealPolicyFactory' );
+		$mpf = TTnew( 'MealPolicyFactory' ); /** @var MealPolicyFactory $mpf */
 
 		$mpf->setCompany( $this->company_id );
 
@@ -293,7 +293,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createExceptionPolicy( $type ) {
-		$epcf = TTnew( 'ExceptionPolicyControlFactory' );
+		$epcf = TTnew( 'ExceptionPolicyControlFactory' ); /** @var ExceptionPolicyControlFactory $epcf */
 
 		$epcf->setCompany( $this->company_id );
 		$epcf->setName( $type );
@@ -441,7 +441,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 				foreach ($data['exceptions'] as $code => $exception_data) {
 					Debug::Text('Looping Code: '. $code, __FILE__, __LINE__, __METHOD__, 10);
 
-					$epf = TTnew( 'ExceptionPolicyFactory' );
+					$epf = TTnew( 'ExceptionPolicyFactory' ); /** @var ExceptionPolicyFactory $epf */
 					$epf->setExceptionPolicyControl( $epc_id );
 					if ( isset($exception_data['active'])  ) {
 						$epf->setActive( TRUE );
@@ -474,7 +474,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createSchedulePolicy( $type, $meal_policy_id ) {
-		$spf = TTnew( 'SchedulePolicyFactory' );
+		$spf = TTnew( 'SchedulePolicyFactory' ); /** @var SchedulePolicyFactory $spf */
 		$spf->setCompany( $this->company_id );
 
 		switch ( $type ) {
@@ -506,7 +506,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createSchedule( $user_id, $date_stamp, $data = NULL ) {
-		$sf = TTnew( 'ScheduleFactory' );
+		$sf = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
 		$sf->setCompany( $this->company_id );
 		$sf->setUser( $user_id );
 		//$sf->setUserDateId( UserDateFactory::findOrInsertUserDate( $user_id, $date_stamp) );
@@ -658,7 +658,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function checkCalcQuickExceptions( $user_id, $start_date, $end_date, $check_date ) {
-		$udtlf = TTNew('UserDateTotalListFactory');
+		$udtlf = TTNew('UserDateTotalListFactory'); /** @var UserDateTotalListFactory $udtlf */
 		$udtlf->getMidDayExceptionsByStartDateAndEndDateAndPayPeriodStatus( $start_date, $end_date, array(10,12,15,30), $user_id );
 		Debug::text('  MidDayException Filter Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ) .' Check Date: '. TTDate::getDate('DATE', $check_date ) .' Record Count: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $udtlf->getRecordCount() > 0 ) {
@@ -676,7 +676,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function calculateExceptions( $date_epoch ) {
-		$cp = TTNew('CalculatePolicy');
+		$cp = TTNew('CalculatePolicy'); /** @var CalculatePolicy $cp */
 		$cp->setFlag( $this->calculate_policy_flags );
 		$cp->setUserObject( $this->user_obj );
 		$cp->addPendingCalculationDate( $date_epoch, $date_epoch );
@@ -685,7 +685,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function deleteExceptions( $date_epoch ) {
-		$elf = TTnew('ExceptionListFactory');
+		$elf = TTnew('ExceptionListFactory'); /** @var ExceptionListFactory $elf */
 		$elf->getByCompanyIDAndUserIdAndStartDateAndEndDate( $this->company_id, $this->user_id, $date_epoch, $date_epoch );
 		if ( $elf->getRecordCount() > 0 ) {
 			foreach( $elf as $e_obj ) {
@@ -696,7 +696,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function getExceptions( $date_epoch ) {
-		$elf = TTnew('ExceptionListFactory');
+		$elf = TTnew('ExceptionListFactory'); /** @var ExceptionListFactory $elf */
 		//$elf->getByUserIdAndDateStamp( $this->user_id, $date_epoch );
 		$elf->getByCompanyIDAndUserIdAndStartDateAndEndDate( $this->company_id, $this->user_id, $date_epoch, $date_epoch );
 		if ( $elf->getRecordCount() > 0 ) {

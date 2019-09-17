@@ -42,7 +42,7 @@ LocalCacheData.current_open_report_controller = null; //save open report view co
 
 LocalCacheData.current_doing_context_action = ''; //Save what context action is doing right now
 
-LocalCacheData.current_selet_date = ''; // Save
+LocalCacheData.current_select_date = ''; // Save
 
 LocalCacheData.edit_id_for_next_open_view = '';
 
@@ -199,12 +199,7 @@ LocalCacheData.getRequiredLocalCache = function( key, format ) {
 		try {
 			Global.sendErrorReport( 'ERROR: Unable to get required local cache data: ' + key ); //Send error as soon as possible, before any data gets cleared.
 
-			//This code is duplicated in RibbonViewController.doLogout() but that class can't be called here or reloads will throw a bunch of extra errors.
-			Global.clearSessionCookie();
-			LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
-			LocalCacheData.setLoginUser( null );
-			LocalCacheData.setCurrentCompany( null );
-			sessionStorage.clear();
+			Global.Logout();
 			window.location.reload();
 		} catch ( e ) {
 			// Early page loads won't have Global or TAlertManager

@@ -81,14 +81,14 @@ class PolicyGroupRoundIntervalPolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Policy Group
-		$pglf = TTnew( 'PolicyGroupListFactory' );
+		$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 		$this->Validator->isResultSetWithRows(	'policy_group',
 														$pglf->getByID($this->getPolicyGroup()),
 														TTi18n::gettext('Policy Group is invalid')
 													);
 		// Interval Rounding Policy
 		if ( $this->getRoundIntervalPolicy() != TTUUID::getZeroID() ) {
-			$riplf = TTnew( 'RoundIntervalPolicyListFactory' );
+			$riplf = TTnew( 'RoundIntervalPolicyListFactory' ); /** @var RoundIntervalPolicyListFactory $riplf */
 			$this->Validator->isResultSetWithRows(	'round_inteval_policy',
 														$riplf->getByID($this->getRoundIntervalPolicy()),
 														TTi18n::gettext('Selected Interval Rounding Policy is invalid')

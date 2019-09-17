@@ -84,7 +84,7 @@ class APIReportSchedule extends APIFactory {
 		//Only allow getting report data for currently logged in user.
 		$data['filter_data']['user_id'] = $this->getCurrentUserObject()->getId();
 
-		$blf = TTnew( 'ReportScheduleListFactory' );
+		$blf = TTnew( 'ReportScheduleListFactory' ); /** @var ReportScheduleListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -155,7 +155,7 @@ class APIReportSchedule extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'ReportScheduleListFactory' );
+				$lf = TTnew( 'ReportScheduleListFactory' ); /** @var ReportScheduleListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -247,7 +247,7 @@ class APIReportSchedule extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'ReportScheduleListFactory' );
+				$lf = TTnew( 'ReportScheduleListFactory' ); /** @var ReportScheduleListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -340,7 +340,7 @@ class APIReportSchedule extends APIFactory {
 	 * @return array
 	 */
 	function getReportOutputFormatOptions( $user_report_data_id ) {
-		$urpdlf = TTnew('UserReportDataListFactory');
+		$urpdlf = TTnew('UserReportDataListFactory'); /** @var UserReportDataListFactory $urpdlf */
 		$urpdlf->getById( $user_report_data_id );
 		if ( $urpdlf->getRecordCount() > 0 ) {
 			$urd_obj = $urpdlf->getCurrent();

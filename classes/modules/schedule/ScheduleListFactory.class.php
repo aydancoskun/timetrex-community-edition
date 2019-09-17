@@ -55,7 +55,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -83,7 +83,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -126,7 +126,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -173,7 +173,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					ORDER BY a.start_time asc, a.status_id desc
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -215,7 +215,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -264,7 +264,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -315,7 +315,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -428,7 +428,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		//Debug::Arr($ph, 'Query: '. $query .' Limit: '. $limit, __FILE__, __LINE__, __METHOD__, 10);
 		return $this;
@@ -517,7 +517,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -539,15 +539,17 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		//Need to handle schedules on next/previous dates from when the punch is.
 		//ie: if the schedule started on 11:30PM on Jul 5th and the punch is 01:00AM on Jul 6th.
+		//These two functions are almost identical: PunchFactory::findScheduleId() and ScheduleListFactory::getScheduleObjectByUserIdAndEpoch()
 		$slf = new ScheduleListFactory();
-		$slf->getByUserIdAndStartDateAndEndDate($user_id, (TTDate::getMiddleDayEpoch($epoch) - 86400), (TTDate::getMiddleDayEpoch($epoch) + 86400) );
+		$slf->getByUserIdAndStartDateAndEndDate($user_id, (TTDate::getMiddleDayEpoch($epoch) - 86400), (TTDate::getMiddleDayEpoch($epoch) + 86400), NULL, array( 'a.date_stamp' => 'asc', 'a.status_id' => 'asc', 'a.start_time' => 'desc' ) );
 		if ( $slf->getRecordCount() > 0 ) {
 			Debug::Text(' Found User Date ID! User: '. $user_id .' Epoch: '. TTDate::getDATE('DATE+TIME', $epoch ) .'('.$epoch.')', __FILE__, __LINE__, __METHOD__, 10);
 			$retval = FALSE;
 			$best_diff = FALSE;
 			//Check for schedule policy
 			foreach( $slf as $s_obj ) {
-				Debug::Text(' Found Schedule!: ID: '. $s_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text(' Checking Schedule ID: '. $s_obj->getID() .' Start: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ) .' End: '. TTDate::getDate('DATE+TIME', $s_obj->getEndTime() ), __FILE__, __LINE__, __METHOD__, 10);
+
 				//If the Start/Stop window is large (ie: 6-8hrs) we need to find the closest schedule.
 				$schedule_diff = $s_obj->inScheduleDifference( $epoch );
 				if ( $schedule_diff === 0 ) {
@@ -646,7 +648,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -1344,7 +1346,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -1618,7 +1620,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 

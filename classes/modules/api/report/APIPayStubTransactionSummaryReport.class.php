@@ -1,8 +1,4 @@
 <?php
-/**
- * $License$
- */
-
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.

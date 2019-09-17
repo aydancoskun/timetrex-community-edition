@@ -121,9 +121,8 @@ class FormVariables {
 		return @htmlspecialchars( str_ireplace( array('javascript:', 'src=', 'www.example.com'), '', $val ), ENT_QUOTES, 'UTF-8' ); //Supress warnings due to invalid multibyte sequences
 	}
 
-	//Reverse sanitation for when HTML is allowed. Make sure we purify the HTML after though.
-
 	/**
+	 * Reverse sanitation for when HTML is allowed. Make sure we purify the HTML after though.
 	 * @param $val
 	 * @return string
 	 */

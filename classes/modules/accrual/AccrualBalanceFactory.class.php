@@ -256,7 +256,7 @@ class AccrualBalanceFactory extends Factory {
 		$retval = FALSE;
 		$update_balance = TRUE;
 
-		$alf = TTnew( 'AccrualListFactory' );
+		$alf = TTnew( 'AccrualListFactory' ); /** @var AccrualListFactory $alf */
 
 		$alf->StartTransaction();
 		//$alf->db->SetTransactionMode( 'SERIALIZABLE' ); //Serialize balance transactions so concurrency issues don't corrupt the balance.
@@ -264,14 +264,14 @@ class AccrualBalanceFactory extends Factory {
 		$balance = $alf->getSumByUserIdAndAccrualPolicyAccount($user_id, $accrual_policy_account_id);
 		Debug::text('Balance for User ID: '. $user_id .' Accrual Account ID: '. $accrual_policy_account_id .' Balance: '. $balance, __FILE__, __LINE__, __METHOD__, 10);
 
-		$ablf = TTnew( 'AccrualBalanceListFactory' );
+		$ablf = TTnew( 'AccrualBalanceListFactory' ); /** @var AccrualBalanceListFactory $ablf */
 		$ablf->getByUserIdAndAccrualPolicyAccount( $user_id, $accrual_policy_account_id);
 		Debug::text('Found balance records: '. $ablf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ablf->getRecordCount() > 1 ) { //In case multiple records exist, delete them all and re-insert.
 			foreach($ablf as $ab_obj) {
-				$ab_obj->Delete();
+				$ab_obj->Delete( TRUE );
 			}
-			$ab_obj = TTnew( 'AccrualBalanceFactory' );
+			$ab_obj = TTnew( 'AccrualBalanceFactory' ); /** @var AccrualBalanceFactory $ab_obj */
 		} elseif( $ablf->getRecordCount() == 1 ) {
 			$ab_obj = $ablf->getCurrent();
 			if ( $balance == $ab_obj->getBalance() ) {
@@ -279,7 +279,7 @@ class AccrualBalanceFactory extends Factory {
 				$update_balance = FALSE;
 			}
 		} else { //No balance record exists yet.
-			$ab_obj = TTnew( 'AccrualBalanceFactory' );
+			$ab_obj = TTnew( 'AccrualBalanceFactory' ); /** @var AccrualBalanceFactory $ab_obj */
 		}
 
 		if ( $update_balance == TRUE ) {
@@ -314,7 +314,7 @@ class AccrualBalanceFactory extends Factory {
 
 
 		// User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'user_id',
 													$ulf->getByID( $this->getUser() ),
 													TTi18n::gettext('Invalid Employee')
@@ -322,7 +322,7 @@ class AccrualBalanceFactory extends Factory {
 
 		// Accrual Policy Account
 		if ( $this->getAccrualPolicyAccount() != TTUUID::getZeroID() ) {
-			$apalf = TTnew( 'AccrualPolicyAccountListFactory' );
+			$apalf = TTnew( 'AccrualPolicyAccountListFactory' ); /** @var AccrualPolicyAccountListFactory $apalf */
 			$this->Validator->isResultSetWithRows(	'accrual_policy_account_id',
 													$apalf->getByID($this->getAccrualPolicyAccount()),
 													TTi18n::gettext('Accrual Account is invalid')

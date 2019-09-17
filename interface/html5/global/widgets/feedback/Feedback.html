@@ -1,17 +1,38 @@
-<div class="message-container">
-    <div class="top-bar-title"></div><br>
-    <div class="message-box">
-        <div class="title"></div><br>
-        <textarea class="feedback-messagebox"></textarea>
-        <div class="user-contact-details">
-            <div class="contact-notice-text"></div>
-            <div class="row"><span class="email-label-text" style="width:40px;"></span> <input type="email" class="feedback-email" placeholder="Email" style="width:20em;line-height:15px"> </div>
-            <div class="row"><span class="phone-label-text" style="width:40px;"></span> <input type="phone" class="feedback-phone" placeholder="Phone" style="width:20em;line-height:15px"> </div>
+<div class="feedback-overlay">
+    <div class="feedback-container">
+        <div class="top-bar-title"></div>
+        <div class="context-box">
+            <div class="feedback-page default">
+                <img class="top-image" src="theme/default/css/global/widgets/feedback/images/dogs_listening_with_head_turned_optimized.png">
+                <p class="page-text"></p>
+                <button class="feedback-button btn btn-success positive-button"></button>
+                <button class="feedback-button btn negative-button"></button>
+                <button class="feedback-button btn cancel-button"></button>
+            </div>
+            <div class="feedback-page positive">
+                <img class="top-image" src="theme/default/css/global/widgets/feedback/images/dog_with_knife_and_fork_sm_optimized.png">
+                <p class="page-text block1"></p>
+                <p class="page-text block2"></p>
+                <p class="page-text block3"></p>
+                <button class="feedback-button btn btn-success positive-button openReviewPageButton"></button>
+                <button class="feedback-button btn cancel-button"></button>
+            </div>
+            <div class="feedback-page negative">
+                <img class="top-image" src="theme/default/css/global/widgets/feedback/images/dog_with_big_ears_optimized.png">
+                <p class="page-text"></p>
+                <textarea class="feedback-messagebox"></textarea>
+                <div class="user-contact-details">
+                    <div class="contact-notice-text"></div>
+                    <div class="row"><span class="email-label-text" style="width:40px;"></span> <input type="email" class="feedback-email" placeholder="Email" style="width:20em;line-height:15px"> </div>
+                    <div class="row"><span class="phone-label-text" style="width:40px;"></span> <input type="phone" class="feedback-phone" placeholder="Phone" style="width:20em;line-height:15px"> </div>
+                </div>
+                <button class="feedback-button btn btn-success positive-button sendButton"></button>
+                <button class="feedback-button btn cancel-button"></button>
+                <!--<div class="bottom-bar">-->
+                    <!--<button class="feedback-button sendButton"></button>-->
+                    <!--<button class="feedback-button cancel-button"></button>-->
+                <!--</div>-->
+            </div>
         </div>
     </div>
-    <div class="bottom-bar">
-        <button class="t-button sendButton"></button>
-        <button class="t-button cancelButton"></button>
-    </div>
 </div>
-

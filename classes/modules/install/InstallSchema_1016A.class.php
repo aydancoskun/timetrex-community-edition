@@ -64,7 +64,7 @@ class InstallSchema_1016A extends InstallSchema_Base {
 
 		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		$cjlf = TTnew( 'CronJobListFactory' );
+		$cjlf = TTnew( 'CronJobListFactory' ); /** @var CronJobListFactory $cjlf */
 		$cjlf->getAll();
 		if ( $cjlf->getRecordCount() > 0 ) {
 			foreach( $cjlf as $cj_obj ) {

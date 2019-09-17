@@ -67,7 +67,7 @@ class StationBranchFactory extends Factory {
 		if ( is_object($this->branch_obj) ) {
 			return $this->branch_obj;
 		} else {
-			$blf = TTnew( 'BranchListFactory' );
+			$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 			$blf->getById( $this->getBranch() );
 			if ( $blf->getRecordCount() == 1 ) {
 				$this->branch_obj = $blf->getCurrent();
@@ -94,9 +94,8 @@ class StationBranchFactory extends Factory {
 		return $this->setGenericDataValue( 'branch_id', $value );
 	}
 
-	//This table doesn't have any of these columns, so overload the functions.
-
 	/**
+	 * This table doesn't have any of these columns, so overload the functions.
 	 * @return bool
 	 */
 	function Validate() {
@@ -116,7 +115,7 @@ class StationBranchFactory extends Factory {
 											);
 		}
 		// Branch
-		$blf = TTnew( 'BranchListFactory' );
+		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$this->Validator->isResultSetWithRows(	'branch',
 														$blf->getByID($this->getBranch()),
 														TTi18n::gettext('Selected Branch is invalid')

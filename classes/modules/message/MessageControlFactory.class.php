@@ -251,9 +251,8 @@ class MessageControlFactory extends Factory {
 		return FALSE;
 	}
 
-	//Expose message_sender_id for migration purposes.
-
 	/**
+	 * Expose message_sender_id for migration purposes.
 	 * @return bool
 	 */
 	function getMessageSenderId() {
@@ -283,9 +282,8 @@ class MessageControlFactory extends Factory {
 		return TRUE;
 	}
 
-	//Parent ID is the parent message_sender_id.
-
 	/**
+	 * Parent ID is the parent message_sender_id.
 	 * @return bool
 	 */
 	function getParent() {
@@ -301,9 +299,8 @@ class MessageControlFactory extends Factory {
 		return $this->setGenericTempDataValue( 'parent_id', $value );
 	}
 
-	//These functions are out of the ordinary, as the getStatus gets the status of a message based on a SQL join to the recipient table.
-
 	/**
+	 * These functions are out of the ordinary, as the getStatus gets the status of a message based on a SQL join to the recipient table.
 	 * @return bool|int
 	 */
 	function getStatus() {
@@ -583,7 +580,7 @@ class MessageControlFactory extends Factory {
 
 		Debug::Arr($ids, 'Message Recipeint Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$mrlf = TTnew( 'MessageRecipientListFactory' );
+		$mrlf = TTnew( 'MessageRecipientListFactory' ); /** @var MessageRecipientListFactory $mrlf */
 		$mrlf->getByCompanyIdAndUserIdAndMessageSenderIdAndStatus( $company_id, $user_id, $ids, 10 );
 		if ( $mrlf->getRecordCount() > 0 ) {
 			foreach( $mrlf as $mr_obj ) {
@@ -607,7 +604,7 @@ class MessageControlFactory extends Factory {
 			//Get user preferences and determine if they accept email notifications.
 			Debug::Arr($user_ids, 'Recipient User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			$uplf = TTnew( 'UserPreferenceListFactory' );
+			$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 			//$uplf->getByUserId( $user_ids );
 			$uplf->getByUserIdAndStatus( $user_ids, 10 ); //Only email ACTIVE employees/supervisors.
 			if ( $uplf->getRecordCount() > 0 ) {
@@ -769,7 +766,7 @@ class MessageControlFactory extends Factory {
 					//On the other hand, having multiple sender records, one for each recipient makes it hard to show
 					//just the necessary messages on the embedded message list, as it wants to show duplicates messages for
 					//each recipient.
-					$msf = TTnew( 'MessageSenderFactory' );
+					$msf = TTnew( 'MessageSenderFactory' ); /** @var MessageSenderFactory $msf */
 					$msf->setUser( $this->getFromUserId() );
 					Debug::Text('Parent ID: '. $this->getParent(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -790,7 +787,7 @@ class MessageControlFactory extends Factory {
 						Debug::Text('Message Sender ID: '. $message_sender_id, __FILE__, __LINE__, __METHOD__, 10);
 
 						if ( $message_sender_id != FALSE ) {
-							$mrf = TTnew( 'MessageRecipientFactory' );
+							$mrf = TTnew( 'MessageRecipientFactory' ); /** @var MessageRecipientFactory $mrf */
 							$mrf->setUser( $to_user_id );
 							$mrf->setMessageSender( $message_sender_id );
 							if ( isset($this->migration_status) ) {

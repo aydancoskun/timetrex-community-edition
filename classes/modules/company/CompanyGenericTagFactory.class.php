@@ -306,7 +306,7 @@ class CompanyGenericTagFactory extends Factory {
 		//
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'company',
 															$clf->getByID($this->getCompany()),
 															TTi18n::gettext('Company is invalid')
@@ -435,9 +435,9 @@ class CompanyGenericTagFactory extends Factory {
 		return $data;
 	}
 
-	//Each tag needs a + or -. + Adds new tags, - deletes tags. Tags without these are ignores.
-	//Tags are separated by a comma.
 	/**
+	 * Each tag needs a + or -. + Adds new tags, - deletes tags. Tags without these are ignores.
+	 * Tags are separated by a comma.
 	 * @param $tags
 	 * @return array|bool
 	 */
@@ -489,7 +489,7 @@ class CompanyGenericTagFactory extends Factory {
 		if ( is_array($parsed_tags) ) {
 			$existing_tags = array();
 			//Get the IDs for all tags
-			$cgtlf = TTnew( 'CompanyGenericTagListFactory' );
+			$cgtlf = TTnew( 'CompanyGenericTagListFactory' ); /** @var CompanyGenericTagListFactory $cgtlf */
 			$cgtlf->getByCompanyIdAndObjectTypeAndTags($company_id, $object_type_id, $parsed_tags['all']);
 			if ( $cgtlf->getRecordCount() > 0 ) {
 				foreach( $cgtlf as $cgt_obj ) {
@@ -508,7 +508,7 @@ class CompanyGenericTagFactory extends Factory {
 				//Add new tags.
 				foreach( $tags_diff as $new_tag ) {
 					$new_tag = trim($new_tag);
-					$cgtf = TTnew('CompanyGenericTagFactory');
+					$cgtf = TTnew('CompanyGenericTagFactory'); /** @var CompanyGenericTagFactory $cgtf */
 					$cgtf->setCompany( $company_id );
 					$cgtf->setObjectType( $object_type_id );
 					$cgtf->setName( $new_tag );

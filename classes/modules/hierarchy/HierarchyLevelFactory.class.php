@@ -108,7 +108,7 @@ class HierarchyLevelFactory extends Factory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
@@ -126,7 +126,7 @@ class HierarchyLevelFactory extends Factory {
 		if ( is_object($this->hierarchy_control_obj) ) {
 			return $this->hierarchy_control_obj;
 		} else {
-			$hclf = TTnew( 'HierarchyControlListFactory' );
+			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 			$this->hierarchy_control_obj = $hclf->getById( $this->getHierarchyControl() )->getCurrent();
 
 			return $this->hierarchy_control_obj;
@@ -186,8 +186,8 @@ class HierarchyLevelFactory extends Factory {
 	function setUser( $id) {
 		$id = trim($id);
 
-		$ulf = TTnew( 'UserListFactory' );
-		$hllf = TTnew( 'HierarchyLevelListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+		$hllf = TTnew( 'HierarchyLevelListFactory' ); /** @var HierarchyLevelListFactory $hllf */
 		//$hulf = TTnew( 'HierarchyUserListFactory' );
 
 		if ( $this->getHierarchyControl() == FALSE ) {
@@ -247,7 +247,7 @@ class HierarchyLevelFactory extends Factory {
 
 	/**
 	 * @param $hierarchy_level_data
-	 * @return bool
+	 * @return array|bool
 	 */
 	static function RemoveDuplicateHierarchyLevels( $hierarchy_level_data ) {
 		if ( !is_array($hierarchy_level_data) ) {
@@ -279,9 +279,9 @@ class HierarchyLevelFactory extends Factory {
 		return $hierarchy_level_data;
 	}
 
-	//Remaps raw hierarchy_levels so they always start from 1, and have no gaps in them.
-	//Also remove any duplicate superiors from the hierarchy.
 	/**
+	 * Remaps raw hierarchy_levels so they always start from 1, and have no gaps in them.
+	 * Also remove any duplicate superiors from the hierarchy.
 	 * @param $hierarchy_level_data
 	 * @return bool
 	 */
@@ -312,13 +312,12 @@ class HierarchyLevelFactory extends Factory {
 		return $remapped_hierarchy_levels;
 	}
 
-	//Takes a hierarchy level map array and converts it to a SQL where clause.
-
 	/**
+	 * Takes a hierarchy level map array and converts it to a SQL where clause.
 	 * @param $hierarchy_level_map
 	 * @param string $object_table
 	 * @param string $hierarchy_user_table
-	 * @param int $type_id ID_column
+	 * @param null $type_id_column
 	 * @return bool|string
 	 */
 	static function convertHierarchyLevelMapToSQL( $hierarchy_level_map, $object_table = 'a.', $hierarchy_user_table = 'z.', $type_id_column = NULL ) {
@@ -449,7 +448,7 @@ class HierarchyLevelFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Hierarchy Control
-		$hclf = TTnew( 'HierarchyControlListFactory' );
+		$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 		$this->Validator->isResultSetWithRows(	'hierarchy_control_id',
 														$hclf->getByID($this->getHierarchyControl()),
 														TTi18n::gettext('Invalid Hierarchy Control')

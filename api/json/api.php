@@ -56,22 +56,26 @@ function unauthenticatedInvokeService( $class_name, $method, $arguments, $messag
 				$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
 			}
 			if ( $method != '' AND method_exists( $obj, $method ) ) {
-				$retval = call_user_func_array( array($obj, $method), (array)$arguments );
-				//If the function returns anything else, encode into JSON and return it.
-				//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
-				echo json_encode( $retval );
-				$json_error = getJSONError();
-				if ( $json_error !== FALSE ) {
-					Debug::Arr( $retval, 'ERROR: JSON: ' . $json_error, __FILE__, __LINE__, __METHOD__, 10 );
-					echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', 'ERROR: JSON: ' . $json_error ) );
+				try {
+					$retval = call_user_func_array( array($obj, $method), (array)$arguments );
+					//If the function returns anything else, encode into JSON and return it.
+					//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+					echo json_encode( $retval );
+					$json_error = getJSONError();
+					if ( $json_error !== FALSE ) {
+						Debug::Arr( $retval, 'ERROR: JSON: ' . $json_error, __FILE__, __LINE__, __METHOD__, 10 );
+						echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', 'ERROR: JSON: ' . $json_error ) );
+					}
+				} catch ( ArgumentCountError $e ) {
+					echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', $e->getMessage() ) );
 				}
 			} else {
-				$validator = TTnew( 'Validator' );
+				$validator = TTnew( 'Validator' ); /** @var Validator $validator */
 				Debug::text( 'Method: ' . $method . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
 				echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText( 'Method %1 does not exist.', array($validator->escapeHTML( $method )) ) ) );
 			}
 		} else {
-			$validator = TTnew( 'Validator' );
+			$validator = TTnew( 'Validator' ); /** @var Validator $validator */
 			Debug::text( 'Class: ' . $class_name . ' does not exist! (unauth)', __FILE__, __LINE__, __METHOD__, 10 );
 			echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText( 'Class %1 does not exist, or unauthenticated.', array($validator->escapeHTML( $class_name )) ) ) );
 		}
@@ -83,7 +87,7 @@ function unauthenticatedInvokeService( $class_name, $method, $arguments, $messag
 	return TRUE;
 }
 
-function authenticatedInvokeService(  $class_name, $method, $arguments, $message_id, $authentication, $api_auth ) {
+function authenticatedInvokeService( $class_name, $method, $arguments, $message_id, $authentication, $api_auth ) {
 	global $current_user, $current_user_prefs, $current_company, $obj;
 
 	$current_user = $authentication->getObject();
@@ -125,20 +129,24 @@ function authenticatedInvokeService(  $class_name, $method, $arguments, $message
 				}
 
 				if ( $method != '' AND method_exists( $obj, $method ) ) {
-					$retval = call_user_func_array( array($obj, $method), (array)$arguments );
-					if ( $retval !== NULL ) {
-						if ( !is_object( $retval ) ) { //Make sure we never return a raw object to end-user, as too much information could be included in it.
-							echo json_encode( $retval );
-							$json_error = getJSONError();
-							if ( $json_error !== FALSE ) {
-								Debug::Arr($retval, 'ERROR: JSON: '. $json_error, __FILE__, __LINE__, __METHOD__, 10);
-								echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', 'ERROR: JSON: '. $json_error ) );
+					try {
+						$retval = call_user_func_array( array($obj, $method), (array)$arguments );
+						if ( $retval !== NULL ) {
+							if ( !is_object( $retval ) ) { //Make sure we never return a raw object to end-user, as too much information could be included in it.
+								echo json_encode( $retval );
+								$json_error = getJSONError();
+								if ( $json_error !== FALSE ) {
+									Debug::Arr($retval, 'ERROR: JSON: '. $json_error, __FILE__, __LINE__, __METHOD__, 10);
+									echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', 'ERROR: JSON: '. $json_error ) );
+								}
+							} else {
+								Debug::text('OBJECT return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10);
 							}
 						} else {
-							Debug::text('OBJECT return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('NULL return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10);
 						}
-					} else {
-						Debug::text('NULL return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10);
+					} catch ( ArgumentCountError $e ) {
+						echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', $e->getMessage() ) );
 					}
 				} else {
 					Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
@@ -242,7 +250,7 @@ if ( PRODUCTION == TRUE AND $argument_size > (1024 * 12) ) {
 }
 unset($argument_size);
 
-$api_auth = TTNew('APIAuthentication'); //Used to handle error cases and display error messages.
+$api_auth = TTNew('APIAuthentication'); /** @var APIAuthentication $api_auth */ //Used to handle error cases and display error messages.
 $session_id = getSessionID();
 if ( Misc::checkValidReferer() == TRUE ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
 	if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == FALSE ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) AND $session_id != '' AND !isset($_GET['disable_db']) AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.

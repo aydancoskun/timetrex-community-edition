@@ -446,11 +446,11 @@ class ExceptionFactory extends Factory {
 				//Make sure supervisor email notifcations are enabled
 				if ( $ep_obj->getEmailNotification() == 20 OR $ep_obj->getEmailNotification() == 100 ) {
 					//Find supervisor(s)
-					$hlf = TTnew( 'HierarchyListFactory' );
+					$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 					$parent_user_id = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $u_obj->getCompany(), $u_obj->getId(), 80 );
 					if ( $parent_user_id != FALSE ) {
 						//Parent could be multiple supervisors, make sure we email them all.
-						$ulf = TTnew( 'UserListFactory' );
+						$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 						$ulf->getByIdAndCompanyId( $parent_user_id, $u_obj->getCompany() );
 						if ( $ulf->getRecordCount() > 0 ) {
 							foreach( $ulf as $parent_user_obj ) {
@@ -641,14 +641,14 @@ class ExceptionFactory extends Factory {
 		//
 
 		// User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'user',
 													$ulf->getByID($this->getUser()),
 													TTi18n::gettext('Invalid Employee')
 												);
 		// Pay Period
 		if ( $this->getPayPeriod() != FALSE AND $this->getPayPeriod() != TTUUID::getZeroID() ) {
-			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			$this->Validator->isResultSetWithRows(	'pay_period',
 															$pplf->getByID($this->getPayPeriod()),
 															TTi18n::gettext('Invalid Pay Period')
@@ -670,7 +670,7 @@ class ExceptionFactory extends Factory {
 		}
 		// Exception Policy ID
 		if ( $this->getExceptionPolicyID() !== FALSE AND $this->getExceptionPolicyID() != TTUUID::getZeroID() ) {
-			$eplf = TTnew( 'ExceptionPolicyListFactory' );
+			$eplf = TTnew( 'ExceptionPolicyListFactory' ); /** @var ExceptionPolicyListFactory $eplf */
 			$this->Validator->isResultSetWithRows(	'exception_policy',
 															$eplf->getByID($this->getExceptionPolicyID()),
 															TTi18n::gettext('Invalid Exception Policy ID')
@@ -678,7 +678,7 @@ class ExceptionFactory extends Factory {
 		}
 		// Punch Control ID
 		if ( $this->getPunchControlID() !== FALSE AND $this->getPunchControlID() != TTUUID::getZeroID() ) {
-			$pclf = TTnew( 'PunchControlListFactory' );
+			$pclf = TTnew( 'PunchControlListFactory' ); /** @var PunchControlListFactory $pclf */
 			$this->Validator->isResultSetWithRows(	'punch_control',
 															$pclf->getByID($this->getPunchControlID()),
 															TTi18n::gettext('Invalid Punch Control ID')
@@ -686,7 +686,7 @@ class ExceptionFactory extends Factory {
 		}
 		// Punch ID
 		if ( $this->getPunchID() !== FALSE AND $this->getPunchID() != TTUUID::getZeroID() ) {
-			$plf = TTnew( 'PunchListFactory' );
+			$plf = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf */
 			$this->Validator->isResultSetWithRows(	'punch',
 															$plf->getByID($this->getPunchID()),
 															TTi18n::gettext('Invalid Punch ID')
@@ -767,7 +767,7 @@ class ExceptionFactory extends Factory {
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 
-		$epf = TTnew( 'ExceptionPolicyFactory' );
+		$epf = TTnew( 'ExceptionPolicyFactory' ); /** @var ExceptionPolicyFactory $epf */
 		$exception_policy_type_options = $epf->getOptions('type');
 		$exception_policy_severity_options = $epf->getOptions('severity');
 

@@ -55,7 +55,7 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -124,9 +124,9 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -158,7 +158,7 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -190,7 +190,7 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -329,7 +329,7 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

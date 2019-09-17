@@ -773,7 +773,7 @@ class CurrencyFactory extends Factory {
 			return $amount;
 		}
 
-		$clf = TTnew( 'CurrencyListFactory' );
+		$clf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $clf */
 		$clf->getById( $src_currency_id );
 		if ( $clf->getRecordCount() > 0 ) {
 			$src_currency_obj = $clf->getCurrent();
@@ -825,7 +825,7 @@ class CurrencyFactory extends Factory {
 
 		Debug::Text('Begin updating Currencies...', __FILE__, __LINE__, __METHOD__, 10);
 
-		$clf = TTnew( 'CurrencyListFactory' );
+		$clf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $clf */
 		$clf->getByCompanyId( $company_id );
 		$manual_currencies = array();
 		$active_currencies = array();
@@ -854,7 +854,7 @@ class CurrencyFactory extends Factory {
 		//Download rates to fill in the gaps, if rates returned by server don't fill all gaps, manually fill them ourselves.
 		if ( empty($active_currencies) == FALSE OR empty($manual_currencies) == FALSE ) {
 			$earliest_pay_period_start_date = time();
-			$pplf = TTNew('PayPeriodListFactory');
+			$pplf = TTNew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 			$pplf->getByCompanyId($company_id, 1, NULL, NULL, array( 'start_date' => 'asc' ) );
 			if ( $pplf->getRecordCount() > 0 ) {
 				$earliest_pay_period_start_date = $pplf->getCurrent()->getStartDate();
@@ -863,7 +863,7 @@ class CurrencyFactory extends Factory {
 			Debug::Text('  Earliest Pay Period Date: '. TTDate::getDATE('DATE', $earliest_pay_period_start_date) .'('. $earliest_pay_period_start_date .')', __FILE__, __LINE__, __METHOD__, 10);
 
 
-			$crlf = TTNew('CurrencyRateListFactory');
+			$crlf = TTNew('CurrencyRateListFactory'); /** @var CurrencyRateListFactory $crlf */
 			if ( empty($active_currencies) == FALSE ) {
 				Debug::Text('  Processing Auto-Update Currencies... Total: '. count($active_currencies), __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $active_currencies as $active_currency_id => $active_currency_iso_code ) {
@@ -882,7 +882,7 @@ class CurrencyFactory extends Factory {
 						if ( is_array($currency_rates[$active_currency_iso_code]) ) {
 							Debug::Text('Currency Rates for: '. $active_currency_iso_code .' Total: '. count( $currency_rates ), __FILE__, __LINE__, __METHOD__, 10);
 							foreach( $currency_rates[$active_currency_iso_code] as $date_stamp => $conversion_rate ) {
-								$crf = TTnew('CurrencyRateFactory');
+								$crf = TTnew('CurrencyRateFactory'); /** @var CurrencyRateFactory $crf */
 								$crf->setCurrency( $active_currency_id );
 								$crf->setDateStamp( strtotime( $date_stamp ) );
 								$crf->setConversionRate(  $conversion_rate );
@@ -901,7 +901,7 @@ class CurrencyFactory extends Factory {
 			}
 			unset($crlf);
 
-			$crlf = TTNew('CurrencyRateListFactory');
+			$crlf = TTNew('CurrencyRateListFactory'); /** @var CurrencyRateListFactory $crlf */
 			if ( empty($manual_currencies) == FALSE ) {
 				Debug::Text('  Processing Manual Currencies... Total: '. count($manual_currencies), __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $manual_currencies as $active_currency_id => $active_currency_iso_code ) {
@@ -915,7 +915,7 @@ class CurrencyFactory extends Factory {
 					$latest_currency_rate_date += 86400; //Start on next day.
 
 					if ( ( TTDate::getMiddleDayEpoch( time() ) - TTDate::getMiddleDayEpoch( $latest_currency_rate_date ) ) >= 86400 ) {
-						$clf = TTnew( 'CurrencyListFactory' );
+						$clf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $clf */
 						$clf->getByIdAndCompanyId( $active_currency_id, $company_id );
 						if ( $clf->getRecordCount() > 0 ) {
 							$last_conversion_rate = $clf->getCurrent()->getConversionRate();
@@ -923,13 +923,13 @@ class CurrencyFactory extends Factory {
 
 							//As an optimization, do quick inserts if we're more than 30 days old.
 							if ( TTDate::getDays( ( time() - $latest_currency_rate_date ) ) > 30 ) {
-								$crf = TTnew('CurrencyRateFactory');
+								$crf = TTnew('CurrencyRateFactory'); /** @var CurrencyRateFactory $crf */
 								for( $x = TTDate::getMiddleDayEpoch( $latest_currency_rate_date ); $x <= TTDate::getMiddleDayEpoch( time() ); $x += 86400 ) {
-									$crf->db->Execute('INSERT INTO '. $crf->getTable() .' (id,currency_id,date_stamp,conversion_rate,created_date) VALUES(\''. TTUUID::generateUUID() .'\',\''. $active_currency_id .'\',\''. $crf->db->BindDate($x) .'\', '. $last_conversion_rate .','. time() .')');
+									$crf->ExecuteSQL('INSERT INTO '. $crf->getTable() .' (id,currency_id,date_stamp,conversion_rate,created_date) VALUES(\''. TTUUID::generateUUID() .'\',\''. $active_currency_id .'\',\''. $crf->db->BindDate($x) .'\', '. $last_conversion_rate .','. time() .')');
 								}
 							} else {
 								for( $x = TTDate::getMiddleDayEpoch( $latest_currency_rate_date ); $x <= TTDate::getMiddleDayEpoch( time() ); $x += 86400 ) {
-									$crf = TTnew('CurrencyRateFactory');
+									$crf = TTnew('CurrencyRateFactory'); /** @var CurrencyRateFactory $crf */
 									$crf->setCurrency( $active_currency_id );
 									$crf->setDateStamp( $x );
 									$crf->setConversionRate( $last_conversion_rate );
@@ -962,7 +962,7 @@ class CurrencyFactory extends Factory {
 		if ( isset($currency_rates) AND is_array($currency_rates) AND count($currency_rates) > 0 ) {
 			foreach( $currency_rates as $currency => $rate ) {
 				if ( is_numeric($rate) ) {
-					$clf = TTnew( 'CurrencyListFactory' );
+					$clf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $clf */
 					$clf->getByCompanyIdAndISOCode( $company_id, $currency);
 					if ( $clf->getRecordCount() == 1 ) {
 						$c_obj = $clf->getCurrent();
@@ -1003,7 +1003,7 @@ class CurrencyFactory extends Factory {
 		//
 		// Company
 		if ( $this->getCompany() != FALSE AND $this->getCompany() != TTUUID::getZeroID() ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -1119,8 +1119,7 @@ class CurrencyFactory extends Factory {
 			//CHeck to make sure currency isnt in-use by paystubs/employees/wages, if so, don't delete.
 
 			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
-				/** @var ProductListFactory $splf */
-				$splf = TTnew( 'RemittanceSourceAccountListFactory' );
+				$splf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $splf */
 				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
 				if ( $splf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
@@ -1129,8 +1128,7 @@ class CurrencyFactory extends Factory {
 				}
 			}
 			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
-				/** @var ProductListFactory $splf */
-				$splf = TTnew( 'ProductListFactory' );
+				$splf = TTnew( 'ProductListFactory' ); /** @var ProductListFactory $splf */
 				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
 				if ( $splf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
@@ -1139,8 +1137,7 @@ class CurrencyFactory extends Factory {
 				}
 			}
 			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
-				/** @var ProductListFactory $splf */
-				$splf = TTnew( 'UserListFactory' );
+				$splf = TTnew( 'UserListFactory' ); /** @var UserListFactory $splf */
 				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
 				if ( $splf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
@@ -1149,8 +1146,7 @@ class CurrencyFactory extends Factory {
 				}
 			}
 			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
-				/** @var InvoiceListFactory $splf */
-				$splf = TTnew( 'InvoiceListFactory' );
+				$splf = TTnew( 'InvoiceListFactory' ); /** @var InvoiceListFactory $splf */
 				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
 				if ( $splf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
@@ -1159,8 +1155,7 @@ class CurrencyFactory extends Factory {
 				}
 			}
 			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
-				/** @var ClientContactListFactory $splf */
-				$splf = TTnew( 'ClientContactListFactory' );
+				$splf = TTnew( 'ClientContactListFactory' ); /** @var ClientContactListFactory $splf */
 				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
 				if ( $splf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
@@ -1170,8 +1165,7 @@ class CurrencyFactory extends Factory {
 			}
 
 			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
-				/** @var ProductListFactory $splf */
-				$splf = TTnew( 'RemittanceDestinationAccountListFactory' );
+				$splf = TTnew( 'RemittanceDestinationAccountListFactory' ); /** @var RemittanceDestinationAccountListFactory $splf */
 				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
 				if ( $splf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
@@ -1180,8 +1174,7 @@ class CurrencyFactory extends Factory {
 				}
 			}
 			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
-				/** @var ProductListFactory $splf */
-				$splf = TTnew( 'TransactionListFactory' );
+				$splf = TTnew( 'TransactionListFactory' ); /** @var TransactionListFactory $splf */
 				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'currency_id' => $this->getId() ), 1 );
 				if ( $splf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
@@ -1190,8 +1183,7 @@ class CurrencyFactory extends Factory {
 				}
 			}
 			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {
-				/** @var ProductListFactory $splf */
-				$splf = TTnew( 'PayStubListFactory' );
+				$splf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $splf */
 				$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'pay_stub_currency_id' => $this->getId() ), 1 );
 				if ( $splf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
@@ -1229,12 +1221,12 @@ class CurrencyFactory extends Factory {
 
 		if ( $this->getDeleted() == FALSE ) {
 			Debug::Text('Currency modified, update historical rate for today: '. $this->getISOCode() .' Date: '. time() .' Rate: '. $this->getConversionRate(), __FILE__, __LINE__, __METHOD__, 10);
-			$crlf = TTnew('CurrencyRateListFactory');
+			$crlf = TTnew('CurrencyRateListFactory'); /** @var CurrencyRateListFactory $crlf */
 			$crlf->getByCurrencyIdAndDateStamp( $this->getID(), time() );
 			if ( $crlf->getRecordCount() > 0 ) {
 				$crf = $crlf->getCurrent();
 			} else {
-				$crf = TTnew('CurrencyRateFactory');
+				$crf = TTnew('CurrencyRateFactory'); /** @var CurrencyRateFactory $crf */
 			}
 			$crf->setCurrency( $this->getID() );
 			$crf->setDateStamp( time() );
@@ -1247,9 +1239,9 @@ class CurrencyFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

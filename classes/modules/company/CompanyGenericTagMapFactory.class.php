@@ -54,7 +54,7 @@ class CompanyGenericTagMapFactory extends Factory {
 		$retval = NULL;
 		switch( $name ) {
 			case 'object_type':
-				$cgtf = TTnew('CompanyGenericTagFactory');
+				$cgtf = TTnew('CompanyGenericTagFactory'); /** @var CompanyGenericTagFactory $cgtf */
 				$retval = $cgtf->getOptions( $name );
 				break;
 		}
@@ -69,7 +69,7 @@ class CompanyGenericTagMapFactory extends Factory {
 		if ( is_object($this->tag_obj) ) {
 			return $this->tag_obj;
 		} else {
-			$cgtlf = TTnew( 'CompanyGenericTagListFactory' );
+			$cgtlf = TTnew( 'CompanyGenericTagListFactory' ); /** @var CompanyGenericTagListFactory $cgtlf */
 			$this->tag_obj = $cgtlf->getById( $this->getTagID() )->getCurrent();
 
 			return $this->tag_obj;
@@ -156,7 +156,7 @@ class CompanyGenericTagMapFactory extends Factory {
 				}
 
 				//If needed, delete mappings first.
-				$cgtmlf = TTnew( 'CompanyGenericTagMapListFactory' );
+				$cgtmlf = TTnew( 'CompanyGenericTagMapListFactory' ); /** @var CompanyGenericTagMapListFactory $cgtmlf */
 				$cgtmlf->getByCompanyIDAndObjectTypeAndObjectID( $company_id, $object_type_id, $object_id );
 
 				$tmp_ids = array();
@@ -183,7 +183,7 @@ class CompanyGenericTagMapFactory extends Factory {
 						if ( isset($existing_tags[$add_tag])
 								AND TTUUID::isUUID( $existing_tags[$add_tag] ) AND  $existing_tags[$add_tag] != TTUUID::getZeroID() AND $existing_tags[$add_tag] != TTUUID::getNotExistID()
 								AND !in_array($existing_tags[$add_tag], $tmp_ids) ) {
-							$cgtmf = TTnew('CompanyGenericTagMapFactory');
+							$cgtmf = TTnew('CompanyGenericTagMapFactory'); /** @var CompanyGenericTagMapFactory $cgtmf */
 							$cgtmf->setObjectType( $object_type_id );
 							$cgtmf->setObjectID( $object_id );
 							$cgtmf->setTagID( $existing_tags[strtolower($add_tag)] );
@@ -387,7 +387,7 @@ class CompanyGenericTagMapFactory extends Factory {
 
 */
 				case 100:
-					$lf = TTnew( 'CompanyListFactory' );
+					$lf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $lf */
 					$lf->getById( $this->getObjectId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description = ' - '.TTi18n::getText('Company').': '. $lf->getCurrent()->getName();
@@ -397,7 +397,7 @@ class CompanyGenericTagMapFactory extends Factory {
 					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, 'company' );
 					break;
 				case 200:
-					$lf = TTnew( 'UserListFactory' );
+					$lf = TTnew( 'UserListFactory' ); /** @var UserListFactory $lf */
 					$lf->getById( $this->getObjectId() );
 					if ( $lf->getRecordCount() > 0 ) {
 						$description .= ' - '.TTi18n::getText('Employee').': '. $lf->getCurrent()->getFullName();

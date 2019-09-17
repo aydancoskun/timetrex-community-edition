@@ -89,7 +89,7 @@ class DepartmentBranchUserFactory extends Factory {
 		//
 		// Department Branch
 		if ( $this->getDepartmentBranch() == TTUUID::getZeroID() ) {
-			$dblf = TTnew( 'DepartmentBranchListFactory' );
+			$dblf = TTnew( 'DepartmentBranchListFactory' ); /** @var DepartmentBranchListFactory $dblf */
 			$this->Validator->isResultSetWithRows(	'department_branch',
 															$dblf->getByID($this->getDepartmentBranch()),
 															TTi18n::gettext('Department Branch is invalid')
@@ -97,7 +97,7 @@ class DepartmentBranchUserFactory extends Factory {
 		}
 		// User
 		if ( $this->getUser() == TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('User is invalid')

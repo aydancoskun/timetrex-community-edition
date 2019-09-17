@@ -170,7 +170,7 @@ class EthnicGroupFactory extends Factory {
 		//
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'company',
 															$clf->getByID($this->getCompany()),
 															TTi18n::gettext('Company is invalid')
@@ -197,21 +197,15 @@ class EthnicGroupFactory extends Factory {
 	function postSave() {
 		if ( $this->getDeleted() == TRUE ) {
 			Debug::Text('UnAssign ethnic group from employees: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			//Unassign hours from this job.
-			$uf = TTnew( 'UserFactory' );
-			//$udf = TTnew( 'UserDefaultFactory' );
-
+			$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 			$query = 'update '. $uf->getTable() .' set ethnic_group_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND ethnic_group_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
-
-			//$query = 'update '. $udf->getTable() .' set title_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND title_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			//$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 		}
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

@@ -55,7 +55,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -87,7 +87,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -116,7 +116,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -146,7 +146,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -183,7 +183,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -240,7 +240,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -266,7 +266,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -292,7 +292,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -321,7 +321,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -355,7 +355,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 					ORDER BY id ASC
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -405,7 +405,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -456,7 +456,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -500,7 +500,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -551,14 +551,13 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
-	//Used by calcQuickExceptions maintenance job to speed up finding days that need to have exceptions calculated throughout the day.
-
 	/**
+	 * Used by calcQuickExceptions maintenance job to speed up finding days that need to have exceptions calculated throughout the day.
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
 	 * @param int $pay_period_status_id
@@ -645,7 +644,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -732,7 +731,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 					GROUP BY user_id
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -771,7 +770,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 						AND deleted = ?
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

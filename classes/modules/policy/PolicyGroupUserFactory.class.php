@@ -67,7 +67,7 @@ class PolicyGroupUserFactory extends Factory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
@@ -83,7 +83,7 @@ class PolicyGroupUserFactory extends Factory {
 	 * @return bool
 	 */
 	function isUniqueUser( $id) {
-		$pglf = TTnew( 'PolicyGroupListFactory' );
+		$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 
 		$ph = array(
 					'id' => TTUUID::castUUID($id),
@@ -125,7 +125,7 @@ class PolicyGroupUserFactory extends Factory {
 		//
 		// Policy Group
 		if (  $this->getPolicyGroup() == TTUUID::getZeroID() ) {
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$this->Validator->isResultSetWithRows(	'policy_group',
 															$pglf->getByID($this->getPolicyGroup()),
 															TTi18n::gettext('Policy Group is invalid')
@@ -133,7 +133,7 @@ class PolicyGroupUserFactory extends Factory {
 		}
 		// Employee
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Selected Employee is invalid')

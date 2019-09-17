@@ -89,7 +89,7 @@ $locales = array(
 //	'he_IL',
 //	'hi_IN',
 //	'hr_HR',
-//	'hu_HU',
+	'hu_HU',
 //	'hy_AM',
 	'id_ID',
 // 'is_IS',

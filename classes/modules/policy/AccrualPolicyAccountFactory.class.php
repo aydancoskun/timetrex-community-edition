@@ -117,7 +117,7 @@ class AccrualPolicyAccountFactory extends Factory {
 		if ( is_object($this->company_obj) ) {
 			return $this->company_obj;
 		} else {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->company_obj = $clf->getById( $this->getCompany() )->getCurrent();
 
 			return $this->company_obj;
@@ -228,7 +228,7 @@ class AccrualPolicyAccountFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -272,7 +272,7 @@ class AccrualPolicyAccountFactory extends Factory {
 		//
 
 		if ( $this->getDeleted() == TRUE ) {
-			$aplf = TTnew( 'AccrualPolicyListFactory' );
+			$aplf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $aplf */
 			$aplf->getByCompanyIdAndAccrualPolicyAccount( $this->getCompany(), $this->getId() );
 			Debug::Text('  Accrual Policy Total Records: '. $aplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $aplf->getRecordCount() > 0 ) {
@@ -282,7 +282,7 @@ class AccrualPolicyAccountFactory extends Factory {
 			} else {
 				//Only if there are no accrual policies attached,
 				//Check to make sure there are no hours using this accrual policy if.
-				$alf = TTnew( 'AccrualListFactory' );
+				$alf = TTnew( 'AccrualListFactory' ); /** @var AccrualListFactory $alf */
 				$alf->getByAccrualPolicyAccount( $this->getId() );
 				Debug::Text('  Accrual Total Records: '. $alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $alf->getRecordCount() > 0 ) {
@@ -328,7 +328,7 @@ class AccrualPolicyAccountFactory extends Factory {
 		}
 
 		//Check min/max times of accrual policy.
-		$ablf = TTnew( 'AccrualBalanceListFactory' );
+		$ablf = TTnew( 'AccrualBalanceListFactory' ); /** @var AccrualBalanceListFactory $ablf */
 		$ablf->getByUserIdAndAccrualPolicyAccount( $user_id, $accrual_policy_account_id );
 		if ( $ablf->getRecordCount() > 0 ) {
 			$accrual_balance = $ablf->getCurrent()->getBalance();

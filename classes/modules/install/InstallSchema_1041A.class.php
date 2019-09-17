@@ -56,7 +56,7 @@ class InstallSchema_1041A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Modify all hierarchies with the request object type included, to add new request object types.
-		$hclf = TTnew( 'HierarchyControlListFactory' );
+		$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 		$hclf->getAll();
 		if ( $hclf->getRecordCount() > 0 ) {
 			foreach( $hclf as $hc_obj ) {

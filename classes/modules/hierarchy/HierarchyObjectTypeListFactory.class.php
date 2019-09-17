@@ -55,7 +55,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -113,7 +113,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -167,7 +167,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order, $strict_order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $cache_id);
 		}
@@ -213,7 +213,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

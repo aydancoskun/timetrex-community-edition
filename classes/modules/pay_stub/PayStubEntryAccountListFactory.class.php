@@ -56,7 +56,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -89,7 +89,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			if ( !is_array($id) ) {
 				$this->saveCache($this->rs, $id);
@@ -123,7 +123,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -159,7 +159,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -195,7 +195,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -235,7 +235,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $cache_id, $group_id);
 		}
@@ -273,7 +273,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -315,7 +315,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -342,7 +342,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -386,15 +386,15 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
 	 * @param string $company_id UUID
-	 * @param int $status_id
-	 * @param int $type_id
+	 * @param int[] $status_id
+	 * @param int[] $type_id
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayStubEntryAccountListFactory
@@ -432,7 +432,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $cache_id, $group_id);
 		}
@@ -604,7 +604,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 
 		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -682,8 +682,8 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 
 	/**
 	 * @param string $company_id UUID
-	 * @param int $status_id
-	 * @param int $type_id
+	 * @param int[] $status_id
+	 * @param int[] $type_id
 	 * @param bool $include_blank
 	 * @param bool $abbreviate_type
 	 * @return array|bool

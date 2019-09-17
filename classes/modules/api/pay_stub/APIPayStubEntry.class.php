@@ -92,14 +92,12 @@ class APIPayStubEntry extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
 
-		/** @var PayStubEntryListFactory $pself */
-		$pself = TTnew( 'PayStubEntryListFactory' );
+		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $pself->getRecordCount() > 0 ) {
 			$this->setPagerObject( $pself );
 			$retarr = array();
-			/** @var PayStubEntryFactory $pse_obj */
 			foreach( $pself as $pse_obj ) {
 
 				$retarr[] = $pse_obj->getObjectAsArray( $data['filter_columns'] );

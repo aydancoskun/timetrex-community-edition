@@ -942,6 +942,9 @@ class PurgeDatabase {
 							$query[] = 'DELETE FROM '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( d.status_id = 20 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .')';
 							break;
 						case 'user_identification':
+							//Purge biometric data from terminated employees within 45 days (expire time) of their termination date.
+							$query[] =  'UPDATE '. $table .' as a SET deleted = 1, updated_date = '. time() .', deleted_date = '. time() .', deleted_by = '. $db->qstr( TTUUID::getZeroID() ) .' FROM users as b WHERE a.user_id = b.id AND a.type_id in (20, 70, 71, 75, 76, 77, 78, 79, 80, 100, 101) AND b.status_id = 20 AND b.termination_date <= '. $db->qstr( TTDate::getDBTimeStamp( (time() - (86400 * ($expire_days))) ) ) .' AND a.deleted = 0 AND b.deleted = 0';
+							//No break here, as it needs to continue through to message_recipient.
 						case 'pay_period_time_sheet_verify':
 						case 'message_sender':
 						case 'message_recipient':
@@ -1020,7 +1023,7 @@ class PurgeDatabase {
 							//Tag mapping is specific to almost every other major table, so need to handle it one at a time.
 							$table_arr = $db->MetaTables(); //Get list of tables, so we don't cause SQL errors if the table doesn't exist.
 
-							$cgtf = TTnew('CompanyGenericTagFactory');
+							$cgtf = TTnew('CompanyGenericTagFactory'); /** @var CompanyGenericTagFactory $cgtf */
 							$object_type_arr = $cgtf->getOptions('object_type');
 							foreach( $object_type_arr as $object_type_id => $object_type ) {
 								if ( in_array( $object_type, $table_arr ) ) {
@@ -1159,7 +1162,7 @@ class PurgeDatabase {
 						foreach( $plf as $p_obj ) {
 							Debug::text('  Punch ID: '. $p_obj->getID() .' Date: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ) .' Image File Name: '. $p_obj->getImageFileName(), __FILE__, __LINE__, __METHOD__, 10);
 							$query = 'UPDATE '. $plf->getTable() .' SET has_image = 0 WHERE id = \''. TTUUID::castUUID( $p_obj->getID() ) .'\'';
-							if ( $plf->db->Execute( $query ) !== FALSE ) {
+							if ( $plf->ExecuteSQL( $query ) !== FALSE ) {
 								$p_obj->cleanStoragePath();
 							} else {
 								Debug::text('  ERROR: Update query to purge has_image failed... ID: '. $p_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);

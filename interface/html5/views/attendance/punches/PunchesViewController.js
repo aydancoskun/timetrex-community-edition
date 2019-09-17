@@ -1425,6 +1425,7 @@ PunchesViewController = BaseViewController.extend( {
 				data.filter_columns.first_name = true;
 				data.filter_columns.last_name = true;
 				data.filter_columns.user_id = true;
+				data.filter_columns.date_stamp = true; // #2735 - grouping punches by date_stamp instead of punch_date, to allow cross date punch controls to plot distances.
 				data.filter_columns.punch_date = true;
 				data.filter_columns.punch_time = true;
 				data.filter_columns.time_stamp = true;

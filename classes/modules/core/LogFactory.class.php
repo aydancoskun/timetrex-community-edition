@@ -471,7 +471,7 @@ class LogFactory extends Factory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->user_obj = $ulf->getById( $this->getUser() )->getCurrent();
 
 			return $this->user_obj;
@@ -826,7 +826,7 @@ class LogFactory extends Factory {
 				$class = new $table_class;
 				Debug::Text( 'Table Class: '. $table_class, __FILE__, __LINE__, __METHOD__, 10);
 
-				$ldlf = TTnew( 'LogDetailListFactory' );
+				$ldlf = TTnew( 'LogDetailListFactory' ); /** @var LogDetailListFactory $ldlf */
 				$ldlf->getBySystemLogIdAndCompanyId( $this->getID(), $this->getUserObject()->getCompany() );
 				if ( $ldlf->getRecordCount() > 0 ) {
 					$detail_row = array();
@@ -854,9 +854,8 @@ class LogFactory extends Factory {
 		return FALSE;
 	}
 
-	//Don't allow remote API calls to set audit trail records.
-
 	/**
+	 * Don't allow remote API calls to set audit trail records.
 	 * @param $data
 	 * @return bool
 	 */
@@ -933,9 +932,8 @@ class LogFactory extends Factory {
 		return $data;
 	}
 
-	//This table doesn't have any of these columns, so overload the functions.
-
 	/**
+	 * This table doesn't have any of these columns, so overload the functions.
 	 * @return bool
 	 */
 	function getDeleted() {
@@ -1041,13 +1039,16 @@ class LogFactory extends Factory {
 		return FALSE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function Validate() {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// User
 		if ( $this->getUser() !== FALSE AND $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('User is invalid')

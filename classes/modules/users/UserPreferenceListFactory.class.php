@@ -55,7 +55,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -89,7 +89,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			if ( !is_array($id) ) {
 				$this->saveCache($this->rs, $id);
@@ -159,7 +159,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			if ( !is_array($id) ) {
 				$this->saveCache($this->rs, $id);
@@ -206,7 +206,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			if ( !is_array($id) ) {
 				$this->saveCache($this->rs, $id);
@@ -241,7 +241,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -278,7 +278,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 						AND a.deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -317,7 +317,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -440,9 +440,31 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
+	}
+
+	/**
+	 * Returns the most commonly used timezone by employees.
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @return mixed
+	 */
+	function getMostCommonTimeZone( $where = NULL) {
+		$query = '
+					SELECT	a.time_zone as time_zone
+					FROM	'. $this->getTable() .' as a
+					WHERE	( a.deleted = 0 )
+					GROUP BY time_zone
+					ORDER BY count(*) DESC
+					LIMIT 1
+					';
+
+		$query .= $this->getWhereSQL( $where );
+
+		$result = $this->db->GetOne( $query );
+
+		return $result;
 	}
 
 	/**
@@ -605,7 +627,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

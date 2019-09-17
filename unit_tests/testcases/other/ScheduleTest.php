@@ -257,7 +257,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createMealPolicy( $type_id ) {
-		$mpf = TTnew( 'MealPolicyFactory' );
+		$mpf = TTnew( 'MealPolicyFactory' ); /** @var MealPolicyFactory $mpf */
 
 		$mpf->setCompany( $this->company_id );
 
@@ -287,7 +287,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createSchedulePolicy( $meal_policy_id, $full_shift_absence_policy_id = 0, $partial_shift_absence_policy_id = 0 ) {
-		$spf = TTnew( 'SchedulePolicyFactory' );
+		$spf = TTnew( 'SchedulePolicyFactory' ); /** @var SchedulePolicyFactory $spf */
 
 		$spf->setCompany( $this->company_id );
 		$spf->setName( 'Schedule Policy' );
@@ -310,7 +310,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createSchedule( $user_id, $date_stamp, $data = NULL ) {
-		$sf = TTnew( 'ScheduleFactory' );
+		$sf = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
 		$sf->setCompany( $this->company_id );
 		$sf->setUser( $user_id );
 		//$sf->setUserDateId( UserDateFactory::findOrInsertUserDate( $user_id, $date_stamp) );
@@ -475,7 +475,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		}
 
 		//Check min/max times of accrual policy.
-		$ablf = TTnew( 'AccrualBalanceListFactory' );
+		$ablf = TTnew( 'AccrualBalanceListFactory' ); /** @var AccrualBalanceListFactory $ablf */
 		$ablf->getByUserIdAndAccrualPolicyAccount( $user_id, $accrual_policy_account_id );
 		if ( $ablf->getRecordCount() > 0 ) {
 			$accrual_balance = $ablf->getCurrent()->getBalance();
@@ -518,7 +518,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 																	'end_time' => '5:00PM',
 																  ) );
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -557,7 +557,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 																	'end_time' => '8:00AM',
 																  ) );
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -594,7 +594,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 																	'end_time' => '7:00AM',
 																  ) );
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -635,7 +635,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		) );
 		TTDate::setTimeFormat('g:i A');
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -672,7 +672,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 																	'end_time' => '7:00AM',
 																  ) );
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -724,7 +724,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 																	'end_time' => '4:00PM',
 																  ) );
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -867,7 +867,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 																	'end_time' => '4:00PM',
 																  ) );
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -967,7 +967,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 																	'end_time' => '4:00PM',
 																  ) );
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -1042,7 +1042,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 				'end_time'           => '4:30PM',
 		) );
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -1159,7 +1159,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$iso_date_stamp = date('Ymd', $date_epoch );
+		$iso_date_stamp = TTDate::getISODateStamp( $date_epoch );
 
 		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), $this->policy_ids['absence_policy'][10], 0 ); //Full Shift Undertime
 
@@ -1170,7 +1170,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 				'end_time'           => '4:30PM',
 		) );
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $open_schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -1186,7 +1186,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 				'start_time'         => '8:30AM',
 				'end_time'           => '4:30PM',
 		) );
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -1198,13 +1198,13 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		}
 
 		//Populate global variables for current_user.
-		$ulf = TTnew('UserListFactory');
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $this->user_id )->getCurrent();
 		global $current_user, $current_company;
 		$current_user = $user_obj;
 		$current_company = $user_obj->getCompanyObject();
 
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
 		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
@@ -1242,7 +1242,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 				'end_time' => '4:30PM',
 				'replaced_id' => $schedule_id,
 		) );
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id2 );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -1262,7 +1262,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $tmp_schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
 
 
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
 		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
@@ -1285,7 +1285,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		//Now delete the schedules and make sure the original open shift reappears.
 		$dd->deleteSchedule( $schedule_id );
 		$dd->deleteSchedule( $schedule_id2 );
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
@@ -1337,7 +1337,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$iso_date_stamp = date('Ymd', $date_epoch );
+		$iso_date_stamp = TTDate::getISODateStamp( $date_epoch );
 
 		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), $this->policy_ids['absence_policy'][10], 0 ); //Full Shift Undertime
 
@@ -1348,7 +1348,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 				'end_time'           => '4:30PM',
 		) );
 
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $open_schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -1364,7 +1364,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 				'start_time'         => '8:30AM',
 				'end_time'           => '4:30PM',
 		) );
-		$slf = TTNew('ScheduleListFactory');
+		$slf = TTNew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
@@ -1376,13 +1376,13 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		}
 
 		//Populate global variables for current_user.
-		$ulf = TTnew('UserListFactory');
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $this->user_id )->getCurrent();
 		global $current_user, $current_company;
 		$current_user = $user_obj;
 		$current_company = $user_obj->getCompanyObject();
 
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
 		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
@@ -1399,7 +1399,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		//Now edit the filled shift and change just the note, make sure the open shift does not reappear.
 		$dd->editSchedule( $schedule_id, array('note' => 'Test1') );
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
 		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
@@ -1417,7 +1417,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		//Now change the start/end time and confirm that the original open shift reappears since it no longer matches.
 		$dd->editSchedule( $schedule_id, array('start_time' => strtotime( '8:35AM', $date_epoch ) ) );
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
 		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
@@ -1435,7 +1435,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		//Now change the start/end time back and confirm that the original open shift is filled again.
 		$dd->editSchedule( $schedule_id, array('start_time' => strtotime( '8:30AM', $date_epoch ) ) );
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
 		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
@@ -1453,7 +1453,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		//Now change the branch and confirm that the original open shift reappears since it no longer matches.
 		$dd->editSchedule( $schedule_id, array('branch_id' => $this->branch_id ) );
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
 		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
@@ -1471,7 +1471,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		//Now change the branch back and confirm that the original open shift is filled again.
 		$dd->editSchedule( $schedule_id, array('branch_id' => 0 ) );
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
 		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
@@ -1489,7 +1489,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		//Now change the department and confirm that the original open shift reappears since it no longer matches.
 		$dd->editSchedule( $schedule_id, array('department_id' => $this->department_id ) );
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
 		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
@@ -1507,7 +1507,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		//Now change the department back and confirm that the original open shift is filled again.
 		$dd->editSchedule( $schedule_id, array('department_id' => 0 ) );
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
 		//var_dump($schedule_arr);
 		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );

@@ -54,7 +54,7 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -83,7 +83,7 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -114,7 +114,7 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -147,7 +147,7 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -180,7 +180,7 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		//$this->ExecuteSQL( $query, $ph );
+		//$this->rs = $this->ExecuteSQL( $query, $ph );
 		return (int)$this->db->getOne( $query, $ph );
 	}
 
@@ -209,7 +209,7 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -248,7 +248,7 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

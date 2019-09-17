@@ -292,10 +292,10 @@ class PayCodeFactory extends Factory {
 		return $this->getGenericDataValue( 'pay_stub_entry_account_id' );
 	}
 
-	//Don't require a pay stub entry account to be defined, as there may be some cases
-	//in job costing situations where the rate of pay should be 1.0, but going to no pay stub account so their reports can reflect
-	//proper rates of pay but not have it actually appear on pay stubs.
 	/**
+	 * Don't require a pay stub entry account to be defined, as there may be some cases
+	 * in job costing situations where the rate of pay should be 1.0, but going to no pay stub account so their reports can reflect
+	 * proper rates of pay but not have it actually appear on pay stubs.
 	 * @param string $value UUID
 	 * @return bool
 	 */
@@ -314,7 +314,7 @@ class PayCodeFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 													$clf->getByID($this->getCompany()),
 													TTi18n::gettext('Company is invalid')
@@ -365,7 +365,7 @@ class PayCodeFactory extends Factory {
 		}
 		// Pay Formula Policy
 		if ( $this->getPayFormulaPolicy() !== FALSE AND $this->getPayFormulaPolicy() != TTUUID::getZeroID() ) {
-			$pfplf = TTnew( 'PayFormulaPolicyListFactory' );
+			$pfplf = TTnew( 'PayFormulaPolicyListFactory' ); /** @var PayFormulaPolicyListFactory $pfplf */
 			$this->Validator->isResultSetWithRows(	'pay_formula_policy_id',
 															$pfplf->getByID($this->getPayFormulaPolicy()),
 															TTi18n::gettext('Pay Formula Policy is invalid')
@@ -373,7 +373,7 @@ class PayCodeFactory extends Factory {
 		}
 		// Pay Stub Account
 		if ( $this->getPayStubEntryAccountId() !== FALSE AND $this->getPayStubEntryAccountId() != TTUUID::getZeroID() ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->Validator->isResultSetWithRows(	'pay_stub_entry_account_id',
 															$psealf->getById($this->getPayStubEntryAccountId()),
 															TTi18n::gettext('Invalid Pay Stub Account')
@@ -385,7 +385,7 @@ class PayCodeFactory extends Factory {
 		//
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no hours using this PayCode.
-			$udtlf = TTnew( 'UserDateTotalListFactory' );
+			$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 			$udtlf->getByPayCodeId( $this->getId(), 1 ); //Limit 1
 			if ( $udtlf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -393,7 +393,7 @@ class PayCodeFactory extends Factory {
 											TTi18n::gettext('This pay code is currently in use') .' '. TTi18n::gettext('by employee timesheets') );
 			}
 
-			$rtplf = TTNew('RegularTimePolicyListFactory');
+			$rtplf = TTNew('RegularTimePolicyListFactory'); /** @var RegularTimePolicyListFactory $rtplf */
 			$rtplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
 			if ( $rtplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -401,7 +401,7 @@ class PayCodeFactory extends Factory {
 											TTi18n::gettext('This pay code is currently in use') .' '. TTi18n::gettext('by regular time policies') );
 			}
 
-			$otplf = TTNew('OverTimePolicyListFactory');
+			$otplf = TTNew('OverTimePolicyListFactory'); /** @var OverTimePolicyListFactory $otplf */
 			$otplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
 			if ( $otplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -409,7 +409,7 @@ class PayCodeFactory extends Factory {
 											TTi18n::gettext('This pay code is currently in use') .' '. TTi18n::gettext('by overtime policies') );
 			}
 
-			$pplf = TTNew('PremiumPolicyListFactory');
+			$pplf = TTNew('PremiumPolicyListFactory'); /** @var PremiumPolicyListFactory $pplf */
 			$pplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
 			if ( $pplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -417,7 +417,7 @@ class PayCodeFactory extends Factory {
 											TTi18n::gettext('This pay code is currently in use') .' '. TTi18n::gettext('by premium policies') );
 			}
 
-			$aplf = TTNew('AbsencePolicyListFactory');
+			$aplf = TTNew('AbsencePolicyListFactory'); /** @var AbsencePolicyListFactory $aplf */
 			$aplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
 			if ( $aplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -425,7 +425,7 @@ class PayCodeFactory extends Factory {
 											TTi18n::gettext('This pay code is currently in use') .' '. TTi18n::gettext('by absence policies') );
 			}
 
-			$mplf = TTNew('MealPolicyListFactory');
+			$mplf = TTNew('MealPolicyListFactory'); /** @var MealPolicyListFactory $mplf */
 			$mplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
 			if ( $mplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -433,7 +433,7 @@ class PayCodeFactory extends Factory {
 											TTi18n::gettext('This pay code is currently in use') .' '. TTi18n::gettext('by meal policies') );
 			}
 
-			$bplf = TTNew('BreakPolicyListFactory');
+			$bplf = TTNew('BreakPolicyListFactory'); /** @var BreakPolicyListFactory $bplf */
 			$bplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
 			if ( $bplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -441,7 +441,7 @@ class PayCodeFactory extends Factory {
 											TTi18n::gettext('This pay code is currently in use')  .' '. TTi18n::gettext('by break policies') );
 			}
 
-			$csplf = TTNew('ContributingPayCodePolicyListFactory');
+			$csplf = TTNew('ContributingPayCodePolicyListFactory'); /** @var ContributingPayCodePolicyListFactory $csplf */
 			$csplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
 			if ( $csplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -452,7 +452,7 @@ class PayCodeFactory extends Factory {
 			if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID()
 					AND $this->getPayFormulaPolicy() == TTUUID::getZeroID() ) { //Defined by Policy
 				//Check to make sure all policies associated with this pay code have a pay formula defined
-				$rtplf = TTNew('RegularTimePolicyListFactory');
+				$rtplf = TTNew('RegularTimePolicyListFactory'); /** @var RegularTimePolicyListFactory $rtplf */
 				$rtplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $rtplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
@@ -460,7 +460,7 @@ class PayCodeFactory extends Factory {
 												TTi18n::gettext('Regular Time Policy: %1 requires this Pay Formula Policy to be defined', array( $rtplf->getCurrent()->getName() ) ));
 				}
 
-				$otplf = TTNew('OverTimePolicyListFactory');
+				$otplf = TTNew('OverTimePolicyListFactory'); /** @var OverTimePolicyListFactory $otplf */
 				$otplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $otplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
@@ -468,7 +468,7 @@ class PayCodeFactory extends Factory {
 												TTi18n::gettext('Overtime Policy: %1 requires this Pay Formula Policy to be defined', array( $otplf->getCurrent()->getName() ) ));
 				}
 
-				$pplf = TTNew('PremiumPolicyListFactory');
+				$pplf = TTNew('PremiumPolicyListFactory'); /** @var PremiumPolicyListFactory $pplf */
 				$pplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $pplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
@@ -476,7 +476,7 @@ class PayCodeFactory extends Factory {
 												TTi18n::gettext('Premium Policy: %1 requires this Pay Formula Policy to be defined', array( $pplf->getCurrent()->getName() ) ));
 				}
 
-				$aplf = TTNew('AbsencePolicyListFactory');
+				$aplf = TTNew('AbsencePolicyListFactory'); /** @var AbsencePolicyListFactory $aplf */
 				$aplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $aplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
@@ -484,7 +484,7 @@ class PayCodeFactory extends Factory {
 												TTi18n::gettext('Absence Policy: %1 requires this Pay Formula Policy to be defined', array( $aplf->getCurrent()->getName() ) ));
 				}
 
-				$mplf = TTNew('MealPolicyListFactory');
+				$mplf = TTNew('MealPolicyListFactory'); /** @var MealPolicyListFactory $mplf */
 				$mplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $mplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
@@ -492,7 +492,7 @@ class PayCodeFactory extends Factory {
 												TTi18n::gettext('Meal Policy: %1 requires this Pay Formula Policy to be defined', array( $mplf->getCurrent()->getName() ) ));
 				}
 
-				$bplf = TTNew('BreakPolicyListFactory');
+				$bplf = TTNew('BreakPolicyListFactory'); /** @var BreakPolicyListFactory $bplf */
 				$bplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $bplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
@@ -524,10 +524,10 @@ class PayCodeFactory extends Factory {
 	function postSave() {
 		if ( $this->getDeleted() == TRUE ) {
 			Debug::Text('UnAssign PayCode from ContributingShiftPolicies: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			$cgmf = TTnew('CompanyGenericMapFactory');
+			$cgmf = TTnew('CompanyGenericMapFactory'); /** @var CompanyGenericMapFactory $cgmf */
 
 			$query = 'delete from '. $cgmf->getTable() .' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND object_type_id = 90 AND map_id = \''. TTUUID::castUUID($this->getID()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 		}
 
 		$this->removeCache( $this->getId() );
@@ -535,11 +535,10 @@ class PayCodeFactory extends Factory {
 		return TRUE;
 	}
 
-	//Migrate data from one pay code to another, without recalculating timesheets.
-
 	/**
+	 * Migrate data from one pay code to another, without recalculating timesheets.
 	 * @param string $company_id UUID
-	 * @param string $src_ids UUID
+	 * @param string[] $src_ids UUID
 	 * @param string $dst_id UUID
 	 * @return bool
 	 */
@@ -551,7 +550,7 @@ class PayCodeFactory extends Factory {
 			return FALSE;
 		}
 
-		$pclf = TTnew('PayCodeListFactory');
+		$pclf = TTnew('PayCodeListFactory'); /** @var PayCodeListFactory $pclf */
 		$pclf->getByIdAndCompanyID( $dst_id, $company_id );
 		if ( $pclf->getRecordCount() != 1 ) {
 			Debug::Text('Destination PayCode not valid: '. $dst_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -570,10 +569,10 @@ class PayCodeFactory extends Factory {
 					'dst_pay_code_id' => TTUUID::castUUID($dst_id),
 					);
 
-		$udtf = TTNew('UserDateTotalFactory');
+		$udtf = TTNew('UserDateTotalFactory'); /** @var UserDateTotalFactory $udtf */
 
 		$query = 'update '. $udtf->getTable() .' set pay_code_id = ? where pay_code_id in ('. $this->getListSQL($src_ids, $ph, 'uuid' ) .') AND deleted = 0';
-		$this->db->Execute($query, $ph);
+		$this->ExecuteSQL($query, $ph);
 
 		return TRUE;
 	}

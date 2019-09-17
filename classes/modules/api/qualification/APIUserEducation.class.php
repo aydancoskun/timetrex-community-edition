@@ -100,7 +100,7 @@ class APIUserEducation extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$uelf = TTnew( 'UserEducationListFactory' );
+		$uelf = TTnew( 'UserEducationListFactory' ); /** @var UserEducationListFactory $uelf */
 
 		$uelf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 
@@ -193,7 +193,7 @@ class APIUserEducation extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserEducationListFactory' );
+				$lf = TTnew( 'UserEducationListFactory' ); /** @var UserEducationListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -312,7 +312,7 @@ class APIUserEducation extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserEducationListFactory' );
+				$lf = TTnew( 'UserEducationListFactory' ); /** @var UserEducationListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

@@ -55,7 +55,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -118,7 +118,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -155,7 +155,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 						AND a.deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -188,7 +188,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id.$user_id);
 		}
@@ -217,7 +217,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -268,7 +268,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 		//Debug::text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -306,7 +306,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 						';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 		if ( $this->getRecordCount() > 0 ) {
 			Debug::text('User Tax rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
@@ -315,10 +315,8 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return FALSE;
 	}
 
-
-	//Grabs JUST the latest wage entry.
-
 	/**
+	 * Grabs JUST the latest wage entry.
 	 * @param string $user_id UUID
 	 * @return bool|UserWageListFactory
 	 */
@@ -345,14 +343,13 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 					ORDER BY b.effective_date desc
 					LIMIT 1';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
-	//Grabs JUST the latest wage entry.
-
 	/**
+	 * Grabs JUST the latest wage entry.
 	 * @param string $user_id UUID
 	 * @param int $epoch EPOCH
 	 * @return bool|UserWageListFactory
@@ -392,7 +389,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 						AND ( c.deleted = 0	AND a.deleted = 0)
 				';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -430,7 +427,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 					ORDER BY b.effective_date desc
 					LIMIT 1';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -468,7 +465,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 					ORDER BY b.effective_date desc
 					LIMIT 1';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -530,7 +527,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 					ORDER BY effective_date desc
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -589,7 +586,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 					ORDER BY wage_group_id, effective_date desc
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -656,7 +653,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 //					ORDER BY effective_date desc
 //					';
 //
-//		$this->ExecuteSQL( $query, $ph );
+//		$this->rs = $this->ExecuteSQL( $query, $ph );
 //
 //		return $this;
 //	}
@@ -731,7 +728,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 						AND b.deleted = 0';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -778,7 +775,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 						AND b.deleted = 0';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -903,7 +900,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -1039,7 +1036,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

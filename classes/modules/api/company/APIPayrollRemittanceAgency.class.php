@@ -103,7 +103,7 @@ class APIPayrollRemittanceAgency extends APIFactory {
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
 
-		$blf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$blf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -179,7 +179,7 @@ class APIPayrollRemittanceAgency extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+				$lf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -286,7 +286,7 @@ class APIPayrollRemittanceAgency extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+				$lf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -396,7 +396,7 @@ class APIPayrollRemittanceAgency extends APIFactory {
 
 		Debug::Arr($country, 'bCountry: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$cf = TTnew( 'CompanyFactory' );
+		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 
 		$province_arr = $cf->getOptions('province');
 
@@ -420,8 +420,8 @@ class APIPayrollRemittanceAgency extends APIFactory {
 
 	/**
 	 * Returns district options for one or more provinces
-	 * @param array $country
-	 * @param array $province
+	 * @param string $country
+	 * @param string $province
 	 * @return array|bool
 	 */
 	function getDistrictOptions( $country, $province ) {
@@ -431,15 +431,15 @@ class APIPayrollRemittanceAgency extends APIFactory {
 			return FALSE;
 		}
 
-		if ( !is_array($country) AND $country == '' ) {
+		if ( $country == '' ) {
 			return FALSE;
 		}
 
-		if ( !is_array($province) AND $province == '' ) {
+		if ( $province == '' ) {
 			return FALSE;
 		}
 
-		$praf = TTnew('CompanyFactory');
+		$praf = TTnew('CompanyFactory'); /** @var CompanyFactory $praf */
 		$district_arr = $praf->getOptions( 'district', $country );
 
 		if ( isset($district_arr[$province]) ) {

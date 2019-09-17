@@ -382,12 +382,14 @@ DashletController = Backbone.View.extend( {
 							$this.initTimesheetGridComplete = true;
 						}
 						$this.buildAccumulatedTotalData();
+					} else {
+						$this.showNoResultCover();
 					}
-					$( '.button-rotate' ).removeClass( 'button-rotate' );
 				} else {
-					$( '.button-rotate' ).removeClass( 'button-rotate' );
+					$this.showNoResultCover();
 				}
 
+				$( '.button-rotate' ).removeClass( 'button-rotate' );
 			}
 		} );
 	},
@@ -1112,6 +1114,9 @@ DashletController = Backbone.View.extend( {
 				break;
 			case 'accrual_balance_summary':
 				result = $.i18n._( 'No accrual balances at this time.' );
+				break;
+			case 'timesheet_summary':
+				result = $.i18n._( 'Timesheet not available.' );
 				break;
 			case 'timesheet_verification_summary':
 			case 'timesheet_verification_summary_child':

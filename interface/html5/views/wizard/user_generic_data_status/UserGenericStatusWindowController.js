@@ -6,7 +6,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 	batch_id: '',
 	user_id: '',
 
-	call_back: null,
+	callback: null,
 
 	events: {
 		'click .done-btn': 'onCloseClick'
@@ -16,8 +16,8 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 		// UserGenericStatusWindowController.instance = null;
 		$( this.el ).remove();
 
-		if ( this.call_back ) {
-			this.call_back();
+		if ( this.callback ) {
+			this.callback();
 		}
 
 	},
@@ -29,7 +29,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 		this.user_id = this.options.user_id;
 
 		if ( this.options.callback ) {
-			this.call_back = this.options.callback;
+			this.callback = this.options.callback;
 		}
 
 		this.api = new (APIFactory.getAPIClass( 'APIUserGenericStatus' ))();
@@ -239,7 +239,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 
 // UserGenericStatusWindowController.instance = null;
 
-UserGenericStatusWindowController.open = function( batch_id, user_id, call_back ) {
+UserGenericStatusWindowController.open = function( batch_id, user_id, callback ) {
 	Global.loadViewSource( 'UserGenericStatus', 'UserGenericStatusWindow.css' );
 	Global.loadViewSource( 'UserGenericStatus', 'UserGenericStatusWindow.html', function( result ) {
 		var args = {
@@ -258,14 +258,14 @@ UserGenericStatusWindowController.open = function( batch_id, user_id, call_back 
 		// 	user_id: user_id,
 		// 	can_cache_controller: false
 		// } );
-		//UserGenericStatusWindowController.instance.call_back = call_back;
+		//UserGenericStatusWindowController.instance.callback = callback;
 
 		new UserGenericStatusWindowController( {
 			el: '#'+ batch_id,
 			batch_id: batch_id,
 			user_id: user_id,
 			can_cache_controller: false,
-			call_back: call_back,
+			callback: callback,
 		} );
 
 	} );

@@ -746,7 +746,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			this.export_setup_data = this.save_export_setup_data[type];
 
 			if ( !this.export_setup_data.columns && this.export_setup_data[type] ) {
-				this.export_setup_data = this.export_setup_data[type]
+				this.export_setup_data = this.export_setup_data[type];
 				this.export_setup_data.export_type = type;
 			}
 

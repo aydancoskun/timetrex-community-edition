@@ -104,9 +104,9 @@ class Install {
 
 		return $this->progress_bar_obj;
 	}
-	//Returns the AMF messageID for each individual call.
 
 	/**
+	 * Returns the AMF messageID for each individual call.
 	 * @return bool|null
 	 */
 	function getAMFMessageID() {
@@ -177,9 +177,8 @@ class Install {
 		return FALSE;
 	}
 
-	//Checks if this is the professional version or not
-
 	/**
+	 * Checks if this is the professional version or not
 	 * @return int
 	 */
 	function getTTProductEdition() {
@@ -344,9 +343,14 @@ class Install {
 					unset($tmp_base_url);
 				}
 
+				if ( isset($new_config_vars['other']['primary_company_id']) AND TTUUID::isUUID( $new_config_vars['other']['primary_company_id'] ) == FALSE ) {
+					Debug::Text('PRIMARY_COMPANY_ID is attempting to be saved as a non-UUID, ignoring...', __FILE__, __LINE__, __METHOD__, 9);
+					unset( $new_config_vars['other']['primary_company_id'] );
+				}
+
 				//Check for bug introduced in v7.4.5 that removed all backslashes from paths, to attempt to put them back automatically.
 				//This should be able to be removed by v8.0.
-				if ( PRODUCTION == FALSE OR OPERATING_SYSTEM == 'WIN' ) {
+				if ( OPERATING_SYSTEM == 'WIN' ) {
 					if ( !isset($new_config_vars['path']['php_cli']) AND isset($config_vars['path']['php_cli']) AND strpos( $config_vars['path']['php_cli'], '\\' ) === FALSE  ) {
 						Debug::Text('Found php_cli path without backslash, trying to correct...', __FILE__, __LINE__, __METHOD__, 9);
 						$new_config_vars['path']['php_cli'] = str_ireplace(':TimeTrexphpphp-win.exe', ':\TimeTrex\php\php-win.exe', $config_vars['path']['php_cli'] );
@@ -539,9 +543,9 @@ class Install {
 		return FALSE;
 	}
 
-	//Get all schema versions
-	//A=Community, B=Professional, C=Corporate, D=Enterprise, T=Tax
 	/**
+	 * Get all schema versions
+	 * A=Community, B=Professional, C=Corporate, D=Enterprise, T=Tax
 	 * @param array $group
 	 * @return array
 	 */
@@ -581,7 +585,7 @@ class Install {
 	function handleSchemaGroupChange() {
 		//Pre v7.0, if the database version is less than 7.0 we need to *copy* the schema version from group B to C so we don't try to upgrade the database with old schemas.
 		if ( $this->getIsUpgrade() == TRUE ) {
-			$sslf = TTnew( 'SystemSettingListFactory' );
+			$sslf = TTnew( 'SystemSettingListFactory' ); /** @var SystemSettingListFactory $sslf */
 			$sslf->getByName( 'system_version' );
 			if ( $sslf->getRecordCount() > 0 ) {
 				$ss_obj = $sslf->getCurrent();
@@ -599,12 +603,12 @@ class Install {
 						Debug::text('Schema Version Group B: '. $schema_version_group_b, __FILE__, __LINE__, __METHOD__, 9);
 
 						$tmp_name = 'schema_version_group_C';
-						$tmp_sslf = TTnew( 'SystemSettingListFactory' );
+						$tmp_sslf = TTnew( 'SystemSettingListFactory' ); /** @var SystemSettingListFactory $tmp_sslf */
 						$tmp_sslf->getByName( $tmp_name );
 						if ( $tmp_sslf->getRecordCount() == 1 ) {
 							$tmp_obj = $tmp_sslf->getCurrent();
 						} else {
-							$tmp_obj = TTnew( 'SystemSettingListFactory' );
+							$tmp_obj = TTnew( 'SystemSettingListFactory' ); /** @var SystemSettingListFactory $tmp_obj */
 						}
 						$tmp_obj->setName( $tmp_name );
 						$tmp_obj->setValue( $schema_version_group_b );
@@ -624,9 +628,9 @@ class Install {
 		return FALSE;
 	}
 
-	//Creates DB schema starting at and including start_version, and ending at, including end version.
-	//Starting at NULL is first version, ending at NULL is last version.
 	/**
+	 * Creates DB schema starting at and including start_version, and ending at, including end version.
+	 * Starting at NULL is first version, ending at NULL is last version.
 	 * @param null $start_version
 	 * @param null $end_version
 	 * @param array $group
@@ -768,7 +772,7 @@ class Install {
 		if ( $this->checkTableExists( 'system_setting') == TRUE ) {
 			Debug::text('System Setting Table DOES exist...', __FILE__, __LINE__, __METHOD__, 9);
 
-			$sslf = TTnew( 'SystemSettingListFactory' );
+			$sslf = TTnew( 'SystemSettingListFactory' ); /** @var SystemSettingListFactory $sslf */
 			$sslf->getByName( 'schema_version_group_'. substr( $version, -1, 1) );
 			if ( $sslf->getRecordCount() > 0 ) {
 				$ss_obj = $sslf->getCurrent();
@@ -805,6 +809,11 @@ class Install {
 		return $retval;
 	}
 
+	/**
+	 * @param $schema_version
+	 * @param $create_schema_result
+	 * @return bool
+	 */
 	function postCreateSchema( $schema_version, $create_schema_result ) {
 		if ( $create_schema_result === TRUE ) { //Only run post functions when the schema was actually installed and not skipped because the schema version is already ahead.
 			if ( $this->getDatabaseType() == 'postgresql' ) {
@@ -854,9 +863,9 @@ class Install {
 		return TRUE;
 	}
 
-	//Only required with MySQL, this can help prevent race conditions when creating new tables.
-	//It will also correct any corrupt sequences that don't match their parent tables.
 	/**
+	 * Only required with MySQL, this can help prevent race conditions when creating new tables.
+	 * It will also correct any corrupt sequences that don't match their parent tables.
 	 * @return bool
 	 */
 	function initializeSequences() {
@@ -927,7 +936,7 @@ class Install {
 		Debug::text('Comparing with Version: '. $php_version, __FILE__, __LINE__, __METHOD__, 9);
 
 		$min_version = '5.4.0';
-		$max_version = '7.2.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
+		$max_version = '7.3.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
 
 		$unsupported_versions = array('');
 
@@ -1401,7 +1410,7 @@ class Install {
 			}
 
 			if ( $this->checkTableExists( 'system_setting' ) == TRUE ) {
-				$sslf = TTnew( 'SystemSettingListFactory' );
+				$sslf = TTnew( 'SystemSettingListFactory' ); /** @var SystemSettingListFactory $sslf */
 				$sslf->getByName( 'schema_version_group_B' );
 				if ( $sslf->getRecordCount() == 1 ) {
 					Debug::text('ERROR: Database schema out of sync with edition...', __FILE__, __LINE__, __METHOD__, 9);
@@ -1491,13 +1500,11 @@ class Install {
 		$url = $this->getBaseURL();
 		$headers = @get_headers($url);
 		Debug::Arr($headers, 'Checking Base URL: '. $url, __FILE__, __LINE__, __METHOD__, 9);
-//		if ( isset($headers[0]) AND stripos($headers[0], '404') !== FALSE ) {
-//			return 1; //Not found
-//		} else {
-//			return 0; //Found
-//		}
-
-		return 0; //Found
+		if ( isset($headers[0]) AND stripos($headers[0], '404') !== FALSE ) {
+			return 1; //Not found
+		} else {
+			return 0; //Found
+		}
 	}
 
 	/**
@@ -1591,9 +1598,9 @@ class Install {
 		$command = '"'. $this->getPHPCLI() .'" "'. Environment::getBasePath() .'tools'. DIRECTORY_SEPARATOR .'unattended_upgrade.php" --config "'. CONFIG_FILE .'" --requirements_only --web_installer';
 		return $command;
 	}
-	//Only check this if *not* being called from the CLI to prevent infinite loops.
 
 	/**
+	 * Only check this if *not* being called from the CLI to prevent infinite loops.
 	 * @return int
 	 */
 	function checkPHPCLIRequirements() {
@@ -1784,9 +1791,8 @@ class Install {
 		return 1;
 	}
 
-	//No longer required, used pure PHP implemented TTDate::EasterDays() instead.
-
 	/**
+	 * No longer required, used pure PHP implemented TTDate::EasterDays() instead.
 	 * @return int
 	 */
 	function checkCALENDAR() {
@@ -1853,9 +1859,8 @@ class Install {
 		return 1;
 	}
 
-	//Not currently mandatory, but can be useful to provide better SOAP timeouts.
-
 	/**
+	 * Not currently mandatory, but can be useful to provide better SOAP timeouts.
 	 * @return int
 	 */
 	function checkCURL() {
@@ -2419,8 +2424,10 @@ class Install {
 	function regexConvertToUUIDNoHash( $matches ) {
 		return $this->regexConvertToUUID($matches, FALSE);
 	}
+
 	/**
 	 * @param $matches
+	 * @param bool $include_hash
 	 * @return bool|int|string
 	 */
 	function regexConvertToUUID( $matches, $include_hash = TRUE ) {
@@ -2467,7 +2474,11 @@ class Install {
 		return $recombined_array;
 	}
 
-	function processColumns($columns_data) {
+	/**
+	 * @param $columns_data
+	 * @return array
+	 */
+	function processColumns( $columns_data) {
 		$retval = array();
 		if ( is_array( $columns_data ) ) {
 			foreach ( $columns_data as $key => $value ) {

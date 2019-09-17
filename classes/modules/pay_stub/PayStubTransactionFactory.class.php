@@ -57,7 +57,7 @@ class PayStubTransactionFactory extends Factory {
 		$retval = NULL;
 		switch( $name ) {
 			case 'remittance_source_account_type_id':
-				$pstf = TTnew('RemittanceSourceAccountFactory');
+				$pstf = TTnew('RemittanceSourceAccountFactory'); /** @var RemittanceSourceAccountFactory $pstf */
 				$retval = $pstf->getOptions('type');
 				break;
 			case 'transaction_status_id':
@@ -311,7 +311,7 @@ class PayStubTransactionFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setRemittanceSourceAccountName( $value) {
@@ -365,7 +365,7 @@ class PayStubTransactionFactory extends Factory {
 		$value = TTUUID::castUUID( $value );
 		Debug::Text('Currency ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 
-		$culf = TTnew( 'CurrencyListFactory' );
+		$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 		$old_currency_id = $this->getCurrency();
 
 		if ( $culf->getRecordCount() == 1
@@ -518,7 +518,7 @@ class PayStubTransactionFactory extends Factory {
 
 		// Pay Stub
 		if ( $this->getPayStub() !== FALSE ) {
-			$pslf = TTnew( 'PayStubListFactory' );
+			$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 			$this->Validator->isResultSetWithRows(	'pay_stub_id',
 													  $pslf->getByID($this->getPayStub()),
 													  TTi18n::gettext('Invalid Pay Stub')
@@ -526,7 +526,7 @@ class PayStubTransactionFactory extends Factory {
 		}
 		// Remittance source account
 		if ( $this->getRemittanceSourceAccount() !== FALSE ) {
-			$lf = TTnew( 'RemittanceSourceAccountListFactory' );
+			$lf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $lf */
 			$this->Validator->isResultSetWithRows(	'remittance_source_account_id',
 													  $lf->getByID($this->getRemittanceSourceAccount()),
 													  TTi18n::gettext('Remittance source account is invalid')
@@ -534,7 +534,7 @@ class PayStubTransactionFactory extends Factory {
 		}
 		// Remittance destination account
 		if ( $this->getRemittanceDestinationAccount() !== FALSE ) {
-			$lf = TTnew( 'RemittanceDestinationAccountListFactory' );
+			$lf = TTnew( 'RemittanceDestinationAccountListFactory' ); /** @var RemittanceDestinationAccountListFactory $lf */
 			$this->Validator->isResultSetWithRows(	'remittance_destination_account_id',
 													  $lf->getByID($this->getRemittanceDestinationAccount()),
 													  TTi18n::gettext('Employee payment method is invalid')
@@ -543,7 +543,7 @@ class PayStubTransactionFactory extends Factory {
 
 		// Currency
 		if ( $this->getCurrency() !== FALSE ) {
-			$culf = TTnew( 'CurrencyListFactory' );
+			$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 			$this->Validator->isResultSetWithRows(	'currency_id',
 													  $culf->getByID($this->getCurrency()),
 													  TTi18n::gettext('Invalid Currency')
@@ -941,6 +941,7 @@ class PayStubTransactionFactory extends Factory {
 	 * @param object $ps_obj
 	 * @param $transaction_number
 	 * @param $output
+	 * @param $cheque_object
 	 * @return array
 	 */
 	function endChequeFile( $rs_obj, $ps_obj, $transaction_number, $output, $cheque_object ) {
@@ -962,7 +963,10 @@ class PayStubTransactionFactory extends Factory {
 	 *
 	 * @param object $ps_obj
 	 * @param object $pst_obj
+	 * @param $rs_obj
 	 * @param object $uf_obj
+	 * @param $transaction_number
+	 * @param bool $alignment_grid
 	 * @return array
 	 */
 	function getChequeData( $ps_obj, $pst_obj, $rs_obj, $uf_obj, $transaction_number, $alignment_grid = FALSE ) {
@@ -1010,10 +1014,12 @@ class PayStubTransactionFactory extends Factory {
 
 	/**
 	 * Compiles EFT record data.
+	 * @param $eft
 	 * @param object $pst_obj
 	 * @param object $ps_obj
 	 * @param object $rs_obj
 	 * @param object $uf_obj
+	 * @param $originator_reference_number
 	 * @return EFT_Record
 	 */
 	function getEFTRecord( $eft, $pst_obj, $ps_obj, $rs_obj, $uf_obj, $originator_reference_number ) {
@@ -1055,9 +1061,8 @@ class PayStubTransactionFactory extends Factory {
 	 * @param null $pstlf
 	 * @param null $export_type
 	 * @param object $company_obj
+	 * @param null $last_transaction_numbers
 	 * @return bool
-	 * @throws DBError
-	 * @throws GeneralError
 	 */
 	function exportPayStubTransaction( $pstlf = NULL, $export_type = NULL, $company_obj = NULL, $last_transaction_numbers = NULL ) {
 		require_once( Environment::getBasePath() . '/classes/ChequeForms/ChequeForms.class.php' );
@@ -1069,8 +1074,7 @@ class PayStubTransactionFactory extends Factory {
 			global $current_company;
 		}
 
-		/** @var PayStubTransactionListFactory $pstlf */
-		if ( get_class( $pstlf ) !== 'PayStubTransactionListFactory' ) {
+		if ( is_a( $pstlf, 'PayStubTransactionListFactory' ) == FALSE ) {
 			return FALSE;
 		}
 
@@ -1084,7 +1088,6 @@ class PayStubTransactionFactory extends Factory {
 			Debug::Text( 'Getting paystub transactions. Count: ' . $pstlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 			$pstlf_sorted_array = array();
 			foreach ( $pstlf as $tmp_pst_obj ) {
-				/** @var PayStubTransactionFactory $tmp_pst_obj */
 				$pstlf_sorted_array[TTUUID::castUUID($tmp_pst_obj->getRemittanceSourceAccount())][] = $tmp_pst_obj;
 			}
 			unset( $tmp_pst_obj );
@@ -1102,7 +1105,6 @@ class PayStubTransactionFactory extends Factory {
 					Debug::Text( '---------------------------------------------------------------------', __FILE__, __LINE__, __METHOD__, 10 );
 					Debug::Text( 'PS Transaction ID: ' . $pst_obj->getId() . ' Amount: ' . $pst_obj->getAmount() .' Type: '. $pst_obj->getType() .' Status: '. $pst_obj->getStatus(), __FILE__, __LINE__, __METHOD__, 10 );
 
-					/** @var PayStubTransactionFactory $pst_obj */
 					//If the status is a Stop Payment - ReIssue (200), and still type=10 (Valid)
 					//clone the object and create a new one to provide history
 					if ( $pst_obj->getStatus() == 200 ) {
@@ -1135,24 +1137,19 @@ class PayStubTransactionFactory extends Factory {
 					}
 
 					if ( $pst_obj->getStatus() == 10 ) {
-						/** @var UserFactory $uf_obj */
 						$uf_obj = $pst_obj->getRemittanceDestinationAccountObject()->getUserObject();
 						Debug::Text( 'USER: name: [' . $uf_obj->getFullName() . '] ID: ' . $uf_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 
-						/** @var RemittanceDestinationAccountFactory $rd_obj */
 						$rd_obj = $pst_obj->getRemittanceDestinationAccountObject();
 						Debug::Text( 'RDA: name: [' . $rd_obj->getName() . '] ID: ' . $rd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 
-						/** @var PayStubFactory $ps_obj */
 						$ps_obj = $pst_obj->getPayStubObject();
 						Debug::Text( 'PayStub: TransactionDate: [' . TTDate::getDate( 'DATE', $ps_obj->getTransactionDate() ) . '] ID: ' . $ps_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 
 						//Get first rs_obj
 						if ( $n == 0 ) {
-							/** @var RemittanceSourceAccountFactory $rs_obj */
 							$rs_obj = $pst_obj->getRemittanceSourceAccountObject();
 
-							/** @var LegalEntityFactory $le_obj */
 							$le_obj = $rs_obj->getLegalEntityObject();
 
 							if ( isset( $last_transaction_numbers ) AND isset( $last_transaction_numbers[$rs_obj->getId()] ) AND count( $last_transaction_numbers ) > 0 ) {
@@ -1244,7 +1241,7 @@ class PayStubTransactionFactory extends Factory {
 							//START BATCH
 							if ( $n == 0 ) {
 								$data_format_type_id = $rs_obj->getDataFormat();
-								$check_file_obj = TTnew('ChequeForms');
+								$check_file_obj = TTnew('ChequeForms'); /** @var ChequeForms $check_file_obj */
 								$check_obj = $check_file_obj->getFormObject( strtoupper( $data_format_types[$data_format_type_id] ) );
 								$check_obj->setPageOffsets( $rs_obj->getValue6(), $rs_obj->getValue5() ); //Value5=Vertical, Value6=Horizontal
 								$transaction_number = $rs_obj->getNextTransactionNumber();
@@ -1257,7 +1254,6 @@ class PayStubTransactionFactory extends Factory {
 
 							$check_file_obj->addForm( $check_obj );
 							$confirmation_number = $transaction_number;
-							$transaction_number++;
 
 							//end this file and start another file.
 							if ( $n == $n_max ) {
@@ -1265,6 +1261,8 @@ class PayStubTransactionFactory extends Factory {
 								$transaction_number = 1;
 								//Debug::Arr($output,'NEW File Added To CHQ Output',__FILE__,__LINE__,__METHOD__,10);
 							}
+
+							$transaction_number++; //This needs to go after endChequeFile() otherwise it will always add 1 too many to the last cheque number.
 						} //end CHECK loop
 
 						if ( isset($confirmation_number) ) { //If no confirmation is set, it likely didn't get paid since it wasn't with check or direct deposit.
@@ -1325,8 +1323,7 @@ class PayStubTransactionFactory extends Factory {
 			$company_obj = $current_company;
 		}
 
-		/** @var PayStubTransactionListFactory $pstlf */
-		if ( get_class( $pstlf ) !== 'PayStubTransactionListFactory' ) {
+		if ( is_a( $pstlf, 'PayStubTransactionListFactory' ) == FALSE ) {
 			return FALSE;
 		}
 
@@ -1348,23 +1345,19 @@ class PayStubTransactionFactory extends Factory {
 			Debug::Arr( $pay_period_run_ids, '  Total Pay Stub Pay Periods: '. count($pay_period_run_ids), __FILE__, __LINE__, __METHOD__, 10 );
 			if ( count($pay_period_run_ids) > 0 ) {
 				//Find all full service agency events that need to be processed.
-				$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
+				$praelf = TTnew('PayrollRemittanceAgencyEventListFactory'); /** @var PayrollRemittanceAgencyEventListFactory $praelf */
 				$praelf->getByCompanyIdAndStatus( $company_obj->getId(), 15 ); //15=Full Service
 				if ( $praelf->getRecordCount() > 0 ) {
 					foreach ( $praelf as $prae_obj ) {
-						/** @var $prae_obj PayrollRemittanceAgencyEventFactory */
 
 						$event_data = $prae_obj->getEventData();
 						if ( is_array($event_data) AND isset($event_data['flags']) AND $event_data['flags']['auto_pay'] == TRUE ) {
 
 							if ( is_object( $prae_obj->getPayrollRemittanceAgencyObject() ) ) {
-								/** @var $pra_obj PayrollRemittanceAgencyFactory */
 								$pra_obj = $prae_obj->getPayrollRemittanceAgencyObject();
 
-								/** @var $rs_obj PayrollRemittanceSourceFactory */
 								$rs_obj = $pra_obj->getRemittanceSourceAccountObject();
 
-								/** @var LegalEntityFactory $le_obj */
 								$le_obj = $rs_obj->getLegalEntityObject();
 
 								if ( $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 ) { //3000=EFT/ACH, 5=TimeTrex EFT  -- This is the remittance source account assigned the remittance agency, not the individual transactions.
@@ -1378,7 +1371,7 @@ class PayStubTransactionFactory extends Factory {
 										foreach ( $pay_period_run_ids as $pay_period_id => $run_ids ) {
 											Debug::Text( '    Pay Period ID: ' . $pay_period_id . ' Total Runs: ' . count( $run_ids ), __FILE__, __LINE__, __METHOD__, 10 );
 
-											$pplf = TTnew( 'PayPeriodListFactory' );
+											$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 											$pplf->getByIdAndCompanyId( $pay_period_id, $company_obj->getId() );
 											if ( $pplf->getRecordCount() > 0 ) {
 												$pp_obj = $pplf->getCurrent();
@@ -1386,7 +1379,6 @@ class PayStubTransactionFactory extends Factory {
 												foreach ( $run_ids as $run_id => $run_id_bool ) {
 													Debug::Text( '      Run ID: ' . $run_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-													/** @var $report_obj Report */
 													$report_obj = $prae_obj->getReport( 'raw', NULL, $pra_user_obj, new Permission() );
 													//$report_obj = $prae_obj->getReport( '123456', NULL, $pra_user_obj, new Permission() ); //Test with generic TaxSummaryReport
 
@@ -1417,18 +1409,18 @@ class PayStubTransactionFactory extends Factory {
 																	//Generate a consistent remote_id based on the exact pay stubs that are selected, the remittance agency event, and batch ID.
 																	//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
 																	$output_data['agency_report_data']['remote_id'] = TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $output_data['agency_report_data']['remote_batch_id'] . $pay_period_id . $run_id ) );
-																	$output_data['agency_report_data']['pay_period_start_date'] = $pp_obj->getStartDate();
-																	$output_data['agency_report_data']['pay_period_end_date'] = $pp_obj->getEndDate();
-																	$output_data['agency_report_data']['pay_period_transaction_date'] = $pp_obj->getTransactionDate();
+																	$output_data['agency_report_data']['pay_period_start_date'] = TTDate::getISODateStamp( $pp_obj->getStartDate() );
+																	$output_data['agency_report_data']['pay_period_end_date'] = TTDate::getISODateStamp( $pp_obj->getEndDate() );
+																	$output_data['agency_report_data']['pay_period_transaction_date'] = TTDate::getISODateStamp( $pp_obj->getTransactionDate() );
 																	$output_data['agency_report_data']['pay_period_run'] = $run_id;
 
 																	//Check to see if transaction date is outside of the current agency event start/end period, if so then we want to use date from the next period.
 																	if ( $pp_obj->getTransactionDate() > $pp_obj->getEndDate() ) {
 																		$event_next_dates = $prae_obj->calculateNextDate( $prae_obj->getDueDate() );
 																		if ( is_array( $event_next_dates ) ) {
-																			$output_data['agency_report_data']['period_start_date'] = $event_next_dates['start_date'];
-																			$output_data['agency_report_data']['period_end_date'] = $event_next_dates['end_date'];
-																			$output_data['agency_report_data']['due_date'] = $event_next_dates['due_date'];
+																			$output_data['agency_report_data']['period_start_date'] = TTDate::getISODateStamp( $event_next_dates['start_date'] );
+																			$output_data['agency_report_data']['period_end_date'] = TTDate::getISODateStamp( $event_next_dates['end_date'] );
+																			$output_data['agency_report_data']['due_date'] = TTDate::getISOTimeStamp( $event_next_dates['due_date'] );
 																		}
 																		unset( $event_next_dates );
 																	}
@@ -1541,7 +1533,7 @@ class PayStubTransactionFactory extends Factory {
 		$data = array();
 
 		$variable_function_map = $this->getVariableToFunctionMap();
-		$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+		$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {

@@ -135,7 +135,7 @@ class ROEReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'ROEReport', 'custom_column' );
@@ -146,13 +146,13 @@ class ROEReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'ROEReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'ROEReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -161,7 +161,7 @@ class ROEReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'ROEReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -427,9 +427,8 @@ class ROEReport extends Report {
 		return $retarr;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -442,7 +441,7 @@ class ROEReport extends Report {
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get ROE data for joining
-		$rlf = TTnew( 'ROEListFactory' );
+		$rlf = TTnew( 'ROEListFactory' ); /** @var ROEListFactory $rlf */
 		$rlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' ROE Total Rows: '. $rlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $rlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -465,7 +464,7 @@ class ROEReport extends Report {
 		$filter_data['id'] = array_keys($this->tmp_data['roe']);
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -481,8 +480,7 @@ class ROEReport extends Report {
 		unset($filter_data['id'], $filter_data['roe_id']); //Remove this filter so we don't cause problems with below queries.
 
 		//Get legal entity data for joining.
-		/** @var LegalEntityListFactory $lelf */
-		$lelf = TTnew( 'LegalEntityListFactory' );
+		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		//Debug::Text( ' User Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
@@ -501,8 +499,7 @@ class ROEReport extends Report {
 		$this->tmp_data['remittance_agency'] = array();
 
 		$filter_data['agency_id'] = array('10:CA:00:00:0010',  '10:CA:00:00:0020'); //CA Service Canada (ROE)
-		/** @var PayrollRemittanceAgencyListFactory $ralf */
-		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		//Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
@@ -516,9 +513,8 @@ class ROEReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {
@@ -607,7 +603,7 @@ class ROEReport extends Report {
 			return FALSE;
 		}
 
-		$roef = TTnew('ROEFactory');
+		$roef = TTnew('ROEFactory'); /** @var ROEFactory $roef */
 
 		$i = 0;
 		if ( isset( $this->form_data['roe'] ) AND is_array( $this->form_data['roe'] ) ) {
@@ -623,7 +619,6 @@ class ROEReport extends Report {
 					continue;
 				}
 
-				/** @var LegalEntityFactory $legal_entity_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
 
 				$cra_pra_obj = $this->form_data['remittance_agency'][ $legal_entity_id ][10];
@@ -646,7 +641,7 @@ class ROEReport extends Report {
 				$batch_id = '';
 				$report_data = array();
 				foreach ( $user_rows as $row ) {
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 					$ulf->getById( TTUUID::castUUID( $row['user_id'] ) );
 					if ( $ulf->getRecordCount() == 1 ) {
 						$user_obj = $ulf->getCurrent();
@@ -724,7 +719,7 @@ class ROEReport extends Report {
 
 				$full_service_efile = FALSE;
 				if ( $format == 'efile_xml' ) {
-					$praelf = TTNew( 'PayrollRemittanceAgencyEventListFactory' );
+					$praelf = TTNew( 'PayrollRemittanceAgencyEventListFactory' ); /** @var PayrollRemittanceAgencyEventListFactory $praelf */
 					$praelf->getAPISearchByCompanyIdAndArrayCriteria( $legal_entity_obj->getCompany(), array('payroll_remittance_agency_id' => $pra_obj->getId(), 'type_id' => 'ROE', 'status_id' => 15 ) ); //15=Full Service
 					if ( $praelf->getRecordCount() > 0 ) {
 						$prae_obj = $praelf->getCurrent();
@@ -822,9 +817,8 @@ class ROEReport extends Report {
 		return Misc::zip( $file_arr, $zip_filename, TRUE );
 	}
 
-	//Short circuit this function, as no postprocessing is required for exporting the data.
-
 	/**
+	 * Short circuit this function, as no postprocessing is required for exporting the data.
 	 * @param null $format
 	 * @return bool
 	 */

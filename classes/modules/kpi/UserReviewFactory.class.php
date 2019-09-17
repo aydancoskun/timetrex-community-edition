@@ -214,13 +214,13 @@ class UserReviewFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// KPI
-		$klf = TTnew( 'KPIListFactory' );
+		$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
 		$this->Validator->isResultSetWithRows( 'kpi_id',
 														$klf->getById($this->getKPI()),
 														TTi18n::gettext('Invalid KPI')
 													);
 		// review control
-		$urclf = TTnew('UserReviewControlListFactory');
+		$urclf = TTnew('UserReviewControlListFactory'); /** @var UserReviewControlListFactory $urclf */
 		$this->Validator->isResultSetWithRows( 'user_review_control_id',
 														$urclf->getById($this->getUserReviewControl()),
 														TTi18n::gettext('Invalid review control')

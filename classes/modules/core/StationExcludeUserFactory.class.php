@@ -67,7 +67,7 @@ class StationExcludeUserFactory extends Factory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getExcludeUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
@@ -93,6 +93,10 @@ class StationExcludeUserFactory extends Factory {
 		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
+
+	/**
+	 * @return bool
+	 */
 	function Validate() {
 		//
 		// BELOW: Validation code moved from set*() functions.
@@ -110,7 +114,7 @@ class StationExcludeUserFactory extends Factory {
 											);
 		}
 		// Exclude User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'exclude_user',
 														$ulf->getByID($this->getExcludeUser()),
 														TTi18n::gettext('Selected User is invalid')
@@ -120,6 +124,7 @@ class StationExcludeUserFactory extends Factory {
 		//
 		return TRUE;
 	}
+
 	//This table doesn't have any of these columns, so overload the functions.
 
 	/**

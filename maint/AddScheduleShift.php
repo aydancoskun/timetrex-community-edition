@@ -59,7 +59,7 @@ if ( $clf->getRecordCount() > 0 ) {
 			//
 			//Get recurring schedules that are ready to be committed.
 			//
-			$rsf = TTNew('RecurringScheduleFactory');
+			$rsf = TTNew('RecurringScheduleFactory'); /** @var RecurringScheduleFactory $rsf */
 			$rsf->addScheduleFromRecurringSchedule( $c_obj, $initial_start_date, $initial_end_date );
 		} else {
 			Debug::text('Company is not ACTIVE: '. $c_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);

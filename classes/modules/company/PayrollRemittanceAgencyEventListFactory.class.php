@@ -1,7 +1,38 @@
 <?php
-/**
- * $License$
- */
+/*********************************************************************************
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License version 3 as published by
+ * the Free Software Foundation with the addition of the following permission
+ * added to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED
+ * WORK IN WHICH THE COPYRIGHT IS OWNED BY TIMETREX, TIMETREX DISCLAIMS THE
+ * WARRANTY OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ *
+ * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ *
+ * The interactive user interfaces in modified source and object code versions
+ * of this program must display Appropriate Legal Notices, as required under
+ * Section 5 of the GNU Affero General Public License version 3.
+ *
+ * In accordance with Section 7(b) of the GNU Affero General Public License
+ * version 3, these Appropriate Legal Notices must retain the display of the
+ * "Powered by TimeTrex" logo. If the display of the logo is not reasonably
+ * feasible for technical reasons, the Appropriate Legal Notices must display
+ * the words "Powered by TimeTrex".
+ ********************************************************************************/
 
 /**
  * @package Modules\Company
@@ -23,7 +54,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -53,7 +84,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -97,7 +128,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$query .= $this->getSortSQL( $order );
 
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -138,7 +169,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$query .= $this->getSortSQL( $order );
 
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -179,7 +210,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$query .= $this->getSortSQL( $order );
 
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -227,7 +258,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -239,10 +270,15 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 	 * WHERE end of day today is past next_reminder_date and last_reminder_date is not equal to next_reminder_date
 	 *
 	 * WHEN the reminder is sent:
-	 * 	  we expect last_reminder_date == next_reminder date;
+	 *      we expect last_reminder_date == next_reminder date;
 	 *    update last_reminder date = next_reminder_date
 	 *
 	 * The process must be resumable.
+	 * @param $company_id
+	 * @param null $where
+	 * @param null $order
+	 * @return bool|PayrollRemittanceAgencyEventListFactory
+	 * @throws DBError
 	 */
 	function getPendingReminder($company_id, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
@@ -275,7 +311,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$query .= $this->getSortSQL( $order );
 
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -318,7 +354,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -427,7 +463,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;

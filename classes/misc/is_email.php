@@ -1116,11 +1116,11 @@ if (!defined('ISEMAIL_VALID')) {
 		if ((is_bool($result) && !(bool) $result))
 			$return_status[] = ISEMAIL_DNSWARN_NO_RECORD;			// Domain can't be found in DNS
 		else {
-			if (count($result) === 0) {
+			if ( ( is_array( $result ) && count($result) === 0 ) ) {
 				$return_status[]	= ISEMAIL_DNSWARN_NO_MX_RECORD;		// MX-record for domain can't be found
 				$result			= @dns_get_record($parsedata[ISEMAIL_COMPONENT_DOMAIN], DNS_A + DNS_CNAME);
 
-				if (count($result) === 0)
+				if ( (is_bool($result) && !(bool) $result) || ( is_array( $result ) && count($result) === 0 ) )
 					$return_status[] = ISEMAIL_DNSWARN_NO_RECORD;		// No usable records for the domain can be found
 			} else $dns_checked = true;
 		}

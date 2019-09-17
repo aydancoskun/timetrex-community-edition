@@ -251,9 +251,9 @@ ScheduleViewController = BaseViewController.extend( {
 		var dateStr = date.format( format );
 
 		if ( !LocalCacheData.last_schedule_selected_date ) {
-			if ( LocalCacheData.current_selet_date && Global.strToDate( LocalCacheData.current_selet_date, 'YYYYMMDD' ) ) { //Select date get from URL.
-				this.setDatePickerValue( Global.strToDate( LocalCacheData.current_selet_date, 'YYYYMMDD' ).format() );
-				LocalCacheData.current_selet_date = '';
+			if ( LocalCacheData.current_select_date && Global.strToDate( LocalCacheData.current_select_date, 'YYYY-MM-DD' ) ) { //Select date get from URL.
+				this.setDatePickerValue( Global.strToDate( LocalCacheData.current_select_date, 'YYYY-MM-DD' ).format() );
+				LocalCacheData.current_select_date = '';
 			} else {
 				this.setDatePickerValue( dateStr );
 			}
@@ -372,7 +372,13 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	getSelectDate: function() {
-		return this.start_date_picker.getValue();
+		retval = this.start_date_picker.getValue();
+
+		if ( retval == 'Invalid date' ) {
+			retval = new Date();
+		}
+
+		return retval;
 	},
 
 	getGridSelectIdArray: function() {
@@ -696,16 +702,14 @@ ScheduleViewController = BaseViewController.extend( {
 	onDeleteClick: function() {
 		var $this = this;
 		LocalCacheData.current_doing_context_action = 'delete';
-		TAlertManager.showConfirmAlert( $.i18n._( 'You are about to delete data, once data is deleted it can not be recovered ' +
-		'Are you sure you wish to continue?' ), null, function( result ) {
-
+		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
 			if (result) {
 				var remove_ids = [];
 				//#2571 - $this.current_edit_record is null
 				if ( $this.edit_view && $this.current_edit_record ) {
 					remove_ids.push( $this.current_edit_record.id );
 				} else {
-					remove_ids = $this.getGridSelectIdArray();
+					remove_ids = $this.getGridSelectIdArray().slice(); //Use .slice() to make a copy of the IDs.
 				}
 				ProgressBar.showOverlay();
 				if ( remove_ids.length > 0 ) {
@@ -719,7 +723,6 @@ ScheduleViewController = BaseViewController.extend( {
 								if ($this.edit_view) {
 									$this.removeEditView();
 								}
-
 							} else {
 								TAlertManager.showErrorAlert(result);
 							}
@@ -740,10 +743,11 @@ ScheduleViewController = BaseViewController.extend( {
 		});
 
 		function doNext( result ) {
+			//Since we can't delete recurring schedules, we need to override them as absent without a absence policy instead.
 			var recurring_delete_shifts_array = [];
 			for ( var i = 0; i < $this.select_cells_Array.length; i++ ) {
 				if ( $this.select_cells_Array[i].shift ) {
-					$this.select_cells_Array[i].shift.status_id = '20';
+					$this.select_cells_Array[i].shift.status_id = '20'; //Set shift to absent.
 					recurring_delete_shifts_array.push($this.select_cells_Array[i].shift);
 				}
 			}
@@ -1620,7 +1624,7 @@ ScheduleViewController = BaseViewController.extend( {
 							}
 						}
 
-						if ( !date_stamp || date_stamp == "Invalid date" ) {
+						if ( !date_stamp || date_stamp == 'Invalid date' ) {
 							continue;
 						}
 						target_data = {};
@@ -2387,9 +2391,7 @@ ScheduleViewController = BaseViewController.extend( {
 		record = this.processAddRecord( record );
 		record = this.uniformVariable( record );
 
-		if ( this.current_edit_record.start_date_stamp.indexOf( ' - ' ) > 0 ||
-				$.type( this.current_edit_record.start_date_stamp ) === 'array' ) {
-
+		if ( this.current_edit_record.start_date_stamp && ( this.current_edit_record.start_date_stamp.indexOf( ' - ' ) > 0 || $.type( this.current_edit_record.start_date_stamp ) === 'array' ) ) {
 			if ( this.current_edit_record.start_date_stamp.indexOf( ' - ' ) > 0 ) {
 				this.current_edit_record.start_date_stamp = this.parserDatesRange( this.current_edit_record.start_date_stamp );
 			}
@@ -3961,13 +3963,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 		this.setSearchPanelFilter( true );
 
-		var $this = this;
-
-		$this.search( false, true );
-
-		$this.setDefaultMenu( true );
-
-
+		this.search( true, true ); //Make sure we setDefaultMenu is TRUE so autoOpenEditViewIfNecessary() is called.
 	},
 
 	getMode: function() {
@@ -3975,6 +3971,7 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	search: function( setDefaultMenu, use_date_picker_date ) {
+		this.clearSelection(); //Clear selection on search, as we aren't re-populating it anyways, and causes a problem if you select 2 cells, click top-right refresh icon, then click New icon, it thinks the selection still exists.
 		this.setActionsButtonStatus();
 		this.final_schedule_data_array = [];
 
@@ -4031,6 +4028,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 				if ( setDefaultMenu ) {
 					$this.setDefaultMenu( true );
+					$this.autoOpenEditViewIfNecessary();
 				}
 
 				$this.searchDone();
@@ -4226,7 +4224,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 			$this.setScrollPosition();
 
-			$this.autoOpenEditViewIfNecessary();
+			//$this.autoOpenEditViewIfNecessary();
 
 			$this.setMonthDateRowBackGround();
 

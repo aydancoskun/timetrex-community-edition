@@ -8,6 +8,7 @@ LoginViewController = BaseViewController.extend( {
 	currentUser_api: null,
 	currency_api: null,
 	user_preference_api: null,
+	user_locale: 'en_US',
 	is_login: true,
 	date_api: null,
 	permission_api: null,
@@ -36,7 +37,8 @@ LoginViewController = BaseViewController.extend( {
 
 		//Clean cache that saved in some views
 		LocalCacheData.cleanNecessaryCache();
-		if ( getCookie( Global.getSessionIDKey() ) && getCookie( Global.getSessionIDKey() ).length > 0 && LocalCacheData.getLoginData().is_logged_in ) {
+		var session_cookie = getCookie( Global.getSessionIDKey() );
+		if ( session_cookie && session_cookie.length >= 40 && LocalCacheData.getLoginData().is_logged_in ) {
 			var timeout_count = 0;
 			$( this.el ).invisible();
 			//JS load Optimize
@@ -151,7 +153,6 @@ LoginViewController = BaseViewController.extend( {
 	},
 
 	onLoginSuccess: function( e, session_id ) {
-
 		var result;
 		var $this = this;
 
@@ -191,10 +192,106 @@ LoginViewController = BaseViewController.extend( {
 			LocalCacheData.setSessionID( result );
 			setCookie( Global.getSessionIDKey(), result );
 
-// 			$this.authentication_api.getApplicationName( {onResult: $this.onGetApplicationName, delegate: $this} );
-			$this.currentUser_api.getCurrentUser( { onResult: $this.onGetCurrentUser, delegate: $this } ); //Get more in result handler
-		}
+			if ( typeof is_login === 'undefined' ) {
+				this.is_login = true;
+			}
 
+			//Error: TypeError: this.currentUser_api.getCurrentUserPreference is not a function in /interface/html5/framework/jquery.min.js?v=8.0.4-20150320-094021 line 2 > eval line 205
+			if ( !this.currentUser_api || typeof this.currentUser_api['getCurrentUserPreference'] !== 'function' ) {
+				return;
+			}
+
+			$this.initializeLoginData();
+		}
+	},
+
+	initializeLoginData: function() {
+		var $this = this;
+
+		TTPromise.add('login', 'init');
+
+		TTPromise.add('login', 'getCurrentUser');
+		$this.currentUser_api.getCurrentUser( { onResult: $this.onGetCurrentUser, delegate: $this } ); //Get more in result handler
+
+
+		TTPromise.add('login', 'getCurrentUserPreference');
+		$this.currentUser_api.getCurrentUserPreference( { onResult: $this.onGetCurrentUserPreference, delegate: $this } );
+
+
+		//Ensure that the language chosen at the login screen is passed in so that the user's country can be appended to create a proper locale.
+		TTPromise.add('login', 'getCurrentUserLocale');
+		$this.authentication_api.getLocale( $( '.language-selector' ).val(), { onResult: $this.onGetCurrentUserLocale, delegate: $this } );
+
+
+		TTPromise.add('login', 'getPermission');
+		$this.permission_api.getPermission( {
+			onResult: function( permissionRes ) {
+				permission_result = permissionRes.getResult();
+
+				if ( permission_result != false ) {
+					LocalCacheData.setPermissionData( permission_result );
+					TTPromise.resolve('login', 'getPermission');
+				} else {
+					//User does not have any permissions.
+					Debug.Text( 'User does not have any permissions!', 'LoginViewController.js', 'LoginViewController', 'initializeLoginData:next', 10 );
+					TAlertManager.showAlert( $.i18n._( 'Unable to login due to permissions, please try again and if the problem persists contact customer support.' ), '', function() {
+						Global.Logout();
+						window.location.reload();
+					} );
+				}
+			}
+		} );
+
+
+		TTPromise.add('login', 'getCurrentCompany');
+		$this.authentication_api.getCurrentCompany( {
+			onResult: function ( current_company_result ) {
+				var com_result = current_company_result.getResult();
+
+				if ( com_result != false ) {
+					if ( com_result.is_setup_complete === '1' || com_result.is_setup_complete === 1 ) {
+						com_result.is_setup_complete = true;
+					} else {
+						com_result.is_setup_complete = false;
+					}
+
+					LocalCacheData.setCurrentCompany( com_result );
+					Debug.Text( 'Version: Client: ' + APIGlobal.pre_login_data.application_build + ' Server: ' + com_result.application_build, 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
+
+					//Avoid reloading in unit test mode.
+					if ( APIGlobal.pre_login_data.application_build != com_result.application_build && !Global.UNIT_TEST_MODE ) {
+						Debug.Text( 'Version mismatch on login: Reloading...', 'LoginViewController.js', 'LoginViewController', 'initializeLoginData:next', 10 );
+						window.location.reload( true );
+					}
+
+					TTPromise.resolve( 'login', 'getCurrentCompany' );
+				} else {
+					//User does not have any permissions.
+					Debug.Text( 'Unable to get company information!', 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
+					TAlertManager.showAlert( $.i18n._( 'Unable to download required information, please check your network connection and try again. If the problem persists contact customer support.' ), '', function() {
+						Global.Logout();
+						window.location.reload();
+					} );
+				}
+			}
+		} );
+
+
+		TTPromise.add('login', 'getUniqueCountry');
+		$this.permission_api.getUniqueCountry( {
+			onResult: function ( country_result ) {
+				LocalCacheData.setUniqueCountryArray( country_result.getResult() );
+				TTPromise.resolve('login', 'getUniqueCountry');
+			}
+		} );
+
+
+		//Once all login promises are complete, switch to home view.
+		TTPromise.wait( 'login', null, function() {
+			$this.goToView()
+		});
+
+		TTPromise.resolve('login', 'init');
 	},
 
 	onGetCurrentUser: function( e ) {
@@ -207,150 +304,84 @@ LoginViewController = BaseViewController.extend( {
 		filter.filter_columns.symbol = true;
 
 		e.get( 'delegate' ).currency_api.getCurrency( filter, {
-			onResult: function( e1 ) {
-
-				var result = e1.getResult();
+			onResult: function( raw_result ) {
+				var result = raw_result.getResult();
 
 				if ( Global.isArrayAndHasItems( result ) && result[0].symbol ) {
 					LocalCacheData.setCurrentCurrencySymbol( result[0].symbol );
 				} else {
 					LocalCacheData.setCurrentCurrencySymbol( '$' );
 				}
-
-			}, delegate: e.get( 'delegate' )
+			}
 		} );
 
-		e.get( 'delegate' ).updateUserPreference();
-
+		TTPromise.resolve('login', 'getCurrentUser');
 	},
 
-	updateUserPreference: function( is_login ) {
-		if ( typeof is_login === 'undefined' ) {
-			is_login = true;
-		}
-
-		this.is_login = is_login;
-
-		//Error: TypeError: this.currentUser_api.getCurrentUserPreference is not a function in /interface/html5/framework/jquery.min.js?v=8.0.4-20150320-094021 line 2 > eval line 205
-		if ( !this.currentUser_api || typeof this.currentUser_api['getCurrentUserPreference'] !== 'function' ) {
-			return;
-		}
-
-		this.currentUser_api.getCurrentUserPreference( { onResult: this.onUserPreference, delegate: this } );
-
-	},
-
-	onUserPreference: function( e ) {
-
+	onGetCurrentUserPreference: function( e ) {
 		var result = e.getResult();
 		var login_view_this = e.get( 'delegate' );
 
 		if ( result.date_format ) {
-			next( result );
+			handleDateTimeFormats( result );
 		} else {
 			login_view_this.user_preference_api.getUserPreferenceDefaultData( {
 				onResult: function( userPD ) {
-					next( userPD.getResult() );
+					handleDateTimeFormats( userPD.getResult() );
 				}
 			} );
-
 		}
 
-		function next( nextResult ) {
+		function handleDateTimeFormats( nextResult ) {
 			LocalCacheData.loginUserPreference = nextResult;
 
-			login_view_this.date_api.getTimeZoneOffset( {
-				onResult: function( timeZoneRes ) {
-					login_view_this.date_api.getHours( timeZoneRes.getResult(), {
-						onResult: function( hoursRes ) {
-							var hoursResultData = hoursRes.getResult();
+			TTPromise.add('getCurrentUserPreference', 'getDateFormat');
+			login_view_this.user_preference_api.getOptions( 'moment_date_format', {
+				onResult: function( jsDateFormatRes ) {
+					var jsDateFormatResultData = jsDateFormatRes.getResult();
 
-							//Flex way, Need this in js? Let's see
-							if ( hoursResultData.indexOf( '-' ) > -1 ) {
-								hoursResultData = hoursResultData.replace( '-', '+' );
-							} else {
-								hoursResultData = hoursResultData.replace( '+', '-' );
-							}
+					//For moment date parser
+					LocalCacheData.loginUserPreference.js_date_format = jsDateFormatResultData;
 
-							LocalCacheData.loginUserPreference.time_zone_offset = hoursResultData;
+					var date_format = LocalCacheData.loginUserPreference.date_format;
+					if ( !date_format ) {
+						date_format = 'DD-MMM-YY';
+					}
 
-							login_view_this.user_preference_api.getOptions( 'moment_date_format', {
-								onResult: function( jsDateFormatRes ) {
+					LocalCacheData.loginUserPreference.date_format = LocalCacheData.loginUserPreference.js_date_format[date_format];
 
-									var jsDateFormatResultData = jsDateFormatRes.getResult();
+					LocalCacheData.loginUserPreference.date_format_1 = Global.convertTojQueryFormat( date_format ); //TDatePicker, TRangePicker
+					LocalCacheData.loginUserPreference.time_format_1 = Global.convertTojQueryFormat( LocalCacheData.loginUserPreference.time_format ); //TTimePicker
 
-									//For moment date parser
-									LocalCacheData.loginUserPreference.js_date_format = jsDateFormatResultData;
-
-									var date_format = LocalCacheData.loginUserPreference.date_format;
-
-									LocalCacheData.loginUserPreference.date_format = LocalCacheData.loginUserPreference.js_date_format[date_format];
-
-									////For date picker
-									//LocalCacheData.loginUserPreference.js_date_format_1 = jsDateFormatResultData;
-									LocalCacheData.loginUserPreference.date_format_1 = Global.convertTojQueryFormat( date_format );
-									LocalCacheData.loginUserPreference.time_format_1 = Global.convertTojQueryFormat( LocalCacheData.loginUserPreference.time_format );
-
-									login_view_this.user_preference_api.getOptions( 'moment_time_format', {
-										onResult: function( jsTimeFormatRes ) {
-
-											var jsTimeFormatResultData = jsTimeFormatRes.getResult();
-
-											LocalCacheData.loginUserPreference.js_time_format = jsTimeFormatResultData;
-
-											LocalCacheData.setLoginUserPreference( LocalCacheData.loginUserPreference );
-
-											login_view_this.permission_api.getPermission( {
-												onResult: function( permissionRes ) {
-													LocalCacheData.setPermissionData( permissionRes.getResult() );
-
-													login_view_this.permission_api.getUniqueCountry( {
-														onResult: function( country_result ) {
-															LocalCacheData.setUniqueCountryArray( country_result.getResult() );
-															login_view_this.authentication_api.getCurrentCompany( {
-																onResult: function( current_company_result ) {
-																	var com_result = current_company_result.getResult();
-
-																	if ( com_result.is_setup_complete === '1' || com_result.is_setup_complete === 1 ) {
-																		com_result.is_setup_complete = true;
-																	} else {
-																		com_result.is_setup_complete = false;
-																	}
-
-																	LocalCacheData.setCurrentCompany( com_result );
-																	login_view_this.goToView();
-																	Debug.Text( 'Version: Client: ' + APIGlobal.pre_login_data.application_build + ' Server: ' + com_result.application_build, 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
-
-																	//avoid reloading in unit test mode.
-																	if ( APIGlobal.pre_login_data.application_build != com_result.application_build && !Global.UNIT_TEST_MODE ) {
-																		Debug.Text( 'Version mismatch on login: Reloading...', 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
-																		window.location.reload( true );
-																	}
-																}
-															} );
-
-														}
-													} );
-
-												}
-											} );
-
-										}
-									} );
-
-								}
-							} );
-
-						}
-					} );
-
+					TTPromise.resolve('getCurrentUserPreference', 'getDateFormat');
 				}
 			} );
 
-//			  var jsTimeFormatRes = e.get('delegate').user_preference_api.getOptions('js_time_format',{async:false});
+			TTPromise.add('getCurrentUserPreference', 'getTimeFormat');
+			login_view_this.user_preference_api.getOptions( 'moment_time_format', {
+				onResult: function( jsTimeFormatRes ) {
+					var jsTimeFormatResultData = jsTimeFormatRes.getResult();
 
+					LocalCacheData.loginUserPreference.js_time_format = jsTimeFormatResultData;
+					TTPromise.resolve('getCurrentUserPreference', 'getTimeFormat');
+				}
+			} );
+
+			TTPromise.wait( 'getCurrentUserPreference', null, function() {
+				LocalCacheData.setLoginUserPreference( LocalCacheData.loginUserPreference );
+				TTPromise.resolve('login', 'getCurrentUserPreference');
+			});
+		}
+	},
+
+	onGetCurrentUserLocale: function( e ) {
+		var login_view_this = e.get( 'delegate' );
+		result = e.getResult();
+		if ( result ) {
+			login_view_this.user_locale = result;
 		}
 
+		TTPromise.resolve('login', 'getCurrentUserLocale');
 	},
 
 	goToView: function() {
@@ -360,18 +391,12 @@ LoginViewController = BaseViewController.extend( {
 		Global.topContainer().empty();
 		LocalCacheData.currentShownContextMenuName = null;
 
-		//Ensure that the language chosen at the login screen is passed in so that the user's country can be appended to create a proper locale.
-		var result = this.authentication_api.getLocale( $( '.language-selector' ).val(), { async: false } );
-		var login_language = 'en_US';
-		if ( result ) {
-			login_language = result.getResult();
-		}
-		var message_id = UUID.guid();
-		if ( LocalCacheData.getLoginData().locale != null && login_language !== LocalCacheData.getLoginData().locale ) {
+		var message_id = TTUUID.generateUUID();
+		if ( LocalCacheData.getLoginData().locale != null && this.user_locale !== LocalCacheData.getLoginData().locale ) {
 			ProgressBar.showProgressBar( message_id );
 			ProgressBar.changeProgressBarMessage( $.i18n._( 'Language changed, reloading' ) + '...' );
 
-			Global.setLanguageCookie( login_language );
+			Global.setLanguageCookie( this.user_locale );
 			LocalCacheData.setI18nDic( null );
 			setTimeout( function() {
 				window.location.reload( true );
@@ -381,7 +406,7 @@ LoginViewController = BaseViewController.extend( {
 		var target_view = getCookie( 'PreviousSessionType' );
 		if ( target_view && getCookie( 'PreviousSessionID' ) ) {
 			TopMenuManager.goToView( target_view );
-			setCookie( 'PreviousSessionType', null, 30, LocalCacheData.cookie_path, Global.getHost() );
+			deleteCookie( 'PreviousSessionType', LocalCacheData.cookie_path, Global.getHost() );
 		} else {
 			if ( Global.getDeepLink() != false ) {
 
@@ -423,9 +448,10 @@ LoginViewController = BaseViewController.extend( {
 
 	autoLogin: function() {
 		// Error: TypeError: e is null in interface/html5/framework/jquery.min.js?v=9.0.5-20151222-094938 line 2 > eval line 154
-		if ( getCookie( Global.getSessionIDKey() ) ) {
+		var session_cookie = getCookie( Global.getSessionIDKey() );
+		if ( session_cookie && session_cookie.length >= 40 ) {
 			this.doing_login = true;
-			this.onLoginSuccess( null, getCookie( Global.getSessionIDKey() ) );
+			this.onLoginSuccess( null, session_cookie );
 		} else {
 			$( this.el ).visible();
 			this.render();
@@ -435,7 +461,7 @@ LoginViewController = BaseViewController.extend( {
 	render: function() {
 
 		var $this = this;
-		var message_id = UUID.guid();
+		var message_id = TTUUID.generateUUID();
 		LocalCacheData.setSessionID( '' );
 
 		if(!$('body').hasClass('mobile-device-mode')) {

@@ -81,14 +81,14 @@ class PolicyGroupOverTimePolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Policy Group
-		$pglf = TTnew( 'PolicyGroupListFactory' );
+		$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 		$this->Validator->isResultSetWithRows(	'policy_group',
 														$pglf->getByID($this->getPolicyGroup()),
 														TTi18n::gettext('Policy Group is invalid')
 													);
 		// Overtime Policy
 		if ( $this->getOverTimePolicy() != TTUUID::getZeroID() ) {
-			$otplf = TTnew( 'OverTimePolicyListFactory' );
+			$otplf = TTnew( 'OverTimePolicyListFactory' ); /** @var OverTimePolicyListFactory $otplf */
 			$this->Validator->isResultSetWithRows(	'over_time_policy',
 														$otplf->getByID($this->getOverTimePolicy()),
 														TTi18n::gettext('Selected Overtime Policy is invalid')

@@ -112,7 +112,7 @@ class APICurrency extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$utlf = TTnew( 'CurrencyListFactory' );
+		$utlf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $utlf */
 		$utlf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $utlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $utlf->getRecordCount() > 0 ) {
@@ -192,7 +192,7 @@ class APICurrency extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'CurrencyListFactory' );
+				$lf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -293,7 +293,7 @@ class APICurrency extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'CurrencyListFactory' );
+				$lf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

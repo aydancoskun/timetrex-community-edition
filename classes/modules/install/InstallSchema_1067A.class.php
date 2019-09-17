@@ -56,7 +56,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Remove existing AddRecurringSchedule cron job so we can re-add with new times.
-		$cjlf = TTnew('CronJobListFactory');
+		$cjlf = TTnew('CronJobListFactory'); /** @var CronJobListFactory $cjlf */
 		$cjlf->getByName('AddRecurringScheduleShift');
 		if ( $cjlf->getRecordCount() > 0 ) {
 			foreach( $cjlf as $cj_obj ) {
@@ -69,7 +69,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 		unset($cjlf, $cj_obj);
 
 		//Add AddRecurringSchedule cronjob to database.
-		$cjf = TTnew( 'CronJobFactory' );
+		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
 		$cjf->setName('AddScheduleShift');
 		$cjf->setMinute(50);
 		$cjf->setHour('2,6,10,14,18,22'); //Every 4hrs.
@@ -80,7 +80,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 		$cjf->Save();
 
 		//Add MiscWeekly cronjob to database.
-		$cjf = TTnew( 'CronJobFactory' );
+		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
 		$cjf->setName('AddRecurringScheduleShift');
 		$cjf->setMinute(55);
 		$cjf->setHour(4);
@@ -114,7 +114,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 						}
 						Debug::text('Recurring Schedule ID: '. $rsc_obj->getID() .' Maximum End Date: '. TTDate::getDate('DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10);
 
-						$rsf = TTnew('RecurringScheduleFactory');
+						$rsf = TTnew('RecurringScheduleFactory'); /** @var RecurringScheduleFactory $rsf */
 						$rsf->addRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getCompany(), $rsc_obj->getID(), $current_epoch, $maximum_end_date );
 					}
 				}
@@ -123,7 +123,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 				//
 				//Migrate Recurring PS Amendments to Tax/Deductions
 				//
-				$rpsalf = TTnew('RecurringPayStubAmendmentListFactory');
+				$rpsalf = TTnew('RecurringPayStubAmendmentListFactory'); /** @var RecurringPayStubAmendmentListFactory $rpsalf */
 				$rpsalf->getByCompanyId( $c_obj->getId() );
 				if ( $rpsalf->getRecordCount() > 0 ) {
 					$i = 1;
@@ -135,7 +135,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 							) {
 							Debug::text(' Recurring PS Amendment is enabled and active... ID: '. $rpsa_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 
-							$cdf = TTnew('CompanyDeductionFactory');
+							$cdf = TTnew('CompanyDeductionFactory'); /** @var CompanyDeductionFactory $cdf */
 
 							$cdf->StartTransaction();
 							$cdf->setCompany( $rpsa_obj->getCompany() );
@@ -196,7 +196,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 							}
 
 							//Delete any ACTIVE Pay Stub Amendments created from this Recurring PSA that are ACTIVE. Otherwise the pay stub might double-up the amounts.
-							$psamlf = TTnew('PayStubAmendmentListFactory');
+							$psamlf = TTnew('PayStubAmendmentListFactory'); /** @var PayStubAmendmentListFactory $psamlf */
 							$psamlf->getAPISearchByCompanyIdAndArrayCriteria( $c_obj->getId(), array('recurring_ps_amendment_id' => $rpsa_obj->getId(), 'status_id' => 50 ) );
 							if ( $psamlf->getRecordCount() > 0 ) {
 								foreach( $psamlf as $psam_obj ) {
@@ -226,7 +226,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 				//
 				//Remove Accrual Policies of Type "Standard" as they serve no purpose anymore.
 				//
-				$aplf = TTnew('AccrualPolicyListFactory');
+				$aplf = TTnew('AccrualPolicyListFactory'); /** @var AccrualPolicyListFactory $aplf */
 				$aplf->getByCompanyIdAndTypeId( $c_obj->getId(), 10 );
 				if ( $aplf->getRecordCount() > 0 ) {
 					foreach( $aplf as $ap_obj ) {
@@ -242,7 +242,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 		}
 
 		//Remove existing AddRecurringPayStubAmendment cron job, as they will be migrated to Tax/Deductions instead.
-		$cjlf = TTnew('CronJobListFactory');
+		$cjlf = TTnew('CronJobListFactory'); /** @var CronJobListFactory $cjlf */
 		$cjlf->getByName('AddRecurringPayStubAmendment');
 		if ( $cjlf->getRecordCount() > 0 ) {
 			foreach( $cjlf as $cj_obj ) {
@@ -255,7 +255,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 		unset($cjlf, $cj_obj);
 
 		//Push MiscWeekly cron back by one hour so it doesnt run at the same time as MiscDaily
-		$cjlf = TTnew('CronJobListFactory');
+		$cjlf = TTnew('CronJobListFactory'); /** @var CronJobListFactory $cjlf */
 		$cjlf->getByName('MiscWeekly');
 		if ( $cjlf->getRecordCount() > 0 ) {
 			foreach( $cjlf as $cj_obj ) {
@@ -268,7 +268,7 @@ class InstallSchema_1067A extends InstallSchema_Base {
 		}
 		unset($cjlf, $cj_obj);
 
-		$sslf = TTnew( 'SystemSettingListFactory' );
+		$sslf = TTnew( 'SystemSettingListFactory' ); /** @var SystemSettingListFactory $sslf */
 		$sslf->getByName( 'schema_version_group_T' );
 		if ( $sslf->getRecordCount() > 0 ) {
 			foreach( $sslf as $ss_obj ) {

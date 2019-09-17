@@ -1048,9 +1048,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 					item.id = item.id + '_' + item.user_id;
 				}
 
-				$this.grid.setData( result_data );
+				if ( $this.grid ) {
+					$this.grid.setData( result_data );
 
-				$this.reSelectLastSelectItems();
+					$this.reSelectLastSelectItems();
+				}
 
 				$this.setGridCellBackGround(); //Set cell background for some views
 
@@ -1077,7 +1079,6 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				}
 
 				$this.searchDone();
-
 			}
 		} );
 

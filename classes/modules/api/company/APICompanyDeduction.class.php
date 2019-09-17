@@ -107,7 +107,7 @@ class APICompanyDeduction extends APIFactory {
 			} else {
 				//User has access the user_tax_deduction permissions, restrict columns that are returned so we don't include all users, include/exclude PSA's etc...
 				if ( !isset($data['filter_columns']) ) {
-					$cdf = TTnew( 'CompanyDeductionFactory' );
+					$cdf = TTnew( 'CompanyDeductionFactory' ); /** @var CompanyDeductionFactory $cdf */
 					$data['filter_columns'] = Misc::preSetArrayValues( array(), array_keys( $cdf->getVariableToFunctionMap() ), TRUE );
 					unset($cdf, $data['filter_columns']['user'], $data['filter_columns']['include_pay_stub_entry_account'], $data['filter_columns']['exclude_pay_stub_entry_account'], $data['filter_columns']['total_users']);
 				}
@@ -132,7 +132,7 @@ class APICompanyDeduction extends APIFactory {
 			$data['filter_data']['permission_children_ids'] = NULL;
 		}
 
-		$blf = TTnew( 'CompanyDeductionListFactory' );
+		$blf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -219,7 +219,7 @@ class APICompanyDeduction extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'CompanyDeductionListFactory' );
+				$lf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -330,7 +330,7 @@ class APICompanyDeduction extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'CompanyDeductionListFactory' );
+				$lf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -429,7 +429,7 @@ class APICompanyDeduction extends APIFactory {
 	 * @return string
 	 */
 	function getCombinedCalculationID( $calculation_id = NULL, $country = NULL, $province = NULL ) {
-		$cdf = TTnew( 'CompanyDeductionFactory' );
+		$cdf = TTnew( 'CompanyDeductionFactory' ); /** @var CompanyDeductionFactory $cdf */
 		//Don't use returnHandler here as its boolean TRUE/FALSE that is returned.
 		return $cdf->getCombinedCalculationID( $calculation_id, $country, $province );
 	}
@@ -440,7 +440,7 @@ class APICompanyDeduction extends APIFactory {
 	 * @return bool
 	 */
 	function isCountryCalculationID( $calculation_id ) {
-		$cdf = TTnew( 'CompanyDeductionFactory' );
+		$cdf = TTnew( 'CompanyDeductionFactory' ); /** @var CompanyDeductionFactory $cdf */
 		return $cdf->isCountryCalculationID( $calculation_id );
 	}
 	/**
@@ -449,7 +449,7 @@ class APICompanyDeduction extends APIFactory {
 	 * @return bool
 	 */
 	function isProvinceCalculationID( $calculation_id ) {
-		$cdf = TTnew( 'CompanyDeductionFactory' );
+		$cdf = TTnew( 'CompanyDeductionFactory' ); /** @var CompanyDeductionFactory $cdf */
 		return $cdf->isProvinceCalculationID( $calculation_id );
 	}
 	/**
@@ -458,7 +458,7 @@ class APICompanyDeduction extends APIFactory {
 	 * @return bool
 	 */
 	function isDistrictCalculationID( $calculation_id ) {
-		$cdf = TTnew( 'CompanyDeductionFactory' );
+		$cdf = TTnew( 'CompanyDeductionFactory' ); /** @var CompanyDeductionFactory $cdf */
 		return $cdf->isDistrictCalculationID( $calculation_id );
 	}
 }

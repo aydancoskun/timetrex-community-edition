@@ -59,7 +59,8 @@ class APITimeSheet extends APIFactory {
 	function getTimeSheetDates( $base_date = NULL ) {
 		$epoch = TTDate::parseDateTime( $base_date );
 
-		if ( $epoch == '' ) {
+
+		if ( $epoch == '' OR $epoch < 946728000 OR $epoch > ( time() + ( 3650 * 86400 ) ) ) { //Make sure date is after 01-Jan-2000 and before 10 years in the future.
 			$epoch = TTDate::getTime();
 		}
 
@@ -123,7 +124,7 @@ class APITimeSheet extends APIFactory {
 		//
 		//Get PayPeriod information
 		//
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 
 		$pplf->StartTransaction();
 		//Make sure we all pay periods that fall within the start/end date, so we can properly display the timesheet range at the top.
@@ -163,7 +164,7 @@ class APITimeSheet extends APIFactory {
 			$filter_data['filter_data']['job_item_id'] = $data['filter_data']['job_item_id'];
 		}
 
-		$plf = TTnew( 'PunchListFactory' );
+		$plf = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf */
 		$plf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $filter_data['filter_data'], $filter_data['filter_items_per_page'], $filter_data['filter_page'], NULL, $filter_data['filter_sort'] );
 		Debug::Text('Punch Record Count: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $plf->getRecordCount() > 0 ) {
@@ -231,7 +232,7 @@ class APITimeSheet extends APIFactory {
 			$udt_filter_data['filter_data']['job_item_id'] = $data['filter_data']['job_item_id'];
 		}
 
-		$udtlf = TTnew( 'UserDateTotalListFactory' );
+		$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 		$udtlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $udt_filter_data['filter_data'], $udt_filter_data['filter_items_per_page'], $udt_filter_data['filter_page'], NULL, $udt_filter_data['filter_sort'] );
 		Debug::Text('User Date Total Record Count: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $udtlf->getRecordCount() > 0 ) {
@@ -360,7 +361,7 @@ class APITimeSheet extends APIFactory {
 				$pp_udt_filter_data['filter_data']['job_item_id'] = $data['filter_data']['job_item_id'];
 			}
 
-			$udtlf = TTnew( 'UserDateTotalListFactory' );
+			$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 			$udtlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $pp_udt_filter_data['filter_data'], $pp_udt_filter_data['filter_items_per_page'], $pp_udt_filter_data['filter_page'], NULL, $pp_udt_filter_data['filter_sort'] );
 			Debug::Text('PP User Date Total Record Count: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $udtlf->getRecordCount() > 0 ) {
@@ -408,7 +409,7 @@ class APITimeSheet extends APIFactory {
 		//
 		$exception_data = array();
 
-		$elf = TTnew( 'ExceptionListFactory' );
+		$elf = TTnew( 'ExceptionListFactory' ); /** @var ExceptionListFactory $elf */
 		$elf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $filter_data['filter_data'], $filter_data['filter_items_per_page'], $filter_data['filter_page'], NULL, $filter_data['filter_sort'] );
 		Debug::Text('Exception Record Count: '. $elf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $elf->getRecordCount() > 0 ) {
@@ -442,7 +443,7 @@ class APITimeSheet extends APIFactory {
 		//
 		$request_data = array();
 
-		$rlf = TTnew( 'RequestListFactory' );
+		$rlf = TTnew( 'RequestListFactory' ); /** @var RequestListFactory $rlf */
 		$rlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $filter_data['filter_data'], $filter_data['filter_items_per_page'], $filter_data['filter_page'], NULL, $filter_data['filter_sort'] );
 		Debug::Text('Request Record Count: '. $rlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $rlf->getRecordCount() > 0 ) {
@@ -467,7 +468,7 @@ class APITimeSheet extends APIFactory {
 		//
 		$timesheet_verify_data = array();
 		if ( isset($primary_pay_period_id) AND TTUUID::isUUID($primary_pay_period_id) AND $primary_pay_period_id != TTUUID::getZeroID() AND $primary_pay_period_id != TTUUID::getNotExistID() ) {
-			$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+			$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $pptsvlf */
 			$pptsvlf->getByPayPeriodIdAndUserId( $primary_pay_period_id, $user_id );
 
 			if ( $pptsvlf->getRecordCount() > 0 ) {
@@ -523,7 +524,7 @@ class APITimeSheet extends APIFactory {
 		//Get holiday data.
 		//
 		$holiday_data = array();
-		$hlf = TTnew( 'HolidayListFactory' );
+		$hlf = TTnew( 'HolidayListFactory' ); /** @var HolidayListFactory $hlf */
 		$hlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), array( 'start_date' => $timesheet_dates['start_date'], 'end_date' => $timesheet_dates['end_date'], 'user_id' => $user_id ), $filter_data['filter_items_per_page'], $filter_data['filter_page'], NULL, $filter_data['filter_sort'] );
 		Debug::Text('Holiday Record Count: '. $hlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $hlf->getRecordCount() > 0 ) {
@@ -595,10 +596,9 @@ class APITimeSheet extends APIFactory {
 
 	/**
 	 * ReCalculate timesheet/policies
-	 * @param string $pay_period_ids UUID
+	 * @param string|string[] $pay_period_ids UUID
 	 * @param string $user_ids UUID
 	 * @return array|bool
-	 * @throws DBError
 	 */
 	function reCalculateTimeSheet( $pay_period_ids, $user_ids = NULL ) {
 		//Debug::text('Recalculating Employee Timesheet: User ID: '. $user_ids .' Pay Period ID: '. $pay_period_ids, __FILE__, __LINE__, __METHOD__, 10);
@@ -624,7 +624,7 @@ class APITimeSheet extends APIFactory {
 
 		//Make sure pay period is not CLOSED.
 		//We can re-calc on locked though.
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 		$pplf->getByIdList( $pay_period_ids, NULL, array( 'start_date' => 'asc' ) );
 		if ( $pplf->getRecordCount() > 0 ) {
 			foreach( $pplf as $pp_obj ) {
@@ -632,7 +632,7 @@ class APITimeSheet extends APIFactory {
 				if ( $pp_obj->getStatus() != 20 ) {
 					$recalculate_company = FALSE;
 
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 					if ( is_array($user_ids) AND count($user_ids) > 0 AND isset($user_ids[0])
 							AND	TTUUID::isUUID( $user_ids[0] ) AND $user_ids[0] != TTUUID::getZeroID() AND $user_ids[0] != TTUUID::getNotExistID() ) {
 						$ulf->getByIdAndCompanyId( $user_ids, $this->getCurrentCompanyObject()->getId() );
@@ -684,29 +684,19 @@ class APITimeSheet extends APIFactory {
 							) {
 								TTLog::addEntry( $u_obj->getId(), 500, TTi18n::gettext('Recalculating Employee TimeSheet').': '. $u_obj->getFullName() .' '. TTi18n::gettext('From').': '. TTDate::getDate('DATE', $start_date ) .' '.  TTi18n::gettext('To').': '. TTDate::getDate('DATE', $end_date ), $this->getCurrentUserObject()->getId(), 'user_date_total' );
 
-								$retry_max_attempts = 3;
-								$sleep = 5;
-								$retry_attempts = 0;
-								do {
-									try {
-										$cp = TTNew( 'CalculatePolicy' );
-										$cp->setUserObject( $u_obj );
-										$cp->addPendingCalculationDate( $start_date, $end_date );
-										$cp->calculate(); //This sets timezone itself.
-										$cp->Save();
-									} catch (Exception $e) {
-										Debug::text('WARNING: SQL query failed, likely due to transaction isolation: Retry Attempt: '. $retry_attempts .' Sleep: '. $sleep, __FILE__, __LINE__, __METHOD__, 10);
-										$retry_attempts++;
-										sleep( $sleep );
-										continue;
-									}
-									break;
-								} while ( $retry_attempts <= $retry_max_attempts );
+								$transaction_function = function() use ( $u_obj, $start_date, $end_date ) {
+									$cp = TTNew( 'CalculatePolicy' ); /** @var CalculatePolicy $cp */
+									$cp->setUserObject( $u_obj );
+									$cp->getUserObject()->setTransactionMode( 'REPEATABLE READ' );
+									$cp->addPendingCalculationDate( $start_date, $end_date );
+									$cp->calculate(); //This sets timezone itself.
+									$cp->Save();
+									$cp->getUserObject()->setTransactionMode(); //Back to default isolation level.
 
-								if ( $retry_attempts == $retry_max_attempts ) { //Allow retry_max_attempst to be set at 0 to prevent any retries and fail without an error.
-									Debug::text('ERROR: SQL query failed after max attempts: '. $retry_attempts, __FILE__, __LINE__, __METHOD__, 10);
-									throw new DBError($e);
-								}
+									return TRUE;
+								};
+
+								$u_obj->RetryTransaction( $transaction_function, 3, 3 ); //Set retry_sleep this fairly high so real-time punches have a chance to get saved between retries.
 							}
 //							else {
 //								Debug::text('Skipping inactive or terminated user: '. $u_obj->getID() .' Status: '. $u_obj->getStatus() .' Termination Date: '. TTDate::getDate('DATE', $u_obj->getTerminationDate() ) .' Updated Date: '. TTDate::getDate('DATE', $u_obj->getUpdatedDate() ), __FILE__, __LINE__, __METHOD__, 10);
@@ -725,7 +715,6 @@ class APITimeSheet extends APIFactory {
 					Debug::text('Pay Period is CLOSED: ', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
-
 		}
 
 		return $this->returnHandler( TRUE );
@@ -742,31 +731,43 @@ class APITimeSheet extends APIFactory {
 			Debug::text('Verifying Pay Period TimeSheet ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
-			$pptsvlf->StartTransaction();
-			$pptsvlf->getByPayPeriodIdAndUserId( $pay_period_id, $user_id );
-			if ( $pptsvlf->getRecordCount() == 0 ) {
-				Debug::text('Timesheet NOT verified by employee yet.', __FILE__, __LINE__, __METHOD__, 10);
-				$pptsvf = TTnew( 'PayPeriodTimeSheetVerifyFactory' );
-			} else {
-				Debug::text('Timesheet re-verified by employee, or superior...', __FILE__, __LINE__, __METHOD__, 10);
-				$pptsvf = $pptsvlf->getCurrent();
-			}
+			/** @var PayPeriodTimeSheetVerifyListFactory $pptsvlf
+			 * @return array
+			 */
 
-			$pptsvf->setCurrentUser( $this->getCurrentUserObject()->getId() );
-			$pptsvf->setUser( $user_id );
-			$pptsvf->setPayPeriod( $pay_period_id );
+			$transaction_function = function() use ( $pptsvlf, $user_id, $pay_period_id ) {
+				$pptsvlf->setTransactionMode( 'REPEATABLE READ' );
+				$pptsvlf->StartTransaction();
+				$pptsvlf->getByPayPeriodIdAndUserId( $pay_period_id, $user_id );
+				if ( $pptsvlf->getRecordCount() == 0 ) {
+					Debug::text( 'Timesheet NOT verified by employee yet.', __FILE__, __LINE__, __METHOD__, 10 );
+					$pptsvf = TTnew( 'PayPeriodTimeSheetVerifyFactory' ); /** @var PayPeriodTimeSheetVerifyFactory $pptsvf */
+				} else {
+					Debug::text( 'Timesheet re-verified by employee, or superior...', __FILE__, __LINE__, __METHOD__, 10 );
+					$pptsvf = $pptsvlf->getCurrent();
+				}
 
-			if ( $pptsvf->isValid() ) {
-				$pptsvf->Save( FALSE );
+				$pptsvf->setCurrentUser( $this->getCurrentUserObject()->getId() );
+				$pptsvf->setUser( $user_id );
+				$pptsvf->setPayPeriod( $pay_period_id );
 
-				$retval = $this->returnHandler( $pptsvf->getId() );
-			} else {
-				$pptsvlf->FailTransaction();
+				if ( $pptsvf->isValid() ) {
+					$pptsvf->Save( FALSE );
 
-				$retval = $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $pptsvf->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
-			}
+					$retval = $this->returnHandler( $pptsvf->getId() );
+				} else {
+					$pptsvlf->FailTransaction();
 
-			$pptsvlf->CommitTransaction();
+					$retval = $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), $pptsvf->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
+				}
+
+				$pptsvlf->CommitTransaction();
+				$pptsvlf->setTransactionMode();
+
+				return array( $retval );
+			};
+
+			list( $retval ) = $pptsvlf->RetryTransaction( $transaction_function, 3, 3 ); //Set retry_sleep this fairly high so real-time punches have a chance to get saved between retries.
 
 			return $retval; //This is a returnHandler()
 		}

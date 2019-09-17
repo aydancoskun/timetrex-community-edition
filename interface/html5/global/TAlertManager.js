@@ -48,9 +48,7 @@ var TAlertManager = (function() {
 			result.remove();
 			result = null;
 
-			var host = Global.getHost();
-
-			setCookie( 'AlternateSessionData', null, 1, LocalCacheData.cookie_path, host );
+			deleteCookie( 'AlternateSessionData', LocalCacheData.cookie_path, Global.getHost() );
 		}
 
 		function backToPreSession() {

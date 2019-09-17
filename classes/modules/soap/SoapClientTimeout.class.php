@@ -35,9 +35,8 @@
  ********************************************************************************/
 
 
-//This class extends the built-in PHP SoapClient class to use CURL with proper timeout periods.
-
 /**
+ * This class extends the built-in PHP SoapClient class to use CURL with proper timeout periods.
  * Class SoapClientTimeout
  */
 class SoapClientTimeout extends SoapClient {
@@ -92,6 +91,8 @@ class SoapClientTimeout extends SoapClient {
 		if ( !$one_way ) {
 			return $response;
 		}
+
+		return FALSE;
 	}
 }
 ?>

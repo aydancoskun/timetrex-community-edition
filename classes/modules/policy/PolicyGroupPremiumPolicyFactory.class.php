@@ -81,14 +81,14 @@ class PolicyGroupPremiumPolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Policy Group
-		$pglf = TTnew( 'PolicyGroupListFactory' );
+		$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 		$this->Validator->isResultSetWithRows(	'policy_group',
 														$pglf->getByID($this->getPolicyGroup()),
 														TTi18n::gettext('Policy Group is invalid')
 													);
 		// Premium Policy
 		if ( $this->getPremiumPolicy() != TTUUID::getZeroID() ) {
-			$pplf = TTnew( 'PremiumPolicyListFactory' );
+			$pplf = TTnew( 'PremiumPolicyListFactory' ); /** @var PremiumPolicyListFactory $pplf */
 			$this->Validator->isResultSetWithRows(	'premium_policy',
 														$pplf->getByID($this->getPremiumPolicy()),
 														TTi18n::gettext('Selected Premium Policy is invalid')

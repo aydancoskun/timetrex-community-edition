@@ -337,9 +337,9 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		}
 	},
 
-	onSaveClick: function() {
-		this._super( 'onSaveClick' );
-		Global.clearCache( 'getOptions' );
+	onSaveClick: function( ignoreWarning ) {
+		this._super( 'onSaveClick', ignoreWarning );
+		Global.clearCache( 'getOptions_type' ); //Needs to clear cache so if they add a source account of a new type, it will immediately appear in the Type dropdown for Payment Methods.
 	},
 
 	attachElement: function( key ) {

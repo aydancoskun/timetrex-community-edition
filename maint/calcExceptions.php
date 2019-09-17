@@ -77,14 +77,14 @@ if ( $clf->getRecordCount() > 0 ) {
 	foreach ( $clf as $c_obj ) {
 		if ( $c_obj->getStatus() != 30 ) {
 			$company_start_time = microtime(TRUE);
-			Debug::text('Company: '. $c_obj->getName() .'('.$c_obj->getId().')', __FILE__, __LINE__, __METHOD__,5);
+			Debug::text('Company: '. $c_obj->getName() .' ('.$c_obj->getId().')', __FILE__, __LINE__, __METHOD__,5);
 
 			TTDate::setTimeZone(); //Reset timezone to system defaults for each company.
 
 			//Recalculate at least the last two days.
 			$start_date = TTDate::getMiddleDayEpoch( ( $execution_time - (86400 * 2) ) ) ;
 			$end_date = TTDate::getMiddleDayEpoch( ( $execution_time - 86400 ) ) ;
-			Debug::text('X:'. $x .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__,5);
+			Debug::text('X: '. $x .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__,5);
 
 			//Get the last time cron ran this script.
 			$cjlf = new CronJobListFactory();
@@ -134,7 +134,7 @@ if ( $clf->getRecordCount() > 0 ) {
 			$date_arr = TTDate::getDateArray( $start_date, $end_date );
 			if ( is_array($date_arr) ) {
 				//Loop over all employees
-				$ulf = TTnew('UserListFactory');
+				$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 				$ulf->getByCompanyIdAndStatus( $c_obj->getId(), 10 ); //Only active employees
 				if ( $ulf->getRecordCount() > 0 ) {
 					$i = 0;
@@ -158,16 +158,22 @@ if ( $clf->getRecordCount() > 0 ) {
 						//Problem is a late shift on say Monday: 2:00PM to 11:00PM won't trigger the exception at 1AM the next day,
 						//but by 1AM the following day (2days later) its too late and emails are disabled if enable_premature_exceptions are disabled.
 						//**With new CalculatePolicy code we can calculate multiple days in a single pass, so always enable pre-mature exceptions, and they will be disabled automatically in CalculatePolicy if necessary.
-						Debug::text($x .'('.$i.'). User: '. $u_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__,5);
+						Debug::text($x .': ('.$i.'). User: '. $u_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__,5);
 
-						//UserDateTotalFactory::reCalculateDay( $ud_obj->getId(), TRUE, $enable_premature_exceptions );
+						$transaction_function = function() use ( $u_obj, $flags, $date_arr ) {
+							$cp = TTNew('CalculatePolicy'); /** @var CalculatePolicy $cp */
+							$cp->setFlag( $flags );
+							$cp->setUserObject( $u_obj );
+							$cp->getUserObject()->setTransactionMode( 'REPEATABLE READ' );
+							$cp->addPendingCalculationDate( $date_arr );
+							$cp->calculate(); //This sets timezone itself.
+							$cp->Save();
+							$cp->getUserObject()->setTransactionMode(); //Back to default isolation level.
 
-						$cp = TTNew('CalculatePolicy');
-						$cp->setFlag( $flags );
-						$cp->setUserObject( $u_obj );
-						$cp->addPendingCalculationDate( $date_arr );
-						$cp->calculate(); //This sets timezone itself.
-						$cp->Save();
+							return TRUE;
+						};
+
+						$u_obj->RetryTransaction( $transaction_function, 2, 3 ); //Set retry_sleep this fairly high so real-time punches have a chance to get saved between retries.
 
 						$i++; //User Counter
 					}

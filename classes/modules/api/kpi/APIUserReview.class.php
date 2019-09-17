@@ -95,7 +95,7 @@ class APIUserReview extends APIFactory {
 		}
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_review', 'view' );
 
-		$urlf = TTnew( 'UserReviewListFactory' );
+		$urlf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $urlf */
 		$urlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $urlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $urlf->getRecordCount() > 0 ) {
@@ -164,7 +164,7 @@ class APIUserReview extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserReviewListFactory' );
+				$lf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -266,7 +266,7 @@ class APIUserReview extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserReviewListFactory' );
+				$lf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

@@ -267,6 +267,7 @@ class UserFactory extends Factory {
 										'home_email_is_valid_key' => 'HomeEmailIsValidKey',
 										'home_email_is_valid_date' => 'HomeEmailIsValidDate',
 										'feedback_rating'	=> 'FeedbackRating',
+										'prompt_for_feedback'	=> 'PromptForFeedback',
 
 										'work_email' => 'WorkEmail',
 										'work_email_is_valid' => 'WorkEmailIsValid',
@@ -481,6 +482,7 @@ class UserFactory extends Factory {
 	}
 
 	/**
+	 * @param bool $force
 	 * @return bool
 	 */
 	function getPermissionControl( $force = FALSE ) {
@@ -491,7 +493,7 @@ class UserFactory extends Factory {
 			return $value;
 		} elseif ( TTUUID::isUUID($this->getCompany()) AND $this->getCompany() != TTUUID::getZeroID() AND $this->getCompany() != TTUUID::getNotExistID()
 				AND TTUUID::isUUID($this->getID()) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
-			$pclfb = TTnew( 'PermissionControlListFactory' );
+			$pclfb = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclfb */
 			$pclfb->getByCompanyIdAndUserId( $this->getCompany(), $this->getID() );
 			if ( $pclfb->getRecordCount() > 0 ) {
 				return $pclfb->getCurrent()->getId();
@@ -521,7 +523,7 @@ class UserFactory extends Factory {
 			return $value;
 		} elseif ( TTUUID::isUUID( $this->getCompany() ) AND $this->getCompany() != TTUUID::getZeroID() AND $this->getCompany() != TTUUID::getNotExistID()
 				AND TTUUID::isUUID( $this->getID() ) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
-			$ppslfb = TTnew( 'PayPeriodScheduleListFactory' );
+			$ppslfb = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslfb */
 			$ppslfb->getByUserId( $this->getID() );
 			if ( $ppslfb->getRecordCount() > 0 ) {
 				return $ppslfb->getCurrent()->getId();
@@ -551,7 +553,7 @@ class UserFactory extends Factory {
 			return $value;
 		} elseif ( TTUUID::isUUID( $this->getCompany() ) AND $this->getCompany() != TTUUID::getZeroID() AND $this->getCompany() != TTUUID::getNotExistID()
 				AND TTUUID::isUUID( $this->getID() ) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$pglf->getByUserIds( $this->getID());
 			if ( $pglf->getRecordCount() > 0 ) {
 				return $pglf->getCurrent()->getId();
@@ -570,9 +572,8 @@ class UserFactory extends Factory {
 		return $this->setGenericTempDataValue( 'policy_group_id', $value );
 	}
 
-	//Display each superior that the employee is assigned too.
-
 	/**
+	 * Display each superior that the employee is assigned too.
 	 * @return bool|string
 	 */
 	function getHierarchyLevelDisplay() {
@@ -607,13 +608,12 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
-	//Display each hierarchy that the employee is assigned too.
-
 	/**
+	 * Display each hierarchy that the employee is assigned too.
 	 * @return bool|string
 	 */
 	function getHierarchyControlDisplay() {
-		$hclf = TTnew( 'HierarchyControlListFactory' );
+		$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 		$hclf->getObjectTypeAppendedListByCompanyIDAndUserID( $this->getCompany(), $this->getID() );
 		$data = $hclf->getArrayByListFactory( $hclf, FALSE, FALSE, TRUE );
 
@@ -642,7 +642,7 @@ class UserFactory extends Factory {
 			return $value;
 		} elseif ( TTUUID::isUUID( $this->getCompany() ) AND $this->getCompany() != TTUUID::getZeroID() AND $this->getCompany() != TTUUID::getNotExistID()
 					AND TTUUID::isUUID( $this->getID() ) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
-			$hclf = TTnew( 'HierarchyControlListFactory' );
+			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 			$hclf->getObjectTypeAppendedListByCompanyIDAndUserID( $this->getCompany(), $this->getID() );
 
 			return $hclf->getArrayByListFactory( $hclf, FALSE, TRUE, FALSE );
@@ -699,6 +699,38 @@ class UserFactory extends Factory {
 	}
 
 	/**
+	 * Determines if the user should be prompted for feedback.
+	 * @return array|bool
+	 */
+	function getPromptForFeedback() {
+		global $config_vars;
+		$epoch = time();
+
+		$feedback_rating = UserSettingFactory::getUserSetting( $this->getId(), 'feedback_rating' ); //-1, 0, 1
+		$feedback_rating_review = UserSettingFactory::getUserSetting( $this->getId(), 'feedback_rating_review' ); //0 or 1
+
+		if (
+//				TRUE OR //Helps with testing.
+				PRODUCTION == TRUE AND
+				( !isset($config_vars['other']['disable_feedback']) OR $config_vars['other']['disable_feedback'] == FALSE ) AND
+				( !isset($config_vars['other']['disable_feedback_prompt']) OR $config_vars['other']['disable_feedback_prompt'] == FALSE ) AND
+				rand( 0, 99 ) < 3 AND //1=1 in 100 (1%), 3=3 in 100 (3%) [1 in 30], 10=10 in 100 (10%) chance
+				$this->getCreatedDate() <= ( $epoch - ( 180 * 86400 ) ) AND //Check that user was created more than 6 months ago. (this implies company was created at least 180days/6 months ago)
+				$this->getCurrentUserPermissionLevel() > 15 AND //Check permission level >= 15 so its above supervisor level.
+				( $feedback_rating == FALSE OR ( is_array( $feedback_rating ) AND TTDate::parseDateTime( $feedback_rating['updated_date'] ) <= ( $epoch - ( 120 * 86400 ) ) ) ) AND //Prompt at most once every 4 months (4x per year).
+				(
+						( $feedback_rating == FALSE OR ( is_array( $feedback_rating ) AND $feedback_rating['value'] != 1 ) ) OR //No feedback at all, or negative feedback.
+						( ( is_array( $feedback_rating ) AND $feedback_rating['value'] == 1 ) AND ( $feedback_rating_review == FALSE OR ( is_array( $feedback_rating_review ) AND $feedback_rating_review['value'] == 0 ) ) ) //Positive feedback, but no review.
+				)
+		) {
+			Debug::Text('Time to prompt user for feedback.', __FILE__, __LINE__, __METHOD__, 10);
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
 	 * @param $user_name
 	 * @return bool
 	 */
@@ -739,6 +771,14 @@ class UserFactory extends Factory {
 	}
 
 	/**
+	 * @return bool
+	 */
+	function checkLoginPermissions() {
+		$permission = new Permission();
+		return $permission->Check( 'system', 'login', $this->getId(), $this->getCompany() ) === TRUE;
+	}
+
+	/**
 	 * @param $password
 	 * @param bool $check_password_policy
 	 * @return bool
@@ -754,6 +794,8 @@ class UserFactory extends Factory {
 			return FALSE;
 		}
 
+		$retval = FALSE;
+
 		//Check if LDAP is enabled
 		$ldap_authentication_type_id = 0;
 		if ( DEMO_MODE != TRUE AND function_exists('ldap_connect') AND !isset($config_vars['other']['enable_ldap']) OR ( isset($config_vars['other']['enable_ldap']) AND $config_vars['other']['enable_ldap'] == TRUE ) ) {
@@ -761,7 +803,7 @@ class UserFactory extends Factory {
 			if ( is_object( $this->getCompanyObject() ) ) {
 				$ldap_authentication_type_id = $this->getCompanyObject()->getLDAPAuthenticationType();
 				if ( $ldap_authentication_type_id > 0 ) {
-					$ldap = TTnew('TTLDAP');
+					$ldap = TTnew('TTLDAP'); /** @var TTLDAP $ldap */
 					$ldap->setHost( $this->getCompanyObject()->getLDAPHost() );
 					$ldap->setPort( $this->getCompanyObject()->getLDAPPort() );
 					$ldap->setBindUserName( $this->getCompanyObject()->getLDAPBindUserName() );
@@ -771,7 +813,7 @@ class UserFactory extends Factory {
 					$ldap->setUserFilter( $this->getCompanyObject()->getLDAPUserFilter() );
 					$ldap->setLoginAttribute( $this->getCompanyObject()->getLDAPLoginAttribute() );
 					if (  $ldap->authenticate( $this->getUserName(), $password ) === TRUE ) {
-						return TRUE;
+						$retval = TRUE;
 					} elseif ( $ldap_authentication_type_id == 1 ) {
 						Debug::Text('LDAP authentication failed, falling back to local password...', __FILE__, __LINE__, __METHOD__, 10);
 						TTLog::addEntry( $this->getId(), 510, TTi18n::getText('LDAP Authentication failed, falling back to local password for username').': '. $this->getUserName() . TTi18n::getText('IP Address') .': '. Misc::getRemoteIPAddress(), $this->getId(), $this->getTable() );
@@ -795,33 +837,39 @@ class UserFactory extends Factory {
 			//Allow override passwords always.
 			if ( $check_password_policy == TRUE AND $this->isFirstLogin() == TRUE AND $this->isCompromisedPassword() == TRUE ) { //Need to check for compromised password, as last_login_date doesn't get updated until they can actually login fully.
 				Debug::Text('Password Policy: First login, password needs to be changed, denying access...', __FILE__, __LINE__, __METHOD__, 10);
-				return FALSE;
+				$retval = FALSE;
 			} elseif ( $check_password_policy == TRUE AND $this->isPasswordPolicyEnabled() == TRUE AND $this->isCompromisedPassword() == TRUE ) {
 				Debug::Text('Password Policy: Password has never changed, denying access...', __FILE__, __LINE__, __METHOD__, 10);
-				return FALSE;
+				$retval = FALSE;
 			} elseif ( $check_password_policy == TRUE AND $this->isPasswordPolicyEnabled() == TRUE AND $this->checkPasswordAge() == FALSE ) {
 				Debug::Text('Password Policy: Password exceeds maximum age, denying access...', __FILE__, __LINE__, __METHOD__, 10);
-				return FALSE;
+				$retval = FALSE;
 			} else {
 				//If password version is not the latest, update the password version when it successfully matches.
 				if ( $password_version < TTPassword::getLatestVersion() ) {
 					Debug::Text('Converting password to latest encryption version...', __FILE__, __LINE__, __METHOD__, 10);
-					$this->db->Execute( 'UPDATE '. $this->getTable() .' SET password = ? where id = ?', array( 'password' => TTPassword::encryptPassword( $password, $this->getCompany(), $this->getID() ), 'id' => TTUUID::castUUID( $this->getID() ) ) );
+					$this->ExecuteSQL( 'UPDATE '. $this->getTable() .' SET password = ? where id = ?', array( 'password' => TTPassword::encryptPassword( $password, $this->getCompany(), $this->getID() ), 'id' => TTUUID::castUUID( $this->getID() ) ) );
 					unset($password);
 				}
 
-				return TRUE; //Password accepted.
+				$retval = TRUE; //Password accepted.
 			}
 		} elseif ( isset($config_vars['other']['override_password_prefix'])
 						AND $config_vars['other']['override_password_prefix'] != '' ) {
 			//Check override password
 			if ( TTPassword::checkPassword( $encrypted_password, TTPassword::encryptPassword( trim( trim( $config_vars['other']['override_password_prefix'] ).substr($this->getUserName(), 0, 2) ), $this->getCompany(), $this->getID(), $password_version ) ) ) {
 				TTLog::addEntry( $this->getId(), 510, TTi18n::getText('Override Password successful from IP Address').': '. Misc::getRemoteIPAddress(), NULL, $this->getTable() );
-				return TRUE;
+				$retval = TRUE;
 			}
 		}
 
-		return FALSE;
+		//Check to make sure permissions exist and that the Login permission is allowed.
+		if ( $retval == TRUE AND $this->checkLoginPermissions() !== TRUE ) {
+			Debug::Text('Permissions: System -> Login permissions not allowed...', __FILE__, __LINE__, __METHOD__, 10);
+			$retval = FALSE;
+		}
+
+		return $retval;
 	}
 
 	/**
@@ -885,7 +933,7 @@ class UserFactory extends Factory {
 												TTi18n::gettext('Password is too weak, it should not match any commonly known personal information') )
 				AND
 				$this->Validator->isTrue(		'password',
-												( ( $force == FALSE AND Misc::getPasswordStrength( $password ) <= 2 ) ? FALSE : TRUE ),
+												( ( $force == FALSE AND TTPassword::getPasswordStrength( $password ) <= 2 ) ? FALSE : TRUE ),
 												TTi18n::gettext('Password is too weak, add additional numbers or special/upper case characters') )
 				AND
 				$this->Validator->isTrue(		'password',
@@ -899,7 +947,7 @@ class UserFactory extends Factory {
 			//When changing the password, we need to check if a Password Policy is defined.
 			$c_obj = $this->getCompanyObject();
 			if ( $this->isPasswordPolicyEnabled() == TRUE ) {
-				Debug::Text('Password Policy: Minimum Length: '. $c_obj->getPasswordMinimumLength() .' Min. Strength: '. $c_obj->getPasswordMinimumStrength() .' ('.  Misc::getPasswordStrength( $password ) .') Age: '. $c_obj->getPasswordMinimumAge(), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text('Password Policy: Minimum Length: '. $c_obj->getPasswordMinimumLength() .' Min. Strength: '. $c_obj->getPasswordMinimumStrength() .' ('.  TTPassword::getPasswordStrength( $password ) .') Age: '. $c_obj->getPasswordMinimumAge(), __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( strlen( $password ) < $c_obj->getPasswordMinimumLength() ) {
 					$update_password = FALSE;
@@ -908,7 +956,7 @@ class UserFactory extends Factory {
 													TTi18n::gettext('Password is too short') );
 				}
 
-				if ( Misc::getPasswordStrength( $password ) <= $c_obj->getPasswordMinimumStrength() ) {
+				if ( TTPassword::getPasswordStrength( $password ) <= $c_obj->getPasswordMinimumStrength() ) {
 					$update_password = FALSE;
 					$this->Validator->isTrue(		'password',
 													FALSE,
@@ -923,7 +971,7 @@ class UserFactory extends Factory {
 				}
 
 				if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID() ) {
-					$uilf = TTnew( 'UserIdentificationListFactory' );
+					$uilf = TTnew( 'UserIdentificationListFactory' ); /** @var UserIdentificationListFactory $uilf */
 					$uilf->getByUserIdAndTypeIdAndValue( $this->getId(), 5, TTPassword::encryptPassword( $password, $this->getCompany(), $this->getID() ) );
 					if ( $uilf->getRecordCount() > 0 ) {
 						$update_password = FALSE;
@@ -1138,7 +1186,7 @@ class UserFactory extends Factory {
 			$company_id = $this->getCompany();
 		}
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getHighestEmployeeNumberByCompanyId( $company_id );
 		if ( $ulf->getRecordCount() > 0 ) {
 			Debug::Text('Highest Employee Number: '. $ulf->getCurrent()->getEmployeeNumber(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1874,6 +1922,7 @@ class UserFactory extends Factory {
 	}
 
 	/**
+	 * @param bool $raw
 	 * @return bool|mixed
 	 */
 	function getBirthDate( $raw = FALSE ) {
@@ -1898,7 +1947,7 @@ class UserFactory extends Factory {
 		if ( $value == '' ) {
 			$value = NULL; //Force to NULL if no birth date is set, this prevents "0" from being entered and causing problems with "is NULL" SQL queries.
 		}
-		return $this->setGenericDataValue( 'birth_date', ( $value != 0 AND $value != '' ) ? TTDate::getBeginDayEpoch( $value ) : NULL );
+		return $this->setGenericDataValue( 'birth_date', ( $value != 0 AND $value != '' ) ? TTDate::getISODateStamp( $value ) : NULL );
 	}
 
 	/**
@@ -1907,7 +1956,7 @@ class UserFactory extends Factory {
 	 */
 	function isValidWageForHireDate( $epoch ) {
 		if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID() AND $epoch != '' ) {
-			$uwlf = TTnew( 'UserWageListFactory' );
+			$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 
 			//Check to see if any wage entries exist for this employee
 			$uwlf->getLastWageByUserId( $this->getID() );
@@ -1927,6 +1976,7 @@ class UserFactory extends Factory {
 	}
 
 	/**
+	 * @param bool $raw
 	 * @return bool|mixed
 	 */
 	function getHireDate( $raw = FALSE ) {
@@ -1935,7 +1985,7 @@ class UserFactory extends Factory {
 			if ( $raw === TRUE ) {
 				return $value;
 			} else {
-				return TTDate::getBeginDayEpoch( TTDate::strtotime( $value ) );
+				return TTDate::strtotime( $value );
 			}
 		}
 
@@ -1943,17 +1993,18 @@ class UserFactory extends Factory {
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param $value
 	 * @return bool
 	 */
 	function setHireDate( $value ) {
 		//Hire Date should be assumed to be the beginning of the day. (inclusive)
 		//Termination Date should be assumed to be the end of the day. (inclusive)
 		//So if an employee is hired and terminated on the same day, and is salary, they should get one day pay.
-		return $this->setGenericDataValue( 'hire_date', TTDate::getBeginDayEpoch( $value ) );
+		return $this->setGenericDataValue( 'hire_date', TTDate::getISODateStamp( $value ) );
 	}
 
 	/**
+	 * @param bool $raw
 	 * @return bool|mixed
 	 */
 	function getTerminationDate( $raw = FALSE ) {
@@ -1975,15 +2026,12 @@ class UserFactory extends Factory {
 	 */
 	function setTerminationDate( $value ) {
 		//Hire Date should be assumed to be the beginning of the day. (inclusive)
-		//Termination Date should be assumed to be the end of the day. (inclusive)
+		//Termination Date should be assumed to be the end of the day. (inclusive) This is done in getTerminationDate().
 		//So if an employee is hired and terminated on the same day, and is salary, they should get one day pay.
-		//FIXME: Save hire date as getMiddleDayEpoch(), but change all use cases to force it to beginning of the day when comparisons are made on it.
-		//       Save termination date as getMiddleDayEpoch(), but change all use cases to force it to use the end of the day when comparisons are made on it.
-		//		 Alternatively, switch it to use date_stamp datatype, and use >= or <= operators.
 		if ( $value == '' ) {
 			$value = NULL; //Force to NULL if no termination date is set, this prevents "0" from being entered and causing problems with "is NULL" SQL queries.
 		}
-		return $this->setGenericDataValue( 'termination_date', ( $value != 0 AND $value != '' ) ? TTDate::getEndDayEpoch( $value ) : NULL );
+		return $this->setGenericDataValue( 'termination_date', ( $value != 0 AND $value != '' ) ? TTDate::getISODateStamp( $value ) : NULL );
 	}
 
 	/**
@@ -2061,6 +2109,10 @@ class UserFactory extends Factory {
 		return $this->setGenericDataValue( 'sin', $value );
 	}
 
+	/**
+	 * @param $sin
+	 * @return bool
+	 */
 	function isUniqueSIN( $sin ) {
 		if ( $sin == '' ) {
 			return TRUE;
@@ -2504,7 +2556,7 @@ class UserFactory extends Factory {
 		$email = trim(strtolower($email));
 
 		try {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByHomeEmailOrWorkEmail( $email );
 			if ( $ulf->getRecordCount() > 0 ) {
 				foreach( $ulf as $u_obj ) {
@@ -2556,7 +2608,7 @@ class UserFactory extends Factory {
 											 TTi18n::gettext('Company must be specified'));
 		}
 		if ( $this->getCompany() !== FALSE AND $this->Validator->isError('company') == FALSE ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows( 'company_id',
 												   $clf->getByID( $this->getCompany() ),
 												   TTi18n::gettext( 'Company is invalid' )
@@ -2570,7 +2622,7 @@ class UserFactory extends Factory {
 											 TTi18n::gettext('Legal entity must be specified'));
 		}
 		if ( $this->getLegalEntity() !== FALSE AND $this->Validator->isError('legal_entity_id') == FALSE ) {
-			$clf = TTnew( 'LegalEntityListFactory' );
+			$clf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'legal_entity_id',
 															$clf->getByID($this->getLegalEntity()),
 															TTi18n::gettext('Legal entity is invalid')
@@ -2593,7 +2645,7 @@ class UserFactory extends Factory {
 		}
 		// Group
 		if ( $this->getGroup() !== FALSE AND $this->getGroup() != TTUUID::getZeroID() ) {
-			$uglf = TTnew( 'UserGroupListFactory' );
+			$uglf = TTnew( 'UserGroupListFactory' ); /** @var UserGroupListFactory $uglf */
 			$this->Validator->isResultSetWithRows(	'group',
 															$uglf->getByID($this->getGroup()),
 															TTi18n::gettext('Group is invalid')
@@ -2604,7 +2656,7 @@ class UserFactory extends Factory {
 		//Don't allow permissions to be modified if the currently logged in user has a lower permission level.
 		//As such if someone with a lower level is able to edit the user of higher level, they must not call this function at all, or use a blank value.
 		if ( $this->getPermissionControl() != '' ) {
-			$pclf = TTnew( 'PermissionControlListFactory' );
+			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 
 			$current_user_permission_level = $this->getCurrentUserPermissionLevel();
 
@@ -2641,7 +2693,7 @@ class UserFactory extends Factory {
 
 		// Pay Period schedule
 		if ( $this->getPayPeriodSchedule() !== FALSE AND $this->getPayPeriodSchedule() != TTUUID::getZeroID() ) {
-			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+			$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 			$this->Validator->isResultSetWithRows(	'pay_period_schedule_id',
 															$ppslf->getByID($this->getPayPeriodSchedule()),
 															TTi18n::gettext('Pay Period schedule is invalid')
@@ -2649,7 +2701,7 @@ class UserFactory extends Factory {
 		}
 		// Policy Group
 		if ( $this->getPolicyGroup() !== FALSE AND $this->getPolicyGroup() != TTUUID::getZeroID() ) {
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$this->Validator->isResultSetWithRows(	'policy_group_id',
 															$pglf->getByID($this->getPolicyGroup()),
 															TTi18n::gettext('Policy Group is invalid')
@@ -2658,7 +2710,7 @@ class UserFactory extends Factory {
 
 		// Hierarchy
 		if ( $this->getHierarchyControl() !== FALSE AND is_array( $this->getHierarchyControl() ) ) {
-			$hclf = TTnew( 'HierarchyControlListFactory' );
+			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 			foreach( $this->getHierarchyControl() as $hierarchy_control_id ) {
 				$hierarchy_control_id = Misc::trimSortPrefix( $hierarchy_control_id );
 
@@ -2775,7 +2827,7 @@ class UserFactory extends Factory {
 		}
 		// Title
 		if ( $this->getTitle() !== FALSE AND $this->getTitle() != TTUUID::getZeroID() ) {
-			$utlf = TTnew( 'UserTitleListFactory' );
+			$utlf = TTnew( 'UserTitleListFactory' ); /** @var UserTitleListFactory $utlf */
 			$this->Validator->isResultSetWithRows(	'title',
 															$utlf->getByID($this->getTitle()),
 															TTi18n::gettext('Title is invalid')
@@ -2783,7 +2835,7 @@ class UserFactory extends Factory {
 		}
 		// Ethnic Group
 		if ( $this->getEthnicGroup() !== FALSE AND $this->getEthnicGroup() != TTUUID::getZeroID() ) {
-			$eglf = TTnew( 'EthnicGroupListFactory' );
+			$eglf = TTnew( 'EthnicGroupListFactory' ); /** @var EthnicGroupListFactory $eglf */
 			$this->Validator->isResultSetWithRows( 'ethnic_group',
 															$eglf->getById($this->getEthnicGroup()),
 															TTi18n::gettext('Ethnic Group is invalid')
@@ -2791,7 +2843,7 @@ class UserFactory extends Factory {
 		}
 		// Default Job
 		if ( $this->getDefaultJob() !== FALSE AND $this->getDefaultJob() != TTUUID::getZeroID() ) {
-			$jlf = TTnew( 'JobListFactory' );
+			$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 			$this->Validator->isResultSetWithRows(	'default_job_id',
 															$jlf->getByID($this->getDefaultJob()),
 															TTi18n::gettext('Invalid Default Job')
@@ -2799,7 +2851,7 @@ class UserFactory extends Factory {
 		}
 		// Default Task
 		if ( $this->getDefaultJobItem() !== FALSE AND $this->getDefaultJobItem() != TTUUID::getZeroID() ) {
-			$jilf = TTnew( 'JobItemListFactory' );
+			$jilf = TTnew( 'JobItemListFactory' ); /** @var JobItemListFactory $jilf */
 			$this->Validator->isResultSetWithRows(	'default_job_item_id',
 															$jilf->getByID($this->getDefaultJobItem()),
 															TTi18n::gettext('Invalid Default Task')
@@ -2807,7 +2859,7 @@ class UserFactory extends Factory {
 		}
 		// Default Branch
 		if ( $this->getDefaultBranch() !== FALSE AND $this->getDefaultBranch() != TTUUID::getZeroID() ) {
-			$blf = TTnew( 'BranchListFactory' );
+			$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 			$this->Validator->isResultSetWithRows(	'default_branch',
 															$blf->getByID($this->getDefaultBranch()),
 															TTi18n::gettext('Invalid Default Branch')
@@ -2815,7 +2867,7 @@ class UserFactory extends Factory {
 		}
 		// Default Department
 		if ( $this->getDefaultDepartment() !== FALSE AND $this->getDefaultDepartment() != TTUUID::getZeroID() ) {
-			$dlf = TTnew( 'DepartmentListFactory' );
+			$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 			$this->Validator->isResultSetWithRows(	'default_department',
 															$dlf->getByID($this->getDefaultDepartment()),
 															TTi18n::gettext('Invalid Default Department')
@@ -2940,7 +2992,7 @@ class UserFactory extends Factory {
 			}
 		}
 		// Country
-		$cf = TTnew( 'CompanyFactory' );
+		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 		if ( $this->getCountry() !== FALSE ) {
 			$this->Validator->inArrayKey(		'country',
 													$this->getCountry(),
@@ -3159,7 +3211,7 @@ class UserFactory extends Factory {
 		}
 		// currency
 		if ( $this->getCurrency() !== FALSE ) {
-			$culf = TTnew( 'CurrencyListFactory' );
+			$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 			$this->Validator->isResultSetWithRows(	'currency_id',
 															$culf->getByID($this->getCurrency()),
 															TTi18n::gettext('Invalid currency')
@@ -3287,7 +3339,7 @@ class UserFactory extends Factory {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND $this->isNew( TRUE ) == FALSE ) {
 			if ( TTUUID::isUUID( $this->getDefaultJob() ) AND $this->getDefaultJob() != TTUUID::getZeroID() AND $this->getDefaultJob() != TTUUID::getNotExistID() ) {
-				$jlf = TTnew( 'JobListFactory' );
+				$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 				$jlf->getById( $this->getDefaultJob() );
 				if ( $jlf->getRecordCount() > 0 ) {
 					$j_obj = $jlf->getCurrent();
@@ -3323,8 +3375,8 @@ class UserFactory extends Factory {
 				//Check to make sure there aren't any punches/timesheet data in the last 2 years.
 				$start_date = TTDate::incrementDate( time(), -2, 'year');
 
-				$udtlf = TTnew( 'UserDateTotalListFactory' );
-				$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->getCompany(), $this->getId(), 10, $start_date, $end_date, 1 ); //10=System Limit 1
+				$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
+				$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->getCompany(), $this->getId(), 10, $start_date, $end_date, 1 ); //10=System, Limit 1
 				if ( $udtlf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
 											  FALSE,
@@ -3336,7 +3388,7 @@ class UserFactory extends Factory {
 				//Check to make sure there aren't any PAID pay stubs in the last 7 years.
 				$start_date = TTDate::incrementDate( time(), -7, 'year');
 
-				$pslf = TTnew( 'PayStubListFactory' );
+				$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 				$pslf->getByUserId( $this->getId(), 1 ); //limit 1
 				$pslf->getByUserIdAndStartDateAndEndDate( $this->getId(), $start_date, $end_date, 1 ); //Limit 1
 				if ( $pslf->getRecordCount() > 0 ) {
@@ -3352,7 +3404,7 @@ class UserFactory extends Factory {
 
 		if ( $ignore_warning == FALSE ) {
 			if ( $this->isNew( TRUE ) == FALSE AND $this->getLegalEntity() != $this->getGenericOldDataValue('legal_entity_id') ) {
-				$pslf = TTnew( 'PayStubListFactory');
+				$pslf = TTnew( 'PayStubListFactory'); /** @var PayStubListFactory $pslf */
 				$pslf->getByUserId( $this->getId(), 1 ); //limit 1
 				if ( $pslf->getRecordCount() > 0 ) {
 					$this->Validator->Warning( 'legal_entity_id', TTi18n::gettext('Changing the legal entity after an employee has been paid will cause historical tax information to be lost. Please create a new employee record instead') );
@@ -3365,10 +3417,19 @@ class UserFactory extends Factory {
 			//Check if birth date is not specified and payroll is being processed (some pay stubs do exist for this legal entity) to remind the user to specify a birth date.
 			//  This is critical especially in Canada for CPP eligibility.
 			if ( $this->getBirthDate() == '' ) {
-				$pslf = TTnew( 'PayStubListFactory');
+				$pslf = TTnew( 'PayStubListFactory'); /** @var PayStubListFactory $pslf */
 				$pslf->getByCompanyIdAndLegalEntityId( $this->getCompany(), $this->getLegalEntity(), 1 ); //limit 1
 				if ( $pslf->getRecordCount() > 0 ) {
 					$this->Validator->Warning( 'birth_date', TTi18n::gettext( 'Birth Date is not specified, this may prevent some Tax/Deduction calculations from being performed accurately' ) );
+				}
+			}
+
+			if ( $this->getBirthDate() != '' ) { //Only check age if birth date is specified.
+				if ( $this->getAge() < 12 ) { //In Canada, anyone under 12 needs direct permission from the director of employment standards.
+					$this->Validator->Warning( 'birth_date', TTi18n::gettext( 'Employee is less than 12 years old, please confirm that the birth date is correct' ) );
+				}
+				if ( $this->getAge() > 90 ) { //Anyone over 90 is reaching an age where they are unlikely to be employed.
+					$this->Validator->Warning( 'birth_date', TTi18n::gettext( 'Employee is more than 90 years old, please confirm that the birth date is correct' ) );
 				}
 			}
 
@@ -3388,7 +3449,7 @@ class UserFactory extends Factory {
 
 				if ( $this->isNew( TRUE ) == FALSE ) {
 					//Check to see if worked/absence time exist after termination
-					$udtlf = TTnew('UserDateTotalListFactory');
+					$udtlf = TTnew('UserDateTotalListFactory'); /** @var UserDateTotalListFactory $udtlf */
 					$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate($this->getCompany(), $this->getID(), array(10,50), ( $this->getTerminationDate() + 86400 ), ( time() + ( 86400 * 365 ) ) );
 					if ( $udtlf->getRecordCount() > 0 ) {
 						$this->Validator->Warning( 'termination_date', TTi18n::gettext('Employee has time on their timesheet after their termination date that may be ignored (%1)', array( TTDate::getDate('DATE', $udtlf->getCurrent()->getDateStamp() ) ) ) );
@@ -3396,7 +3457,7 @@ class UserFactory extends Factory {
 					unset($udtlf);
 
 					//Check to see if Pay Stub Amendments exists after termination date
-					$psalf = TTnew('PayStubAmendmentListFactory');
+					$psalf = TTnew('PayStubAmendmentListFactory'); /** @var PayStubAmendmentListFactory $psalf */
 					$psalf->getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDate( $this->getID(), TRUE, array( 50 ),  ( $this->getTerminationDate() + 86400 ), ( time() + ( 86400 * 365 ) ) );
 					if ( $psalf->getRecordCount() > 0 ) {
 						$this->Validator->Warning( 'termination_date', TTi18n::gettext('Employee has pay stub amendments effective after their termination date that may be ignored (%1)', array( TTDate::getDate('DATE', $psalf->getCurrent()->getEffectiveDate() ) ) ) );
@@ -3469,7 +3530,7 @@ class UserFactory extends Factory {
 		if ( $this->getDeleted() == FALSE AND $this->getPermissionControl() !== FALSE ) {
 			Debug::text('Permission Group is set...', __FILE__, __LINE__, __METHOD__, 10);
 
-			$pclf = TTnew( 'PermissionControlListFactory' );
+			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 			$pclf->getByCompanyIdAndUserID( $this->getCompany(), $this->getId() );
 			if ( $pclf->getRecordCount() > 0 ) {
 				Debug::text('Already assigned to a Permission Group...', __FILE__, __LINE__, __METHOD__, 10);
@@ -3481,12 +3542,12 @@ class UserFactory extends Factory {
 				} else {
 					Debug::text('Permission Group has changed...', __FILE__, __LINE__, __METHOD__, 10);
 
-					$pulf = TTnew( 'PermissionUserListFactory' );
+					$pulf = TTnew( 'PermissionUserListFactory' ); /** @var PermissionUserListFactory $pulf */
 					$pulf->getByPermissionControlIdAndUserID( $pc_obj->getId(), $this->getId() );
 					Debug::text('Record Count: '. $pulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 					if ( $pulf->getRecordCount() > 0 ) {
 						foreach( $pulf as $pu_obj ) {
-							Debug::text('Deleteing from Permission Group: '. $pu_obj->getPermissionControl(), __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('Deleting from Permission Group: '. $pu_obj->getPermissionControl(), __FILE__, __LINE__, __METHOD__, 10);
 							$pu_obj->Delete();
 						}
 
@@ -3504,7 +3565,7 @@ class UserFactory extends Factory {
 				Debug::text('Adding user to Permission Group...', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Add to new permission group
-				$puf = TTnew( 'PermissionUserFactory' );
+				$puf = TTnew( 'PermissionUserFactory' ); /** @var PermissionUserFactory $puf */
 				$puf->setPermissionControl( $this->getPermissionControl() );
 				$puf->setUser( $this->getID() );
 
@@ -3515,7 +3576,7 @@ class UserFactory extends Factory {
 					$puf->Save();
 
 					//Clear permission class for this employee.
-					$pf = TTnew( 'PermissionFactory' );
+					$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 					$pf->clearCache( $this->getID(), $this->getCompany() );
 				}
 			}
@@ -3527,7 +3588,7 @@ class UserFactory extends Factory {
 
 			$add_pay_period_schedule = FALSE;
 
-			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+			$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 			$ppslf->getByUserId( $this->getId() );
 			if ( $ppslf->getRecordCount() > 0 ) {
 				$pps_obj = $ppslf->getCurrent();
@@ -3539,12 +3600,12 @@ class UserFactory extends Factory {
 					Debug::text('Changing Pay Period Schedule...', __FILE__, __LINE__, __METHOD__, 10);
 
 					//Remove user from current schedule.
-					$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
+					$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' ); /** @var PayPeriodScheduleUserListFactory $ppsulf */
 					$ppsulf->getByPayPeriodScheduleIdAndUserID( $pps_obj->getId(), $this->getId() );
 					Debug::text('Record Count: '. $ppsulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 					if ( $ppsulf->getRecordCount() > 0 ) {
 						foreach( $ppsulf as $ppsu_obj ) {
-							Debug::text('Deleteing from Pay Period Schedule: '. $ppsu_obj->getPayPeriodSchedule(), __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('Deleting from Pay Period Schedule: '. $ppsu_obj->getPayPeriodSchedule(), __FILE__, __LINE__, __METHOD__, 10);
 							$ppsu_obj->Delete();
 						}
 					}
@@ -3557,7 +3618,7 @@ class UserFactory extends Factory {
 
 			if ( $this->getPayPeriodSchedule() !== FALSE AND $add_pay_period_schedule == TRUE ) {
 				//Add to new pay period schedule
-				$ppsuf = TTnew( 'PayPeriodScheduleUserFactory' );
+				$ppsuf = TTnew( 'PayPeriodScheduleUserFactory' ); /** @var PayPeriodScheduleUserFactory $ppsuf */
 				$ppsuf->setPayPeriodSchedule( $this->getPayPeriodSchedule() );
 				$ppsuf->setUser( $this->getID() );
 				if ( $ppsuf->isValid() ) {
@@ -3576,7 +3637,7 @@ class UserFactory extends Factory {
 		if ( $this->getDeleted() == FALSE AND $this->getPolicyGroup() !== FALSE ) {
 			Debug::text('Policy Group is set...', __FILE__, __LINE__, __METHOD__, 10);
 
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$pglf->getByUserIds( $this->getId() );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$pg_obj = $pglf->getCurrent();
@@ -3588,7 +3649,7 @@ class UserFactory extends Factory {
 					Debug::text('Changing Policy Group...', __FILE__, __LINE__, __METHOD__, 10);
 
 					//Remove user from current schedule.
-					$pgulf = TTnew( 'PolicyGroupUserListFactory' );
+					$pgulf = TTnew( 'PolicyGroupUserListFactory' ); /** @var PolicyGroupUserListFactory $pgulf */
 					$pgulf->getByPolicyGroupIdAndUserId( $pg_obj->getId(), $this->getId() );
 					Debug::text('Record Count: '. $pgulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 					if ( $pgulf->getRecordCount() > 0 ) {
@@ -3606,7 +3667,7 @@ class UserFactory extends Factory {
 
 			if ( $this->getPolicyGroup() !== FALSE AND $add_policy_group == TRUE ) {
 				//Add to new policy group
-				$pguf = TTnew( 'PolicyGroupUserFactory' );
+				$pguf = TTnew( 'PolicyGroupUserFactory' ); /** @var PolicyGroupUserFactory $pguf */
 				$pguf->setPolicyGroup( $this->getPolicyGroup() );
 				$pguf->setUser( $this->getID() );
 
@@ -3624,7 +3685,7 @@ class UserFactory extends Factory {
 			//Debug::Arr($hierarchy_control_data, 'Setting hierarchy control data...', __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( is_array( $hierarchy_control_data ) ) {
-				$hclf = TTnew( 'HierarchyControlListFactory' );
+				$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 				$hclf->getObjectTypeAppendedListByCompanyIDAndUserID( $this->getCompany(), $this->getID() );
 				$existing_hierarchy_control_data = array_unique( array_values( (array)$hclf->getArrayByListFactory( $hclf, FALSE, TRUE, FALSE ) ) );
 				//Debug::Arr($existing_hierarchy_control_data, 'Existing hierarchy control data...', __FILE__, __LINE__, __METHOD__, 10);
@@ -3636,7 +3697,7 @@ class UserFactory extends Factory {
 				if ( is_array($hierarchy_control_delete_diff) ) {
 					foreach( $hierarchy_control_delete_diff as $hierarchy_control_id ) {
 						if ( $hierarchy_control_id != TTUUID::getZeroID() ) {
-							$hulf = TTnew( 'HierarchyUserListFactory' );
+							$hulf = TTnew( 'HierarchyUserListFactory' ); /** @var HierarchyUserListFactory $hulf */
 							$hulf->getByHierarchyControlAndUserID( $hierarchy_control_id, $this->getID() );
 							if ( $hulf->getRecordCount() > 0 ) {
 								Debug::text('Deleting user from hierarchy control ID: '. $hierarchy_control_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -3654,7 +3715,7 @@ class UserFactory extends Factory {
 					foreach( $hierarchy_control_add_diff as $hierarchy_control_id ) {
 						Debug::text('Hierarchy data changed...', __FILE__, __LINE__, __METHOD__, 10);
 						if ( $hierarchy_control_id != TTUUID::getZeroID() ) {
-							$huf = TTnew( 'HierarchyUserFactory' );
+							$huf = TTnew( 'HierarchyUserFactory' ); /** @var HierarchyUserFactory $huf */
 							$huf->setHierarchyControl( $hierarchy_control_id );
 							$huf->setUser( $this->getId() );
 							if ( $huf->isValid() ) {
@@ -3671,7 +3732,7 @@ class UserFactory extends Factory {
 		if ( DEMO_MODE != TRUE AND $this->getDeleted() == FALSE AND $this->getPasswordUpdatedDate() >= (time() - 10) ) { //If the password was updated in the last 10 seconds.
 			Debug::text('Password changed, saving it for historical purposes... Password: '. $this->getPassword(), __FILE__, __LINE__, __METHOD__, 10);
 
-			$uif = TTnew( 'UserIdentificationFactory' );
+			$uif = TTnew( 'UserIdentificationFactory' ); /** @var UserIdentificationFactory $uif */
 			$uif->setUser( $this->getID() );
 			$uif->setType( 5 ); //Password History
 			$uif->setNumber( 0 );
@@ -3694,13 +3755,13 @@ class UserFactory extends Factory {
 			if ( is_array($data_diff)
 					AND ( $this->isDataDifferent( 'hire_date', $data_diff, 'date' ) OR $this->isDataDifferent( 'termination_date', $data_diff, 'date' ) ) ) {
 				Debug::text('Hire Date or Termination date have changed!', __FILE__, __LINE__, __METHOD__, 10);
-				$rsf = TTnew('RecurringScheduleFactory');
+				$rsf = TTnew('RecurringScheduleFactory'); /** @var RecurringScheduleFactory $rsf */
 				$rsf->recalculateRecurringSchedules( $this->getID(), ( time() - ( 86400 * 28 ) ), ( time() + ( 86400 * 28 ) ) );
 			}
 		}
 
 		if ( isset($this->is_new) AND $this->is_new == TRUE ) {
-			$udlf = TTnew( 'UserDefaultListFactory' );
+			$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 			$udlf->getByCompanyId( $this->getCompany() );
 			if ( $udlf->getRecordCount() > 0 ) {
 				Debug::Text('Using User Defaults', __FILE__, __LINE__, __METHOD__, 10);
@@ -3710,12 +3771,12 @@ class UserFactory extends Factory {
 				$company_deduction_ids = $udf_obj->getCompanyDeduction();
 				if ( is_array( $company_deduction_ids ) AND count( $company_deduction_ids ) > 0 ) {
 					//UserDefaults should be able to select Tax/Deduction records from *any* legal entity, and we will just filter them out to the proper legal entity here.
-					$cdlf = TTNew('CompanyDeductionListFactory');
+					$cdlf = TTNew('CompanyDeductionListFactory'); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'id' => $company_deduction_ids ) );
 					if ( $cdlf->getRecordCount() > 0 ) {
 						foreach( $cdlf as $cd_obj ) {
 							if ( ( $cd_obj->getLegalEntity() == $this->getLegalEntity() OR $cd_obj->getLegalEntity() == TTUUID::getZeroID() ) ) {
-								$udf = TTnew( 'UserDeductionFactory' );
+								$udf = TTnew( 'UserDeductionFactory' ); /** @var UserDeductionFactory $udf */
 								$udf->setUser( $this->getId() );
 								$udf->setCompanyDeduction( $cd_obj->getId() );
 								if ( $udf->isValid() ) {
@@ -3730,7 +3791,7 @@ class UserFactory extends Factory {
 				unset( $company_deduction_ids, $udf, $cdlf, $cd_obj );
 
 				Debug::text('Inserting Default Prefs (a)...', __FILE__, __LINE__, __METHOD__, 10);
-				$upf = TTnew( 'UserPreferenceFactory' );
+				$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 				$upf->setUser( $this->getId() );
 				$upf->setLanguage( $udf_obj->getLanguage() );
 				$upf->setDateFormat( $udf_obj->getDateFormat() );
@@ -3754,7 +3815,7 @@ class UserFactory extends Factory {
 			} else {
 				//No New Hire defaults, use global defaults.
 				Debug::text('Inserting Default Prefs (b)...', __FILE__, __LINE__, __METHOD__, 10);
-				$upf = TTnew( 'UserPreferenceFactory' );
+				$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 				$upf->setUser( $this->getId() );
 				$upf->setLanguage( 'en' );
 				$upf->setDateFormat( 'd-M-y' );
@@ -3782,13 +3843,13 @@ class UserFactory extends Factory {
 			//Delete any accruals for them as well.
 
 			//Pay Period Schedule
-			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+			$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 			$ppslf->getByUserId( $this->getId() );
 			if ( $ppslf->getRecordCount() > 0 ) {
 				$pps_obj = $ppslf->getCurrent();
 
 				//Remove user from current schedule.
-				$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
+				$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' ); /** @var PayPeriodScheduleUserListFactory $ppsulf */
 				$ppsulf->getByPayPeriodScheduleIdAndUserID( $pps_obj->getId(), $this->getId() );
 				Debug::text('Record Count: '. $ppsulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $ppsulf->getRecordCount() > 0 ) {
@@ -3800,28 +3861,28 @@ class UserFactory extends Factory {
 			}
 
 			//Policy Group
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$pglf->getByUserIds( $this->getId() );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$pg_obj = $pglf->getCurrent();
 
-				$pgulf = TTnew( 'PolicyGroupUserListFactory' );
+				$pgulf = TTnew( 'PolicyGroupUserListFactory' ); /** @var PolicyGroupUserListFactory $pgulf */
 				$pgulf->getByPolicyGroupIdAndUserId( $pg_obj->getId(), $this->getId() );
 				Debug::text('Record Count: '. $pgulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $pgulf->getRecordCount() > 0 ) {
 					foreach( $pgulf as $pgu_obj ) {
-						Debug::text('Deleteing from Policy Group: '. $pgu_obj->getPolicyGroup(), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Deleting from Policy Group: '. $pgu_obj->getPolicyGroup(), __FILE__, __LINE__, __METHOD__, 10);
 						$pgu_obj->Delete();
 					}
 				}
 			}
 
 			//Hierarchy
-			$hclf = TTnew( 'HierarchyControlListFactory' );
+			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 			$hclf->getByCompanyId( $this->getCompany() );
 			if ( $hclf->getRecordCount() > 0 ) {
 				foreach( $hclf as $hc_obj ) {
-					$hf = TTnew( 'HierarchyListFactory' );
+					$hf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hf */
 					$hf->setUser( $this->getID() );
 					$hf->setHierarchyControl( $hc_obj->getId() );
 					$hf->Delete();
@@ -3845,21 +3906,21 @@ class UserFactory extends Factory {
 			*/
 
 			//Station employee critiera
-			$siuf = TTnew( 'StationIncludeUserFactory' );
-			$seuf = TTnew( 'StationExcludeUserFactory' );
+			$siuf = TTnew( 'StationIncludeUserFactory' ); /** @var StationIncludeUserFactory $siuf */
+			$seuf = TTnew( 'StationExcludeUserFactory' ); /** @var StationExcludeUserFactory $seuf */
 
 			$query = 'delete from '. $siuf->getTable() .' where user_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'delete from '. $seuf->getTable() .' where user_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			//Job employee criteria
-			$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
+			$cgmlf = TTnew( 'CompanyGenericMapListFactory' ); /** @var CompanyGenericMapListFactory $cgmlf */
 			$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), array(1040, 1050), $this->getID() );
 			if ( $cgmlf->getRecordCount() > 0 ) {
 				foreach( $cgmlf as $cgm_obj ) {
-					Debug::text('Deleteing from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Deleting from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 					$cgm_obj->Delete();
 				}
 			}
@@ -3894,7 +3955,7 @@ class UserFactory extends Factory {
 
 		//If status is set to anything other than ACTIVE, logout user.
 		if ( $this->getStatus() != 10 ) {
-			$authentication = TTNew('Authentication');
+			$authentication = TTNew('Authentication'); /** @var Authentication $authentication */
 			$authentication->logoutUser( $this->getID() );
 		}
 
@@ -3916,9 +3977,9 @@ class UserFactory extends Factory {
 		return Misc::getMapURL( $this->getAddress1(), $this->getAddress2(), $this->getCity(), $this->getProvince(), $this->getPostalCode(), $this->getCountry() );
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

@@ -1450,7 +1450,7 @@ class CompanyFactory extends Factory {
 									);
 				break;
 			case 'password_minimum_permission_level':
-				$pcf = TTNew('PermissionControlFactory');
+				$pcf = TTNew('PermissionControlFactory'); /** @var PermissionControlFactory $pcf */
 				$retval = $pcf->getOptions('level');
 				break;
 			case 'ldap_authentication_type':
@@ -1616,7 +1616,7 @@ class CompanyFactory extends Factory {
 		if ( is_object($this->user_default_obj) ) {
 			return $this->user_default_obj;
 		} else {
-			$udlf = TTnew( 'UserDefaultListFactory' );
+			$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 			$udlf->getByCompanyId( $this->getID() );
 			if ( $udlf->getRecordCount() == 1 ) {
 				$this->user_default_obj = $udlf->getCurrent();
@@ -1639,7 +1639,7 @@ class CompanyFactory extends Factory {
 		if ( isset($this->user_obj[$user_id]) AND is_object($this->user_obj[$user_id]) ) {
 			return $this->user_obj[$user_id];
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $user_id );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj[$user_id] = $ulf->getCurrent();
@@ -1651,13 +1651,12 @@ class CompanyFactory extends Factory {
 		return FALSE;
 	}
 
-	//Returns total number of currencies, if its 1 then we know we don't need to do any currency conversions at all.
-
 	/**
+	 * Returns total number of currencies, if its 1 then we know we don't need to do any currency conversions at all.
 	 * @return mixed
 	 */
 	function getTotalCurrencies() {
-		$clf = TTNew('CurrencyListFactory');
+		$clf = TTNew('CurrencyListFactory'); /** @var CurrencyListFactory $clf */
 		return $clf->getByCompanyID( $this->getID() )->getRecordCount();
 	}
 
@@ -1668,7 +1667,7 @@ class CompanyFactory extends Factory {
 		if ( is_object( $this->base_currency_obj ) ) {
 			return $this->base_currency_obj;
 		} else {
-			$crlf = TTnew( 'CurrencyListFactory' );
+			$crlf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $crlf */
 			$crlf->getByCompanyIdAndBase( $this->getId(), TRUE );
 			if ( $crlf->getRecordCount() > 0 ) {
 				$this->base_currency_obj = $crlf->getCurrent();
@@ -2166,7 +2165,7 @@ class CompanyFactory extends Factory {
 	 * @return bool
 	 */
 	function getDefaultCurrency() {
-		$culf = TTnew( 'CurrencyListFactory' );
+		$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 		$culf->getByCompanyIdAndDefault( $this->getId(), TRUE );
 		Debug::Text(' Finding Default Currency for Company ID: '. $this->getId() .' Records: '. $culf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9);
 		if ( $culf->getRecordCount() == 1 ) {
@@ -2485,11 +2484,10 @@ class CompanyFactory extends Factory {
 		return Environment::getStorageBasePath() . DIRECTORY_SEPARATOR .'company_logo'. DIRECTORY_SEPARATOR . $company_id;
 	}
 
-
-	//Send company data to TimeTrex server so auto update notifications are correct
-	//based on geographical region.
-	//This shouldn't be called unless the user requests auto update notification.
 	/**
+	 * Send company data to TimeTrex server so auto update notifications are correct
+	 * based on geographical region.
+	 * This shouldn't be called unless the user requests auto update notification.
 	 * @return bool
 	 */
 	function remoteSave() {
@@ -2769,9 +2767,8 @@ class CompanyFactory extends Factory {
 		return $this->setGenericDataValue( 'ldap_login_attribute', $value );
 	}
 
-	//Returns either UTF-8 or ISO-8859-1 encodings mainly as a report optimization.
-
 	/**
+	 * Returns either UTF-8 or ISO-8859-1 encodings mainly as a report optimization.
 	 * @param bool $company_id
 	 * @return bool|mixed|string
 	 */
@@ -2786,16 +2783,16 @@ class CompanyFactory extends Factory {
 		if ( $retval === FALSE ) {
 			if ( $retval === FALSE ) {
 				//Get unique currencies, to check if currency symbol requires unicode.
-				$clf = TTnew('CurrencyListFactory');
+				$clf = TTnew('CurrencyListFactory'); /** @var CurrencyListFactory $clf */
 				$iso_codes = $clf->getUniqueISOCodeByCompanyId( $company_id );
 				//Debug::Arr($iso_codes, 'ISO Codes: ', __FILE__, __LINE__, __METHOD__, 9);
 				if ( is_array($iso_codes) ) {
 					foreach( $iso_codes as $iso_code ) {
-						//$encoding = strtoupper( mb_detect_encoding(TTi18n::getCurrencySymbol( $iso_code ), 'auto') );
 						$encoding = TTI18n::detectUTF8( TTi18n::getCurrencySymbol( $iso_code ) );
 						if ( $encoding == TRUE ) {
 							Debug::Text('ISO Code: '. $iso_code .' Encoding: '. $encoding, __FILE__, __LINE__, __METHOD__, 9);
 							$retval = 'UTF-8';
+							break; //Stop as soon we have found one that requires UTF-8.
 						}
 					}
 				}
@@ -2803,13 +2800,14 @@ class CompanyFactory extends Factory {
 
 			if ( $retval === FALSE ) {
 				//Get unique language codes, if anything other than english is used, assume UTF-8.
-				$uplf = TTnew('UserPreferenceListFactory');
+				$uplf = TTnew('UserPreferenceListFactory'); /** @var UserPreferenceListFactory $uplf */
 				$language_codes = $uplf->getUniqueLanguageByCompanyId( $company_id );
 				//Debug::Arr($language_codes, 'Language Codes: ', __FILE__, __LINE__, __METHOD__, 9);
 				if ( is_array($language_codes) ) {
 					foreach( $language_codes as $language_code ) {
 						if ( $language_code != 'en' ) {
 							$retval = 'UTF-8';
+							break; //Stop as soon we have found one that requires UTF-8.
 						}
 					}
 				}
@@ -2831,10 +2829,10 @@ class CompanyFactory extends Factory {
 	function getDefaultContact() {
 		if ( TTUUID::isUUID($this->getID()) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
 			//Loop through all employees with the highest permission level, and pick the account that is the oldest and logged in within the last 30 days.
-			$pclf = TTnew('PermissionControlListFactory');
+			$pclf = TTnew('PermissionControlListFactory'); /** @var PermissionControlListFactory $pclf */
 			$pclf->getByCompanyId( $this->getID(), 1, NULL, NULL, array( 'level' => 'desc' ) );
 			if ( $pclf->getRecordCount() > 0 ) {
-				$ulf = TTnew('UserListFactory');
+				$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 
 				foreach( $pclf as $pc_obj ) {
 					$ulf->getByIdAndCompanyId( $pc_obj->getUser(), $this->getId(), NULL, NULL, array( 'status_id =' => 10 ), array( 'created_date' => 'asc' ) );
@@ -2887,7 +2885,7 @@ class CompanyFactory extends Factory {
 											TTi18n::gettext('Parent Company cannot be itself')
 										);
 			if ( $this->Validator->isError('parent') == FALSE ) {
-				$clf = TTnew( 'CompanyListFactory' );
+				$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 				$this->Validator->isResultSetWithRows(	'parent',
 											$clf->getByID($this->getParent()),
 											TTi18n::gettext('Parent Company is invalid')
@@ -3080,7 +3078,7 @@ class CompanyFactory extends Factory {
 		}
 
 		// Admin Contact User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		if ( $this->getAdminContact() != '' AND $this->getAdminContact() != TTUUID::getZeroID() ) {
 			$this->Validator->isResultSetWithRows( 'admin_contact',
 												   $ulf->getByID( $this->getAdminContact() ),
@@ -3307,7 +3305,7 @@ class CompanyFactory extends Factory {
 
 		//Delete users before deleting the company, otherwise the company doesn't exist and validation functions fail.
 		if ( $this->getDeleted() == TRUE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByCompanyId( $this->getID() );
 			if ( $ulf->getRecordCount() > 0 ) {
 				$ulf->StartTransaction();
@@ -3339,12 +3337,12 @@ class CompanyFactory extends Factory {
 
 			//Add base currency for this new company.
 			if ( $this->getEnableAddCurrency() == TRUE ) {
-				$clf = TTnew( 'CurrencyListFactory' );
+				$clf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $clf */
 				$clf->getByCompanyId( $this->getId() );
 				if ( $clf->getRecordCount() == 0 ) {
 					Debug::text('Adding Default Currency...', __FILE__, __LINE__, __METHOD__, 9);
 
-					$cf = TTnew( 'CurrencyFactory' );
+					$cf = TTnew( 'CurrencyFactory' ); /** @var CurrencyFactory $cf */
 					$country_to_currency_map_arr = $cf->getOptions('country_currency');
 
 					if ( isset($country_to_currency_map_arr[$this->getCountry()]) ) {
@@ -3373,7 +3371,7 @@ class CompanyFactory extends Factory {
 
 			//Add legal entity, this must come *after* the currency is created though, as it in turn creates a default remittance source account.
 			if ( $this->getEnableAddLegalEntity() == TRUE ) {
-				$lef = TTnew( 'LegalEntityFactory' );
+				$lef = TTnew( 'LegalEntityFactory' ); /** @var LegalEntityFactory $lef */
 				$lef->setCompany( $this->getId() );
 				$lef->setStatus( 10 ); //10=Active
 				$lef->setType( 10 ); //10=Corporation.
@@ -3401,7 +3399,7 @@ class CompanyFactory extends Factory {
 			if ( $this->getEnableAddPermissionGroupPreset() == TRUE ) {
 				Debug::text('Adding Preset Permission Groups...', __FILE__, __LINE__, __METHOD__, 9);
 
-				$pf = TTnew( 'PermissionFactory' );
+				$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 				$pf->StartTransaction();
 
 				$preset_flags = array_keys( $pf->getOptions('preset_flags') );
@@ -3410,7 +3408,7 @@ class CompanyFactory extends Factory {
 
 				$preset_level_options = $pf->getOptions('preset_level');
 				foreach( $preset_options as $preset_id => $preset_name ) {
-					$pcf = TTnew( 'PermissionControlFactory' );
+					$pcf = TTnew( 'PermissionControlFactory' ); /** @var PermissionControlFactory $pcf */
 					$pcf->setCompany( $this->getId() );
 					$pcf->setName( $preset_name );
 					$pcf->setDescription( '' );
@@ -3427,7 +3425,7 @@ class CompanyFactory extends Factory {
 				Debug::text('Adding Default Station...', __FILE__, __LINE__, __METHOD__, 9);
 
 				//Enable punching in from all stations
-				$sf = TTnew( 'StationFactory' );
+				$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
 				$sf->setCompany( $this->getId() );
 				$sf->setStatus( 20 );
 				$sf->setType( 10 ); //PC
@@ -3442,7 +3440,7 @@ class CompanyFactory extends Factory {
 				}
 
 				if ( $this->getProductEdition() >= 15 ) {
-					$sf = TTnew( 'StationFactory' );
+					$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
 					$sf->setCompany( $this->getId() );
 					$sf->setStatus( 20 );
 					$sf->setType( 25 ); //WAP
@@ -3456,7 +3454,7 @@ class CompanyFactory extends Factory {
 						$sf->Save();
 					}
 
-					$sf = TTnew( 'StationFactory' );
+					$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
 					$sf->setCompany( $this->getId() );
 					$sf->setStatus( 20 );
 					$sf->setType( 26 ); //Mobile web browser
@@ -3470,7 +3468,7 @@ class CompanyFactory extends Factory {
 						$sf->Save();
 					}
 
-					$sf = TTnew( 'StationFactory' );
+					$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
 					$sf->setCompany( $this->getId() );
 					$sf->setStatus( 20 );
 					$sf->setType( 28 ); //Mobile App
@@ -3492,7 +3490,7 @@ class CompanyFactory extends Factory {
 					OR $this->getEnableAddUserDefaultPreset() == TRUE
 				) {
 				Debug::text('Adding Presets...', __FILE__, __LINE__, __METHOD__, 9);
-				$sp = TTNew('SetupPresets');
+				$sp = TTNew('SetupPresets'); /** @var SetupPresets $sp */
 				$sp->setCompany( $this->getID() );
 				//$sp->setUser( $this->getCurrentUserObject()->getId() );
 
@@ -3506,7 +3504,7 @@ class CompanyFactory extends Factory {
 
 			//If status is set to anything other than ACTIVE, logout all users.
 			if ( $this->getStatus() != 10 ) {
-				$authentication = TTNew('Authentication');
+				$authentication = TTNew('Authentication'); /** @var Authentication $authentication */
 				$authentication->logoutCompany( $this->getID() );
 			}
 		}

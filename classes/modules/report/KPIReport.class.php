@@ -129,6 +129,7 @@ class KPIReport extends Report {
 				break;
 			case 'date_columns':
 				$retval = array_merge(
+									TTDate::getReportDateOptions( 'user.hire', TTi18n::getText('Hire Date'), 15, FALSE ),
 									TTDate::getReportDateOptions( 'user_review_control.start', TTi18n::getText('Start Date'), 16, FALSE ),
 									TTDate::getReportDateOptions( 'user_review_control.end', TTi18n::getText('End Date'), 17, FALSE ),
 									TTDate::getReportDateOptions( 'user_review_control.due', TTi18n::getText('Due Date'), 18, FALSE )
@@ -136,7 +137,7 @@ class KPIReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'KPIReport', 'custom_column' );
@@ -147,13 +148,13 @@ class KPIReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'KPIReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'KPIReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -162,7 +163,7 @@ class KPIReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'KPIReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -247,7 +248,7 @@ class KPIReport extends Report {
 				$columns = array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_custom_column') );
 				if ( is_array($columns) ) {
 					foreach($columns as $column => $name ) {
-						if ( strpos($column, 'rate') !== FALSE) {
+						if ( strpos($column, 'rating') !== FALSE) {
 							$retval[$column] = 'numeric';
 						} elseif ( strpos($column, 'total_review') !== FALSE ) {
 							$retval[$column] = 'numeric';
@@ -462,9 +463,8 @@ class KPIReport extends Report {
 		return $retval;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -473,10 +473,10 @@ class KPIReport extends Report {
 
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
-		$columns['start_date'] = $columns['end_date'] = $columns['due_date'] = TRUE;
+		$columns['hire_date'] = $columns['start_date'] = $columns['end_date'] = $columns['due_date'] = TRUE;
 		//$columns['status'] = $columns['type'] = $columns['note'] = $columns['rating'] = TRUE;
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -486,7 +486,7 @@ class KPIReport extends Report {
 		}
 
 		//Get KPI data for joining.
-		$klf = TTnew( 'KPIListFactory' );
+		$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
 		$klf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' KPI Rows: '. $klf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $klf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -496,7 +496,7 @@ class KPIReport extends Report {
 		}
 
 		//Get user review control data for joining.
-		$urclf = TTnew( 'UserReviewControlListFactory' );
+		$urclf = TTnew( 'UserReviewControlListFactory' ); /** @var UserReviewControlListFactory $urclf */
 		$urclf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Review Control Rows: '. $urclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $urclf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -507,7 +507,7 @@ class KPIReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
-		$urlf = TTnew( 'UserReviewListFactory' );
+		$urlf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $urlf */
 		$urlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Review Rows: '. $urlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $urlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -521,13 +521,11 @@ class KPIReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {
-
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['user_review_control']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
 		$key = 0;
@@ -536,6 +534,12 @@ class KPIReport extends Report {
 
 				foreach( $level_1 as $user_id => $user_review_control ) {
 					$processed_data = array();
+					if ( isset($this->tmp_data['user'][$user_id]['user.hire_date']) ) {
+						$hire_date_columns = TTDate::getReportDates( 'user.hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['user.hire_date'] ), FALSE, $this->getUserObject() );
+					} else {
+						$hire_date_columns = array();
+					}
+
 					if ( isset($user_review_control['user_review_control.start_date']) ) {
 						$start_date_columns = TTDate::getReportDates( 'user_review_control.start', TTDate::parseDateTime( $user_review_control['user_review_control.start_date'] ), FALSE, $this->getUserObject() );
 					} else {
@@ -566,7 +570,7 @@ class KPIReport extends Report {
 									$processed_data = array_merge( $processed_data, $this->tmp_data['kpi'][$kpi_id] );
 								}
 
-								$this->data[] = array_merge( $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
+								$this->data[] = array_merge( $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
 
 						}
 					} else {
@@ -576,14 +580,14 @@ class KPIReport extends Report {
 							$processed_data = array_merge( $processed_data, $user_review_control );
 						}
 
-						$this->data[] = array_merge( $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
+						$this->data[] = array_merge( $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
 					}
 
 				}
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 				$key++;
 			}
-			unset($this->tmp_data, $kpi, $user_review_control, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
+			unset($this->tmp_data, $kpi, $user_review_control, $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;

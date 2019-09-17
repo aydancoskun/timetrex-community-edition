@@ -57,7 +57,7 @@ class InstallSchema_1007A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//New Pay Period Schedule format, update any current schedules.
-		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+		$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 		$ppslf->getAll();
 		Debug::text('Found Pay Period Schedules: '. $ppslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9);
 		if ( $ppslf->getRecordCount() > 0 ) {

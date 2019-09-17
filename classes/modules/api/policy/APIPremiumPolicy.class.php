@@ -118,7 +118,7 @@ class APIPremiumPolicy extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'premium_policy', 'view' );
 
-		$blf = TTnew( 'PremiumPolicyListFactory' );
+		$blf = TTnew( 'PremiumPolicyListFactory' ); /** @var PremiumPolicyListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -196,7 +196,7 @@ class APIPremiumPolicy extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PremiumPolicyListFactory' );
+				$lf = TTnew( 'PremiumPolicyListFactory' ); /** @var PremiumPolicyListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -239,7 +239,7 @@ class APIPremiumPolicy extends APIFactory {
 					//Force Company ID to current company.
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 
-					$lf->setObjectFromArray( $row, $validate_only );
+					$lf->setObjectFromArray( $row );
 					$lf->Validator->setValidateOnly( $validate_only );
 
 					$is_valid = $lf->isValid( $ignore_warning );
@@ -302,7 +302,7 @@ class APIPremiumPolicy extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PremiumPolicyListFactory' );
+				$lf = TTnew( 'PremiumPolicyListFactory' ); /** @var PremiumPolicyListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

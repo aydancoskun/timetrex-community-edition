@@ -43,6 +43,7 @@ class Import {
 
 	public $company_id = NULL;
 	public $user_id = NULL;
+	public $session_id = NULL;
 
 	private $user_id_cache = NULL; //getUserIDByRowData cache.
 
@@ -96,9 +97,9 @@ class Import {
 
 		return $this->progress_bar_obj;
 	}
-	//Returns the AMF messageID for each individual call.
 
 	/**
+	 * Returns the AMF messageID for each individual call.
 	 * @return bool|null
 	 */
 	function getAMFMessageID() {
@@ -231,14 +232,25 @@ class Import {
 		$dir = $this->getStoragePath();
 		Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 		if ( isset($dir) ) {
-			if ( file_exists( $dir ) == FALSE ) {
-				$mkdir_result = @mkdir( $dir, 0700, TRUE );
-				if ( $mkdir_result == FALSE ) {
-					Debug::Text( 'ERROR: Unable to create storage file directory: ' . $dir, __FILE__, __LINE__, __METHOD__, 10 );
+			//Use retry loop because at the end of the import process we clean up files/directories, which could cause simultaneous imports to fail if the directory gets removed after mkdir() and before file_put_contents().
+			$retry_function = function() use ( $data, $dir ) {
+				if ( file_exists( $dir ) == FALSE ) {
+					$mkdir_result = @mkdir( $dir, 0700, TRUE );
+					if ( $mkdir_result == FALSE ) {
+						Debug::Text( 'ERROR: Unable to create storage file directory: ' . $dir, __FILE__, __LINE__, __METHOD__, 10 );
+						throw new Exception( 'ERROR: Unable to create storage file directory: ' . $dir);
+					}
 				}
-			}
 
-			return file_put_contents( $dir . $this->getLocalFileName(), $data );
+				$file_put_contents_result = file_put_contents( $dir . $this->getLocalFileName(), $data );
+				if ( $file_put_contents_result == TRUE ) {
+					return TRUE;
+				} else {
+					throw new Exception( 'ERROR: Unable to save data to file: ' . $dir . $this->getLocalFileName() );
+				}
+			};
+
+			return Misc::Retry( $retry_function );
 		}
 
 		return FALSE;
@@ -274,6 +286,8 @@ class Import {
 		if ( isset($this->data['parsed_data']) ) {
 			return $this->data['parsed_data'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -290,9 +304,8 @@ class Import {
 		return FALSE;
 	}
 
-	//Generates a "best fit" column map array.
-
 	/**
+	 * Generates a "best fit" column map array.
 	 * @return array|bool
 	 */
 	function generateColumnMap() {
@@ -344,10 +357,10 @@ class Import {
 		return FALSE;
 	}
 
-	//Takes a saved column map and tries to merge it with existing column data from the file.
-	//Needs to account for manually added columns that don't exist in the file already.
-	//Needs to account for less/more columns added to the file itself.
 	/**
+	 * Takes a saved column map and tries to merge it with existing column data from the file.
+	 * Needs to account for manually added columns that don't exist in the file already.
+	 * Needs to account for less/more columns added to the file itself.
 	 * @param $saved_column_map
 	 * @return mixed
 	 */
@@ -362,6 +375,8 @@ class Import {
 		if ( isset($this->data['column_map']) ) {
 			return $this->data['column_map'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -587,10 +602,10 @@ class Import {
 		return $retval;
 	}
 
-	//Parse data while applying any parse hints.
-	//This converts the raw data into something that can be passed directly to the setObjectAsArray functions for this object.
-	//Which may include converting one column into multiples and vice versa.
 	/**
+	 * Parse data while applying any parse hints.
+	 * This converts the raw data into something that can be passed directly to the setObjectAsArray functions for this object.
+	 * Which may include converting one column into multiples and vice versa.
 	 * @return bool
 	 */
 	function parseData() {
@@ -670,9 +685,8 @@ class Import {
 		return $this->setParsedData( $parsed_data );
 	}
 
-	//This function can't be named "import" as it will be called during __construct() then.
-
 	/**
+	 * This function can't be named "import" as it will be called during __construct() then.
 	 * @param bool $validate_only
 	 * @return bool
 	 */
@@ -680,7 +694,9 @@ class Import {
 		//Because parse functions can create additional records (like groups, titles, branches)
 		//we need to wrap those in a transaction so they can be rolled back on validate_only calls.
 		//However non-validate_only calls can't be in any transaction, otherwise skipped records will get rolled back.
-		$f = TTnew('UserFactory');
+		$f = TTnew('UserFactory'); /** @var UserFactory $f */
+
+		$retval = FALSE;
 
 		if ( $validate_only == TRUE ) {
 			$f->StartTransaction();
@@ -694,7 +710,7 @@ class Import {
 			$retval = $this->_import( $validate_only );
 
 			if ( $validate_only == FALSE ) {
-				$lf = TTnew('LogFactory');
+				$lf = TTnew('LogFactory'); /** @var LogFactory $lf */
 				$table_options = $lf->getOptions('table_name');
 
 				$log_description = TTi18n::getText('Imported').' ';
@@ -711,13 +727,6 @@ class Import {
 				TTLog::addEntry( $this->user_id, 500, $log_description, $this->user_id, 'users' );
 				$this->cleanStoragePath();
 			}
-
-			if ( $validate_only == TRUE ) {
-				$f->FailTransaction();
-				$f->CommitTransaction();
-			}
-
-			return $retval;
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -725,12 +734,13 @@ class Import {
 			$f->CommitTransaction();
 		}
 
-		return FALSE;
+		return $retval;
 	}
 
 	//
 	// File upload functions.
 	//
+
 	/**
 	 * @return array|bool
 	 */
@@ -752,6 +762,8 @@ class Import {
 		if ( isset($this->data['remote_file_name']) ) {
 			return $this->data['remote_file_name'];
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -772,7 +784,8 @@ class Import {
 	 * @return string
 	 */
 	function getLocalFileName() {
-		$retval = md5( $this->company_id . $this->user_id );
+		//Include the session_id in the file name so multiple logins with the same user (but different sessions) can import files at the same time.
+		$retval = md5( $this->company_id . $this->user_id . $this->session_id );
 		Debug::Text( 'Local File Name: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
@@ -860,6 +873,7 @@ class Import {
 	//
 	// Generic parser functions.
 	//
+
 	/**
 	 * @param $input
 	 * @param $options
@@ -897,7 +911,7 @@ class Import {
 	 */
 	function getUserObject( $user_id ) {
 		if ( $user_id != '' ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByCompanyIdAndID( $this->company_id, $user_id );
 			if ( $ulf->getRecordCount() == 1 ) {
 				return $ulf->getCurrent();
@@ -910,7 +924,7 @@ class Import {
 	 * @return array|null
 	 */
 	function getUserIdentificationColumns() {
-		$uf = TTNew('UserFactory');
+		$uf = TTNew('UserFactory'); /** @var UserFactory $uf */
 		$retval = Misc::arrayIntersectByKey( array('user_name', 'employee_number', 'sin'), Misc::trimSortPrefix( $uf->getOptions('columns') ) );
 
 		return $retval;
@@ -975,7 +989,7 @@ class Import {
 				Debug::Text('Found existing cached record ID: '. $this->user_id_cache[$cache_id], __FILE__, __LINE__, __METHOD__, 10);
 				return $this->user_id_cache[$cache_id];
 			} else {
-				$ulf = TTnew( 'UserListFactory' );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data );
 				if ( $ulf->getRecordCount() == 1 ) {
 					$tmp_user_obj = $ulf->getCurrent();
@@ -1235,7 +1249,7 @@ class Import {
 	 * @return array|bool|mixed
 	 */
 	function parse_country( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$cf = TTnew('CompanyFactory');
+		$cf = TTnew('CompanyFactory'); /** @var CompanyFactory $cf */
 		$options = $cf->getOptions( 'country' );
 
 		if ( isset($options[strtoupper($input)]) ) {
@@ -1271,7 +1285,7 @@ class Import {
 
 		$options = array();
 		if ( $country != '' ) {
-			$cf = TTnew('CompanyFactory');
+			$cf = TTnew('CompanyFactory'); /** @var CompanyFactory $cf */
 			$options = (array)$cf->getOptions( 'province', $country );
 		}
 
@@ -1301,7 +1315,7 @@ class Import {
 	 */
 	function getBranchOptions() {
 		$this->branch_options = $this->branch_manual_id_options = array();
-		$blf = TTNew('BranchListFactory');
+		$blf = TTNew('BranchListFactory'); /** @var BranchListFactory $blf */
 		$blf->getByCompanyId( $this->company_id );
 		if ( $blf->getRecordCount() > 0 ) {
 			foreach( $blf as $b_obj ) {
@@ -1353,7 +1367,7 @@ class Import {
 	function getDepartmentOptions() {
 		//Get departments
 		$this->department_options = $this->department_manual_id_options = array();
-		$dlf = TTNew('DepartmentListFactory');
+		$dlf = TTNew('DepartmentListFactory'); /** @var DepartmentListFactory $dlf */
 		$dlf->getByCompanyId( $this->company_id );
 		if ( $dlf->getRecordCount() > 0 ) {
 			foreach( $dlf as $d_obj ) {
@@ -1406,7 +1420,7 @@ class Import {
 	function getJobOptions() {
 		//Get jobs
 		$this->job_options = $this->job_manual_id_options = array();
-		$dlf = TTNew('JobListFactory');
+		$dlf = TTNew('JobListFactory'); /** @var JobListFactory $dlf */
 		$dlf->getByCompanyId( $this->company_id );
 		if ( $dlf->getRecordCount() > 0 ) {
 			foreach( $dlf as $d_obj ) {
@@ -1458,7 +1472,7 @@ class Import {
 	function getJobItemOptions() {
 		//Get job_items
 		$this->job_item_options = $this->job_item_manual_id_options = array();
-		$dlf = TTNew('JobItemListFactory');
+		$dlf = TTNew('JobItemListFactory'); /** @var JobItemListFactory $dlf */
 		$dlf->getByCompanyId( $this->company_id );
 		if ( $dlf->getRecordCount() > 0 ) {
 			foreach( $dlf as $d_obj ) {

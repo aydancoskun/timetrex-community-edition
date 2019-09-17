@@ -59,7 +59,7 @@ class UserMembershipFactory extends Factory {
 									);
 				break;
 			case 'source_type':
-				$qf = TTnew('QualificationFactory');
+				$qf = TTnew('QualificationFactory'); /** @var QualificationFactory $qf */
 				$retval = $qf->getOptions( $name );
 				break;
 			case 'columns':
@@ -310,7 +310,7 @@ class UserMembershipFactory extends Factory {
 	}
 
 	/**
-	 * @param $tags
+	 * @param $value
 	 * @return bool
 	 */
 	function setTag( $value ) {
@@ -329,7 +329,7 @@ class UserMembershipFactory extends Factory {
 		//
 		// Employee
 		if ( $this->getUser() !== FALSE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user_id',
 															$ulf->getByID($this->getUser() ),
 															TTi18n::gettext('Employee must be specified')
@@ -337,7 +337,7 @@ class UserMembershipFactory extends Factory {
 		}
 		// Qualification
 		if ( $this->getQualification() !== FALSE ) {
-			$qlf = TTnew( 'QualificationListFactory' );
+			$qlf = TTnew( 'QualificationListFactory' ); /** @var QualificationListFactory $qlf */
 			$this->Validator->isResultSetWithRows( 'qualification_id',
 															$qlf->getById( $this->getQualification() ),
 															TTi18n::gettext('Membership must be specified')
@@ -353,7 +353,7 @@ class UserMembershipFactory extends Factory {
 		}
 		// Currency
 		if ( $this->getCurrency() !== FALSE ) {
-			$culf = TTnew( 'CurrencyListFactory' );
+			$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 			$this->Validator->isResultSetWithRows(	'currency_id',
 															$culf->getByID($this->getCurrency()),
 															TTi18n::gettext('Currency must be specified')

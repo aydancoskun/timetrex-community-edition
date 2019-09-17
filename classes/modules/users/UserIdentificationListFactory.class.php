@@ -55,7 +55,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -121,7 +121,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND a.deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -156,7 +156,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -193,14 +193,14 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND a.deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
 	 * @param string $company_id UUID
-	 * @param int $type_id
+	 * @param int[] $type_id
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserIdentificationListFactory
 	 */
@@ -237,14 +237,14 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
 	 * @param string $company_id UUID
-	 * @param int $type_id
+	 * @param int[] $type_id
 	 * @param int $date EPOCH
 	 * @param array $valid_user_ids
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
@@ -317,7 +317,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -361,7 +361,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND a.deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -387,14 +387,14 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
 	 * @param string $user_id UUID
-	 * @param int $type_id
+	 * @param int[] $type_id
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserIdentificationListFactory
 	 */
@@ -426,7 +426,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -473,7 +473,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -531,7 +531,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND a.deleted = 0';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -571,7 +571,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -608,7 +608,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 		if ( $this->getRecordCount() > 0 ) {
 			Debug::text('User Identification rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
@@ -709,7 +709,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND b.deleted = 0';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

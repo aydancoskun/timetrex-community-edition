@@ -57,13 +57,13 @@ class InstallSchema_1037A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Migrate messages from old system to new system.
-		$mlf = TTnew( 'MessageListFactory' );
+		$mlf = TTnew( 'MessageListFactory' ); /** @var MessageListFactory $mlf */
 		$mlf->StartTransaction();
 		$mlf->getAll( NULL, NULL, NULL, array('created_date' => 'asc' ) );
 		if ( $mlf->getRecordCount() > 0 ) {
 			$id_map = array(); //Maps the old_id to the message_sender_id.
 
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$i = 0;
 			$e = 0;
 			foreach( $mlf as $message) {
@@ -83,7 +83,7 @@ class InstallSchema_1037A extends InstallSchema_Base {
 				if ( isset($created_by_user_obj) AND is_object($created_by_user_obj) AND $created_by_user_obj->getCompanyObject()->getStatus() != 30 ) {
 					Debug::text('Message: Object Type: '. $message->getObjectType() .' Object ID: '. $message->getObject() .'  From User ID: '. $message->getCreatedBy() .' Subject: '. $message->getSubject(), __FILE__, __LINE__, __METHOD__, 10);
 
-					$mcf = TTnew( 'MessageControlFactory' );
+					$mcf = TTnew( 'MessageControlFactory' ); /** @var MessageControlFactory $mcf */
 
 					$mcf->migration_status = $message->getStatus();
 					$mcf->setObjectType( $message->getObjectType() );
@@ -104,14 +104,14 @@ class InstallSchema_1037A extends InstallSchema_Base {
 
 						//We may never know who the message is actually sent to when its not an email, as the hierarchies and such could have changed.
 						//Try our best though using current hierarchies.
-						$hlf = TTnew( 'HierarchyListFactory' );
+						$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 						$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $created_by_user_obj->getCompany(), $message->getCreatedBy(), $message->getObjectType(), TRUE, FALSE ); //Request - Immediate parents only.
 						//Debug::Arr($request_parent_level_user_ids, 'Sending message to current direct Superiors: ', __FILE__, __LINE__, __METHOD__, 10);
 						if ( $request_parent_level_user_ids !== FALSE ) {
 							$to_user_ids = (array)$request_parent_level_user_ids;
 						}
 
-						$mslf = TTnew( 'MessageSenderListFactory' );
+						$mslf = TTnew( 'MessageSenderListFactory' ); /** @var MessageSenderListFactory $mslf */
 						$mslf->getByCompanyIdAndObjectTypeAndObjectAndNotUser( $created_by_user_obj->getCompany(), $message->getObjectType(), $message->getObject(), $message->getCreatedBy() );
 						if ( $mslf->getRecordCount() > 0 ) {
 							foreach( $mslf as $ms_obj ) {
@@ -157,18 +157,18 @@ class InstallSchema_1037A extends InstallSchema_Base {
 		unset($id_map);
 
 		//Go through each permission group, and enable view_schedule_summary report for anyone who can see view_timesheet_summary.
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj ) {
 				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 				if ( $c_obj->getStatus() != 30 ) {
-					$pclf = TTnew( 'PermissionControlListFactory' );
+					$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 					$pclf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Sort order defaults to "level" column in newer versions which doesn't exist when this runs.
 					if ( $pclf->getRecordCount() > 0 ) {
 						foreach( $pclf as $pc_obj ) {
 							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
-							$plf = TTnew( 'PermissionListFactory' );
+							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $c_obj->getId(), $pc_obj->getId(), 'report', 'view_timesheet_summary', 1 );
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text('Found permission group with job analysis report enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);

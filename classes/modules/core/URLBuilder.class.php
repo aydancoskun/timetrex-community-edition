@@ -42,9 +42,8 @@ class URLBuilder {
 	static protected $data = array();
 	static protected $script = 'index.php';
 
-	//Recursively convert an array to a URL.
-
 	/**
+	 * Recursively convert an array to a URL.
 	 * @param $var
 	 * @param null $varName
 	 * @param bool $sub_array

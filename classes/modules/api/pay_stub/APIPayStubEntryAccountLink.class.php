@@ -61,8 +61,7 @@ class APIPayStubEntryAccountLink extends APIFactory {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		/** @var PayStubEntryAccountlinkListFactory $pseallf */
-		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 		$pseallf->getByCompanyId($this->getCurrentUserObject()->getCompany());
 		Debug::Text('PayStubEntryAccountLink Record Count: '. $pseallf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -72,7 +71,6 @@ class APIPayStubEntryAccountLink extends APIFactory {
 			$prev_type = NULL;
 			$retarr = array();
 
-			/** @var PayStubEntryAccountlinkFactory $pseal_obj */
 			foreach( $pseallf as $pseal_obj ) {
 				$retarr[] = $pseal_obj->data; //FIXME: whip up an objectToArray function
 			}

@@ -69,7 +69,7 @@ class UserSkillFactory extends Factory {
 									);
 				break;
 			case 'source_type':
-				$qf = TTnew('QualificationFactory');
+				$qf = TTnew('QualificationFactory'); /** @var QualificationFactory $qf */
 				$retval = $qf->getOptions( $name );
 				break;
 			case 'columns':
@@ -372,7 +372,7 @@ class UserSkillFactory extends Factory {
 	}
 
 	/**
-	 * @param $tags
+	 * @param $value
 	 * @return bool
 	 */
 	function setTag( $value ) {
@@ -392,7 +392,7 @@ class UserSkillFactory extends Factory {
 		//
 		// Employee
 		if ( $this->getUser() !== FALSE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user_id',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Employee must be specified')
@@ -400,7 +400,7 @@ class UserSkillFactory extends Factory {
 		}
 		// Qualification
 		if ( $this->getQualification() !== FALSE ) {
-			$qlf = TTnew( 'QualificationListFactory' );
+			$qlf = TTnew( 'QualificationListFactory' ); /** @var QualificationListFactory $qlf */
 			$this->Validator->isResultSetWithRows( 'qualification_id',
 															$qlf->getById( $this->getQualification() ),
 															TTi18n::gettext('Skill must be specified')

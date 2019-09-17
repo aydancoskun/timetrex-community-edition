@@ -56,10 +56,10 @@ class InstallSchema_1040A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Loop through all permission control rows and set the levels as best we can.
-		$pclf = TTnew( 'PermissionControlListFactory' );
+		$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 		$pclf->getAll();
 		if ( $pclf->getRecordCount() > 0 ) {
-			$pf = TTnew( 'PermissionFactory' );
+			$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 			$preset_options = $pf->getOptions('preset');
 			$preset_level_options = $pf->getOptions('preset_level');
 

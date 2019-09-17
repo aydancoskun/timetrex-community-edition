@@ -234,7 +234,7 @@ class ContributingPayCodePolicyFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -287,7 +287,7 @@ class ContributingPayCodePolicyFactory extends Factory {
 		}
 
 		if ( $this->getDeleted() == TRUE ) {
-			$cpcplf = TTNew('ContributingShiftPolicyListFactory');
+			$cpcplf = TTNew('ContributingShiftPolicyListFactory'); /** @var ContributingShiftPolicyListFactory $cpcplf */
 			$cpcplf->getByCompanyIdAndContributingPayCodePolicyId( $this->getCompany(), $this->getId() );
 			if ( $cpcplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
@@ -295,7 +295,7 @@ class ContributingPayCodePolicyFactory extends Factory {
 											TTi18n::gettext('This contributing pay code policy is currently in use') .' '. TTi18n::gettext('by contributing shift policies') );
 			}
 
-			$cdlf = TTNew('CompanyDeductionListFactory');
+			$cdlf = TTNew('CompanyDeductionListFactory'); /** @var CompanyDeductionListFactory $cdlf */
 			$cdlf->getByCompanyIdAndContributingPayCodePolicyId( $this->getCompany(), $this->getId() );
 			if ( $cdlf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',

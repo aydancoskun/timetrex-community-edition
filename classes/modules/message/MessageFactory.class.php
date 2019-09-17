@@ -387,7 +387,7 @@ class MessageFactory extends Factory {
 						if ( $this->getParent() == TTUUID::getZeroID() ) {
 							$user_ids[] = $obj->getId();
 						} else {
-							$mlf = TTnew( 'MessageListFactory' );
+							$mlf = TTnew( 'MessageListFactory' ); /** @var MessageListFactory $mlf */
 							$mlf->getById( $this->getParent() );
 							if ( $mlf->getRecordCount() > 0 ) {
 								$m_obj = $mlf->getCurrent();
@@ -402,7 +402,7 @@ class MessageFactory extends Factory {
 						break;
 					case 50: //Request
 						//Get all users who have contributed to the thread.
-						$mlf = TTnew( 'MessageListFactory' );
+						$mlf = TTnew( 'MessageListFactory' ); /** @var MessageListFactory $mlf */
 						$mlf->getMessagesInThreadById( $this->getId() );
 						Debug::Text(' Messages In Thread: '. $mlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 						if ( $mlf->getRecordCount() > 0 ) {
@@ -419,7 +419,7 @@ class MessageFactory extends Factory {
 							//Get direct parent in hierarchy.
 							$u_obj = $obj->getUserObject();
 
-							$hlf = TTnew( 'HierarchyListFactory' );
+							$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 							$user_ids[] = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $u_obj->getCompany(), $u_obj->getId(), $this->getObjectType(), TRUE, FALSE );
 							unset($hlf);
 						}
@@ -449,7 +449,7 @@ class MessageFactory extends Factory {
 				//Get user preferences and determine if they accept email notifications.
 				Debug::Arr($user_ids, 'Recipient User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 
-				$uplf = TTnew( 'UserPreferenceListFactory' );
+				$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 				$uplf->getByUserId( $user_ids );
 				if ( $uplf->getRecordCount() > 0 ) {
 					$retarr = array();
@@ -563,7 +563,7 @@ class MessageFactory extends Factory {
 		//
 		// Parent
 		if ( $this->getParent() != TTUUID::getZeroID() ) {
-			$mlf = TTnew( 'MessageListFactory' );
+			$mlf = TTnew( 'MessageListFactory' ); /** @var MessageListFactory $mlf */
 			$this->Validator->isResultSetWithRows(	'parent',
 															$mlf->getByID($this->getParent()),
 															TTi18n::gettext('Parent is invalid')
@@ -619,7 +619,7 @@ class MessageFactory extends Factory {
 												TTi18n::gettext('Invalid Acknowledge Date')
 											);
 		// User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'ack_by',
 														$ulf->getByID($this->getAckBy()),
 														TTi18n::gettext('Incorrect User')

@@ -81,7 +81,7 @@ class InstallSchema_1015A extends InstallSchema_Base {
 		if ( is_array($this->station_users) AND count($this->station_users) > 0 ) {
 			foreach( $this->station_users as $station_id => $user_ids ) {
 				//Get station object.
-				$slf = TTnew( 'StationListFactory' );
+				$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 				$slf->getById( $station_id );
 				if ( $slf->getRecordCount() > 0 ) {
 					$s_obj = $slf->getCurrent();
@@ -113,7 +113,7 @@ class InstallSchema_1015A extends InstallSchema_Base {
 		}
 		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__, 9);
 
-		$cjf = TTnew( 'CronJobFactory' );
+		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
 		$cjf->setName('TimeClockSync');
 		$cjf->setMinute('*');
 		$cjf->setHour('*');

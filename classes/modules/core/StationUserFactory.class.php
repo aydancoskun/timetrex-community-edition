@@ -102,7 +102,7 @@ class StationUserFactory extends Factory {
 		}
 		// User
 		if ( $this->getUser() != TTUUID::getNotExistID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('User is invalid')

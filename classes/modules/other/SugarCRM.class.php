@@ -165,9 +165,8 @@ class SugarCRM {
 		return TRUE;
 	}
 
-	//Search by account name as well, if the email doesn't match but company name does.
-
 	/**
+	 * Search by account name as well, if the email doesn't match but company name does.
 	 * @param $search_field
 	 * @param $search_value
 	 * @param string $select_fields
@@ -202,9 +201,8 @@ class SugarCRM {
 		return new SugarCRMReturnHandler( $result, $select_fields, $limit );
 	}
 
-	//Search by account name as well, if the email doesn't match but company name does.
-
 	/**
+	 * Search by account name as well, if the email doesn't match but company name does.
 	 * @param $search_field
 	 * @param $search_value
 	 * @param string $select_fields
@@ -518,9 +516,8 @@ class SugarCRMReturnHandler {
 		return FALSE;
 	}
 
-	//Returns the array of just one row.
-
 	/**
+	 * Returns the array of just one row.
 	 * @param array $select_fields
 	 * @return array|bool
 	 */
@@ -544,9 +541,8 @@ class SugarCRMReturnHandler {
 		return FALSE;
 	}
 
-	//Returns one column from one row returned.
-
 	/**
+	 * Returns one column from one row returned.
 	 * @return bool|mixed
 	 */
 	function getOne() {
@@ -579,9 +575,8 @@ class SugarCRMReturnHandler {
 		return FALSE;
 	}
 
-	//Used by getResult()
-
 	/**
+	 * Used by getResult()
 	 * @param $result
 	 * @param array $select_fields
 	 * @param string $limit

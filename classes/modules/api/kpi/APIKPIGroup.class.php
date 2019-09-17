@@ -101,7 +101,7 @@ class APIKPIGroup extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'kpi', 'view' );
 
-		$qglf = TTnew( 'KPIGroupListFactory' );
+		$qglf = TTnew( 'KPIGroupListFactory' ); /** @var KPIGroupListFactory $qglf */
 
 		if ( $mode == 'flat' ) {
 
@@ -195,7 +195,7 @@ class APIKPIGroup extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'KPIGroupListFactory' );
+				$lf = TTnew( 'KPIGroupListFactory' ); /** @var KPIGroupListFactory $lf */
 				$lf->StartTransaction();
 
 				if ( isset($row['id']) AND $row['id'] != '' ) {
@@ -300,7 +300,7 @@ class APIKPIGroup extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'KPIGroupListFactory' );
+				$lf = TTnew( 'KPIGroupListFactory' ); /** @var KPIGroupListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

@@ -65,7 +65,7 @@ class TTLog {
 
 		if ( $user_id == '' ) {
 			global $current_user;
-			if ( is_object($current_user) AND ( strpos( get_class( $current_user ), 'UserFactory' ) === 0 OR strpos( get_class( $current_user ), 'UserListFactory' ) === 0 ) ) { //Make sure we ignore Portal users.
+			if ( is_object( $current_user ) AND is_a( $current_user, 'UserFactory' ) ) { //Make sure we ignore Portal users.
 				Debug::text('User Class: '. get_class( $current_user ) .' Full Name: '. $current_user->getFullName(), __FILE__, __LINE__, __METHOD__, 10);
 				$user_id = $current_user->getId();
 			} else {
@@ -77,7 +77,7 @@ class TTLog {
 			return FALSE;
 		}
 
-		$lf = TTnew( 'LogFactory' );
+		$lf = TTnew( 'LogFactory' ); /** @var LogFactory $lf */
 
 		$lf->setObject( $object_id );
 		$lf->setAction( $action_id );
@@ -96,7 +96,7 @@ class TTLog {
 					)
 					AND is_object($object) AND $object->getEnableSystemLogDetail() == TRUE ) {
 
-				$ldf = TTnew( 'LogDetailFactory' );
+				$ldf = TTnew( 'LogDetailFactory' ); /** @var LogDetailFactory $ldf */
 				$ldf->addLogDetail( $action_id, $insert_id, $object );
 			} else {
 				Debug::text('LogDetail Disabled... Object ID: '. $object_id .' Action ID: '. $action_id .' Table: '. $table .' Description: '. $description.' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);

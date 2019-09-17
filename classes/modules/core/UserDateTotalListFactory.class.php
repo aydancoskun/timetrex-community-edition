@@ -55,7 +55,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -126,7 +126,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -162,7 +162,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -230,7 +230,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					';
 
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -238,10 +238,15 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $user_id UUID
 	 * @param int $object_type_id
+	 * @param null $absence_policy_id
+	 * @param null $limit
+	 * @param null $page
+	 * @param null $where
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
+	 * @throws DBError
 	 */
-	function getLastByUserIdAndObjectType( $user_id, $object_type_id, $order = NULL ) {
+	function getLastByUserIdAndObjectTypeOrAbsencePolicy( $user_id, $object_type_id, $absence_policy_id = NULL, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -255,20 +260,23 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		$ph = array(
 				'user_id' => TTUUID::castUUID($user_id),
+
 		);
 
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a
 					where a.user_id = ?
-						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
-						AND a.total_time != 0
+						AND ( a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .') 
+							OR ( a.object_type_id in ( 25, 50 ) AND a.src_object_id in ('. $this->getListSQL( $absence_policy_id, $ph, 'uuid' ) .') ) )
+						AND a.total_time != 0						
 						AND ( a.deleted = 0 )
 					';
 
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
+		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
@@ -276,8 +284,10 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $user_id UUID
 	 * @param int $object_type_id
+	 * @param $date_stamp
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
+	 * @throws DBError
 	 */
 	function getNextByUserIdAndObjectTypeAndEpoch( $user_id, $object_type_id, $date_stamp, $order = NULL ) {
 		if ( $user_id == '' ) {
@@ -312,7 +322,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -368,7 +378,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -426,7 +436,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -480,7 +490,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -525,12 +535,10 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND deleted = 0
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
-
-	//function getTotalSumByUserDateID( $user_date_id ) {
 
 	/**
 	 * @param string $user_id UUID
@@ -678,9 +686,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		return $total;
 	}
 
-	//Make sure we take into account auto-deduct/add meal/break policies.
-
 	/**
+	 * Make sure we take into account auto-deduct/add meal/break policies.
 	 * @param string $user_id UUID
 	 * @param int $epoch EPOCH
 	 * @param int $week_start_epoch EPOCH
@@ -733,9 +740,11 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 * @param int $object_type_id
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
+	 * @param null $limit
 	 * @return bool|UserDateTotalListFactory
+	 * @throws DBError
 	 */
-	function getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $company_id, $user_id, $object_type_id, $start_date, $end_date) {
+	function getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $company_id, $user_id, $object_type_id, $start_date, $end_date, $limit = NULL ) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -786,14 +795,13 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					ORDER BY a.date_stamp asc, a.object_type_id asc, d.type_id desc, a.src_object_id desc, a.total_time, a.id
 					';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
 
 		return $this;
 	}
 
-	//Used by calcQuickExceptions maintenance job to speed up finding days that need to have exceptions calculated throughout the day.
-
 	/**
+	 * Used by calcQuickExceptions maintenance job to speed up finding days that need to have exceptions calculated throughout the day.
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
 	 * @param int $pay_period_status_id
@@ -908,17 +916,16 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 				';
 				//Don't check deleted = 0 on PCF/PF tables, as we need to check IS NULL on them instead.
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
 
-
-	//This isn't JUST worked time, it also includes paid lunch/break time. Specifically in auto-deduct cases
-	//where they work 8.5hrs and only get paid for 8hrs due to auto-deduct lunch or breaks.
 	/**
+	 * This isn't JUST worked time, it also includes paid lunch/break time. Specifically in auto-deduct cases
+	 * where they work 8.5hrs and only get paid for 8hrs due to auto-deduct lunch or breaks.
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
@@ -1012,8 +1019,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 	/**
 	 * @param string $user_id UUID
-	 * @param int $object_type_id
-	 * @param string $pay_code_id UUID
+	 * @param int|int[] $object_type_id
+	 * @param string[] $pay_code_id UUID
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
 	 * @return bool
@@ -1305,9 +1312,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		return $this->db->getCol( $query, $ph );
 	}
 
-	//Finds number of days the employee received paid absence time.
-
 	/**
+	 * Finds number of days the employee received paid absence time.
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
@@ -1414,8 +1420,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		return $total;
 	}
-
-	//function getDaysWorkedByUserIDAndUserDateIDs( $user_id, $user_date_ids ) {
 
 	/**
 	 * @param string $user_id UUID
@@ -1577,8 +1581,9 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $user_id UUID
 	 * @param string $pay_period_id UUID
+	 * @param $object_type_id
+	 * @param $override
 	 * @return bool|int
 	 */
 	function getTotalByPayPeriodIdAndObjectTypeAndOverride( $pay_period_id, $object_type_id, $override ) {
@@ -1645,7 +1650,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					';
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
 
 		return $this;
 	}
@@ -1725,7 +1730,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					order by a.object_type_id = 25, a.object_type_id desc, a.pay_code_id asc
 				';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1848,7 +1853,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -1934,7 +1939,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= $this->getSortSQL( $order, FALSE );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -2064,7 +2069,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		$query .= $this->getSortSQL( $order, FALSE );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -2204,7 +2209,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		$query .= $this->getSortSQL( $order, FALSE );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -2350,7 +2355,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					';
 
 		$query .= $this->getSortSQL( $order, FALSE );
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -2510,7 +2515,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					';
 
 		$query .= $this->getSortSQL( $order, FALSE );
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -2649,7 +2654,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					';
 
 		$query .= $this->getSortSQL( $order, FALSE );
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -2947,7 +2952,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 

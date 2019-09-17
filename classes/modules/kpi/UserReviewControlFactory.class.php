@@ -392,13 +392,13 @@ class UserReviewControlFactory extends Factory {
 		//
 
 		// employee
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'user_id',
 														$ulf->getByID($this->getUser()),
 														TTi18n::gettext('Invalid employee')
 													);
 		// reviewer
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows( 'reviewer_user_id',
 														$ulf->getByID($this->getReviewerUser()),
 														TTi18n::gettext('Invalid reviewer')
@@ -530,9 +530,9 @@ class UserReviewControlFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

@@ -82,7 +82,7 @@ class AccrualFactory extends Factory {
 				unset($retval[10], $retval[20]); //Remove just Banked/Used as those can't be deleted.
 				break;
 			case 'accrual_policy_type':
-				$apf = TTNew('AccrualPolicyFactory');
+				$apf = TTNew('AccrualPolicyFactory'); /** @var AccrualPolicyFactory $apf */
 				$retval = $apf->getOptions('type');
 				break;
 			case 'columns':
@@ -392,7 +392,7 @@ class AccrualFactory extends Factory {
 			}
 		}
 		if ( $this->getUser() != '' AND $this->Validator->isError('user_id') == FALSE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user_id',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Invalid Employee')
@@ -400,7 +400,7 @@ class AccrualFactory extends Factory {
 		}
 		// Accrual Policy
 		if ( $this->getAccrualPolicy() != '' AND $this->getAccrualPolicy() != TTUUID::getZeroID() ) {
-			$aplf = TTnew( 'AccrualPolicyListFactory' );
+			$aplf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $aplf */
 			$this->Validator->isResultSetWithRows(	'accrual_policy_id',
 													  $aplf->getByID($this->getAccrualPolicy()),
 													  TTi18n::gettext('Accrual Policy is invalid')
@@ -416,7 +416,7 @@ class AccrualFactory extends Factory {
 			}
 		}
 		if ( $this->getAccrualPolicyAccount() != '' AND $this->Validator->isError('accrual_policy_account_id') == FALSE ) {
-			$apalf = TTnew( 'AccrualPolicyAccountListFactory' );
+			$apalf = TTnew( 'AccrualPolicyAccountListFactory' ); /** @var AccrualPolicyAccountListFactory $apalf */
 			$this->Validator->isResultSetWithRows(	'accrual_policy_account_id',
 														$apalf->getByID($this->getAccrualPolicyAccount()),
 														TTi18n::gettext('Accrual Account is invalid')
@@ -439,7 +439,7 @@ class AccrualFactory extends Factory {
 		}
 		// UserDateTotal
 		if ( $this->getUserDateTotalID() != '' AND $this->getUserDateTotalID() != TTUUID::getZeroID() ) {
-			$udtlf = TTnew( 'UserDateTotalListFactory' );
+			$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 			$this->Validator->isResultSetWithRows(	'user_date_total',
 													  $udtlf->getByID($this->getUserDateTotalID()),
 													  TTi18n::gettext('User Date Total ID is invalid')
@@ -512,13 +512,13 @@ class AccrualFactory extends Factory {
 		//Or orphaned entries on Sum'ing?
 		//Would have to do it on view as well though.
 		if ( TTUUID::isUUID( $this->getUserDateTotalID() ) AND $this->getUserDateTotalID() != TTUUID::getZeroID() AND $this->getUserDateTotalID() != TTUUID::getNotExistID() ) {
-			$alf = TTnew( 'AccrualListFactory' );
+			$alf = TTnew( 'AccrualListFactory' ); /** @var AccrualListFactory $alf */
 			$alf->getByUserIdAndAccrualPolicyAccountAndAccrualPolicyAndUserDateTotalID( $this->getUser(), $this->getAccrualPolicyAccount(), $this->getAccrualPolicy(), $this->getUserDateTotalID() );
 			Debug::text('Found Duplicate Records: '. (int)$alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $alf->getRecordCount() > 0 ) {
 				foreach($alf as $a_obj ) {
 					if ( $a_obj->getId() != $this->getId() ) { //Make sure we don't delete the record we are currently editing.
-						$a_obj->Delete();
+						$a_obj->Delete( TRUE );
 					}
 				}
 			}
@@ -555,7 +555,7 @@ class AccrualFactory extends Factory {
 	static function deleteOrphans( $user_id, $date_stamp ) {
 		Debug::text('Attempting to delete Orphaned Records for User ID: '. $user_id .' Date: '. TTDate::getDate('DATE', $date_stamp), __FILE__, __LINE__, __METHOD__, 10);
 		//Remove orphaned entries
-		$alf = TTnew( 'AccrualListFactory' );
+		$alf = TTnew( 'AccrualListFactory' ); /** @var AccrualListFactory $alf */
 		$alf->getOrphansByUserIdAndDate( $user_id, $date_stamp );
 		Debug::text('Found Orphaned Records: '. $alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $alf->getRecordCount() > 0 ) {
@@ -563,7 +563,7 @@ class AccrualFactory extends Factory {
 			foreach( $alf as $a_obj ) {
 				Debug::text('Orphan Record ID: '. $a_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 				$accrual_policy_ids[] = $a_obj->getAccrualPolicyAccount();
-				$a_obj->Delete();
+				$a_obj->Delete( TRUE );
 			}
 
 			//ReCalc balances

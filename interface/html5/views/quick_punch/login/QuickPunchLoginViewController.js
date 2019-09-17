@@ -80,51 +80,78 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 		this.authentication_api.PunchLogin( quick_punch_id, quick_punch_password, {
 			onResult: function( raw_result ) {
 				if ( raw_result.isValid() ) {
+					var result = raw_result.getResult();
 
-					//set up promises to complete before view change
-					TTPromise.add( 'QPLogin', 'Permissions' );
+					TTPromise.add( 'QPLogin', 'init' );
+
 					TTPromise.add( 'QPLogin', 'CurrentStation' );
-					TTPromise.add( 'QPLogin', 'CurrentUser' );
-					TTPromise.add( 'QPLogin', 'CurrentCompany' );
-					TTPromise.add( 'QPLogin', 'Locale' );
+					$this.getCurrentStation();
 
-					//when all QPLogin promises complete, forward to punch view
+					TTPromise.add( 'QPLogin', 'CurrentUser' );
+					$this.getCurrentUser();
+
+					// LocalCacheData.setSessionID( result.SessionID );
+					setCookie( 'SessionID-QP', result.SessionID, { expires: 30, path: LocalCacheData.cookie_path } );
+
+					TTPromise.add( 'QPLogin', 'Permissions' );
+					$this.permission_api.getPermission( {
+						onResult: function( permissionRes ) {
+							permission_result = permissionRes.getResult();
+
+							if ( permission_result != false ) {
+								LocalCacheData.setPermissionData( permission_result );
+								TTPromise.resolve( 'QPLogin', 'Permissions' );
+							} else {
+								//User does not have any permissions.
+								Debug.Text( 'User does not have any permissions!', 'QuickPunchLoginController.js', 'QuickPunchViewController', 'getPermission', 10 );
+								TAlertManager.showAlert( $.i18n._( 'Unable to login due to permissions, please try again and if the problem persists contact customer support.' ), '', function() {
+									Global.Logout();
+									window.location.reload();
+								} );
+							}
+						}
+					} );
+
+					TTPromise.add( 'QPLogin', 'CurrentCompany' );
+					$this.authentication_api.getCurrentCompany( {
+						onResult: function( current_company_result ) {
+							var com_result = current_company_result.getResult();
+
+							if ( com_result != false ) {
+								if ( com_result.is_setup_complete == 1 ) {
+									com_result.is_setup_complete = true;
+								} else {
+									com_result.is_setup_complete = false;
+								}
+
+								LocalCacheData.setCurrentCompany( com_result );
+								Debug.Text( 'Version: Client: ' + APIGlobal.pre_login_data.application_build + ' Server: ' + com_result.application_build, 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
+
+								if ( APIGlobal.pre_login_data.application_build != com_result.application_build && APIGlobal.pre_login_data['PRODUCTION'] == true ) {
+									Debug.Text( 'Version mismatch on login: Reloading...', 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
+									window.location.reload( true );
+								}
+
+								TTPromise.resolve( 'QPLogin', 'CurrentCompany' );
+							} else {
+								Debug.Text( 'Unable to get company information!', 'QuickPunchLoginController.js', 'QuickPunchViewController', 'getPermission', 10 );
+								TAlertManager.showAlert( $.i18n._( 'Unable to download required information, please check your network connection and try again. If the problem persists contact customer support.' ), '', function() {
+									Global.Logout();
+									window.location.reload();
+								} );
+							}
+						}
+					} );
+
+					TTPromise.add( 'QPLogin', 'Locale' );
+					$this.getLocale();
+
+					//When all QPLogin promises complete, forward to punch view
 					TTPromise.wait( 'QPLogin', null, function() {
 						$this.goToView();
 					} );
 
-					var result = raw_result.getResult();
-					$this.getCurrentStation();
-					$this.getCurrentUser();
-					// LocalCacheData.setSessionID( result.SessionID );
-					setCookie( 'SessionID-QP', result.SessionID, { expires: 30, path: LocalCacheData.cookie_path } );
-					$this.permission_api.getPermission( {
-						onResult: function( permissionRes ) {
-							LocalCacheData.setPermissionData( permissionRes.getResult() );
-							TTPromise.resolve( 'QPLogin', 'Permissions' );
-						}
-					} );
-
-					$this.authentication_api.getCurrentCompany( {
-						onResult: function( current_company_result ) {
-							var com_result = current_company_result.getResult();
-							if ( com_result.is_setup_complete == 1 ) {
-								com_result.is_setup_complete = true;
-							} else {
-								com_result.is_setup_complete = false;
-							}
-							LocalCacheData.setCurrentCompany( com_result );
-
-
-							TTPromise.resolve( 'QPLogin', 'CurrentCompany' );
-							Debug.Text( 'Version: Client: ' + APIGlobal.pre_login_data.application_build + ' Server: ' + com_result.application_build, 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
-							if ( APIGlobal.pre_login_data.application_build != com_result.application_build && APIGlobal.pre_login_data['PRODUCTION'] == true ) {
-								Debug.Text( 'Version mismatch on login: Reloading...', 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
-								window.location.reload( true );
-							}
-						}
-					} );
-					$this.getLocale();
+					TTPromise.resolve( 'QPLogin', 'init' );
 				} else {
 					$this.setErrorTips( raw_result );
 				}
@@ -154,7 +181,7 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 				if ( result ) {
 					login_language = result.getResult();
 				}
-				var message_id = UUID.guid();
+				var message_id = TTUUID.generateUUID();
 				if ( LocalCacheData.getLoginData().locale != null && login_language !== LocalCacheData.getLoginData().locale ) {
 					ProgressBar.showProgressBar( message_id );
 					ProgressBar.changeProgressBarMessage( $.i18n._( 'Language changed, reloading' ) + '...' );
@@ -325,7 +352,7 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 	onLanguageChange: function( e ) {
 		Global.setLanguageCookie( $( e.target ).val() );
 		LocalCacheData.setI18nDic( null );
-		var message_id = UUID.guid();
+		var message_id = TTUUID.generateUUID();
 		ProgressBar.showProgressBar( message_id );
 		ProgressBar.changeProgressBarMessage( $.i18n._( 'Language changed, reloading' ) + '...' );
 

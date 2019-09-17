@@ -55,7 +55,7 @@ class ImportPayStubAmendment extends Import {
 		$retval = NULL;
 		switch( $name ) {
 			case 'columns':
-				$psaf = TTNew('PayStubAmendmentFactory');
+				$psaf = TTNew('PayStubAmendmentFactory'); /** @var PayStubAmendmentFactory $psaf */
 				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('status', 'type', 'pay_stub_entry_name', 'effective_date', 'amount', 'rate', 'units', 'description', 'ytd_adjustment'), Misc::trimSortPrefix( $psaf->getOptions('columns') ) ) );
 
 				break;
@@ -73,7 +73,7 @@ class ImportPayStubAmendment extends Import {
 								);
 				break;
 			case 'parse_hint':
-				$upf = TTnew('UserPreferenceFactory');
+				$upf = TTnew('UserPreferenceFactory'); /** @var UserPreferenceFactory $upf */
 
 				$retval = array(
 								'effective_date' => $upf->getOptions('date_format'),
@@ -122,12 +122,13 @@ class ImportPayStubAmendment extends Import {
 	//
 	// Generic parser functions.
 	//
+
 	/**
 	 * @return bool
 	 */
 	function getPayStubAccountOptions() {
 		//Get accrual policies
-		$psealf = TTNew('PayStubEntryAccountListFactory');
+		$psealf = TTNew('PayStubEntryAccountListFactory'); /** @var PayStubEntryAccountListFactory $psealf */
 		$psealf->getByCompanyIdAndTypeId( $this->company_id, array(10, 20, 30, 50, 80) );
 
 		//Get names with types in front, ie: "Earning - Commission"
@@ -185,7 +186,7 @@ class ImportPayStubAmendment extends Import {
 	 * @return array|bool|mixed
 	 */
 	function parse_status( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$psaf = TTnew('PayStubAmendmentFactory');
+		$psaf = TTnew('PayStubAmendmentFactory'); /** @var PayStubAmendmentFactory $psaf */
 		$options = Misc::trimSortPrefix( $psaf->getOptions( 'status' ) );
 
 		if ( isset($options[$input]) ) {
@@ -206,7 +207,7 @@ class ImportPayStubAmendment extends Import {
 	 * @return array|bool|mixed
 	 */
 	function parse_type( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$psaf = TTnew('PayStubAmendmentFactory');
+		$psaf = TTnew('PayStubAmendmentFactory'); /** @var PayStubAmendmentFactory $psaf */
 		$options = Misc::trimSortPrefix( $psaf->getOptions( 'type' ) );
 
 		if ( isset($options[$input]) ) {

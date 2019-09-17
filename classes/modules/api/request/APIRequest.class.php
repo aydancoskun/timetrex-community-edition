@@ -94,7 +94,7 @@ class APIRequest extends APIFactory {
 			}
 			Debug::Arr( $type_id, 'Type ID: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			$blf = TTnew( 'RequestListFactory' );
+			$blf = TTnew( 'RequestListFactory' ); /** @var RequestListFactory $blf */
 			$object_type_id = $blf->getHierarchyTypeId( $type_id );
 			if ( isset($object_type_id) AND is_array($object_type_id) ) {
 				$hl = new APIHierarchyLevel();
@@ -122,7 +122,7 @@ class APIRequest extends APIFactory {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		$blf = TTnew( 'RequestListFactory' );
+		$blf = TTnew( 'RequestListFactory' ); /** @var RequestListFactory $blf */
 
 		//If type_id and hierarchy_level is passed, assume we are in the authorization view.
 		if ( isset($data['filter_data']['type_id']) AND is_array($data['filter_data']['type_id']) AND isset($data['filter_data']['hierarchy_level'])
@@ -139,7 +139,7 @@ class APIRequest extends APIFactory {
 				$data['filter_data']['type_id'] = array_keys( $this->getOptions('type') );
 			}
 
-			$hllf = TTnew( 'HierarchyLevelListFactory' );
+			$hllf = TTnew( 'HierarchyLevelListFactory' ); /** @var HierarchyLevelListFactory $hllf */
 			$hierarchy_level_arr = $hllf->getLevelsAndHierarchyControlIDsByUserIdAndObjectTypeID( $this->getCurrentUserObject()->getId(), $blf->getHierarchyTypeId( $data['filter_data']['type_id'] ) );
 			Debug::Arr( $data['filter_data']['type_id'], 'Type ID: ', __FILE__, __LINE__, __METHOD__, 10);
 			Debug::Arr( $blf->getHierarchyTypeId( $data['filter_data']['type_id'] ), 'Hierarchy Type ID: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -252,95 +252,106 @@ class APIRequest extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach ( $data as $key => $row ) {
-				$primary_validator = $tertiary_validator = new Validator();
-				$lf = TTnew( 'RequestListFactory' );
-				$lf->StartTransaction();
-				if ( isset( $row['id'] ) AND TTUUID::isUUID($row['id']) AND $row['id'] != TTUUID::getZeroID() AND $row['id'] != TTUUID::getNotExistID()) {
-					//Modifying existing object.
-					//Get request object, so we can only modify just changed data for specific records if needed.
-					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
-					if ( $lf->getRecordCount() == 1 ) {
-						//Object exists, check edit permissions
-						if (
-								$validate_only == TRUE
-								OR
-								(
-										$this->getPermissionObject()->Check( 'request', 'edit' )
-										OR ( $this->getPermissionObject()->Check( 'request', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy() ) === TRUE )
-										OR ( $this->getPermissionObject()->Check( 'request', 'edit_child' ) AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
-								)
-						) {
-							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
-							$lf = $lf->getCurrent();
-							$row = array_merge( $lf->getObjectAsArray(), $row );
+				$transaction_function = function() use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $permission_children_ids ) {
+					$primary_validator = $tertiary_validator = new Validator();
+					$lf = TTnew( 'RequestListFactory' ); /** @var RequestListFactory $lf */
+					if ( $validate_only	== FALSE ) { //Only switch into serializable mode when actually saving the record.
+						$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing duplicate user records or duplicate employee number/user_names.
+					}
+					$lf->StartTransaction();
+					if ( isset( $row['id'] ) AND TTUUID::isUUID( $row['id'] ) AND $row['id'] != TTUUID::getZeroID() AND $row['id'] != TTUUID::getNotExistID() ) {
+						//Modifying existing object.
+						//Get request object, so we can only modify just changed data for specific records if needed.
+						$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
+						if ( $lf->getRecordCount() == 1 ) {
+							//Object exists, check edit permissions
+							if (
+									$validate_only == TRUE
+									OR
+									(
+											$this->getPermissionObject()->Check( 'request', 'edit' )
+											OR ( $this->getPermissionObject()->Check( 'request', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy() ) === TRUE )
+											OR ( $this->getPermissionObject()->Check( 'request', 'edit_child' ) AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
+									)
+							) {
+								Debug::Text( 'Row Exists, getting current data for ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
+								$lf = $lf->getCurrent();
+								$row = array_merge( $lf->getObjectAsArray(), $row );
+							} else {
+								$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Edit permission denied' ) );
+							}
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Edit permission denied' ) );
+							//Object doesn't exist.
+							$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
 						}
 					} else {
-						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
+						//Adding new object, check ADD permissions.
+						$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check( 'request', 'add' ), TTi18n::gettext( 'Add permission denied' ) );
+
+						//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first,
+						//so the sub-classes can depend on it. We also need to call Save( TRUE, TRUE ) to force a lookup on isNew()
+						$row['id'] = $lf->getNextInsertId();
 					}
-				} else {
-					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check( 'request', 'add' ), TTi18n::gettext( 'Add permission denied' ) );
+					Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-					//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first,
-					//so the sub-classes can depend on it. We also need to call Save( TRUE, TRUE ) to force a lookup on isNew()
-					$row['id'] = $lf->getNextInsertId();
-				}
-				Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $validate_only == TRUE ) {
+						$lf->Validator->setValidateOnly( $validate_only );
+					}
 
-				if ( $validate_only == TRUE ) {
-					$lf->Validator->setValidateOnly( $validate_only );
-				}
+					$is_valid = $primary_validator->isValid( $ignore_warning );
+					if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
+						Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 
-				$is_valid = $primary_validator->isValid( $ignore_warning );
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
-
-					$lf->setObjectFromArray( $row );
-					//Save request_schedule here...
-					if ( $this->getCurrentCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-						if ( isset( $row['request_schedule'] ) AND is_array( $row['request_schedule'] ) AND count( $row['request_schedule'] ) > 0 ) {
-							$rs_obj = TTnew( 'APIRequestSchedule' );
-							foreach ( $row['request_schedule'] as $request_schedule_row ) {
-								if ( is_array( $request_schedule_row ) ) {
-									$request_schedule_row['request_id'] = $row['id'];
-									$request_schedule_row['user_id'] = TTUUID::castUUID($row['user_id']);
-									$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $rs_obj->setRequestSchedule( $request_schedule_row, $validate_only ), $tertiary_validator );
-									$is_valid = $tertiary_validator->isValid( $ignore_warning );
+						$lf->setObjectFromArray( $row );
+						//Save request_schedule here...
+						if ( $this->getCurrentCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+							if ( isset( $row['request_schedule'] ) AND is_array( $row['request_schedule'] ) AND count( $row['request_schedule'] ) > 0 ) {
+								$rs_obj = TTnew( 'APIRequestSchedule' );
+								/** @var APIRequestSchedule $rs_obj */
+								foreach ( $row['request_schedule'] as $request_schedule_row ) {
+									if ( is_array( $request_schedule_row ) ) {
+										$request_schedule_row['request_id'] = $row['id'];
+										$request_schedule_row['user_id'] = TTUUID::castUUID( $row['user_id'] );
+										$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $rs_obj->setRequestSchedule( $request_schedule_row, $validate_only ), $tertiary_validator );
+										$is_valid = $tertiary_validator->isValid( $ignore_warning );
+									}
 								}
+								unset( $rs_obj );
 							}
-							unset( $rs_obj );
 						}
-					}
 
-					//Checking tertiary validity
-					if ( $is_valid == TRUE ) {
-						$is_valid = $lf->isValid( $ignore_warning );
+						//Checking tertiary validity
 						if ( $is_valid == TRUE ) {
-							Debug::Text( 'Saving data...', __FILE__, __LINE__, __METHOD__, 10 );
-							if ( $validate_only == TRUE ) {
-								$save_result[$key] = TRUE;
-							} else {
-								$save_result[$key] = $lf->Save( TRUE, TRUE );
+							$is_valid = $lf->isValid( $ignore_warning );
+							if ( $is_valid == TRUE ) {
+								Debug::Text( 'Saving data...', __FILE__, __LINE__, __METHOD__, 10 );
+								if ( $validate_only == TRUE ) {
+									$save_result[ $key ] = TRUE;
+								} else {
+									$save_result[ $key ] = $lf->Save( TRUE, TRUE );
+								}
+								$validator_stats['valid_records']++;
 							}
-							$validator_stats['valid_records']++;
 						}
 					}
-				}
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $is_valid == FALSE ) {
+						Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
-					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
+						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf, $tertiary_validator );
-				} elseif ( $validate_only == TRUE ) {
-					$lf->FailTransaction();
-				}
+						$validator[ $key ] = $this->setValidationArray( $primary_validator, $lf, $tertiary_validator );
+					} elseif ( $validate_only == TRUE ) {
+						$lf->FailTransaction();
+					}
 
-				$lf->CommitTransaction();
+					$lf->CommitTransaction();
+					$lf->setTransactionMode(); //Back to default isolation level.
+
+					return array( $validator, $validator_stats, $key, $save_result );
+				};
+
+				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
@@ -383,7 +394,7 @@ class APIRequest extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'RequestListFactory' );
+				$lf = TTnew( 'RequestListFactory' ); /** @var RequestListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

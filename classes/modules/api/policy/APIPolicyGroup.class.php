@@ -108,7 +108,7 @@ class APIPolicyGroup extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$utlf = TTnew( 'PolicyGroupListFactory' );
+		$utlf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $utlf */
 		$utlf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $utlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $utlf->getRecordCount() > 0 ) {
@@ -188,7 +188,7 @@ class APIPolicyGroup extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PolicyGroupListFactory' );
+				$lf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -293,7 +293,7 @@ class APIPolicyGroup extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PolicyGroupListFactory' );
+				$lf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

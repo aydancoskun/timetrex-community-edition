@@ -64,9 +64,9 @@ class APIUser extends APIFactory {
 		}
 		Debug::Text('Getting user default data for Company ID: '. $company_id .' TMP Company ID: '. $tmp_company_id, __FILE__, __LINE__, __METHOD__, 10);
 
-		$uf = TTnew('UserFactory');
+		$uf = TTnew('UserFactory'); /** @var UserFactory $uf */
 		//Get New Hire Defaults.
-		$udlf = TTnew( 'UserDefaultListFactory' );
+		$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 		$udlf->getByCompanyId( $company_id );
 		if ( $udlf->getRecordCount() > 0 ) {
 			Debug::Text('Using User Defaults, as they exist...', __FILE__, __LINE__, __METHOD__, 10);
@@ -113,7 +113,7 @@ class APIUser extends APIFactory {
 			$data['country'] = 'US';
 		}
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getHighestEmployeeNumberByCompanyId( $company_id );
 		if ( $ulf->getRecordCount() > 0 ) {
 			Debug::Text('Highest Employee Number: '. $ulf->getCurrent()->getEmployeeNumber(), __FILE__, __LINE__, __METHOD__, 10);
@@ -207,7 +207,7 @@ class APIUser extends APIFactory {
 
 		$include_last_punch_time = ( isset($data['filter_columns']['max_punch_time_stamp']) ) ? TRUE : FALSE;
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'], $include_last_punch_time );
 		Debug::Text('Record Count: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ulf->getRecordCount() > 0 ) {
@@ -296,176 +296,187 @@ class APIUser extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $row ) {
-				$primary_validator = new Validator();
-				$lf = TTnew( 'UserListFactory' );
-				$lf->StartTransaction();
+				$transaction_function = function() use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $permission_children_ids ) {
+					$primary_validator = new Validator();
 
-				//Force Company ID to current company.
-				if ( !isset($row['company_id']) OR ( isset($row['company_id']) AND $row['company_id'] == '' ) OR !$this->getPermissionObject()->Check('company', 'view') ) {
-					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
-				}
+					$lf = TTnew( 'UserListFactory' ); /** @var UserListFactory $lf */
+					if ( $validate_only	== FALSE ) { //Only switch into serializable mode when actually saving the record.
+						$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing duplicate user records or duplicate employee number/user_names.
+					}
+					$lf->StartTransaction();
 
-				if ( isset($row['id']) AND $row['id'] != '' ) {
-					//Modifying existing object.
-					//Get user object, so we can only modify just changed data for specific records if needed.
-					$lf->getByIdAndCompanyId( $row['id'], $row['company_id'] );
-					if ( $lf->getRecordCount() == 1 ) {
-						//Object exists, check edit permissions
-						//Debug::Text('User ID: '. $row['id'] .' Created By: '. $lf->getCurrent()->getCreatedBy() .' Is Owner: '. (int)$this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) .' Is Child: '. (int)$this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ), __FILE__, __LINE__, __METHOD__, 10);
-						if (
-							$validate_only == TRUE
-							OR
-								(
-								$this->getPermissionObject()->Check('user', 'edit')
-									OR ( $this->getPermissionObject()->Check('user', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('user', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )
-								) ) {
+					//Force Company ID to current company.
+					if ( !isset($row['company_id']) OR ( isset($row['company_id']) AND $row['company_id'] == '' ) OR !$this->getPermissionObject()->Check('company', 'view') ) {
+						$row['company_id'] = $this->getCurrentCompanyObject()->getId();
+					}
 
-							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
-							//$row = array_merge( $lf->getCurrent()->getObjectAsArray(), $row );
-							$lf = $lf->getCurrent(); //Make the current $lf variable the current object, so we can ignore some fields if needed.
-							$row = array_merge( $lf->getObjectAsArray(), $row );
+					if ( isset($row['id']) AND $row['id'] != '' ) {
+						//Modifying existing object.
+						//Get user object, so we can only modify just changed data for specific records if needed.
+						$lf->getByIdAndCompanyId( $row['id'], $row['company_id'] );
+						if ( $lf->getRecordCount() == 1 ) {
+							//Object exists, check edit permissions
+							//Debug::Text('User ID: '. $row['id'] .' Created By: '. $lf->getCurrent()->getCreatedBy() .' Is Owner: '. (int)$this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) .' Is Child: '. (int)$this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ), __FILE__, __LINE__, __METHOD__, 10);
+							if (
+									$validate_only == TRUE
+									OR
+									(
+											$this->getPermissionObject()->Check('user', 'edit')
+											OR ( $this->getPermissionObject()->Check('user', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+											OR ( $this->getPermissionObject()->Check('user', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )
+									) ) {
+
+								Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+								//$row = array_merge( $lf->getCurrent()->getObjectAsArray(), $row );
+								$lf = $lf->getCurrent(); //Make the current $lf variable the current object, so we can ignore some fields if needed.
+								$row = array_merge( $lf->getObjectAsArray(), $row );
+							} else {
+								$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
+							}
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
+							//Object doesn't exist.
+							$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
 						}
 					} else {
-						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
-					}
-				} else {
-					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user', 'add'), TTi18n::gettext('Add permission denied') );
+						//Adding new object, check ADD permissions.
+						$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user', 'add'), TTi18n::gettext('Add permission denied') );
 
-					//Because password encryption requires the user_id, we need to get it first when creating a new employee.
-					$row['id'] = $lf->getNextInsertId();
-				}
-
-				//When doing a mass edit of employees, user name is never specified, so we need to avoid this validation issue.
-				//Generate random user name if its validate only and not otherwise specified.
-				if ( $validate_only == TRUE AND ( !isset($row['user_name']) OR $row['user_name'] == '' ) ) {
-					$row['user_name'] = 'random'.rand(10000000, 99999999);
-				}
-				//Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-				$is_valid = $primary_validator->isValid( $ignore_warning );
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Attempting to save data... AMF Message ID: '. $this->getAMFMessageID(), __FILE__, __LINE__, __METHOD__, 10);
-
-					if ( DEMO_MODE == TRUE AND $lf->isNew() == FALSE ) { //Allow changing these if DEMO is enabled, but they are adding new records.
-						Debug::Text('DEMO Mode ENABLED, disable modifying some data...', __FILE__, __LINE__, __METHOD__, 10);
-						unset($row['permission_control_id'], $row['status_id'], $row['phone_id'], $row['user_name'], $row['password']);
+						//Because password encryption requires the user_id, we need to get it first when creating a new employee.
+						$row['id'] = $lf->getNextInsertId();
 					}
 
-					if ( $this->getPermissionObject()->Check('user', 'edit_advanced') == FALSE ) {
-						Debug::Text('NOT allowing advanced edit...', __FILE__, __LINE__, __METHOD__, 10);
-						//Unset all advanced fields.
-						unset(
-							$row['user_name'],
-							$row['currency_id'],
-							$row['employee_number'], //This must always be set
-							$row['default_branch_id'],
-							$row['default_department_id'],
-							$row['group_id'],
-							$row['title_id'],
-							$row['first_name'],
-							$row['middle_name'],
-							$row['last_name'],
-							$row['city'],
-							$row['country'],
-							$row['province'],
-							$row['hire_date'],
-							$row['birth_date'],
-							$row['termination_date'],
-							$row['sin'],
-							$row['other_id1'],
-							$row['other_id2'],
-							$row['other_id3'],
-							$row['other_id4'],
-							$row['other_id5'],
-							$row['note'],
-							$row['tags']
-						);
+					//When doing a mass edit of employees, user name is never specified, so we need to avoid this validation issue.
+					//Generate random user name if its validate only and not otherwise specified.
+					if ( $validate_only == TRUE AND ( !isset($row['user_name']) OR $row['user_name'] == '' ) ) {
+						$row['user_name'] = 'random'.rand(10000000, 99999999);
 					}
+					//Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-					//If the user doesn't have permissions to change the hierarchy_control, unset that data.
-					if ( isset($row['hierarchy_control']) AND ( $this->getPermissionObject()->Check('hierarchy', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_hierarchy') ) ) {
-						Debug::Text('Allowing change of hierarchy...', __FILE__, __LINE__, __METHOD__, 10);
-					} else {
-						Debug::Text('NOT allowing change of hierarchy...', __FILE__, __LINE__, __METHOD__, 10);
-						unset($row['hierarchy_control']);
-					}
+					$is_valid = $primary_validator->isValid( $ignore_warning );
+					if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
+						Debug::Text('Attempting to save data... AMF Message ID: '. $this->getAMFMessageID(), __FILE__, __LINE__, __METHOD__, 10);
 
-					//Handle additional permission checks for setPermissionControl().
-					if ( isset($row['permission_control_id'])
-						AND ( $lf->getPermissionLevel() <= $this->getPermissionObject()->getLevel() AND ( $this->getPermissionObject()->Check('permission', 'edit') OR $this->getPermissionObject()->Check('permission', 'edit_own') OR $this->getPermissionObject()->Check('user', 'edit_permission_group') ) ) ) {
-						Debug::Text('Allowing change of permissions...', __FILE__, __LINE__, __METHOD__, 10);
-					} else {
-						Debug::Text('NOT allowing change of permissions...', __FILE__, __LINE__, __METHOD__, 10);
-						unset($row['permission_control_id']);
-					}
-
-					if ( isset($row['pay_period_schedule_id']) AND ( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_pay_period_schedule') ) ) {
-						Debug::Text('Allowing change of pay period schedule...', __FILE__, __LINE__, __METHOD__, 10);
-					} else {
-						Debug::Text('NOT allowing change of pay period schedule...', __FILE__, __LINE__, __METHOD__, 10);
-						unset($row['pay_period_schedule_id']);
-					}
-
-					if ( isset($row['policy_group_id']) AND ( $this->getPermissionObject()->Check('policy_group', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_policy_group') ) ) {
-						Debug::Text('Allowing change of policy group...', __FILE__, __LINE__, __METHOD__, 10);
-					} else {
-						Debug::Text('NOT allowing change of policy group...', __FILE__, __LINE__, __METHOD__, 10);
-						unset($row['policy_group_id']);
-					}
-
-					$lf->setObjectFromArray( $row );
-
-					//This must go below setObjectFromArray.
-					if ( $lf->isNew() == TRUE ) {
-						//Get New Hire Defaults of the company that the user is being added too. This is critical when adding a user to a new company.
-						$udlf = TTnew( 'UserDefaultListFactory' );
-						$udlf->getByCompanyId( $row['company_id'] );
-						if ( $udlf->getRecordCount() > 0 ) {
-							$udf_obj = $udlf->getCurrent();
+						if ( DEMO_MODE == TRUE AND $lf->isNew() == FALSE ) { //Allow changing these if DEMO is enabled, but they are adding new records.
+							Debug::Text('DEMO Mode ENABLED, disable modifying some data...', __FILE__, __LINE__, __METHOD__, 10);
+							unset($row['permission_control_id'], $row['status_id'], $row['phone_id'], $row['user_name'], $row['password']);
 						}
 
-						if ( isset($udf_obj) AND is_object($udf_obj) ) {
-							if ( !isset($row['permission_control_id']) AND $udf_obj->getPermissionControl() != TTUUID::getZeroID() AND $udf_obj->getPermissionControl() != $udf_obj::getNotExistID() ) {
-								Debug::Text('Using default permissions...', __FILE__, __LINE__, __METHOD__, 10);
-								$lf->setPermissionControl( $udf_obj->getPermissionControl() );
+						if ( $this->getPermissionObject()->Check('user', 'edit_advanced') == FALSE ) {
+							Debug::Text('NOT allowing advanced edit...', __FILE__, __LINE__, __METHOD__, 10);
+							//Unset all advanced fields.
+							unset(
+									$row['user_name'],
+									$row['currency_id'],
+									$row['employee_number'], //This must always be set
+									$row['default_branch_id'],
+									$row['default_department_id'],
+									$row['group_id'],
+									$row['title_id'],
+									$row['first_name'],
+									$row['middle_name'],
+									$row['last_name'],
+									$row['city'],
+									$row['country'],
+									$row['province'],
+									$row['hire_date'],
+									$row['birth_date'],
+									$row['termination_date'],
+									$row['sin'],
+									$row['other_id1'],
+									$row['other_id2'],
+									$row['other_id3'],
+									$row['other_id4'],
+									$row['other_id5'],
+									$row['note'],
+									$row['tags']
+							);
+						}
+
+						//If the user doesn't have permissions to change the hierarchy_control, unset that data.
+						if ( isset($row['hierarchy_control']) AND ( $this->getPermissionObject()->Check('hierarchy', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_hierarchy') ) ) {
+							Debug::Text('Allowing change of hierarchy...', __FILE__, __LINE__, __METHOD__, 10);
+						} else {
+							Debug::Text('NOT allowing change of hierarchy...', __FILE__, __LINE__, __METHOD__, 10);
+							unset($row['hierarchy_control']);
+						}
+
+						//Handle additional permission checks for setPermissionControl().
+						if ( isset($row['permission_control_id'])
+								AND ( $lf->getPermissionLevel() <= $this->getPermissionObject()->getLevel() AND ( $this->getPermissionObject()->Check('permission', 'edit') OR $this->getPermissionObject()->Check('permission', 'edit_own') OR $this->getPermissionObject()->Check('user', 'edit_permission_group') ) ) ) {
+							Debug::Text('Allowing change of permissions...', __FILE__, __LINE__, __METHOD__, 10);
+						} else {
+							Debug::Text('NOT allowing change of permissions...', __FILE__, __LINE__, __METHOD__, 10);
+							unset($row['permission_control_id']);
+						}
+
+						if ( isset($row['pay_period_schedule_id']) AND ( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_pay_period_schedule') ) ) {
+							Debug::Text('Allowing change of pay period schedule...', __FILE__, __LINE__, __METHOD__, 10);
+						} else {
+							Debug::Text('NOT allowing change of pay period schedule...', __FILE__, __LINE__, __METHOD__, 10);
+							unset($row['pay_period_schedule_id']);
+						}
+
+						if ( isset($row['policy_group_id']) AND ( $this->getPermissionObject()->Check('policy_group', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_policy_group') ) ) {
+							Debug::Text('Allowing change of policy group...', __FILE__, __LINE__, __METHOD__, 10);
+						} else {
+							Debug::Text('NOT allowing change of policy group...', __FILE__, __LINE__, __METHOD__, 10);
+							unset($row['policy_group_id']);
+						}
+
+						$lf->setObjectFromArray( $row );
+
+						//This must go below setObjectFromArray.
+						if ( $lf->isNew() == TRUE ) {
+							//Get New Hire Defaults of the company that the user is being added too. This is critical when adding a user to a new company.
+							$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
+							$udlf->getByCompanyId( $row['company_id'] );
+							if ( $udlf->getRecordCount() > 0 ) {
+								$udf_obj = $udlf->getCurrent();
 							}
 
-							if ( !isset($row['pay_period_schedule_id']) AND $udf_obj->getPayPeriodSchedule() != TTUUID::getZeroID() AND $udf_obj->getPayPeriodSchedule() != $udf_obj::getNotExistID() ) {
-								Debug::Text('Using default pay period schedule...', __FILE__, __LINE__, __METHOD__, 10);
-								$lf->setPayPeriodSchedule( $udf_obj->getPayPeriodSchedule() );
+							if ( isset($udf_obj) AND is_object($udf_obj) ) {
+								if ( !isset($row['permission_control_id']) AND $udf_obj->getPermissionControl() != TTUUID::getZeroID() AND $udf_obj->getPermissionControl() != $udf_obj::getNotExistID() ) {
+									Debug::Text('Using default permissions...', __FILE__, __LINE__, __METHOD__, 10);
+									$lf->setPermissionControl( $udf_obj->getPermissionControl() );
+								}
+
+								if ( !isset($row['pay_period_schedule_id']) AND $udf_obj->getPayPeriodSchedule() != TTUUID::getZeroID() AND $udf_obj->getPayPeriodSchedule() != $udf_obj::getNotExistID() ) {
+									Debug::Text('Using default pay period schedule...', __FILE__, __LINE__, __METHOD__, 10);
+									$lf->setPayPeriodSchedule( $udf_obj->getPayPeriodSchedule() );
+								}
 							}
 						}
-					}
 
-					$lf->Validator->setValidateOnly( $validate_only );
+						$lf->Validator->setValidateOnly( $validate_only );
 
-					$is_valid = $lf->isValid( $ignore_warning );
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
-						if ( $validate_only == TRUE ) {
-							$save_result[$key] = TRUE;
-						} else {
-							$save_result[$key] = $lf->Save( TRUE, TRUE );
+						$is_valid = $lf->isValid( $ignore_warning );
+						if ( $is_valid == TRUE ) {
+							Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
+							if ( $validate_only == TRUE ) {
+								$save_result[$key] = TRUE;
+							} else {
+								$save_result[$key] = $lf->Save( TRUE, TRUE );
+							}
+							$validator_stats['valid_records']++;
 						}
-						$validator_stats['valid_records']++;
 					}
-				}
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
-					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
-				} elseif ( $validate_only == TRUE ) {
-					//Always fail transaction when valididate only is used, as	is saved to different tables immediately.
-					$lf->FailTransaction();
-				}
+					if ( $is_valid == FALSE ) {
+						Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
+						$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					} elseif ( $validate_only == TRUE ) {
+						//Always fail transaction when valididate only is used, as	is saved to different tables immediately.
+						$lf->FailTransaction();
+					}
 
-				$lf->CommitTransaction();
+					$lf->CommitTransaction();
+					$lf->setTransactionMode(); //Back to default isolation level.
+
+					return array( $validator, $validator_stats, $key, $save_result );
+				};
+
+				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
@@ -515,7 +526,7 @@ class APIUser extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'UserListFactory' );
+				$lf = TTnew( 'UserListFactory' ); /** @var UserListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					if ( $this->getPermissionObject()->Check('company', 'view') == TRUE ) {
@@ -598,7 +609,7 @@ class APIUser extends APIFactory {
 	function isUniqueUserName( $user_name ) {
 		Debug::Text('Checking for unique user name: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
 
-		$uf = TTNew('UserFactory');
+		$uf = TTNew('UserFactory'); /** @var UserFactory $uf */
 		$retval = $uf->isUniqueUserName( $user_name );
 		return $this->returnHandler( $retval );
 	}
@@ -612,7 +623,7 @@ class APIUser extends APIFactory {
 	 * @return array|bool
 	 */
 	function changePassword( $current_password, $new_password, $new_password2, $type = 'web' ) {
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getByIdAndCompanyId( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
 		if ( $ulf->getRecordCount() == 1 ) {
 			$uf = $ulf->getCurrent();
@@ -729,7 +740,7 @@ class APIUser extends APIFactory {
 	 */
 	function getUniqueUserProvinces() {
 		//Get a unique list of states each employee belongs to
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getByCompanyId( $this->getCurrentCompanyObject()->getId() );
 		$retarr = array();
 		if ( $ulf->getRecordCount() > 0 ) {
@@ -765,7 +776,7 @@ class APIUser extends APIFactory {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getByIdAndCompanyId( $user_ids, $this->getCurrentCompanyObject()->getId() );
 		if ( $ulf->getRecordCount() == 1 ) {
 			$emails_sent = 0;
@@ -804,28 +815,31 @@ class APIUser extends APIFactory {
 	}
 
 	/**
-	 * @param $rating
+	 * @param int $rating Accepted values are -1, 0, 1.
 	 * @param bool $message
 	 * @return array|bool
 	 */
 	function setUserFeedbackRating( $rating, $message = FALSE ) {
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getByIdAndCompanyId( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
 		if ( $ulf->getRecordCount() == 1 ) {
 			$u_obj = $ulf->getCurrent();
 
 			if ( $rating != $u_obj->getFeedbackRating() ) {
-			$u_obj->setFeedbackRating( $rating );
-			if ( $u_obj->isValid() ) {
-				$retval = $u_obj->Save( FALSE );
-				if ( $retval == TRUE ) {
-					$ttsc = new TimeTrexSoapClient();
-					$ttsc->sendUserFeedback( $rating, $message, $u_obj );
+				$u_obj->setFeedbackRating( $rating );
+				if ( $u_obj->isValid() ) {
+					$retval = $u_obj->Save( FALSE );
+					if ( $retval == TRUE ) {
+						//Save in user_setting table as well, so we have other information such as created date.
+						UserSettingFactory::setUserSetting( $this->getCurrentUserObject()->getId(), 'feedback_rating', $rating, 20 ); //20=Private
 
-					//Since we are updating the user record, the audit log will contain the rating change.
-					//TTLog::addEntry( $u_obj->getId(), 500, TTi18n::getText('Feedback Rating').': '. $rating .' '. TTi18n::getText('Message') .': '. $message, $u_obj->getId(), $u_obj->getTable() );
+						$ttsc = new TimeTrexSoapClient();
+						$ttsc->sendUserFeedback( $rating, $message, $u_obj );
+
+						//Since we are updating the user record, the audit log will contain the rating change.
+						//TTLog::addEntry( $u_obj->getId(), 500, TTi18n::getText('Feedback Rating').': '. $rating .' '. TTi18n::getText('Message') .': '. $message, $u_obj->getId(), $u_obj->getTable() );
+					}
 				}
-			}
 			} elseif ( $message != '' ) {
 				$ttsc = new TimeTrexSoapClient();
 				$ttsc->sendUserFeedback( $rating, $message, $u_obj );
@@ -837,6 +851,19 @@ class APIUser extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
+	/**
+	 * @param $submitted_review Accepted values are 0 or 1.
+	 * @return array|bool
+	 */
+	function setUserFeedbackReview( $submitted_review ) {
+		$submitted_review = (int)$submitted_review;
+		return $this->returnHandler( UserSettingFactory::setUserSetting( $this->getCurrentUserObject()->getId(), 'feedback_rating_review', $submitted_review, 20 ) ); //20=Private
+	}
+
+	/**
+	 * @param $employee_id
+	 * @return array|bool
+	 */
 	function deleteImage( $employee_id ) {
 		//permissions match setUser()
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
@@ -846,14 +873,15 @@ class APIUser extends APIFactory {
 
 		$result = $this->stripReturnHandler( $this->getUser( array('filter_data' => array( 'id' => $employee_id ) ) ) );
 		if ( isset($result[0]) AND count($result[0]) > 0 ) {
-			/** @var UserFactory $uf */
-			$uf = TTnew( 'UserFactory' );
+			$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 			$file_name = $uf->getPhotoFileName( $this->current_company->getId(), $employee_id, FALSE ); //Do not include default image.
 
 			if ( file_exists($file_name) ) {
 				unlink($file_name);
 			}
 		}
+
+		return $this->returnHandler( TRUE );
 	}
 }
 ?>

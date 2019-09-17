@@ -54,6 +54,7 @@ class TTUUID {
 	}
 
 	/**
+	 * @param null $int
 	 * @return int|string
 	 */
 	static function getNotExistID( $int = NULL ) {
@@ -119,6 +120,7 @@ class TTUUID {
 
 	/**
 	 * @param string $uuid UUID
+	 * @param bool $allow_null
 	 * @return int|string
 	 */
 	static function castUUID( $uuid, $allow_null = FALSE ) {
@@ -139,6 +141,10 @@ class TTUUID {
 		return self::getZeroID();
 	}
 
+	/**
+	 * @param bool $exact_string
+	 * @return string
+	 */
 	static function getRegex( $exact_string = TRUE ) {
 		$regex = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 		if ( $exact_string === TRUE ) {
@@ -313,6 +319,12 @@ class TTUUID {
 		return FALSE;
 	}
 
+	/**
+	 * @param $uuid
+	 * @param $length
+	 * @param bool $include_dashes
+	 * @return string
+	 */
 	static function truncateUUID( $uuid, $length, $include_dashes = TRUE ) {
 		//Re-arrange UUID so most unique data is at the beginning.
 		if ( is_numeric( self::getUUIDGroup( $uuid, 4 ) ) AND stripos( self::getSeed( FALSE ), self::getUUIDGroup( $uuid, 0 ) ) !== FALSE ) {

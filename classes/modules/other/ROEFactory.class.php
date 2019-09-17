@@ -168,7 +168,7 @@ class ROEFactory extends Factory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->user_obj = $ulf->getById( $this->getUser() )->getCurrent();
 
 			return $this->user_obj;
@@ -182,7 +182,7 @@ class ROEFactory extends Factory {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
 		} else {
-			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 			$pseallf->getByCompanyID( $this->getUserObject()->getCompany() );
 			if ( $pseallf->getRecordCount() > 0 ) {
 				$this->pay_stub_entry_account_link_obj = $pseallf->getCurrent();
@@ -491,7 +491,7 @@ class ROEFactory extends Factory {
 
 		$start_date = FALSE;
 
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 		$pay_period_obj = $pplf->getByUserIdAndEndDate( $this->getUser(), $this->getLastDate() )->getCurrent();
 		Debug::Text('Pay Period ID: '. $pay_period_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -604,11 +604,11 @@ class ROEFactory extends Factory {
 		$user_id = $this->getUser();
 
 		//get User data for hire date
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById($user_id)->getCurrent();
 
 		//Is there a previous ROE? If so, find first shift back since ROE was issued.
-		$rlf = TTnew( 'ROEListFactory' );
+		$rlf = TTnew( 'ROEListFactory' ); /** @var ROEListFactory $rlf */
 		$rlf->getLastROEByUserId( $user_id );
 		if ( $rlf->getRecordCount() > 0 ) {
 			$roe_obj = $rlf->getCurrent();
@@ -623,8 +623,8 @@ class ROEFactory extends Factory {
 			$first_date = $user_obj->getHireDate();
 		}
 
-		$udlf = TTnew( 'UserDateTotalListFactory' );
-		$udlf->getNextByUserIdAndObjectTypeAndEpoch( $user_id, array( 10 ), $first_date ); //10=Worked time only. This needs to include punches and manual timesheet entries.
+		$udlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udlf */
+		$udlf->getNextByUserIdAndObjectTypeAndEpoch( $user_id, array( 10 ), $first_date ); //10=Worked time only. This needs to include punches and manual timesheet entries. FIXME: Should probably include insurable absence policies too like calculateLastDate()
 		if ( $udlf->getRecordCount() > 0 ) {
 			$first_date = $udlf->getCurrent()->getDateStamp();
 		}
@@ -640,8 +640,13 @@ class ROEFactory extends Factory {
 	function calculateLastDate() {
 		$user_id = $this->getUser();
 
-		$udlf = TTnew( 'UserDateTotalListFactory' );
-		$udlf->getLastByUserIdAndObjectType( $user_id, array( 10 ) ); //10=Worked time only. This needs to include punches and manual timesheet entries.
+		$setup_data = $this->getSetupData();
+
+		$udlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udlf */
+
+		//10=Worked time. This needs to include punches and manual timesheet entries.
+		// It also needs to include insurable absence policies from the Form Setup since its last day worked or received insurable earnings.
+		$udlf->getLastByUserIdAndObjectTypeOrAbsencePolicy( $user_id, array( 10 ), $setup_data['absence_policy_ids'], 1 );
 
 		if ( $udlf->getRecordCount() > 0 ) {
 			$ud_obj = $udlf->getCurrent();
@@ -668,12 +673,12 @@ class ROEFactory extends Factory {
 				$end_date = time();
 			}
 
-			$plf = TTnew( 'PayPeriodListFactory' );
+			$plf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $plf */
 			$plf->getByUserIdAndEndDate($user_id, $end_date );
 			if ( $plf->getRecordCount() > 0 ) {
 				$pp_obj = $plf->getCurrent();
 				Debug::Text('PayPeriod ID: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
-				$pslf = TTnew('PayStubListFactory');
+				$pslf = TTnew('PayStubListFactory'); /** @var PayStubListFactory $pslf */
 				$pslf->getByUserIdAndCompanyIdAndPayPeriodId( $this->getUserObject()->getId(), $this->getUserObject()->getCompany(), array( $pp_obj->getId() ) );
 				if ( $pslf->getRecordCount() > 0 ) {
 					Debug::Text('PS ID: '. $pslf->getCurrent()->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
@@ -701,12 +706,12 @@ class ROEFactory extends Factory {
 				$end_date = time();
 			}
 
-			$plf = TTnew( 'PayPeriodListFactory' );
+			$plf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $plf */
 			$plf->getByUserIdAndEndDate($user_id, $end_date );
 			if ( $plf->getRecordCount() > 0 ) {
 				$pp_obj = $plf->getCurrent();
 				Debug::Text('PayPeriod ID: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
-				$pslf = TTnew('PayStubListFactory');
+				$pslf = TTnew('PayStubListFactory'); /** @var PayStubListFactory $pslf */
 				$pslf->getByUserIdAndCompanyIdAndPayPeriodId( $this->getUserObject()->getId(), $this->getUserObject()->getCompany(), array( $pp_obj->getId() ) );
 				if ( $pslf->getRecordCount() > 0 ) {
 					return $pslf->getCurrent()->getTransactionDate();
@@ -732,12 +737,12 @@ class ROEFactory extends Factory {
 				$end_date = time();
 			}
 
-			$plf = TTnew( 'PayPeriodListFactory' );
+			$plf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $plf */
 			$plf->getByUserIdAndEndDate($user_id, $end_date );
 			if ( $plf->getRecordCount() > 0 ) {
 				$pp_obj = $plf->getCurrent();
 				Debug::Text('PayPeriod ID: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
-				$pslf = TTnew('PayStubListFactory');
+				$pslf = TTnew('PayStubListFactory'); /** @var PayStubListFactory $pslf */
 				$pslf->getByUserIdAndCompanyIdAndPayPeriodId( $this->getUserObject()->getId(), $this->getUserObject()->getCompany(), array( $pp_obj->getId() ) );
 				if ( $pslf->getRecordCount() > 0 ) {
 					return TRUE;
@@ -755,7 +760,7 @@ class ROEFactory extends Factory {
 	function calculatePayPeriodType( $date ) {
 		$user_id = $this->getUser();
 
-		$plf = TTnew( 'PayPeriodListFactory' );
+		$plf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $plf */
 		$pay_period_obj = $plf->getByUserIdAndEndDate( $user_id, $date )->getCurrent();
 
 		$pay_period_type_id = FALSE;
@@ -790,7 +795,7 @@ class ROEFactory extends Factory {
 	function getSetupData() {
 		//FIXME: Alert the user if they don't have enough information in TimeTrex to get accurate values.
 		//Get insurable hours, earnings, and vacation pay now that the final pay stub is generated
-		$ugdlf = TTnew( 'UserGenericDataListFactory' );
+		$ugdlf = TTnew( 'UserGenericDataListFactory' ); /** @var UserGenericDataListFactory $ugdlf */
 		$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getUserObject()->getCompany(), $this->getTable() );
 		if ( $ugdlf->getRecordCount() > 0 ) {
 			Debug::Text('Found Company Form Setup!', __FILE__, __LINE__, __METHOD__, 10);
@@ -864,7 +869,7 @@ class ROEFactory extends Factory {
 		//Don't include YTD adjustments in ROE totals,
 		//As the proper way is to generate ROEs from their old system and ROEs from TimeTrex, and issue both to the employee.
 		//Since its unlikely that they will be importing hours and earnings worked in each pay period in order to properly account for them.
-		$pself = TTnew( 'PayStubEntryListFactory' );
+		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getPayPeriodReportByUserIdAndEntryNameIdAndStartDateAndEndDate( $this->getUser(), $setup_data['insurable_earnings_psea_ids'], $insurable_earnings_start_date, $this->getFinalPayStubEndDate(), 0, TRUE, NULL, array('x.start_date' => 'desc') );
 		if ( $pself->getRecordCount() > 0 ) {
 			$this->pay_period_earnings = $this->initial_pay_period_earnings;
@@ -951,7 +956,7 @@ class ROEFactory extends Factory {
 			//$pay_period_earning_keys = array_keys( $pay_period_earnings );
 			//$last_pay_period_id = array_shift( $pay_period_earning_keys );
 
-			$pself = TTnew( 'PayStubEntryListFactory' );
+			$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 			$retval = $pself->getAmountSumByUserIdAndEntryNameIdAndPayPeriodId( $this->getUser(), $setup_data['vacation_psea_ids'], $last_pay_period_ids);
 
 			Debug::Arr($last_pay_period_ids, 'Last Pay Period Vacation Pay: '. $retval['amount'] .' Last Pay Period ID: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -967,7 +972,7 @@ class ROEFactory extends Factory {
 	function reCalculate() {
 		//Re-generate final pay stub
 		//get current pay period based off their last day of work
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 		$pplf->getByUserIdAndEndDate( $this->getUser(), $this->getFinalPayStubEndDate() );
 		if ( $pplf->getRecordCount() > 0 ) {
 			$pay_period_id = $pplf->getCurrent()->getId();
@@ -984,7 +989,7 @@ class ROEFactory extends Factory {
 		if ( $this->getEnableGeneratePayStub() == TRUE ) {
 			//Find out if a pay stub is already generated for the pay period we are currently in.
 			//If it is, delete it so we can start from fresh
-			$pslf = TTnew( 'PayStubListFactory' );
+			$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 			$pslf->getByUserIdAndPayPeriodId( $this->getUser(), $pay_period_id );
 
 			foreach ($pslf as $pay_stub) {
@@ -1024,7 +1029,7 @@ class ROEFactory extends Factory {
 
 		//All worked time and overtime is considered insurable.
 		//Only between the start and final date worked, as if they worked or have insurable earnings past the last date then the last date should be moved back.
-		$udtlf = TTnew( 'UserDateTotalListFactory' );
+		$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 		$worked_total_time = $udtlf->getWorkedTimeSumByUserIDAndStartDateAndEndDate( $this->getUser(), $insurable_hours_start_date, $this->getLastDate() );
 		Debug::text('Worked Total Time: '. $worked_total_time, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1056,7 +1061,7 @@ class ROEFactory extends Factory {
 
 		//ReSave these
 		if ( $this->getId() != '' ) {
-			$rlf = TTnew( 'ROEListFactory' );
+			$rlf = TTnew( 'ROEListFactory' ); /** @var ROEListFactory $rlf */
 			$rlf->getById( $this->getId() );
 			if ( $rlf->getRecordCount() > 0 ) {
 				$roe_obj = $rlf->getCurrent();
@@ -1114,7 +1119,7 @@ class ROEFactory extends Factory {
 		//
 		// User
 		if ( $this->getUser() !== FALSE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Invalid Employee')
@@ -1122,7 +1127,7 @@ class ROEFactory extends Factory {
 		}
 		// Pay period type
 		if ( $this->getPayPeriodType() !== FALSE ) {
-			$ppsf = TTnew( 'PayPeriodScheduleFactory' );
+			$ppsf = TTnew( 'PayPeriodScheduleFactory' ); /** @var PayPeriodScheduleFactory $ppsf */
 			$this->Validator->inArrayKey(	'pay_period_type_id',
 													$this->getPayPeriodType(),
 													TTi18n::gettext('Incorrect pay period type'),
@@ -1273,7 +1278,7 @@ class ROEFactory extends Factory {
 				UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName( TRUE ) . ' - ' . TTi18n::gettext( 'Pay Stub Amendment' ), 30, TTi18n::gettext( 'Releasing all employee accruals' ), NULL );
 
 				//If the final pay stub end date is the same pay period as the Last Date, then use the last date as the effective date.
-				$pplf = TTnew( 'PayPeriodListFactory' );
+				$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 				$pplf->getByUserIdAndEndDate( $this->getUser(), $this->getFinalPayStubEndDate() );
 				if ( $pplf->getRecordCount() == 1 ) {
 					$pay_period_obj = $pplf->getCurrent();
@@ -1309,7 +1314,7 @@ class ROEFactory extends Factory {
 
 		if ( $this->getEnableReCalculate() == TRUE ) {
 			//Set User Termination date to Last Day.
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() > 0 ) {
 				Debug::Text('Setting User Termination Date', __FILE__, __LINE__, __METHOD__, 10);
@@ -1325,7 +1330,7 @@ class ROEFactory extends Factory {
 			}
 
 			//Warn user if employee has pay stubs or pay stub amendments after the Final Pay Stub End Date.
-			if ( $this->getFinalPayStubTransactionDate() != '' ) {$pslf = TTnew( 'PayStubListFactory' );
+			if ( $this->getFinalPayStubTransactionDate() != '' ) {$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 			$pslf->getNextPayStubByUserIdAndTransactionDateAndRun( $this->getUser(), $this->getFinalPayStubTransactionDate(), 1);
 			Debug::Text('Pay Stubs after final: '. $pslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $pslf->getRecordCount() > 0 ) {
@@ -1410,7 +1415,7 @@ class ROEFactory extends Factory {
 							}
 							break;
 						case 'pay_period_type':
-							$ppsf = TTnew( 'PayPeriodScheduleFactory' );
+							$ppsf = TTnew( 'PayPeriodScheduleFactory' ); /** @var PayPeriodScheduleFactory $ppsf */
 							$data[$variable] = Option::getByKey( $this->getPayPeriodType(), $ppsf->getOptions( 'type' ) );
 							break;
 						case 'first_date':

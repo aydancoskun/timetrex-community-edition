@@ -476,8 +476,11 @@ UserSkillViewController = BaseViewController.extend( {
 		last_used_date = last_used_date ? last_used_date : new Date().format();
 
 		if ( first_used_date !== '' && last_used_date !== '' ) {
-			var experience = this.api.calcExperience( first_used_date, last_used_date, { async: false } ).getResult();
-			this.edit_view_ui_dic['experience'].setValue( experience );
+			var result = this.api.calcExperience( first_used_date, last_used_date, { async: false } );
+			if ( result ) {
+				var experience = result.getResult();
+				this.edit_view_ui_dic['experience'].setValue( experience );
+			}
 		} else {
 			this.edit_view_ui_dic['experience'].setValue( 0 );
 		}

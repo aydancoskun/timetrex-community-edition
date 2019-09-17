@@ -1,2 +1,6 @@
 Employee #,SIN/SSN,User Name,Type,Account,Effective Date,Amount,Pay Stub Note (Public)
-99,846920813,john.smith,Fixed,Regular Time,24-Sept-2014,,,
+99,846920813,john.smith,Fixed,Regular Time,24-Sept-2014,100.01,,
+99,846920813,john.smith,Fixed,EE - Social Security,24-Sept-2014,101.02,,
+99,846920813,john.smith,Fixed,ER - Social Security,24-Sept-2014,102.03,,
+99,846920813,john.smith,Fixed,EE - Medicare,24-Sept-2014,101.02,,
+99,846920813,john.smith,Fixed,ER - Medicare,24-Sept-2014,102.03,,

@@ -67,7 +67,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$dd->createUserWageGroups( $this->company_id );
 
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
-		$ulf = TTnew('UserListFactory');
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 		$this->user_obj = $ulf->getById( $this->user_id )->getCurrent();
 
 
@@ -420,7 +420,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function getPreviousPunch( $epoch ) {
-		$plf = TTnew( 'PunchListFactory' );
+		$plf = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf */
 		$plf->getPreviousPunchByUserIDAndEpoch( $this->user_id, $epoch );
 		if ( $plf->getRecordCount() > 0 ) {
 			Debug::Text(' Found Previous Punch within Continuous Time from now...', __FILE__, __LINE__, __METHOD__, 10);
@@ -434,7 +434,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function getDefaultPunchSettings( $epoch ) {
-		$pf = TTnew('PunchFactory');
+		$pf = TTnew('PunchFactory'); /** @var PunchFactory $pf */
 		return $pf->getDefaultPunchSettings( $this->user_obj, $epoch );
 	}
 

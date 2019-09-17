@@ -88,13 +88,13 @@ class HierarchyShareFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Hierarchy control
-		$hclf = TTnew( 'HierarchyControlListFactory' );
+		$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 		$this->Validator->isResultSetWithRows(	'hierarchy_control',
 														$hclf->getByID($this->getHierarchyControl()),
 														TTi18n::gettext('Hierarchy control is invalid')
 													);
 		// User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'user',
 														$ulf->getByID($this->getUser()),
 														TTi18n::gettext('User is invalid')

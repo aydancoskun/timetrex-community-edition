@@ -103,7 +103,7 @@ class APIPayStubEntryAccount extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub_account', 'view' );
 
-		$blf = TTnew( 'PayStubEntryAccountListFactory' );
+		$blf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -183,7 +183,7 @@ class APIPayStubEntryAccount extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayStubEntryAccountListFactory' );
+				$lf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -288,7 +288,7 @@ class APIPayStubEntryAccount extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayStubEntryAccountListFactory' );
+				$lf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -378,7 +378,7 @@ class APIPayStubEntryAccount extends APIFactory {
 	/**
 	 * Migrate time from one pay stub account to another without recalculating pay stubs.
 	 * @param array $src_ids Source PayStubAccount IDs
-	 * @param array $dst_id Destination PayStubAccount IDs
+	 * @param string $dst_id Destination PayStubAccount IDs
 	 * @param int $effective_date EPOCH
 	 * @return array|bool
 	 * @internal param bool $user_ids Users to affect.
@@ -389,7 +389,7 @@ class APIPayStubEntryAccount extends APIFactory {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
-		$pseaf = TTNew('PayStubEntryAccountFactory');
+		$pseaf = TTNew('PayStubEntryAccountFactory'); /** @var PayStubEntryAccountFactory $pseaf */
 		$retval = $pseaf->migrate( $this->getCurrentCompanyObject()->getId(), $src_ids, $dst_id, TTDate::parseDateTime( $effective_date ) );
 
 		if ( $retval == TRUE ) {

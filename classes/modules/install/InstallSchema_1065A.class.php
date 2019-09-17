@@ -70,7 +70,7 @@ class InstallSchema_1065A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Delete dummy pay codes created in 1064A schema.
-		$pclf = TTnew('PayCodeListFactory');
+		$pclf = TTnew('PayCodeListFactory'); /** @var PayCodeListFactory $pclf */
 		$pclf->getAll();
 		if ( $pclf->getRecordCount() > 0 ) {
 			foreach( $pclf as $pc_obj ) {

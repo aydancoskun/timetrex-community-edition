@@ -118,7 +118,7 @@ class APICompany extends APIFactory {
 
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$blf = TTnew( 'CompanyListFactory' );
+		$blf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -206,7 +206,7 @@ class APICompany extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'CompanyListFactory' );
+				$lf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -343,7 +343,7 @@ class APICompany extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'CompanyListFactory' );
+				$lf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -471,7 +471,7 @@ class APICompany extends APIFactory {
 
 		Debug::Arr($data, 'Final Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$cuclf = TTnew( 'CompanyUserCountListFactory' );
+		$cuclf = TTnew( 'CompanyUserCountListFactory' ); /** @var CompanyUserCountListFactory $cuclf */
 		$cuclf->getMinAvgMaxByCompanyIdsAndStartDateAndEndDate( $data['filter_data']['company_id'], $data['filter_data']['start_date'], $data['filter_data']['end_date'] );
 		Debug::Text('Record Count: '. $cuclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $cuclf->getRecordCount() > 0 ) {
@@ -541,7 +541,7 @@ class APICompany extends APIFactory {
 
 		Debug::Arr($data, 'Final Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPIEmailAddressDataByArrayCriteria( $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ulf->getRecordCount() > 0 ) {
@@ -597,7 +597,7 @@ class APICompany extends APIFactory {
 			$data['filter_data']['end_date'] = TTDate::getEndMonthEpoch( time() );
 		}
 
-		$llf = TTnew( 'LogListFactory' );
+		$llf = TTnew( 'LogListFactory' ); /** @var LogListFactory $llf */
 		$llf->getByPhonePunchDataByCompanyIdAndStartDateAndEndDate( $data['filter_data']['company_id'], $data['filter_data']['start_date'], $data['filter_data']['end_date'] );
 		Debug::Text('Record Count: '. $llf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $llf->getRecordCount() > 0 ) {
@@ -654,7 +654,7 @@ class APICompany extends APIFactory {
 			$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$llf = TTnew( 'StationListFactory' );
+		$llf = TTnew( 'StationListFactory' ); /** @var StationListFactory $llf */
 		if ( !isset($data['filter_data']['type_id']) ) {
 			//$data['filter_data']['type_id'] = array_keys( Misc::trimSortPrefix( $llf->getOptions('type') ) );
 			$data['filter_data']['type_id'] = array(61, 65);
@@ -709,7 +709,7 @@ class APICompany extends APIFactory {
 			}
 		}
 
-		$llf = TTnew( 'StationListFactory' );
+		$llf = TTnew( 'StationListFactory' ); /** @var StationListFactory $llf */
 		if ( !isset($data['filter_data']['status_id']) ) {
 			$data['filter_data']['status_id'] = array(20);
 		}
@@ -753,26 +753,26 @@ class APICompany extends APIFactory {
 						'job_item' => FALSE,
 						);
 
-		$blf = TTnew( 'BranchListFactory' );
+		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$blf->getByCompanyId( $this->getCurrentCompanyObject()->getId(), 1 );
 		if ( $blf->getRecordCount() >= 1 ) {
 			$retarr['branch'] = TRUE;
 		}
 
-		$dlf = TTnew( 'DepartmentListFactory' );
+		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		$dlf->getByCompanyId( $this->getCurrentCompanyObject()->getId(), 1 );
 		if ( $dlf->getRecordCount() >= 1 ) {
 			$retarr['department'] = TRUE;
 		}
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$jlf = TTnew( 'JobListFactory' );
+			$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 			$jlf->getByCompanyId( $this->getCurrentCompanyObject()->getId(), 1 );
 			if ( $jlf->getRecordCount() >= 1 ) {
 				$retarr['job'] = TRUE;
 			}
 
-			$jilf = TTnew( 'JobItemListFactory' );
+			$jilf = TTnew( 'JobItemListFactory' ); /** @var JobItemListFactory $jilf */
 			$jilf->getByCompanyId( $this->getCurrentCompanyObject()->getId(), 1 );
 			if ( $jilf->getRecordCount() >= 1 ) {
 				$retarr['job_item'] = TRUE;
@@ -783,6 +783,10 @@ class APICompany extends APIFactory {
 	}
 
 
+	/**
+	 * @param $company_id
+	 * @return bool
+	 */
 	function deleteImage( $company_id ) {
 		//Permissions match setCompany
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
@@ -792,14 +796,15 @@ class APICompany extends APIFactory {
 
 		$result = $this->stripReturnHandler( $this->getCompany( array('filter_data' => array( 'id' => $company_id ) ) ) );
 		if ( isset($result[0]) AND count($result[0]) > 0 ) {
-			/** @var CompanyFactory $f */
-			$f = TTnew( 'CompanyFactory' );
+			$f = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $f */
 			$file_name = $f->getLogoFileName( $company_id, FALSE );
 
 			if ( file_exists($file_name) ) {
 				unlink($file_name);
 			}
 		}
+
+		return $this->returnHandler( TRUE );
 	}
 
 }

@@ -73,7 +73,7 @@ switch ($object_type) {
 				Debug::Text('HTML5 Base64 encoded upload...', __FILE__, __LINE__, __METHOD__, 10);
 				$allowed_upload_content_types = array(FALSE, 'image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
 
-				$icf = TTnew( 'InvoiceConfigFactory' );
+				$icf = TTnew( 'InvoiceConfigFactory' ); /** @var InvoiceConfigFactory $icf */
 				$icf->cleanStoragePath( $current_company->getId() );
 				$dir = $icf->getStoragePath( $current_company->getId() );
 				Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
@@ -122,16 +122,15 @@ switch ($object_type) {
 		if ( DEMO_MODE == FALSE AND ( $permission->Check($section, 'add') OR $permission->Check($section, 'edit') OR $permission->Check($section, 'edit_child') OR $permission->Check($section, 'edit_own') ) ) {
 			$permission_children_ids = $permission->getPermissionHierarchyChildren( $current_company->getId(), $current_user->getId() );
 
-			$drlf = TTnew( 'DocumentRevisionListFactory' );
+			$drlf = TTnew( 'DocumentRevisionListFactory' ); /** @var DocumentRevisionListFactory $drlf */
 			$drlf->getByIdAndCompanyId( $object_id, $current_user->getCompany() );
 			if ( $drlf->getRecordCount() == 1 ) {
 				if ( $permission->Check($section, 'edit')
 					OR ( $permission->Check($section, 'edit_own') AND $permission->isOwner( $drlf->getCurrent()->getCreatedBy(), $drlf->getCurrent()->getID() ) === TRUE )
 					OR ( $permission->Check($section, 'edit_child') AND $permission->isChild( $drlf->getCurrent()->getId(), $permission_children_ids ) === TRUE )  ) {
 
-					$df = TTnew( 'DocumentFactory' );
-					/** @var DocumentRevisionFactory $drf */
-					$drf = TTnew( 'DocumentRevisionFactory' );
+					$df = TTnew( 'DocumentFactory' ); /** @var DocumentFactory $df */
+					$drf = TTnew( 'DocumentRevisionFactory' ); /** @var DocumentRevisionFactory $drf */
 
 					//Debug::setVerbosity(11);
 					$upload->set_max_filesize( $max_upload_file_size ); //128mb or less, though I'm not 100% sure this is even working.
@@ -202,7 +201,7 @@ switch ($object_type) {
 				Debug::Text('HTML5 Base64 encoded upload...', __FILE__, __LINE__, __METHOD__, 10);
 				$allowed_upload_content_types = array(FALSE, 'image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
 
-				$cf = TTnew( 'CompanyFactory' );
+				$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 				$cf->cleanStoragePath( $current_company->getId() );
 				$dir = $cf->getStoragePath( $current_company->getId() );
 				Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
@@ -253,7 +252,7 @@ switch ($object_type) {
 				Debug::Text('HTML5 Base64 encoded upload...', __FILE__, __LINE__, __METHOD__, 10);
 				$allowed_upload_content_types = array(FALSE, 'image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
 
-				$lef = TTnew( 'LegalEntityFactory' );
+				$lef = TTnew( 'LegalEntityFactory' ); /** @var LegalEntityFactory $lef */
 				$lef->cleanStoragePath( $object_id );
 				$dir = $lef->getStoragePath( $object_id );
 
@@ -303,7 +302,7 @@ switch ($object_type) {
 		if ( DEMO_MODE == FALSE AND ( $permission->Check('user', 'add') OR $permission->Check('user', 'edit') OR $permission->Check('user', 'edit_child') OR $permission->Check('user', 'edit_own') ) ) {
 			$permission_children_ids = $permission->getPermissionHierarchyChildren( $current_company->getId(), $current_user->getId() );
 
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByIdAndCompanyId( $object_id, $current_company->getId() );
 			if ( $ulf->getRecordCount() == 1
 				AND
@@ -316,7 +315,7 @@ switch ($object_type) {
 					$allowed_upload_content_types = array(FALSE, 'image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
 
 					if ( $ulf->getRecordCount() == 1 ) {
-						$uf = TTnew( 'UserFactory' );
+						$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 						$uf->cleanStoragePath( $current_company->getId(), $object_id );
 						$dir = $uf->getStoragePath( $current_company->getId() );
 						Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
@@ -366,7 +365,7 @@ switch ($object_type) {
 		if ( DEMO_MODE == FALSE AND ( $permission->Check('remittance_source_account', 'add') OR $permission->Check('remittance_source_account', 'edit') OR $permission->Check('remittance_source_account', 'edit_child') OR $permission->Check('remittance_source_account', 'edit_own') ) ) {
 			$permission_children_ids = $permission->getPermissionHierarchyChildren( $current_company->getId(), $current_user->getId() );
 
-			$rsalf = TTnew( 'RemittanceSourceAccountListFactory' );
+			$rsalf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $rsalf */
 			$rsalf->getByIdAndCompanyId( $object_id, $current_company->getId() );
 			if ( $rsalf->getRecordCount() == 1
 					AND
@@ -379,7 +378,7 @@ switch ($object_type) {
 					$allowed_upload_content_types = array(FALSE, 'image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
 
 					if ( $rsalf->getRecordCount() == 1 ) {
-						$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+						$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */
 						$rsaf->cleanStoragePath( $current_company->getId(), $object_id );
 						$dir = $rsaf->getStoragePath( $current_company->getId() );
 						Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
@@ -513,9 +512,16 @@ switch ($object_type) {
 					OR $permission->Check('job_item', 'add')
 				)
 			) {
-			$import = TTnew( 'Import' );
+			$import = TTnew( 'Import' ); /** @var Import $import */
 			$import->company_id = $current_company->getId();
 			$import->user_id = $current_user->getId();
+
+			global $authentication;
+			if ( is_object($authentication) AND $authentication->getSessionID() != '' ) {
+				Debug::text('Session ID: '. $authentication->getSessionID(), __FILE__, __LINE__, __METHOD__, 10);
+				$import->session_id = $authentication->getSessionID();
+			}
+
 			$import->deleteLocalFile(); //Make sure we delete the original file upon uploading, so if there is an error and the file upload is denied we don't show old files.
 
 			//Sometimes Excel uploads .CSV files as application/vnd.ms-excel

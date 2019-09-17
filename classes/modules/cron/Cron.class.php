@@ -149,11 +149,11 @@ class Cron {
 		return FALSE;
 	}
 
-	//Parses any column into a complete list of entries.
-	//ie: converts:		0-59 to an array of: 0, 1, 2, 3, 4, 5, 6, ...
-	//					0-2, 16, 18 to array of 0, 1, 2, 16, 18
-	//					*/2 to array of 0, 2, 4, 6, 8, ...
 	/**
+	 * Parses any column into a complete list of entries.
+	 * ie: converts:		0-59 to an array of: 0, 1, 2, 3, 4, 5, 6, ...
+	 * 						0-2, 16, 18 to array of 0, 1, 2, 16, 18
+	 * 						<star>/2 to array of 0, 2, 4, 6, 8, ...
 	 * @param $str
 	 * @param $type
 	 * @return array

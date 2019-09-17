@@ -831,121 +831,131 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testPasswordStrength() {
 		//Numbers
-		$this->assertEquals( Misc::getPasswordStrength('1'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('12'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('1'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('12'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('123'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('1234'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('123'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('1234'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('12345'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('123456'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('1234567'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('12345'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('123456'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('1234567'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('12345678'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('123456789'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('12345678'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('123456789'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('1234567890'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('12345678901'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('123456789012'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('1234567890123'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('1234567890'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('12345678901'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('123456789012'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('1234567890123'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('12345678901234'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('123456789012345'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('12345678901234'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('123456789012345'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('987654321'), 1 ); //Backwards
+		$this->assertEquals( TTPassword::getPasswordStrength('987654321'), 1 ); //Backwards
 
 		//Letters
-		$this->assertEquals( Misc::getPasswordStrength('a'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('ab'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abc'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcd'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('a'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('ab'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abc'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcd'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('abcde'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdef'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdefg'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdefgh'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcde'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdef'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefg'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefgh'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('abcdefghi'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdefghij'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdefghijk'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdefghijkl'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdefghijklm'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghi'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghij'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghijk'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghijkl'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghijklm'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('abcdefghijklmn'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdefghijklmno'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghijklmn'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghijklmno'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('ihgfedcba'), 1 ); //Backwards
+		$this->assertEquals( TTPassword::getPasswordStrength('ihgfedcba'), 1 ); //Backwards
 
 		//Half letters, half numbers
-		$this->assertEquals( Misc::getPasswordStrength('a1'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('ab12'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abc123'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcd1234'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcde12345'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdef123456'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdefg1234567'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdefgh12345678'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('a1'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('ab12'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abc123'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcd1234'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcde12345'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdef123456'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefg1234567'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdefgh12345678'), 1 );
 
 
 		//All the same char.
-		$this->assertEquals( Misc::getPasswordStrength('aaaaaa'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('aaabbb'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('aaaccc'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('111111'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('111222'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('111333'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('123123'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('aaaaaa'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('aaabbb'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('aaaccc'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('111111'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('111222'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('111333'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('123123'), 1 );
 
 		//Some what real passwords.
-		$this->assertEquals( Misc::getPasswordStrength('test'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('pear'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('orange'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('test'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('pear'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('orange'), 1 );
 
-		$this->assertEquals( Misc::getPasswordStrength('!Qa12'), 2 ); //Unique, but not enough characters to make it difficult.
-		$this->assertEquals( Misc::getPasswordStrength('2000'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('696969'), 2 );
-		$this->assertEquals( Misc::getPasswordStrength('trustno1'), 2 );
+		$this->assertEquals( TTPassword::getPasswordStrength('!Qa12'), 2 ); //Unique, but not enough characters to make it difficult.
+		$this->assertEquals( TTPassword::getPasswordStrength('2000'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('696969'), 2 );
+		$this->assertEquals( TTPassword::getPasswordStrength('trustno1'), 2 );
 
-		$this->assertEquals( Misc::getPasswordStrength('abababababababab'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcabcabcabcabc'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcdabcdabcdabcd'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abcd.abcd^abcd#abcd'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('abc123'), 1 );
-		$this->assertEquals( Misc::getPasswordStrength('test123'), 2 );
-		$this->assertEquals( Misc::getPasswordStrength('admin123'), 3 );
-		$this->assertEquals( Misc::getPasswordStrength('pear123'), 3 );
-		$this->assertEquals( Misc::getPasswordStrength('pear1234'), 3 );
-		$this->assertEquals( Misc::getPasswordStrength('pear12345'), 3 );
-		$this->assertEquals( Misc::getPasswordStrength('orange123456'), 4 );
-		$this->assertEquals( Misc::getPasswordStrength('car123456789'), 1 ); //Too many consecutive.
-		$this->assertEquals( Misc::getPasswordStrength('cars123456789'), 1 ); //Too many consecutive.
-		$this->assertEquals( Misc::getPasswordStrength('orange123456789'), 1 ); //Too many consecutive.
-		$this->assertEquals( Misc::getPasswordStrength('superabundant123456789'), 6 ); //Too many consecutive.
+		$this->assertEquals( TTPassword::getPasswordStrength('abababababababab'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcabcabcabcabc'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcdabcdabcdabcd'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abcd.abcd^abcd#abcd'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('abc123'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength('test123'), 2 );
+		$this->assertEquals( TTPassword::getPasswordStrength('admin123'), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength('pear123'), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength('pear1234'), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength('pear12345'), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength('orange123456'), 4 );
+		$this->assertEquals( TTPassword::getPasswordStrength('car123456789'), 1 ); //Too many consecutive.
+		$this->assertEquals( TTPassword::getPasswordStrength('cars123456789'), 1 ); //Too many consecutive.
+		$this->assertEquals( TTPassword::getPasswordStrength('orange123456789'), 1 ); //Too many consecutive.
+		$this->assertEquals( TTPassword::getPasswordStrength('superabundant123456789'), 6 ); //Too many consecutive.
 
-		$this->assertEquals( Misc::getPasswordStrength('cars.8.apple'), 4 );
-		$this->assertEquals( Misc::getPasswordStrength('cars.8#apple'), 4 );
+		$this->assertEquals( TTPassword::getPasswordStrength('cars.8.apple'), 4 );
+		$this->assertEquals( TTPassword::getPasswordStrength('cars.8#apple'), 4 );
 
-		$this->assertEquals( Misc::getPasswordStrength('password'), 1 ); //Dictionary word
-		$this->assertEquals( Misc::getPasswordStrength('Password'), 1 ); //Dictionary word
-		$this->assertEquals( Misc::getPasswordStrength('password1'), 1 ); //Dictionary word with one extra char.
-		$this->assertEquals( Misc::getPasswordStrength('password11'), 3 );
-		$this->assertEquals( Misc::getPasswordStrength('1password'), 1 ); //Dictionary word with one extra char.
-		$this->assertEquals( Misc::getPasswordStrength('password!'), 1 ); //Dictionary word with one extra char.
-		$this->assertEquals( Misc::getPasswordStrength('!password'), 1 ); //Dictionary word with one extra char.
-		$this->assertEquals( Misc::getPasswordStrength('qwerty'), 1 ); //Dictionary word
-		$this->assertEquals( Misc::getPasswordStrength('dragon'), 1 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength('password'), 1 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength('Password'), 1 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength('password1'), 1 ); //Dictionary word with one extra char.
+		$this->assertEquals( TTPassword::getPasswordStrength('password11'), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength('1password'), 1 ); //Dictionary word with one extra char.
+		$this->assertEquals( TTPassword::getPasswordStrength('password!'), 1 ); //Dictionary word with one extra char.
+		$this->assertEquals( TTPassword::getPasswordStrength('!password'), 1 ); //Dictionary word with one extra char.
+		$this->assertEquals( TTPassword::getPasswordStrength('qwerty'), 1 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength('dragon'), 1 ); //Dictionary word
 
-		$this->assertEquals( Misc::getPasswordStrength('superabundant'), 1 ); //Dictionary word
-		$this->assertEquals( Misc::getPasswordStrength('Super.Abundant#41'), 5 ); //Dictionary word
-		$this->assertEquals( Misc::getPasswordStrength('pearappleorange'), 3 );
-		$this->assertEquals( Misc::getPasswordStrength('pear.apple@orange#strawberry'), 5 );
-		$this->assertEquals( Misc::getPasswordStrength('superabundant123'), 4 );
+		$this->assertEquals( TTPassword::getPasswordStrength('superabundant'), 1 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength('Super.Abundant#41'), 5 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength('pearappleorange'), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength('pear.apple@orange#strawberry'), 5 );
+		$this->assertEquals( TTPassword::getPasswordStrength('superabundant123'), 4 );
 
-		$this->assertEquals( Misc::getPasswordStrength('Superabundant.123'), 5 );
-		$this->assertEquals( Misc::getPasswordStrength('Super^91Pear.87'), 5 );
-		$this->assertEquals( Misc::getPasswordStrength('Super^91Bop.87'), 5 );
+		$this->assertEquals( TTPassword::getPasswordStrength('Superabundant.123'), 5 );
+		$this->assertEquals( TTPassword::getPasswordStrength('Super^91Pear.87'), 5 );
+		$this->assertEquals( TTPassword::getPasswordStrength('Super^91Bop.87'), 5 );
 
-		$this->assertEquals( Misc::getPasswordStrength('a1j8U4y7K2qA.#@5.'), 7 );
+		$this->assertEquals( TTPassword::getPasswordStrength('a1j8U4y7K2qA.#@5.'), 7 );
+	}
+
+	/**
+	 * @group MiscTest_testRandomPasswordStregth
+	 */
+	function testRandomPasswordStregth() {
+		for ( $i = 0; $i < 10000; $i++ ) {
+			$random_password = TTPassword::generateRandomPassword( 14 );
+			$this->assertGreaterThan( 3, TTPassword::getPasswordStrength( $random_password ), $random_password ); //14 character random password should always be above 3 on the password strength.
+		}
 	}
 
 	/**
@@ -1177,7 +1187,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	 * @group testSOAPClient
 	 */
 	function testSOAPClient() {
-		$ttsc = TTnew('TimeTrexSoapClient');
+		$ttsc = TTnew('TimeTrexSoapClient'); /** @var TimeTrexSoapClient $ttsc */
 		$this->assertEquals( $ttsc->ping(), TRUE );
 	}
 
@@ -1200,7 +1210,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		//censorString( $str, $censor_char = 'X', $min_first_chunk_size = NULL, $max_first_chunk_size = NULL, $min_last_chunk_size = NULL, $max_last_chunk_size = NULL )
 		$this->assertEquals( Misc::censorString('4111222233334444', 'X', 4, 4, 4, 4), '4111XXXXXXXX4444' );
 
-		$uf = TTnew('UserFactory');
+		$uf = TTnew('UserFactory'); /** @var UserFactory $uf */
 		$this->assertEquals( $uf->getSecureSIN('0'), 'X' );
 		$this->assertEquals( $uf->getSecureSIN('00'), 'XX' );
 		$this->assertEquals( $uf->getSecureSIN('000'), 'XXX' );

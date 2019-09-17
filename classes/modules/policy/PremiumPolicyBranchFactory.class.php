@@ -51,7 +51,7 @@ class PremiumPolicyBranchFactory extends Factory {
 		if ( is_object($this->branch_obj) ) {
 			return $this->branch_obj;
 		} else {
-			$lf = TTnew( 'BranchListFactory' );
+			$lf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $lf */
 			$lf->getById( $this->getBranch() );
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->branch_obj = $lf->getCurrent();
@@ -117,7 +117,7 @@ class PremiumPolicyBranchFactory extends Factory {
 											);
 		}
 		// Branch
-		$blf = TTnew( 'BranchListFactory' );
+		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$this->Validator->isResultSetWithRows(	'branch',
 												$blf->getByID($this->getBranch()),
 												TTi18n::gettext('Selected Branch is invalid')
@@ -245,6 +245,8 @@ class PremiumPolicyBranchFactory extends Factory {
 		if ( is_object($obj) ) {
 			return TTLog::addEntry( $this->getPremiumPolicy(), $log_action, TTi18n::getText('Branch').': '. $obj->getName(), NULL, $this->getTable() );
 		}
+
+		return FALSE;
 	}
 }
 ?>

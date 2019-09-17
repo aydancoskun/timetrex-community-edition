@@ -52,7 +52,7 @@ class HierarchyUserFactory extends Factory {
 		if ( is_object($this->hierarchy_control_obj) ) {
 			return $this->hierarchy_control_obj;
 		} else {
-			$hclf = TTnew( 'HierarchyControlListFactory' );
+			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 			$this->hierarchy_control_obj = $hclf->getById( $this->getHierarchyControl() )->getCurrent();
 
 			return $this->hierarchy_control_obj;
@@ -66,7 +66,7 @@ class HierarchyUserFactory extends Factory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
@@ -103,8 +103,8 @@ class HierarchyUserFactory extends Factory {
 		if ( $exclude_id === 0 ) {
 			$exclude_id = TTUUID::getZeroID();
 		}
-		$hcf = TTnew( 'HierarchyControlFactory' );
-		$hotf = TTnew( 'HierarchyObjectTypeFactory' );
+		$hcf = TTnew( 'HierarchyControlFactory' ); /** @var HierarchyControlFactory $hcf */
+		$hotf = TTnew( 'HierarchyObjectTypeFactory' ); /** @var HierarchyObjectTypeFactory $hotf */
 
 		$ph = array(
 					'hierarchy_control_id' => $this->getHierarchyControl(),
@@ -161,7 +161,7 @@ class HierarchyUserFactory extends Factory {
 
 		// Hierarchy Control
 		if ( $this->getHierarchyControl() == '' OR $this->getHierarchyControl() == TTUUID::getZeroID() ) {
-			$hclf = TTnew( 'HierarchyControlListFactory' );
+			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 			$this->Validator->isResultSetWithRows(	'hierarchy_control_id',
 															$hclf->getByID($this->getHierarchyControl()),
 															TTi18n::gettext('Invalid Hierarchy Control')
@@ -169,7 +169,7 @@ class HierarchyUserFactory extends Factory {
 		}
 
 		// Selected Employee
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'user',
 													$ulf->getByID($this->getUser()),
 													TTi18n::gettext('Selected Employee is invalid')
@@ -316,7 +316,7 @@ class HierarchyUserFactory extends Factory {
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getHierarchyControl(), $log_action, TTi18n::getText('Suborindate').': '. $u_obj->getFullName( FALSE, TRUE ), NULL, $this->getTable() );
+			return TTLog::addEntry( $this->getHierarchyControl(), $log_action, TTi18n::getText('Subordinate').': '. $u_obj->getFullName( FALSE, TRUE ), NULL, $this->getTable() );
 		}
 
 		return FALSE;

@@ -175,7 +175,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function editUserPermission( $user_id, $section, $name, $value ) {
-		$pclf = TTnew( 'PermissionControlListFactory' );
+		$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 		$pclf->getByCompanyIdAndUserID( $this->company_id, $user_id );
 		if ( $pclf->getRecordCount() > 0 ) {
 			$pc_obj = $pclf->getCurrent();
@@ -214,7 +214,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	function testBasicPermissionFunctions() {
 		global $dd;
 
-		$permission = TTnew('Permission');
+		$permission = TTnew('Permission'); /** @var Permission $permission */
 		$permission_arr = $permission->getPermissions( $this->user_id, $this->company_id );
 		$this->assertGreaterThan( 40, count($permission_arr) ); //Needs to be low enough for community edtion.
 
@@ -262,7 +262,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//Admin user at the top
 		$dd->createAuthorizationHierarchyLevel( $this->company_id, $hierarchy_control_id, $superior_user_id, 1 );
 
-		$permission = TTnew('Permission');
+		$permission = TTnew('Permission'); /** @var Permission $permission */
 		$permission_arr = $permission->getPermissions( $superior_user_id, $this->company_id );
 		$this->assertGreaterThan( 20, count($permission_arr) ); //Needs to be low enough for community edition.
 
@@ -339,7 +339,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
 
-		$permission = TTnew('Permission'); //This clears cache
+		$permission = TTnew('Permission'); /** @var Permission $permission */ //This clears cache
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'dPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertSame(  array( $superior_user_id ), $permission_children_ids );
@@ -382,7 +382,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
 
-		$permission = TTnew('Permission'); //This clears cache
+		$permission = TTnew('Permission'); /** @var Permission $permission */ //This clears cache
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'ePermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertSame( $subordinate_user_ids, $permission_children_ids );
@@ -427,7 +427,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
 
-		$permission = TTnew('Permission'); //This clears cache
+		$permission = TTnew('Permission'); /** @var Permission $permission */ //This clears cache
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'fPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertSame( array_merge( $subordinate_user_ids, (array)$superior_user_id ), $permission_children_ids );
@@ -470,7 +470,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//
 		$this->editUserPermission( $superior_user_id, 'wage', 'view', TRUE );
 
-		$permission = TTnew('Permission'); //This clears cache
+		$permission = TTnew('Permission'); /** @var Permission $permission */ //This clears cache
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'gPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertSame( NULL, $permission_children_ids );
@@ -515,7 +515,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
 
-		$permission = TTnew('Permission'); //This clears cache
+		$permission = TTnew('Permission'); /** @var Permission $permission */ //This clears cache
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'hPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertSame( NULL, $permission_children_ids );
@@ -560,7 +560,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
 		//$permission = TTnew('Permission'); //This clears cache
 
-		$ulf = TTnew('UserListFactory');
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $superior_user_id )->getCurrent();
 
 		//Global current_user/current_company as this is required to properly check permissions in each report
@@ -575,7 +575,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$config['columns'][] = 'hourly_rate';
 		$config['sort'][] = array( 'employee_number' => 'asc' ); //Force sort, so it doesn't change on us.
 
-		$report_obj = TTnew('UserSummaryReport');
+		$report_obj = TTnew('UserSummaryReport'); /** @var UserSummaryReport $report_obj */
 		$report_obj->setUserObject( $user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$report_obj->setConfig( (array)$config );
@@ -627,7 +627,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
 		//$permission = TTnew('Permission'); //This clears cache
 
-		$ulf = TTnew('UserListFactory');
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $superior_user_id )->getCurrent();
 
 		//Global current_user/current_company as this is required to properly check permissions in each report
@@ -642,7 +642,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$config['columns'][] = 'hourly_rate';
 		$config['sort'][] = array( 'employee_number' => 'asc' ); //Force sort, so it doesn't change on us.
 
-		$report_obj = TTnew('UserSummaryReport');
+		$report_obj = TTnew('UserSummaryReport'); /** @var UserSummaryReport $report_obj */
 		$report_obj->setUserObject( $user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$report_obj->setConfig( (array)$config );
@@ -697,7 +697,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
 		//$permission = TTnew('Permission'); //This clears cache
 
-		$ulf = TTnew('UserListFactory');
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $superior_user_id )->getCurrent();
 
 		//Global current_user/current_company as this is required to properly check permissions in each report
@@ -712,7 +712,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$config['columns'][] = 'hourly_rate';
 		$config['sort'][] = array( 'employee_number' => 'asc' ); //Force sort, so it doesn't change on us.
 
-		$report_obj = TTnew('UserSummaryReport');
+		$report_obj = TTnew('UserSummaryReport'); /** @var UserSummaryReport $report_obj */
 		$report_obj->setUserObject( $user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$report_obj->setConfig( (array)$config );
@@ -776,7 +776,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
 		//$permission = TTnew('Permission'); //This clears cache
 
-		$ulf = TTnew('UserListFactory');
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $superior_user_id )->getCurrent();
 
 		//Global current_user/current_company as this is required to properly check permissions in each report
@@ -791,7 +791,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$config['columns'][] = 'hourly_rate';
 		$config['sort'][] = array( 'employee_number' => 'asc' ); //Force sort, so it doesn't change on us.
 
-		$report_obj = TTnew('UserSummaryReport');
+		$report_obj = TTnew('UserSummaryReport'); /** @var UserSummaryReport $report_obj */
 		$report_obj->setUserObject( $user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$report_obj->setConfig( (array)$config );
@@ -856,7 +856,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
 		//$permission = TTnew('Permission'); //This clears cache
 
-		$ulf = TTnew('UserListFactory');
+		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $superior_user_id )->getCurrent();
 
 		//Global current_user/current_company as this is required to properly check permissions in each report
@@ -871,7 +871,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$config['columns'][] = 'hourly_rate';
 		$config['sort'][] = array( 'employee_number' => 'asc' ); //Force sort, so it doesn't change on us.
 
-		$report_obj = TTnew('UserSummaryReport');
+		$report_obj = TTnew('UserSummaryReport'); /** @var UserSummaryReport $report_obj */
 		$report_obj->setUserObject( $user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$report_obj->setConfig( (array)$config );

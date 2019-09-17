@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class TimeTrexPaymentServices
+ */
 class TimeTrexPaymentServices {
 	protected $url = 'https://paymentservices.timetrex.com/api/soap/api.php';
 
@@ -52,7 +56,7 @@ class TimeTrexPaymentServices {
 	/**
 	 * Converts a remittance agency object to a agency authorization array for uploading.
 	 * @param $rae_obj
-	 * @return array
+	 * @return array|bool
 	 */
 	function convertRemittanceAgencyEventObjectToAgencyAuthorizationArray( $rae_obj ) {
 		if ( !is_object( $rae_obj ) ) {
@@ -112,6 +116,11 @@ class TimeTrexPaymentServices {
 	}
 
 
+	/**
+	 * @param $end_date
+	 * @param null $run_id
+	 * @return false|string
+	 */
 	function generateBatchID( $end_date, $run_id = NULL ) {
 		//APR 02 R01 -- Only the first 7 characters are shown on settlement transactions.
 		//was: PP APR02 R01
@@ -190,8 +199,7 @@ class TimeTrexPaymentServices {
 			$filter_data['agency_id'] = array('10:US:00:00:0010'); //US federal
 		}
 
-		/** @var PayrollRemittanceAgencyListFactory $ralf */
-		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $le_obj->getCompany(), $filter_data );
 		if ( $ralf->getRecordCount() > 0 ) {
 			$ra_obj = $ralf->getCurrent();
@@ -233,6 +241,7 @@ class TimeTrexPaymentServices {
 	/**
 	 * Converts a user object to a remittance user array for uploading.
 	 * @param $u_obj
+	 * @param null $remote_organization_id
 	 * @return array
 	 */
 	function convertUserObjectToUserArray( $u_obj, $remote_organization_id = NULL ) {
@@ -257,7 +266,7 @@ class TimeTrexPaymentServices {
 				'home_phone' => $u_obj->getHomePhone(),
 				'mobile_phone' => $u_obj->getMobilePhone(),
 
-				'birth_date' => $u_obj->getBirthDate(),
+				'birth_date' =>  TTDate::getISODateStamp( $u_obj->getBirthDate() ),
 				'sin' => $u_obj->getSIN(),
 
 				'work_email' => $u_obj->getWorkEmail(),
@@ -281,7 +290,7 @@ class TimeTrexPaymentServices {
 	 * @param object $pra_obj
 	 * @param object $rs_obj
 	 * @param object $pra_user_obj
-	 * @return array
+	 * @return array|bool
 	 */
 	function convertReportPaymentServicesDataToAgencyReportArray( $report_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj ) {
 		if ( !isset($report_data['agency_report_data'] ) ) {
@@ -322,11 +331,11 @@ class TimeTrexPaymentServices {
 
 	/**
 	 * Converts ROE objects to a agency report array for uploading.
-	 * @param $pst_obj
-	 * @param $ps_obj
-	 * @param $rs_obj
-	 * @param $uf_obj
-	 * @param $confirmation_number
+	 * @param $form_obj
+	 * @param $report_data
+	 * @param $rae_obj
+	 * @param $ra_obj
+	 * @param $remote_id
 	 * @param $batch_id
 	 * @return array
 	 */
@@ -382,11 +391,11 @@ class TimeTrexPaymentServices {
 
 	/**
 	 * Converts T4 objects to a agency report array for uploading.
-	 * @param $pst_obj
-	 * @param $ps_obj
-	 * @param $rs_obj
-	 * @param $uf_obj
-	 * @param $confirmation_number
+	 * @param $form_obj
+	 * @param $report_data
+	 * @param $rae_obj
+	 * @param $ra_obj
+	 * @param $remote_id
 	 * @param $batch_id
 	 * @return array
 	 */
@@ -487,6 +496,11 @@ class TimeTrexPaymentServices {
 	}
 
 	//Create organization from Legal Entity
+
+	/**
+	 * @param $row
+	 * @return bool
+	 */
 	function createNewOrganization( $row ) {
 		if ( isset( $row['_kind'] ) ) {
 			$row = array( $row );
@@ -511,6 +525,10 @@ class TimeTrexPaymentServices {
 		return TRUE;
 	}
 
+	/**
+	 * @param $row
+	 * @return bool
+	 */
 	function createNewUser( $row ) {
 		if ( isset( $row['_kind'] ) ) {
 			$row = array( $row );
@@ -681,6 +699,11 @@ class TimeTrexPaymentServices {
 		return $api_result;
 	}
 
+	/**
+	 * @param null $start_date
+	 * @param null $end_date
+	 * @return bool
+	 */
 	function getAccountStatementReport( $start_date = NULL, $end_date = NULL ) {
 		$api = new PaymentServicesClientAPI( 'APIOrganization' );
 		$api_result = $api->getAccountStatementReport( $start_date, $end_date );
@@ -697,6 +720,9 @@ class TimeTrexPaymentServices {
 		return FALSE;
 	}
 
+	/**
+	 * @return mixed
+	 */
 	function ping() {
 		$api = new PaymentServicesClientAPI( 'APIAuthentication' );
 		return $api->ping();

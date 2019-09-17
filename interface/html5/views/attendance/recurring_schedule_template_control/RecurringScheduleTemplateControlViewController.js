@@ -599,13 +599,17 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		if ( recurring_schedule_template_id ) {
 			var startTime = row_widgets['start_time' + recurring_schedule_template_id].getValue();
 			var endTime = row_widgets['end_time' + recurring_schedule_template_id].getValue();
-
 			var schedulePolicyId = row_widgets.schedule_policy_id.getValue();
 
-			if (startTime !== '' && endTime !== '' && schedulePolicyId !== '') {
-				var total_time = this.schedule_api.getScheduleTotalTime(startTime, endTime, schedulePolicyId, { async: false }).getResult();
-				row_widgets.total_time.setValue(Global.getTimeUnit(total_time));
+			if ( startTime !== '' && endTime !== '' && schedulePolicyId !== '' ) {
+				var result = this.schedule_api.getScheduleTotalTime(startTime, endTime, schedulePolicyId, { async: false });
+				if ( result ) {
+					var total_time = result.getResult();
+
+					row_widgets.total_time.setValue( Global.getTimeUnit( total_time ) );
+				}
 			}
+
 			this.validate();
 		}
 	},

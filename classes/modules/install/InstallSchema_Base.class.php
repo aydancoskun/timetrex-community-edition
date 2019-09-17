@@ -125,9 +125,8 @@ class InstallSchema_Base {
 		return strtoupper($schema_group);
 	}
 
-	//Copied from Install class.
-
 	/**
+	 * Copied from Install class.
 	 * @param $table_name
 	 * @return bool
 	 */
@@ -150,9 +149,8 @@ class InstallSchema_Base {
 		return FALSE;
 	}
 
-	//load Schema file data
-
 	/**
+	 * load Schema file data
 	 * @return bool|string
 	 */
 	function getSchemaSQLFileData() {
@@ -191,9 +189,8 @@ class InstallSchema_Base {
 		return $retval;
 	}
 
-	//Add support for custom variables in SQL files so we can access PHP variables in SQL and keep PostgreSQL vs. MySQL schema files similar.
-
 	/**
+	 * Add support for custom variables in SQL files so we can access PHP variables in SQL and keep PostgreSQL vs. MySQL schema files similar.
 	 * @param $sql
 	 * @return mixed
 	 */

@@ -221,7 +221,7 @@ class CurrencyRateFactory extends Factory {
 		//
 		// Currency
 		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't do the follow validation checks during Mass Edit.
-			$culf = TTnew( 'CurrencyListFactory' );
+			$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 			$this->Validator->isResultSetWithRows( 'currency_id',
 												   $culf->getByID( $this->getCurrency() ),
 												   TTi18n::gettext( 'Invalid Currency' )
@@ -304,9 +304,9 @@ class CurrencyRateFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

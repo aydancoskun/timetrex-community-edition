@@ -47,9 +47,8 @@ class Validator {
 
 	public $validate_only = FALSE;
 
-	//Checks a result set for one or more rows.
-
 	/**
+	 * Checks a result set for one or more rows.
 	 * @param $label
 	 * @param $rs
 	 * @param null $msg
@@ -62,11 +61,6 @@ class Validator {
 			if ( isset($rs->rs) AND is_object($rs->rs) AND isset($rs->rs->_numOfRows) AND $rs->rs->_numOfRows > 0 ) {
 				return TRUE;
 			}
-			//foreach($rs as $result) {
-			//	Debug::Arr($result, 'zzzResultSet: ', __FILE__, __LINE__, __METHOD__, $this->verbosity);
-			//	return TRUE;
-			//}
-			//unset($result); //code standards
 		}
 
 		$this->Error($label, $msg);
@@ -98,9 +92,8 @@ class Validator {
 		return TRUE;
 	}
 
-	//Function to simple set an error.
-
 	/**
+	 * Function to simple set an error.
 	 * @param $label
 	 * @param $value
 	 * @param null $msg
@@ -1062,18 +1055,16 @@ class Validator {
 		return $this->validate_only;
 	}
 
-	//Returns both Errors and Warnings combined.
-
 	/**
+	 * Returns both Errors and Warnings combined.
 	 * @return array
 	 */
 	function getErrorsAndWarningsArray() {
 		return array( 'errors' => $this->errors, 'warnings' => $this->warnings );
 	}
 
-	//Merges all errors/warnings from the passed $validator object to this one.
-
 	/**
+	 * Merges all errors/warnings from the passed $validator object to this one.
 	 * @param object $validator
 	 * @return bool
 	 */
@@ -1116,14 +1107,19 @@ class Validator {
 
 	/**
 	 * @param bool $numbered_list
+	 * @param array $errors_arr Pass in other error array to be converted to text.
 	 * @return bool|string
 	 */
-	function getTextErrors( $numbered_list = TRUE ) {
-		if ( count($this->errors ) > 0) {
+	function getTextErrors( $numbered_list = TRUE, $errors_arr = NULL ) {
+		if ( $errors_arr == NULL ) {
+			$errors_arr = $this->errors;
+		}
+
+		if ( count( $errors_arr ) > 0) {
 			$output = '';
 			$number_prefix = NULL;
 			$i = 1;
-			foreach ($this->errors as $label) {
+			foreach ( $errors_arr as $label) {
 				foreach ($label as $msg) {
 					if ( $numbered_list == TRUE ) {
 						$number_prefix = $i .'. ';

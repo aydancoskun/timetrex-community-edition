@@ -191,13 +191,14 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 	 * @param post_data
 	 */
 	showHTMLReport: function( report_name, new_window ) {
-
 		ProgressBar.showOverlay();
 		var api = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ))();
 		api['getReportData']( this.selected_remittance_agency_event_id, 'html', {
 			onResult: function( res ) {
-				var result = res.getResult();
-				if ( result ) {
+				ProgressBar.closeOverlay();
+
+				if ( res.isValid() ) {
+					var result = res.getResult();
 					if ( new_window ) {
 						var w = window.open();
 						w.document.writeln( result.api_retval );
@@ -205,9 +206,9 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 					} else if ( result ) {
 						IndexViewController.openWizard( 'ReportViewWizard', result.api_retval );
 					}
+				} else {
+					TAlertManager.showErrorAlert( res );
 				}
-				ProgressBar.closeOverlay();
-
 			}
 		} );
 	},

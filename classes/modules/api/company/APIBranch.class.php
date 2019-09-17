@@ -75,7 +75,7 @@ class APIBranch extends APIFactory {
 
 		Debug::Text('Getting branch default data...', __FILE__, __LINE__, __METHOD__, 10);
 
-		$bf = TTnew('BranchFactory');
+		$bf = TTnew('BranchFactory'); /** @var BranchFactory $bf */
 		$next_available_manual_id = $bf->getNextAvailableManualId( $company_obj->getId() );
 
 		$data = array(
@@ -119,7 +119,7 @@ class APIBranch extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$blf = TTnew( 'BranchListFactory' );
+		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -207,7 +207,7 @@ class APIBranch extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'BranchListFactory' );
+				$lf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -318,7 +318,7 @@ class APIBranch extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'BranchListFactory' );
+				$lf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

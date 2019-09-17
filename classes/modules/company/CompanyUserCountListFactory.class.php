@@ -55,7 +55,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -119,7 +119,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -147,7 +147,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -175,7 +175,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -202,7 +202,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -258,14 +258,13 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
 
-	//This function returns data for multiple companies, used by the API.
-
 	/**
+	 * Returns data for multiple companies, used by the API.
 	 * @param string $id UUID
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
@@ -321,7 +320,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -387,7 +386,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -449,14 +448,13 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
 
-	//This gets the totals across all companies.
-
 	/**
+	 * Gets the totals across all companies.
 	 * @param int $status_id
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
@@ -475,7 +473,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 			return FALSE;
 		}
 
-		$cf = TTNew('CompanyFactory');
+		$cf = TTNew('CompanyFactory'); /** @var CompanyFactory $cf */
 
 		$ph = array(
 					'status_id' => (int)$status_id,
@@ -535,7 +533,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -563,7 +561,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 						';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -596,7 +594,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 						';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

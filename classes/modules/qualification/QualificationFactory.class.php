@@ -160,7 +160,7 @@ class QualificationFactory extends Factory {
 		if ( $qlf->getRecordCount() == 1 ) {
 			$qualification_id = $qlf->getCurrent()->getID();
 		} else {
-			$qf = TTnew('QualificationFactory');
+			$qf = TTnew('QualificationFactory'); /** @var QualificationFactory $qf */
 			$qf->setType( $type_id );
 			$qf->setVisibilityType( $visibility_type_id );
 			$qf->setSourceType( $source_type_id );
@@ -186,7 +186,7 @@ class QualificationFactory extends Factory {
 	}
 
 	/**
-	 * @param int $type_id
+	 * @param $value
 	 * @return bool
 	 */
 	function setType( $value) {
@@ -202,7 +202,7 @@ class QualificationFactory extends Factory {
 	}
 
 	/**
-	 * @param int $source_type_id
+	 * @param $value
 	 * @return bool
 	 */
 	function setSourceType( $value) {
@@ -218,7 +218,7 @@ class QualificationFactory extends Factory {
 	}
 
 	/**
-	 * @param int $type_id
+	 * @param $value
 	 * @return bool
 	 */
 	function setVisibilityType( $value) {
@@ -242,7 +242,7 @@ class QualificationFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setCompany( $value) {
@@ -258,7 +258,7 @@ class QualificationFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setGroup( $value) {
@@ -315,7 +315,7 @@ class QualificationFactory extends Factory {
 	}
 
 	/**
-	 * @param $name
+	 * @param $value
 	 * @return bool
 	 */
 	function setName( $value) {
@@ -356,7 +356,7 @@ class QualificationFactory extends Factory {
 
 
 	/**
-	 * @param $description
+	 * @param $value
 	 * @return bool
 	 */
 	function setDescription( $value) {
@@ -383,7 +383,7 @@ class QualificationFactory extends Factory {
 	}
 
 	/**
-	 * @param $tags
+	 * @param $value
 	 * @return bool
 	 */
 	function setTag( $value ) {
@@ -428,7 +428,7 @@ class QualificationFactory extends Factory {
 		}
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'company_id',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -436,7 +436,7 @@ class QualificationFactory extends Factory {
 		}
 		// Group
 		if ( $this->getGroup() !== FALSE AND $this->getGroup() != TTUUID::getZeroID() ) {
-			$qglf = TTnew( 'QualificationGroupListFactory' );
+			$qglf = TTnew( 'QualificationGroupListFactory' ); /** @var QualificationGroupListFactory $qglf */
 			$this->Validator->isResultSetWithRows(	'group_id',
 														$qglf->getByID($this->getGroup()),
 														TTi18n::gettext('Group is invalid')
@@ -505,26 +505,26 @@ class QualificationFactory extends Factory {
 			Debug::Text('UnAssign Hours from Qualification: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			//Unassign hours from this qualification.
 
-			$sf = TTnew( 'UserSkillFactory' );
-			$ef = TTnew( 'UserEducationFactory' );
-			$lf = TTnew( 'UserLicenseFactory' );
-			$lg = TTnew( 'UserLanguageFactory' );
-			$mf = TTnew( 'UserMembershipFactory' );
+			$sf = TTnew( 'UserSkillFactory' ); /** @var UserSkillFactory $sf */
+			$ef = TTnew( 'UserEducationFactory' ); /** @var UserEducationFactory $ef */
+			$lf = TTnew( 'UserLicenseFactory' ); /** @var UserLicenseFactory $lf */
+			$lg = TTnew( 'UserLanguageFactory' ); /** @var UserLanguageFactory $lg */
+			$mf = TTnew( 'UserMembershipFactory' ); /** @var UserMembershipFactory $mf */
 
 			$query = 'update '. $sf->getTable() .' set qualification_id = \''. TTUUID::getZeroID() .'\' where qualification_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $ef->getTable() .' set qualification_id = \''. TTUUID::getZeroID() .'\' where qualification_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $lf->getTable() .' set qualification_id = \''. TTUUID::getZeroID() .'\' where qualification_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $lg->getTable() .' set qualification_id = \''. TTUUID::getZeroID() .'\' where qualification_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 
 			$query = 'update '. $mf->getTable() .' set qualification_id = \''. TTUUID::getZeroID() .'\' where qualification_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->db->Execute($query);
+			$this->ExecuteSQL($query);
 			//Job employee criteria
 		}
 

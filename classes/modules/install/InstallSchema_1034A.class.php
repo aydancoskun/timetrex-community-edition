@@ -58,7 +58,7 @@ class InstallSchema_1034A extends InstallSchema_Base {
 
 		//Go through all employee wages and update HourlyRate to the accurate annual hourly rate.
 		//Take into account wage entries that don't have the proper effective date based on the employees hire date, force a correct effective_date.
-		$uwlf = TTnew( 'UserWageListFactory' );
+		$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 		$uwlf->getAll();
 		if ( $uwlf->getRecordCount() > 0 ) {
 			foreach( $uwlf as $uw_obj ) {

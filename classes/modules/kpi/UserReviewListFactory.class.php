@@ -58,7 +58,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 					WHERE a.deleted = 0 AND urcf.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -86,7 +86,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 							AND a.deleted = 0 AND urcf.deleted = 0';
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 			$this->saveCache( $this->rs, $id );
 		}
 
@@ -112,7 +112,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 					where	a.user_review_control_id = ?
 						AND a.deleted = 0 AND urcf.deleted = 0';
 		$query .= $this->getSortSQL( $order );
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -137,7 +137,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
                     where  a.kpi_id = ?
                         AND a.deleted = 0 AND urcf.deleted = 0';
 		$query .= $this->getSortSQL( $order );
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -165,7 +165,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 						AND a.deleted = 0 AND urcf.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -198,7 +198,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 						AND a.deleted = 0 AND urcf.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -279,7 +279,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		$query .= ' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

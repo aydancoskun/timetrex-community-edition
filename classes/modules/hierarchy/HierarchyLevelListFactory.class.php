@@ -56,7 +56,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -86,7 +86,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -118,7 +118,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -157,7 +157,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -193,7 +193,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -231,7 +231,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -272,7 +272,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -322,7 +322,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 	/**
 	 * @param string $user_id UUID
 	 * @param int $object_type_id
-	 * @return array|bool
+	 * @return bool|HierarchyLevelListFactory
 	 */
 	function getByUserIdAndObjectTypeID( $user_id, $object_type_id = 50 ) { //50 = Requests
 
@@ -349,7 +349,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 					AND ( a.deleted = 0 )
 				';
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -403,7 +403,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -453,7 +453,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 				ORDER BY x.level asc
 				';
 
-		$rs = $this->db->Execute($query, $ph);
+		$rs = $this->ExecuteSQL($query, $ph);
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		$hierarchy_to_level_map = array();
@@ -573,7 +573,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

@@ -586,10 +586,8 @@ class FastTree {
 		return FALSE;
 	}
 
-
-	//MPTT + Gap add function.
-
 	/**
+	 * MPTT + Gap add function.
 	 * @param string $object_id UUID
 	 * @param int $parent_id
 	 * @return bool
@@ -929,9 +927,9 @@ class FastTree {
 
 	}
 
-	//Flex requires that all index keys start at 0, even in the children section,
-	//So we need to handle that as well so Flex doesn't need any post processing.
 	/**
+	 * Flex requires that all index keys start at 0, even in the children section,
+	 * So we need to handle that as well so Flex doesn't need any post processing.
 	 * @param $nodes
 	 * @param bool $include_root
 	 * @return array

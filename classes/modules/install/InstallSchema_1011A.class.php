@@ -63,7 +63,7 @@ class InstallSchema_1011A extends InstallSchema_Base {
 		//Configure currencies for Standard Edition.
 		if ( $this->getIsUpgrade() == TRUE ) {
 
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$clf->StartTransaction();
 			$clf->getAll();
 			if ( $clf->getRecordCount() > 0 ) {
@@ -71,7 +71,7 @@ class InstallSchema_1011A extends InstallSchema_Base {
 					if ( $c_obj->getStatus() == 10 ) {
 						//Converting to new Accrual Policy table.
 						Debug::text('Converting to new Accrual Policy Table: '. $c_obj->getName() .' ID: '. $c_obj->getId(), __FILE__, __LINE__, __METHOD__, 9);
-						$pglf = TTnew( 'PolicyGroupListFactory' );
+						$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 						$pglf->getByCompanyId( $c_obj->getId() );
 						if ( $pglf->getRecordCount() > 0 ) {
 							foreach( $pglf as $pg_obj ) {
@@ -87,10 +87,10 @@ class InstallSchema_1011A extends InstallSchema_Base {
 						}
 
 						Debug::text('Adding Currency Information to Company: '. $c_obj->getName() .' ID: '. $c_obj->getId(), __FILE__, __LINE__, __METHOD__, 9);
-						$crlf = TTnew( 'CurrencyListFactory' );
+						$crlf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $crlf */
 						$crlf->getByCompanyId( $c_obj->getId() );
 						if ( $crlf->getRecordCount() == 0 ) {
-							$cf = TTnew( 'CurrencyFactory' );
+							$cf = TTnew( 'CurrencyFactory' ); /** @var CurrencyFactory $cf */
 							$country_to_currency_map_arr = $cf->getOptions('country_currency');
 
 							if ( isset($country_to_currency_map_arr[$c_obj->getCountry()]) ) {
@@ -117,7 +117,7 @@ class InstallSchema_1011A extends InstallSchema_Base {
 								Debug::text('Base Currency ID: '. $base_currency_id, __FILE__, __LINE__, __METHOD__, 10);
 
 								//Set Employee Hire Defaults.
-								$udlf = TTnew( 'UserDefaultListFactory' );
+								$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 								$udlf->getByCompanyId($c_obj->getId() );
 								if ( $udlf->getRecordCount() > 0 ) {
 									$ud_obj = $udlf->getCurrent();
@@ -130,7 +130,7 @@ class InstallSchema_1011A extends InstallSchema_Base {
 								unset($udlf, $ud_obj);
 
 								if ( is_numeric( $base_currency_id ) ) {
-									$ulf = TTnew( 'UserListFactory' );
+									$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 									$ulf->getByCompanyId( $c_obj->getId() );
 									if ( $ulf->getRecordCount() > 0 ) {
 										foreach( $ulf as $u_obj ) {
@@ -143,7 +143,7 @@ class InstallSchema_1011A extends InstallSchema_Base {
 											if ( $u_obj->isValid() ) {
 												if ( $u_obj->Save() == TRUE ) {
 													//Set User Default Language
-													$uplf = TTnew( 'UserPreferenceListFactory' );
+													$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 													$uplf->getByUserIDAndCompanyID( $user_id, $c_obj->getId() );
 													if ( $uplf->getRecordCount() > 0 ) {
 														$up_obj = $uplf->getCurrent();
@@ -223,7 +223,7 @@ class InstallSchema_1011A extends InstallSchema_Base {
 		}
 		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__, 9);
 
-		$cjf = TTnew( 'CronJobFactory' );
+		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
 		$cjf->setName('UpdateCurrencyRates');
 		$cjf->setMinute(45);
 		$cjf->setHour(1);

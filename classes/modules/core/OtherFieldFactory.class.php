@@ -152,7 +152,7 @@ class OtherFieldFactory extends Factory {
 		if ( is_object($this->company_obj) ) {
 			return $this->company_obj;
 		} else {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->company_obj = $clf->getById( $this->getCompany() )->getCurrent();
 
 			return $this->company_obj;
@@ -444,12 +444,15 @@ class OtherFieldFactory extends Factory {
 		return $data;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function Validate() {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 													$clf->getByID($this->getCompany()),
 													TTi18n::gettext('Company is invalid')

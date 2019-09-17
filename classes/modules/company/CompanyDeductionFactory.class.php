@@ -303,7 +303,7 @@ class CompanyDeductionFactory extends Factory {
 									);
 				break;
 			case 'apply_payroll_run_type':
-				$psf = TTnew('PayStubFactory');
+				$psf = TTnew('PayStubFactory'); /** @var PayStubFactory $psf */
 				$retval = $psf->getOptions('type');
 				break;
 			case 'look_back_unit':
@@ -513,6 +513,24 @@ class CompanyDeductionFactory extends Factory {
 														'-1710-#lookback_exclude_pay_stub_units#' => TTi18n::getText('Lookback - Exclude Pay Stub Units'),
 														'-1720-#lookback_exclude_pay_stub_ytd_units#' => TTi18n::getText('Lookback - Exclude Pay Stub YTD Units'),
 									);
+
+				$retval = array_merge( $retval, (array)$this->getOptions('formula_dynamic_variables') );
+				ksort($retval);
+				break;
+			case 'formula_dynamic_variables':
+				$retval = array();
+
+				global $current_user;
+				$ps_summary_report_obj = TTnew('PayStubSummaryReport');
+				$ps_summary_report_obj->setUserObject( $current_user );
+
+				$psa_variables = $ps_summary_report_obj->getOptions('pay_stub_account_amount_columns', array( 'include_ytd_amount' => TRUE ) );
+				foreach( $psa_variables as $psa_variable => $label ) {
+					$psa_variable = str_replace('-P', '-#P', $psa_variable) .'#'; //Add # to the beginning/end of the variable name so it can be used in a custom formula
+					$retval[$psa_variable] = $label;
+				}
+				unset( $ps_summary_report_obj, $psa_variables, $psa_variable, $label );
+
 				break;
 			case 'columns':
 				$retval = array(
@@ -700,7 +718,7 @@ class CompanyDeductionFactory extends Factory {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
 		} else {
-			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 			$pseallf->getByCompanyId( $this->getCompany() );
 			if ( $pseallf->getRecordCount() > 0 ) {
 				$this->pay_stub_entry_account_link_obj = $pseallf->getCurrent();
@@ -957,9 +975,8 @@ class CompanyDeductionFactory extends Factory {
 		return $this->setGenericDataValue( 'end_date', $value );
 	}
 
-	//Check if this date is within the effective date range
-
 	/**
+	 * Check if this date is within the effective date range
 	 * @param object $ud_obj
 	 * @param int $pp_end_date EPOCH
 	 * @param int $pp_transaction_date EPOCH
@@ -1343,7 +1360,7 @@ class CompanyDeductionFactory extends Factory {
 
 		$pay_code_policy_obj = $this->getLengthOfServiceContributingPayCodePolicyObject();
 		if ( is_object( $pay_code_policy_obj ) ) {
-			$udtlf = TTnew( 'UserDateTotalListFactory' );
+			$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 			$retval = $udtlf->getTotalTimeSumByUserIDAndPayCodeIDAndStartDateAndEndDate( $user_id, $pay_code_policy_obj->getPayCode(), $start_date, $end_date );
 		}
 
@@ -1672,9 +1689,8 @@ class CompanyDeductionFactory extends Factory {
 		return $this->setGenericDataValue( 'province', $value );
 	}
 
-	//Used for getting district name on W2's
-
 	/**
+	 * Used for getting district name on W2's
 	 * @return bool|mixed|null
 	 */
 	function getDistrictName() {
@@ -2320,7 +2336,7 @@ class CompanyDeductionFactory extends Factory {
 		$list = $this->getCache( $cache_id );
 		if ( $list === FALSE ) {
 			//Debug::text('Caching Include IDs: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			$cdpsealf = TTnew( 'CompanyDeductionPayStubEntryAccountListFactory' );
+			$cdpsealf = TTnew( 'CompanyDeductionPayStubEntryAccountListFactory' ); /** @var CompanyDeductionPayStubEntryAccountListFactory $cdpsealf */
 			$cdpsealf->getByCompanyDeductionIdAndTypeId( $this->getId(), 10 );
 
 			$list = NULL;
@@ -2352,7 +2368,7 @@ class CompanyDeductionFactory extends Factory {
 			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$cdpsealf = TTnew( 'CompanyDeductionPayStubEntryAccountListFactory' );
+				$cdpsealf = TTnew( 'CompanyDeductionPayStubEntryAccountListFactory' ); /** @var CompanyDeductionPayStubEntryAccountListFactory $cdpsealf */
 				$cdpsealf->getByCompanyDeductionIdAndTypeId( $this->getId(), 10 );
 
 				foreach ($cdpsealf as $obj) {
@@ -2373,11 +2389,11 @@ class CompanyDeductionFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 
 			foreach ($ids as $id) {
 				if ( $id != FALSE AND isset($ids) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() AND !in_array($id, $tmp_ids) ) {
-					$cdpseaf = TTnew( 'CompanyDeductionPayStubEntryAccountFactory' );
+					$cdpseaf = TTnew( 'CompanyDeductionPayStubEntryAccountFactory' ); /** @var CompanyDeductionPayStubEntryAccountFactory $cdpseaf */
 					$cdpseaf->setCompanyDeduction( $this->getId() );
 					$cdpseaf->setType(10); //Include
 					$cdpseaf->setPayStubEntryAccount( $id );
@@ -2423,7 +2439,7 @@ class CompanyDeductionFactory extends Factory {
 		$list = $this->getCache( $cache_id );
 		if ( $list === FALSE ) {
 			//Debug::text('Caching Exclude IDs: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			$cdpsealf = TTnew( 'CompanyDeductionPayStubEntryAccountListFactory' );
+			$cdpsealf = TTnew( 'CompanyDeductionPayStubEntryAccountListFactory' ); /** @var CompanyDeductionPayStubEntryAccountListFactory $cdpsealf */
 			$cdpsealf->getByCompanyDeductionIdAndTypeId( $this->getId(), 20 );
 
 			$list = NULL;
@@ -2455,7 +2471,7 @@ class CompanyDeductionFactory extends Factory {
 			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$cdpsealf = TTnew( 'CompanyDeductionPayStubEntryAccountListFactory' );
+				$cdpsealf = TTnew( 'CompanyDeductionPayStubEntryAccountListFactory' ); /** @var CompanyDeductionPayStubEntryAccountListFactory $cdpsealf */
 				$cdpsealf->getByCompanyDeductionIdAndTypeId( $this->getId(), 20 );
 				foreach ($cdpsealf as $obj) {
 					$id = $obj->getPayStubEntryAccount();
@@ -2476,11 +2492,11 @@ class CompanyDeductionFactory extends Factory {
 
 			//Insert new mappings.
 			//$lf = TTnew( 'UserListFactory' );
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 
 			foreach ($ids as $id) {
 				if ( $id != FALSE AND isset($ids) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() AND !in_array($id, $tmp_ids) ) {
-					$cdpseaf = TTnew( 'CompanyDeductionPayStubEntryAccountFactory' );
+					$cdpseaf = TTnew( 'CompanyDeductionPayStubEntryAccountFactory' ); /** @var CompanyDeductionPayStubEntryAccountFactory $cdpseaf */
 					$cdpseaf->setCompanyDeduction( $this->getId() );
 					$cdpseaf->setType(20); //Include
 					$cdpseaf->setPayStubEntryAccount( $id );
@@ -2508,7 +2524,7 @@ class CompanyDeductionFactory extends Factory {
 	function getUser() {
 		//Cache the user list to help performance in TaxSummaryReport
 		if ( $this->users === NULL ) {
-			$udlf = TTnew( 'UserDeductionListFactory' );
+			$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 			$udlf->getByCompanyIdAndCompanyDeductionId( $this->getCompany(), $this->getId() );
 
 			$this->users = array();
@@ -2539,7 +2555,7 @@ class CompanyDeductionFactory extends Factory {
 			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$udlf = TTnew( 'UserDeductionListFactory' );
+				$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 				$udlf->getByCompanyIdAndCompanyDeductionId( $this->getCompany(), $this->getId() );
 				foreach ($udlf as $obj) {
 					$id = $obj->getUser();
@@ -2559,10 +2575,10 @@ class CompanyDeductionFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			foreach ($ids as $id) {
 				if ( $id != FALSE AND isset($ids) AND !in_array($id, $tmp_ids) ) {
-					$udf = TTnew( 'UserDeductionFactory' );
+					$udf = TTnew( 'UserDeductionFactory' ); /** @var UserDeductionFactory $udf */
 					$udf->setUser( $id );
 					$udf->setCompanyDeduction( $this->getId() );
 
@@ -2592,7 +2608,7 @@ class CompanyDeductionFactory extends Factory {
 	 * @return mixed
 	 */
 	function getTotalUsers() {
-		$udlf = TTnew( 'UserDeductionListFactory' );
+		$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 		$udlf->getByCompanyDeductionId( $this->getId() );
 		return $udlf->getRecordCount();
 	}
@@ -2644,7 +2660,7 @@ class CompanyDeductionFactory extends Factory {
 
 		$psea_ids_from_type_ids = array();
 		if ( empty($type_ids) == FALSE ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$psea_ids_from_type_ids = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $this->getCompany(), array(10, 20), $type_ids, FALSE );
 			if ( is_array( $psea_ids_from_type_ids ) ) {
 				$psea_ids_from_type_ids = array_keys( $psea_ids_from_type_ids );
@@ -2658,7 +2674,7 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	/**
-	 * @param object $pay_stub_obj
+	 * @param PayStubFactory $pay_stub_obj
 	 * @param string|array $ids UUID
 	 * @param string $ps_entries
 	 * @param string $return_value
@@ -2801,9 +2817,8 @@ class CompanyDeductionFactory extends Factory {
 		return $amount;
 	}
 
-	//Handle look back period, which is always based on the transaction date *before* the current pay periods transaction date.
-
 	/**
+	 * Handle look back period, which is always based on the transaction date *before* the current pay periods transaction date.
 	 * @param object $pay_period_obj
 	 * @return array
 	 */
@@ -2835,7 +2850,7 @@ class CompanyDeductionFactory extends Factory {
 	function getLookbackPayStubs( $user_id, $pay_period_obj ) {
 		$lookback_dates = $this->getLookbackStartAndEndDates( $pay_period_obj );
 
-		$pslf = TTNew('PayStubListFactory');
+		$pslf = TTNew('PayStubListFactory'); /** @var PayStubListFactory $pslf */
 		$this->lookback_pay_stub_lf = $pslf->getByUserIdAndStartDateAndEndDate( $user_id, $lookback_dates['start_date'], $lookback_dates['end_date'] );
 
 		$retarr = array();
@@ -2933,7 +2948,7 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	static function getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, $type_id, $name ) {
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+		$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 		$psealf->getByCompanyIdAndTypeAndFuzzyName( $company_id, $type_id, $name );
 		if ( $psealf->getRecordCount() > 0 ) {
 			return $psealf->getCurrent()->getId();
@@ -2952,7 +2967,7 @@ class CompanyDeductionFactory extends Factory {
 		//
 		// Legal Entity
 		if ( $this->getLegalEntity() != TTUUID::getZeroID() AND $this->getLegalEntity() != TTUUID::getNotExistID() ) {
-			$clf = TTnew( 'LegalEntityListFactory' );
+			$clf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'legal_entity_id',
 														$clf->getByID($this->getLegalEntity()),
 														TTi18n::gettext('Legal Entity is invalid')
@@ -2960,7 +2975,7 @@ class CompanyDeductionFactory extends Factory {
 		}
 
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 													$clf->getByID($this->getCompany()),
 													TTi18n::gettext('Company is invalid')
@@ -2968,7 +2983,7 @@ class CompanyDeductionFactory extends Factory {
 
 		// Payroll remittance agency
 		if ( $this->getPayrollRemittanceAgency() !== FALSE AND $this->getPayrollRemittanceAgency() != TTUUID::getZeroID() ) {
-			$clf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+			$clf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $clf */
 			$this->Validator->isResultSetWithRows(	'payroll_remittance_agency_id',
 														$clf->getByID( $this->getPayrollRemittanceAgency() ),
 														TTi18n::gettext('Payroll remittance agency is invalid')
@@ -3095,7 +3110,7 @@ class CompanyDeductionFactory extends Factory {
 
 		// Contributing Pay Code Policy
 		if ( $this->getLengthOfServiceContributingPayCodePolicy() !== FALSE AND $this->getLengthOfServiceContributingPayCodePolicy() != TTUUID::getZeroID() ) {
-			$csplf = TTnew( 'ContributingPayCodePolicyListFactory' );
+			$csplf = TTnew( 'ContributingPayCodePolicyListFactory' ); /** @var ContributingPayCodePolicyListFactory $csplf */
 			$this->Validator->isResultSetWithRows(	'length_of_service_contributing_pay_code_policy_id',
 															$csplf->getByID($this->getLengthOfServiceContributingPayCodePolicy()),
 															TTi18n::gettext('Contributing Pay Code Policy is invalid')
@@ -3176,7 +3191,7 @@ class CompanyDeductionFactory extends Factory {
 												TTi18n::gettext('Invalid Calculation Order')
 											);
 
-		$cf = TTnew( 'CompanyFactory' );
+		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 		// Country
 		if ( $this->getCountry() != '' ) {
 			$this->Validator->inArrayKey(	'country',
@@ -3402,7 +3417,7 @@ class CompanyDeductionFactory extends Factory {
 
 		// Pay Stub Account
 		if ( $this->getPayStubEntryAccount() != TTUUID::getZeroID() ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->Validator->isResultSetWithRows(	'pay_stub_entry_account',
 													$psealf->getByID($this->getPayStubEntryAccount()),
 													TTi18n::gettext('Pay Stub Account is invalid')
@@ -3715,7 +3730,6 @@ class CompanyDeductionFactory extends Factory {
 				'WY - Unemployment Insurance - Employer' => '20:US:WY:00:0020',
 
 				//Other
-				'TX - UI Obligation Assessment' => '20:US:TX:00:0020',
 				'AL - Employment Security Assessment' => '20:US:AL:00:0020',
 				'AZ - Job Training Surcharge' => '20:US:AZ:00:0020',
 				'CA - Disability Insurance' => '20:US:CA:00:0010',
@@ -3825,27 +3839,32 @@ class CompanyDeductionFactory extends Factory {
 
 		$c_obj = $this->getCompanyObject();
 		if ( is_object($c_obj) AND $c_obj->getStatus() != 30 ) {
-			Debug::text('Company: '. $c_obj->getName() .' Date: '. TTDate::getDate('DATE+TIME', $date), __FILE__, __LINE__, __METHOD__, 9);
-			$cdlf = TTnew( 'CompanyDeductionListFactory' );
+			$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 			$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $c_obj->getID(), array('calculation_id' => array(100, 200), 'country' => 'CA') );
+			Debug::text('Company: '. $c_obj->getName() .' Date: '. TTDate::getDate('DATE+TIME', $date) .' Tax/Deduction Records to update: '. $cdlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9);
 			if ( $cdlf->getRecordCount() > 0 ) {
 				foreach ( $cdlf as $cd_obj ) {
 					$pd_obj = new PayrollDeduction( $cd_obj->getCountry(), $cd_obj->getProvince() );
 					$pd_obj->setDate( $date );
 
 					if ( $cd_obj->getCalculation() == 100 ) { //Federal
-						$pd_obj->setFederalTotalClaimAmount( $cd_obj->getUserValue1() );
-						$claim_amount = $pd_obj->getFederalTotalClaimAmount();
+						//$pd_obj->setFederalTotalClaimAmount( $cd_obj->getUserValue1() );
+						//$claim_amount = $pd_obj->getFederalTotalClaimAmount();
+
+						//Force the claim amount to the basic no matter what. This avoids problems with claim amounts increasing/decreasing throughout the years and possibly being wrong for prolonged periods.
+						$claim_amount = $pd_obj->getBasicFederalClaimCodeAmount();
 					} elseif ( $cd_obj->getCalculation() == 200 ) { //Provincial
-						$pd_obj->setProvincialTotalClaimAmount( $cd_obj->getUserValue1() );
-						$claim_amount = $pd_obj->getProvincialTotalClaimAmount();
+						//$pd_obj->setProvincialTotalClaimAmount( $cd_obj->getUserValue1() );
+						//$claim_amount = $pd_obj->getProvincialTotalClaimAmount();
+
+						$claim_amount = $pd_obj->getBasicProvinceClaimCodeAmount();
 					}
 
 					if ( (float)$cd_obj->getUserValue1() != (float)$claim_amount ) {
 						Debug::text( 'Updating claim amounts... Old: ' . $cd_obj->getUserValue1() . ' New: ' . $claim_amount, __FILE__, __LINE__, __METHOD__, 9 );
 						//Use a SQL query instead of modifying the CompanyDeduction class, as that can cause errors when we add columns to the table later on.
 						$query = 'UPDATE ' . $cd_obj->getTable() . ' set user_value1 = ' . (float)$claim_amount . ' where id = \''. TTUUID::castUUID($cd_obj->getId()) .'\'';
-						$this->db->Execute( $query );
+						$this->ExecuteSQL( $query );
 					} else {
 						Debug::text( 'Amount matches, no changes needed... Old: ' . $cd_obj->getUserValue1() . ' New: ' . $claim_amount, __FILE__, __LINE__, __METHOD__, 9 );
 					}
@@ -3899,7 +3918,7 @@ class CompanyDeductionFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Check if any users are assigned to this, if so, delete mappings.
-			$udlf = TTnew( 'UserDeductionListFactory' );
+			$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 
 			$udlf->StartTransaction();
 			$udlf->getByCompanyIdAndCompanyDeductionId( $this->getCompany(), $this->getId() );

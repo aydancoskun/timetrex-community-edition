@@ -55,7 +55,7 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -117,7 +117,7 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit);
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit);
 
 		return $this;
 	}
@@ -156,7 +156,7 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit);
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit);
 
 		return $this;
 	}
@@ -199,7 +199,7 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -236,7 +236,7 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -276,7 +276,7 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		$query .= $this->getSortSQL( $order );
 
 		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -343,6 +343,7 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 							) as in_use,					
 							rsaf.name as remittance_source_account,
 							rsaf.legal_entity_id as legal_entity_id,
+							uf.employee_number as user_employee_number,
 							uf.first_name as user_first_name,
 							uf.last_name as user_last_name,
 							y.first_name as created_by_first_name,
@@ -390,7 +391,7 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 		//Debug::Arr($ph, 'Query: '.$query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;

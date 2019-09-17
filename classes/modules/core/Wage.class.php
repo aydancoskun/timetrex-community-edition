@@ -113,7 +113,7 @@ class Wage {
 		if ( isset($this->user_obj) AND is_object($this->user_obj) AND $this->getUser() == $this->user_obj->getID() ) {
 			return $this->user_obj;
 		} else {
-			$lf = TTnew( 'UserListFactory' );
+			$lf = TTnew( 'UserListFactory' ); /** @var UserListFactory $lf */
 			$lf->getById( $this->getUser() );
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->user_obj = $lf->getCurrent();
@@ -131,7 +131,7 @@ class Wage {
 		if ( isset($this->pay_period_obj) AND is_object($this->pay_period_obj) AND $this->getPayPeriod() == $this->pay_period_obj->getID() ) {
 			return $this->pay_period_obj;
 		} else {
-			$lf = TTnew( 'PayPeriodListFactory' );
+			$lf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $lf */
 			$lf->getById( $this->getPayPeriod() );
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->pay_period_obj = $lf->getCurrent();
@@ -153,7 +153,7 @@ class Wage {
 		if ( isset($this->pay_period_schedule_obj) AND is_object($this->pay_period_schedule_obj) AND $pay_period_schedule_id == $this->pay_period_schedule_obj->getID() ) {
 			return $this->pay_period_schedule_obj;
 		} else {
-			$lf = TTnew( 'PayPeriodScheduleListFactory' );
+			$lf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $lf */
 			$lf->getById( $pay_period_schedule_id );
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->pay_period_schedule_obj = $lf->getCurrent();
@@ -176,7 +176,7 @@ class Wage {
 		if ( isset($this->pay_stub_entry_account_link_obj) AND is_object($this->pay_stub_entry_account_link_obj) AND $company_id == $this->pay_stub_entry_account_link_obj->getCompany() ) {
 			return $this->pay_stub_entry_account_link_obj;
 		} else {
-			$lf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+			$lf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $lf */
 			$lf->getByCompanyId( $company_id );
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->pay_stub_entry_account_link_obj = $lf->getCurrent();
@@ -221,7 +221,7 @@ class Wage {
 	 */
 	function getPayStubAmendmentEarnings() {
 		//Get pay stub amendments here.
-		$psalf = TTnew( 'PayStubAmendmentListFactory' );
+		$psalf = TTnew( 'PayStubAmendmentListFactory' ); /** @var PayStubAmendmentListFactory $psalf */
 
 		if ( $this->getAdvance() == TRUE ) {
 			//For advances, any PS amendment effective BEFORE the advance end date is considered in full.
@@ -252,7 +252,7 @@ class Wage {
 	 */
 	function getPayStubAmendmentDeductions() {
 		//Get pay stub amendments here.
-		$psalf = TTnew( 'PayStubAmendmentListFactory' );
+		$psalf = TTnew( 'PayStubAmendmentListFactory' ); /** @var PayStubAmendmentListFactory $psalf */
 
 		if ( $this->getAdvance() == TRUE ) {
 			//For advances, any PS amendment effective BEFORE the advance end date is considered in full.
@@ -328,7 +328,7 @@ class Wage {
 	 */
 	function setUserDateTotalArray() {
 		//Loop through unique UserDateTotal rows... Adding entries to pay stubs.
-		$udtlf = TTnew( 'UserDateTotalListFactory' );
+		$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 		$udtlf->getByUserIdAndPayPeriodIdAndEndDate( $this->getUser(), $this->getPayPeriod(), $this->getPayPeriodObject()->getEndDate() );
 
 		$calculate_salary = FALSE;
@@ -475,7 +475,7 @@ class Wage {
 				Debug::text('Calculating Salary...', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Get all wages that apply in this period so we can determine pro-rating for salaries.
-				$uwlf = TTNew('UserWageListFactory');
+				$uwlf = TTNew('UserWageListFactory'); /** @var UserWageListFactory $uwlf */
 				$uwlf->getDefaultWageGroupByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() ); //ORDER BY effective_date desc
 				if ( $uwlf->getRecordCount() > 0 ) {
 					foreach( $uwlf as $uw_obj ) {

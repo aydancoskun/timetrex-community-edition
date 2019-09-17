@@ -85,12 +85,6 @@ Global.sendErrorReport = function() {
 	var line = arguments[2];
 	var error_stack = arguments[4];
 
-	if ( Global.idle_time > 15 ) {
-		Debug.Text( 'User inactive more than 15 mins, not sending error report.', 'Global.js', '', 'sendErrorReport', 1 );
-		ga( 'send', 'exception', { 'exDescription': 'Session Idle: '+ error_string + ' in ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '') : 'N/A' ) + ' line ' + line, 'exFatal': false } );
-		return;
-	}
-
 	RateLimit.setID( 'sendErrorReport' );
 	RateLimit.setAllowedCalls( 6 );
 	RateLimit.setTimeFrame( 7200 ); //2hrs
@@ -98,15 +92,28 @@ Global.sendErrorReport = function() {
 	if ( RateLimit.check() ) {
 		var api_authentication = new APIAuthentication();
 		var login_user = LocalCacheData.getLoginUser();
+
 		/*
 		 * JavaScript exception ignore list
 		 */
-		if ( error_string.indexOf( 'TypeError: \'null\' is not an object' ) >= 0 ||
+		if (    error_string.indexOf( 'Script error' ) >= 0 || //Script error. in:  line: 0 -- Likely browser extensions or errors from injected or outside javascript.
+				error_string.indexOf( 'Unspecified error' ) >= 0 || //From IE: Unspecified error. in N/A line 1
+				error_string.indexOf( 'TypeError: \'null\' is not an object' ) >= 0 ||
+				error_string.indexOf( '_avast_submit' ) >= 0 || //Errors from anti-virus extension
+				error_string.indexOf( 'googletag' ) >= 0 || //Errors from google tag extension -- Uncaught TypeError: Cannot redefine property: googletag
 				error_string.indexOf( 'NS_ERROR_' ) >= 0 ||
 				error_string.indexOf( 'NS_ERROR_OUT_OF_MEMORY' ) >= 0 ||
 				error_string.indexOf( 'NPObject' ) >= 0 ) { //Error calling method on NPObject - likely caused by an extension or plugin in the browser
+			console.error( 'Ignoring javascript exception outside of our control...' );
 			return;
 		}
+
+		if ( Global.idle_time > 15 ) {
+			Debug.Text( 'User inactive more than 15 mins, not sending error report.', 'Global.js', '', 'sendErrorReport', 1 );
+			ga( 'send', 'exception', { 'exDescription': 'Session Idle: '+ error_string + ' File: ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '') : 'N/A' ) + ' Line: ' + line, 'exFatal': false } );
+			return;
+		}
+
 		var error;
 
 		//BUG#2066 - allow this function to be called earlier.
@@ -130,7 +137,7 @@ Global.sendErrorReport = function() {
 		if ( login_user && Debug.varDump ) {
 			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: ' + login_user.user_name + '\n\nURL: ' + window.location.href + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie + '\n\nCurrent Ping: '+ Global.current_ping + '\n\nIdle Time: '+ Global.idle_time + '\n\nSession ID Key: '+ LocalCacheData.getSessionID() + '\n\nCurrent User Object: \n' + Debug.varDump(login_user) + '\n\nCurrent Company Object: \n' + Debug.varDump(current_company_obj) + '\n\nPreLogin: \n' + Debug.varDump(pre_login_data) + ' ';
 		} else {
-			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie + '\n\nPreLogin: \n' + Debug.varDump(pre_login_data);
+			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: N/A' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
 		}
 
 		console.error( 'JAVASCRIPT EXCEPTION:\n---------------------------------------------\n' + error + '\n---------------------------------------------' );
@@ -144,7 +151,7 @@ Global.sendErrorReport = function() {
 		if ( typeof(ga) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
 			// Send an exception hit to Google Analytics. Must be 8192 bytes or smaller.
 			// Strip the domain part off the URL on 'from_file' to better account for similar errors.
-			ga( 'send', 'exception', { 'exDescription': error_string + ' in ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '') : 'N/A' ) + ' line ' + line, 'exFatal': false } );
+			ga( 'send', 'exception', { 'exDescription': error_string + ' File: ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '') : 'N/A' ) + ' Line: ' + line, 'exFatal': false } );
 		}
 
 		//Don't send error report if exception not happens in our codes.
@@ -165,12 +172,12 @@ Global.sendErrorReport = function() {
 
 		if ( error_stack ) {
 			var trace = error_stack.stack;
-			error = error + '\n\n\n' + 'Function called stacks: ' + trace;
+			error = error + '\n\n\n' + 'Stack Trace: ' + trace;
 		}
 
 		Debug.Text( 'ERROR: ' + error, 'Global.js', '', 'sendErrorReport', 1 );
 
-		if ( Global.isCanvasSupported() ) {
+		if ( Global.isCanvasSupported() && typeof Promise !== 'undefined' ) { //HTML2Canvas requires promises, which IE11 does not have.
 			html2canvas( document.body ).then( function( canvas ) {
 				var image_string = canvas.toDataURL().split( ',' )[1];
 				api_authentication.sendErrorReport( error, image_string, {
@@ -258,37 +265,34 @@ Global.getUpgradeMessage = function() {
 	return message;
 };
 
-Global.doPingIfNecessary = function() {
-	var api = new (APIFactory.getAPIClass( 'APIMisc' ))();
-	if ( Global.idle_time < Math.min(15 , APIGlobal.pre_login_data.session_idle_timeout / 60 ) ) { //idle_time is minutes, session_idle_timeout is seconds.
+Global.doPingIfNecessary = function () {
+	var api = new ( APIFactory.getAPIClass( 'APIMisc' ) )();
+	if ( Global.idle_time < Math.min( 15, APIGlobal.pre_login_data.session_idle_timeout / 60 ) ) { //idle_time is minutes, session_idle_timeout is seconds.
 		Global.idle_time = 0;
-			return;
-		}
+		return;
+	}
 
-		Debug.Text('User is active again after idle for: ' + Global.idle_time + '... Resetting idle to 0', 'Global.js', '', 'doPingIfNecessary', 1);
-		Global.idle_time = 0;
+	Debug.Text( 'User is active again after idle for: ' + Global.idle_time + '... Resetting idle to 0', 'Global.js', '', 'doPingIfNecessary', 1 );
+	Global.idle_time = 0;
 
-		if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
-			return;
-		}
-		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
-		if ( !api || (typeof api.isLoggedIn) !== 'function' ) {
-			return;}
+	if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
+		return;
+	}
+	//Error: Uncaught TypeError: undefined is not a function in /interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
+	if ( !api || ( typeof api.isLoggedIn ) !== 'function' ) {
+		return;
+	}
 
-		api.isLoggedIn( false, {
-			onResult: function( result ) {
-				var res_data = result.getResult();
+	api.isLoggedIn( false, {
+		onResult: function ( result ) {
+			var res_data = result.getResult();
 
-				if ( res_data !== true ) {
-					api.ping( {
-						onResult: function() {
-
-						}
-					} );
-				}
-
+			if ( res_data !== true ) {
+				//Don't do Logout here, as we need to display a "Session Expired" message to the user, which is triggered from the ServiceCaller.
+				api.ping( { onResult: function () {} } );
 			}
-		} );
+		}
+	} );
 };
 
 Global.setupPing = function() {
@@ -500,13 +504,11 @@ Global.convertTojQueryFormat = function( date_format ) {
 	};
 
 	return jquery_date_format[date_format];
-
 };
 
 Global.updateUserPreference = function( callBack, message ) {
 	var user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
 	var current_user_aou = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
-	var date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
 
 	if ( message ) {
 		ProgressBar.changeProgressBarMessage( message );
@@ -516,64 +518,41 @@ Global.updateUserPreference = function( callBack, message ) {
 		onResult: function( result ) {
 			var result_data = result.getResult();
 			LocalCacheData.loginUserPreference = result_data;
-			date_api.getTimeZoneOffset( {
-				onResult: function( timeZoneRes ) {
 
-					date_api.getHours( timeZoneRes.getResult(), {
-						onResult: function( hoursRes ) {
-							var hoursResultData = hoursRes.getResult();
+			user_preference_api.getOptions( 'moment_date_format', {
+				onResult: function( jsDateFormatRes ) {
+					var jsDateFormatResultData = jsDateFormatRes.getResult();
 
-							//Flex way, Need this in js? Let's see
-							if ( hoursResultData.indexOf( '-' ) > -1 ) {
-								hoursResultData = hoursResultData.replace( '-', '+' );
-							} else {
-								hoursResultData = hoursResultData.replace( '+', '-' );
+					//For moment date parser
+					LocalCacheData.loginUserPreference.js_date_format = jsDateFormatResultData;
+
+					var date_format = LocalCacheData.loginUserPreference.date_format;
+					if ( !date_format ) {
+						date_format = 'DD-MMM-YY';
+					}
+
+					LocalCacheData.loginUserPreference.date_format = LocalCacheData.loginUserPreference.js_date_format[date_format];
+
+					LocalCacheData.loginUserPreference.date_format_1 = Global.convertTojQueryFormat( date_format ); //TDatePicker, TRangePicker
+					LocalCacheData.loginUserPreference.time_format_1 = Global.convertTojQueryFormat( LocalCacheData.loginUserPreference.time_format ); //TTimePicker
+
+					user_preference_api.getOptions( 'moment_time_format', {
+						onResult: function( jsTimeFormatRes ) {
+							var jsTimeFormatResultData = jsTimeFormatRes.getResult();
+
+							LocalCacheData.loginUserPreference.js_time_format = jsTimeFormatResultData;
+
+							LocalCacheData.setLoginUserPreference( LocalCacheData.loginUserPreference );
+
+							if ( callBack ) {
+								callBack();
 							}
-
-							LocalCacheData.loginUserPreference.time_zone_offset = hoursResultData;
-
-							user_preference_api.getOptions( 'moment_date_format', {
-								onResult: function( jsDateFormatRes ) {
-
-									var jsDateFormatResultData = jsDateFormatRes.getResult();
-									//For moment date parser
-									LocalCacheData.loginUserPreference.js_date_format = jsDateFormatResultData;
-									var date_format = LocalCacheData.loginUserPreference.date_format;
-
-									if ( !date_format ) {
-										date_format = 'DD-MMM-YY';
-									}
-									LocalCacheData.loginUserPreference.date_format = LocalCacheData.loginUserPreference.js_date_format[date_format];
-									////For date picker
-									//LocalCacheData.loginUserPreference.js_date_format_1 = jsDateFormatResultData;
-									LocalCacheData.loginUserPreference.date_format_1 = Global.convertTojQueryFormat( date_format );
-									LocalCacheData.loginUserPreference.time_format_1 = Global.convertTojQueryFormat( LocalCacheData.loginUserPreference.time_format );
-
-									user_preference_api.getOptions( 'moment_time_format', {
-										onResult: function( jsTimeFormatRes ) {
-
-											var jsTimeFormatResultData = jsTimeFormatRes.getResult();
-
-											LocalCacheData.loginUserPreference.js_time_format = jsTimeFormatResultData;
-
-											LocalCacheData.setLoginUserPreference( LocalCacheData.loginUserPreference );
-
-											if ( callBack ) {
-												callBack();
-											}
-
-										}
-									} );
-
-								}
-							} );
 
 						}
 					} );
 
 				}
 			} );
-
 		}
 	} );
 };
@@ -1432,8 +1411,8 @@ Global.bottomContainer = function() {
 	return $( '#bottomContainer' );
 };
 
-Global.bottomFeedbackContainer = function() {
-	return $( '#feedbackContainer' );
+Global.bottomFeedbackLinkContainer = function() {
+	return $( '#feedbackLinkContainer' );
 };
 
 Global.setSignalStrength = function() {
@@ -1689,7 +1668,7 @@ Global.getRibbonIconRealPath = function( icon ) {
 
 Global.loadLanguage = function( name ) {
 	var successflag = false;
-	var message_id = UUID.guid();
+	var message_id = TTUUID.generateUUID();
 	ProgressBar.showProgressBar( message_id );
 	var res_data = {};
 
@@ -2059,28 +2038,26 @@ Global.loadWidgetByName = function( widgetName, raw_text ) {
 
 	if ( input && raw_text == true ) {
 		return input;
-	}
-
-	//#2571 - Error: Unable to get property 'indexOf' of undefined or null reference
-	if ( input && input.indexOf( '<' ) != -1 ) {
-		if ( !raw_text ) {
-			input = $( input );
-		}
 	} else {
-		var error_string = $.i18n._( 'Network error, failed to load' ) + ' ' + widgetName + ' ' + $.i18n._( 'Result' ) + ': "' + input + '"';
-		TAlertManager.showNetworkErrorAlert( { status: 200 }, error_string, null ); //Show the user an error popoup.
-		throw( new Error( error_string ) ); //Halt execution and ensure that the email has a good error message because of failure of web server to provide the requested file.
-		input = false;
+		//#2571 - Error: Unable to get property 'indexOf' of undefined or null reference
+		if ( input && input.indexOf( '<' ) != -1 ) {
+			if ( !raw_text ) {
+				input = $( input );
+			}
+		} else {
+			var error_string = $.i18n._( 'Network error, failed to load' ) + ': ' + widgetName + ' ' + $.i18n._( 'Result' ) + ': "' + input + '"';
+			TAlertManager.showNetworkErrorAlert( { status: 200 }, error_string, null ); //Show the user an error popoup.
+			throw( new Error( error_string ) ); //Halt execution and ensure that the email has a good error message because of failure of web server to provide the requested file.
+			input = false;
+		}
+
+		return input;
 	}
-
-	return input;
-
 };
 
 /* jshint ignore:end */
 
 Global.loadWidget = function( url ) {
-
 	if ( LocalCacheData.loadedWidgetCache[url] ) {
 		return (LocalCacheData.loadedWidgetCache[url]);
 	}
@@ -2091,7 +2068,7 @@ Global.loadWidget = function( url ) {
 		realPath = Global.url_offset + realPath;
 	}
 
-	var message_id = UUID.guid();
+	var message_id = TTUUID.generateUUID();
 	ProgressBar.showProgressBar( message_id );
 	var responseData = $.ajax( {
 		async: false,
@@ -2759,7 +2736,7 @@ Global.loadPageSync = function( url ) {
 	if ( Global.url_offset ) {
 		realPath = Global.url_offset + realPath;
 	}
-	var message_id = UUID.guid();
+	var message_id = TTUUID.generateUUID();
 	ProgressBar.showProgressBar( message_id );
 	var responseData = $.ajax( {
 		async: false,
@@ -2785,7 +2762,7 @@ Global.loadPageSync = function( url ) {
 Global.loadPage = function( url, onResult ) {
 
 	var realPath = url + '?v=' + APIGlobal.pre_login_data.application_build;
-	var message_id = UUID.guid();
+	var message_id = TTUUID.generateUUID();
 	if ( Global.url_offset ) {
 		realPath = Global.url_offset + realPath;
 	}
@@ -3413,21 +3390,6 @@ Global.m_sort_by = (function() {
 
 }());
 
-var UUID = (function() {
-
-	var s4 = function() {
-		return Math.floor( (1 + Math.random()) * 0x10000 ).toString( 16 ).substring( 1 );
-	};
-
-	var guid = function() {
-		return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-				s4() + '-' + s4() + s4() + s4();
-	};
-
-	return { guid: guid };
-
-})();
-
 $.fn.invisible = function() {
 	return this.each( function() {
 		$( this ).css( 'opacity', '0' );
@@ -3905,10 +3867,10 @@ Global.moveCookiesToNewPath = function() {
 	for ( var i = 0; i < cookies.length; i++ ) {
 		var val = Global.eraseCookieFromAllPaths( cookies[i] );
 		if ( val && val.length > 0 ) {
-			Debug.Text( 'Setting cookie:' + cookies[i] + ' with value:' + val + ' and path:' + APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10 );
+			Debug.Text( 'Setting cookie:' + cookies[i] + ' with value:' + val + ' and path:' + APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'moveCookiesToNewPath', 10 );
 			document.cookie = cookies[i] + '=' + val + '; expires=Thu, 01-Jan-' + (year + 10) + ' 00:00:01 GMT; path=' + APIGlobal.pre_login_data.cookie_base_url + ';';
 		} else {
-			Debug.Text( 'NOT Setting cookie:' + cookies[i] + ' with value:' + val + ' and path:' + APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10 );
+			Debug.Text( 'NOT Setting cookie:' + cookies[i] + ' with value:' + val + ' and path:' + APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'moveCookiesToNewPath', 10 );
 		}
 	}
 	Debug.Arr( document.cookie, 'COOKIE AFTER CONTENT: ', 'Global.js', 'Global', 'moveCookiesToNewPath', 10 );
@@ -3916,7 +3878,7 @@ Global.moveCookiesToNewPath = function() {
 
 Global.clearSessionCookie = function() {
 	Global.moveCookiesToNewPath();
-	setCookie( Global.getSessionIDKey(), null );
+	deleteCookie( Global.getSessionIDKey() );
 };
 Global.array_unique = function( arr ) {
 	if ( Global.isArray( arr ) == false ) {
@@ -4037,7 +3999,7 @@ Global.APIFileDownload = function( class_name, method, post_data, url ) {
 	if ( url == undefined ) {
 		url = ServiceCaller.getURLWithSessionId( 'Class=' + class_name + '&Method=' + method );
 	}
-	var message_id = UUID.guid();
+	var message_id = TTUUID.generateUUID();
 	url = url + '&MessageID=' + message_id;
 
 	var tempForm = $( '<form></form>' );
@@ -4276,5 +4238,18 @@ Global.setVirtualDeviceViewport = function ( setting ) {
 		Debug.Text( 'Error: Invalid device settings. Either width or scale is invalid', 'Global.js', 'Global', 'setVirtualDeviceViewport', 1 );
 		return undefined;
 	}
+};
+
+//Clear all session and local cache data for logout.
+Global.Logout = function () {
+	Global.clearSessionCookie();
+	LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
+	LocalCacheData.setLoginUser( null );
+	LocalCacheData.setCurrentCompany( null );
+	sessionStorage.clear();
+
+	//Don't reload or change views, allow that to be done by the caller.
+
+	return true;
 };
 

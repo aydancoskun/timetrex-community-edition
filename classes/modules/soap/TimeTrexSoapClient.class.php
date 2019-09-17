@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-//Add custom soap client that automatically retries calls on network errors like "Could not connect to host"
 
 /**
+ * Add custom soap client that automatically retries calls on network errors like "Could not connect to host"
  * Class TTSoapClient
  */
 class TTSoapClient extends SoapClient {
@@ -194,11 +194,9 @@ class TimeTrexSoapClient {
 		//Make sure a database connection has been established at least, otherwise this can cause FATAL error
 		//which during installation (before any database exists) is bad.
 		if ( isset($db) AND is_object($db) ) {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 
-			if ( !isset( $config_vars['other']['primary_company_id'] ) ) {
-				//$config_vars['other']['primary_company_id'] = 1;
-
+			if ( !isset( $config_vars['other']['primary_company_id'] ) OR ( isset( $config_vars['other']['primary_company_id'] ) AND TTUUID::isUUID( $config_vars['other']['primary_company_id'] ) == FALSE ) ) {
 				//Find the first created company that is still active.
 				Debug::Text('WARNING: Primary company is not defined in .ini file, attempting to guess...', __FILE__, __LINE__, __METHOD__, 10);
 				$clf->getAll( 1, NULL, array( 'status_id' => '= 10' ), array( 'created_date' => 'asc' ) ); //Limit 1
@@ -300,7 +298,7 @@ class TimeTrexSoapClient {
 	 * @return bool
 	 */
 	function saveRegistrationKey() {
-		$sslf = TTnew( 'SystemSettingListFactory' );
+		$sslf = TTnew( 'SystemSettingListFactory' ); /** @var SystemSettingListFactory $sslf */
 		$sslf->getByName('registration_key');
 
 		$get_new_key = FALSE;
@@ -350,7 +348,7 @@ class TimeTrexSoapClient {
 	 */
 	function sendCompanyVersionData( $company_id ) {
 		Debug::Text('Sending Company Version Data...', __FILE__, __LINE__, __METHOD__, 10);
-		$cf = TTnew( 'CompanyFactory' );
+		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 
 		$tt_version_data = array();
 		$tt_version_data['registration_key'] = $this->getLocalRegistrationKey();
@@ -409,7 +407,7 @@ class TimeTrexSoapClient {
 	 * @return bool
 	 */
 	function sendCompanyUserCountData( $company_id ) {
-		$cuclf = TTnew( 'CompanyUserCountListFactory' );
+		$cuclf = TTnew( 'CompanyUserCountListFactory' ); /** @var CompanyUserCountListFactory $cuclf */
 		$cuclf->getActiveUsers();
 		$user_counts = array();
 		if ( $cuclf->getRecordCount() > 0 ) {
@@ -451,7 +449,7 @@ class TimeTrexSoapClient {
 			return FALSE;
 		}
 
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getById( $company_id );
 		if ( $clf->getRecordCount() > 0 ) {
 
@@ -459,7 +457,7 @@ class TimeTrexSoapClient {
 			$location_data['registration_key'] = $this->getLocalRegistrationKey();
 			$location_data['company_id'] = $company_id;
 
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByCompanyId( $company_id );
 			if ( $ulf->getRecordCount() > 0 ) {
 				foreach( $ulf as $u_obj ) {
@@ -500,7 +498,7 @@ class TimeTrexSoapClient {
 			$anonymous_update_notify = (int)SystemSettingFactory::getSystemSettingValueByKey( 'anonymous_update_notify' );
 		}
 																																																			$obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; @$obj = new $obj_class; $hardware_id = $obj->getHardwareID(); unset($obj, $obj_class);
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getById( $company_id );
 		$company_data = array();
 		if ( $clf->getRecordCount() > 0 ) {
@@ -525,7 +523,7 @@ class TimeTrexSoapClient {
 					$company_data['work_phone'] = $c_obj->getWorkPhone();
 					$company_data['fax_phone'] = $c_obj->getFaxPhone();
 
-					$ulf = TTnew( 'UserListFactory' );
+					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 					if ( $c_obj->getBillingContact() != '' ) {
 						$ulf->getById( $c_obj->getBillingContact() );
 						if ( $ulf->getRecordCount() == 1 ) {
@@ -575,31 +573,31 @@ class TimeTrexSoapClient {
 				$company_data['postal_code'] = $c_obj->getPostalCode();
 
 				//Get Last user login date.
-				$ulf = TTnew('UserListFactory');
+				$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
 				$ulf->getByCompanyId( $company_id, 1, NULL, array( 'last_login_date' => 'is not null' ), array( 'last_login_date' => 'desc' ) );
 				if ( $ulf->getRecordCount() == 1 ) {
 					$company_data['last_login_date'] = $ulf->getCurrent()->getLastLoginDate();
 				}
 				//Get Last Punch Date (before today). Use PunchControl table only as its much faster.
-				$plf = TTnew('PunchControlListFactory');
+				$plf = TTnew('PunchControlListFactory'); /** @var PunchControlListFactory $plf */
 				$plf->getByCompanyId( $company_id, 1, NULL, array( array('date_stamp' => ">= '". $plf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) )."'") , array( 'date_stamp' => "<= '". $plf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) )."'" ) ), array( 'date_stamp' => 'desc' ) );
 				if ( $plf->getRecordCount() == 1 ) {
 					$company_data['last_punch_date'] = $plf->getCurrent()->getDateStamp();
 				}
 				//Get Last Schedule Date (before today)
-				$slf = TTnew('ScheduleListFactory');
+				$slf = TTnew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
 				$slf->getByCompanyId( $company_id, 1, NULL, array( array('date_stamp' => ">= '". $slf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) )."'") , array( 'date_stamp' => "<= '". $slf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) )."'" ) ), array( 'date_stamp' => 'desc' ) );
 				if ( $slf->getRecordCount() == 1 ) {
 					$company_data['last_schedule_date'] = $slf->getCurrent()->getStartTime();
 				}
 				//Get Last Pay Stub Date (before today)
-				$pslf = TTnew('PayStubListFactory');
+				$pslf = TTnew('PayStubListFactory'); /** @var PayStubListFactory $pslf */
 				$pslf->getByCompanyId( $company_id, 1, NULL, array( array('a.start_date' => ">= '". $pslf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) )."'") , array( 'a.start_date' => "<= '". $pslf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) )."'" ) ), array( 'a.start_date' => 'desc' ) );
 				if ( $pslf->getRecordCount() == 1 ) {
 					$company_data['last_pay_stub_date'] = $pslf->getCurrent()->getEndDate();
 				}
 				//Get Last Review Date (before today)
-				$rclf = TTnew('UserReviewControlListFactory');
+				$rclf = TTnew('UserReviewControlListFactory'); /** @var UserReviewControlListFactory $rclf */
 				$rclf->getByCompanyId( $company_id, 1, NULL, array( array('a.created_date' => ">= ". TTDate::getBeginDayEpoch( time() - (86400 * 30) ) ) , array( 'a.created_date' => "<= ". TTDate::getEndDayEpoch( time() )  ) ), array( 'a.created_date' => 'desc' ) );
 				if ( $rclf->getRecordCount() == 1 ) {
 					$company_data['last_user_review_date'] = $rclf->getCurrent()->getCreatedDate();
@@ -648,6 +646,7 @@ class TimeTrexSoapClient {
 	//
 	// Currency Data Feed functions
 	//
+
 	/**
 	 * @param string $company_id UUID
 	 * @param $currency_arr
@@ -761,6 +760,7 @@ class TimeTrexSoapClient {
 	//
 	// Email relay through SOAP
 	//
+
 	/**
 	 * @param $email
 	 * @return bool
@@ -797,6 +797,7 @@ class TimeTrexSoapClient {
 	//
 	// GEO Coding
 	//
+
 	/**
 	 * @param $address1
 	 * @param $address2

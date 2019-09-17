@@ -121,7 +121,7 @@ class APIPayPeriodSchedule extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$ulf = TTnew( 'PayPeriodScheduleListFactory' );
+		$ulf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ulf->getRecordCount() > 0 ) {
@@ -205,7 +205,7 @@ class APIPayPeriodSchedule extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayPeriodScheduleListFactory' );
+				$lf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -319,7 +319,7 @@ class APIPayPeriodSchedule extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayPeriodScheduleListFactory' );
+				$lf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -394,7 +394,7 @@ class APIPayPeriodSchedule extends APIFactory {
 	 * @return array|bool
 	 */
 	function detectPayPeriodScheduleSettings( $type_id, $example_dates ) {
-		$ppsf = TTnew('PayPeriodScheduleFactory');
+		$ppsf = TTnew('PayPeriodScheduleFactory'); /** @var PayPeriodScheduleFactory $ppsf */
 
 		//Start with default data...
 		$ppsf->setObjectFromArray( $this->stripReturnHandler( $this->getPayPeriodScheduleDefaultData() ) );
@@ -420,7 +420,7 @@ class APIPayPeriodSchedule extends APIFactory {
 	 * @return array|bool
 	 */
 	function detectPayPeriodScheduleDates( $type_id, $start_date ) {
-		$ppsf = TTnew('PayPeriodScheduleFactory');
+		$ppsf = TTnew('PayPeriodScheduleFactory'); /** @var PayPeriodScheduleFactory $ppsf */
 		$retval = $ppsf->detectPayPeriodScheduleDates( $type_id, $start_date );
 		Debug::Arr($retval, 'Dates: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $this->returnHandler( $retval );

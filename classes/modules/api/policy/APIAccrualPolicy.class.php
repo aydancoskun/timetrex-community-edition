@@ -103,7 +103,7 @@ class APIAccrualPolicy extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'accrual_policy', 'view' );
 
-		$blf = TTnew( 'AccrualPolicyListFactory' );
+		$blf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -182,7 +182,7 @@ class APIAccrualPolicy extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'AccrualPolicyListFactory' );
+				$lf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -284,7 +284,7 @@ class APIAccrualPolicy extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'AccrualPolicyListFactory' );
+				$lf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -389,7 +389,7 @@ class APIAccrualPolicy extends APIFactory {
 
 					if ( $new_id !== NULL ) {
 						//Get milestones by original_id.
-						$apmlf = TTnew( 'AccrualPolicyMilestoneListFactory' );
+						$apmlf = TTnew( 'AccrualPolicyMilestoneListFactory' ); /** @var AccrualPolicyMilestoneListFactory $apmlf */
 						$apmlf->getByAccrualPolicyID( $original_id );
 						if ( $apmlf->getRecordCount() > 0 ) {
 							foreach( $apmlf as $apm_obj ) {
@@ -434,14 +434,15 @@ class APIAccrualPolicy extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		$report_obj = TTNew('Report');
+		$report_obj = TTNew('Report'); /** @var Report $report_obj */
+		$report_obj->setUserObject( $this->getCurrentUserObject() );
 		$date_arr = $report_obj->convertTimePeriodToStartEndDate( $time_period_arr, NULL, TRUE ); //Force start/end dates even if pay periods selected.
 		Debug::Arr($date_arr, 'Date Arr', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( isset($date_arr['start_date']) AND isset($date_arr['end_date']) ) {
 			$total_days = TTDate::getDays( ( $date_arr['end_date'] - $date_arr['start_date'] ) );
 
-			$aplf = TTnew( 'AccrualPolicyListFactory' );
+			$aplf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $aplf */
 			$aplf->getByIdAndCompanyId( (array)$accrual_policy_ids, $this->getCurrentCompanyObject()->getId() );
 			if ( $aplf->getRecordCount() > 0 ) {
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $aplf->getRecordCount(), NULL, TTi18n::getText('ReCalculating...') );

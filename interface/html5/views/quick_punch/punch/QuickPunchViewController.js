@@ -35,7 +35,6 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			'APICompany',
 			'APIStation',
 			'APICurrentUser',
-			'../global/TTUUID'
 		],
 		20: [
 			'APIJob',
@@ -930,7 +929,7 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			//stop the update loop for live chat with support
 			clearTimeout( lh_inst.timeoutStatuscheck );
 		}
-		setCookie( 'SessionID-QP', null );
+		deleteCookie( 'SessionID-QP' );
 		LocalCacheData.setPunchLoginUser( null );
 		LocalCacheData.setCurrentCompany( null );
 		sessionStorage.clear();

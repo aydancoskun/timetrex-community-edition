@@ -336,7 +336,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 
 		//Debug::Text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$rs = $this->db->Execute($query, $ph);
+		$rs = $this->ExecuteSQL($query, $ph);
 
 		if ( $rs->RecordCount() > 0 ) {
 
@@ -454,7 +454,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 				';
 
 		//Debug::Text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		$rs = $this->db->Execute($query, $ph);
+		$rs = $this->ExecuteSQL($query, $ph);
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rs->RecordCount() > 0 ) {
@@ -467,7 +467,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 				} elseif ( $row['level'] < $current_level AND $row['is_subordinate'] == 0 ) {
 					$retarr['parent_level'][] = $row['user_id'];
 				} elseif ( $row['level'] > $current_level AND $row['is_subordinate'] == 1 ) {
-					//Only ever show suborindates at child levels, this fixes the bug where the currently logged in user would see their own requests
+					//Only ever show subordinates at child levels, this fixes the bug where the currently logged in user would see their own requests
 					//in the authorization list.
 					$retarr['child_level'][] = $row['user_id'];
 				} //else { //Debug::Text(' Skipping row...', __FILE__, __LINE__, __METHOD__, 10);
@@ -570,7 +570,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 				';
 
 		//Debug::Text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		$rs = $this->db->Execute($query, $ph);
+		$rs = $this->ExecuteSQL($query, $ph);
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rs->RecordCount() > 0 ) {
@@ -583,7 +583,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 				} elseif ( $row['level'] < $current_level AND $row['is_subordinate'] == 0 ) {
 					$retarr['parent_level'][] = $row['user_id'];
 				} elseif ( $row['level'] > $current_level AND $row['is_subordinate'] == 1 ) {
-					//Only ever show suborindates at child levels, this fixes the bug where the currently logged in user would see their own requests
+					//Only ever show subordinates at child levels, this fixes the bug where the currently logged in user would see their own requests
 					//in the authorization list.
 					$retarr['child_level'][] = $row['user_id'];
 				} //else { //Debug::Text(' Skipping row...', __FILE__, __LINE__, __METHOD__, 10);
@@ -628,7 +628,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		$retval = FALSE;
 
 		//Parents are only considered if an employee is explicitly assigned to a hierarchy as a subordinate.
-		//This does not take into account an employee being in the middle of a hierarchy but not assigned to it as a suborindate.
+		//This does not take into account an employee being in the middle of a hierarchy but not assigned to it as a subordinate.
 		//This is because the same employee can be assigned as a superior to many hierarchies, but only to a single hierarchy (of the same object type) if they are subordinates.
 
 		$uf = new UserFactory();
@@ -659,7 +659,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 					';
 
 		//Debug::Text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		$rs = $this->db->Execute($query, $ph);
+		$rs = $this->ExecuteSQL($query, $ph);
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rs->RecordCount() > 0 ) {
@@ -751,7 +751,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 					';
 
 		//Debug::Arr($ph, ' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		$rs = $this->db->Execute($query, $ph);
+		$rs = $this->ExecuteSQL($query, $ph);
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rs->RecordCount() > 0 ) {

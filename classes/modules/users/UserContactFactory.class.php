@@ -685,6 +685,8 @@ class UserContactFactory extends Factory {
 		if ( $value != '' ) {
 			return $this->setGenericDataValue( 'sin', $value );
 		}
+
+		return FALSE;
 	}
 
 	/**
@@ -741,7 +743,7 @@ class UserContactFactory extends Factory {
 		//
 		// Employee
 		if ( $this->getUser() !== FALSE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user_id',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Invalid Employee')
@@ -821,7 +823,7 @@ class UserContactFactory extends Factory {
 		}
 		// Ethnic Group
 		if ( $this->getEthnicGroup() !== FALSE AND $this->getEthnicGroup() != TTUUID::getZeroID() ) {
-			$eglf = TTnew( 'EthnicGroupListFactory' );
+			$eglf = TTnew( 'EthnicGroupListFactory' ); /** @var EthnicGroupListFactory $eglf */
 			$this->Validator->isResultSetWithRows( 'ethnic_group',
 														$eglf->getById($this->getEthnicGroup()),
 														TTi18n::gettext('Ethnic Group is invalid')
@@ -877,7 +879,7 @@ class UserContactFactory extends Factory {
 		}
 		// Country
 		if ( $this->getCountry() !== FALSE ) {
-			$cf = TTnew( 'CompanyFactory' );
+			$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 			$this->Validator->inArrayKey(		'country',
 														$this->getCountry(),
 														TTi18n::gettext('Invalid Country'),
@@ -1062,9 +1064,9 @@ class UserContactFactory extends Factory {
 		return Misc::getMapURL( $this->getAddress1(), $this->getAddress2(), $this->getCity(), $this->getProvince(), $this->getPostalCode(), $this->getCountry() );
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

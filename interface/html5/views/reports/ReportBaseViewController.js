@@ -858,6 +858,7 @@ ReportBaseViewController = BaseViewController.extend( {
 		var skill_expiry_date;
 		var membership_renewal_date;
 		var license_expiry_date;
+		var education_graduate_date;
 
 		if ( this.visible_report_widgets && (this.visible_report_widgets[key] || key === 'start_date' || key === 'end_date' || key === 'pay_period_id' || key === 'pay_period_schedule_id') ) {
 			if ( key === 'sort' ) {
@@ -907,8 +908,15 @@ ReportBaseViewController = BaseViewController.extend( {
 				license_expiry_date = this.visible_report_values['license_expiry_date'];
 				license_expiry_date[key.replace( '_3', '' )] = target.getValue();
 
-			} else {
+			} else if ( key === 'education_graduate_date' ) {
+				education_graduate_date = target.getValue();
+				this.visible_report_values[key] = { time_period: education_graduate_date };
 
+				this.onEducationGraduateDate( target );
+			} else if ( key === 'start_date_4' || key === 'end_date_4' || key === 'pay_period_id_4' || key === 'pay_period_schedule_id_4' ) {
+				education_graduate_date = this.visible_report_values['education_graduate_date'];
+				education_graduate_date[key.replace( '_4', '' )] = target.getValue();
+			} else {
 				if ( target.hasClass( 't-checkbox' ) ) {
 					this.visible_report_values[key] = target.getValue();
 				} else {
@@ -919,9 +927,7 @@ ReportBaseViewController = BaseViewController.extend( {
 						delete this.visible_report_values[key];
 					}
 				}
-
 			}
-
 		} else {
 			this.current_edit_record[key] = target.getValue();
 		}
@@ -1035,7 +1041,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			if ( field.indexOf( 'time_period' ) >= 0 ||
 					field === 'membership_renewal_date' ||
 					field === 'skill_expiry_date' ||
-					field == 'license_expiry_date' ) {
+					field == 'license_expiry_date' ||
+					field == 'education_graduate_date'
+				) {
 				this.addEditFieldToColumn( $.i18n._( this.getFieldLabel( field ) ), widget, tab0_column1, '', null, true, true );
 				$this.edit_view_form_item_dic[field].attr( 'id', 'report_' + field + '_div' );
 
@@ -1058,6 +1066,9 @@ ReportBaseViewController = BaseViewController.extend( {
 				} else if ( field === 'license_expiry_date' ) {
 					widget.setValue( value.time_period );
 					$this.onLicenseExpiryDate( widget, value );
+				} else if ( field === 'education_graduate_date' ) {
+					widget.setValue( value.time_period );
+					$this.onEducationGraduateDate( widget, value );
 				} else if ( field === 'filter' ) {
 					$this.setFilterValue( widget, value );
 				} else if ( field === 'sort' ) {
@@ -1324,6 +1335,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				case 'license_expiry_date':
 				case 'membership_renewal_date':
 				case 'skill_expiry_date':
+				case 'education_graduate_date':
 					widget = this.getComboBox( field );
 					break;
 				case 'user_group_id':
@@ -1743,6 +1755,10 @@ ReportBaseViewController = BaseViewController.extend( {
 				api_instance = this.api;
 				option = 'skill_expiry_date';
 				break;
+			case 'education_graduate_date':
+				api_instance = this.api;
+				option = 'education_graduate_date';
+				break;
 			case 'group':
 			case 'sub_total':
 
@@ -2099,6 +2115,186 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.visible_report_widgets.license_expiry_date = time_period;
 			$this.visible_report_widgets.start_date_3 = start_date;
 			$this.visible_report_widgets.end_date_3 = end_date;
+
+			time_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			start_date.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			end_date.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			v_box.append( form_item );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
+			v_box.append( form_item2 );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
+			v_box.append( form_item3 );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
+
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
+
+			form_input_div.append( v_box );
+
+		}
+
+	},
+
+	onEducationGraduateDate: function( target, defaultValue ) {
+
+		var $this = this;
+		var value = target.getValue();
+
+		this.visible_report_widgets.education_graduate_date = null;
+		this.visible_report_widgets.start_date_4 = null;
+		this.visible_report_widgets.end_date_4 = null;
+		this.visible_report_widgets.pay_period_id_4 = null;
+		this.visible_report_widgets.pay_period_schedule_id_4 = null;
+
+		if ( value === 'custom_date' ) {
+			buildCustomDateUI();
+		} else if ( value === 'custom_pay_period' ) {
+			buildPayPeriodUI();
+		} else if ( value === 'this_pay_period' || value === 'last_pay_period' || value === 'to_last_pay_period' || value === 'to_this_pay_period' ) {
+			buildPayPeriodScheduleUI();
+		} else {
+			buildDefaultUI();
+		}
+
+		function buildPayPeriodScheduleUI() {
+			var form_item_div = ($this.edit_view).find( '#report_education_graduate_date_div' );
+			var form_input_div = $( form_item_div.children()[1] );
+			form_input_div.empty();
+
+			var v_box = $( '<div class=\'v-box\'></div>' );
+
+			var time_period = $this.getSimpleTComboBox( 'education_graduate_date', false, false );
+			$this.initSourceData( 'education_graduate_date', time_period );
+			time_period.setValue( value );
+
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_4', ALayoutIDs.PAY_PERIOD_SCHEDULE, (APIFactory.getAPIClass( 'APIPayPeriodSchedule' )) );
+
+			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
+			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
+
+			$this.visible_report_widgets.education_graduate_date = time_period;
+			$this.visible_report_widgets.pay_period_schedule_id_4 = pay_period;
+
+			time_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			if ( defaultValue ) {
+				pay_period.setValue( defaultValue.pay_period_schedule_id );
+			}
+
+			v_box.append( form_item );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
+			v_box.append( form_item2 );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
+
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 120 );
+
+			form_input_div.append( v_box );
+		}
+
+		function buildPayPeriodUI() {
+			var form_item_div = ($this.edit_view).find( '#report_education_graduate_date_div' );
+			var form_input_div = $( form_item_div.children()[1] );
+			form_input_div.empty();
+
+			var v_box = $( '<div class=\'v-box\'></div>' );
+
+			var time_period = $this.getSimpleTComboBox( 'education_graduate_date', false, false );
+			$this.initSourceData( 'education_graduate_date', time_period );
+			time_period.setValue( value );
+
+			var pay_period = $this.getTComboBox( 'pay_period_id_4', ALayoutIDs.PAY_PERIOD, (APIFactory.getAPIClass( 'APIPayPeriod' )) );
+
+			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
+			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period' ) );
+
+			$this.visible_report_widgets.education_graduate_date = time_period;
+			$this.visible_report_widgets.pay_period_id_4 = pay_period;
+
+			time_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			if ( defaultValue ) {
+				pay_period.setValue( defaultValue.pay_period_id );
+			}
+
+			form_input_div.append( v_box );
+
+			v_box.append( form_item );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
+			v_box.append( form_item2 );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
+
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
+
+		}
+
+		function buildDefaultUI() {
+			var form_item_div = ($this.edit_view).find( '#report_education_graduate_date_div' );
+			var form_input_div = $( form_item_div.children()[1] );
+			form_input_div.empty();
+
+			var time_period = $this.getSimpleTComboBox( 'education_graduate_date', false, false );
+
+			form_input_div.append( time_period );
+
+			time_period.setValue( value );
+
+			$this.initSourceData( 'education_graduate_date', time_period );
+
+			time_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			$this.visible_report_widgets.education_graduate_date = time_period;
+
+		}
+
+		function buildCustomDateUI() {
+			var form_item_div = ($this.edit_view).find( '#report_education_graduate_date_div' );
+			var form_input_div = $( form_item_div.children()[1] );
+			form_input_div.empty();
+
+			var v_box = $( '<div class=\'v-box\'></div>' );
+
+			var time_period = $this.getSimpleTComboBox( 'education_graduate_date', false, false );
+			$this.initSourceData( 'education_graduate_date', time_period );
+			time_period.setValue( value );
+
+			var start_date = $this.getDatePicker( 'start_date_4' );
+
+			var end_date = $this.getDatePicker( 'end_date_4' );
+
+			if ( defaultValue ) {
+				start_date.setValue( defaultValue.start_date );
+				end_date.setValue( defaultValue.end_date );
+			}
+
+			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
+			var form_item2 = $this.putInputToInsideFormItem( start_date, $.i18n._( 'Start Date' ) );
+			var form_item3 = $this.putInputToInsideFormItem( end_date, $.i18n._( 'End Date' ) );
+
+			$this.visible_report_widgets.education_graduate_date = time_period;
+			$this.visible_report_widgets.start_date_4 = start_date;
+			$this.visible_report_widgets.end_date_4 = end_date;
 
 			time_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2684,7 +2880,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			if ( key === 'time_period' ||
 					key === 'membership_renewal_date' ||
 					key === 'skill_expiry_date' ||
-					key === 'license_expiry_date' ) {
+					key === 'license_expiry_date' ||
+					key === 'education_graduate_date'
+			) {
 				if ( this.visible_report_widgets[key] && this.visible_report_widgets[key].is( ':visible' ) ) {
 					this.visible_report_widgets[key].setErrorStyle( error_list[key], true );
 					found_in_current_tab = true;
@@ -2867,9 +3065,11 @@ ReportBaseViewController = BaseViewController.extend( {
 		} else {
 			//#2293 - synchronous call to validation api allows us to return the value in realtime
 			var result = this.api['validateReport']( config, 'pdf', { async: false } );
-			this.validateResult( result );
+			if ( result ) {
+				this.validateResult( result );
 
-			return result.getResult();
+				return result.getResult();
+			}
 		}
 
 	},
@@ -2894,6 +3094,16 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		this.doFormIFrameCall( post_data );
+
+		var source = 'Excel'; // Backup value in case the url sm does not exist.
+		if( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm ) {
+			source = LocalCacheData.all_url_args.sm + '@Excel';
+		}
+		$().TFeedback({
+			source: source,
+			force_source: true,
+			delay: 5000
+		});
 	},
 
 	getVisibleReportValues: function() {
@@ -3034,20 +3244,24 @@ ReportBaseViewController = BaseViewController.extend( {
 		$this.show_empty_message = false;
 		$this.form_setup_changed = false;
 
-		this.api.setCompanyFormConfig( form_setup, {
-			onResult: function( result ) {
+		if ( form_setup ) { //Don't save if form_setup is false.
+			this.api.setCompanyFormConfig( form_setup, {
+				onResult: function ( result ) {
 
-				if ( result.isValid() ) {
+					if ( result.isValid() ) {
 
-					TAlertManager.showAlert( label + ' ' + $.i18n._( 'has been saved successfully' ) );
-				} else {
-					$this.show_empty_message = true;
-					$this.form_setup_changed = true;
-					TAlertManager.showAlert( label + ' ' + $.i18n._( 'save failed, Please try again' ) );
+						TAlertManager.showAlert( label + ' ' + $.i18n._( 'has been saved successfully' ) );
+					} else {
+						$this.show_empty_message = true;
+						$this.form_setup_changed = true;
+						TAlertManager.showAlert( label + ' ' + $.i18n._( 'save failed, please try again' ) );
+					}
+
 				}
-
-			}
-		} );
+			} );
+		} else {
+			TAlertManager.showAlert( label + ' ' + $.i18n._( 'invalid, please try again' ) );
+		}
 
 	},
 
@@ -3090,7 +3304,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			if ( Global.getStationID() ) {
 				url = url + '&StationID=' + Global.getStationID();
 			}
-			var message_id = UUID.guid();
+			var message_id = TTUUID.generateUUID();
 			url = url + '&MessageID=' + message_id;
 
 			var refresh_request = '<script>';
@@ -3158,6 +3372,16 @@ ReportBaseViewController = BaseViewController.extend( {
 		} else {
 			this.doFormIFrameCall( post_data );
 			ProgressBar.closeOverlay();
+
+			var source = 'PDF'; // Backup value in case the url sm does not exist.
+			if( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm ) {
+				source = LocalCacheData.all_url_args.sm +'@PDF';
+			}
+			$().TFeedback({
+				source: source,
+				force_source: true,
+				delay: 5000
+			});
 		}
 
 	},

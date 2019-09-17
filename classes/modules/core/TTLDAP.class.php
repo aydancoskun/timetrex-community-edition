@@ -238,9 +238,9 @@ class TTLDAP {
 		return TRUE;
 	}
 
-	//This is not fully implemented, not sure if its even needed, as it appears
-	//most active directory installs will work without needing to specify the domain.
 	/**
+	 * This is not fully implemented, not sure if its even needed, as it appears
+	 * most active directory installs will work without needing to specify the domain.
 	 * @return bool
 	 */
 	function getUserNameSuffix() {
@@ -273,10 +273,10 @@ class TTLDAP {
 		return FALSE;
 	}
 
-	//Bind authentication is when a specific bind User/Password is *not* specified,
-	//so we try to initially bind as the username trying to login instead.
-	//However when bind username/password is specified, we can still attempt to bind as the username trying to login after a filter query is run.
 	/**
+	 * Bind authentication is when a specific bind User/Password is *not* specified,
+	 * so we try to initially bind as the username trying to login instead.
+	 * However when bind username/password is specified, we can still attempt to bind as the username trying to login after a filter query is run.
 	 * @return bool
 	 */
 	function isBindAuthentication() {

@@ -206,14 +206,12 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 	}
 
 	function setUnitTestMode($username) {
-		/** @var StationFactory $sf */
-		$sf = TTnew('StationFactory');
-		$slf = TTnew('StationListFactory');
+		$sf = TTnew('StationFactory'); /** @var StationFactory $sf */
+		$slf = TTnew('StationListFactory'); /** @var StationListFactory $slf */
 
 		$slf->getByStationId('UNITTEST');
 		if ( $slf->getRecordCount() == 0 ) {
-			/** @var UserListFactory $ulf */
-			$ulf = TTNew('UserListFactory');
+			$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 			$ulf->getByUserName($username);
 			if ( $ulf->getRecordCount() > 0 ) {
 				$sf->setCompany( $ulf->getCurrent()->getCompany() );

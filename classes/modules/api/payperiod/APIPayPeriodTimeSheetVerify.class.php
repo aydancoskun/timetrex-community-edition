@@ -101,7 +101,7 @@ class APIPayPeriodTimeSheetVerify extends APIFactory {
 			//This is because if the hierarchy objects are changed when pending requests exist, the ANY type_id will catch them and display them,
 			//But if you filter on type_id = <specific value> as well a specific hierarchy level, it may exclude them.
 
-			$hllf = TTnew( 'HierarchyLevelListFactory' );
+			$hllf = TTnew( 'HierarchyLevelListFactory' ); /** @var HierarchyLevelListFactory $hllf */
 			$hierarchy_level_arr = $hllf->getLevelsAndHierarchyControlIDsByUserIdAndObjectTypeID( $this->getCurrentUserObject()->getId(), 90 );
 			//Debug::Arr( $hierarchy_level_arr, 'Hierarchy Levels: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -123,7 +123,7 @@ class APIPayPeriodTimeSheetVerify extends APIFactory {
 		//Is this to too restrictive when authorizing requests, as they have to be in the permission hierarchy as well as the request hierarchy?
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
 
-		$blf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+		$blf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $blf */
 		$blf->getAPIAuthorizationSearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -210,7 +210,7 @@ class APIPayPeriodTimeSheetVerify extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+				$lf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -317,7 +317,7 @@ class APIPayPeriodTimeSheetVerify extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+				$lf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.

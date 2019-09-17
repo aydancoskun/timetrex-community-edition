@@ -55,7 +55,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -84,7 +84,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -117,7 +117,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -285,7 +285,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -370,7 +370,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, array('from_last_name', 'to_last_name') );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -519,7 +519,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		//Debug::Arr($ph, $query, __FILE__, __LINE__, __METHOD__, 10);
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -591,13 +591,13 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 //		$query .= $this->getWhereSQL( $where );
 //		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 //
-//		$this->ExecuteSQL( $query, $ph, $limit, $page );
+//		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 //
 //		return $this;
 //	}
 
-	//Returns all parties involved in a thread, for finding out who "Reply All" should go to.
 	/**
+	 * Returns all parties involved in a thread, for finding out who "Reply All" should go to.
 	 * @param string $company_id UUID
 	 * @param int $object_type_id
 	 * @param string $object_id UUID
@@ -649,9 +649,9 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 							AND ( a.deleted = 0 AND bb.deleted = 0 AND cc.deleted = 0 )
 					';
 
-		$rs = $this->db->Execute($query, $ph);
+		$rs = $this->ExecuteSQL($query, $ph);
 
-			$retarr = array();
+		$retarr = array();
 		if ( $rs->RecordCount() > 0 ) {
 			foreach( $rs as $row ) {
 				if ( $user_id != $row['from_user_id'] ) {
@@ -828,7 +828,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		//Debug::Arr($ph, ' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -912,7 +912,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, array('from_last_name', 'to_last_name') );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

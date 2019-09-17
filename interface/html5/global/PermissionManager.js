@@ -216,6 +216,12 @@ var PermissionManager = (function() {
 			case 'AbsencePolicy':
 			case 'HolidayPolicy':
 			case 'RecurringHoliday':
+				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
+					result = false;
+				} else if ( PermissionManager.validate( permission_section, 'view' ) ) {
+					result = true;
+				}
+				break;
 			case 'RequestAuthorization':
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;

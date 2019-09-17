@@ -67,7 +67,7 @@ class StationUserGroupFactory extends Factory {
 		if ( is_object($this->group_obj) ) {
 			return $this->group_obj;
 		} else {
-			$uglf = TTnew( 'UserGroupListFactory' );
+			$uglf = TTnew( 'UserGroupListFactory' ); /** @var UserGroupListFactory $uglf */
 			$uglf->getById( $this->getGroup() );
 			if ( $uglf->getRecordCount() == 1 ) {
 				$this->group_obj = $uglf->getCurrent();
@@ -94,6 +94,9 @@ class StationUserGroupFactory extends Factory {
 		return $this->setGenericDataValue( 'group_id', $value );
 	}
 
+	/**
+	 * @return bool
+	 */
 	function Validate() {
 		//
 		// BELOW: Validation code moved from set*() functions.
@@ -112,7 +115,7 @@ class StationUserGroupFactory extends Factory {
 		}
 		// Group
 		if ( $this->getGroup() != TTUUID::getZeroID() ) {
-			$uglf = TTnew( 'UserGroupListFactory' );
+			$uglf = TTnew( 'UserGroupListFactory' ); /** @var UserGroupListFactory $uglf */
 			$this->Validator->isResultSetWithRows(	'group',
 															$uglf->getByID($this->getGroup()),
 															TTi18n::gettext('Selected Group is invalid')

@@ -207,7 +207,7 @@ class MessageRecipientFactory extends Factory {
 		//
 		// Employee
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Invalid Employee')
@@ -216,7 +216,7 @@ class MessageRecipientFactory extends Factory {
 		// Message Sender
 		if ( $this->isNew() == TRUE ) { //If the sender deletes their sent message, this validation will fail if the receiving tries to view/mark the message as read.
 			if ( $this->getMessageSender() !== FALSE ) {
-				$mslf = TTnew( 'MessageSenderListFactory' );
+				$mslf = TTnew( 'MessageSenderListFactory' ); /** @var MessageSenderListFactory $mslf */
 				$this->Validator->isResultSetWithRows( 'message_sender_id',
 													   $mslf->getByID( $this->getMessageSender() ),
 													   TTi18n::gettext( 'Message Sender is invalid' )
@@ -226,7 +226,7 @@ class MessageRecipientFactory extends Factory {
 
 		// Message Control
 		if ( $this->getMessageControl() !== FALSE ) {
-			$mclf = TTnew( 'MessageControlListFactory' );
+			$mclf = TTnew( 'MessageControlListFactory' ); /** @var MessageControlListFactory $mclf */
 			$this->Validator->isResultSetWithRows(	'message_control_id',
 															$mclf->getByID($this->getMessageControl()),
 															TTi18n::gettext('Message Control is invalid')

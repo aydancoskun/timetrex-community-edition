@@ -80,7 +80,7 @@ class PayPeriodScheduleUserFactory extends Factory {
 	 * @return bool
 	 */
 	function isUniqueUser( $id) {
-		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+		$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 
 		$ph = array(
 					'id' => TTUUID::castUUID($id),
@@ -121,7 +121,7 @@ class PayPeriodScheduleUserFactory extends Factory {
 		//
 		// Pay Period Schedule
 		if ( $this->getPayPeriodSchedule() == TTUUID::getZeroID() ) {
-			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+			$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 			$this->Validator->isResultSetWithRows(	'pay_period_schedule',
 															$ppslf->getByID($this->getPayPeriodSchedule()),
 															TTi18n::gettext('Pay Period Schedule is invalid')
@@ -129,7 +129,7 @@ class PayPeriodScheduleUserFactory extends Factory {
 		}
 		// Selected Employee
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 														$ulf->getByID($this->getUser()),
 														TTi18n::gettext('Selected Employee is invalid')

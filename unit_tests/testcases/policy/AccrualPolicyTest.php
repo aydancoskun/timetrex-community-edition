@@ -198,7 +198,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createPayFormulaPolicy( $company_id, $type, $accrual_policy_account_id = 0, $wage_source_contributing_shift_policy_id = 0, $time_source_contributing_shift_policy_id = 0 ) {
-		$pfpf = TTnew( 'PayFormulaPolicyFactory' );
+		$pfpf = TTnew( 'PayFormulaPolicyFactory' ); /** @var PayFormulaPolicyFactory $pfpf */
 		$pfpf->setCompany( $company_id );
 
 		switch ( $type ) {
@@ -238,7 +238,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createAccrualPolicyUserModifier( $accrual_policy_id, $user_id, $length_of_service_date = NULL, $accrual_rate = NULL ) {
-		$apumf = TTnew( 'AccrualPolicyUserModifierFactory' );
+		$apumf = TTnew( 'AccrualPolicyUserModifierFactory' ); /** @var AccrualPolicyUserModifierFactory $apumf */
 		$apumf->setAccrualPolicy( $accrual_policy_id );
 		$apumf->setUser( $user_id );
 		$apumf->setLengthOfServiceDate( $length_of_service_date );
@@ -257,7 +257,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createAccrualPolicyAccount( $company_id, $type ) {
-		$apaf = TTnew( 'AccrualPolicyAccountFactory' );
+		$apaf = TTnew( 'AccrualPolicyAccountFactory' ); /** @var AccrualPolicyAccountFactory $apaf */
 
 		$apaf->setCompany( $company_id );
 
@@ -285,7 +285,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		return FALSE;
 	}
 	function createAccrualPolicy( $company_id, $type, $accrual_policy_account_id, $contributing_shift_policy_id = 0 ) {
-		$apf = TTnew( 'AccrualPolicyFactory' );
+		$apf = TTnew( 'AccrualPolicyFactory' ); /** @var AccrualPolicyFactory $apf */
 
 		$apf->setCompany( $company_id );
 
@@ -722,7 +722,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 			$insert_id = $apf->Save();
 			Debug::Text('Accrual Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
-			$apmf = TTnew( 'AccrualPolicyMilestoneFactory' );
+			$apmf = TTnew( 'AccrualPolicyMilestoneFactory' ); /** @var AccrualPolicyMilestoneFactory $apmf */
 
 			switch ( $type ) {
 				case 20:
@@ -1133,7 +1133,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		//$offset = 79200;
 		$offset = ( (86400 * $day_multiplier) - 7200 );
 
-		$aplf = TTnew( 'AccrualPolicyListFactory' );
+		$aplf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $aplf */
 
 		$aplf->getByIdAndCompanyId( $accrual_policy_id, $company_id );
 		if ( $aplf->getRecordCount() > 0 ) {
@@ -1162,7 +1162,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		}
 
 		//Check min/max times of accrual policy.
-		$ablf = TTnew( 'AccrualBalanceListFactory' );
+		$ablf = TTnew( 'AccrualBalanceListFactory' ); /** @var AccrualBalanceListFactory $ablf */
 		$ablf->getByUserIdAndAccrualPolicyAccount( $user_id, $accrual_policy_account_id );
 		if ( $ablf->getRecordCount() > 0 ) {
 			$accrual_balance = $ablf->getCurrent()->getBalance();
@@ -1183,7 +1183,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$retarr = array();
 
 		//Check min/max times of accrual policy.
-		$alf = TTnew( 'AccrualListFactory' );
+		$alf = TTnew( 'AccrualListFactory' ); /** @var AccrualListFactory $alf */
 		$alf->getByCompanyIdAndUserIdAndAccrualPolicyAccount( $this->company_id, $user_id, $accrual_policy_account_id );
 		if ( $alf->getRecordCount() > 0 ) {
 			foreach( $alf as $a_obj ) {
@@ -1196,7 +1196,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function getUserObject( $user_id ) {
-		$ulf = TTNew( 'UserListFactory' );
+		$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getById( $user_id );
 		if ( $ulf->getRecordCount() > 0 ) {
 			return $ulf->getCurrent();
@@ -3445,7 +3445,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		//Test InApplyFrequency when the system timezone is EST5EDT, but some users are MST5MDT.
 		$user_obj = $this->getUserObject( $this->user_id );
 
-		$ap_obj = TTnew('AccrualPolicyFactory');
+		$ap_obj = TTnew('AccrualPolicyFactory'); /** @var AccrualPolicyFactory $ap_obj */
 		$ap_obj->setType( 20 );
 		$ap_obj->setApplyFrequency( 10 ); //Each Pay Period
 		$ap_obj->setMilestoneRolloverHireDate( TRUE );
@@ -3582,7 +3582,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		//Test InApplyFrequency when the system timezone is MST5MDT, but some users are EST5EDT.
 		$user_obj = $this->getUserObject( $this->user_id );
 
-		$ap_obj = TTnew('AccrualPolicyFactory');
+		$ap_obj = TTnew('AccrualPolicyFactory'); /** @var AccrualPolicyFactory $ap_obj */
 		$ap_obj->setType( 20 );
 		$ap_obj->setApplyFrequency( 10 ); //Each Pay Period
 		$ap_obj->setMilestoneRolloverHireDate( TRUE );

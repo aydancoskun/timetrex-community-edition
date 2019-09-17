@@ -239,7 +239,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createMealPolicy( $type_id, $include_lunch_punch_time = FALSE ) {
-		$mpf = TTnew( 'MealPolicyFactory' );
+		$mpf = TTnew( 'MealPolicyFactory' ); /** @var MealPolicyFactory $mpf */
 
 		$mpf->setCompany( $this->company_id );
 
@@ -288,7 +288,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createRoundingPolicy( $company_id, $type ) {
-		$ripf = TTnew( 'RoundIntervalPolicyFactory' );
+		$ripf = TTnew( 'RoundIntervalPolicyFactory' ); /** @var RoundIntervalPolicyFactory $ripf */
 		$ripf->setCompany( $company_id );
 
 		switch ( $type ) {
@@ -441,7 +441,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createSchedulePolicy( $type, $meal_policy_id ) {
-		$spf = TTnew( 'SchedulePolicyFactory' );
+		$spf = TTnew( 'SchedulePolicyFactory' ); /** @var SchedulePolicyFactory $spf */
 		$spf->setCompany( $this->company_id );
 
 		switch ( $type ) {
@@ -473,7 +473,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createSchedule( $user_id, $date_stamp, $data = NULL ) {
-		$sf = TTnew( 'ScheduleFactory' );
+		$sf = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
 		$sf->setCompany( $this->company_id );
 		$sf->setUser( $user_id );
 		//$sf->setUserDateId( UserDateFactory::findOrInsertUserDate( $user_id, $date_stamp) );
@@ -3812,6 +3812,93 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group Punch_testValidationH
+	 */
+	function testValidationH() {
+		/*
+		 * Test case where punches are added in this order.
+		 *   1:00PM
+		 *   11:00PM
+		 *   12:00PM (before the first punch)
+		 *   1:15PM (inbetween the first punch pair) <-- This should be rejected.
+		 */
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 1:00PM'),
+								 strtotime($date_stamp.' 11:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
+		//print_r($punch_arr);
+		$this->assertEquals( 1, count( $punch_arr ) );
+		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 12:00PM'),
+								 NULL, //strtotime($date_stamp.' 1:15PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
+		//print_r($punch_arr);
+		$this->assertEquals( 1, count( $punch_arr ) );
+		$this->assertEquals( 3, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+
+		//This punch should fail due to conflicting punch.
+		$retval = $dd->createPunchPair( 	$this->user_id,
+								 NULL, //strtotime($date_stamp.' 12:00PM'),
+								 strtotime($date_stamp.' 1:15PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+		$this->assertEquals( $retval, FALSE ); //Check that adding Punch fails.
+
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
+		//print_r($punch_arr);
+		$this->assertEquals( 1, count( $punch_arr ) );
+		$this->assertEquals( 3, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+		return TRUE;
+	}
+
+	/**
 	 * @group Punch_testRoundingA
 	 */
 	function testRoundingA() {
@@ -6234,6 +6321,120 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group Punch_testScheduleMatchingH
+	 */
+	function testScheduleMatchingH() {
+		//Test with matching end/start schedule times.
+		global $dd;
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
+		$schedule_a = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:00AM',
+				'end_time' => '1:00PM',
+				'branch_id' => $this->tmp_branch_id[0],
+				'department_id' => $this->tmp_department_id[0],
+		) );
+
+		$schedule_b = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 1:00PM',
+				'end_time' => '5:00PM',
+				'branch_id' => $this->tmp_branch_id[1],
+				'department_id' => $this->tmp_department_id[1],
+		) );
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 1:00PM');
+
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
+		$plf->setUser( $this->user_id );
+		$plf->setTimeStamp( $epoch );
+		$plf->setStatus( 10 ); //In
+		$schedule_id = $plf->findScheduleId();
+
+		$this->assertEquals( $schedule_id, $schedule_b ); //1PM In punch should match Schedule B.
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Punch_testScheduleMatchingI
+	 */
+	function testScheduleMatchingI() {
+		//Test with matching end/start schedule times.
+		global $dd;
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
+		$schedule_a = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:00AM',
+				'end_time' => '1:00PM',
+				'branch_id' => $this->tmp_branch_id[0],
+				'department_id' => $this->tmp_department_id[0],
+		) );
+
+		$schedule_b = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 1:00PM',
+				'end_time' => '5:00PM',
+				'branch_id' => $this->tmp_branch_id[1],
+				'department_id' => $this->tmp_department_id[1],
+		) );
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 1:00PM');
+
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
+		$plf->setUser( $this->user_id );
+		$plf->setTimeStamp( $epoch );
+		$plf->setStatus( 20 ); //Out
+		$schedule_id = $plf->findScheduleId();
+
+		$this->assertEquals( $schedule_id, $schedule_a ); //1PM Out punch should match Schedule A.
+
+		return TRUE;
+	}
+
+	/**
 	 * @group Punch_testDefaultPunchSettingsNoScheduleA
 	 */
 	function testDefaultPunchSettingsNoScheduleA() {
@@ -6248,11 +6449,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 		//var_dump($data);
@@ -6289,11 +6490,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 		//var_dump($data);
@@ -6351,11 +6552,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 5:00PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -6408,11 +6609,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 9:30AM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -6465,11 +6666,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -6522,11 +6723,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -6579,11 +6780,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -6650,11 +6851,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -6721,11 +6922,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -6778,11 +6979,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00:57 PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -6835,11 +7036,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00:23 PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -6891,17 +7092,17 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00:23 PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$prev_punch_obj = TTnew( 'PunchListFactory' );
+		$prev_punch_obj = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $prev_punch_obj */
 		$status_id = FALSE;
 		$type_id = FALSE;
 
 		//Test similar functionality to what the timeclock would use to avoid duplicate punches.
 		//This is different than what the mobile app would do though, as the mobile app needs to be able to refresh its default punch settings immediately.
-		$plf = TTnew( 'PunchListFactory' );
+		$plf = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf */
 		$plf->getPreviousPunchByUserIDAndEpoch( $user_obj->getId(), $epoch );
 		if ( $plf->getRecordCount() > 0 ) {
 			$prev_punch_obj = $plf->getCurrent();
@@ -6957,11 +7158,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 		//var_dump($data);
@@ -7011,11 +7212,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 		//var_dump($data);
@@ -7079,11 +7280,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 5:00PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -7146,11 +7347,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 9:30AM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -7213,11 +7414,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -7280,11 +7481,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -7347,11 +7548,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -7422,11 +7623,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -7497,11 +7698,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -7572,11 +7773,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:10PM');
 
-		$ulf = TTNew('UserListFactory');
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
 
-		$plf = TTNew('PunchFactory');
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
@@ -7585,6 +7786,295 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleGA
+	 */
+	function testDefaultPunchSettingsScheduleGA() {
+		//Test with matching end/start schedule times.
+		global $dd;
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+//		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
+		$schedule_policy_id = $this->createSchedulePolicy( 10, TTUUID::getZeroID() );
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:00AM',
+				'end_time' => '1:00PM',
+				'branch_id' => $this->tmp_branch_id[0],
+				'department_id' => $this->tmp_department_id[0],
+		) );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 1:00PM',
+				'end_time' => '5:00PM',
+				'branch_id' => $this->tmp_branch_id[1],
+				'department_id' => $this->tmp_department_id[1],
+		) );
+
+//		$dd->createPunchPair( 	$this->user_id,
+//								 strtotime($date_stamp.' 8:00AM'),
+//								 NULL, //strtotime($date_stamp.' 1:00PM'),
+//								 array(
+//										 'in_type_id' => 10,
+//										 'out_type_id' => 10,
+//										 'branch_id' => $this->tmp_branch_id[0],
+//										 'department_id' => $this->tmp_department_id[0],
+//										 'job_id' => 0,
+//										 'job_item_id' => 0,
+//								 ),
+//								 TRUE
+//		);
+
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 8:00AM'); //Test adding a new punch at 8:00AM
+
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
+
+		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
+
+		$this->assertEquals( 10, $data['status_id'] ); //In/Out
+		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
+
+		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
+		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleGB
+	 */
+	function testDefaultPunchSettingsScheduleGB() {
+		//Test with matching end/start schedule times.
+		global $dd;
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+//		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
+		$schedule_policy_id = $this->createSchedulePolicy( 10, TTUUID::getZeroID() );
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:00AM',
+				'end_time' => '1:00PM',
+				'branch_id' => $this->tmp_branch_id[0],
+				'department_id' => $this->tmp_department_id[0],
+		) );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 1:00PM',
+				'end_time' => '5:00PM',
+				'branch_id' => $this->tmp_branch_id[1],
+				'department_id' => $this->tmp_department_id[1],
+		) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 NULL, //strtotime($date_stamp.' 1:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->tmp_branch_id[0],
+										 'department_id' => $this->tmp_department_id[0],
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 1:00PM'); //Test adding a new punch at 1:00PM
+
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
+
+		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
+
+		$this->assertEquals( 20, $data['status_id'] ); //In/Out
+		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
+
+		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
+		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleGC
+	 */
+	function testDefaultPunchSettingsScheduleGC() {
+		//Test with matching end/start schedule times.
+		global $dd;
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		//$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
+		$schedule_policy_id = $this->createSchedulePolicy( 10, TTUUID::getZeroID() );
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:00AM',
+				'end_time' => '1:00PM',
+				'branch_id' => $this->tmp_branch_id[0],
+				'department_id' => $this->tmp_department_id[0],
+		) );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 1:00PM',
+				'end_time' => '5:00PM',
+				'branch_id' => $this->tmp_branch_id[1],
+				'department_id' => $this->tmp_department_id[1],
+		) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 1:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->tmp_branch_id[0],
+										 'department_id' => $this->tmp_department_id[0],
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 1:00PM'); //Test adding a new punch at 1:00PM
+
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
+
+		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
+
+		$this->assertEquals( 10, $data['status_id'] ); //In/Out
+		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
+
+		$this->assertEquals( $this->tmp_branch_id[1], $data['branch_id'] );
+		$this->assertEquals( $this->tmp_department_id[1], $data['department_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
+		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleGD
+	 */
+	function testDefaultPunchSettingsScheduleGD() {
+		//Test with matching end/start schedule times.
+		global $dd;
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, 0, 0, 0 ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		//$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
+		$schedule_policy_id = $this->createSchedulePolicy( 10, TTUUID::getZeroID() );
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:00AM',
+				'end_time' => '1:00PM',
+				'branch_id' => $this->tmp_branch_id[0],
+				'department_id' => $this->tmp_department_id[0],
+		) );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 1:00PM',
+				'end_time' => '5:00PM',
+				'branch_id' => $this->tmp_branch_id[1],
+				'department_id' => $this->tmp_department_id[1],
+		) );
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 1:00PM'); //Test adding a new punch at 1:00PM
+
+		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$plf = TTNew('PunchFactory'); /** @var PunchFactory $plf */
+
+		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
+
+		$this->assertEquals( 10, $data['status_id'] ); //In/Out
+		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
+
+		$this->assertEquals( $this->tmp_branch_id[1], $data['branch_id'] );
+		$this->assertEquals( $this->tmp_department_id[1], $data['department_id'] );
 		$this->assertEquals( TTUUID::getZeroID(), $data['job_id'] );
 		$this->assertEquals( TTUUID::getZeroID(), $data['job_item_id'] );
 
@@ -7823,7 +8313,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		$fail_transaction = FALSE;
-		$pf = TTnew( 'PunchFactory' );
+		$pf = TTnew( 'PunchFactory' ); /** @var PunchFactory $pf */
 		$pf->setTransfer( FALSE );
 		$pf->setUser( $this->user_id );
 		$pf->setType( 10 );
@@ -7847,7 +8337,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		}
 
 		if ( $fail_transaction == FALSE ) {
-			$pcf = TTnew( 'PunchControlFactory' );
+			$pcf = TTnew( 'PunchControlFactory' ); /** @var PunchControlFactory $pcf */
 			$pcf->setId( $pf->getPunchControlID() );
 			$pcf->setPunchObject( $pf );
 			//$pcf->setBranch( 0 );

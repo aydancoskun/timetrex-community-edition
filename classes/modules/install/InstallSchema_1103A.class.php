@@ -55,13 +55,11 @@ class InstallSchema_1103A extends InstallSchema_Base {
 	function postInstall() {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		/** @var CompanyListFactory $clf */
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->StartTransaction();
 		$clf->getAll( NULL, NULL, NULL, array('created_date' => 'asc' ) );
 		Debug::Text( 'Get all companies. Found: ' . $clf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $clf->getRecordCount() > 0 ) {
-			/** @var CompanyFactory $c_obj */
 			foreach ( $clf as $c_obj ) {
 				Debug::text( 'Processing company: ' . $c_obj->getId() . ' Name: ' . $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 

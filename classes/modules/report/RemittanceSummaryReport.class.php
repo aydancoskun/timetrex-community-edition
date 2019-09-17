@@ -119,7 +119,7 @@ class RemittanceSummaryReport extends Report {
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
 					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'RemittanceSummaryReport', 'custom_column' );
@@ -130,13 +130,13 @@ class RemittanceSummaryReport extends Report {
 				break;
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'RemittanceSummaryReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'RemittanceSummaryReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
@@ -145,7 +145,7 @@ class RemittanceSummaryReport extends Report {
 				break;
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
+					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'RemittanceSummaryReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
@@ -522,9 +522,8 @@ class RemittanceSummaryReport extends Report {
 		return $retarr;
 	}
 
-	//Get raw data for report
-
 	/**
+	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
@@ -534,7 +533,7 @@ class RemittanceSummaryReport extends Report {
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
 
-		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 		$pseallf->getByCompanyId( $this->getUserObject()->getCompany() );
 		if ( $pseallf->getRecordCount() > 0 ) {
 			$pseal_obj = $pseallf->getCurrent();
@@ -550,7 +549,7 @@ class RemittanceSummaryReport extends Report {
 			$gross_payroll_psea_ids['exclude'] = array();
 		}
 
-		$cdlf = TTnew( 'CompanyDeductionListFactory' );
+		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10, 20), 10 );
 		$tax_deductions = array();
 		$tax_deduction_users = array();
@@ -563,7 +562,7 @@ class RemittanceSummaryReport extends Report {
 					$tax_deduction_users[$cd_obj->getId()] = $cd_obj->getUser(); //Optimization so we don't have to get assigned users more than once per obj, as its used lower down in a tighter loop.
 
 					//Need to determine start/end dates for each CompanyDeduction/User pair, so we can break down total wages earned in the date ranges.
-					$udlf = TTnew( 'UserDeductionListFactory' );
+					$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 					$udlf->getByCompanyIdAndCompanyDeductionId( $cd_obj->getCompany(), $cd_obj->getId() );
 					if ( $udlf->getRecordCount() > 0 ) {
 						foreach( $udlf as $ud_obj ) {
@@ -579,7 +578,7 @@ class RemittanceSummaryReport extends Report {
 		}
 		unset($cdlf, $cd_obj, $udlf, $ud_obj);
 
-		$pself = TTnew( 'PayStubEntryListFactory' );
+		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		if ( $pself->getRecordCount() > 0 ) {
 			$final_date_stamp = FALSE; //Used for PayrollDeduction class below.
@@ -691,7 +690,7 @@ class RemittanceSummaryReport extends Report {
 			//Debug::Arr($this->tmp_data['pay_period_ids'], 'Per User Pay Periods: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			//Get PayPeriodSchedule data for each employee.
-			$ppslf = TTNew('PayPeriodScheduleListFactory');
+			$ppslf = TTNew('PayPeriodScheduleListFactory'); /** @var PayPeriodScheduleListFactory $ppslf */
 			$ppslf->getByCompanyIdAndUserId( $this->getUserObject()->getCompany(), $this->user_ids );
 			if ( $ppslf->getRecordCount() > 0 ) {
 				foreach( $ppslf as $pps_obj ) {
@@ -764,7 +763,7 @@ class RemittanceSummaryReport extends Report {
 		$this->user_ids = array_unique( $this->user_ids ); //Used to get the total number of employees.
 
 		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
@@ -777,9 +776,8 @@ class RemittanceSummaryReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {
@@ -853,7 +851,11 @@ class RemittanceSummaryReport extends Report {
 
 	/**
 	 * Formats report data for exporting to TimeTrex payment service.
-	 * @return array
+	 * @param $prae_obj
+	 * @param $pra_obj
+	 * @param $rs_obj
+	 * @param $pra_user_obj
+	 * @return array|bool
 	 */
 	function getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj ) {
 		$tmp_data = $this->getOutput( 'raw' ); //Generate the report so getSummaryTableData() has data to work with.
@@ -896,6 +898,10 @@ class RemittanceSummaryReport extends Report {
 	}
 
 
+	/**
+	 * @param null $format
+	 * @return null |null
+	 */
 	function getSummaryTableData( $format = NULL ) {
 		//Get the earliest transaction date of all pay periods.
 		$this->form_data['pay_period'] = array_unique( (array)$this->form_data['pay_period'] );

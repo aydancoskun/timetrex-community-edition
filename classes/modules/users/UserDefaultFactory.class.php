@@ -657,7 +657,7 @@ class UserDefaultFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getCompanyDeduction() {
-		$udcdlf = TTnew( 'UserDefaultCompanyDeductionListFactory' );
+		$udcdlf = TTnew( 'UserDefaultCompanyDeductionListFactory' ); /** @var UserDefaultCompanyDeductionListFactory $udcdlf */
 		$udcdlf->getByUserDefaultId( $this->getId() );
 
 		$list = array();
@@ -687,7 +687,7 @@ class UserDefaultFactory extends Factory {
 			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$udcdlf = TTnew( 'UserDefaultCompanyDeductionListFactory' );
+				$udcdlf = TTnew( 'UserDefaultCompanyDeductionListFactory' ); /** @var UserDefaultCompanyDeductionListFactory $udcdlf */
 				$udcdlf->getByUserDefaultId( $this->getId() );
 				foreach ($udcdlf as $obj) {
 					$id = $obj->getCompanyDeduction();
@@ -708,11 +708,11 @@ class UserDefaultFactory extends Factory {
 
 			//Insert new mappings.
 			//$lf = TTnew( 'UserListFactory' );
-			$cdlf = TTnew( 'CompanyDeductionListFactory' );
+			$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 
 			foreach ($ids as $id) {
 				if ( $id != FALSE AND isset($ids) AND !in_array($id, $tmp_ids) ) {
-					$udcdf = TTnew( 'UserDefaultCompanyDeductionFactory' );
+					$udcdf = TTnew( 'UserDefaultCompanyDeductionFactory' ); /** @var UserDefaultCompanyDeductionFactory $udcdf */
 					$udcdf->setUserDefault( $this->getId() );
 					$udcdf->setCompanyDeduction( $id );
 
@@ -742,7 +742,7 @@ class UserDefaultFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 													$clf->getByID($this->getCompany()),
 													TTi18n::gettext('Company is invalid')
@@ -754,14 +754,14 @@ class UserDefaultFactory extends Factory {
 												);
 		}
 		// Legal entity
-		$clf = TTnew( 'LegalEntityListFactory' );
+		$clf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'legal_entity_id',
 														$clf->getByID($this->getLegalEntity()),
 														TTi18n::gettext('Legal entity is invalid')
 													);
 		// Permission Group
 		if ( $this->getPermissionControl() != '' AND $this->getPermissionControl() != TTUUID::getZeroID() ) {
-			$pclf = TTnew( 'PermissionControlListFactory' );
+			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
 			$this->Validator->isResultSetWithRows( 'permission_control_id',
 												   $pclf->getByID( $this->getPermissionControl() ),
 												   TTi18n::gettext( 'Permission Group is invalid' )
@@ -770,7 +770,7 @@ class UserDefaultFactory extends Factory {
 
 		// Pay Period schedule
 		if ( $this->getPayPeriodSchedule() != '' AND $this->getPayPeriodSchedule() != TTUUID::getZeroID() ) {
-			$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+			$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 			$this->Validator->isResultSetWithRows(	'pay_period_schedule_id',
 															$ppslf->getByID($this->getPayPeriodSchedule()),
 															TTi18n::gettext('Pay Period schedule is invalid')
@@ -778,7 +778,7 @@ class UserDefaultFactory extends Factory {
 		}
 		// Policy Group
 		if ( $this->getPolicyGroup() != '' AND $this->getPolicyGroup() != TTUUID::getZeroID() ) {
-			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 			$this->Validator->isResultSetWithRows(	'policy_group_id',
 															$pglf->getByID($this->getPolicyGroup()),
 															TTi18n::gettext('Policy Group is invalid')
@@ -795,7 +795,7 @@ class UserDefaultFactory extends Factory {
 		}
 		// Title
 		if ( $this->getTitle() != '' AND $this->getTitle() != TTUUID::getZeroID() ) {
-			$utlf = TTnew( 'UserTitleListFactory' );
+			$utlf = TTnew( 'UserTitleListFactory' ); /** @var UserTitleListFactory $utlf */
 			$this->Validator->isResultSetWithRows(	'title',
 															$utlf->getByID($this->getTitle()),
 															TTi18n::gettext('Title is invalid')
@@ -803,7 +803,7 @@ class UserDefaultFactory extends Factory {
 		}
 		// Default Branch
 		if ( $this->getDefaultBranch() != '' AND $this->getDefaultBranch() != TTUUID::getZeroID() ) {
-			$blf = TTnew( 'BranchListFactory' );
+			$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 			$this->Validator->isResultSetWithRows(	'default_branch',
 															$blf->getByID($this->getDefaultBranch()),
 															TTi18n::gettext('Invalid Default Branch')
@@ -811,7 +811,7 @@ class UserDefaultFactory extends Factory {
 		}
 		// Default Department
 		if ( $this->getDefaultDepartment() != '' AND $this->getDefaultDepartment() != TTUUID::getZeroID() ) {
-			$dlf = TTnew( 'DepartmentListFactory' );
+			$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 			$this->Validator->isResultSetWithRows(	'default_department',
 															$dlf->getByID($this->getDefaultDepartment()),
 															TTi18n::gettext('Invalid Default Department')
@@ -819,7 +819,7 @@ class UserDefaultFactory extends Factory {
 		}
 		// Currency
 		if ( $this->getCurrency() != '' AND $this->getCurrency() != TTUUID::getZeroID() ) {
-			$culf = TTnew( 'CurrencyListFactory' );
+			$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 			$this->Validator->isResultSetWithRows( 'currency',
 												   $culf->getByID( $this->getCurrency() ),
 												   TTi18n::gettext( 'Invalid Currency' )
@@ -842,7 +842,7 @@ class UserDefaultFactory extends Factory {
 			}
 		}
 		// Country
-		$cf = TTnew( 'CompanyFactory' );
+		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 		$this->Validator->inArrayKey(		'country',
 													$this->getCountry(),
 													TTi18n::gettext('Invalid Country'),
@@ -900,7 +900,7 @@ class UserDefaultFactory extends Factory {
 												$language_options
 											);
 		// Date format
-		$upf = TTnew( 'UserPreferenceFactory' );
+		$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 		$this->Validator->inArrayKey(	'date_format',
 												$this->getDateFormat(),
 												TTi18n::gettext('Incorrect date format'),
@@ -963,9 +963,9 @@ class UserDefaultFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

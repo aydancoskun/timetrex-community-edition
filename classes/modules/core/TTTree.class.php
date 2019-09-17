@@ -39,8 +39,8 @@
  * @package Core
  */
 class TTTree {
-	//Format flat array for JS tree grid.
 	/**
+	 * Format flat array for JS tree grid.
 	 * @param $nodes
 	 * @param bool $include_root
 	 * @return array
@@ -63,9 +63,8 @@ class TTTree {
 		return $nodes;
 	}
 
-	//Flatten a nested array.
-
 	/**
+	 * Flatten a nested array.
 	 * @param $nodes
 	 * @return array
 	 */
@@ -84,9 +83,8 @@ class TTTree {
 		return $retarr;
 	}
 
-	//Get one specific element from all nodes in nested array.
-
 	/**
+	 * Get one specific element from all nodes in nested array.
 	 * @param $nodes
 	 * @param string $key
 	 * @return array
@@ -105,9 +103,8 @@ class TTTree {
 		return $retarr;
 	}
 
-	//Get just the children of a specific parent.
-
 	/**
+	 * Get just the children of a specific parent.
 	 * @param $nodes
 	 * @param string $parent_id
 	 * @return array
@@ -130,9 +127,8 @@ class TTTree {
 		return ( $a['name'] < $b['name'] ) ? -1 : 1;
 	}
 
-	//Takes a flat array of nodes typically straight from the database and converts into a nested array with depth/level values.
-
 	/**
+	 * Takes a flat array of nodes typically straight from the database and converts into a nested array with depth/level values.
 	 * @param $nodes
 	 * @param string $parent_id
 	 * @param int $depth

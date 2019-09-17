@@ -62,7 +62,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL($query, NULL, $limit, $page);
+		$this->rs = $this->ExecuteSQL($query, NULL, $limit, $page);
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 						status_id = ?
 						AND deleted = 0';
 
-		$this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -98,7 +98,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 	 * @return $this
 	 */
 	function getByCompanyIdAndStatus( $company_id, $status, $where = NULL, $order = NULL) {
-		$uf = TTnew( 'UserFactory' );
+		$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 
 		$ph = array(
 					'company_id' => TTUUID::castUUID($company_id),
@@ -114,7 +114,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 						AND a.status_id = ?
 						AND a.deleted = 0';
 
-		$this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -159,7 +159,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 						where	id = ?
 							AND deleted = 0';
 
-			$this->ExecuteSQL($query, $ph);
+			$this->rs = $this->ExecuteSQL($query, $ph);
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -207,9 +207,9 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL($query, $ph, $limit, $page);
+		$this->rs = $this->ExecuteSQL($query, $ph, $limit, $page);
 
-		$this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -243,7 +243,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 							OR lower(work_email) = ? )
 						AND deleted = 0';
 
-		$this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -272,7 +272,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 						AND status_id = ?
 						AND deleted = 0';
 
-		$this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -297,7 +297,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 			$strict = TRUE;
 		}
 
-		$uf = TTnew('UserFactory');
+		$uf = TTnew('UserFactory'); /** @var UserFactory $uf */
 		$ph = array(
 					'company_id' => TTUUID::castUUID($company_id),
 					);
@@ -311,7 +311,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL($query, $ph, $limit, $page);
+		$this->rs = $this->ExecuteSQL($query, $ph, $limit, $page);
 
 		return $this;
 	}
@@ -409,7 +409,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		if ( $date == '') {
 			return FALSE;
 		}
-		$uf = TTnew('UserFactory');
+		$uf = TTnew('UserFactory'); /** @var UserFactory $uf */
 		$ph = array(
 					'company_id' => TTUUID::castUUID($company_id),
 					'created_date' => $date,
@@ -431,7 +431,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query, $ph, $limit, $page);
+		$this->rs = $this->ExecuteSQL($query, $ph, $limit, $page);
 
 		return $this;
 	}
@@ -485,7 +485,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
-		$uf = TTnew( 'UserFactory' );
+		$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 		$bf = new BranchFactory();
 		$df = new DepartmentFactory();
 		$ugf = new UserGroupFactory();
@@ -590,7 +590,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL($query, $ph, $limit, $page);
+		$this->rs = $this->ExecuteSQL($query, $ph, $limit, $page);
 
 		return $this;
 	}

@@ -65,6 +65,7 @@ return array(
 							'auto_file'           => TRUE, //TT can automatically files.
 							'auto_pay'            => TRUE, //TT can automatically pays.
 					),
+					'date_restrictions' => array( 'start' => 90, 'end' => 90 ), //Days
 					'frequency'        => array( //Weekly,Monthly,Quarterly
 
 												 //Accelerated (Threshold 1)
@@ -140,7 +141,6 @@ return array(
 					'tax_codes'        => array('INCOME', 'EI', 'CPP'),
 					'filing_methods'   => array('EFILE'),
 					'payment_methods'  => array('EPAY'),
-
 					'flags'            => array(
 							'include_w2'          => FALSE,
 							'file_zero_wage'      => FALSE,
@@ -148,6 +148,7 @@ return array(
 							'auto_file'           => TRUE, //TT can automatically files.
 							'auto_pay'            => FALSE, //TT only pays through the T4SD event currently. This is needed to allow T4 efiling without DD. Shortfalls need to be paid another way.
 					),
+					'date_restrictions' => array( 'start' => (365 * 2), 'end' => 365 ), //Days
 					'frequency'        => array( //Annual
 												 array(
 														 'status_id'            => 10, //Enabled
@@ -173,6 +174,7 @@ return array(
 							'auto_file'           => TRUE, //TT can automatically files.
 							'auto_pay'            => FALSE, //TT only pays through the T4SD event currently. This is needed to allow T4 efiling without DD. Shortfalls need to be paid another way.
 					),
+					'date_restrictions' => array( 'start' => (365 * 2), 'end' => 365 ), //Days
 					'frequency'        => array( //Annual
 												 array(
 														 'status_id'            => 10, //Enabled
@@ -201,6 +203,7 @@ return array(
 												 'auto_file'           => TRUE, //TT can automatically files.
 												 'auto_pay'            => FALSE, //TT can automatically pays.
 										 ),
+										 'date_restrictions' => array( 'start' => (365 * 100), 'end' => ( 365 * 100 ) ), //Days -- No restrictions.
 										 'frequency'        => array(	//If you have a monthly pay period or 13 pay periods per year (every four weeks), you must issue electronic ROEs by whichever date is earlier:
 																		//  five calendar days after the end of the pay period in which an employee experiences an interruption of earnings; or
 																		//  15 calendar days after the first day of an interruption of earnings.
@@ -1060,33 +1063,6 @@ return array(
 								 ),
 	),
 	'20:CA:NL:00:0040' => array( //Child Support
-								 'SUPPORT' => array(
-										 'form_code'        => '',
-										 'form_name'        => TTi18n::getText( 'Maintenance Enforcement Payment' ),
-										 'form_description' => TTi18n::getText( 'Maintenance Enforcement Payment' ),
-										 'note'             => TTi18n::getText( '' ),
-										 'tax_codes'        => array('SUPPORT'),
-										 'filing_methods'   => array('PRINT','EFILE'),
-										 'payment_methods'  => array('CHECK','EPAY'),
-										 'flags'            => array(
-												 'include_w2'          => FALSE,
-												 'file_zero_wage'      => FALSE,
-												 'file_zero_liability' => FALSE,
-												 'auto_file'           => FALSE,
-												 'auto_pay'            => FALSE,
-										 ),
-										 'frequency'        => array(
-											 //Per Pay Period
-											 array(
-													 'status_id'           => 10, //Enabled
-													 'frequency_id'        => 1000, //Per Pay Period
-													 'due_date_delay_days' => 10,
-													 'reminder_days'       => 5,
-											 ),
-										 ),
-								 ),
-	),
-	'20:CA:NS:00:0040' => array( //Child Support
 								 'SUPPORT' => array(
 										 'form_code'        => '',
 										 'form_name'        => TTi18n::getText( 'Maintenance Enforcement Payment' ),

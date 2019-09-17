@@ -55,7 +55,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
 
 		return $this;
 	}
@@ -86,7 +86,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -130,7 +130,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -173,7 +173,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
 
 		return $this;
 	}
@@ -185,7 +185,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 	 * @param int $limit Limit the number of records returned
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
-	 * @return bool|RegularTimePolicyListFactory
+	 * @return bool|BreakPolicyListFactory
 	 */
 	function getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $company_id, $pay_code_id, $pay_formula_policy_id, $limit = NULL, $where = NULL, $order = NULL) {
 		if ( $pay_code_id == '') {
@@ -218,7 +218,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
 
 		return $this;
 	}
@@ -260,7 +260,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -306,7 +306,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -366,7 +366,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -405,7 +405,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -509,7 +509,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

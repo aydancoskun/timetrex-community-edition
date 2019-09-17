@@ -906,4 +906,183 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ph[0], 0 );
 	}
 
+	function testTransactionNestingA() {
+		$uf = new UserFactory();
+
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+
+		$uf->StartTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 1 );
+
+		$uf->StartTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 2 );
+
+		$uf->StartTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 3 );
+
+		//$uf->FailTransaction();
+		$uf->CommitTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 2 );
+
+		$uf->CommitTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 1 );
+
+		$uf->CommitTransaction();
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+	}
+
+	function testTransactionNestingB() {
+		$uf = new UserFactory();
+
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+
+		$uf->StartTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 1 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+		$uf->StartTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 2 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+		$uf->StartTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 3 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+		$uf->FailTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 3 );
+		$this->assertEquals( $uf->db->_transOK, FALSE );
+
+		$uf->CommitTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 2 );
+		$this->assertEquals( $uf->db->_transOK, FALSE );
+
+		$uf->CommitTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 1 );
+		$this->assertEquals( $uf->db->_transOK, FALSE );
+
+		$uf->CommitTransaction();
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, FALSE );
+
+
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, FALSE );
+	}
+
+	function testTransactionNestingC() {
+		$uf = new UserFactory();
+
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+
+		$uf->StartTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 1 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+		$uf->StartTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 2 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+		$uf->StartTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 3 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+		$uf->FailTransaction();
+		$this->assertEquals( $uf->db->transCnt, 1 );
+		$this->assertEquals( $uf->db->transOff, 3 );
+		$this->assertEquals( $uf->db->_transOK, FALSE );
+
+		$uf->CommitTransaction( TRUE ); //Unest all transactions.
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, FALSE );
+
+
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, FALSE );
+	}
+
+	function testTransactionNestingC2() {
+		$uf = new UserFactory();
+
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->FailTransaction();
+
+		$uf->CommitTransaction( TRUE ); //Unest all transactions.
+
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, FALSE );
+	}
+
+	function testTransactionNestingC3() {
+		$uf = new UserFactory();
+
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, TRUE );
+
+
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->StartTransaction();
+		$uf->FailTransaction();
+		$uf->FailTransaction();
+		$uf->FailTransaction();
+
+		$uf->CommitTransaction( TRUE ); //Unest all transactions.
+
+		$this->assertEquals( $uf->db->transCnt, 0 );
+		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( $uf->db->_transOK, FALSE );
+	}
 }

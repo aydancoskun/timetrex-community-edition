@@ -50,9 +50,9 @@ class APIMisc extends APIFactory {
 		return TRUE;
 	}
 
-	//Ping function is also in APIMisc for when the session timesout is valid.
-	//Flex calls this after session is timedout so it can get the proper validation error and display the correct message to the user.
 	/**
+	 * Ping function is also in APIMisc for when the session timesout is valid.
+	 * Flex calls this after session is timedout so it can get the proper validation error and display the correct message to the user.
 	 * @return bool
 	 */
 	function Ping() {

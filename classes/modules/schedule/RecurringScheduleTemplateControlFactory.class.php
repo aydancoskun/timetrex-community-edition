@@ -174,7 +174,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -200,7 +200,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure nothing else references this, so we can be sure its okay to delete it.
-			$rsclf = TTnew('RecurringScheduleControlListFactory');
+			$rsclf = TTnew('RecurringScheduleControlListFactory'); /** @var RecurringScheduleControlListFactory $rsclf */
 			$rsclf->getByCompanyIdAndTemplateID( $this->getCompany(), $this->getId() );
 			if ( $rsclf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',
@@ -221,7 +221,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 		//
 
 		//Loop through all RecurringScheduleControl rows associated with this template, so we can recalculate the recurring schedules for them.
-		$rsclf = TTNew('RecurringScheduleControlListFactory');
+		$rsclf = TTNew('RecurringScheduleControlListFactory'); /** @var RecurringScheduleControlListFactory $rsclf */
 		$rsclf->getByCompanyIdAndTemplateID( $this->getCompany(), $this->getId() );
 		if ( $rsclf->getRecordCount() > 0 ) {
 			Debug::text('Found RecurringScheduleControl records assigned to this template: '. $rsclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -230,7 +230,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 				//Handle generating recurring schedule rows, so they are as real-time as possible.
 				$current_epoch = TTDate::getBeginWeekEpoch( TTDate::getBeginWeekEpoch( time() ) - 86400 );
 
-				$rsf = TTnew('RecurringScheduleFactory');
+				$rsf = TTnew('RecurringScheduleFactory'); /** @var RecurringScheduleFactory $rsf */
 				$rsf->setAMFMessageID( $this->getAMFMessageID() );
 				$rsf->StartTransaction();
 				$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getID(), ( $current_epoch - (86400 * 720) ), ( $current_epoch + (86400 * 720) ) );

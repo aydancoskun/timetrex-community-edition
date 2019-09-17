@@ -156,16 +156,15 @@ class UserDeductionFactory extends Factory {
 		return $this->getGenericObject( 'CompanyDeductionListFactory', $this->getCompanyDeduction(), 'company_deduction_obj' );
 	}
 
-	//Do not replace this with getGenericObject() as it uses the CompanyID not the ID itself.
-
 	/**
+	 * Do not replace this with getGenericObject() as it uses the CompanyID not the ID itself.
 	 * @return bool|null
 	 */
 	function getPayStubEntryAccountLinkObject() {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
 		} else {
-			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 			$pseallf->getByCompanyID( $this->getUserObject()->getCompany() );
 			if ( $pseallf->getRecordCount() > 0 ) {
 				$this->pay_stub_entry_account_link_obj = $pseallf->getCurrent();
@@ -508,9 +507,8 @@ class UserDeductionFactory extends Factory {
 		return $this->setGenericDataValue( 'user_value10', $value );
 	}
 
-	//Primarily used to display marital status/allowances/claim amounts on pay stubs.
-
 	/**
+	 * Primarily used to display marital status/allowances/claim amounts on pay stubs.
 	 * @param bool $transaction_date
 	 * @return bool|string
 	 */
@@ -654,7 +652,8 @@ class UserDeductionFactory extends Factory {
 	/**
 	 * Since some Tax/Deduction calculation types (ie: Canada Federal/Provincial) take into account specific amounts calculated by other Tax/Deduction records (ie: Canada CPP/EI),
 	 * this provides a way to force additional required PSA's that affect just the dependancy tree.
-	 * @return int|string
+	 * @return array
+	 * @throws DBError
 	 */
 	function getAdditionalRequiredPayStubAccounts() {
 		$cd_obj = $this->getCompanyDeductionObject();
@@ -665,7 +664,7 @@ class UserDeductionFactory extends Factory {
 		// but we can't include the CPP/EI PSA's in the Tax/Deduction record as that would include the dollar values.
 		// So we need way to inject additional required PSA's into just the dependancy tree, to ensure consistent calculation order.
 		if ( in_array( $cd_obj->getCalculation(), array( 100, 200 ) ) AND $this->getCompanyDeductionObject()->getCountry() == 'CA' ) {
-			$cdlf = TTnew( 'CompanyDeductionListFactory' );
+			$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 			$cdlf->getByCompanyIdAndLegalEntityIdAndCalculationIdAndStatusId( $cd_obj->getCompany(), $cd_obj->getLegalEntity(), array( 90, 91 ), 10 ); //90=CPP,91=EI, 10=Enabled
 			if ( $cdlf->getRecordCount() > 0 ) {
 				foreach( $cdlf as $tmp_cd_obj ) {
@@ -679,12 +678,13 @@ class UserDeductionFactory extends Factory {
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param $user_obj
 	 * @param object $pay_stub_obj
 	 * @param object $pay_period_obj
 	 * @param int $formula_type_id
 	 * @param int $payroll_run_id
 	 * @return int|string
+	 * @throws DBError
 	 */
 	function getDeductionAmount( $user_obj, $pay_stub_obj, $pay_period_obj, $formula_type_id = 10, $payroll_run_id = 1 ) {
 		if ( !is_object($user_obj) ) {
@@ -702,11 +702,11 @@ class UserDeductionFactory extends Factory {
 			return FALSE;
 		}
 
-		$this->user_obj = $user_obj;
+		$this->user_obj = $user_obj; /** @var UserFactory $user_obj */
 		$user_id = $user_obj->getId();
 
 		//Calculates the deduction.
-		$cd_obj = $this->getCompanyDeductionObject();
+		$cd_obj = $this->getCompanyDeductionObject(); /** @var CompanyDeductionFactory $cd_obj */
 
 		$annual_pay_periods = $pay_period_obj->getPayPeriodScheduleObject()->getAnnualPayPeriods();
 		if ( $annual_pay_periods <= 0 ) {
@@ -1261,7 +1261,7 @@ class UserDeductionFactory extends Factory {
 				Debug::Arr( $formula_variables, 'Formula Variables: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 				if ( is_array($formula_variables) ) {
-					$udtlf = TTnew( 'UserDateTotalListFactory' );
+					$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 
 					if ( in_array('currency_conversion_rate', $formula_variables) AND is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCurrencyObject() ) ) {
 						$currency_iso_code = $this->getUserObject()->getCurrencyObject()->getISOCode();
@@ -1271,7 +1271,7 @@ class UserDeductionFactory extends Factory {
 
 					//First pass to gather any necessary data based on variables
 					if ( in_array('employee_hourly_rate', $formula_variables) OR in_array('employee_annual_wage', $formula_variables ) OR in_array( 'employee_wage_average_weekly_hours', $formula_variables ) ) {
-						$uwlf = TTnew('UserWageListFactory');
+						$uwlf = TTnew('UserWageListFactory'); /** @var UserWageListFactory $uwlf */
 						$uwlf->getWageByUserIdAndPayPeriodEndDate( $this->getUser(), $pay_period_obj->getEndDate() );
 						if ( $uwlf->getRecordCount() > 0 ) {
 							$uwf = $uwlf->getCurrent();
@@ -1324,6 +1324,22 @@ class UserDeductionFactory extends Factory {
 
 					//Second pass to define variables.
 					foreach( $formula_variables as $formula_variable ) {
+						//Handle individual PS account amounts/units.
+						switch ( substr( $formula_variable, 0, 3 ) ) {
+							case 'PU:': //Units
+								$variables[$formula_variable] = $cd_obj->getPayStubEntryAmountSum( $pay_stub_obj, array( str_replace('PU:', '', $formula_variable ) ), 'current', 'units' );
+								break;
+							case 'PR:': //Rate
+								$variables[$formula_variable] = $cd_obj->getPayStubEntryAmountSum( $pay_stub_obj, array( str_replace('PR:', '', $formula_variable ) ), 'current', 'rate' );
+								break;
+							case 'PA:': //Amount
+								$variables[$formula_variable] = $cd_obj->getPayStubEntryAmountSum( $pay_stub_obj, array( str_replace('PA:', '', $formula_variable ) ), 'current', 'amount' );
+								break;
+							case 'PY:': //YTD Amount/Balance
+								$variables[$formula_variable] = $cd_obj->getPayStubEntryAmountSum( $pay_stub_obj, array( str_replace('PY:', '', $formula_variable ) ), 'previous', 'ytd_amount' ); //YTD Amount is only populated on previous pay stub when this runs.
+								break;
+						}
+
 						if ( !isset($variables[$formula_variable]) ) {
 							switch ($formula_variable) {
 								case 'custom_value1':
@@ -1719,7 +1735,7 @@ class UserDeductionFactory extends Factory {
 					$pd_obj->setFederalTotalClaimAmount( $user_value1 );
 					$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
-					$cdlf = TTnew('CompanyDeductionListFactory');
+					$cdlf = TTnew('CompanyDeductionListFactory'); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndLegalEntityIdAndCalculationIdAndStatusId( $cd_obj->getCompany(), $cd_obj->getLegalEntity(), 90, 10); //90=CPP, 10=Enabled
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$tmp_cd_obj = $cdlf->getCurrent();
@@ -1846,7 +1862,7 @@ class UserDeductionFactory extends Factory {
 
 					$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
-					$cdlf = TTnew('CompanyDeductionListFactory');
+					$cdlf = TTnew('CompanyDeductionListFactory'); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndLegalEntityIdAndCalculationIdAndStatusId( $cd_obj->getCompany(), $cd_obj->getLegalEntity(), 90, 10); //90=CPP, 10=Enabled
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$tmp_cd_obj = $cdlf->getCurrent();
@@ -1904,7 +1920,7 @@ class UserDeductionFactory extends Factory {
 					Debug::Text('US Pay Period Deductions...', __FILE__, __LINE__, __METHOD__, 10);
 
 					//Need to set Federal settings here.
-					$udlf = TTnew( 'UserDeductionListFactory' );
+					$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 					$udlf->getByUserIdAndCalculationIdAndCountryID( $user_id, 100, $cd_obj->getCountry() );
 					if ( $udlf->getRecordCount() > 0 ) {
 						$tmp_ud_obj = $udlf->getCurrent();
@@ -2023,10 +2039,10 @@ class UserDeductionFactory extends Factory {
 		return $retval;
 	}
 
-	//Returns the maximum taxable wages for any given calculation formula.
-	//Returns FALSE for no maximum.
-	//Primary used in TaxSummary (Generic) report.
 	/**
+	 * Returns the maximum taxable wages for any given calculation formula.
+	 * Returns FALSE for no maximum.
+	 * Primary used in TaxSummary (Generic) report.
 	 * @return bool|mixed
 	 */
 	function getMaximumPayStubEntryAccountAmount() {
@@ -2098,23 +2114,21 @@ class UserDeductionFactory extends Factory {
 	 * Migrates UserDeductions as best as it possibly can for an employee when switching legal entities.
 	 * @param $user_obj object
 	 * @param $data_diff array
+	 * @return bool
 	 */
 	static function MigrateLegalEntity( $user_obj, $data_diff ) {
 		//Get all CompanyDeduction records assigned to the new legal entity so we can quickly loop over them multiple times if needed.
 
-		/** @var CompanyDeductionListFactory $cdlf */
-		$cdlf = TTnew( 'CompanyDeductionListFactory' );
+		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 
 		$cdlf->StartTransaction();
 
 		$cdlf->getByCompanyIdAndLegalEntityId( $user_obj->getCompany(), $user_obj->getLegalEntity() );
 
-		/** @var UserDeductionListFactory $udlf */
-		$udlf = TTnew( 'UserDeductionListFactory' );
+		$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 		$udlf->getByCompanyIdAndUserId( $user_obj->getCompany(), $user_obj->getId() );
 		if ( $udlf->getRecordCount() > 0 ) {
 			Debug::text('Legal Entity changed. Trying to match all tax/deduction data to new entity for user: '. $user_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			/** @var UserDeductionFactory $ud_obj */
 			foreach( $udlf as $ud_obj ) {
 				$matched_company_deduction_ids = array();
 
@@ -2198,14 +2212,14 @@ class UserDeductionFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// User
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$this->Validator->isResultSetWithRows(	'user',
 														$ulf->getByID($this->getUser()),
 														TTi18n::gettext('Invalid Employee')
 													);
 		// Tax/Deduction
 		if ( $this->getCompanyDeduction() == TTUUID::getZeroID() ) {
-			$cdlf = TTnew( 'CompanyDeductionListFactory' );
+			$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 			$this->Validator->isResultSetWithRows(	'company_deduction',
 															$cdlf->getByID($this->getCompanyDeduction()),
 															TTi18n::gettext('Tax/Deduction is invalid')
@@ -2438,7 +2452,7 @@ class UserDeductionFactory extends Factory {
 							$data[$variable] = $this->getColumn( $variable );
 							break;
 						case 'user_status':
-							$uf = TTnew( 'UserFactory' );
+							$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 							$data[$variable] = Option::getByKey( $this->getColumn( $variable.'_id' ), $uf->getOptions( 'status' ) );
 							break;
 						case 'full_name':
@@ -2478,6 +2492,8 @@ class UserDeductionFactory extends Factory {
 		if ( is_object($obj) ) {
 			return TTLog::addEntry( $this->getCompanyDeduction(), $log_action, TTi18n::getText('Employee Deduction') .': '. $obj->getFullName(), NULL, $this->getTable(), $this );
 		}
+
+		return FALSE;
 	}
 }
 ?>

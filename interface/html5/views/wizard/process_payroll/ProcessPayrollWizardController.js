@@ -348,6 +348,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 		$( this.el ).remove();
 
+		$().TFeedback({
+			source: this.wizard_id
+		});
 	},
 
 	getGridColumns: function( gridId, callBack ) {

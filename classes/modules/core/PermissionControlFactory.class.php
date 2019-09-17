@@ -55,7 +55,7 @@ class PermissionControlFactory extends Factory {
 		$retval = NULL;
 		switch( $name ) {
 			case 'preset':
-				$pf = TTnew( 'PermissionFactory' );
+				$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 				$retval = $pf->getOptions('preset');
 				break;
 			case 'level':
@@ -248,12 +248,10 @@ class PermissionControlFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getUser() {
-		/** @var PermissionUserListFactory $pulf */
-		$pulf = TTnew( 'PermissionUserListFactory' );
+		$pulf = TTnew( 'PermissionUserListFactory' ); /** @var PermissionUserListFactory $pulf */
 		$pulf->getByPermissionControlId( $this->getId() );
 
 		$list = array();
-		/** @var PermissionUserFactory $obj */
 		foreach ($pulf as $obj) {
 			$list[] = $obj->getUser();
 		}
@@ -280,7 +278,7 @@ class PermissionControlFactory extends Factory {
 
 			//Remove any of the selected employees from other permission control objects first.
 			//So there we can switch employees from one group to another in a single action.
-			$pulf = TTnew( 'PermissionUserListFactory' );
+			$pulf = TTnew( 'PermissionUserListFactory' ); /** @var PermissionUserListFactory $pulf */
 			$pulf->getByCompanyIdAndUserIdAndNotPermissionControlId( $this->getCompany(), $ids, TTUUID::castUUID($this->getId()) );
 			if ( $pulf->getRecordCount() > 0 ) {
 				Debug::text('Found User IDs assigned to another Permission Group, unassigning them!', __FILE__, __LINE__, __METHOD__, 10);
@@ -296,7 +294,7 @@ class PermissionControlFactory extends Factory {
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
-				$pulf = TTnew( 'PermissionUserListFactory' );
+				$pulf = TTnew( 'PermissionUserListFactory' ); /** @var PermissionUserListFactory $pulf */
 				$pulf->getByPermissionControlId( $this->getId() );
 				foreach ($pulf as $obj) {
 					$id = $obj->getUser();
@@ -324,7 +322,7 @@ class PermissionControlFactory extends Factory {
 			}
 
 			//Insert new mappings.
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 			foreach ($ids as $id) {
 				if ( isset($ids) AND !in_array($id, $tmp_ids) ) {
@@ -332,7 +330,7 @@ class PermissionControlFactory extends Factory {
 					//first, otherwise there is a gap where an employee has
 					//no permissions, this is especially bad for administrators
 					//who are currently logged in.
-					$puf = TTnew( 'PermissionUserFactory' );
+					$puf = TTnew( 'PermissionUserFactory' ); /** @var PermissionUserFactory $puf */
 					$puf->setPermissionControl( $this->getId() );
 					$puf->setUser( $id );
 
@@ -363,7 +361,7 @@ class PermissionControlFactory extends Factory {
 
 		$retval = array();
 
-		$pf = TTnew( 'PermissionFactory' );
+		$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 		$sections = $pf->getOptions('section');
 		$names = $pf->getOptions('name');
 		if ( is_array($names) ) {
@@ -388,8 +386,7 @@ class PermissionControlFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getPermission() {
-		/** @var PermissionListFactory $plf */
-		$plf = TTnew( 'PermissionListFactory' );
+		$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 		$plf->getByCompanyIdAndPermissionControlId( $this->getCompany(), $this->getId() );
 		if ( $plf->getRecordCount() > 0 ) {
 			$current_permissions = array();
@@ -439,7 +436,7 @@ class PermissionControlFactory extends Factory {
 			//Debug::Text(' New Permissions: '. count($permission_arr), __FILE__, __LINE__, __METHOD__, 10);
 			//Debug::Arr($permission_arr, ' Final Permissions: '. count($permission_arr), __FILE__, __LINE__, __METHOD__, 10);
 		}
-		$pf = TTnew( 'PermissionFactory' );
+		$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 
 		//Don't Delete all previous permissions, do that in the Permission class.
 		if ( isset($permission_arr) AND is_array($permission_arr) AND count($permission_arr) > 0 ) {
@@ -457,7 +454,7 @@ class PermissionControlFactory extends Factory {
 
 						if ( $value == 0 OR $value == 1 ) {
 							Debug::Text('	 Modifying/Adding Section: '. $section .' Permission: '. $name .' - Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-							$tmp_pf = TTnew( 'PermissionFactory' );
+							$tmp_pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $tmp_pf */
 							$tmp_pf->setEnableSectionAndNameValidation( FALSE ); //Disable error checking for performance optimization, as we know they are correct.
 							$tmp_pf->setCompany( $this->getCompanyObject()->getId() );
 							$tmp_pf->setPermissionControl( $this->getId() );
@@ -478,9 +475,8 @@ class PermissionControlFactory extends Factory {
 		return TRUE;
 	}
 
-	//Quick way to touch the updated_date, updated_by when adding/removing employees from the UserFactory.
-
 	/**
+	 * Quick way to touch the updated_date, updated_by when adding/removing employees from the UserFactory.
 	 * @param string $permission_control_id UUID
 	 * @return bool
 	 * @throws DBError
@@ -501,21 +497,20 @@ class PermissionControlFactory extends Factory {
 					);
 
 		$query = 'update '. $this->getTable() .' set updated_date = ?, updated_by = ? where id = ?';
+		$this->ExecuteSQL($query, $ph);
 
-		try {
-			$this->db->Execute($query, $ph);
-		} catch (Exception $e) {
-			throw new DBError($e);
-		}
-
+		return TRUE;
 	}
 
+	/**
+	 * @return bool
+	 */
 	function Validate() {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -576,7 +571,7 @@ class PermissionControlFactory extends Factory {
 	}
 
 	function postSave() {
-		$pf = TTnew( 'PermissionFactory' );
+		$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 
 		$clear_cache_user_ids = array_merge( (array)$this->getUser(), (array)$this->tmp_previous_user_ids);
 		foreach( $clear_cache_user_ids as $user_id ) {
@@ -584,9 +579,9 @@ class PermissionControlFactory extends Factory {
 		}
 	}
 
-	//Support setting created_by, updated_by especially for importing data.
-	//Make sure data is set based on the getVariableToFunctionMap order.
 	/**
+	 * Support setting created_by, updated_by especially for importing data.
+	 * Make sure data is set based on the getVariableToFunctionMap order.
 	 * @param $data
 	 * @return bool
 	 */

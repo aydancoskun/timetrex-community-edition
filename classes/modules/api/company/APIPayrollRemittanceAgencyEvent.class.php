@@ -1,8 +1,4 @@
 <?php
-/**
- * $License$
- */
-
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -107,8 +103,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( ( isset( $data['filter_columns'] ) ) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions( 'list_columns' ) ) );
 		}
 
-		/** @var $blf PayrollRemittanceAgencyEventListFactory */
-		$blf = TTnew( 'PayrollRemittanceAgencyEventListFactory' );
+		$blf = TTnew( 'PayrollRemittanceAgencyEventListFactory' ); /** @var PayrollRemittanceAgencyEventListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text( 'Record Count: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $blf->getRecordCount() > 0 ) {
@@ -185,7 +180,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 
 			foreach ( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayrollRemittanceAgencyEventListFactory' );
+				$lf = TTnew( 'PayrollRemittanceAgencyEventListFactory' ); /** @var PayrollRemittanceAgencyEventListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset( $row['id'] ) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -295,7 +290,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 
 			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'PayrollRemittanceAgencyEventListFactory' );
+				$lf = TTnew( 'PayrollRemittanceAgencyEventListFactory' ); /** @var PayrollRemittanceAgencyEventListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -402,45 +397,49 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		/** @var PayrollRemittanceAgencyEventListFactory $praelf */
-		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
+		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory'); /** @var PayrollRemittanceAgencyEventListFactory $praelf */
 		$praelf->getByIdAndCompanyId( $prae_id, $this->getCurrentCompanyObject()->getId() );
 		if ( $praelf->getRecordCount() > 0 ) {
 			$user_obj = $this->getCurrentUserObject();
 			$permission_obj = $this->getPermissionObject();
 
 			$report_obj = $praelf->getCurrent()->getReport( $report_id, $data, $user_obj, $permission_obj );
-			$report_obj->setAMFMessageId( $this->getAMFMessageId() ); //Be sure to pass along the AMFMessageId so progress bars work properly, specifically from the Tax Wizard.
+			if ( is_object( $report_obj ) ) {
+				$report_obj->setAMFMessageId( $this->getAMFMessageId() ); //Be sure to pass along the AMFMessageId so progress bars work properly, specifically from the Tax Wizard.
 
-			$output_arr = $report_obj->getOutput( $report_id );
-			if ( isset( $output_arr['file_name'] ) AND isset( $output_arr['mime_type'] ) AND isset( $output_arr['data'] ) ) {
-				//If using the SOAP API, return data base64 encoded so it can be decoded on the client side.
-				if ( defined( 'TIMETREX_SOAP_API' ) AND TIMETREX_SOAP_API == TRUE ) {
-					$output_arr['data'] = base64_encode( $output_arr['data'] );
+				$output_arr = $report_obj->getOutput( $report_id );
+				if ( isset( $output_arr['file_name'] ) AND isset( $output_arr['mime_type'] ) AND isset( $output_arr['data'] ) ) {
+					//If using the SOAP API, return data base64 encoded so it can be decoded on the client side.
+					if ( defined( 'TIMETREX_SOAP_API' ) AND TIMETREX_SOAP_API == TRUE ) {
+						$output_arr['data'] = base64_encode( $output_arr['data'] );
 
+						$retval = $this->returnHandler( $output_arr );
+					} else {
+						if ( $output_arr['mime_type'] === 'text/html' ) {
+							$retval = $this->returnHandler( $output_arr['data'] );
+						} else {
+							Misc::APIFileDownload( $output_arr['file_name'], $output_arr['mime_type'], $output_arr['data'] );
+
+							return NULL; //Don't send any additional data, so JSON encoding doesn't corrupt the download.
+						}
+					}
+				} elseif ( isset( $output_arr['api_retval'] ) ) { //Pass through validation errors.
+					Debug::Text( 'Report returned VALIDATION error, passing through...', __FILE__, __LINE__, __METHOD__, 10 );
+
+					$retval = $this->returnHandler( $output_arr['api_retval'], $output_arr['api_details']['code'], $output_arr['api_details']['description'] );
+				} elseif ( $output_arr !== FALSE ) {
+					//Likely RAW data, return untouched.
 					$retval = $this->returnHandler( $output_arr );
 				} else {
-					if ( $output_arr['mime_type'] === 'text/html' ) {
-						$retval = $this->returnHandler( $output_arr['data'] );
-					} else {
-						Misc::APIFileDownload( $output_arr['file_name'], $output_arr['mime_type'], $output_arr['data'] );
-
-						return NULL; //Don't send any additional data, so JSON encoding doesn't corrupt the download.
-					}
+					//getOutput() returned FALSE, some error occurred. Likely load too high though.
+					$retval = $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'ERROR: Please try again later or narrow your search criteria to decrease the size of your report' ) . '...' );
 				}
-			} elseif ( isset( $output_arr['api_retval'] ) ) { //Pass through validation errors.
-				Debug::Text( 'Report returned VALIDATION error, passing through...', __FILE__, __LINE__, __METHOD__, 10 );
 
-				$retval = $this->returnHandler( $output_arr['api_retval'], $output_arr['api_details']['code'], $output_arr['api_details']['description'] );
-			} elseif ( $output_arr !== FALSE ) {
-				//Likely RAW data, return untouched.
-				$retval = $this->returnHandler( $output_arr );
+				return $this->returnHandler( $retval ); //This is double wrapped in returnHandler() for some reason
 			} else {
-				//getOutput() returned FALSE, some error occurred. Likely load too high though.
-				$retval = $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'ERROR: Please try again later or narrow your search criteria to decrease the size of your report' ) . '...' );
+				Debug::Text( 'Report likely has VALIDATION error, show to user...', __FILE__, __LINE__, __METHOD__, 10 );
+				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'ERROR: Unable to generate report, likely due to missing or invalid Form Setup' ) . '...' );
 			}
-
-			return $this->returnHandler( $retval ); //This is double wrapped in returnHandler() for some reason
 		}
 
 		return $this->returnHandler( FALSE );
@@ -449,7 +448,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 	/**
 	 * Returns make payment data intended for the tax wizard
 	 * @param $prae_id
-	 * @param $report_id
+	 * @param $action_id
 	 * @param null $data
 	 * @return array|bool
 	 */
@@ -460,8 +459,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		/** @var PayrollRemittanceAgencyEventListFactory $praelf */
-		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
+		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory'); /** @var PayrollRemittanceAgencyEventListFactory $praelf */
 		$praelf->getByIdAndCompanyId( $prae_id, $this->getCurrentCompanyObject()->getId() );
 		if ( $praelf->getRecordCount() == 1 ) {
 			$prae_obj = $praelf->getCurrent();
@@ -477,7 +475,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 	/**
 	 * Submits data to Payment Services for filing and payment.
 	 * @param $prae_id
-	 * @param $report_id
+	 * @param $action_id
 	 * @param null $data
 	 * @return array|bool
 	 */
@@ -488,11 +486,9 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		/** @var PayrollRemittanceAgencyEventListFactory $praelf */
-		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
+		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory'); /** @var PayrollRemittanceAgencyEventListFactory $praelf */
 		$praelf->getByIdAndCompanyId( $prae_id, $this->getCurrentCompanyObject()->getId() );
 		if ( $praelf->getRecordCount() == 1 ) {
-			/** @var $prae_obj PayrollRemittanceAgencyEventFactory */
 			$prae_obj = $praelf->getCurrent();
 
 			if ( $prae_obj->getStatus() == 15 ) { //15=Full Service
@@ -502,13 +498,10 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 				);
 
 				if ( is_object( $prae_obj->getPayrollRemittanceAgencyObject() ) ) {
-					/** @var $pra_obj PayrollRemittanceAgencyFactory */
 					$pra_obj = $prae_obj->getPayrollRemittanceAgencyObject();
 
-					/** @var $rs_obj PayrollRemittanceSourceFactory */
 					$rs_obj = $pra_obj->getRemittanceSourceAccountObject();
 
-					/** @var LegalEntityFactory $le_obj */
 					$le_obj = $rs_obj->getLegalEntityObject();
 
 					if ( $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 ) { //3000=EFT/ACH, 5=TimeTrex EFT
@@ -519,7 +512,6 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 
 							$pra_user_obj = $pra_obj->getContactUserObject();
 
-							/** @var $report_obj Report */
 							$report_obj = $prae_obj->getReport( 'raw', NULL, $pra_user_obj, new Permission() );
 							//$report_obj = $prae_obj->getReport( '123456', NULL, $pra_user_obj, new Permission() ); //Test with generic TaxSummaryReport
 
@@ -603,7 +595,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 
 	/**
 	 * @param $data
-	 * @return array
+	 * @return array|bool
 	 */
 	function calculateNextRunDate( $data ) {
 		$praef = new PayrollRemittanceAgencyEventFactory();
@@ -620,6 +612,8 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 					'next_reminder_date' => TTDate::getDate( 'DATE+TIME', $next_reminder_date ),
 			);
 		}
+
+		return FALSE;
 	}
 }
 

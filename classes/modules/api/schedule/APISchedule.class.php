@@ -110,7 +110,7 @@ class APISchedule extends APIFactory {
 				'end_date' => $last_date_stamp,
 		);
 
-		$sf = TTNew('ScheduleFactory');
+		$sf = TTNew('ScheduleFactory'); /** @var ScheduleFactory $sf */
 		$schedule_arr = $sf->getScheduleArray( $filter_data );
 		if ( !is_array( $schedule_arr ) OR count( $schedule_arr ) == 0 ) { //If no data was returned, try to look back further.
 			$filter_data['start_date'] = TTDate::getBeginWeekEpoch( ( TTDate::getMiddleDayEpoch($first_date_stamp) - (86400 * 7) ) );
@@ -140,7 +140,7 @@ class APISchedule extends APIFactory {
 	function getScheduleDates( $base_date, $type, $strict = TRUE ) {
 		$epoch = TTDate::parseDateTime( $base_date );
 
-		if ( $epoch == '' ) {
+		if ( $epoch == '' OR $epoch < 946728000 OR $epoch > ( time() + ( 3650 * 86400 ) ) ) { //Make sure date is after 01-Jan-2000 and before 10 years in the future.
 			$epoch = TTDate::getTime();
 		}
 
@@ -250,7 +250,7 @@ class APISchedule extends APIFactory {
 
 		$data = $this->initializeFilterAndPager( $data );
 
-		$sf = TTnew( 'ScheduleFactory' );
+		$sf = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
 
 		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $sf->setQueryStatementTimeout( 1200000 ); }
 
@@ -278,7 +278,7 @@ class APISchedule extends APIFactory {
 			//Get holiday data.
 			//
 			$holiday_data = array();
-			$hlf = TTnew( 'HolidayListFactory' );
+			$hlf = TTnew( 'HolidayListFactory' ); /** @var HolidayListFactory $hlf */
 			$hlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), array( 'start_date' => $schedule_dates['start_date'], 'end_date' => $schedule_dates['end_date'] ), $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 			Debug::Text('Holiday Record Count: '. $hlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $hlf->getRecordCount() > 0 ) {
@@ -319,7 +319,7 @@ class APISchedule extends APIFactory {
 		//if ( count($data['filter_data']) == 0 ) {
 		if ( !isset($data['filter_data']['id']) AND !isset($data['filter_data']['pay_period_ids']) AND !isset($data['filter_data']['pay_period_id']) AND ( !isset($data['filter_data']['start_date']) AND !isset($data['filter_data']['end_date']) ) ) {
 			Debug::Text('Adding default filter data...', __FILE__, __LINE__, __METHOD__, 10);
-			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			$pplf->getByCompanyId( $this->getCurrentCompanyObject()->getId() );
 			$pay_period_ids = array_keys((array)$pplf->getArrayByListFactory( $pplf, FALSE, FALSE ) );
 			if ( isset($pay_period_ids[0]) AND isset($pay_period_ids[1]) ) {
@@ -339,7 +339,7 @@ class APISchedule extends APIFactory {
 			$data['filter_data']['permission_children_ids'][] = TTUUID::getZeroID();
 		}
 
-		$blf = TTnew( 'ScheduleListFactory' );
+		$blf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $blf */
 		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $blf->setQueryStatementTimeout( 60000 ); }
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -416,7 +416,6 @@ class APISchedule extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-
 		if ( $validate_only == TRUE ) {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
 			$permission_children_ids = FALSE;
@@ -440,91 +439,101 @@ class APISchedule extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $row ) {
-				$primary_validator = new Validator();
-				$lf = TTnew( 'ScheduleListFactory' );
-				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] != '' AND $row['id'] != TTUUID::getZeroID() AND $row['id'] != TTUUID::getNotExistID() ) {
-					//Modifying existing object.
-					//Get schedule object, so we can only modify just changed data for specific records if needed.
-					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
-					if ( $lf->getRecordCount() == 1 ) {
-						//Object exists, check edit permissions
-						if (
-							$validate_only == TRUE
-							OR
-								(
-								$this->getPermissionObject()->Check('schedule', 'edit')
-									OR ( $this->getPermissionObject()->Check('schedule', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('schedule', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
-								) ) {
+				$transaction_function = function() use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $permission_children_ids ) {
+					$primary_validator = new Validator();
 
-							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
-							$lf = $lf->getCurrent();
-							$row = array_merge( $lf->getObjectAsArray(), $row );
+					$lf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $lf */
+					if ( $validate_only	== FALSE ) { //Only switch into serializable mode when actually saving the record.
+						$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing duplicate user records or duplicate employee number/user_names.
+					}
+					$lf->StartTransaction();
+
+					if ( isset( $row['id'] ) AND $row['id'] != '' AND $row['id'] != TTUUID::getZeroID() AND $row['id'] != TTUUID::getNotExistID() ) {
+						//Modifying existing object.
+						//Get schedule object, so we can only modify just changed data for specific records if needed.
+						$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
+						if ( $lf->getRecordCount() == 1 ) {
+							//Object exists, check edit permissions
+							if (
+									$validate_only == TRUE
+									OR
+									(
+											$this->getPermissionObject()->Check( 'schedule', 'edit' )
+											OR ( $this->getPermissionObject()->Check( 'schedule', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+											OR ( $this->getPermissionObject()->Check( 'schedule', 'edit_child' ) AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
+									) ) {
+
+								Debug::Text( 'Row Exists, getting current data for ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
+								$lf = $lf->getCurrent();
+								$row = array_merge( $lf->getObjectAsArray(), $row );
+							} else {
+								$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Edit permission denied' ) );
+							}
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
+							//Object doesn't exist.
+							$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
 						}
 					} else {
-						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
-					}
-				} else {
-					//Adding new object, check ADD permissions.
-					if (	!( $validate_only == TRUE
+						//Adding new object, check ADD permissions.
+						if ( !( $validate_only == TRUE
 								OR
-								( $this->getPermissionObject()->Check('schedule', 'add')
-									AND
-									(
-										$this->getPermissionObject()->Check('schedule', 'edit')
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('schedule', 'edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('schedule', 'edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('schedule', 'view_open') AND TTUUID::castUUID($row['user_id']) == TTUUID::getZeroID() )
-									)
+								( $this->getPermissionObject()->Check( 'schedule', 'add' )
+										AND
+										(
+												$this->getPermissionObject()->Check( 'schedule', 'edit' )
+												OR ( isset( $row['user_id'] ) AND $this->getPermissionObject()->Check( 'schedule', 'edit_own' ) AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+												OR ( isset( $row['user_id'] ) AND $this->getPermissionObject()->Check( 'schedule', 'edit_child' ) AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+												OR ( isset( $row['user_id'] ) AND $this->getPermissionObject()->Check( 'schedule', 'view_open' ) AND TTUUID::castUUID( $row['user_id'] ) == TTUUID::getZeroID() )
+										)
 								)
-							) ) {
-						$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Add permission denied') );
-					}
-					$row['id'] = $this->getNextInsertID();
-				}
-				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-				$is_valid = $primary_validator->isValid( $ignore_warning );
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-
-					$row['company_id'] = $this->getCurrentCompanyObject()->getId();	 //This prevents a validation error if company_id is FALSE.
-					$lf->setObjectFromArray( $row );
-
-					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
-
-					$lf->Validator->setValidateOnly( $validate_only );
-
-					$is_valid = $lf->isValid( $ignore_warning );
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
-						$lf->setEnableTimeSheetVerificationCheck(TRUE); //Unverify timesheet if its already verified.
-						$lf->setEnableReCalculateDay(TRUE); //Need to recalculate absence time when editing a schedule, in case schedule policy changed.
-
-						if ( $validate_only == TRUE ) {
-							$save_result[$key] = TRUE;
-						} else {
-							$save_result[$key] = $lf->Save( TRUE, TRUE );
+						) ) {
+							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Add permission denied' ) );
 						}
-						$validator_stats['valid_records']++;
+						$row['id'] = $this->getNextInsertID();
 					}
-				}
+					Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+					$is_valid = $primary_validator->isValid( $ignore_warning );
+					if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 
-					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
+						$row['company_id'] = $this->getCurrentCompanyObject()->getId();     //This prevents a validation error if company_id is FALSE.
+						$lf->setObjectFromArray( $row );
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
-				} elseif ( $validate_only == TRUE ) {
-					$lf->FailTransaction();
-				}
+						Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 
+						$lf->Validator->setValidateOnly( $validate_only );
 
-				$lf->CommitTransaction();
+						$is_valid = $lf->isValid( $ignore_warning );
+						if ( $is_valid == TRUE ) {
+							Debug::Text( 'Saving data...', __FILE__, __LINE__, __METHOD__, 10 );
+							$lf->setEnableTimeSheetVerificationCheck( TRUE ); //Unverify timesheet if its already verified.
+							$lf->setEnableReCalculateDay( TRUE ); //Need to recalculate absence time when editing a schedule, in case schedule policy changed.
+
+							if ( $validate_only == TRUE ) {
+								$save_result[ $key ] = TRUE;
+							} else {
+								$save_result[ $key ] = $lf->Save( TRUE, TRUE );
+							}
+							$validator_stats['valid_records']++;
+						}
+					}
+
+					if ( $is_valid == FALSE ) {
+						Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
+						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
+
+						$validator[ $key ] = $this->setValidationArray( $primary_validator, $lf );
+					} elseif ( $validate_only == TRUE ) {
+						$lf->FailTransaction();
+					}
+
+					$lf->CommitTransaction();
+					$lf->setTransactionMode(); //Back to default isolation level.
+
+					return array( $validator, $validator_stats, $key, $save_result );
+				};
+
+				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
@@ -573,58 +582,66 @@ class APISchedule extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $id ) {
-				$primary_validator = new Validator();
-				$lf = TTnew( 'ScheduleListFactory' );
-				$lf->StartTransaction();
-				if ( $id != '' ) {
-					//Modifying existing object.
-					//Get schedule object, so we can only modify just changed data for specific records if needed.
-					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
-					if ( $lf->getRecordCount() == 1 ) {
-						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('schedule', 'delete')
-								OR ( $this->getPermissionObject()->Check('schedule', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-								OR ( $this->getPermissionObject()->Check('schedule', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )) {
-							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-							$lf = $lf->getCurrent();
+				$transaction_function = function() use ( $data, $validator_stats, $validator, $save_result, $key, $id, $permission_children_ids ) {
+					$primary_validator = new Validator();
+					$lf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $lf */
+					$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing incorrect calculations in user_date_total table.
+					$lf->StartTransaction();
+					if ( $id != '' ) {
+						//Modifying existing object.
+						//Get schedule object, so we can only modify just changed data for specific records if needed.
+						$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
+						if ( $lf->getRecordCount() == 1 ) {
+							//Object exists, check edit permissions
+							if ( $this->getPermissionObject()->Check( 'schedule', 'delete' )
+									OR ( $this->getPermissionObject()->Check( 'schedule', 'delete_own' ) AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check( 'schedule', 'delete_child' ) AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE ) ) {
+								Debug::Text( 'Record Exists, deleting record ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
+								$lf = $lf->getCurrent();
+							} else {
+								$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Delete permission denied' ) );
+							}
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
+							//Object doesn't exist.
+							$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 						}
 					} else {
-						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 					}
-				} else {
-					$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
-				}
 
-				//Debug::Arr($lf, 'AData: ', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::Arr($lf, 'AData: ', __FILE__, __LINE__, __METHOD__, 10);
 
-				$is_valid = $primary_validator->isValid();
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10);
-					Debug::Arr($lf->data, 'Current Data: ', __FILE__, __LINE__, __METHOD__, 10);
-					$lf->setDeleted(TRUE);
+					$is_valid = $primary_validator->isValid();
+					if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
+						Debug::Text( 'Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10 );
+						Debug::Arr( $lf->data, 'Current Data: ', __FILE__, __LINE__, __METHOD__, 10 );
+						$lf->setDeleted( TRUE );
 
-					$is_valid = $lf->isValid();
-					if ( $is_valid == TRUE ) {
-						$lf->setEnableReCalculateDay(TRUE); //Need to remove absence time when deleting a schedule.
+						$is_valid = $lf->isValid();
+						if ( $is_valid == TRUE ) {
+							$lf->setEnableReCalculateDay( TRUE ); //Need to remove absence time when deleting a schedule.
 
-						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
-						$save_result[$key] = $lf->Save();
-						$validator_stats['valid_records']++;
+							Debug::Text( 'Record Deleted...', __FILE__, __LINE__, __METHOD__, 10 );
+							$save_result[ $key ] = $lf->Save();
+							$validator_stats['valid_records']++;
+						}
 					}
-				}
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+					if ( $is_valid == FALSE ) {
+						Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
-					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
+						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
-				}
+						$validator[ $key ] = $this->setValidationArray( $primary_validator, $lf );
+					}
 
-				$lf->CommitTransaction();
+					$lf->CommitTransaction();
+					$lf->setTransactionMode(); //Back to default isolation level.
+
+					return array( $validator, $validator_stats, $key, $save_result );
+				};
+
+				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
@@ -656,7 +673,7 @@ class APISchedule extends APIFactory {
 			return FALSE;
 		}
 
-		$sf = TTnew( 'ScheduleFactory' );
+		$sf = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
 
 		//This helps calculate the schedule total time based on schedule policy or policy groups.
 		$sf->setCompany( $this->getCurrentCompanyObject()->getId() );
@@ -747,7 +764,7 @@ class APISchedule extends APIFactory {
 	/**
 	 * Creates punches from an array of scheduled shift ids.
 	 *
-	 * @param array $schedule_arr should have 2 sub arrays of integer ids, one labeled 'schedule', one labeled 'recurring'
+	 * @param array $schedule_arr should have 2 sub arrays of ids, one labeled 'schedule', one labeled 'recurring'
 	 * @return array|bool
 	 */
 	function addPunchesFromScheduledShifts( $schedule_arr ) {
@@ -767,7 +784,7 @@ class APISchedule extends APIFactory {
 
 			if ( isset( $schedule_arr['recurring'] ) AND is_array( $schedule_arr['recurring'] ) AND count( $schedule_arr['recurring'] ) > 0 ) {
 				$data['filter_data']['id'] = $schedule_arr['recurring'];
-				$rslf = TTnew( 'RecurringScheduleListFactory' );
+				$rslf = TTnew( 'RecurringScheduleListFactory' ); /** @var RecurringScheduleListFactory $rslf */
 				$rslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'] );
 
 				if ( $rslf->getRecordCount() > 0 ) {
@@ -777,9 +794,11 @@ class APISchedule extends APIFactory {
 										OR ( $this->getPermissionObject()->Check( 'punch', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $rs_obj->getCurrent()->getCreatedBy(), $rs_obj->getCurrent()->getUser() ) === TRUE )
 										OR ( $this->getPermissionObject()->Check( 'punch', 'edit_child' ) AND $this->getPermissionObject()->isChild( $rs_obj->getCurrent()->getUser(), $data['filter_data']['permission_children_ids'] ) === TRUE ) )
 						) {
-							$result = ScheduleFactory::addPunchFromScheduleObject( $rs_obj );
+							$sf = TTnew('ScheduleFactory'); /** @var ScheduleFactory $sf */
+							$result = $sf->addPunchFromScheduleObject( $rs_obj );
+							unset($sf);
 
-							//don't try to punch open schedules.
+							//Don't try to punch open schedules.
 							if ( $rs_obj->getUserObject() == FALSE ) {
 								UserGenericStatusFactory::queueGenericStatus(  TTi18n::gettext('OPEN'), 10, TTi18n::gettext( 'Unable to auto-punch OPEN scheduled shift.' ).'...' );
 							} else {
@@ -805,7 +824,7 @@ class APISchedule extends APIFactory {
 
 			if ( isset( $schedule_arr['schedule'] ) AND is_array( $schedule_arr['schedule'] ) AND count( $schedule_arr['schedule'] ) > 0 ) {
 				$data['filter_data']['id'] = $schedule_arr['schedule'];
-				$slf = TTnew( 'ScheduleListFactory' );
+				$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
 				$slf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'] );
 
 				if ( $slf->getRecordCount() > 0 ) {
@@ -815,7 +834,7 @@ class APISchedule extends APIFactory {
 										OR ( $this->getPermissionObject()->Check( 'punch', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $s_obj->getCurrent()->getCreatedBy(), $s_obj->getCurrent()->getUser() ) === TRUE )
 										OR ( $this->getPermissionObject()->Check( 'punch', 'edit_child' ) AND $this->getPermissionObject()->isChild( $s_obj->getCurrent()->getUser(), $data['filter_data']['permission_children_ids'] ) === TRUE ) )
 						) {
-							$result = ScheduleFactory::addPunchFromScheduleObject( $s_obj );
+							$result = $s_obj->addPunchFromScheduleObject( $s_obj );
 
 							//don't try to punch open schedules.
 							if ( $s_obj->getUserObject() == FALSE ) {
@@ -842,7 +861,7 @@ class APISchedule extends APIFactory {
 			unset( $data );
 
 			if ( UserGenericStatusFactory::isStaticQueue() == TRUE ) {
-				$ugsf = TTnew( 'UserGenericStatusFactory' );
+				$ugsf = TTnew( 'UserGenericStatusFactory' ); /** @var UserGenericStatusFactory $ugsf */
 				$ugsf->setUser( $this->getCurrentUserObject()->getId() );
 				$ugsf->setBatchID( $ugsf->getNextBatchId() );
 				$ugsf->setQueue( UserGenericStatusFactory::getStaticQueue() );

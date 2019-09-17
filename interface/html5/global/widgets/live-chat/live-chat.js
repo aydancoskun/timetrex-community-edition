@@ -66,16 +66,19 @@ if ( current_company && current_user ) {
 		domain: 'timetrex.com'
 	};
 
-	(function() {
-		var po = document.createElement( 'script' );
-		po.type = 'text/javascript';
-		po.async = true;
-		var refferer = (document.referrer) ? encodeURIComponent( document.referrer.substr( document.referrer.indexOf( '://' ) + 1 ) ) : '';
-		var location = (document.location) ? encodeURIComponent( window.location.href.substring( window.location.protocol.length ) ) : '';
-		po.src = 'https://chat.timetrex.com/index.php/chat/getstatus/(click)/internal/(position)/api/(ma)/br/(dot)/true/(top)/350/(units)/pixels/(leaveamessage)/true/(department)/2/(disable_pro_active)/true?r=' + refferer + '&l=' + location + '&ttr=' + new Date().getTime();
-		po.crossOrigin = 'anonymous';
-		var s = document.getElementsByTagName( 'script' )[0];
-		s.parentNode.insertBefore( po, s );
-	})();
-
+	//Only make a call to load the chat service JS when the chat button is actually clicked. This should help reduce the chance of JS errors occurring for users who never use the chat.
+	function openSupportChat() {
+		(function() {
+			var po = document.createElement( 'script' );
+			po.type = 'text/javascript';
+			po.async = true;
+			var refferer = (document.referrer) ? encodeURIComponent( document.referrer.substr( document.referrer.indexOf( '://' ) + 1 ) ) : '';
+			var location = (document.location) ? encodeURIComponent( window.location.href.substring( window.location.protocol.length ) ) : '';
+			po.src = 'https://chat.timetrex.com/index.php/chat/getstatus/(click)/internal/(position)/api/(ma)/br/(dot)/true/(units)/pixels/(leaveamessage)/true/(department)/2/(disable_pro_active)/true?r=' + refferer + '&l=' + location + '&ttr=' + new Date().getTime();
+			po.crossOrigin = 'anonymous';
+			po.onload = function() { return lh_inst.lh_openchatWindow(); }; //Wait for script to load before popping up chat box.
+			var s = document.getElementsByTagName( 'script' )[0];
+			s.parentNode.insertBefore( po, s );
+		})();
+	}
 }

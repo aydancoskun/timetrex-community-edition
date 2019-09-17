@@ -56,21 +56,21 @@ class InstallSchema_1054A extends InstallSchema_Base {
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Update Social Security rates. Can't do this in the 1020T as that is executed before 1031A, which will cause an error due to missing columns.
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj ) {
 				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 				if ( $c_obj->getStatus() != 30 AND $c_obj->getCountry() == 'US' ) {
 					//Get PayStub Link accounts
-					$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+					$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 					$pseallf->getByCompanyId( $c_obj->getID() );
 					if	( $pseallf->getRecordCount() > 0 ) {
 						$psea_obj = $pseallf->getCurrent();
 					} else {
 
 						// @codingStandardsIgnoreStart
-						Debug::text('Failed getting PayStubEntryLink for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Failed getting PayStubEntryLink for Company ID: '. $c_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 						//leaving debugs alone.
 						// @codingStandardsIgnoreEnd
 						continue;
@@ -79,19 +79,19 @@ class InstallSchema_1054A extends InstallSchema_Base {
 					$include_pay_stub_accounts = FALSE;
 					$exclude_pay_stub_accounts = FALSE;
 
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Medicare - Employee' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();
 						Debug::text('Found Medicare Employee Tax / Deduction, ID: '. $c_obj->getID(), __FILE__, __LINE__, __METHOD__, 9);
 						if ( $cd_obj->getCalculation() == 10 ) {
 							//Copy filing status from Federal Income Tax.
-							$cdlf = TTnew( 'CompanyDeductionListFactory' );
+							$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 							$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Federal Income Tax' );
 							if ( $cdlf->getRecordCount() == 1 ) {
 								$tmp_cd_obj = $cdlf->getCurrent();
 							} else {
-								$cdlf = TTnew( 'CompanyDeductionListFactory' );
+								$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 								$cdlf->getByCompanyIdAndName($c_obj->getID(), 'US - Federal Income Tax' );
 								if ( $cdlf->getRecordCount() == 1 ) {
 									$tmp_cd_obj = $cdlf->getCurrent();
@@ -100,7 +100,7 @@ class InstallSchema_1054A extends InstallSchema_Base {
 
 							$filing_status = array();
 							if ( is_object($tmp_cd_obj) ) {
-								$udlf = TTnew( 'UserDeductionListFactory' );
+								$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 								$udlf->getByCompanyIdAndCompanyDeductionId( $c_obj->getID(), $tmp_cd_obj->getID() );
 								if ( $udlf->getRecordCount() > 0 ) {
 									foreach( $udlf as $ud_obj ) {
@@ -120,7 +120,7 @@ class InstallSchema_1054A extends InstallSchema_Base {
 
 							if ( $cd_obj->isValid() ) {
 								//Delete existing UserDeduction rows, so we can create new ones.
-								$udlf = TTnew( 'UserDeductionListFactory' );
+								$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 								$udlf->getByCompanyIdAndCompanyDeductionId( $c_obj->getID(), $cd_obj->getID() );
 								if ( $udlf->getRecordCount() > 0 ) {
 									Debug::text('Deleting '. $udlf->getRecordCount() .' User Deductions assigned to Company Deduction ID: '. $cd_obj->getID(), __FILE__, __LINE__, __METHOD__, 9);
@@ -148,7 +148,7 @@ class InstallSchema_1054A extends InstallSchema_Base {
 					}
 					unset($cdlf, $cd_obj);
 
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Medicare - Employer' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();
@@ -171,7 +171,7 @@ class InstallSchema_1054A extends InstallSchema_Base {
 					}
 					unset($cdlf, $cd_obj);
 
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Social Security - Employee' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();
@@ -194,7 +194,7 @@ class InstallSchema_1054A extends InstallSchema_Base {
 					}
 					unset($cdlf, $cd_obj);
 
-					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Social Security - Employer' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();

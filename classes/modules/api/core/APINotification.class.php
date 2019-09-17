@@ -53,7 +53,7 @@ class APINotification extends APIFactory {
 	/**
 	 * Returns array of notifications message to be displayed to the user.
 	 * @param bool|string $action Action that is being performed, possible values: 'login', 'preference', 'notification', 'pay_period'
-	 * @return array
+	 * @return array|bool
 	 */
 	function getNotifications( $action = FALSE ) {
 		global $config_vars, $disable_database_connection;
@@ -274,7 +274,7 @@ class APINotification extends APIFactory {
 
 				//Check if any pay periods are past their transaction date and not closed.
 				if ( DEMO_MODE == FALSE AND $this->getPermissionObject()->Check('pay_period_schedule', 'enabled') AND $this->getPermissionObject()->Check('pay_period_schedule', 'view') ) {
-					$pplf = TTnew('PayPeriodListFactory');
+					$pplf = TTnew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 					$pplf->getByCompanyIdAndStatusAndTransactionDate( $this->getCurrentCompanyObject()->getId(), array(10, 12, 30), TTDate::getBeginDayEpoch( time() ) ); //Open or Locked or Post Adjustment pay periods.
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach( $pplf as $pp_obj ) {
@@ -292,21 +292,23 @@ class APINotification extends APIFactory {
 					unset($pplf, $pp_obj);
 				}
 
-				//CHeck for unread messages
-				$mclf = new MessageControlListFactory();
-				$unread_messages = $mclf->getNewMessagesByCompanyIdAndUserId( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId() );
-				Debug::text('UnRead Messages: '. $unread_messages, __FILE__, __LINE__, __METHOD__, 10);
-				if ( $unread_messages > 0 ) {
-					$retarr[] = array(
-										'delay' => 25,
-										'bg_color' => '#FFFF00', //Yellow
-										'message' => TTi18n::getText('NOTICE: You have %1 new message(s) waiting, click here to read them now.', $unread_messages ),
-										'destination' => array('menu_name' => 'Messages'),
-										);
+				if ( $this->getPermissionObject()->Check('message', 'enabled') AND ( $this->getPermissionObject()->Check('message', 'view') OR $this->getPermissionObject()->Check('message', 'view_own') ) ) {
+					//Check for unread messages
+					$mclf = new MessageControlListFactory();
+					$unread_messages = $mclf->getNewMessagesByCompanyIdAndUserId( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId() );
+					Debug::text( 'UnRead Messages: ' . $unread_messages, __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $unread_messages > 0 ) {
+						$retarr[] = array(
+								'delay'       => 25,
+								'bg_color'    => '#FFFF00', //Yellow
+								'message'     => TTi18n::getText( 'NOTICE: You have %1 new message(s) waiting, click here to read them now.', $unread_messages ),
+								'destination' => array('menu_name' => 'Messages'),
+						);
+					}
+					unset( $mclf, $unread_messages );
 				}
-				unset($mclf, $unread_messages);
 
-				if ( DEMO_MODE == FALSE ) {
+				if ( DEMO_MODE == FALSE AND ( $this->getPermissionObject()->Check('punch', 'enabled') AND ( $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'punch_in_out') ) ) ) { //Exceptions are only viewable if they permissions to punch in/out.
 					$elf = new ExceptionListFactory();
 					$elf->getFlaggedExceptionsByUserIdAndPayPeriodStatus( $this->getCurrentUserObject()->getId(), 10 );
 					$display_exception_flag = FALSE;

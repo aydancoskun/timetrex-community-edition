@@ -51,7 +51,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 		if ( is_object($this->company_obj) ) {
 			return $this->company_obj;
 		} else {
-			$clf = TTnew( 'CompanyListFactory' );
+			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->company_obj = $clf->getById( $this->getCompany() )->getCurrent();
 
 			return $this->company_obj;
@@ -260,7 +260,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 		$value = TTUUID::castUUID( $value );
 
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+		$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 		return $this->setGenericDataValue( 'monthly_advance_deduction', $value );
 	}
 
@@ -284,7 +284,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
@@ -297,49 +297,49 @@ class PayStubEntryAccountLinkFactory extends Factory {
 		}
 		// Pay Stub Account
 		if ( $this->getTotalGross() != TTUUID::getZeroID() ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->Validator->isResultSetWithRows(	'total_gross',
 															$psealf->getByID($this->getTotalGross()),
 															TTi18n::gettext('Pay Stub Account is invalid')
 														);
 		}
 		if ( $this->getTotalEmployeeDeduction() != TTUUID::getZeroID() ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->Validator->isResultSetWithRows(	'total_employee_deduction',
 															$psealf->getByID($this->getTotalEmployeeDeduction()),
 															TTi18n::gettext('Pay Stub Account is invalid')
 														);
 		}
 		if ( $this->getTotalEmployerDeduction() != TTUUID::getZeroID() ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->Validator->isResultSetWithRows(	'total_employer_deduction',
 															$psealf->getByID($this->getTotalEmployerDeduction()),
 															TTi18n::gettext('Pay Stub Account is invalid')
 														);
 		}
 		if ( $this->getTotalNetPay() != TTUUID::getZeroID() ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->Validator->isResultSetWithRows(	'total_net_pay',
 															$psealf->getByID($this->getTotalNetPay()),
 															TTi18n::gettext('Pay Stub Account is invalid')
 														);
 		}
 		if ( $this->getRegularTime() != TTUUID::getZeroID() ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->Validator->isResultSetWithRows(	'regular_time',
 															$psealf->getByID($this->getRegularTime()),
 															TTi18n::gettext('Pay Stub Account is invalid')
 														);
 		}
 		if ( $this->getEmployeeCPP() !== FALSE AND $this->getEmployeeCPP() != TTUUID::getZeroID() ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->Validator->isResultSetWithRows(	'employee_cpp',
 															$psealf->getByID($this->getEmployeeCPP()),
 															TTi18n::gettext('Pay Stub Account is invalid')
 														);
 		}
 		if ( $this->getEmployeeEI() !== FALSE AND $this->getEmployeeEI() != TTUUID::getZeroID() ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->Validator->isResultSetWithRows(	'employee_ei',
 															$psealf->getByID($this->getEmployeeEI()),
 															TTi18n::gettext('Pay Stub Account is invalid')

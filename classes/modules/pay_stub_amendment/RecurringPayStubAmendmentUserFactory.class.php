@@ -51,7 +51,7 @@ class RecurringPayStubAmendmentUserFactory extends Factory {
 		if ( is_object($this->user_obj) ) {
 			return $this->user_obj;
 		} else {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
@@ -102,7 +102,7 @@ class RecurringPayStubAmendmentUserFactory extends Factory {
 		//
 		// Recurring PS Amendment
 		if ( $this->getRecurringPayStubAmendment() == TTUUID::getZeroID() ) {
-			$rpsalf = TTnew( 'RecurringPayStubAmendmentListFactory' );
+			$rpsalf = TTnew( 'RecurringPayStubAmendmentListFactory' ); /** @var RecurringPayStubAmendmentListFactory $rpsalf */
 			$this->Validator->isResultSetWithRows(	'recurring_ps_amendment',
 															$rpsalf->getByID($this->getRecurringPayStubAmendment()),
 															TTi18n::gettext('Recurring PS Amendment is invalid')
@@ -110,7 +110,7 @@ class RecurringPayStubAmendmentUserFactory extends Factory {
 		}
 		// User
 		if ( $this->getUser() != -1 ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('User is invalid')

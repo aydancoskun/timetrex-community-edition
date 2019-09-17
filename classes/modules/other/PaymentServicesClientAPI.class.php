@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class PaymentServicesClientAPI
+ */
 class PaymentServicesClientAPI {
 	protected $url = 'https://paymentservices.timetrex.com/api/soap/api.php';
 
@@ -19,8 +22,10 @@ class PaymentServicesClientAPI {
 	/**
 	 * PaymentServicesClientAPI constructor.
 	 * @param null $class
+	 * @param null $user_name
+	 * @param null $password
 	 * @param null $url
-	 * @param string $session_id UUID
+	 * @param null $cookies
 	 */
 	function __construct( $class = NULL, $user_name = NULL, $password = NULL, $url = NULL, $cookies = NULL ) {
 		global $PAYMENTSERVICES_URL, $PAYMENTSERVICES_COOKIES, $PAYMENTSERVICES_USER, $PAYMENTSERVICES_PASSWORD;

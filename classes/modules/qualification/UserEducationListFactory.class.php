@@ -55,7 +55,7 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query, NULL, $limit, $page);
+		$this->rs = $this->ExecuteSQL($query, NULL, $limit, $page);
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL($query, $ph);
+			$this->rs = $this->ExecuteSQL($query, $ph);
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -114,7 +114,7 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -152,7 +152,7 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -183,7 +183,7 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -216,7 +216,7 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL($query, $ph);
+			$this->rs = $this->ExecuteSQL($query, $ph);
 
 			$this->saveCache($this->rs, $id.$user_id);
 		}
@@ -252,7 +252,7 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL($query, $ph);
+			$this->rs = $this->ExecuteSQL($query, $ph);
 
 			$this->saveCache($this->rs, $user_id.$qualification_id);
 		}
@@ -270,7 +270,6 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 	 * @return bool|UserEducationListFactory
 	 */
 	function  getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -423,10 +422,11 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 252, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.start_date', $filter_data['start_date'], 'date_range', $ph ) : NULL;
-
 		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.end_date', $filter_data['end_date'], 'date_range', $ph ) : NULL;
-
 		$query .= ( isset($filter_data['graduate_date']) ) ? $this->getWhereClauseSQL( 'a.graduate_date', $filter_data['graduate_date'], 'date_range', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['education_graduate_start_date']) ) ? $this->getWhereClauseSQL( 'a.graduate_date', $filter_data['education_graduate_start_date'], 'start_date', $ph ) : NULL;
+		$query .= ( isset($filter_data['education_graduate_end_date']) ) ? $this->getWhereClauseSQL( 'a.graduate_date', $filter_data['education_graduate_end_date'], 'end_date', $ph ) : NULL;
 
 		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );
@@ -450,7 +450,8 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->ExecuteSQL($query, $ph, $limit, $page);
+		//Debug::Arr($ph, 'Query: '.$query, __FILE__, __LINE__, __METHOD__, 10);
+		$this->rs = $this->ExecuteSQL($query, $ph, $limit, $page);
 
 		return $this;
 	}

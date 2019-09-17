@@ -97,7 +97,7 @@ class PayStubAmendmentFactory extends Factory {
 			case 'export_type':
 			case 'export_eft':
 			case 'export_cheque':
-				$psf = TTNew('PayStubFactory');
+				$psf = TTNew('PayStubFactory'); /** @var PayStubFactory $psf */
 				$retval = $psf->getOptions( $name );
 				break;
 			case 'columns':
@@ -212,7 +212,7 @@ class PayStubAmendmentFactory extends Factory {
 		if ( is_object($this->pay_stub_obj) ) {
 			return $this->pay_stub_obj;
 		} else {
-			$pslf = TTnew( 'PayStubListFactory' );
+			$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 			$pslf->getByUserIdAndPayStubAmendmentId( $this->getUser(), $this->getID() );
 			if ( $pslf->getRecordCount() > 0 ) {
 				$this->pay_stub_obj = $pslf->getCurrent();
@@ -230,7 +230,7 @@ class PayStubAmendmentFactory extends Factory {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
 		} else {
-			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 			$pseallf->getByCompanyID( $this->getUserObject()->getCompany() );
 			if ( $pseallf->getRecordCount() > 0 ) {
 				$this->pay_stub_entry_account_link_obj = $pseallf->getCurrent();
@@ -248,7 +248,7 @@ class PayStubAmendmentFactory extends Factory {
 		if ( is_object($this->pay_stub_entry_name_obj) ) {
 			return $this->pay_stub_entry_name_obj;
 		} else {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$psealf->getByID( $this->getPayStubEntryNameId() );
 			if ( $psealf->getRecordCount() > 0 ) {
 				$this->pay_stub_entry_name_obj = $psealf->getCurrent();
@@ -266,7 +266,7 @@ class PayStubAmendmentFactory extends Factory {
 		if ( is_object($this->percent_amount_entry_name_obj) ) {
 			return $this->percent_amount_entry_name_obj;
 		} else {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$psealf->getByID( $this->getPercentAmountEntryNameId() );
 			if ( $psealf->getRecordCount() > 0 ) {
 				$this->percent_amount_entry_name_obj = $psealf->getCurrent();
@@ -301,7 +301,7 @@ class PayStubAmendmentFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param $value
 	 * @return bool
 	 */
 	function setPayStubEntryNameId( $value ) {
@@ -318,7 +318,7 @@ class PayStubAmendmentFactory extends Factory {
 	function setName( $name) {
 		$name = trim($name);
 
-		$psenlf = TTnew( 'PayStubEntryNameListFactory' );
+		$psenlf = TTnew( 'PayStubEntryNameListFactory' ); /** @var PayStubEntryNameListFactory $psenlf */
 		$result = $psenlf->getByName($name);
 
 		if (  $this->Validator->isResultSetWithRows(	'name',
@@ -348,7 +348,7 @@ class PayStubAmendmentFactory extends Factory {
 	function setRecurringPayStubAmendmentId( $value) {
 		$value = TTUUID::castUUID( $value );
 
-		$rpsalf = TTnew( 'RecurringPayStubAmendmentListFactory' );
+		$rpsalf = TTnew( 'RecurringPayStubAmendmentListFactory' ); /** @var RecurringPayStubAmendmentListFactory $rpsalf */
 		$rpsalf->getById( $value );
 		//Not sure why we tried to use $result here, as if the ID passed is NULL, it causes a fatal error.
 		//$result = $rpsalf->getById( $id )->getCurrent();
@@ -477,13 +477,13 @@ class PayStubAmendmentFactory extends Factory {
 	 */
 	function getPayStubId() {
 		//Find which pay period this effective date belongs too
-		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 		$pplf->getByUserIdAndEndDate( $this->getUser(), $this->getEffectiveDate() );
 		if ( $pplf->getRecordCount() > 0 ) {
 			$pp_obj = $pplf->getCurrent();
 			Debug::text('Found Pay Period ID: '. $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 
-			$pslf = TTnew( 'PayStubListFactory' );
+			$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 			$pslf->getByUserIdAndPayPeriodId( $this->getUser(), $pp_obj->getId() );
 			if ( $pslf->getRecordCount() > 0 ) {
 				$ps_obj = $pslf->getCurrent();
@@ -729,9 +729,8 @@ class PayStubAmendmentFactory extends Factory {
 		return $this->setGenericDataValue( 'ytd_adjustment', $this->toBool($value) );
 	}
 
-	//Used to determine if the pay stub is changing the status, so we can ignore some validation checks.
-
 	/**
+	 * Used to determine if the pay stub is changing the status, so we can ignore some validation checks.
 	 * @return bool
 	 */
 	function getEnablePayStubStatusChange() {
@@ -769,7 +768,7 @@ class PayStubAmendmentFactory extends Factory {
 		}
 		Debug::Text('Effective Date: '. TTDate::getDate('DATE+TIME', $effective_date), __FILE__, __LINE__, __METHOD__, 10);
 
-		$ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getById( $user_id );
 		if ( $ulf->getRecordCount() > 0 ) {
 			$user_obj = $ulf->getCurrent();
@@ -778,19 +777,19 @@ class PayStubAmendmentFactory extends Factory {
 		}
 
 		//Get all PSE acccount accruals
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+		$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 		$psealf->getByCompanyIdAndStatusIdAndTypeId( $user_obj->getCompany(), 10, 50);
 		if ( $psealf->getRecordCount() > 0 ) {
 			$ulf->StartTransaction();
 			foreach( $psealf as $psea_obj ) {
 				//Get PSE account that affects this accrual.
 				//What if there are two accounts? It takes the first one in the list.
-				$psealf_tmp = TTnew( 'PayStubEntryAccountListFactory' );
+				$psealf_tmp = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf_tmp */
 				$psealf_tmp->getByCompanyIdAndAccrualId( $user_obj->getCompany(), $psea_obj->getId() );
 				if ( $psealf_tmp->getRecordCount() > 0 ) {
 					$release_account_id = $psealf_tmp->getCurrent()->getId();
 
-					$psaf = TTnew( 'PayStubAmendmentFactory' );
+					$psaf = TTnew( 'PayStubAmendmentFactory' ); /** @var PayStubAmendmentFactory $psaf */
 					$psaf->setStatus( 50 ); //Active
 					$psaf->setType( 20 ) ; //Percent
 					$psaf->setUser( $user_obj->getId() );
@@ -908,7 +907,7 @@ class PayStubAmendmentFactory extends Factory {
 		//
 		// Employee
 		if ( $this->getUser() !== FALSE ) {
-			$ulf = TTnew( 'UserListFactory' );
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$this->Validator->isResultSetWithRows(	'user_id',
 															$ulf->getByID($this->getUser()),
 															TTi18n::gettext('Invalid Employee')
@@ -916,7 +915,7 @@ class PayStubAmendmentFactory extends Factory {
 		}
 		// Pay Stub Account
 		if ( $this->getPayStubEntryNameId() !== FALSE ) {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$this->Validator->isResultSetWithRows(	'pay_stub_entry_name',
 															$psealf->getById( $this->getPayStubEntryNameId() ),
 															TTi18n::gettext('Invalid Pay Stub Account')
@@ -1051,7 +1050,7 @@ class PayStubAmendmentFactory extends Factory {
 			}
 
 			if ( $this->Validator->isError( 'percent_amount_entry_name' ) == FALSE AND $this->getPercentAmountEntryNameId() !== FALSE AND $this->getPercentAmountEntryNameId() != TTUUID::getZeroID() ) {
-				$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+				$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 				$psealf->getById( $this->getPercentAmountEntryNameId() );
 				//Not sure why we tried to use $result here, as if the ID passed is NULL, it causes a fatal error.
 				//$result = $psealf->getById( $id )->getCurrent();
@@ -1161,7 +1160,7 @@ class PayStubAmendmentFactory extends Factory {
 
 		//Don't allow these to be deleted in closed pay periods either.
 		//Make sure effective date isn't in a CLOSED pay period?
-		$pplf = TTNew('PayPeriodListFactory');
+		$pplf = TTNew('PayPeriodListFactory'); /** @var PayPeriodListFactory $pplf */
 		$pplf->getByUserIdAndEndDate( $this->getUser(), $this->getEffectiveDate() );
 		if ( $pplf->getRecordCount() == 1 ) {
 			$pp_obj = $pplf->getCurrent();
@@ -1219,7 +1218,7 @@ class PayStubAmendmentFactory extends Factory {
 	 * @return array
 	 */
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
-		$uf = TTnew( 'UserFactory' );
+		$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
 
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();

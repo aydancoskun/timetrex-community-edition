@@ -60,7 +60,7 @@ class APIStation extends APIFactory {
 
 		//Check if user is supervisor or not.
 		if ( $this->getPermissionObject()->Check('user', 'view') OR $this->getPermissionObject()->Check('user', 'view_child') ) {
-			$sf = TTnew( 'StationFactory' );
+			$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
 			$station_type_ids = $sf->getOptions('type');
 
 			if ( isset($station_type_ids[61]) ) {
@@ -88,7 +88,7 @@ class APIStation extends APIFactory {
 			Debug::text('Mobile Station device...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		$sf = TTNew('StationFactory');
+		$sf = TTNew('StationFactory'); /** @var StationFactory $sf */
 		$retval = $sf->getOrCreateStation( $station_id, $this->getCurrentCompanyObject()->getID(), $type_id, $this->getPermissionObject(), $this->getCurrentUserObject() );
 
 		if ( is_object($retval) AND isset($retval->Validator) AND $retval->Validator->isValid() == FALSE ) {
@@ -145,7 +145,7 @@ class APIStation extends APIFactory {
 			$data['filter_data']['permission_children_ids'] = array();
 		}
 
-		$slf = TTnew( 'StationListFactory' );
+		$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 		$slf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $slf->getRecordCount() > 0 ) {
@@ -235,7 +235,7 @@ class APIStation extends APIFactory {
 
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'StationListFactory' );
+				$lf = TTnew( 'StationListFactory' ); /** @var StationListFactory $lf */
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] != '' ) {
 					//Modifying existing object.
@@ -350,7 +350,7 @@ class APIStation extends APIFactory {
 
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
-				$lf = TTnew( 'StationListFactory' );
+				$lf = TTnew( 'StationListFactory' ); /** @var StationListFactory $lf */
 				$lf->StartTransaction();
 				if ( $id != '' ) {
 					//Modifying existing object.
@@ -471,7 +471,7 @@ class APIStation extends APIFactory {
 					continue;
 				}
 
-				$slf = TTnew( 'StationListFactory' );
+				$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 				$slf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
 				if ( $slf->getRecordCount() == 1 ) {
 					$s_obj = $slf->getCurrent();

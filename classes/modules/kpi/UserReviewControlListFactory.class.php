@@ -55,7 +55,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query, NULL, $limit, $page);
+		$this->rs = $this->ExecuteSQL($query, NULL, $limit, $page);
 
 		return $this;
 	}
@@ -85,7 +85,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL($query, $ph);
+			$this->rs = $this->ExecuteSQL($query, $ph);
 
 			$this->saveCache($this->rs, $id);
 		}
@@ -115,7 +115,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -148,7 +148,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL($query, $ph);
+			$this->rs = $this->ExecuteSQL($query, $ph);
 
 			$this->saveCache($this->rs, $id.$user_id);
 		}
@@ -192,7 +192,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -229,7 +229,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -398,7 +398,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields);
 
-		$this->ExecuteSQL($query, $ph, $limit, $page);
+		$this->rs = $this->ExecuteSQL($query, $ph, $limit, $page);
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
