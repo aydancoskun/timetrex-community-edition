@@ -194,6 +194,19 @@ class GovernmentForms_Base {
 		return FALSE;
 	}
 
+	/**
+	 * Need to use bcmath for large numbers, especially on 32bit PHP installs.
+	 * @param $array
+	 * @return int|string
+	 */
+	static function arraySum( $array ) {
+		$retval = 0;
+		foreach( $array as $value ) {
+			$retval = bcadd( $retval, $value );
+		}
+
+		return $retval;
+	}
 
 	/*
 	 *

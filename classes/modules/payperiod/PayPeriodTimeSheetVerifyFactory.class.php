@@ -659,6 +659,11 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	 * @return bool
 	 */
 	function calcStatus() {
+		if ( $this->getDeleted() == TRUE ) {
+			Debug::Text(' Deleting record, not calculating status!', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
 		//Get pay period schedule verification type.
 		$time_sheet_verification_type_id = $this->getVerificationType();
 		if ( $time_sheet_verification_type_id > 10 ) { //10 = Disabled
@@ -720,6 +725,19 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	}
 
 	/**
+	 * @return bool
+	 */
+	function preValidate() {
+		$this->calcStatus();
+
+		if ( $this->getAuthorized() == TRUE ) {
+			$this->setAuthorizationLevel( 0 );
+		}
+
+		return TRUE;
+	}
+
+	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
@@ -770,7 +788,6 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		$this->calcStatus();
 
 		if ( $this->getStatus() == '' ) {
 			$this->Validator->isTrue(		'status',
@@ -789,19 +806,6 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 											FALSE,
 											TTi18n::gettext('Unable to verify this timesheet when critical severity exceptions exist in the pay period'));
 			}
-		}
-
-		return TRUE;
-	}
-
-	/**
-	 * @return bool
-	 */
-	function preSave() {
-		$this->calcStatus();
-
-		if ( $this->getAuthorized() == TRUE ) {
-			$this->setAuthorizationLevel( 0 );
 		}
 
 		return TRUE;

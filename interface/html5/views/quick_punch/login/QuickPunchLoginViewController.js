@@ -22,6 +22,8 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 
 		var $this = this;
 		require( this.filterRequiredFiles(), function() {
+			Global.setInternalIP(); //Try to obtain and set internal IP addresses as early as possible.
+
 			$this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
 			$this.authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
 			$this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();

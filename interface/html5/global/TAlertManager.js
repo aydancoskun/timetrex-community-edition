@@ -4,6 +4,17 @@ var TAlertManager = (function() {
 
 	var isShownNetworkAlert = false;
 
+	var closeBrowserBanner = function() {
+		$( '.browser-banner' ).remove();
+	};
+
+	var showBrowserTopBanner = function() {
+		if ( ie && ie <= 11 ) {
+			var div = $( '<div class="browser-banner"><a href="https://www.timetrex.com/supported-web-browsers" target="_blank"><span id="browser-top-banner" class="label">' + $.i18n._( LocalCacheData.getLoginData().application_name + ' is announcing the removal of support for <strong>Internet Explorer 11</strong> effective <strong>January 14th, 2020</strong>.' ) + '<br>' + $.i18n._( 'Please upgrade to Microsoft Edge, FireFox or Chrome for a much improved experience.' ) + '</span></a></div>' );
+			$( 'body' ).append( div );
+		}
+	};
+
 	var showNetworkErrorAlert = function( jqXHR, textStatus, errorThrown ) {
 		//#2514 - status 0 is caused by browser cancelling the request. There is no status because there was no request.
 		if ( jqXHR.status == 0 ) {
@@ -23,7 +34,7 @@ var TAlertManager = (function() {
 				isShownNetworkAlert = false;
 			} );
 			isShownNetworkAlert = true;
-			Global.sendAnalyticsEvent( 'alert-manager', 'error:network', 'network-error:jqXHR-status:' + jqXHR.status + 'error:' + textStatus );
+			Global.sendAnalyticsEvent( 'alert-manager', 'error:network', 'network-error: jqXHR-status: ' + jqXHR.status + ' Error: ' + textStatus );
 		}
 	};
 
@@ -253,6 +264,8 @@ var TAlertManager = (function() {
 	};
 
 	return {
+		showBrowserTopBanner: showBrowserTopBanner,
+		closeBrowserBanner: closeBrowserBanner,
 		showConfirmAlert: showConfirmAlert,
 		showAlert: showAlert,
 		showErrorAlert: showErrorAlert,

@@ -217,36 +217,37 @@ UserReviewControlViewController = BaseViewController.extend( {
 		form_item_input.TTagInput( { field: 'tag', object_type_id: 320 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_review_column2, '', null, null, true );
 
-		// Add KPIs from Groups
+		if ( this.is_add || this.is_edit ) {
+			// Add KPIs from Groups
+			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item_input.AComboBox( {
+				tree_mode: true,
+				allow_multiple_selection: false,
+				layout_name: ALayoutIDs.TREE_COLUMN,
+				set_empty: true,
+				field: 'group_id'
+			} );
+			form_item_input.setSourceData( Global.addFirstItemToArray( $this.kpi_group_array ) );
 
-		form_item_input.AComboBox( {
-			tree_mode: true,
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.TREE_COLUMN,
-			set_empty: true,
-			field: 'group_id'
-		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.kpi_group_array ) );
+			var tab_review_column3 = tab_review.find( '.third-column' ).css( {
+				'float': 'left',
+				'margin-top': '10px',
+				'margin-bottom': '10px'
+			} );
+			tab_review_column3.find( '.column-form-item-label' ).css( {
+				'float': 'left',
+				'margin-right': '10px',
+				'margin-top': '5px'
+			} ).text( $.i18n._( 'Add KPIs from Groups' ) );
+			tab_review_column3.find( '.column-form-item-input' ).css( { 'float': 'left' } ).append( form_item_input );
 
-		var tab_review_column3 = tab_review.find( '.third-column' ).css( {
-			'float': 'left',
-			'margin-top': '10px',
-			'margin-bottom': '10px'
-		} );
-		tab_review_column3.find( '.column-form-item-label' ).css( {
-			'float': 'left',
-			'margin-right': '10px',
-			'margin-top': '5px'
-		} ).text( $.i18n._( 'Add KPIs from Groups' ) );
-		tab_review_column3.find( '.column-form-item-input' ).css( { 'float': 'left' } ).append( form_item_input );
+			this.edit_view_ui_dic[form_item_input.getField()] = form_item_input;
 
-		this.edit_view_ui_dic[form_item_input.getField()] = form_item_input;
-
-		form_item_input.bind( 'formItemChange', function( e, target, doNotValidate ) {
-			$this.onFormItemChange( target, doNotValidate );
-		} );
+			form_item_input.bind( 'formItemChange', function( e, target, doNotValidate ) {
+				$this.onFormItemChange( target, doNotValidate );
+			} );
+		}
 
 		// Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );

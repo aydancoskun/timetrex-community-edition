@@ -162,6 +162,8 @@ LoginViewController = BaseViewController.extend( {
 			result = session_id;
 		}
 
+		TAlertManager.closeBrowserBanner();
+
 		var user_name = $( '#user_name' );
 		var password = $( '#password' );
 
@@ -209,6 +211,8 @@ LoginViewController = BaseViewController.extend( {
 		var $this = this;
 
 		TTPromise.add('login', 'init');
+
+		Global.setInternalIP(); //Try to obtain and set internal IP addresses as early as possible.
 
 		TTPromise.add('login', 'getCurrentUser');
 		$this.currentUser_api.getCurrentUser( { onResult: $this.onGetCurrentUser, delegate: $this } ); //Get more in result handler

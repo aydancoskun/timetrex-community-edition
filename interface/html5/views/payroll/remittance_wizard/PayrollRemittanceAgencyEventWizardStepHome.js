@@ -114,7 +114,7 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 			var item = data[i];
 
 			if ( item.in_time_period == true ) {
-				$( this.grid ).find( 'tr[id=\'' + item.id + '\']' ).css( 'color', '#ccc' );
+				$( '#'+this.grid.ui_id ).find( 'tr[id=\'' + item.id + '\']' ).css( 'color', '#ccc' );
 			}
 
 		}
@@ -185,14 +185,6 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 				sortable: true,
 				title: false
 			}
-			// {
-			// 	name: 'in_time_period',
-			// 	index: 'in_time_period',
-			// 	label: 'in_time_period',
-			// 	width: 100,
-			// 	sortable: false,
-			// 	title: false
-			// },
 		];
 
 		return column_info_array;

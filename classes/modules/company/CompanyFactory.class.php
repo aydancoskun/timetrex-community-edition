@@ -1971,7 +1971,7 @@ class CompanyFactory extends Factory {
 	 */
 	function setLongitude( $value ) {
 		if ( is_numeric($value) ) {
-			$value = Misc::removeTrailingZeros( round( (float)TTi18n::parseFloat( $value ), 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+			$value = Misc::removeTrailingZeros( round( (float)$value, 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000 -- Don't use parseFloat() here as it should never be a user input value with commas as decimal symbols.
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
@@ -1992,7 +1992,7 @@ class CompanyFactory extends Factory {
 	 */
 	function setLatitude( $value ) {
 		if ( is_numeric($value) ) {
-			$value = Misc::removeTrailingZeros( round( (float)TTi18n::parseFloat( $value ), 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+			$value = Misc::removeTrailingZeros( round( (float)$value, 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000 -- Don't use parseFloat() here as it should never be a user input value with commas as decimal symbols.
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
@@ -3000,21 +3000,25 @@ class CompanyFactory extends Factory {
 				);
 			}
 		}
-		// City
-		$this->Validator->isRegEx(		'city',
-											$this->getCity(),
-											TTi18n::gettext('City contains invalid characters'),
-											$this->city_validator_regex
-										);
 
-		if ( $this->Validator->isError('city') == FALSE ) {
-			$this->Validator->isLength(		'city',
-											$this->getCity(),
-											TTi18n::gettext('City name is too short or too long'),
-											2,
-											250
-										);
+		// City
+		if ( $this->getCity() != '' ) {
+			$this->Validator->isLength( 'city',
+										$this->getCity(),
+										TTi18n::gettext( 'City name is too short or too long' ),
+										2,
+										250
+			);
 		}
+
+		if ( $this->getCity() != '' AND $this->Validator->isError('city') == FALSE ) {
+			$this->Validator->isRegEx( 'city',
+									   $this->getCity(),
+									   TTi18n::gettext( 'City contains invalid characters' ),
+									   $this->city_validator_regex
+			);
+		}
+
 		// Country
 		$this->Validator->inArrayKey(		'country',
 											$this->getCountry(),
@@ -3077,29 +3081,31 @@ class CompanyFactory extends Factory {
 										);
 		}
 
-		// Admin Contact User
-		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-		if ( $this->getAdminContact() != '' AND $this->getAdminContact() != TTUUID::getZeroID() ) {
-			$this->Validator->isResultSetWithRows( 'admin_contact',
-												   $ulf->getByID( $this->getAdminContact() ),
-												   TTi18n::gettext( 'Contact is invalid' )
-			);
-		}
+		if ( $this->getDeleted() == FALSE ) {
+			// Admin Contact User
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+			if ( $this->getAdminContact() != '' AND $this->getAdminContact() != TTUUID::getZeroID() ) {
+				$this->Validator->isResultSetWithRows( 'admin_contact',
+													   $ulf->getByID( $this->getAdminContact() ),
+													   TTi18n::gettext( 'Admin Contact is invalid' )
+				);
+			}
 
-		// Billing Contact User
-		if ( $this->getBillingContact() != '' AND $this->getBillingContact() != TTUUID::getZeroID() ) {
-			$this->Validator->isResultSetWithRows( 'billing_contact',
-												   $ulf->getByID( $this->getBillingContact() ),
-												   TTi18n::gettext( 'Contact is invalid' )
-			);
-		}
+			// Billing Contact User
+			if ( $this->getBillingContact() != '' AND $this->getBillingContact() != TTUUID::getZeroID() ) {
+				$this->Validator->isResultSetWithRows( 'billing_contact',
+													   $ulf->getByID( $this->getBillingContact() ),
+													   TTi18n::gettext( 'Billing Contact is invalid' )
+				);
+			}
 
-		// Support Contact User
-		if ( $this->getSupportContact() != '' AND $this->getSupportContact() != TTUUID::getZeroID() ) {
-			$this->Validator->isResultSetWithRows( 'support_contact',
-												   $ulf->getByID( $this->getSupportContact() ),
-												   TTi18n::gettext( 'Contact is invalid' )
-			);
+			// Support Contact User
+			if ( $this->getSupportContact() != '' AND $this->getSupportContact() != TTUUID::getZeroID() ) {
+				$this->Validator->isResultSetWithRows( 'support_contact',
+													   $ulf->getByID( $this->getSupportContact() ),
+													   TTi18n::gettext( 'Support Contact is invalid' )
+				);
+			}
 		}
 
 		// Other ID 1
@@ -3265,6 +3271,14 @@ class CompanyFactory extends Factory {
 		// ABOVE: Validation code moved from set*() functions.
 		//
 
+		//Don't allow status=active companies to be deleted. As we have more strict validation checks when deleting user records that are only disabled if the company is not active.
+		//  Since we don't have a mass edit for companies yet, this requires a manual SQL query to change the status of many companies at once, ie: update company set status_id = 30 where status_id = 10 AND id not in ('<ID>');
+		if ( $this->getDeleted() == TRUE AND $this->getStatus() == 10 ) {
+			$this->Validator->isTrue(		'status',
+											 FALSE,
+											 TTi18n::gettext('Unable to delete an active company') );
+		}
+
 		global $current_user;
 		if ( is_object($current_user) AND $current_user->getCompany() == $this->getID() ) { //Acting on currently logged in user.
 			if ( $this->getDeleted() == TRUE ) {
@@ -3304,13 +3318,14 @@ class CompanyFactory extends Factory {
 		}
 
 		//Delete users before deleting the company, otherwise the company doesn't exist and validation functions fail.
+		//  Due to validation checks performed when deleting employees, the company should be status=cancelled before deleting it.
 		if ( $this->getDeleted() == TRUE ) {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByCompanyId( $this->getID() );
 			if ( $ulf->getRecordCount() > 0 ) {
 				$ulf->StartTransaction();
 				foreach( $ulf as $u_obj ) {
-					Debug::text('Deleting User ID: '. $u_obj->getId(), __FILE__, __LINE__, __METHOD__, 9);
+					Debug::text('Deleting User ID: '. $u_obj->getId() .' Full Name: '. $u_obj->getFullName(), __FILE__, __LINE__, __METHOD__, 9);
 					$u_obj->setDeleted( TRUE );
 					if ( $u_obj->isValid() ) {
 						$u_obj->Save();

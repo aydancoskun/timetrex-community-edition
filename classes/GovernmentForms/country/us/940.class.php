@@ -829,7 +829,7 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 					),
 			),
 			'l17'  => array(
-					'function'    => array('calcL17', 'drawSplitDecimalFloat'),
+					'function'    => array('calcL17', 'drawSplitDecimalFloat', 'showL17MisMatchTotals'),
 					'coordinates' => array(
 							array(
 									'x'      => 346,
@@ -1039,21 +1039,21 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 
 	function calcL6( $value, $schema ) {
 		//Subtotal: Line 4 + Line 5
-		$this->l6 = $this->l4 + $this->l5;
+		$this->l6 = bcadd( $this->l4, $this->l5 );
 
 		return $this->l6;
 	}
 
 	function calcL7( $value, $schema ) {
 		//Total Taxable FUTA wages: Line 3 - Line 6
-		$this->l7 = $this->l3 - $this->l6;
+		$this->l7 = bcsub( $this->l3, $this->l6 );
 
 		return $this->l7;
 	}
 
 	function calcL8( $value, $schema ) {
 		//FUTA tax before adjustments
-		$this->l8 = $this->l7 * $this->futa_tax_before_adjustment_rate;
+		$this->l8 = bcmul( $this->l7, $this->futa_tax_before_adjustment_rate );
 
 		return $this->l8;
 	}
@@ -1073,7 +1073,7 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 
 	function calcL12( $value, $schema ) {
 		//Total FUTA tax after adjustments
-		$this->l12 = $this->l8 + $this->l9 + $this->l10 + $this->l11;
+		$this->l12 = bcadd( $this->l8, bcadd( $this->l9, bcadd( $this->l10, $this->l11 ) ) );
 
 		return $this->l12;
 	}
@@ -1081,7 +1081,7 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 	function calcL14( $value, $schema ) {
 		//Balance Due
 		if ( $this->l12 > $this->l13 ) {
-			$this->l14 = $this->l12 - $this->l13;
+			$this->l14 = bcsub( $this->l12, $this->l13 );
 
 			return $this->l14;
 		}
@@ -1090,10 +1090,9 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 	}
 
 	function calcL15( $value, $schema ) {
-		//Balance Due
-
+		//Overpayment
 		if ( $this->l13 > $this->l12 ) {
-			$this->l15 = $this->l13 - $this->l12;
+			$this->l15 = bcsub( $this->l13, $this->l12 );
 
 			return $this->l15;
 		}
@@ -1104,18 +1103,32 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 	function calcL17( $value, $schema ) {
 		//Total tax liability for the year
 		if ( $this->l12 > $this->line_16_cutoff_amount ) {
-			$this->l17 = $this->l16a + $this->l16b + $this->l16c + $this->l16d;
-
-			if ( $this->MoneyFormat( $this->l17 ) != $this->MoneyFormat( $this->l12 ) ) {
-				$schema['coordinates'][0]['fill_color'] = array(255, 0, 0);
-				$schema['coordinates'][1]['fill_color'] = array(255, 0, 0);
-			}
+			$this->l17 = bcadd( $this->l16a, bcadd( $this->l16b, bcadd( $this->l16c, $this->l16d ) ) );
 
 			return $this->l17;
 		}
 
 		return FALSE;
 	}
+
+	function showL17MisMatchTotals() {
+		if ( isset( $this->l12 ) AND isset( $this->l17 ) AND $this->l12 > $this->line_16_cutoff_amount ) {
+			$l17_to_l12_diff = abs( round( bcsub( $this->l17, $this->l12 ), 2 ) );
+			if ( $l17_to_l12_diff > 0.01 ) {
+				Debug::Text( 'L17 seems incorrect, show warning...', __FILE__, __LINE__, __METHOD__, 10 );
+				$pdf = $this->getPDFObject();
+
+				//Show warning on Page 2
+				$pdf->setTextColor( 255, 0, 0 );
+				$pdf->setXY( 155 + $this->getPageOffsets( 'x' ), 221 + $this->getPageOffsets( 'y' ) );
+
+				$pdf->Cell( 165, 13, 'WARNING: Mismatch with Line 12', 1, 0, 'C', 1, FALSE, 1 );
+			}
+		}
+
+		return TRUE;
+	}
+
 
 	function _outputPDF() {
 		//Initialize PDF with template.

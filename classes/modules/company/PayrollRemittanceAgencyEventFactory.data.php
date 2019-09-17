@@ -1336,7 +1336,7 @@ return array(
 
 										 ),
 								 ),
-								 'P940' => array(
+								 'P940' => array( //Payments must be made after any quarter where the total payment amount exceeds $500.
 										 'form_code'        => '940',
 										 'form_name'        => TTi18n::getText( '940 Payment' ),
 										 'form_description' => TTi18n::getText( 'Employers Federal Payments: FUTA' ),
@@ -1356,7 +1356,7 @@ return array(
 																	  //Quarterly
 																	  array(
 
-																		  'status_id'            => 20, //Enabled
+																		  'status_id'            => 10, //Enabled
 																		  'frequency_id'         => 3000, //Quarterly
 																		  'quarter_month'        => 1,
 																		  'primary_day_of_month' => 31, //Last day

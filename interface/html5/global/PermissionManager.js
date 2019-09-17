@@ -140,14 +140,6 @@ var PermissionManager = (function() {
 					result = true;
 				}
 				break;
-			case 'UserReviewControl':
-				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
-					result = false;
-				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-						PermissionManager.validate( permission_section, 'edit' ) || PermissionManager.validate( permission_section, 'edit_child' ) ) {
-					result = true;
-				}
-				break;
 			case 'GovernmentDocument':
 			case 'Exception':
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {

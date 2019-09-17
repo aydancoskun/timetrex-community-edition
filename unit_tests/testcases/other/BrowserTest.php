@@ -109,7 +109,7 @@ class BrowserTest extends PHPUnit_Framework_TestCase {
 
 		$browser = new Browser( 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/4.0; InfoPath.2; SV1; .NET CLR 2.0.50727; WOW64)' );
 		$this->assertEquals( $browser->getBrowser(), Browser::BROWSER_IE );
-		$this->assertEquals( $browser->getVersion(), '10.0' ); //Take MSIE over Trident here.
+		$this->assertEquals( $browser->getVersion(), '8.0' ); //Take MSIE over Trident here. -- Internet Explorer 8 on Windows 7, Internet Explorer 10 Compatibility View
 
 		return TRUE;
 	}

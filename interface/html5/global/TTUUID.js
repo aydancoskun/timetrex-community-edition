@@ -102,15 +102,15 @@ TTUUID.limitUI16 = TTUUID.maxFromBits( 16 );
 TTUUID.limitUI40 = TTUUID.maxFromBits( 40 );
 
 TTUUID.randomUI04 = function() {
-	return getRandomInt( 0, TTUUID.limitUI04 - 1 );
+	return TTUUID.getRandomInt( 0, TTUUID.limitUI04 - 1 );
 };
 
 TTUUID.randomUI08 = function() {
-	return getRandomInt( 0, TTUUID.limitUI08 - 1 );
+	return TTUUID.getRandomInt( 0, TTUUID.limitUI08 - 1 );
 };
 
 TTUUID.randomUI14 = function() {
-	return getRandomInt( 0, TTUUID.limitUI14 - 1 );
+	return TTUUID.getRandomInt( 0, TTUUID.limitUI14 - 1 );
 };
 
 TTUUID.randomUI40 = function() {
@@ -135,6 +135,6 @@ TTUUID.paddedString = function( string, length, z ) {
 	return string;
 };
 
-function getRandomInt( min, max ) {
+TTUUID.getRandomInt = function( min, max ) {
 	return Math.floor( Math.random() * (max - min + 1) ) + min;
 }

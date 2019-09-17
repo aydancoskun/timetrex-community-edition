@@ -1867,25 +1867,25 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 
 
 	function calcMonth1Total( $value, $schema ) {
-		$this->month1_total = array_sum( (array)$this->month1 );
+		$this->month1_total = $this->arraySum( (array)$this->month1 );
 
 		return $this->month1_total;
 	}
 
 	function calcMonth2Total( $value, $schema ) {
-		$this->month2_total = array_sum( (array)$this->month2 );
+		$this->month2_total = $this->arraySum( (array)$this->month2 );
 
 		return $this->month2_total;
 	}
 
 	function calcMonth3Total( $value, $schema ) {
-		$this->month3_total = array_sum( (array)$this->month3 );
+		$this->month3_total = $this->arraySum( (array)$this->month3 );
 
 		return $this->month3_total;
 	}
 
 	function calcTotal( $value, $schema ) {
-		$this->total = $this->month1_total + $this->month2_total + $this->month3_total;
+		$this->total = bcadd( bcadd($this->month1_total, $this->month2_total ), $this->month3_total );
 
 		return $this->total;
 	}

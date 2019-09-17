@@ -595,7 +595,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		$rate = bcdiv( $rate_data['employee_rate'], 100 );
 		Debug::text( 'Rate: ' . $rate, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$amount = bcmul( $pay_period_income, $rate );
+		$amount = round( bcmul( $pay_period_income, $rate ), 2 ); //Must round separately from additional medicare, as they are broken out in tax reports.
 		Debug::text( 'Amount: ' . $amount, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$threshold_income = $this->getMedicareAdditionalEmployerThreshold();
@@ -607,7 +607,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 				$threshold_income = $pay_period_income;
 			}
 			Debug::text( 'bThreshold Income: ' . $threshold_income, __FILE__, __LINE__, __METHOD__, 10 );
-			$threshold_amount = bcmul( $threshold_income, bcdiv( $rate_data['employee_threshold_rate'], 100 ) );
+			$threshold_amount = round( bcmul( $threshold_income, bcdiv( $rate_data['employee_threshold_rate'], 100 ) ), 2 ); //Must round separately from regular medicare, as they are broken out in tax reports.
 			Debug::text( 'Threshold Amount: ' . $threshold_amount, __FILE__, __LINE__, __METHOD__, 10 );
 			$amount = bcadd( $amount, $threshold_amount );
 		}

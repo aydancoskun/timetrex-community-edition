@@ -287,6 +287,8 @@ class SystemSettingFactory extends Factory {
 		if ( $sslf->getRecordCount() == 1 ) {
 			$obj = $sslf->getCurrent();
 			return $obj->getValue();
+		} elseif ( $sslf->getRecordCount() > 1 ) {
+			Debug::Text('ERROR: '. $sslf->getRecordCount() .' SystemSetting record(s) exists with key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;

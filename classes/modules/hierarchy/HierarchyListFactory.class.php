@@ -658,7 +658,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 						ORDER BY w.level DESC
 					';
 
-		//Debug::Text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$rs = $this->ExecuteSQL($query, $ph);
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 

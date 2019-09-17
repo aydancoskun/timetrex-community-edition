@@ -241,8 +241,14 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$apumf = TTnew( 'AccrualPolicyUserModifierFactory' ); /** @var AccrualPolicyUserModifierFactory $apumf */
 		$apumf->setAccrualPolicy( $accrual_policy_id );
 		$apumf->setUser( $user_id );
-		$apumf->setLengthOfServiceDate( $length_of_service_date );
-		$apumf->setAccrualRateModifier( $accrual_rate );
+
+		if ( $length_of_service_date !== NULL ) {
+			$apumf->setLengthOfServiceDate( $length_of_service_date );
+		}
+
+		if ( $accrual_rate !== NULL ) {
+			$apumf->setAccrualRateModifier( $accrual_rate );
+		}
 
 		if ( $apumf->isValid() ) {
 			$insert_id = $apumf->Save();

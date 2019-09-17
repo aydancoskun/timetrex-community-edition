@@ -179,6 +179,86 @@ class TimeTrexPaymentServices {
 	}
 
 	/**
+	 * Converts a client payment object to a remittance bank account array for uploading.
+	 * @param $invoice_transaction_obj TransactionFactory
+	 * @param $client_payment_obj ClientPaymentFactory
+	 * @param $client_obj ClientFactory
+	 * @param $client_contact_obj ClientContactFactory
+	 * @return array
+	 */
+	function convertClientPaymentObjectToBankAccountArray( $invoice_transaction_obj, $client_payment_obj, $client_obj, $client_contact_obj ) { //$rd_obj, $rs_obj, $u_obj ) {
+		//$country = $client_contact_obj->getCountry();
+		if ( $client_payment_obj->getBankAccountType() == 200 ) {
+			Debug::Text( 'Using PaymentProcess Factory: EFT', __FILE__, __LINE__, __METHOD__, 10 );
+			$country = 'CA';
+		} elseif ( $client_payment_obj->getBankAccountType() == 201 ) {
+			Debug::Text( 'Using PaymentProcess Factory: ACH', __FILE__, __LINE__, __METHOD__, 10 );
+			$country = 'US';
+		}
+
+		$bank_account_data = array(
+				'_kind' => 'BankAccount',
+				'remote_id' => $client_payment_obj->getID(),
+
+				'type_id'   => 'N', //Normal
+
+				'name' => $client_obj->getCompanyName(),
+
+				'domiciled_country' => $country,
+				'currency_iso_code' => $invoice_transaction_obj->getCurrencyObject()->getISOCode(),
+
+				'bank_account_type'   => 'C', //S=Savings, C=Checking
+				'bank_routing_number' => ( $country == 'CA' ) ? str_pad( $client_payment_obj->getInstitution(), 4, 0, STR_PAD_LEFT ) . str_pad( $client_payment_obj->getTransit(), 5, 0, STR_PAD_LEFT ) : $client_payment_obj->getTransit(),
+				'bank_account_number' => $client_payment_obj->getAccount(),
+
+				'deleted' => $invoice_transaction_obj->getDeleted(),
+		);
+
+		Debug::Arr( $bank_account_data, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+		return $bank_account_data;
+	}
+
+	/**
+	 * Converts Invoice Transaction objects to a remittance transaction array for uploading.
+	 * @param $invoice_transaction_obj TransactionFactory
+	 * @param $client_payment_obj ClientPaymentFactory
+	 * @param $payment_gateway_obj PaymentGatewayFactory
+	 * @param $client_obj ClientFactory
+	 * @param $client_contact_obj ClientContactFactory
+	 * @return array
+	 */
+	function convertInvoiceTransactionObjectToTransactionArray( $invoice_transaction_obj, $client_payment_obj, $client_obj, $client_contact_obj, $payment_gateway_obj, $confirmation_number ) { //, $rs_obj, $uf_obj, $confirmation_number, $batch_id ) {
+		//$settlement_bank_account_data = $this->convertRemittanceSourceAccountObjectToBankAccountArray( $rs_obj );
+		$settlement_bank_account_data = $payment_gateway_obj->getCustomerID(); //Customer ID is the UUID of the payment services settlement bank account ID.
+		$bank_account_data = $this->convertClientPaymentObjectToBankAccountArray( $invoice_transaction_obj, $client_payment_obj, $client_obj, $client_contact_obj );
+
+		if ( is_object( $invoice_transaction_obj ) ) {
+			$batch_id = date( 'M d', $invoice_transaction_obj->getEffectiveDate() ); //Must be 9 or less characters, as its prepended with "TT AR " and has to be less than 15 characters overall.
+		}
+
+		$remittances_transaction_data = array(
+				'_kind' => 'Transaction',
+				'remote_id' => $invoice_transaction_obj->getID(),
+				'remote_batch_id' => $batch_id,
+
+				'settlement_bank_account_id' => $settlement_bank_account_data,
+				'bank_account_id' => $bank_account_data,
+
+				'category_id'   => 'AR', //Accounts Receivable
+				'type_id' => 'D', //Debit
+
+				'name' => $client_obj->getCompanyName(),
+				'reference_number' => $confirmation_number,
+				'due_date' => TTDate::getISOTimeStamp( $invoice_transaction_obj->getEffectiveDate() ), //Don't pass epoch as the remote system won't know the timezone.
+
+				'amount' => $invoice_transaction_obj->getAmount(),
+		);
+
+		Debug::Arr( $remittances_transaction_data, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+		return $remittances_transaction_data;
+	}
+
+	/**
 	 * Converts a legal entity object to a remittance organization array for uploading.
 	 * @param $le_obj
 	 * @return array

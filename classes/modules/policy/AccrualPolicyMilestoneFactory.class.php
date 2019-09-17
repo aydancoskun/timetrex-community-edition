@@ -274,13 +274,8 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	 * @return bool
 	 */
 	function setAccrualRate( $value) {
-		$value = trim($value);
-		if ( $value > 0 ) {
-			$this->setGenericDataValue( 'accrual_rate', $value );
-
-			return TRUE;
-		}
-		return FALSE;
+		$value = (float)trim($value);
+		return $this->setGenericDataValue( 'accrual_rate', $value );
 	}
 
 	/**

@@ -1455,12 +1455,21 @@ class RemittanceSourceAccountFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
+
+		//Linked remittance destination records need to be checked in multiple places.
+		$linked_remittance_destination_records = 0;
+		$rdalf = TTnew( 'RemittanceDestinationAccountListFactory'); /** @var RemittanceDestinationAccountListFactory $rdalf */
+		$rdalf->getByRemittanceSourceAccountId( $this->getId(), 1 ); //limit 1.
+		if ( $rdalf->getRecordCount() > 0 ) {
+			$linked_remittance_destination_records = $rdalf->getRecordCount();
+		}
+		unset($rdalf);
+
 		$data_diff = $this->getDataDifferences();
+
 		//$this->setProvince( $this->getProvince() ); //Not sure why this was there, but it causes duplicate errors if the province is incorrect.
 		if ( $this->getDeleted() == TRUE ) {
-			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory'); /** @var RemittanceDestinationAccountListFactory $rdalf */
-			$rdalf->getByRemittanceSourceAccountId( $this->getId(), 1 ); //limit 1.
-			if ( $rdalf->getRecordCount() > 0 ) {
+			if ( $linked_remittance_destination_records > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
 											FALSE,
 											TTi18n::gettext('This remittance source account is currently in use') .' '. TTi18n::gettext('by employee payment methods') );
@@ -1615,6 +1624,13 @@ class RemittanceSourceAccountFactory extends Factory {
 		$this->Validator->isTrue(		'description',
 				( ( stripos( $this->Validator->stripNonNumeric( $this->getDescription() ), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
 										 TTi18n::gettext('Account number must not be a part of the Description') );
+
+		//Don't allow type to be changed if its already in use. It also prevents further errors when trying to edit/delete destination records where a type mismatch occurs.
+		if ( is_array($data_diff) AND $this->isDataDifferent( 'type_id', $data_diff ) AND $linked_remittance_destination_records > 0 ) { //Type has changed
+			$this->Validator->isTRUE(	'type_id',
+										 FALSE,
+										 TTi18n::gettext( 'This remittance source account is currently in use by employee payment methods of a different type' ) );
+		}
 
 		if ( is_array($data_diff) AND $this->isDataDifferent( 'legal_entity_id', $data_diff ) ) { //Legal entity has changed
 			//Cases to handle:

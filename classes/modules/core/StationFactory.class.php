@@ -1720,63 +1720,72 @@ class StationFactory extends Factory {
 	function checkSource( $source, $current_station_id ) {
 		$source = trim($source);
 
-		$remote_addr = Misc::getRemoteIPAddress();
+		$ips_to_check = array( Misc::getRemoteIPAddress() );
 
-		if ( in_array( $this->getType(), array(10, 25, 26, 28) )
-				AND (
-						preg_match('/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{1,2})*/', $source) //IPv4
-						OR
-						preg_match('/(((?=(?>.*?(::))(?!.+\3)))\3?|([\dA-F]{1,4}(\3|:(?!$)|$)|\2))(?4){5}((?4){2}|((2[0-4]|1\d|[1-9])?\d|25[0-5])(\.(?7)){3})*/i', $source) //IPv6
-					)
-			) {
-			Debug::text('Source is an IP address!', __FILE__, __LINE__, __METHOD__, 10);
-		} elseif ( in_array( $this->getType(), array(10, 25, 26, 28, 100) ) AND !in_array( strtolower( $this->getSource() ), $this->getOptions('station_reserved_word') ) )  {
-			//Do hostname lookups for TTA8 timeclocks as well.
-			Debug::text('Source is NOT an IP address, do hostname lookup: '. $source, __FILE__, __LINE__, __METHOD__, 10);
-
-			$hostname_lookup = $this->getCache( $remote_addr.$source );
-			if ( $hostname_lookup === FALSE ) {
-				$hostname_lookup = gethostbyname( $source );
-
-				$this->saveCache($hostname_lookup, $remote_addr.$source );
-			}
-
-			if ($hostname_lookup == $source ) {
-				Debug::text('Hostname lookup failed!', __FILE__, __LINE__, __METHOD__, 10);
-			} else {
-				Debug::text('Hostname lookup succeeded: '. $hostname_lookup, __FILE__, __LINE__, __METHOD__, 10);
-				$source = $hostname_lookup;
-			}
-			unset($hostname_lookup);
-		} else {
-			Debug::text('Source is not internet related', __FILE__, __LINE__, __METHOD__, 10);
+		if ( isset($_SERVER['HTTP_X_INTERNAL_REMOTE_ADDR']) AND $_SERVER['HTTP_X_INTERNAL_REMOTE_ADDR'] != '' ) {
+			Debug::text('  Detected Internal IPs to Check: '. $_SERVER['HTTP_X_INTERNAL_REMOTE_ADDR'], __FILE__, __LINE__, __METHOD__, 10);
+			$ips_to_check += explode(',', $_SERVER['HTTP_X_INTERNAL_REMOTE_ADDR'] );
 		}
 
-		Debug::text('Source: '. $source .' Remote IP: '. $remote_addr, __FILE__, __LINE__, __METHOD__, 10);
-		if (	(
-					$current_station_id == $this->getStation()
-						OR in_array( strtolower( $this->getStation() ), $this->getOptions('station_reserved_word') )
-				)
-				AND
-				(
-					in_array( strtolower( $this->getSource() ), $this->getOptions('source_reserved_word') )
-					OR
-						( $source == $remote_addr )
-					OR
-						( $current_station_id == $this->getSource() )
-					OR
-						( Net_IPv4::validateIP( $remote_addr ) AND Net_IPv4::ipInNetwork( $remote_addr, $source) )
-					OR
-						( Net_IPv6::checkIPv6( $remote_addr ) AND strpos( $source, '/') !== FALSE AND Net_IPv6::isInNetmask( $remote_addr, $source) ) //isInNetMask requires a netmask to be specified, otherwise it always returns TRUE.
-					OR
-						in_array( $this->getType(), array(100, 110, 120, 200) )
-				)
+		foreach( $ips_to_check as $remote_addr ) {
+			Debug::text('Checking Remote IP: '. $remote_addr, __FILE__, __LINE__, __METHOD__, 10);
+
+			if ( in_array( $this->getType(), array(10, 25, 26, 28) )
+					AND (
+							preg_match('/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{1,2})*/', $source) //IPv4
+							OR
+							preg_match('/(((?=(?>.*?(::))(?!.+\3)))\3?|([\dA-F]{1,4}(\3|:(?!$)|$)|\2))(?4){5}((?4){2}|((2[0-4]|1\d|[1-9])?\d|25[0-5])(\.(?7)){3})*/i', $source) //IPv6
+					)
+			) {
+				Debug::text('Source is an IP address!', __FILE__, __LINE__, __METHOD__, 10);
+			} elseif ( in_array( $this->getType(), array(10, 25, 26, 28, 100) ) AND !in_array( strtolower( $this->getSource() ), $this->getOptions('station_reserved_word') ) )  {
+				//Do hostname lookups for TTA8 timeclocks as well.
+				Debug::text('Source is NOT an IP address, do hostname lookup: '. $source, __FILE__, __LINE__, __METHOD__, 10);
+
+				$hostname_lookup = $this->getCache( $remote_addr.$source );
+				if ( $hostname_lookup === FALSE ) {
+					$hostname_lookup = gethostbyname( $source );
+
+					$this->saveCache($hostname_lookup, $remote_addr.$source );
+				}
+
+				if ($hostname_lookup == $source ) {
+					Debug::text('Hostname lookup failed!', __FILE__, __LINE__, __METHOD__, 10);
+				} else {
+					Debug::text('Hostname lookup succeeded: '. $hostname_lookup, __FILE__, __LINE__, __METHOD__, 10);
+					$source = $hostname_lookup;
+				}
+				unset($hostname_lookup);
+			} else {
+				Debug::text('Source is not internet related', __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			Debug::text('Source: '. $source .' Remote IP: '. $remote_addr, __FILE__, __LINE__, __METHOD__, 10);
+			if (	(
+							$current_station_id == $this->getStation()
+							OR in_array( strtolower( $this->getStation() ), $this->getOptions('station_reserved_word') )
+					)
+					AND
+					(
+							in_array( strtolower( $this->getSource() ), $this->getOptions('source_reserved_word') )
+							OR
+							( $source == $remote_addr )
+							OR
+							( $current_station_id == $this->getSource() )
+							OR
+							( Net_IPv4::validateIP( $remote_addr ) AND Net_IPv4::ipInNetwork( $remote_addr, $source) )
+							OR
+							( Net_IPv6::checkIPv6( $remote_addr ) AND strpos( $source, '/') !== FALSE AND Net_IPv6::isInNetmask( $remote_addr, $source) ) //isInNetMask requires a netmask to be specified, otherwise it always returns TRUE.
+							OR
+							in_array( $this->getType(), array(100, 110, 120, 200) )
+					)
 
 			) {
 
-			Debug::text('Returning TRUE', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('Returning TRUE', __FILE__, __LINE__, __METHOD__, 10);
 
-			return TRUE;
+				return TRUE;
+			}
 		}
 
 		Debug::text('Returning FALSE', __FILE__, __LINE__, __METHOD__, 10);
@@ -1910,7 +1919,7 @@ class StationFactory extends Factory {
 	 * @param object $user_obj
 	 * @return StationListFactory
 	 */
-	static function getOrCreateStation( $station_id, $company_id, $type_id = 10, $permission_obj = NULL, $user_obj = NULL ) {
+	static function getOrCreateStation( $station_id, $company_id, $type_id = 10, $description = NULL, $permission_obj = NULL, $user_obj = NULL ) {
 		Debug::text('Checking for Station ID: '. $station_id .' Company ID: '. $company_id .' Type: '. $type_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$slf = new StationListFactory();
@@ -1952,8 +1961,25 @@ class StationFactory extends Factory {
 				case 10: //PC
 				case 26: //Mobile Web Browser
 					$status_id = 20; //Enabled, but will be set disabled automatically by isActiveForAnyEmployee()
-					$station = NULL; //Using NULL means we generate our own.
+
+					//If StationID is passed in, try to use it instead of creating a new one. This enables the User Agent based "sticky" Station IDs to work.
+					if ( $station_id != '' ) {
+						$station = $station_id;
+					} else {
+						$station = NULL; //Using NULL means we generate our own.
+					}
+
 					$description = substr( $_SERVER['HTTP_USER_AGENT'], 0, 250);
+
+					//If we detect internal IPs, add this to the description field so its easier to figure out which IPs we can restrict on.
+					if ( isset($_SERVER['HTTP_X_INTERNAL_REMOTE_ADDR']) AND $_SERVER['HTTP_X_INTERNAL_REMOTE_ADDR'] != '' ) {
+						$internal_ips = trim( str_replace( Misc::getRemoteIPAddress(), '', $_SERVER['HTTP_X_INTERNAL_REMOTE_ADDR'] ), ',');
+						if ( $internal_ips != '' ) {
+							$description .= ' Internal IP: ' . $internal_ips;
+						}
+						unset( $internal_ips );
+					}
+
 					$source = Misc::getRemoteIPAddress();
 					break;
 				case 28: //Mobile App (iOS/Android)
@@ -2000,12 +2026,13 @@ class StationFactory extends Factory {
 						$station = $station_id;
 					}
 
-					if ( $status_id == 10 ) { //Disabled
-						$description = TTi18n::getText('PENDING ACTIVATION') .' - ';
-					} else {
-						$description = '';
+					if ( $description == '' ) {
+						$description = TTi18n::getText( 'Automatic KIOSK Setup [Add name/location of device here]' );
 					}
-					$description .= TTi18n::getText('Automatic KIOSK Setup [Add name/location of device here]');
+
+					if ( $status_id == 10 ) { //Disabled
+						$description = TTi18n::getText( 'PENDING ACTIVATION' ) .' - '. $description;
+					}
 
 					$source = 'ANY';
 

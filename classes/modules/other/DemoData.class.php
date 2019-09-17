@@ -3838,7 +3838,7 @@ class DemoData {
 				//Set Phone ID/Password to test web quickpunch
 				if (  $this->getEnableQuickPunch() == TRUE ) {
 					$uf->setPhoneId( '1235'.$this->getUserNamePostfix() );
-					$uf->setPhonePassword( '1234', TRUE  );
+					$uf->setPhonePassword( '1234' );
 				}
 
 				$uf->setFirstName( 'John' );
@@ -3994,7 +3994,7 @@ class DemoData {
 				//Set Phone ID/Password to test web quickpunch
 				if (  $this->getEnableQuickPunch() == TRUE ) {
 					$uf->setPhoneId( '1234'.$this->getUserNamePostfix() );
-					$uf->setPhonePassword( '1234', TRUE );
+					$uf->setPhonePassword( '1234' );
 				}
 
 				$uf->setFirstName( 'Jane' );
@@ -4182,7 +4182,7 @@ class DemoData {
 				//Set Phone ID/Password to test web quickpunch
 				if (  $this->getEnableQuickPunch() == TRUE ) {
 					$uf->setPhoneId( '1'.$this->getUserNamePostfix().'34' );
-					$uf->setPhonePassword( '1234', TRUE );
+					$uf->setPhonePassword( '1234' );
 				}
 
 				$uf->setFirstName( 'Mr.' );

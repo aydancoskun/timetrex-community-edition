@@ -72,7 +72,7 @@ class DBError extends Exception {
 				$code = 'DBInvalidByteSequence';
 			} elseif ( stristr( $e->getMessage(), 'could not serialize' ) !== FALSE) {
 				$code = 'DBSerialize';
-			} elseif ( stristr( $e->getMessage(), 'deadlock' ) !== FALSE OR stristr( $e->getMessage(), 'concurrent' ) !== FALSE ) {
+			} elseif ( stristr( $e->getMessage(), 'deadlock' ) !== FALSE OR stristr( $e->getMessage(), 'lock timeout' ) !== FALSE OR stristr( $e->getMessage(), 'concurrent' ) !== FALSE ) {
 				$code = 'DBDeadLock';
 			} elseif ( stristr( $e->getMessage(), 'server has gone away' ) !== FALSE OR stristr( $e->getMessage(), 'closed the connection unexpectedly' ) !== FALSE OR stristr( $e->getMessage(), 'execution was interrupted' ) !== FALSE ) { //Connection was lost after it was initially made.
 				$code = 'DBConnectionLost';
@@ -183,6 +183,9 @@ class DBError extends Exception {
 		return TRUE;
 	}
 }
+
+//Used by RetryTransaction() when a nested retry block fails, so we can detect it and trigger the outer most retry block to retry from the scratch.
+class NestedRetryTransaction extends Exception {}
 
 /**
  * @package Core

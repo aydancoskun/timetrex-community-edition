@@ -523,7 +523,6 @@ class PunchControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setQuantity( $value) {
-		$value = TTi18n::parseFloat( $value );
 		if ( $value == FALSE OR $value == 0 OR $value == '' ) {
 			$value = 0;
 		}
@@ -543,7 +542,6 @@ class PunchControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setBadQuantity( $value) {
-		$value = TTi18n::parseFloat( $value );
 		if ( $value == FALSE OR $value == 0 OR $value == '' ) {
 			$value = 0;
 		}

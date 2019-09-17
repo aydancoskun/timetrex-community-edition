@@ -912,6 +912,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				$this.getScheduleTotalTime();
 			} );
 		} else {
+
 			this.hideAdvancedFields();
 			if ( this.edit_view_ui_dic.date_stamp ) {
 				this.edit_view_ui_dic.date_stamp.parents( '.edit-view-form-item-div' ).show();
@@ -930,20 +931,13 @@ RequestViewController = RequestViewCommonController.extend( {
 
 				this.api_request_schedule.getRequestScheduleDefaultData( filter, {
 					onResult: function( res ) {
+
 						data = res.getResult();
-
-						//Now that we call this function all the time with onTypeChanged(), we need to honor data passed in from onAddClick() and merge it with the default data obtained here.
-						//  This is so default data appears when  the user goes to Attendance -> TimeSheet, clicks "Add Request", then changes the type to Schedule Adjustment
-						//  As well as when they go to Attendance -> Schedule, and clicks on an existing shift and clicks "Add Request" as well.
-						if ( $this._on_add_click_data ) {
-							delete $this._on_add_click_data['type_id']; //Remove the type_id, otherwise the user can never switch the type, as it will always swap back to the original when the view first launched.
-							data = $.extend( {}, data, $this._on_add_click_data );
-						}
-
 						data.request_schedule_status_id = data.status_id;
 						data.date_stamp = data.start_date;
 
-						$this.setDefaultData( data, true ); //force = true is required to set the current_edit_record and populate edit_view_ui_dic
+						//force = true is required to set the current_edit_record and populate edit_view_ui_dic
+						$this.setDefaultData( data, true );
 						if ( callback_function ) {
 							callback_function();
 						}
@@ -1171,22 +1165,26 @@ RequestViewController = RequestViewCommonController.extend( {
 				this.onWorkingStatusChanged();
 				break;
 			case 'start_date':
-				this.onStartDateChanged();
-				this.onAvailableBalanceChange();
-				this.setRequestFormDefaultData( null, function() {
-					finishFormItemChange();
-				} );
-				needs_callback = true;
 				this.current_edit_record.start_date = this.edit_view_ui_dic.start_date.getValue();
 				this.current_edit_record.date_stamp = this.edit_view_ui_dic.start_date.getValue();
-				break;
-			case 'end_date':
+				this.onStartDateChanged();
+
 				this.onAvailableBalanceChange();
 				this.setRequestFormDefaultData( null, function() {
 					finishFormItemChange();
 				} );
 				needs_callback = true;
+
+				break;
+			case 'end_date':
 				this.current_edit_record.end_date = this.edit_view_ui_dic.end_date.getValue();
+
+				this.onAvailableBalanceChange();
+				this.setRequestFormDefaultData( null, function() {
+					finishFormItemChange();
+				} );
+				needs_callback = true;
+
 				break;
 			case 'start_time':
 			case 'end_time':
@@ -1265,9 +1263,6 @@ RequestViewController = RequestViewCommonController.extend( {
 		this.setCurrentEditViewState( 'new' );
 		this.openEditView();
 		this.buildAddViewUI();
-
-		this._on_add_click_data = data; //Save data originally passed in so we can reference it again setRequestFormDefaultData(), which is called from onTypeChanged();
-
 		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
 		if ( $this.api && typeof $this.api['get' + $this.api.key_name + 'DefaultData'] === 'function' ) {
 			$this.api['get' + $this.api.key_name + 'DefaultData']( {

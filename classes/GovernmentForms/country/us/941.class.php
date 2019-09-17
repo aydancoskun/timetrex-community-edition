@@ -1254,31 +1254,31 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 	function calcL5A2( $value = NULL, $schema = NULL ) {
-		$this->l5a2 = $this->MoneyFormat( ( $this->l5a * $this->social_security_rate ), FALSE );
+		$this->l5a2 = $this->MoneyFormat( bcmul( $this->l5a, $this->social_security_rate ), FALSE );
 
 		return $this->l5a2;
 	}
 
 	function calcL5B2( $value = NULL, $schema = NULL ) {
-		$this->l5b2 = $this->MoneyFormat( ( $this->l5b * $this->social_security_rate ), FALSE );
+		$this->l5b2 = $this->MoneyFormat( bcmul( $this->l5b, $this->social_security_rate ), FALSE );
 
 		return $this->l5b2;
 	}
 
 	function calcL5C2( $value = NULL, $schema = NULL ) {
-		$this->l5c2 = $this->MoneyFormat( ( $this->l5c * $this->medicare_rate ), FALSE );
+		$this->l5c2 = $this->MoneyFormat( bcmul( $this->l5c, $this->medicare_rate ), FALSE );
 
 		return $this->l5c2;
 	}
 
 	function calcL5D2( $value = NULL, $schema = NULL ) {
-		$this->l5d2 = $this->MoneyFormat( ( $this->l5d * $this->medicare_additional_rate ), FALSE );
+		$this->l5d2 = $this->MoneyFormat( bcmul( $this->l5d, $this->medicare_additional_rate ), FALSE );
 
 		return $this->l5d2;
 	}
 
 	function calcL5E( $value = NULL, $schema = NULL ) {
-		$this->l5e = ( $this->l5a2 + $this->l5b2 + $this->l5c2 + $this->l5d2 );
+		$this->l5e = bcadd( bcadd( bcadd( $this->l5a2, $this->l5b2 ), $this->l5c2 ), $this->l5d2 );
 
 		if ( $this->l5e > 0 ) {
 			$this->l4 = TRUE;
@@ -1290,19 +1290,26 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 	function calcL6( $value = NULL, $schema = NULL ) {
-		$this->l6 = ( $this->l3 + $this->l5e + $this->l5f );
+		$this->l6 = bcadd( bcadd( $this->l3, $this->l5e ), $this->l5f );
 
 		return $this->l6;
 	}
 
 	function showL5Warning() {
-		if ( isset( $this->l5_actual_deducted) ) {
+		if ( isset( $this->l5_actual_deducted ) ) {
 			$l5e_actual_diff = round( bcsub( $this->l5_actual_deducted, $this->l5e ), 2 );
-			Debug::Text( 'L5e Actual Difference: ' . $l5e_actual_diff .' L7: '. $this->l7, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Text( 'L5 Actual Deducted: ' . $this->l5_actual_deducted .' L5e: '. $this->l5e, __FILE__, __LINE__, __METHOD__, 10 );
+
+
+			$threshold_diff = abs( $this->l7 * 2 );
+			if ( $threshold_diff == 0 ) {
+				$threshold_diff = 0.01; //Don't show warning if its less than 0.01. This can happen due to PayrollDeduction and how it used to add regular medicare and additional medicare together, then round. It was later switched to rounding them separately before adding.
+			}
+			Debug::Text( 'L5e Actual Difference: ' . $l5e_actual_diff .' L7: '. $this->l7 .' Threshold Diff: '. $threshold_diff, __FILE__, __LINE__, __METHOD__, 10 );
 
 			//Only show warning if Line 13 (Total Deposits for Quarter) is *not* specified. If it is specified assume they don't match what was expected and are making manual corrections/adjustments, so hide the warning.
 			//As a precaution, show warning if calculated vs. actual amount is off more than twice the fraction of cents value.
-			if ( ( ( isset( $this->l13 ) AND (int)$this->l13 == 0 ) OR !isset( $this->l13 ) ) AND abs( $l5e_actual_diff ) > abs( $this->l7 * 2 ) ) { //Was: abs( $l5e_actual_diff ) > ( ( $this->l1 / 100 ) * 12 )
+			if ( ( ( isset( $this->l13 ) AND (int)$this->l13 == 0 ) OR !isset( $this->l13 ) ) AND abs( $l5e_actual_diff ) > $threshold_diff ) { //Was: abs( $l5e_actual_diff ) > ( ( $this->l1 / 100 ) * 12 )
 				Debug::Text( 'L5e seems incorrect, show warning...', __FILE__, __LINE__, __METHOD__, 10 );
 				$pdf = $this->getPDFObject();
 
@@ -1330,14 +1337,13 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 	function calcL10( $value, $schema ) {
-		//$this->l10 = ( $this->l6 + $this->l7 + $this->l8 + $this->l9 );
 		$this->l10 = bcadd( bcadd( bcadd( $this->l6, $this->l7), $this->l8 ), $this->l9 );
 
 		return $this->l10;
 	}
 
 	function showSBMisMatchTotals( $value, $schema ) {
-		$schedule_b_total_to_l10_diff = abs( round( ( $this->schedule_b_total - $this->l10 ), 2 ) );
+		$schedule_b_total_to_l10_diff = abs( round( bcsub( $this->schedule_b_total, $this->l10 ), 2 ) );
 		if ( isset($this->schedule_b_total) AND $this->schedule_b_total > 0 AND $schedule_b_total_to_l10_diff > 0 ) {
 			$pdf = $this->getPDFObject();
 
@@ -1351,14 +1357,14 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 	function calcL12( $value, $schema ) {
-		$this->l12 = ( $this->l10 - $this->l11 );
+		$this->l12 = bcsub( $this->l10, $this->l11 );
 
 		return $this->l12;
 	}
 
 	function calcL14( $value, $schema ) {
 		if ( $this->l13 != '' AND $this->l12 > $this->l13 ) {
-			$this->l14 = ( $this->l12 - $this->l13 );
+			$this->l14 = bcsub( $this->l12, $this->l13 );
 
 			return $this->l14;
 		}
@@ -1366,7 +1372,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 
 	function calcL15( $value, $schema ) {
 		if ( $this->l13 > $this->l12 ) {
-			$this->l15 = ( $this->l13 - $this->l12 );
+			$this->l15 = bcsub( $this->l13, $this->l12 );
 
 			return $this->l15;
 		}
@@ -1374,7 +1380,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 
 	function showL16MisMatchTotals() {
 		if ( isset( $this->l16_month_total ) AND $this->l16_month_total > 0 AND isset( $this->l12 ) AND $this->l12 > 0 ) {
-			$l16_to_l12_diff = abs( round( ( $this->l16_month_total - $this->l12 ), 2 ) );
+			$l16_to_l12_diff = abs( round( bcsub( $this->l16_month_total, $this->l12 ), 2 ) );
 			if ( $l16_to_l12_diff > 0 ) {
 				Debug::Text( 'L16 seems incorrect, show warning...', __FILE__, __LINE__, __METHOD__, 10 );
 				$pdf = $this->getPDFObject();
@@ -1391,7 +1397,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 	function calcL16MonthTotal( $value, $schema ) {
-		$this->l16_month_total = ( $this->l16_month1 + $this->l16_month2 + $this->l16_month3 );
+		$this->l16_month_total = bcadd( bcadd( $this->l16_month1, $this->l16_month2 ), $this->l16_month3 );
 
 		return $this->l16_month_total;
 	}

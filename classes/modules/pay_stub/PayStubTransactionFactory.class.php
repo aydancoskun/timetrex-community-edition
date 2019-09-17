@@ -1209,6 +1209,12 @@ class PayStubTransactionFactory extends Factory {
 									Debug::Text( 'WARNING: No Payment Service API requests to send...', __FILE__, __LINE__, __METHOD__, 10 );
 								}
 								unset($tt_ps_api_request_arr);
+
+								//rs_obj cleared on save unless passed false
+								$rs_obj->setLastTransactionNumber( $next_transaction_number );
+								if ( $rs_obj->isValid() ) {
+									$rs_obj->Save( FALSE );
+								}
 							}
 						} //end TimeTrex Remittances API loop
 

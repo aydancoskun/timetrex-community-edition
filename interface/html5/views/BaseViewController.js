@@ -3610,8 +3610,7 @@ BaseViewController = Backbone.View.extend( {
 			return;
 		}
 
-		this.navigation.setPossibleDisplayColumns( this.buildDisplayColumnsByColumnModel( this.grid.grid.getGridParam( 'colModel' ) ),
-				this.buildDisplayColumns( this.default_display_columns ) );
+		this.navigation.setPossibleDisplayColumns( this.buildDisplayColumnsByColumnModel( this.grid.getColumnModel() ), this.buildDisplayColumns( this.default_display_columns ) );
 
 		this.navigation.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 
@@ -4221,19 +4220,11 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	getGridSelectIdArray: function() {
-
 		if ( !this.grid ) {
-			return false;
+			return []; //Return empty array so .length on the result doesn't fail with Cannot read property 'length' of undefined
 		}
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=RecurringScheduleTemplateControl line 1007
-		var result = this.grid.grid.getGridParam( 'selarrrow' );
-
-		if ( !result ) {
-			result = [];
-		}
-
-		return result;
+		return this.grid.getSelectedRows();
 	},
 
 	setDefaultMenuAddIcon: function( context_btn, grid_selected_length, pId ) {
@@ -5895,7 +5886,7 @@ BaseViewController = Backbone.View.extend( {
 
 	//Bind column click event to change sort type and save columns to t_grid_header_array to use to set column style (asc or desc)
 	bindGridColumnEvents: function() {
-		var display_columns = this.grid.grid.getGridParam( 'colModel' );
+		var display_columns = this.grid.getColumnModel();
 
 		if ( !display_columns ) {
 			return;
@@ -7865,7 +7856,7 @@ BaseViewController = Backbone.View.extend( {
 				Debug.Text( 'SubView resize triggered', 'BaseViewController.js', 'BaseViewController', 'setGridSize', 10 );
 				if ( sub_view_grid_autosize && sub_view_grid_autosize === true ) {
 
-					var length = this.grid.grid.getGridParam( 'reccount' );
+					var length = this.grid.getRecordCount();
 
 					var cell_height = this.grid.grid.find( 'tr:last td:first' ).height();
 					if ( cell_height < 18 ) {

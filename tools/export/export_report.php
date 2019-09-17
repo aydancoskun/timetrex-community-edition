@@ -39,7 +39,10 @@ if ( PHP_SAPI != 'cli' ) {
 }
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'api'. DIRECTORY_SEPARATOR .'client'. DIRECTORY_SEPARATOR .'TimeTrexClientAPI.class.php');
 
-//Example: php export_report.php -server "http://192.168.1.1/timetrex/api/soap/api.php" -username myusername -password mypass -report UserSummaryReport -template "by_employee+contact" /tmp/employee_list.csv csv
+//Example:	php export_report.php -server "http://192.168.1.1/timetrex/api/soap/api.php" -username myusername -password mypass -report UserSummaryReport -template "by_employee+contact" /tmp/employee_list.csv csv
+//			php export_report.php -server "http://192.168.1.1/timetrex/api/soap/api.php" -username myusername -password mypass -report UserSummaryReport -time_period last_year /tmp/employee_list.csv csv
+//			php export_report.php -server "http://192.168.1.1/timetrex/api/soap/api.php" -username myusername -password mypass -report UserSummaryReport -time_period custom_date -filter start_date=01-Jan-19,end_date=31-Jan-19 /tmp/employee_list.csv csv
+//			php export_report.php -server "http://192.168.1.1/timetrex/api/soap/api.php" -username myusername -password mypass -report UserSummaryReport -time_period custom_date -filter date_stamp="\=>29-Jun-19 & <\=29-Jun-19" /tmp/employee_list.csv csv
 if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output = "Usage: export_report.php [OPTIONS] [output file] [file format]\n";
 	$help_output .= "\n";
@@ -171,8 +174,8 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 			$config = $config_result->getResult();
 		}
 
-		if ( $time_period != '' AND isset($config['-1010-time_period']) ) {
-			$config['-1010-time_period']['time_period'] = $time_period;
+		if ( $time_period != '' ) {
+			$config['time_period']['time_period'] = $time_period;
 		}
 
 		if ( isset($override_filter) AND is_array( $override_filter ) ) {

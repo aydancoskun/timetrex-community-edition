@@ -1096,6 +1096,7 @@ class LegalEntityFactory extends Factory {
 				Debug::Text('Adding default source account...', __FILE__, __LINE__, __METHOD__, 10);
 				//Create a Check Remittance Source account for each legal entity by default.
 				$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */
+				$rsaf->setCompany( $this->getCompany() );
 				$rsaf->setLegalEntity( $this->getId() );
 				$rsaf->setStatus( 10 ); //Enabled
 				$rsaf->setCurrency( $this->getCompanyObject()->getDefaultCurrency() );
@@ -1107,6 +1108,8 @@ class LegalEntityFactory extends Factory {
 				$rsaf->setDataFormat( 10 );
 				if ( $rsaf->isValid() ) {
 					$rsaf->Save();
+				} else {
+					Debug::Text('ERROR: Unable to create default remittance source account!', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 

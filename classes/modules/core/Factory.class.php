@@ -2564,6 +2564,7 @@ abstract class Factory {
 		if ( $e instanceof Exception AND $e->getMessage() != ''
 				AND ( stristr( $e->getMessage(), 'could not serialize' ) !== FALSE
 						OR stristr( $e->getMessage(), 'deadlock' ) !== FALSE
+						OR stristr( $e->getMessage(), 'lock timeout' ) !== FALSE
 						OR stristr( $e->getMessage(), 'current transaction is aborted' ) !== FALSE ) //There seems to be cases wher the "could not serialize" error is not picked up by PHP and therefore not triggered, so on the next query we get this error instead.
 		) {
 			return TRUE;
@@ -2581,11 +2582,14 @@ abstract class Factory {
 	 * @throws DBError
 	 */
 	function RetryTransaction( $transaction_function, $retry_max_attempts = 4, $retry_sleep = 1 ) { //When changing function definition, also see APIFactory->RetryTransaction()
+		$is_nested_retry_transaction = FALSE;
+
 		if ( $this->db->transCnt > 0 ) {
 			//This can happen during import validation, because we need to wrap everything in a transaction that will always be rolled back.
-			Debug::text('WARNING: RetryTransaction called from within a transaction, as the entire transaction cant be rolled back max retry attempts will be 1.', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'WARNING: RetryTransaction called from within a transaction, as the entire transaction cant be rolled back max retry attempts will be 1. Trans Cnt: ' . $this->db->transCnt, __FILE__, __LINE__, __METHOD__, 10 );
 			//throw new Exception('ERROR: RetryTransaction cannot be called from within a transaction, as the entire transaction cant be rolled back then...');
 			$retry_max_attempts = 1;
+			$is_nested_retry_transaction = TRUE;
 		}
 
 		if ( $retry_max_attempts < 1 ) { //Make sure max attempts is set to at least 1.
@@ -2605,43 +2609,54 @@ abstract class Factory {
 
 				$this->cache->_caching = FALSE; //Disable caching when retrying blocks of transaction, since we can't rollback cached data.
 
-				Debug::text('==================START: TRANSACTION BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text( '==================START: TRANSACTION BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10 );
 				$retval = $transaction_function(); //This function should call StartTransaction() at the beginning, and CommitTransaction() at the end.
-				Debug::text('==================END: TRANSACTION BLOCK=====================================', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text( '==================END: TRANSACTION BLOCK=====================================', __FILE__, __LINE__, __METHOD__, 10 );
 
 				$this->cache->_caching = $current_cache_state;
 			} catch ( Exception $e ) {
-				//When we get here, fail transaction should already be called.
-				// But if it hasn't, call it again just in case.
-				if ( $this->db->_transOK == TRUE ) {
-					$this->FailTransaction();
+				if ( $is_nested_retry_transaction == TRUE ) {
+					//If we are inside a nested retry transaction block that fails, we can't fail/retry just part of the transaction,
+					// so instead immediately re-throw a new NestedRetryTransaction exception so we can pass that up to the outer retry transaction block, for retrying at the outer most retry block instead.
+					// Don't need to bother with any sleep intervals, or transaction fail/commit calls, as the outer block will handle that itself.
+					// See APIAuthorization->setAuthorization() and search for "NestedRetryTransaction" for example usage.
+					Debug::text( 'WARNING: Inner nested RetryTransaction failed, passing exception to outer block for retry there...', __FILE__, __LINE__, __METHOD__, 10 );
+					throw new NestedRetryTransaction( $e ); //'SQL exception in Nested RetryTransaction...'
+				} else {
+					//When we get here, fail transaction should already be called.
+					// But if it hasn't, call it again just in case.
+					if ( $this->db->_transOK == TRUE ) {
+						$this->FailTransaction();
+					}
+
+					$this->CommitTransaction( TRUE ); //Make sure we fully unnest all transactions so the retry is in a good state that can be fully restarted.
+
+					$random_sleep_interval = ( ceil( ( rand() / getrandmax() ) * ( ( $tmp_sleep * 0.33 ) * 2 ) - ( $tmp_sleep * 0.33 ) ) ); //+/- 33% of the sleep time.
+
+					Debug::text( 'WARNING: SQL query failed, likely due to transaction isolation: Retry Attempt: ' . $retry_attempts . ' Sleep: ' . ( $tmp_sleep + $random_sleep_interval ) . '(' . $tmp_sleep . ') Code: ' . $e->getCode() . ' Message: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::text( '==================END: TRANSACTION BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10 );
+
+					if ( $retry_attempts < ( $retry_max_attempts - 1 ) ) { //Don't sleep on the last iteration as its serving no purpose.
+						usleep( $tmp_sleep + $random_sleep_interval );
+					}
+
+					$tmp_sleep = ( $tmp_sleep * 2 ); //Exponential back-off with 25% of retry sleep time as a random value.
+					$retry_attempts++;
+
+					continue;
 				}
-				$this->CommitTransaction( TRUE ); //Make sure we fully unnest all transactions so the retry is in a good state that can be fully restarted.
-
-				$random_sleep_interval = ( ceil( ( rand() / getrandmax() ) * ( ( $tmp_sleep * 0.33 ) * 2 ) - ( $tmp_sleep * 0.33 ) ) ); //+/- 33% of the sleep time.
-
-				Debug::text('WARNING: SQL query failed, likely due to transaction isolation: Retry Attempt: '. $retry_attempts .' Sleep: '. ( $tmp_sleep + $random_sleep_interval ) .'('. $tmp_sleep .') Code: '. $e->getCode() .' Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
-				Debug::text('==================END: TRANSACTION BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10);
-
-				if ( $retry_attempts < ( $retry_max_attempts -1 ) ) { //Don't sleep on the last iteration as its serving no purpose.
-					usleep( $tmp_sleep + $random_sleep_interval );
-				}
-
-				$tmp_sleep = ( $tmp_sleep * 2 ); //Exponential back-off with 25% of retry sleep time as a random value.
-				$retry_attempts++;
-
-				continue;
 			}
 			break;
 		}
 
-		if ( isset( $e ) ) { //$retry_attempts >= $retry_max_attempts ) { //Allow retry_max_attempst to be set at 0 to prevent any retries and fail without an error.
-			Debug::text('ERROR: SQL query failed after max attempts: '. $retry_attempts .' Max: '. $retry_max_attempts, __FILE__, __LINE__, __METHOD__, 10);
+		if ( isset( $e ) ) {
+			Debug::text( 'ERROR: SQL query failed after max attempts: ' . $retry_attempts . ' Max: ' . $retry_max_attempts, __FILE__, __LINE__, __METHOD__, 10 );
 			throw new DBError( $e );
 		}
 
 		if ( isset( $retval ) ) {
-			Debug::Arr( $retval, 'Returning Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Arr( $retval, 'Returning Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+
 			return $retval;
 		}
 

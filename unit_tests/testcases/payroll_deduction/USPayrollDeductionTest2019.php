@@ -448,6 +448,7 @@ class USPayrollDeductionTest2019 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeMedicare() ), '14.50' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
+		$this->assertEquals( $this->mf( $pd_obj->getMedicareAdditionalEmployerThreshold() ), '200000.00' );
 	}
 	function testUS_2019a_Additional_MedicareB() {
 		Debug::text('US - SemiMonthly - Beginning of 2019 01-Jan-2019: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -471,6 +472,7 @@ class USPayrollDeductionTest2019 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeMedicare() ), '19.00' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
+		$this->assertEquals( $this->mf( $pd_obj->getMedicareAdditionalEmployerThreshold() ), '200000.00' );
 	}
 
 	function testUS_2019a_Additional_MedicareC() {
@@ -495,6 +497,7 @@ class USPayrollDeductionTest2019 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeMedicare() ), '23.50' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
+		$this->assertEquals( $this->mf( $pd_obj->getMedicareAdditionalEmployerThreshold() ), '200000.00' );
 	}
 	function testUS_2019a_Additional_MedicareD() {
 		Debug::text('US - SemiMonthly - Beginning of 2019 01-Jan-2019: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -518,6 +521,7 @@ class USPayrollDeductionTest2019 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '500000.00' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeMedicare() ), '9950.00' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '7250.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getMedicareAdditionalEmployerThreshold() ), '200000.00' );
 	}
 
 	function testUS_2019a_FederalUI_NoState() {

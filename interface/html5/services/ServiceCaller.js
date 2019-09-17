@@ -304,17 +304,23 @@ var ServiceCaller = Backbone.Model.extend( {
 			ProgressBar.showProgressBar( message_id );
 		}
 
+		var custom_headers = {
+			//#1568  -  Add "fragment" to POST variables in API calls so the server can get it...
+			//Encoding is a must, otherwise HTTP requests will be corrupted on some web browsers (ie: Mobile Safari)
+			//This caused the corrupted requests for things like: "POST_/api/json/api_php?Class"
+			//Also it must use dashes instead of underscores for separators.
+			'Request-Uri-Fragment': encodeURIComponent( LocalCacheData.fullUrlParameterStr )
+		};
+
+		if ( Global.getInternalIP() != '' ) {
+			custom_headers['X-Internal-Remote-Addr'] = Global.getInternalIP();
+		};
+
 		$.ajax(
 			{
 				dataType: 'JSON',
 				data: apiArgs,
-				headers: {
-					//#1568  -  Add "fragment" to POST variables in API calls so the server can get it...
-					//Encoding is a must, otherwise HTTP requests will be corrupted on some web browsers (ie: Mobile Safari)
-					//This caused the corrupted requests for things like: "POST_/api/json/api_php?Class"
-					//Also it must use dashes instead of underscores for separators.
-					'Request-Uri-Fragment': encodeURIComponent( LocalCacheData.fullUrlParameterStr ),
-				},
+				headers: custom_headers,
 				type: 'POST',
 				async: async,
 				url: url,

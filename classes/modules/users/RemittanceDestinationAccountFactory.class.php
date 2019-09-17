@@ -1173,15 +1173,15 @@ class RemittanceDestinationAccountFactory extends Factory {
 	/**
 	 * @return bool
 	 */
-	function preSave() {
-		$this->setCurrency( TTUUID::getZeroID() );
-		if ( $this->getRemittanceSourceAccount() == TTUUID::getZeroID() ) {
-			Debug::Text('WARNING: Remittance Source Account is blank, disabling destination account...', __FILE__, __LINE__, __METHOD__, 10);
-			$this->setStatus(20);
-		} else {
+	function preValidate() {
+		if ( is_object( $this->getRemittanceSourceAccountObject() ) == TRUE ) {
 			//FIXME: Remove this if we enable the currency field in the UI.
 			//This was done because we don't need to be able to edit the destination account currency via the UI at this time, and destinations currencies will match source currencies now.
 			$this->setCurrency( $this->getRemittanceSourceAccountObject()->getCurrency() );
+		} else {
+			Debug::Text('WARNING: Remittance Source Account is blank/invalid, disabling destination account...', __FILE__, __LINE__, __METHOD__, 10);
+			$this->setCurrency( TTUUID::getZeroID() );
+			$this->setStatus(20);
 		}
 
 		if ( $this->getDeleted() == TRUE ) {

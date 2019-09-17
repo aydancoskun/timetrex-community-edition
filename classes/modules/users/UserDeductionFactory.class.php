@@ -875,10 +875,10 @@ class UserDeductionFactory extends Factory {
 					$percent_amount = bcmul($amount, bcdiv($percent, 100) );
 
 					if ( $percent_amount != 0 ) {
-						$filtered_amount = Misc::getAmountUpToLimit( $percent_amount, $target_amount );
+						$filtered_amount = Misc::getAmountToLimit( $percent_amount, $target_amount );
 						Debug::Text('  Filtered Amount: '. $filtered_amount .' YTD Amount: '. $ytd_amount, __FILE__, __LINE__, __METHOD__, 10);
 
-						$filtered_ytd_amount = Misc::getAmountDifferenceUpToLimit( $ytd_amount, $target_ytd_amount );
+						$filtered_ytd_amount = Misc::getAmountDifferenceToLimit( $ytd_amount, $target_ytd_amount );
 						Debug::Text('  Filtered YTD Amount: '. $filtered_ytd_amount .' YTD Amount: '. $ytd_amount, __FILE__, __LINE__, __METHOD__, 10);
 
 						//Choose whichever filtered amount is lower.
@@ -1178,16 +1178,16 @@ class UserDeductionFactory extends Factory {
 				}
 				$target_amount = $this->Validator->stripNonFloat( $target_amount );
 
-				Debug::Text('Amount: '. $fixed_amount .' Target Amount: '. $target_amount, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text('Fixed Amount: '. $fixed_amount .' Target Amount: '. $target_amount, __FILE__, __LINE__, __METHOD__, 10);
 
 				$retval = 0;
 				if ( $fixed_amount != 0 ) {
 					$ytd_amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
 
-					$ytd_amount_remaining = Misc::getAmountDifferenceUpToLimit( $ytd_amount, $target_amount );
-					Debug::Text('  YTD Amount: '. $ytd_amount .' YTD Remaining Amount: '. $ytd_amount_remaining, __FILE__, __LINE__, __METHOD__, 10);
+					$ytd_amount_remaining = Misc::getAmountDifferenceToLimit( $ytd_amount, $target_amount );
 
-					$retval = Misc::getAmountUpToLimit( $ytd_amount_remaining, $fixed_amount );
+					$retval = Misc::getAmountToLimit( $ytd_amount_remaining, $fixed_amount );
+					Debug::Text('  Retval: '. $retval .' YTD Amount: '. $ytd_amount .' YTD Remaining Amount: '. $ytd_amount_remaining, __FILE__, __LINE__, __METHOD__, 10);
 				}
 
 				unset($fixed_amount, $target_amount, $ytd_amount, $ytd_amount_remaining);

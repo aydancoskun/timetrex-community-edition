@@ -135,9 +135,9 @@ Global.sendErrorReport = function() {
 		}
 
 		if ( login_user && Debug.varDump ) {
-			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: ' + login_user.user_name + '\n\nURL: ' + window.location.href + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie + '\n\nCurrent Ping: '+ Global.current_ping + '\n\nIdle Time: '+ Global.idle_time + '\n\nSession ID Key: '+ LocalCacheData.getSessionID() + '\n\nCurrent User Object: \n' + Debug.varDump(login_user) + '\n\nCurrent Company Object: \n' + Debug.varDump(current_company_obj) + '\n\nPreLogin: \n' + Debug.varDump(pre_login_data) + ' ';
+			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: ' + login_user.user_name + '\n\nURL: ' + window.location.href + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE: ' + ie + '\n\nCurrent Ping: '+ Global.current_ping + '\n\nIdle Time: '+ Global.idle_time + '\n\nSession ID Key: '+ LocalCacheData.getSessionID() + '\n\nCurrent User Object: \n' + Debug.varDump(login_user) + '\n\nCurrent Company Object: \n' + Debug.varDump(current_company_obj) + '\n\nPreLogin: \n' + Debug.varDump(pre_login_data) + ' ';
 		} else {
-			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: N/A' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
+			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: N/A' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE: ' + ie;
 		}
 
 		console.error( 'JAVASCRIPT EXCEPTION:\n---------------------------------------------\n' + error + '\n---------------------------------------------' );
@@ -594,7 +594,9 @@ Global.roundTime = function( epoch, round_value, round_type ) {
 },
 
 Global.parseTimeUnit = function( time_unit, format ) {
-	var format;
+	var format, time_unit;
+
+	var time_unit = time_unit.toString(); //Needs to be a string so we can use .charAt and .replace below.
 
 	if ( !format ) {
 		format = LocalCacheData.getLoginUserPreference().time_unit_format;
@@ -602,7 +604,7 @@ Global.parseTimeUnit = function( time_unit, format ) {
 	format = parseInt( format );
 
 	var enable_rounding = true;
-	if ( time_unit.toString().charAt(0) == '"' ) {
+	if ( time_unit.charAt(0) == '"' ) {
 		enable_rounding = false;
 	}
 
@@ -2045,8 +2047,9 @@ Global.loadWidgetByName = function( widgetName, raw_text ) {
 				input = $( input );
 			}
 		} else {
+			//See comment in Global.loadWidget() regarding return null return values.
 			var error_string = $.i18n._( 'Network error, failed to load' ) + ': ' + widgetName + ' ' + $.i18n._( 'Result' ) + ': "' + input + '"';
-			TAlertManager.showNetworkErrorAlert( { status: 200 }, error_string, null ); //Show the user an error popoup.
+			TAlertManager.showNetworkErrorAlert( { status: 999 }, error_string, null ); //Show the user an error popoup.
 			throw( new Error( error_string ) ); //Halt execution and ensure that the email has a good error message because of failure of web server to provide the requested file.
 			input = false;
 		}
@@ -2086,6 +2089,8 @@ Global.loadWidget = function( url ) {
 
 	ProgressBar.removeProgressBar( message_id );
 	//Error: Uncaught ReferenceError: responseText is not defined in interface/html5/global/Global.js?v=9.0.2-20151106-092147 line 1747
+	//  Upon further investigation (IRC discussions on #jQuery) it was suggested to stop using 'async: false' as that could be whats causing a null return value when we are expecting a jqXHR object.
+	//  Since the ultimate goal is to refactor things so .html is embedded in the .js files anyways, may as well just wait for that.
 	if ( !responseData ) {
 		return null;
 	} else {
@@ -4030,7 +4035,92 @@ Global.setStationID = function( val ) {
 };
 
 Global.getStationID = function() {
-	return getCookie( 'StationID' );
+	var retval = getCookie( 'StationID' );
+
+	//Check to see if there is a "sticky" user agent based Station ID defined.
+	if ( navigator.userAgent.indexOf('StationID:') != -1 ) {
+		var regex = /StationID:\s?([a-zA-Z0-9]{30,64})/i;
+		var matches = regex.exec( navigator.userAgent );
+		if ( matches[1] ) {
+			Debug.Text( 'Found StationID in user agent, forcing to that instead!', 'Global.js', '', 'getStationID', 11 );
+			retval = matches[1];
+		}
+		delete regex, matches;
+	}
+
+	return retval;
+};
+
+Global.getInternalIP = function () {
+	if ( window.internal_ips ) {
+		Debug.Text( 'Internal IPs: '+ window.internal_ips, 'Global.js', '', 'getInternalIP', 11 );
+		return window.internal_ips;
+	}
+};
+Global.setInternalIP = function () {
+	//Uses a RTC connection to get the internal IP address of the web browser so it can be used for station restrictions.
+	function getRTCIP() {
+		try { // Handle: Uncaught NotSupportedError: Failed to construct 'RTCPeerConnection': No PeerConnection handler can be created, perhaps WebRTC is disabled?
+			var RTCPeerConnection = window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+
+			if ( RTCPeerConnection ) {
+				var rtc = new RTCPeerConnection( { iceServers: [] } );
+				if ( typeof rtc.createDataChannel === 'function' ) { // This disables the check on Microsoft Edge. It will be switching to Chrome soon anyways.
+					if ( 1 || window.mozRTCPeerConnection ) {      // FF [and now Chrome!] needs a channel/stream to proceed
+						rtc.createDataChannel( '', { reliable: false } );
+					}
+
+					rtc.onicecandidate = function ( evt ) {
+						// convert the candidate to SDP so we can run it through our general parser
+						// see https://twitter.com/lancestout/status/525796175425720320 for details
+						if ( evt.candidate ) grepSDP( 'a=' + evt.candidate.candidate );
+					};
+					rtc.createOffer( function ( offerDesc ) {
+						grepSDP( offerDesc.sdp );
+						rtc.setLocalDescription( offerDesc );
+					}, function ( e ) {
+						console.warn( 'RTC offer failed.', e );
+					} );
+
+					var addrs = Object.create( null );
+					addrs['0.0.0.0'] = false;
+
+					function parseAddr( newAddr ) {
+						if ( newAddr in addrs ) return;
+						else addrs[newAddr] = true;
+						var displayAddrs = Object.keys( addrs ).filter( function ( k ) {
+							return addrs[k];
+						} );
+
+						//Save IP addresses to a global variable for later reading due to async.
+						window.internal_ips = displayAddrs.join( ',' );
+						Debug.Text( 'Setting Internal IPs: ' + window.internal_ips, 'Global.js', '', 'setInternalIP', 11 );
+					}
+
+					function grepSDP( sdp ) {
+						sdp.split( '\r\n' ).forEach( function ( line ) { // c.f. http://tools.ietf.org/html/rfc4566#page-39
+							if ( ~line.indexOf( 'a=candidate' ) ) {     // http://tools.ietf.org/html/rfc4566#section-5.13
+								var parts = line.split( ' ' ),        // http://tools.ietf.org/html/rfc5245#section-15.1
+									addr = parts[4],
+									type = parts[7];
+								if ( type === 'host' ) parseAddr( addr );
+							} else if ( ~line.indexOf( 'c=' ) ) {       // http://tools.ietf.org/html/rfc4566#section-5.7
+								var parts = line.split( ' ' ),
+									addr = parts[2];
+								parseAddr( addr );
+							}
+						} );
+					}
+				}
+			}
+		} catch( e ) {
+			Debug.Text( 'ERROR: Unable to initiate RTC peer connection due to: '+ e.message, 'Global', 'getRTCIP', 10 );
+		}
+	}
+
+	getRTCIP();
+
+	return true;
 };
 
 //#2342 - Close all open edit views from one place.

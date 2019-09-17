@@ -1683,22 +1683,26 @@ class UserDateTotalFactory extends Factory {
 											FALSE,
 											TTi18n::gettext('Please specify an absence type'));
 			}
+		}
 
-			//When calculating all the policies from CalculatePolicy class, skip some validation checks that can't be resolved anyways, so we don't cause the transaction to rollback.
+		//When calculating all the policies from CalculatePolicy class, skip some validation checks that can't be resolved anyways, so we don't cause the transaction to rollback.
+		// Check to make sure absences and manual timesheet time can't be entered before the employees hire date or after termination date.
+		if ( $this->getDeleted() == FALSE AND ( $this->getObjectType() == 10 OR $this->getObjectType() == 50 ) ) { //10=Worked Time, 50=Absence
 			if ( $this->getEnableCalculatePolicy() == FALSE ) {
 				if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $this->getDateStamp() ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
 					$this->Validator->isTRUE( 'date_stamp',
 											  FALSE,
-											  TTi18n::gettext( 'Absence is before employees hire date' ) );
+											  TTi18n::gettext( 'Date is before employees hire date' ) );
 				}
 
 				if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getTerminationDate() != '' AND TTDate::getEndDayEpoch( $this->getDateStamp() ) > TTDate::getEndDayEpoch( $this->getUserObject()->getTerminationDate() ) ) {
 					$this->Validator->isTRUE( 'date_stamp',
 											  FALSE,
-											  TTi18n::gettext( 'Absence is after employees termination date' ) );
+											  TTi18n::gettext( 'Date is after employees termination date' ) );
 				}
 			}
 		}
+
 
 		//Check to make sure if this is an absence row, the absence policy is actually set.
 		//if ( $this->getObjectType() == 50 AND $this->getPayCode() == FALSE ) {

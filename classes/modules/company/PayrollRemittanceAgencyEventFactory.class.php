@@ -813,10 +813,12 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 */
 	function getInTimePeriod() {
 		$current_epoch = time();
+
 		//if ( $current_epoch > $this->getStartDate() AND $current_epoch < $this->getEndDate() ) {
-		if ( $current_epoch < $this->getEndDate()  ) { //per Pay Period frequencies should show a few days in advance, but not be highlighted (black font), so here we just need to check if we haven't passed the end date or not, and ignore the start date.
+		if ( $current_epoch < $this->getEndDate() ) { //per Pay Period frequencies should show a few days in advance, but not be highlighted (black font), so here we just need to check if we haven't passed the end date or not, and ignore the start date.
 			return TRUE;
 		}
+
 		return FALSE;
 	}
 

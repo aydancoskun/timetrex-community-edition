@@ -431,6 +431,28 @@ class TimeTrexClientAPIReturnHandler {
 	}
 
 	/**
+	 * @return bool|string
+	 */
+	function getDetailsDescription() {
+		$details = $this->getDetails();
+		if ( is_array( $details ) ) {
+			$retval = array();
+
+			foreach( $details as $key => $row_details ) {
+				foreach ( $row_details as $field => $field_details ) {
+					foreach( $field_details as $detail ) {
+						$retval[] = '['. $field .'] '. $detail;
+					}
+				}
+			}
+
+			return implode( ' ', $retval );
+		}
+
+		return FALSE;
+	}
+
+	/**
 	 * @return bool
 	 */
 	function getRecordDetails() {

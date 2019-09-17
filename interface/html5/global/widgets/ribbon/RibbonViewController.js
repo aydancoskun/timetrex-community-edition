@@ -432,6 +432,8 @@ RibbonViewController = Backbone.View.extend( {
 		Global.Logout();
 		TopMenuManager.goToView( 'Login' );
 
+		TAlertManager.showBrowserTopBanner();
+
 		return;
 	}
 } );

@@ -243,15 +243,23 @@ class APIAuthorization extends APIFactory {
 						if ( isset( $row['object_type_id'] ) AND $row['object_type_id'] == 90
 								AND isset( $row['object_id'] ) AND $row['object_id'] == TTUUID::getNotExistID()
 								AND isset( $row['user_id'] ) AND isset( $row['pay_period_id'] ) ) {
-							$api_ts = new APITimeSheet();
-							$api_raw_retval = $api_ts->verifyTimeSheet( $row['user_id'], $row['pay_period_id'] );
-							Debug::Arr( $api_raw_retval, 'API Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
-							$api_retval = $this->stripReturnHandler( $api_raw_retval );
-							if ( TTUUID::isUUID( $api_retval ) AND $api_retval != TTUUID::getZeroID() AND $api_retval != TTUUID::getNotExistID() ) {
-								$row['object_id'] = $api_retval;
-							} else {
-								$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $api_raw_retval, $tertiary_validator );
-								$is_valid = $tertiary_validator->isValid( $ignore_warning );
+
+							//Since we are most likely inside a RetryTransaction block already, and verifyTimeSheet() itself is inside one too,
+							// we need rethrow any exceptions to cause the outer nested transaction block to fail and retry as a whole. Since we can't retry just part of the transaction.
+							try {
+								$api_ts = new APITimeSheet();
+								$api_raw_retval = $api_ts->verifyTimeSheet( $row['user_id'], $row['pay_period_id'] );
+								Debug::Arr( $api_raw_retval, 'API Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+								$api_retval = $this->stripReturnHandler( $api_raw_retval );
+								if ( TTUUID::isUUID( $api_retval ) AND $api_retval != TTUUID::getZeroID() AND $api_retval != TTUUID::getNotExistID() ) {
+									$row['object_id'] = $api_retval;
+								} else {
+									$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $api_raw_retval, $tertiary_validator );
+									$is_valid = $tertiary_validator->isValid( $ignore_warning );
+								}
+							} catch ( NestedRetryTransaction $e ) {
+								throw new NestedRetryTransaction( $e ); //This should trigger the outer nested transaction block to fail and retry.
 							}
 						}
 

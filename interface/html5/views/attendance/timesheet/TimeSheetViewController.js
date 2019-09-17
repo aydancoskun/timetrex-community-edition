@@ -3042,13 +3042,12 @@ TimeSheetViewController = BaseViewController.extend( {
 							if ( !_.isObject( item ) ) {
 								continue;
 							}
-							var key = item.date_stamp + '-' + ( ( $this.show_branch_ui && item.branch_id ) ? item.branch_id : TTUUID.zero_id ) +
-								'-' + ( ( $this.show_department_ui && item.department_id ) ? item.department_id : TTUUID.zero_id )
-								+ '-' + ( ( $this.show_job_ui && item.job_id && Global.getProductEdition() >= 20 ) ? item.job_id : TTUUID.zero_id ) +
-								'-' + ( ( $this.show_job_item_ui && item.job_item_id && Global.getProductEdition() >= 20 ) ? item.job_item_id : TTUUID.zero_id ) +
-								'-' + item.total_time;
-							if ( $this.manual_grid_records_map[item.id + '-' + key] ) {
-								$this.manual_grid_records_map[item.id + '-' + key][item.date_stamp].setValue( item.total_time );
+
+							var key = $this.generateManualTimeSheetRecordKey( item, false ); //Don't prepend item_id
+							var item_id_key = item.id + '-' + key;
+
+							if ( $this.manual_grid_records_map[item_id_key] ) {
+								$this.manual_grid_records_map[item_id_key][item.date_stamp].setValue( item.total_time );
 							} else if ( $this.manual_grid_records_map[key] ) {
 								$this.manual_grid_records_map[key].current_edit_item[item.date_stamp] = item;
 								$this.manual_grid_records_map[key][item.date_stamp].setValue( item.total_time );
@@ -4752,6 +4751,8 @@ TimeSheetViewController = BaseViewController.extend( {
 	getRowData: function( grid_id, row_id ) {
 		var $this = this;
 
+		var row_data = null;
+
 		if ( grid_id === 'absence_grid' ) {
 			row_data = $this.absence_grid.getGridParam( 'data' );
 		} else if ( grid_id === 'accumulated_grid' ) {
@@ -4762,7 +4763,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			row_data = $this.grid.getGridParam( 'data' );
 		}
 
-		row = false;
+		var row = false;
 
 		for ( var i in row_data ) {
 			if ( row_data[i].id == row_id ) {
@@ -8007,21 +8008,50 @@ TimeSheetViewController = BaseViewController.extend( {
 		return current_api;
 	},
 
+
+	generateManualTimeSheetRecordKey: function( item, prepend_id ) {
+		var key = item.date_stamp + '-' + ( ( this.show_branch_ui && item.branch_id ) ? item.branch_id : TTUUID.zero_id ) +
+			'-' + ( ( this.show_department_ui && item.department_id ) ? item.department_id : TTUUID.zero_id )
+			+ '-' + ( ( this.show_job_ui && item.job_id && Global.getProductEdition() >= 20 ) ? item.job_id : TTUUID.zero_id ) +
+			'-' + ( ( this.show_job_item_ui && item.job_item_id && Global.getProductEdition() >= 20 ) ? item.job_item_id : TTUUID.zero_id ) +
+			'-' + item.total_time;
+
+		if ( prepend_id == true ) {
+			key = ( ( item.id && item.id != '' ) ? item.id : TTUUID.zero_id ) + '-' + key;
+		}
+
+		return key;
+	},
+
 	createCurrentManualGridRecordsMap: function ( records ) {
-		var $this = this;
 		this.manual_grid_records_map = {};
+
 		for ( var i = 0, m = records.length; i < m; i++ ) {
 			var item = records[i];
-			var key = item.date_stamp + '-' + ( ( this.show_branch_ui && item.branch_id ) ? item.branch_id : TTUUID.zero_id ) +
-				'-' + ( ( this.show_department_ui && item.department_id ) ? item.department_id : TTUUID.zero_id )
-				+ '-' + ( ( this.show_job_ui && item.job_id && Global.getProductEdition() >= 20 ) ? item.job_id : TTUUID.zero_id ) +
-				'-' + ( ( this.show_job_item_ui && item.job_item_id && Global.getProductEdition() >= 20 ) ? item.job_item_id : TTUUID.zero_id ) +
-				'-' + item.total_time;
-			item.id && ( key = item.id + '-' + key );
+
+			var key = this.generateManualTimeSheetRecordKey( item, true ); //Always prepend item.id
+
 			this.manual_grid_records_map[key] = item.row;
+
 			delete item.row;
 		}
 
+	},
+
+	//Don't send records with blank total_time to the API, to better handle cases where the employees hire date is in the middle of the week and they accidently enter time on the Monday, which cause a popup validation error.
+	//This allows them to get out of the scenario by simply clearing out the field or setting it back to 0.
+	filterManualGridRecords: function( records ) {
+		retarr = Array();
+
+		for ( var i = 0; i < records.length; i++ ) {
+			var item = records[i];
+
+			if ( item.id || ( !item.id && item.total_time && item.total_time != 0 ) ) {
+				retarr.push( item );
+			}
+		}
+
+		return retarr;
 	},
 
 	onSaveClick: function ( ignoreWarning ) {
@@ -8036,16 +8066,29 @@ TimeSheetViewController = BaseViewController.extend( {
 				ProgressBar.noProgressForNextCall();
 				this.is_saving_manual_grid = true;
 				this.setDefaultMenu();
-				this.api_user_date_total['set' + this.api_user_date_total.key_name]( records, {
-					onResult: function ( result ) {
-						$this.updateManualGrid();
-					}
-				} );
+
+				records = this.filterManualGridRecords( records );
+				if ( records.length > 0 ) {
+					this.api_user_date_total['set' + this.api_user_date_total.key_name]( records, {
+						onResult: function ( result ) {
+							if ( !result.isValid() ) {
+								TAlertManager.showErrorAlert( result );
+							}
+
+							$this.updateManualGrid();
+						}
+					} );
+
+				} else {
+					$this.updateManualGrid();
+				}
+
 				ProgressBar.showNanobar();
 				ProgressBar.closeOverlay();
 			} else {
 				ProgressBar.closeOverlay();
 			}
+
 			return;
 		}
 

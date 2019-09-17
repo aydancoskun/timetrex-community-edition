@@ -679,7 +679,7 @@ class TTDate {
 			$time_unit_format = self::$time_unit_format;
 		}
 
-		if ( empty($seconds) ) {
+		if ( !is_numeric( $seconds ) ) {
 			switch ($time_unit_format) {
 				case 10: //hh:mm
 					$retval = '00:00';

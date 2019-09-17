@@ -52,5 +52,10 @@
         <testsuite name="i18n">
             <directory suffix=".php">testcases/i18n/</directory>
         </testsuite>
+
+        <testsuite name="Reports">
+            <directory suffix=".php">testcases/report/</directory>
+        </testsuite>
+
     </testsuites>
 </phpunit>

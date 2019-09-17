@@ -541,17 +541,133 @@ class Form940Report extends Report {
 		return $retarr;
 	}
 
+	function _handlePayStubEntryRecord( $user_id, $date_stamp, $row, $setup_data, $form_data, $payments_over_cutoff, $before_adjustment_tax_rate, $excluded_wage_avg = 0, $state_credit_reduction_rates = NULL ) {
+		$legal_entity_id = $row['legal_entity_id'];
+		$quarter_month = TTDate::getYearQuarterMonth( $date_stamp );
+
+		if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['net_payments']) ) {
+			$this->tmp_data['ytd_pay_stub_entry'][$user_id]['net_payments'] = 0;
+		}
+
+		if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['excess_payments']) ) {
+			$this->tmp_data['ytd_pay_stub_entry'][$user_id]['excess_payments'] = 0;
+		}
+
+		$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['exempt_payments'] = Misc::calculateMultipleColumns( $row['psen_ids'], $form_data['exempt_payments']['include_pay_stub_entry_account'], $form_data['exempt_payments']['exclude_pay_stub_entry_account'] );
+
+		//Net Payments are includes/excludes as they already are excluding exempt payments.
+		$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['net_payments'] = Misc::calculateMultipleColumns( $row['psen_ids'], $form_data['total_payments']['include_pay_stub_entry_account'], $form_data['total_payments']['exclude_pay_stub_entry_account'] );
+
+		//Total Payments must include net payments plus all exempt payments, as its later subtracted out on Line 7.
+		$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['total_payments'] = bcadd( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['exempt_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['net_payments'] );
+
+		$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['excess_payments'] = $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['adjustment_tax'] = 0;
+
+		//Need to total up payments for each employee so we know when we exceed the limit.
+		$this->tmp_data['ytd_pay_stub_entry'][ $user_id ]['net_payments'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][ $user_id ]['net_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['net_payments'] );
+
+		if ( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['excess_payments'] == 0  ) {
+			if ( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['net_payments'] > $payments_over_cutoff ) {
+				//Debug::Text(' First time over cutoff for User: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+				$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] = bcsub( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['net_payments'], $payments_over_cutoff );
+				$this->tmp_data['ytd_pay_stub_entry'][$user_id]['excess_payments'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['excess_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] );
+			}
+		} else {
+			//Debug::Text(' Next time over cutoff for User: '. $user_id .' Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
+			$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] );
+		}
+
+		$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'], bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] ) );
+
+
+		//State UI taxable wages - Just need taxable wages up to the federal maximum amount for each state.
+		if ( isset($form_data['state_total_payments']) ) {
+			foreach( $form_data['state_total_payments'] as $state => $state_psen_ids ) {
+
+				//Make sure some state UI was deducted to include the amounts in the state calculation.
+				$state_deducted_amount = Misc::calculateMultipleColumns( $row['psen_ids'], $form_data['state_total_payments'][$state]['pay_stub_entry_account'] );
+				if ( $state_deducted_amount > 0 ) {
+					if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['state'][$state]) ) {
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['state'][$state]['net_payments'] = 0;
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['state'][$state]['excess_payments'] = 0;
+					}
+
+					$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'] = Misc::calculateMultipleColumns( $row['psen_ids'], $form_data['state_total_payments'][ $state ]['include_pay_stub_entry_account'], $form_data['state_total_payments'][ $state ]['exclude_pay_stub_entry_account'] );
+					$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] = bcsub( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['exempt_payments'] );
+					$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] = $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['adjustment_tax'] = 0;
+
+					//Need to total up payments for each employee so we know when we exceed the limit.
+					$this->tmp_data['ytd_pay_stub_entry'][ $user_id ]['state'][ $state ]['net_payments'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][ $user_id ]['state'][ $state ]['net_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] );
+
+					if ( $this->tmp_data['ytd_pay_stub_entry'][ $user_id ]['state'][ $state ]['excess_payments'] == 0 ) {
+						if ( $this->tmp_data['ytd_pay_stub_entry'][ $user_id ]['state'][ $state ]['net_payments'] > $payments_over_cutoff ) {
+							//Debug::Text(' First time over cutoff for User: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+							$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] = ( $this->tmp_data['ytd_pay_stub_entry'][ $user_id ]['state'][ $state ]['net_payments'] - $payments_over_cutoff );
+							$this->tmp_data['ytd_pay_stub_entry'][ $user_id ]['state'][ $state ]['excess_payments'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][ $user_id ]['state'][ $state ]['excess_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] );
+						}
+					} else {
+						//Debug::Text(' Next time over cutoff for User: '. $user_id .' Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
+						$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] = bcadd( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] );
+					}
+
+					$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['taxable_wages'] = bcsub( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'], bcadd( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['exempt_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] ) );
+
+					//Handle state credit reduction rates.
+					if ( isset($state_credit_reduction_rates[$state]) AND $state_credit_reduction_rates[$state] != 0 ) {
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'], $state_credit_reduction_rates[$state] ) );
+						//Debug::Text('   Line 11: Adjustment Tax: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], __FILE__, __LINE__, __METHOD__, 10);
+					}
+
+				}
+			}
+			unset( $state, $state_psen_ids );
+		}
+
+		$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['before_adjustment_tax'] = bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'], $before_adjustment_tax_rate );
+		if (  isset($setup_data['line_10']) AND $setup_data['line_10'] > 0 ) {
+			$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], $excluded_wage_avg );
+			//Debug::Text('   Line 10: Adjustment Tax: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		//Debug::Text(' Total Adjustment Tax: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], __FILE__, __LINE__, __METHOD__, 10);
+		$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['after_adjustment_tax'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['before_adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] );
+
+
+		//Separate data used for reporting, grouping, sorting, from data specific used for the Form.
+		if ( !isset($this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]) ) {
+			$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('total_payments', 'exempt_payments', 'excess_payments', 'taxable_wages', 'before_adjustment_tax', 'adjustment_tax', 'after_adjustment_tax' ), 0 );
+		}
+		$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['total_payments'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['total_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'] );
+		$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['exempt_payments'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['exempt_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'] );
+		$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['excess_payments'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['excess_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] );
+		$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['taxable_wages'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['taxable_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'] );
+		$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['before_adjustment_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['before_adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['before_adjustment_tax'] );
+		$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['adjustment_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] );
+		$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['after_adjustment_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['after_adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['after_adjustment_tax'] );
+
+		return TRUE;
+	}
+
+	function handleLine10Amount( $filter_data, $setup_data ) {
+		if ( TTDate::getDays( $filter_data['end_date'] - $filter_data['start_date'] ) < 360 ) {
+			Debug::Text( ' Report is for less than the entire year, so ignore Line 10 as it can cause problems with Line 17 and per quarter break down.', __FILE__, __LINE__, __METHOD__, 10 );
+			$setup_data['line_10'] = NULL;
+		}
+
+		return $setup_data;
+	}
+
 	/**
 	 * Get raw data for report
 	 * @param null $format
 	 * @return bool
 	 */
 	function _getData( $format = NULL ) {
-		$this->tmp_data = array( 'pay_stub_entry' => array(), 'user_total' => array() );
+		$this->tmp_data = array( 'pay_stub_entry' => array(), 'ytd_pay_stub_entry' => array() );
 
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
-		$setup_data = $this->getFormConfig();
+		$setup_data = $this->handleLine10Amount( $filter_data, $this->getFormConfig() );
 
 		if ( isset($setup_data['total_payments']) ) {
 			unset($setup_data['total_payments'], $form_data['total_payments']); //Ignore any total_payment include/exclude coming from the UI. As its determined from remittance agency data below.
@@ -560,9 +676,13 @@ class Form940Report extends Report {
 		if ( !isset($setup_data['line_10']) ) {
 			$setup_data['line_10'] = NULL;
 		}
-		if ( !isset($setup_data['line_11']) ) {
-			$setup_data['line_11'] = NULL;
-		}
+
+
+
+		$payments_over_cutoff = $this->getF940Object()->payment_cutoff_amount; //Need to get this from the government form.
+		$before_adjustment_tax_rate = $this->getF940Object()->futa_tax_before_adjustment_rate;
+		$tax_rate = $this->getF940Object()->futa_tax_rate;
+		Debug::Text(' Cutoff: '. $payments_over_cutoff .' Before Adjustment Rate: '. $before_adjustment_tax_rate .' Rate: '. $tax_rate .' Line 10: '. $setup_data['line_10'], __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get remittance agency for joining. Also use this to find the Tax/Deduction records to determine the include/exclude pay stub accounts.
 		$filter_data['type_id'] = array(10, 20); //Federal/State (Need State here to determine if they are a multi-state employer or not.
@@ -607,7 +727,6 @@ class Form940Report extends Report {
 							}
 						}
 					}
-
 				}
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
@@ -616,6 +735,54 @@ class Form940Report extends Report {
 			Debug::Arr( $form_data['total_payments'], ' PSE Accounts for Federal Total Payments: ', __FILE__, __LINE__, __METHOD__, 10 );
 			Debug::Arr( $form_data['state_total_payments'], ' PSE Accounts for State Total Payments: ', __FILE__, __LINE__, __METHOD__, 10 );
 		}
+
+		//Need to get totals up to the beginning of this quarter so we can determine if any employees have exceeded the wage limit
+		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
+		$ytd_filter_data = $filter_data;
+		$ytd_filter_data['end_date'] = ( $ytd_filter_data['start_date'] - 1 );
+		$ytd_filter_data['start_date'] = TTDate::getBeginYearEpoch( $ytd_filter_data['start_date'] );
+		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $ytd_filter_data );
+		Debug::Text('YTD Filter Data: Start Date: '. TTDate::getDate('DATE', $ytd_filter_data['start_date'] ) .' End Date: '. TTDate::getDate('DATE', $ytd_filter_data['end_date'] ) .' Rows: '. $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($ytd_filter_data, 'YTD Filter Data: Row Count: '.	$pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $pself->getRecordCount() > 0 ) {
+			foreach( $pself as $pse_obj ) {
+				$user_id = $pse_obj->getColumn('user_id'); //Make sure we don't add this to the unique user_id list.
+				$legal_entity_id = $pse_obj->getColumn('legal_entity_id');
+				//Always use middle day epoch, otherwise multiple entries could exist for the same day.
+				$date_stamp = TTDate::getMiddleDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ) );
+				$branch = $pse_obj->getColumn('default_branch');
+				$department = $pse_obj->getColumn('default_department');
+				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
+
+				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]) ) {
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = array(
+							'legal_entity_id' => $legal_entity_id,
+							'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
+							'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
+							'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+							'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+					);
+				}
+
+				if ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id]) ) {
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
+				} else {
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
+				}
+			}
+
+			if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
+				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
+					foreach($data_a as $date_stamp => $data_b) {
+						$this->_handlePayStubEntryRecord( $user_id, $date_stamp, $data_b, $setup_data, $form_data, $payments_over_cutoff, $before_adjustment_tax_rate );
+					}
+				}
+			}
+			$this->tmp_data['pay_stub_entry'] = array(); //Reset this array once all YTD totals are calculated
+			Debug::Arr($this->tmp_data['ytd_pay_stub_entry'], 'YTD Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		}
+		unset($pse_obj, $user_id, $date_stamp, $branch, $department, $pay_stub_entry_name_id, $this->tmp_data['pay_stub_entry'], $data_a, $data_b );
+
 
 		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array( 'user_id' => 'asc', 'pay_stub_transaction_date' => 'asc' ) );
@@ -646,10 +813,7 @@ class Form940Report extends Report {
 			unset( $legal_entity_id, $user_id, $date_stamp, $pay_stub_entry_name_id, $pse_obj );
 
 			if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
-				$payments_over_cutoff = $this->getF940Object()->payment_cutoff_amount; //Need to get this from the government form.
-				$before_adjustment_tax_rate = $this->getF940Object()->futa_tax_before_adjustment_rate;
-				$tax_rate = $this->getF940Object()->futa_tax_rate;
-				Debug::Text(' Cutoff: '. $payments_over_cutoff .' Before Adjustment Rate: '. $before_adjustment_tax_rate .' Rate: '. $tax_rate .' Line 10: '. $setup_data['line_10'], __FILE__, __LINE__, __METHOD__, 10);
+				$excluded_wage_avg = NULL;
 				if ( $setup_data['line_10'] > 0 ) {
 					//Because they had to fill out a separate worksheet which we don't deal with, just average the excluded wages over each loop iteration.
 					$excluded_wage_divisor = 0;
@@ -662,121 +826,26 @@ class Form940Report extends Report {
 					Debug::Text(' Excluded Wage Avg: '. $excluded_wage_avg .' Divisor: '. $excluded_wage_divisor, __FILE__, __LINE__, __METHOD__, 10);
 					unset($user_id, $data_a, $data_b, $date_stamp);
 				}
-				if ( $setup_data['line_11'] > 0 ) {
-					//Because they had to fill out a separate worksheet which we don't deal with, just average the excluded wages over each loop iteration.
-					$credit_reduction_wage_divisor = 0;
-					foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
-						foreach($data_a as $date_stamp => $data_b) {
-							$credit_reduction_wage_divisor++;
-						}
-					}
-					$credit_reduction_wage_avg = bcdiv( $setup_data['line_11'], $credit_reduction_wage_divisor );
-					Debug::Text(' Excluded Wage Avg: '. $credit_reduction_wage_avg .' Divisor: '. $credit_reduction_wage_divisor, __FILE__, __LINE__, __METHOD__, 10);
-					unset($user_id, $data_a, $data_b, $date_stamp);
+
+				//Get the Form 940 Schedula A object, so we can pull out credit reduction rates from it.
+				$f940sa = $this->getFormObject()->getFormObject( '940sa', 'US' );
+				if ( !defined( 'UNIT_TEST_MODE' ) OR UNIT_TEST_MODE === FALSE ) { //When in unit test mode don't clear form objects so we can run asserts against them.
+					$state_credit_reduction_rates = $f940sa->credit_reduction_rates;
+				} else {
+					$state_credit_reduction_rates = array( 'NY' => 0.014, 'CA' => 0.024 ); //Force credit reduction during unit tests.
 				}
 
 				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
 					foreach($data_a as $date_stamp => $data_b) {
-						$legal_entity_id = $data_b['legal_entity_id'];
-						$quarter_month = TTDate::getYearQuarterMonth( $date_stamp );
 						//Debug::Text(' Quarter Month: '. $quarter_month .' Date: '. TTDate::getDate('DATE+TIME', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
-
-						if ( !isset($this->tmp_data['user_total'][$user_id]) ) {
-							$this->tmp_data['user_total'][$user_id]['net_payments'] = 0;
-							$this->tmp_data['user_total'][$user_id]['excess_payments'] = 0;
-						}
-
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['exempt_payments']['include_pay_stub_entry_account'],	$form_data['exempt_payments']['exclude_pay_stub_entry_account'] );
-
-						//Net Payments are includes/excludes as they already are excluding exempt payments.
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['total_payments']['include_pay_stub_entry_account'], $form_data['total_payments']['exclude_pay_stub_entry_account'] );
-
-						//Total Payments must include net payments plus all exempt payments, as its later subtracted out on Line 7.
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] );
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments']	= $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] = 0;
-
-						//Need to total up payments for each employee so we know when we exceed the limit.
-						$this->tmp_data['user_total'][$user_id]['net_payments'] = bcadd( $this->tmp_data['user_total'][$user_id]['net_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] );
-
-						if ( $this->tmp_data['user_total'][$user_id]['excess_payments'] == 0  ) {
-							if ( $this->tmp_data['user_total'][$user_id]['net_payments'] > $payments_over_cutoff ) {
-								//Debug::Text(' First time over cutoff for User: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] = ( $this->tmp_data['user_total'][$user_id]['net_payments'] - $payments_over_cutoff );
-								$this->tmp_data['user_total'][$user_id]['excess_payments'] = bcadd( $this->tmp_data['user_total'][$user_id]['excess_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] );
-							}
-						} else {
-							//Debug::Text(' Next time over cutoff for User: '. $user_id .' Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] );
-						}
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'], bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] ) );
-
-
-						//State UI taxable wages - Just need taxable wages up to the federal maximum amount for each state.
-						if ( isset($form_data['state_total_payments']) ) {
-							foreach( $form_data['state_total_payments'] as $state => $state_psen_ids ) {
-
-								//Make sure some state UI was deducted to include the amounts in the stat calculation.
-								$state_deducted_amount = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['state_total_payments'][$state]['pay_stub_entry_account'] );
-								if ( $state_deducted_amount > 0 ) {
-									if ( !isset($this->tmp_data['user_total'][$user_id]['state'][$state]) ) {
-										$this->tmp_data['user_total'][$user_id]['state'][$state]['net_payments'] = 0;
-										$this->tmp_data['user_total'][$user_id]['state'][$state]['excess_payments'] = 0;
-									}
-
-									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['state_total_payments'][ $state ]['include_pay_stub_entry_account'], $form_data['state_total_payments'][ $state ]['exclude_pay_stub_entry_account'] );
-									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] = bcsub( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['exempt_payments'] );
-									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] = $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['adjustment_tax'] = 0;
-
-									//Need to total up payments for each employee so we know when we exceed the limit.
-									$this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['net_payments'] = bcadd( $this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['net_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] );
-
-									if ( $this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['excess_payments'] == 0 ) {
-										if ( $this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['net_payments'] > $payments_over_cutoff ) {
-											//Debug::Text(' First time over cutoff for User: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-											$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] = ( $this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['net_payments'] - $payments_over_cutoff );
-											$this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['excess_payments'] = bcadd( $this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['excess_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] );
-										}
-									} else {
-										//Debug::Text(' Next time over cutoff for User: '. $user_id .' Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
-										$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] = bcadd( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] );
-									}
-
-									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['taxable_wages'] = bcsub( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'], bcadd( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['exempt_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] ) );
-								}
-							}
-							unset( $state, $state_psen_ids );
-						}
-
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['before_adjustment_tax'] = bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'], $before_adjustment_tax_rate );
-						if (  isset($setup_data['line_10']) AND $setup_data['line_10'] > 0 ) {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], $excluded_wage_avg );
-							//Debug::Text('   Line 10: Adjustment Tax: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], __FILE__, __LINE__, __METHOD__, 10);
-						}
-						if ( isset($setup_data['line_11']) AND $setup_data['line_11'] > 0 ) {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], $credit_reduction_wage_avg );
-							//Debug::Text('   Line 11: Adjustment Tax: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], __FILE__, __LINE__, __METHOD__, 10);
-						}
-						//Debug::Text(' Total Adjustment Tax: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], __FILE__, __LINE__, __METHOD__, 10);
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['after_adjustment_tax'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['before_adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] );
-
-						//Separate data used for reporting, grouping, sorting, from data specific used for the Form.
-						if ( !isset($this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]) ) {
-							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('total_payments', 'exempt_payments', 'excess_payments', 'taxable_wages', 'before_adjustment_tax', 'adjustment_tax', 'after_adjustment_tax' ), 0 );
-						}
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['total_payments'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['total_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['exempt_payments'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['exempt_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['excess_payments'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['excess_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['taxable_wages'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['taxable_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['before_adjustment_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['before_adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['before_adjustment_tax'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['adjustment_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['after_adjustment_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['after_adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['after_adjustment_tax'] );
+						$this->_handlePayStubEntryRecord( $user_id, $date_stamp, $data_b, $setup_data, $form_data, $payments_over_cutoff, $before_adjustment_tax_rate, $excluded_wage_avg, $state_credit_reduction_rates );
 					}
 				}
-				unset( $legal_entity_id, $quarter_month, $date_stamp, $user_id, $data_a, $data_b );
+				unset( $date_stamp, $user_id, $data_a, $data_b );
 
 				//Total all state amounts
-				if ( isset($this->tmp_data['user_total']) ) {
-					foreach( $this->tmp_data['user_total'] as $user_id => $tmp_state_data ) {
+				if ( isset($this->tmp_data['ytd_pay_stub_entry']) ) {
+					foreach( $this->tmp_data['ytd_pay_stub_entry'] as $user_id => $tmp_state_data ) {
 						if ( isset($tmp_state_data['state']) AND is_array( $tmp_state_data['state'] ) ) {
 							foreach( $tmp_state_data['state'] as $state => $state_data ) {
 								if (  !isset($this->form_data['state'][$state]['excess_payments']) ) {
@@ -813,7 +882,7 @@ class Form940Report extends Report {
 		}
 
 		//Debug::Arr($this->form_data, 'Form Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($this->tmp_data['user_total'], 'Tmp User Total Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->tmp_data['ytd_pay_stub_entry'], 'Tmp User Total Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user data for joining.
@@ -896,8 +965,8 @@ class Form940Report extends Report {
 		}
 		Debug::Text('Generating Form... Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
-		$setup_data = $this->getFormConfig();
 		$filter_data = $this->getFilterConfig();
+		$setup_data = $this->handleLine10Amount( $filter_data, $this->getFormConfig() );
 		//Debug::Arr($filter_data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		$filter_data['end_date'] = isset( $filter_data['end_date'] ) ? $filter_data['end_date'] : NULL;
 		$current_company = $this->getUserObject()->getCompanyObject();
@@ -981,7 +1050,7 @@ class Form940Report extends Report {
 
 				if ( isset( $this->form_data['remittance_agency_states'][$legal_entity_id] ) ) {
 					//Determine which states have FUTA withholdings.
-					if ( isset($this->form_data['state']) AND count($this->form_data['state']) > 1) {
+					if ( isset($this->form_data['state']) AND count($this->form_data['state']) > 1 ) {
 						foreach( $this->form_data['state'] as $state => $tmp_state_data ) {
 							$state_amounts[$state] = bcsub( $tmp_state_data['net_payments'], $tmp_state_data['excess_payments'] );
 						}
@@ -1051,7 +1120,6 @@ class Form940Report extends Report {
 
 					$f940->l9 = ( isset( $setup_data['line_9'] ) AND $setup_data['line_9'] == TRUE ) ? TRUE : FALSE;
 					$f940->l10 = ( isset( $setup_data['line_10'] ) ) ? $setup_data['line_10'] : NULL;
-					//$f940->l11 = ( isset( $setup_data['line_11'] ) ) ? $setup_data['line_11'] : NULL; //Calculated from Schedule A now.
 
 					$f940->l13 = ( isset( $setup_data['tax_deposited'] ) AND $setup_data['tax_deposited'] != '' ) ? $setup_data['tax_deposited'] : NULL;
 
@@ -1092,9 +1160,11 @@ class Form940Report extends Report {
 				$output = $this->getFormObject()->output( $output_format );
 				$file_arr[] = array('file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output);
 
-				$this->clearFormObject();
-				$this->clearF940Object();
-				$this->clearRETURN940Object();
+				if ( !defined( 'UNIT_TEST_MODE' ) OR UNIT_TEST_MODE === FALSE ) { //When in unit test mode don't clear form objects so we can run asserts against them.
+					$this->clearFormObject();
+					$this->clearF940Object();
+					$this->clearRETURN940Object();
+				}
 			}
 		}
 

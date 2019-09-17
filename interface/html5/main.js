@@ -589,19 +589,16 @@ require( [
 
 	is_browser_iOS = ( navigator.userAgent.match( /(iPad|iPhone|iPod)/g ) ? true : false );
 	ie = ( function () {
-		var undef,
-			v = 3,
-			div = document.createElement( 'div' ),
-			all = div.getElementsByTagName( 'i' );
+		var ua = window.navigator.userAgent;
 
-		while (
-			div.innerHTML = '<!--[if gt IE ' + ( ++v ) + ']><i></i><![endif]-->',
-				all[0]
-			) {
-			;
+		var trident = ua.indexOf( 'Trident/' );
+		if ( trident > 0 ) {
+			// IE 11 => return version number
+			var rv = ua.indexOf( 'rv:' );
+			return parseInt( ua.substring( rv + 3, ua.indexOf( '.', rv ) ), 10 );
 		}
 
-		return v > 4 ? v : 11;
+		return null;
 	}() );
 
 	$( function() {
@@ -839,6 +836,8 @@ require( [
 		}
 
 		function initApps() {
+			TAlertManager.showBrowserTopBanner(); //Checks for IE version itself.
+
 			loadViewRequiredJS();
 
 			//Optimization: Only change locale if its *not* en_US or enable_default_language_translation = TRUE

@@ -1136,41 +1136,9 @@ class UserFactory extends Factory {
 	 * @param bool $force
 	 * @return bool
 	 */
-	function setPhonePassword( $phone_password, $force = FALSE ) {
+	function setPhonePassword( $phone_password ) {
 		$phone_password = trim($phone_password);
-
-		$is_new = $this->isNew( TRUE );
-
-		//Phone passwords are now displayed the administrators to make things easier.
-		//NOTE: Phone passwords are used for passwords on the timeclock as well, and need to be able to be cleared sometimes.
-		//Limit phone password to max of 9 digits so we don't overflow an integer on the timeclocks. (10 digits, but maxes out at 2billion)
-		if	(	$phone_password == ''
-				OR (
-				$this->Validator->isRegEx(		'phone_password',
-												$phone_password,
-												TTi18n::gettext('Quick Punch password must be digits only'),
-												$this->phonepassword_validator_regex)
-				AND
-				$this->Validator->isTrue(		'phone_password',
-												( ( $force == FALSE AND $is_new == TRUE AND ( $this->getPhoneId() == $phone_password ) ) ? FALSE : TRUE ),
-												TTi18n::gettext('Quick Punch password must be different then Quick Punch ID') )
-				AND
-				$this->Validator->isTrue(		'phone_password',
-												( ( $force == FALSE AND $is_new == TRUE AND ( $phone_password == '1234' OR $phone_password == '12345' OR strlen( count_chars( $phone_password, 3 ) ) == 1 ) ) ? FALSE : TRUE ),
-												TTi18n::gettext('Quick Punch password is too weak, please try something more secure') )
-				AND
-				$this->Validator->isLength(		'phone_password',
-												$phone_password,
-												TTi18n::gettext('Quick Punch password must be between 4 and 9 digits'),
-												4,
-												9) ) ) {
-
-			$this->setGenericDataValue( 'phone_password', $phone_password );
-
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->setGenericDataValue( 'phone_password', $phone_password );
 	}
 
 	/**
@@ -1640,7 +1608,7 @@ class UserFactory extends Factory {
 	 */
 	function setLongitude( $value ) {
 		if ( is_numeric($value) ) {
-			$value = Misc::removeTrailingZeros( round( (float)TTi18n::parseFloat( $value ), 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+			$value = Misc::removeTrailingZeros( round( (float)$value, 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000 -- Don't use parseFloat() here as it should never be a user input value with commas as decimal symbols.
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
@@ -1661,7 +1629,7 @@ class UserFactory extends Factory {
 	 */
 	function setLatitude( $value ) {
 		if ( is_numeric($value) ) {
-			$value = Misc::removeTrailingZeros( round( (float)TTi18n::parseFloat( $value ), 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+			$value = Misc::removeTrailingZeros( round( (float)$value, 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000 -- Don't use parseFloat() here as it should never be a user input value with commas as decimal symbols.
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
@@ -2595,8 +2563,6 @@ class UserFactory extends Factory {
 	function Validate( $ignore_warning = TRUE ) {
 		global $current_user;
 
-		$data_diff = $this->getDataDifferences();
-
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
@@ -2616,7 +2582,7 @@ class UserFactory extends Factory {
 		}
 
 		// Legal entity
-		if ( $this->getLegalEntity() !== FALSE AND ( ( $this->isNew( TRUE ) == TRUE AND TTUUID::isUUID( $this->getLegalEntity() ) == FALSE ) OR $this->getLegalEntity() == TTUUID::getZeroID() OR $this->getLegalEntity() == TTUUID::getNotExistID() ) ) {
+		if ( $this->getLegalEntity() !== FALSE AND ( ( $this->is_new == TRUE AND TTUUID::isUUID( $this->getLegalEntity() ) == FALSE ) OR $this->getLegalEntity() == TTUUID::getZeroID() OR $this->getLegalEntity() == TTUUID::getNotExistID() ) ) {
 			$this->Validator->isTrue(		'legal_entity_id',
 											 FALSE,
 											 TTi18n::gettext('Legal entity must be specified'));
@@ -2777,7 +2743,7 @@ class UserFactory extends Factory {
 													250
 												);
 		}
-		if ( $this->Validator->isError('user_name') == FALSE ) {
+		if ( $this->getDeleted() == FALSE AND $this->Validator->isError('user_name') == FALSE ) {
 			$this->Validator->isTrue(		'user_name',
 													$this->isUniqueUserName($this->getUserName()),
 													TTi18n::gettext('User name is already taken')
@@ -2805,20 +2771,45 @@ class UserFactory extends Factory {
 														8
 													);
 			}
-			if ( $this->Validator->isError('phone_id') == FALSE ) {
+			if ( $this->getDeleted() == FALSE AND $this->Validator->isError('phone_id') == FALSE ) {
 				$this->Validator->isTrue(		'phone_id',
 														$this->isUniquePhoneId($this->getPhoneId()),
 														TTi18n::gettext('Quick Punch ID is already in use, please try a different one')
 													);
 			}
 		}
+
+		if ( $this->getDeleted() == FALSE AND $this->getPhonePassword() != '' ) {
+			//Phone passwords are now displayed to the administrators to make things easier.
+			//NOTE: Phone passwords are used for passwords on the timeclock as well, and need to be able to be cleared sometimes.
+			//Limit phone password to max of 9 digits so we don't overflow an integer on the timeclocks. (10 digits, but maxes out at 2billion)
+			$this->Validator->isRegEx(		'phone_password',
+											 $this->getPhonePassword(),
+											 TTi18n::gettext('Quick Punch password must be digits only'),
+											 $this->phonepassword_validator_regex);
+
+			$this->Validator->isLength(		'phone_password',
+											   $this->getPhonePassword(),
+											   TTi18n::gettext('Quick Punch password must be between 4 and 9 digits'),
+											   4,
+											   9);
+
+			$this->Validator->isTrue(		'phone_password',
+											( ( DEMO_MODE == FALSE AND ( $this->is_new == TRUE OR $this->getCreatedDate() >= strtotime('2019-07-01') ) AND ( $this->getPhoneId() == $this->getPhonePassword() ) ) ? FALSE : TRUE ),
+											TTi18n::gettext('Quick Punch password must be different then Quick Punch ID') );
+
+			$this->Validator->isTrue(		'phone_password',
+											( ( DEMO_MODE == FALSE AND ( $this->is_new == TRUE OR $this->getCreatedDate() >= strtotime('2019-07-01') ) AND ( $this->getPhonePassword() == '1234' OR $this->getPhonePassword() == '12345' OR strlen( count_chars( $this->getPhonePassword(), 3 ) ) == 1 ) ) ? FALSE : TRUE ),
+											TTi18n::gettext('Quick Punch password is too weak, please try something more secure') );
+		}
+
 		// Employee number
 		if ( $this->getEmployeeNumber() != '' ) {
 			$this->Validator->isNumeric(	'employee_number',
 													$this->getEmployeeNumber(),
 													TTi18n::gettext('Employee number must only be digits')
 												);
-			if ( $this->Validator->isError('employee_number') == FALSE ) {
+			if ( $this->getDeleted() == FALSE AND $this->Validator->isError('employee_number') == FALSE ) {
 				$this->Validator->isTrue(		'employee_number',
 														$this->isUniqueEmployeeNumber($this->getEmployeeNumber()),
 														TTi18n::gettext('Employee number is already in use, please enter a different one')
@@ -3313,7 +3304,7 @@ class UserFactory extends Factory {
 
 		//Need to require password on new employees as the database column is NOT NULL.
 		//However when mass editing, no IDs are set so this always fails during the only validation phase.
-		if ( $this->Validator->getValidateOnly() == FALSE AND $this->isNew( TRUE ) == TRUE AND ( $this->getPassword() == FALSE OR $this->getPassword() == '' ) ) {
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->is_new == TRUE AND ( $this->getPassword() == FALSE OR $this->getPassword() == '' ) ) {
 			$this->setPassword( TTPassword::generateRandomPassword() ); //Default to just some random password instead of making the user decide.
 		}
 
@@ -3337,7 +3328,7 @@ class UserFactory extends Factory {
 			}
 		}
 
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND $this->isNew( TRUE ) == FALSE ) {
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND $this->is_new == FALSE ) {
 			if ( TTUUID::isUUID( $this->getDefaultJob() ) AND $this->getDefaultJob() != TTUUID::getZeroID() AND $this->getDefaultJob() != TTUUID::getNotExistID() ) {
 				$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 				$jlf->getById( $this->getDefaultJob() );
@@ -3403,7 +3394,7 @@ class UserFactory extends Factory {
 
 
 		if ( $ignore_warning == FALSE ) {
-			if ( $this->isNew( TRUE ) == FALSE AND $this->getLegalEntity() != $this->getGenericOldDataValue('legal_entity_id') ) {
+			if ( $this->is_new == FALSE AND $this->getLegalEntity() != $this->getGenericOldDataValue('legal_entity_id') ) {
 				$pslf = TTnew( 'PayStubListFactory'); /** @var PayStubListFactory $pslf */
 				$pslf->getByUserId( $this->getId(), 1 ); //limit 1
 				if ( $pslf->getRecordCount() > 0 ) {
@@ -3447,7 +3438,7 @@ class UserFactory extends Factory {
 					$this->Validator->Warning( 'termination_date', TTi18n::gettext('When setting a termination date retroactively, you may need to recalculate this employees timesheet') );
 				}
 
-				if ( $this->isNew( TRUE ) == FALSE ) {
+				if ( $this->is_new == FALSE ) {
 					//Check to see if worked/absence time exist after termination
 					$udtlf = TTnew('UserDateTotalListFactory'); /** @var UserDateTotalListFactory $udtlf */
 					$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate($this->getCompany(), $this->getID(), array(10,50), ( $this->getTerminationDate() + 86400 ), ( time() + ( 86400 * 365 ) ) );
@@ -3466,16 +3457,18 @@ class UserFactory extends Factory {
 				}
 			}
 
-			//Check for duplicate email addresses and warn about possible account lock-out due to password reset functionality being disabled.
-			if ( $this->isUniqueWorkEmail( $this->getWorkEmail() ) == FALSE ) {
-				$this->Validator->Warning( 'work_email', TTi18n::gettext('Work email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out' ) );
-			}
-			if ( $this->isUniqueHomeEmail( $this->getHomeEmail() ) == FALSE ) {
-				$this->Validator->Warning( 'home_email', TTi18n::gettext('Home email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out' ) );
+			if ( $this->getDeleted() == FALSE ) {
+				//Check for duplicate email addresses and warn about possible account lock-out due to password reset functionality being disabled.
+				if ( $this->isUniqueWorkEmail( $this->getWorkEmail() ) == FALSE ) {
+					$this->Validator->Warning( 'work_email', TTi18n::gettext( 'Work email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out' ) );
+				}
+				if ( $this->isUniqueHomeEmail( $this->getHomeEmail() ) == FALSE ) {
+					$this->Validator->Warning( 'home_email', TTi18n::gettext( 'Home email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out' ) );
+				}
 			}
 
 			//Only when adding a new employee, check if SIN is used by another employee and warn the user in case they are not aware of that and may want to re-activate the existing employee, or not add duplicate employees.
-			if ( $this->isNew( TRUE ) == TRUE AND $this->isUniqueSIN( $this->getSIN() ) == FALSE ) {
+			if ( $this->is_new == TRUE AND $this->isUniqueSIN( $this->getSIN() ) == FALSE ) {
 				$this->Validator->Warning( 'sin', TTi18n::gettext('SIN/SSN is assigned to another employee. Consider reactivating the existing employee instead of creating a new one' ) );
 			}
 		}
@@ -3486,7 +3479,9 @@ class UserFactory extends Factory {
 	/**
 	 * @return bool
 	 */
-	function preSave() {
+	function preValidate() {
+		$this->is_new = $this->isNew( TRUE ); //Remember if this is a new user for postSave(), as well as optimize for Validate()
+
 		if ( $this->getDefaultBranch() == FALSE ) {
 			$this->setDefaultBranch( TTUUID::getZeroID() );
 		}
@@ -3510,11 +3505,6 @@ class UserFactory extends Factory {
 			Debug::text('Clearing password reset data...', __FILE__, __LINE__, __METHOD__, 10);
 			$this->setPasswordResetKey('');
 			$this->setPasswordResetDate('');
-		}
-
-		//Remember if this is a new user for postSave()
-		if ( $this->isNew( TRUE ) ) {
-			$this->is_new = TRUE;
 		}
 
 		return TRUE;
@@ -3749,8 +3739,6 @@ class UserFactory extends Factory {
 
 			$this->clearGeoCode( $data_diff ); //Clear Lon/Lat coordinates when address has changed.
 
-
-
 			//Because old_data hire_date is a date string from the DB and not actually parsed to a epoch yet, we need to parse it here to ensure it has actually changed.
 			if ( is_array($data_diff)
 					AND ( $this->isDataDifferent( 'hire_date', $data_diff, 'date' ) OR $this->isDataDifferent( 'termination_date', $data_diff, 'date' ) ) ) {
@@ -3926,7 +3914,7 @@ class UserFactory extends Factory {
 			}
 		}
 
-		if ( $this->getDeleted() == TRUE OR $this->getStatus() != 10 ) {
+		if ( ( $this->getDeleted() == TRUE OR $this->getStatus() != 10 ) AND is_object( $this->getCompanyObject() ) AND $this->getCompanyObject()->getStatus() == 10 AND $this->getCompanyObject()->getDeleted() == FALSE ) { //Only perform these checks if the company is active. Otherwise we can't delete records for cancelled companies.
 			//Employee is being deleted or inactivated, make sure they are not a company contact, and if so replace them with a new contact.
 			$default_company_contact_user_id = FALSE;
 			if ( in_array( $this->getId(), array( $this->getCompanyObject()->getAdminContact(), $this->getCompanyObject()->getBillingContact(), $this->getCompanyObject()->getSupportContact() ) ) ) {

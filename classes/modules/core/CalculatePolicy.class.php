@@ -4020,10 +4020,9 @@ class CalculatePolicy {
 
 									//Debug::text(' Found Schedule: Start Time: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ), __FILE__, __LINE__, __METHOD__, 10);
 									//Find punches that fall within this schedule time including start/stop window.
-									if ( TTDate::doesRangeSpanMidnight( $s_obj->getStartTime(), $s_obj->getEndTime() ) ) {
+									if ( TTDate::doesRangeSpanMidnight( ( $s_obj->getStartTime() - $s_obj->getStartStopWindow() ), ( $s_obj->getEndTime() + $s_obj->getStartStopWindow() ) ) ) {
 										//Get punches from both days.
 										$plf_tmp = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf_tmp */
-										//$plf_tmp->getShiftPunchesByUserIDAndEpoch( $user_date_obj->getUser(), $s_obj->getStartTime(), 0, $user_date_obj->getPayPeriodObject()->getPayPeriodScheduleObject()->getMaximumShiftTime() );
 										$plf_tmp->getShiftPunchesByUserIDAndEpoch( $user_id, $s_obj->getStartTime(), 0, $premature_delay );
 										Debug::text(' Schedule spans midnight... Found rows from expanded search: '. $plf_tmp->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 										if ( $plf_tmp->getRecordCount() > 0 ) {
@@ -4202,7 +4201,7 @@ class CalculatePolicy {
 										$add_exception = TRUE;
 										Debug::text(' Found Schedule: Start Time: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ), __FILE__, __LINE__, __METHOD__, 10);
 										//Find punches that fall within this schedule time including start/stop window.
-										if ( TTDate::doesRangeSpanMidnight( $s_obj->getStartTime(), $s_obj->getEndTime() ) ) {
+										if ( TTDate::doesRangeSpanMidnight( ( $s_obj->getStartTime() - $s_obj->getStartStopWindow() ), ( $s_obj->getEndTime() + $s_obj->getStartStopWindow() ) ) ) {
 											//Get punches from both days.
 											$plf_tmp = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf_tmp */
 											$plf_tmp->getShiftPunchesByUserIDAndEpoch( $user_id, $s_obj->getStartTime(), 0, $premature_delay );
@@ -5530,7 +5529,7 @@ class CalculatePolicy {
 						if ( is_object( $this->pay_period_obj )
 								AND is_object( $this->pay_period_schedule_obj )
 								AND $this->pay_period_schedule_obj->getTimeSheetVerifyType() > 10 ) {
-							Debug::text('Verification enabled... Window Start: '. TTDate::getDate('DATE+TIME', $this->pay_period_obj->getTimeSheetVerifyWindowStartDate() ) .' Grace Time: '. $ep_obj->getGrace(), __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('V1: Verification enabled... Window Start: '. TTDate::getDate('DATE+TIME', $this->pay_period_obj->getTimeSheetVerifyWindowStartDate() ) .' Grace Time: '. $ep_obj->getGrace(), __FILE__, __LINE__, __METHOD__, 10);
 
 							//*Only* trigger this exception on the last day of the pay period, because when the pay period is verified it has to force the last day to be recalculated.
 							//Ignore timesheets without any time, (worked and absence). Or we could use the Watch Window to specify the minimum time required on
@@ -5539,6 +5538,15 @@ class CalculatePolicy {
 							if (	$this->pay_period_obj->getStatus() != 50
 									AND $current_epoch >= ($this->pay_period_obj->getTimeSheetVerifyWindowStartDate() + $ep_obj->getGrace())
 									AND TTDate::getBeginDayEpoch( $date_stamp ) == TTDate::getBeginDayEpoch( $this->pay_period_obj->getEndDate() )
+									AND
+									//If the employee is hired on the last day of a pay period, allow them to verify that timesheet, so <= is required here.
+									(
+										is_object( $this->getUserObject() )
+										AND
+										( TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) <= TTDate::getMiddleDayEpoch( $this->pay_period_obj->getEndDate() ) )
+										AND
+										( $this->getUserObject()->getTerminationDate() == '' OR ( $this->getUserObject()->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getUserObject()->getTerminationDate() ) >= TTDate::getMiddleDayEpoch( $this->pay_period_obj->getStartDate() ) ) )
+									)
 									) {
 
 									//Get pay period total time, include worked and paid absence time.
@@ -8081,10 +8089,10 @@ class CalculatePolicy {
 				} else {
 					Debug::text('Employee has NOT worked enough days prior or following the holiday!', __FILE__, __LINE__, __METHOD__, 10);
 					if ( $worked_after_days_count < $holiday_policy_obj->getMinimumWorkedAfterDays() ) {
-						$this->is_eligible_holiday_description = TTi18n::getText('Only worked %1 of the required %2 %3 following the holiday', array( $worked_after_days_count, $holiday_policy_obj->getMinimumWorkedAfterDays(), strtolower( Option::getByKey( $holiday_policy_obj->getWorkedAfterScheduledDays(), $holiday_policy_obj->getOptions( 'scheduled_day' ) ) ) ) );
+						$this->is_eligible_holiday_description = TTi18n::getText('Only worked %1 of the required %2 %3 following the holiday', array( $worked_after_days_count, $holiday_policy_obj->getMinimumWorkedAfterDays(), TTi18n::strtolower( Option::getByKey( $holiday_policy_obj->getWorkedAfterScheduledDays(), $holiday_policy_obj->getOptions( 'scheduled_day' ) ) ) ) );
 					}
 					if ( $worked_before_days_count < $holiday_policy_obj->getMinimumWorkedDays() ) {
-						$this->is_eligible_holiday_description = TTi18n::getText('Only worked %1 of the required %2 %3 prior to the holiday', array( $worked_before_days_count, $holiday_policy_obj->getMinimumWorkedDays(), strtolower( Option::getByKey( $holiday_policy_obj->getWorkedScheduledDays(), $holiday_policy_obj->getOptions( 'scheduled_day' ) ) ) ) );
+						$this->is_eligible_holiday_description = TTi18n::getText('Only worked %1 of the required %2 %3 prior to the holiday', array( $worked_before_days_count, $holiday_policy_obj->getMinimumWorkedDays(), TTi18n::strtolower( Option::getByKey( $holiday_policy_obj->getWorkedScheduledDays(), $holiday_policy_obj->getOptions( 'scheduled_day' ) ) ) ) );
 					}
 				}
 			} else {

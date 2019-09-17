@@ -81,7 +81,7 @@ class APIStation extends APIFactory {
 	 * @param int $type_id
 	 * @return array|string
 	 */
-	function getCurrentStation( $station_id = NULL, $type_id = 10 ) {
+	function getCurrentStation( $station_id = NULL, $type_id = 10, $description = NULL ) {
 		//This is normally just called from the main web interface, so if it is try to detect a mobile web browser and switch the type automatically.
 		if ( $type_id == 10 AND Misc::detectMobileBrowser() == TRUE ) {
 			$type_id = 26; //Mobile device web browser
@@ -89,7 +89,7 @@ class APIStation extends APIFactory {
 		}
 
 		$sf = TTNew('StationFactory'); /** @var StationFactory $sf */
-		$retval = $sf->getOrCreateStation( $station_id, $this->getCurrentCompanyObject()->getID(), $type_id, $this->getPermissionObject(), $this->getCurrentUserObject() );
+		$retval = $sf->getOrCreateStation( $station_id, $this->getCurrentCompanyObject()->getID(), $type_id, $description, $this->getPermissionObject(), $this->getCurrentUserObject() );
 
 		if ( is_object($retval) AND isset($retval->Validator) AND $retval->Validator->isValid() == FALSE ) {
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $retval->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0 ) );

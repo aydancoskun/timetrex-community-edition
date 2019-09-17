@@ -428,7 +428,7 @@ class BranchFactory extends Factory {
 	 */
 	function setLongitude( $value ) {
 		if ( is_numeric($value) ) {
-			$value = Misc::removeTrailingZeros( round( (float)TTi18n::parseFloat( $value ), 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+			$value = Misc::removeTrailingZeros( round( (float)$value, 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000 -- Don't use parseFloat() here as it should never be a user input value with commas as decimal symbols.
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
@@ -449,7 +449,7 @@ class BranchFactory extends Factory {
 	 */
 	function setLatitude( $value ) {
 		if ( is_numeric($value) ) {
-			$value = Misc::removeTrailingZeros( round( (float)TTi18n::parseFloat( $value ), 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
+			$value = Misc::removeTrailingZeros( round( (float)$value, 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000 -- Don't use parseFloat() here as it should never be a user input value with commas as decimal symbols.
 		} else {
 			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}

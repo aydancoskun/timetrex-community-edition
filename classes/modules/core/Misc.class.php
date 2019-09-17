@@ -2196,9 +2196,10 @@ class Misc {
 						return TRUE;
 					}
 				} elseif ( isset($_SERVER['HTTP_REFERER']) AND $_SERVER['HTTP_REFERER'] != '' ) {
-					Debug::Text( 'WARNING: CSRF check falling back for legacy browser... Referer: '. $referer, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( 'WARNING: CSRF check falling back for legacy browser... Referer: '. $_SERVER['HTTP_REFERER'], __FILE__, __LINE__, __METHOD__, 10);
 					$referer = $_SERVER['HTTP_REFERER'];
 				} else {
+					Debug::Text( 'WARNING: No HTTP_ORIGIN or HTTP_REFERER headers specified...', __FILE__, __LINE__, __METHOD__, 10);
 					$referer = '';
 				}
 			}
@@ -3250,23 +3251,28 @@ class Misc {
 
 		//This is for the full web interface
 		//IE < 11
-		//Firefox < 24 (52 is latest version on Windows XP)
-		//Chrome < 30 (49 is latest version on Windows XP)
-		//Safari < 5
+		//Edge < 13
+		//Firefox < 43 (52 is latest version on Windows XP)
+		//Chrome < 43 (49 is latest version on Windows XP)
+		//Safari < 7
 		//Opera < 12
 		if ( $browser->getBrowser() == Browser::BROWSER_IE AND version_compare( $browser->getVersion(), 11, '<' ) ) {
 			$retval = TRUE;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_FIREFOX AND version_compare( $browser->getVersion(), 24, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_EDGE AND version_compare( $browser->getVersion(), 13, '<' ) ) {
 			$retval = TRUE;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_CHROME AND version_compare( $browser->getVersion(), 30, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_FIREFOX AND version_compare( $browser->getVersion(), 43, '<' ) ) {
 			$retval = TRUE;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_SAFARI AND version_compare( $browser->getVersion(), 5, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_CHROME AND version_compare( $browser->getVersion(), 43, '<' ) ) {
+			$retval = TRUE;
+		}
+
+		if ( $browser->getBrowser() == Browser::BROWSER_SAFARI AND version_compare( $browser->getVersion(), 7, '<' ) ) {
 			$retval = TRUE;
 		}
 
@@ -3787,27 +3793,30 @@ class Misc {
 	 * @param $limit
 	 * @return int
 	 */
-	static function getAmountUpToLimit( $amount, $limit ) {
+	static function getAmountToLimit( $amount, $limit ) {
 		if ( $amount == 0 ) {
 			return 0;
 		}
 
 		//If no limit is specified, just return the amount.
-		if ( $limit == '' OR $limit === NULL OR $limit === FALSE OR $limit === TRUE ) {
+		if ( $limit == 0 OR $limit === '' OR $limit === NULL OR $limit === FALSE OR $limit === TRUE ) {
 			return $amount;
 		}
 
 		//Cases:
-		// Positive Amount, Positive Limit -- Handle up to limit
-		// Positive Amount, Negative Limit -- Always return 0 as its above limit
-		// Negative Amount, Positive Limit -- Always return negative amount as its below the limit
-		// Negative Amount, Negative Limit -- Handle down to limit
+		// Positive Amount, 0 Limit 		-- Always return the amount as if there is no limit. (handled above)
+		// Positive Amount, Positive Limit 	-- Handle up to limit
+		// Positive Amount, Negative Limit 	-- Always return 0 as they cross 0 and by definition have already crossed the limit.
+		//
+		// Negative Amount, 0 Limit 		-- Always return the amount as if there is no limit. (handled above)
+		// Negative Amount, Positive Limit 	-- Always return 0 as they cross 0 and by definition have already crossed the limit.
+		// Negative Amount, Negative Limit 	-- Handle down to limit
 
 		$retval = 0;
-		if ( $amount > 0 AND $limit <= 0 ) {
+		if ( $amount > 0 AND $limit < 0 ) {
 			$retval = 0;
-		} elseif ( $amount < 0 AND $limit >= 0 ) {
-			$retval = $amount;
+		} elseif ( $amount < 0 AND $limit > 0 ) {
+			$retval = 0;
 		} else {
 			if ( $amount >= 0 ) {
 				if ( $amount >= $limit ) {
@@ -3836,15 +3845,22 @@ class Misc {
 	 * @param $limit
 	 * @return string
 	 */
-	static function getAmountDifferenceUpToLimit( $amount, $limit ) {
+	static function getAmountDifferenceToLimit( $amount, $limit ) {
 		//If no limit is specified, just return the amount.
-		if ( $limit == '' OR $limit === NULL OR $limit === FALSE OR $limit === TRUE ) {
+		if ( $limit === '' OR $limit === NULL OR $limit === FALSE OR $limit === TRUE ) {
 			return $amount;
 		}
 
-		$tmp_amount = self::getAmountUpToLimit( $amount, $limit );
 
-		$retval = bcsub( $limit, $tmp_amount );
+		if ( $amount < 0 AND $limit > 0 ) {
+			$retval = bcadd( abs( $amount ), $limit ); //Return value that gets the amount to the limit.
+		} elseif ( $amount > 0 AND $limit < 0 ) {
+			$retval = bcadd( bcmul( $amount, -1 ), $limit ); //Return value that gets the amount to the limit.
+		} else {
+			$tmp_amount = self::getAmountToLimit( $amount, $limit );
+			$retval = bcsub( $limit, $tmp_amount );
+		}
+
 		return $retval;
 	}
 

@@ -34,6 +34,33 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 		//do render stuff
 	},
 
+	onNextClick: function( e ) {
+		$this = this;
+
+		//Get selected row data so we can determine the time period.
+		if ( this.getStepObject().grid ) {
+			var row_data = this.getStepObject().grid.getRowData( this.getStepObject().grid.getSelectedRow() );
+
+			if ( row_data['in_time_period'] && row_data['in_time_period'] == true ) {
+				TAlertManager.showConfirmAlert( $.i18n._( 'Time period for this event has not ended yet, are you sure you want to process this event early?' ), null, function( flag ) {
+					if ( flag === true ) {
+						triggerOnNextClick();
+					}
+				} );
+			} else {
+				triggerOnNextClick();
+			}
+		} else {
+			triggerOnNextClick();
+		}
+
+		function triggerOnNextClick() {
+			$this._super( 'onNextClick', e );
+		}
+
+		return null;
+	},
+
 	/**
 	 * builds the event data block used on several steps in this wizard.
 	 * @param container_id
@@ -44,7 +71,6 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 		var div = $( '<div id=\'' + container_id + '\' class=\'payroll_remittance_agency_event_wizard_event_details\'><table></table></div>' );
 		var step_obj = this.getStepObject( this.getCurrentStepName() );
 		step_obj.append( div );
-
 
 		var even = false;
 		var td_label, td_value;
@@ -104,6 +130,18 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 				$( '#' + container_id + ' table' ).append( tr );
 			}
 
+			//Show warning if still inside time period.
+			if ( data['in_time_period'] && data['in_time_period'] == true ) {
+				var tr = $( '<tr/>' );
+
+				var row_contents = $( '<td align="center" style="font-weight: bold; color: red;" colspan="4"/>' );
+				row_contents.html( $.i18n._( 'WARNING: Time period has not ended yet, you may be processing early.' ) );
+
+				tr.append( row_contents );
+
+				$( '#' + container_id + ' table' ).append( tr );
+			}
+
 			this.payroll_remittance_agency_event_block = $( '#' + container_id + ' table' ).html();
 		} else {
 			$( '#' + container_id + ' table' ).html( this.payroll_remittance_agency_event_block );
@@ -140,7 +178,8 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 					'frequency': true,
 					'start_date': true,
 					'end_date': true,
-					'due_date': true
+					'due_date': true,
+					'in_time_period': true
 				};
 			} else {
 				filter.columns = columns;

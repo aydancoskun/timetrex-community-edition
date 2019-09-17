@@ -331,6 +331,13 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ), '5,124,095,576,030,431.0000' ); //This is passing a float that is losing precision.
 		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX, PHP_INT_MAX ) ), '5,124,095,576,030,431.0000' );
 		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcadd(PHP_INT_MAX, PHP_INT_MAX ), 660 ) ), '5,124,095,576,030,431.0000' );
+
+		$this->assertEquals( TTDate::getTimeUnit( '' ), '0.00' );
+		$this->assertEquals( TTDate::getTimeUnit( '--' ), '0.00' );
+		$this->assertEquals( TTDate::getTimeUnit( 'XYZ' ), '0.00' );
+		$this->assertEquals( TTDate::getTimeUnit( NULL ), '0.00' );
+		$this->assertEquals( TTDate::getTimeUnit( FALSE ), '0.00' );
+		$this->assertEquals( TTDate::getTimeUnit( TRUE ), '0.00' );
 	}
 
 	function testDate_DMY_1() {

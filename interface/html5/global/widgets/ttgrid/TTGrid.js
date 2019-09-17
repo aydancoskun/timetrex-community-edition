@@ -207,12 +207,65 @@ TTGrid = function( table_id, setup, column_info_array ) {
 		this.grid.setRowData( id, new_record );
 	};
 
+	this.getRowData = function( row_id ) {
+		var row = false;
+
+		var row_data = this.getData();
+
+		for ( var i in row_data ) {
+			if ( row_data[i].id == row_id ) {
+				row = row_data[i];
+				break;
+			}
+		}
+
+		return row;
+	};
+
 	this.getColumnModel = function() {
 		return this.getGridParam( 'colModel' );
 	};
 
 	this.setColumnModel = function( val ) {
 		this.getGridParam( 'colModel', val );
+	};
+
+	this.getRecordCount = function() {
+		if ( !this.grid ) {
+			return false;
+		}
+
+		return this.grid.getGridParam( 'reccount' );
+	};
+
+	//Gets a single row
+	this.getSelectedRow = function() {
+		if ( !this.grid ) {
+			return false;
+		}
+
+		var result = this.grid.getGridParam( 'selrow' );
+
+		if ( !result ) {
+			result = false;
+		}
+
+		return result;
+	};
+
+	//Gets an array of rows if multiple are selected.
+	this.getSelectedRows = function() {
+		if ( !this.grid ) {
+			return []; //Return empty array so .length on the result doesn't fail with Cannot read property 'length' of undefined
+		}
+
+		var result = this.grid.getGridParam( 'selarrrow' );
+
+		if ( !result ) {
+			result = [];
+		}
+
+		return result;
 	};
 
 	this.getSelection = function() {

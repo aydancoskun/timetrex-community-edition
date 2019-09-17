@@ -88,6 +88,16 @@ function getStationID() {
 		$station_id = FALSE;
 	}
 
+	//Check to see if there is a "sticky" user agent based Station ID defined.
+	if ( isset( $_SERVER['HTTP_USER_AGENT'] ) AND $_SERVER['HTTP_USER_AGENT'] != '' AND stripos( $_SERVER['HTTP_USER_AGENT'], 'StationID:' ) !== FALSE ) {
+		if ( preg_match( '/StationID:\s?([a-zA-Z0-9]{30,64})/i', $_SERVER['HTTP_USER_AGENT'], $matches ) > 0 ) {
+			if ( isset( $matches[1] ) ) {
+				Debug::Text( '  Found StationID in user agent, forcing to that instead!', __FILE__, __LINE__, __METHOD__, 10);
+				$station_id = $matches[1];
+			}
+		}
+	}
+
 	return $station_id;
 }
 
