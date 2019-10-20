@@ -1745,6 +1745,8 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 							a.status_id as status_id,
 							a.time_stamp as punch_time_stamp,
 							a.actual_time_stamp as punch_actual_time_stamp,
+							
+							a.has_image as punch_has_image,
 
 							a.created_date as punch_created_date,
 							uf_b.first_name as punch_created_by_first_name,

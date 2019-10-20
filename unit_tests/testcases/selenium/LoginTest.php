@@ -34,10 +34,11 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 require_once( 'TTSeleniumGlobal.php' );
+
 /**
  * @group UI
  */
-class UILoginTest extends TTSeleniumGlobal  {
+class UILoginTest extends TTSeleniumGlobal {
 	public function setUp() {
 		parent::setUp();
 
@@ -51,7 +52,7 @@ class UILoginTest extends TTSeleniumGlobal  {
 	}
 
 	function testUILoginLogout() {
-		$this->Login('demoadmin2','demo.de');
+		$this->Login( 'demoadmin2', 'demo.de' );
 		$this->Logout();
 	}
 
@@ -122,4 +123,5 @@ class UILoginTest extends TTSeleniumGlobal  {
 //		$this->Logout();
 //	}
 }
+
 ?>

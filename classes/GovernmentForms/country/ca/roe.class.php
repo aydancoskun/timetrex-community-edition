@@ -1054,7 +1054,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 					}
 				} else {
 					$xml->ROE[ $e ]->B15C->addChild( 'PP' ); //maxOccurs="53"
-					$xml->ROE[ $e ]->B15C->PP->addAttribute( 'nbr', 0 );
+					$xml->ROE[ $e ]->B15C->PP->addAttribute( 'nbr', 1 );
 					$xml->ROE[ $e ]->B15C->PP->addChild( 'AMT', 0 ); //maxLength 9
 				}
 				// Box16

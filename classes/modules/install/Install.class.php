@@ -1494,7 +1494,7 @@ class Install {
 	 * @return mixed
 	 */
 	function getRecommendedBaseURL() {
-		return str_replace('install', '', dirname( $_SERVER['SCRIPT_NAME'] ) );
+		return str_replace( array( 'install', 'api/json' ), array( '', '' ), dirname( $_SERVER['SCRIPT_NAME'] ) ) .'/interface';
 	}
 
 	/**

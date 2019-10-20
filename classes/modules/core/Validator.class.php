@@ -152,11 +152,11 @@ class Validator {
 	function isNotNull( $label, $value, $msg = NULL) {
 		//Debug::text('Value: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ($value != NULL ) {
+		if ( $value != NULL ) { //== NULL matches on (float)0.0
 			return TRUE;
 		}
 
-		$this->Error($label, $msg, (int)$value );
+		$this->Error($label, $msg, $value );
 
 		return FALSE;
 	}

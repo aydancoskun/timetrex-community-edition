@@ -750,17 +750,13 @@ class UserWageFactory extends Factory {
 													$this->getOptions('type')
 												);
 		}
+
 		// Wage
-		$this->Validator->isNotNull('wage',
+		$this->Validator->isFloat(	'wage',
 											$this->getWage(),
-											TTi18n::gettext('Please specify a wage')
+											TTi18n::gettext('Incorrect Wage')
 										);
-		if ( $this->Validator->isError('wage') == FALSE ) {
-			$this->Validator->isFloat(	'wage',
-												$this->getWage(),
-												TTi18n::gettext('Incorrect Wage')
-											);
-		}
+
 		if ( $this->Validator->isError('wage') == FALSE ) {
 			$this->Validator->isLength(	'wage',
 												$this->getWage(),

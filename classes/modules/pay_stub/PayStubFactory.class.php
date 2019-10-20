@@ -2248,7 +2248,7 @@ class PayStubFactory extends Factory {
 
 		$this->Validator->isTrue(		'entry',
 										FALSE,
-										TTi18n::gettext('Invalid Pay Stub entry'));
+										TTi18n::gettext('Invalid Pay Stub Entry. A Pay Code may not have a Pay Stub Account specified, or amount is invalid'));
 
 		return FALSE;
 	}

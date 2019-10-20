@@ -3161,6 +3161,7 @@ class Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ? count( $this->data ) : 0 ), NULL, TTi18n::getText('Generating HTML...') );
 
 		$static_column_options = (array)Misc::trimSortPrefix( $this->getOptions('static_columns') );
+		$column_format_config = $this->getColumnFormatConfig();
 
 		$sort_by_columns = $this->getSortConfig();
 		$group_by_columns = $this->getGroupConfig();
@@ -3266,7 +3267,11 @@ class Report {
 
 					foreach( $columns as $column => $tmp ) {
 						if ( isset($row[$column]) ) {
-							$value = htmlentities( $row[$column], ENT_QUOTES ); //avoid xss attacks in reports.
+							if ( isset($column_format_config[$column]) AND $column_format_config[$column] == 'html' ) {
+								$value = $row[ $column ]; //Allow raw HTML for displaying images and such.
+							} else {
+								$value = htmlentities( $row[ $column ], ENT_QUOTES ); //avoid xss attacks in reports.
+							}
 						} else {
 							$value = ''; //This needs to be a space, otherwise cells won't be drawn and background colors won't be shown either.
 						}
@@ -3311,16 +3316,23 @@ class Report {
 							unset($n); //code standards
 						} else {
 							$blank_row = FALSE;
-							$this->html .= '<td style="'; // wait for setting the css style in below.
+
+							$this->html .= '<td'; // wait for setting the css style in below.
+
 							//Row formatting...
+							$row_style = '';
 							if ( isset($row['_fontcolor']) AND is_array($row['_fontcolor']) ) {
-								$this->html .= 'color: rgb( '. $row['_fontcolor'][0] .','. $row['_fontcolor'][1] .',' . $row['_fontcolor'][2] . ' );';
+								$row_style .= 'color: rgb( '. $row['_fontcolor'][0] .','. $row['_fontcolor'][1] .',' . $row['_fontcolor'][2] . ' );';
 							}
 							if ( isset($row['_bgcolor']) AND is_array($row['_bgcolor']) ) {
-								$this->html .= 'background-color: rgb( '. $row['_bgcolor'][0] .','. $row['_bgcolor'][1] .',' . $row['_bgcolor'][2] . ' );';
+								$row_style .= 'background-color: rgb( '. $row['_bgcolor'][0] .','. $row['_bgcolor'][1] .',' . $row['_bgcolor'][2] . ' );';
 							}
 
-							$this->html .= '">';
+							if ( $row_style != '' ) {
+								$this->html .= ' style="'. $row_style .'"';
+							}
+
+							$this->html .= '>';
 
 							if ( is_object( $value ) ) {
 								$this->html .= $value->display( 'html', 52, 25 );
@@ -4065,7 +4077,7 @@ class Report {
 	function _pdf_Table() {
 		$this->profiler->startTimer( 'PDF Table' );
 
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->data), NULL, TTi18n::getText('Generating PDF...') );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array($this->data) ? count($this->data) : 0 ), NULL, TTi18n::getText('Generating PDF...') );
 
 		$border = 0;
 

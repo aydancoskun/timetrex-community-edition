@@ -195,6 +195,8 @@ var TAlertManager = (function() {
 					}
 				}
 			} );
+
+			Global.setUIInitComplete();
 		}, 100 );
 
 	};
@@ -252,6 +254,7 @@ var TAlertManager = (function() {
 
 		} );
 
+		Global.setUIInitComplete();
 	};
 
 	var remove = function() {

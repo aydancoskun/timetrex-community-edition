@@ -22,6 +22,7 @@
 			var close_btn = tab.find( '.close-btn' );
 
 			tab.unbind( 'click' ).click( function() {
+				Global.setUINotready();
 				var view_id = $( this ).attr( 'id' ).replace( 'min_tab_', '' );
 				var url = $( this ).attr( 'view_url' );
 				Global.removeViewTab( view_id );

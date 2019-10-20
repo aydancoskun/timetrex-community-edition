@@ -170,11 +170,31 @@ TTPromise = {
 		this.promises = {};
 	},
 
+	isPendingPromises: function( category, key ) {
+		var p = TTPromise.filterPromiseArray( category, key );
+
+		var pending_count = 0;
+		for ( var n in p ) {
+			if ( p[n].state() == 'pending' ) {
+				console.debug( 'Category: ' + p[n].extra_data.category + ' Key: ' + p[n].extra_data.key + ' State: ' + p[n].state() );
+				pending_count++;
+			}
+		}
+
+		if ( pending_count > 0 ) {
+			return true;
+		}
+
+		return false;
+	},
+
 	debugPromises: function( category, key ) {
 		var p = TTPromise.filterPromiseArray( category, key );
+
 		for ( var n in p ) {
 			console.debug( 'Category: ' + p[n].extra_data.category + ' Key: ' + p[n].extra_data.key + ' State: ' + p[n].state() );
 		}
+
 		return true;
 	}
 };

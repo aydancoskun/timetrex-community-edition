@@ -885,7 +885,7 @@ class TimesheetDetailReport extends Report {
 
 		//Now that we only return columns that are displayed, when generating a printable timesheet we need to include the necessary date/time columns that is requires.
 		if ( strpos($format, 'pdf_') !== FALSE ) {
-			$this->setColumnDataConfig( array_merge( $this->getColumnDataConfig(), array( 'time_stamp' => TRUE, 'pay_period' => TRUE ) ) );
+			$this->setColumnDataConfig( array_merge( (array)$this->getColumnDataConfig(), array( 'time_stamp' => TRUE, 'pay_period' => TRUE ) ) );
 		}
 
 		$columns = $this->getColumnDataConfig();

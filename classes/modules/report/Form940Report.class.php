@@ -778,11 +778,12 @@ class Form940Report extends Report {
 					}
 				}
 			}
-			$this->tmp_data['pay_stub_entry'] = array(); //Reset this array once all YTD totals are calculated
+
 			Debug::Arr($this->tmp_data['ytd_pay_stub_entry'], 'YTD Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
-		unset($pse_obj, $user_id, $date_stamp, $branch, $department, $pay_stub_entry_name_id, $this->tmp_data['pay_stub_entry'], $data_a, $data_b );
+		unset($pse_obj, $user_id, $date_stamp, $branch, $department, $pay_stub_entry_name_id, $data_a, $data_b );
 
+		$this->tmp_data['pay_stub_entry'] = array(); //Reset this array once all YTD totals are calculated
 
 		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array( 'user_id' => 'asc', 'pay_stub_transaction_date' => 'asc' ) );

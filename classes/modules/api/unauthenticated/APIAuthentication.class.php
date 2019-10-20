@@ -751,7 +751,7 @@ class APIAuthentication extends APIFactory {
 
 		$subject = 'HTML5 Error Report'; //Don't translate this, as it breaks filters.
 
-		$data = 'IP Address: '. Misc::getRemoteIPAddress() ."\nServer Version: ". APPLICATION_BUILD ."\n\n". $data;
+		$data = 'IP Address: '. Misc::getRemoteIPAddress() ."\nServer Version: ". APPLICATION_BUILD ."\nUser Agent: ". ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A' ) ."\n\n". $data;
 
 		Misc::sendSystemMail( $subject, $data, $attachments ); //Do not send if PRODUCTION=FALSE.
 

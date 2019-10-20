@@ -233,10 +233,10 @@ class PunchSummaryReport extends Report {
 										'-1672-in_station_station_id' => TTi18n::gettext('In Station ID'),
 										'-1673-in_station_source' => TTi18n::gettext('In Station Source'),
 										'-1674-in_station_description' => TTi18n::gettext('In Station Description'),
-										'-1675-out_station_type' => TTi18n::gettext('Out Station Type'),
-										'-1676-out_station_station_id' => TTi18n::gettext('Out Station ID'),
-										'-1677-out_station_source' => TTi18n::gettext('Out Station Source'),
-										'-1678-out_station_description' => TTi18n::gettext('Out Station Description'),
+										'-1680-out_station_type' => TTi18n::gettext('Out Station Type'),
+										'-1681-out_station_station_id' => TTi18n::gettext('Out Station ID'),
+										'-1682-out_station_source' => TTi18n::gettext('Out Station Source'),
+										'-1683-out_station_description' => TTi18n::gettext('Out Station Description'),
 										'-1720-note' => TTi18n::gettext('Note'),
 										'-2100-in_created_date' => TTi18n::gettext('In Created Date'),
 										'-2101-in_created_by' => TTi18n::gettext('In Created By'),
@@ -257,10 +257,13 @@ class PunchSummaryReport extends Report {
 				//Make Long/Lat static so they could group on them if necessary. We can't use sum/avg on them for any useful purpose anyways.
 				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_COMMUNITY ) {
 					$professional_edition_dynamic_columns = array(
-							'-1680-in_longitude' => TTi18n::gettext('In Longitude'),
-							'-1681-in_latitude' => TTi18n::gettext('In Latitude'),
-							'-1682-out_longitude' => TTi18n::gettext('Out Longitude'),
-							'-1683-out_latitude' => TTi18n::gettext('Out Latitude'),
+							'-1710-in_longitude' => TTi18n::gettext('In Longitude'),
+							'-1711-in_latitude' => TTi18n::gettext('In Latitude'),
+							'-1712-out_longitude' => TTi18n::gettext('Out Longitude'),
+							'-1713-out_latitude' => TTi18n::gettext('Out Latitude'),
+
+							'-1675-in_punch_image' => TTi18n::gettext('In Punch Image'),
+							'-1684-out_punch_image' => TTi18n::gettext('Out Punch Image'),
 					);
 					$retval = array_merge( $retval, $professional_edition_dynamic_columns );
 				}
@@ -341,6 +344,7 @@ class PunchSummaryReport extends Report {
 				$retval['in_time_stamp'] = $retval['out_time_stamp'] = $retval['in_actual_time_stamp'] = $retval['out_actual_time_stamp'] = $retval['in_created_date'] = $retval['in_updated_date'] = $retval['out_created_date'] = $retval['out_updated_date'] = $retval['verified_time_sheet_date'] = 'time_stamp';
 				$retval['verified_time_sheet_tainted'] = $retval['tainted'] = 'boolean';
 				$retval['verified_time_sheet_tainted'] = 'boolean';
+				$retval['in_punch_image'] = $retval['out_punch_image'] = 'html';
 				break;
 			case 'aggregates':
 				$retval = array();
@@ -376,14 +380,16 @@ class PunchSummaryReport extends Report {
 										'-1090-by_employee+punch_summary+total_time+actual_time' => TTi18n::gettext('Punch Summary+Actual Time by Employee'),
 										'-1100-by_employee+punch_summary+station_summary+total_time' => TTi18n::gettext('Punch/Station Detail By Employee'),
 
-										'-1110-by_employee+actual_time' => TTi18n::gettext('Actual Time by Employee'),
+										'-3010-by_employee+actual_time' => TTi18n::gettext('Actual Time by Employee'),
 
-										'-1120-by_employee+tainted' => TTi18n::gettext('Tainted Punches By Employee'),
+										'-3020-by_employee+tainted' => TTi18n::gettext('Tainted Punches By Employee'),
 
 
 										//'-1010-by_job+punch_summary+total_time' => TTi18n::gettext('Punch Summary by Job'),
 										//'-1010-by_job_item+punch_summary+total_time' => TTi18n::gettext('Punch Summary by Task'),
-										'-1120-by_employee+verified_time_sheet' => TTi18n::gettext('TimeSheet Verification Tainted'),
+										'-3030-by_employee+verified_time_sheet' => TTi18n::gettext('TimeSheet Verification Tainted'),
+
+										'-3040-by_employee+punch_images' => TTi18n::gettext('Punch Images By Employee'),
 								);
 
 				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -397,6 +403,7 @@ class PunchSummaryReport extends Report {
 									);
 					$retval = array_merge( $retval, $professional_edition_templates );
 				}
+				ksort($retval);
 
 				break;
 			case 'template_config':
@@ -460,6 +467,24 @@ class PunchSummaryReport extends Report {
 							$retval['sort'][] = array('total_punch' => 'desc');
 							$retval['sort'][] = array('last_name' => 'asc');
 							$retval['sort'][] = array('first_name' => 'desc');
+							break;
+						case 'by_employee+punch_images':
+							$retval['-1010-time_period']['time_period'] = 'last_pay_period';
+
+							$retval['columns'][] = 'first_name';
+							$retval['columns'][] = 'last_name';
+
+							$retval['columns'][] = 'in_type';
+							$retval['columns'][] = 'in_time_stamp';
+							$retval['columns'][] = 'in_punch_image';
+							$retval['columns'][] = 'out_type';
+							$retval['columns'][] = 'out_time_stamp';
+							$retval['columns'][] = 'out_punch_image';
+
+							$retval['sort'][] = array('last_name' => 'asc');
+							$retval['sort'][] = array('first_name' => 'asc');
+							$retval['sort'][] = array('date_stamp' => 'asc');
+							$retval['sort'][] = array('in_time_stamp' => 'asc');
 							break;
 						default:
 							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__, 10);
@@ -892,6 +917,12 @@ class PunchSummaryReport extends Report {
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_updated_date'] = TTDate::strtotime( $p_obj->getColumn('punch_updated_date') );
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_updated_by'] = Misc::getFullName( $p_obj->getColumn('punch_updated_by_first_name'), $p_obj->getColumn('punch_updated_by_middle_name'), $p_obj->getColumn('punch_updated_by_last_name'), FALSE, FALSE );
 
+					if ( $format == 'html' AND $p_obj->getColumn('punch_has_image') == TRUE ) {
+						$this->tmp_data['punch'][ $p_obj->getUser() ][ $p_obj->getColumn( 'punch_control_id' ) ]['in_punch_image'] = '<img style="max-width: 150px; max-height: 150px;" src="'. Environment::getBaseURL() .'/send_file.php?object_type=punch_image&parent_id='. $p_obj->getUser() .'&object_id=' . $p_obj->getColumn( 'punch_id' ) .'">';
+					} else {
+						$this->tmp_data['punch'][ $p_obj->getUser() ][ $p_obj->getColumn( 'punch_control_id' ) ]['in_punch_image'] = NULL;
+					}
+
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['total_punch']++;
 				} else {
 					if ( $p_obj->getColumn('longitude') != 0 AND $p_obj->getColumn('latitude') != 0 ) {
@@ -912,6 +943,12 @@ class PunchSummaryReport extends Report {
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_created_by'] = Misc::getFullName( $p_obj->getColumn('punch_created_by_first_name'), $p_obj->getColumn('punch_created_by_middle_name'), $p_obj->getColumn('punch_created_by_last_name'), FALSE, FALSE );
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_updated_date'] = TTDate::strtotime( $p_obj->getColumn('punch_updated_date') );
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_updated_by'] = Misc::getFullName( $p_obj->getColumn('punch_updated_by_first_name'), $p_obj->getColumn('punch_updated_by_middle_name'), $p_obj->getColumn('punch_updated_by_last_name'), FALSE, FALSE );
+
+					if ( $format == 'html' AND $p_obj->getColumn('punch_has_image') == TRUE ) {
+						$this->tmp_data['punch'][ $p_obj->getUser() ][ $p_obj->getColumn( 'punch_control_id' ) ]['out_punch_image'] = '<img style="max-width: 150px; max-height: 150px;" src="'. Environment::getBaseURL() .'/send_file.php?object_type=punch_image&parent_id='. $p_obj->getUser() .'&object_id=' . $p_obj->getColumn( 'punch_id' ) .'">';
+					} else {
+						$this->tmp_data['punch'][ $p_obj->getUser() ][ $p_obj->getColumn( 'punch_control_id' ) ]['out_punch_image'] = NULL;
+					}
 
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['total_punch']++;
 				}

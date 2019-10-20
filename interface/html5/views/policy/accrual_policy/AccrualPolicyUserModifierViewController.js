@@ -49,6 +49,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
+			TTPromise.resolve( 'BaseViewController', 'onTabShow' ); //Since search() isn't called in this case, and we just display the "Please Save This Record ..." message, resolve the promise.
 			return;
 		}
 

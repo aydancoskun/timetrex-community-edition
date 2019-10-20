@@ -3465,20 +3465,6 @@ class CompanyFactory extends Factory {
 					$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
 					$sf->setCompany( $this->getId() );
 					$sf->setStatus( 20 );
-					$sf->setType( 25 ); //WAP
-					$sf->setSource( 'ANY' );
-					$sf->setStation( 'ANY' );
-					$sf->setDescription( 'All WAP devices' );
-					$sf->setGroupSelectionType( 10 );
-					$sf->setBranchSelectionType( 10 );
-					$sf->setDepartmentSelectionType( 10 );
-					if ( $sf->isValid() ) {
-						$sf->Save();
-					}
-
-					$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
-					$sf->setCompany( $this->getId() );
-					$sf->setStatus( 20 );
 					$sf->setType( 26 ); //Mobile web browser
 					$sf->setSource( 'ANY' );
 					$sf->setStation( 'ANY' );

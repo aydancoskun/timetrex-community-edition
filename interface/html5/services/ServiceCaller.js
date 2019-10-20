@@ -1,3 +1,5 @@
+$.xhrPool = [];
+
 var ServiceCaller = Backbone.Model.extend( {
 
 	getOptions: function() {
@@ -254,7 +256,9 @@ var ServiceCaller = Backbone.Model.extend( {
 		}
 
 		message_id = TTUUID.generateUUID();
+
 		TTPromise.add('ServiceCaller', message_id);
+
 		if ( className !== 'APIProgressBar' && function_name !== 'Logout' ) {
 			url = url + '&MessageID=' + message_id;
 		}
@@ -318,6 +322,16 @@ var ServiceCaller = Backbone.Model.extend( {
 				type: 'POST',
 				async: async,
 				url: url,
+				beforeSend: function( jqXHR ) {
+					this.jqXHR = jqXHR;
+					$.xhrPool.push( this ); //Track all pending AJAX requests so we can cancel them if needed.
+				},
+				complete: function( jqXHR ) {
+					var index = $.xhrPool.indexOf( this );
+					if ( index > -1 ) {
+						$.xhrPool.splice( index, 1 ); //Remove completed AJAX request from pool.
+					}
+				},
 				success: function( result ) {
 					//Debug.Arr(result, 'Response from API. message_id: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
 					if ( !Global.isSet( result ) ) {
@@ -338,7 +352,8 @@ var ServiceCaller = Backbone.Model.extend( {
 						TAlertManager.showAlert( apiReturnHandler.getDescription(), 'Error' );
 						//Error: Uncaught ReferenceError: promise_key is not defined
 						if ( typeof promise_key != 'undefined' ) {
-						TTPromise.reject('ServiceCaller',message_id);} else {
+							TTPromise.reject('ServiceCaller', message_id);
+						} else {
 							Debug.Text('ERROR: Unable to release promise because key is NULL.', 'ServiceCaller.js', 'ServiceCaller', null, 10);
 						}
 						return;
@@ -348,7 +363,7 @@ var ServiceCaller = Backbone.Model.extend( {
 						ServiceCaller.cancelAllError = true;
 						LocalCacheData.login_error_string = $.i18n._( 'Session expired, please login again.' );
 						Global.clearSessionCookie(); //This helps skip other API calls or prevent the UI from thinking we are still logged in.
-						if (window.location.href == Global.getBaseURL() + '#!m=' + 'Login') {
+						if ( window.location.href == Global.getBaseURL() + '#!m=' + 'Login') {
 							// Prevent a partially loaded login screen when SessionID cookie is set but not valid on server.
 							window.location.reload();
 						} else {
@@ -366,11 +381,11 @@ var ServiceCaller = Backbone.Model.extend( {
 								}
 							}
 						}
-						TTPromise.resolve('ServiceCaller',message_id);
+						TTPromise.resolve('ServiceCaller', message_id);
 						return;
 					} else if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'DOWN_FOR_MAINTENANCE' ) {
 						//Before the location.replace because after that point we can't be sure of execution.
-						TTPromise.resolve('ServiceCaller',message_id);
+						TTPromise.resolve('ServiceCaller', message_id);
 						//replace instead of assignment to ensure that the DOWN_FOR_MAINTENANCE page does not end up in the back button history.
 						window.location.replace( ServiceCaller.rootURL + LocalCacheData.loginData.base_url  + 'html5/DownForMaintenance.php?exception=DOWN_FOR_MAINTENANCE' );
 						return;
@@ -400,11 +415,11 @@ var ServiceCaller = Backbone.Model.extend( {
 						}
 					}
 
-					TTPromise.resolve('ServiceCaller',message_id);
+					TTPromise.resolve('ServiceCaller', message_id);
 				},
 
 				error: function( jqXHR, textStatus, errorThrown ) {
-					TTPromise.reject('ServiceCaller',message_id);
+					TTPromise.reject('ServiceCaller', message_id);
 					if ( className !== 'APIProgressBar' && function_name !== 'Login' && function_name !== 'getPreLoginData' ) {
 						ProgressBar.removeProgressBar( message_id );
 					}
@@ -476,6 +491,20 @@ ServiceCaller.getURLWithSessionId = function( rest_url ) {
 		return ServiceCaller.baseUrl + '?' + rest_url;
 	}
 };
+
+//Abort in-flight AJAX calls on logout.
+ServiceCaller.abortAll = function() {
+	$.each( $.xhrPool, function( index, ajax_obj ) {
+		if ( typeof ajax_obj == 'object' && ajax_obj.jqXHR && typeof ajax_obj.jqXHR == 'object' && typeof ajax_obj.jqXHR.abort === 'function' ) {
+			if ( ajax_obj.url && ajax_obj.url.indexOf( 'Method=Logout') == -1 ) { //Don't abort the Logout call.
+				Debug.Text(' Aborting API call: '+ ajax_obj.url, 'ServiceCaller.js', 'ServiceCaller', 'abortAll', 10);
+				ajax_obj.jqXHR.abort();
+			} else {
+				Debug.Text('Not aborting Logout API call...', 'ServiceCaller.js', 'ServiceCaller', 'abortAll', 10);
+			}
+		}
+	});
+}
 
 ServiceCaller.hosts = null;
 

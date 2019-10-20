@@ -76,9 +76,9 @@ class Redis_Cache_Lite extends Cache_Lite {
 
 				//Try with 2 second timeout, we don't want redis to block requests if its down.
 				if ( $config_vars['database']['persistent_connections'] == TRUE ) {
-					$connection_retval = $this->_redisHostConn[ $key ]->pconnect( trim( $this->_redisHostHost[ $key ] ), NULL, 2 );
+					$connection_retval = $this->_redisHostConn[ $key ]->pconnect( trim( $this->_redisHostHost[ $key ] ), 6379, 2 );
 				} else {
-					$connection_retval = $this->_redisHostConn[ $key ]->connect( trim( $this->_redisHostHost[ $key ] ), NULL, 2 );
+					$connection_retval = $this->_redisHostConn[ $key ]->connect( trim( $this->_redisHostHost[ $key ] ), 6379, 2 );
 				}
 
 				if ( $connection_retval === TRUE ) {

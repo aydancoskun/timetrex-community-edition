@@ -545,8 +545,25 @@ class TimeTrexPaymentServices {
 		return TRUE;
 	}
 
+
+	function getUser( $id ) {
+		$api = new PaymentServicesClientAPI( 'APIOrganization' );
+		$api_result = $api->getUser( array( 'id' => $id ) );
+		if ( $api_result !== FALSE ) {
+			if ( $api_result->isValid() === TRUE ) {
+				Debug::Text( 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
+
+				return $api_result->getResultData();
+			} else {
+				Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		}
+
+		return FALSE;
+	}
+
 	/**
-	 * Uploads organization data to TimeTrex PaymentServices.
+	 * Uploads user data to TimeTrex PaymentServices.
 	 * @param $rows
 	 * @return bool
 	 */
@@ -575,9 +592,8 @@ class TimeTrexPaymentServices {
 		return TRUE;
 	}
 
-	//Create organization from Legal Entity
-
 	/**
+	 * Create organization from Legal Entity
 	 * @param $row
 	 * @return bool
 	 */

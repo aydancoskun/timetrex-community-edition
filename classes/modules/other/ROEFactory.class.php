@@ -1133,6 +1133,21 @@ class ROEFactory extends Factory {
 											TTi18n::gettext('Employee record must have a valid SIN specified'),
 											$this->getUserObject()->getCountry()
 			);
+
+			$this->Validator->isTRUE(		'user_id',
+											( $this->getUserObject()->getAddress1() != '' ? TRUE : FALSE ),
+											 TTi18n::gettext('Employee record does not have a Address specified')
+			);
+
+			$this->Validator->isTRUE(		'user_id',
+											( $this->getUserObject()->getCity() != '' ? TRUE : FALSE ),
+											 TTi18n::gettext('Employee record does not have a City specified')
+			);
+
+			$this->Validator->isTRUE(		'user_id',
+											( $this->getUserObject()->getPostalCode() != '' ? TRUE : FALSE ),
+											TTi18n::gettext('Employee record does not have a Postal Code specified')
+			);
 		}
 
 		// Pay period type

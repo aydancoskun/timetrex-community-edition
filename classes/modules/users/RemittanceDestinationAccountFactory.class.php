@@ -83,10 +83,10 @@ class RemittanceDestinationAccountFactory extends Factory {
 				}
 
 				if ( $retval == FALSE OR count($retval) == 0 ){
-					$retval = array( 0 => '-- None --' );
+					$retval = array( 0 => TTi18n::gettext('-- None --') );
 				}
 				ksort( $retval );
-				Debug::Arr($retval, 'Available account types for Legal Entity: '. $params['legal_entity_id'], __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Arr($retval, 'Available account types for Legal Entity: '. ( isset($params['legal_entity_id']) ? $params['legal_entity_id'] : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10);
 				break;
 			case 'amount_type':
 				$retval = array(

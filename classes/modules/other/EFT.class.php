@@ -1799,7 +1799,7 @@ class EFT_File_Format_ACH Extends EFT {
 		$line[] = $this->padRecord( date('ymd', $this->getFileCreationDate() ), 6, 'N');
 		$line[] = $this->padRecord( date('Hi', $this->getFileCreationDate() ), 4, 'N');
 
-		$line[] = $this->padRecord( 0, 1, 'N'); //0-9, input file ID modifier
+		$line[] = $this->padRecord( 0, 1, 'N'); //A-Z,0-9 -- Input file ID modifier to differentiate between files sent in the same minute.
 
 		$line[] = $this->padRecord( 94, 3, 'N'); //94 byte records
 		$line[] = $this->padRecord( 10, 2, 'N'); //Blocking factor

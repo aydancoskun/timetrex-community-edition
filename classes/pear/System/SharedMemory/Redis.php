@@ -77,7 +77,7 @@ class System_SharedMemory_Redis extends System_SharedMemory_Common
         extract($this->_default($options, array
         (
             'host'  => '127.0.0.1',
-            'port'  => NULL, //Required to use socket connections.
+            'port'  => 6379, //Required to use socket connections.
             'timeout' => false,
             'persistent' => false,
 			'db' => 0,
@@ -85,13 +85,17 @@ class System_SharedMemory_Redis extends System_SharedMemory_Common
 
         $func = $persistent ? 'pconnect' : 'connect';
 
-        $this->_mc  = new Redis;
-        $this->_connected = $timeout === false ?
-            $this->_mc->$func($host, $port) :
-            $this->_mc->$func($host, $port, $timeout);
+        try {
+			$this->_mc = new Redis;
+			$this->_connected = $timeout === false ?
+					$this->_mc->$func( $host, $port ) :
+					$this->_mc->$func( $host, $port, $timeout );
 
-		if ( $db > 0 ) {
-			$this->_mc->select( $db );
+			if ( $db > 0 ) {
+				$this->_mc->select( $db );
+			}
+		} catch (Exception $e) {
+			$this->_connected = false;
 		}
     }
     // }}}

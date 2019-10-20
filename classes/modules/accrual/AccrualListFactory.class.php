@@ -900,7 +900,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 									);
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == NULL ) {
-			$order = array( 'accrual_policy_account_id' => 'asc', 'date_stamp' => 'desc', 'a.created_date' => 'desc', 'type_id' => 'desc' ); //Sort by type_id last to try and put rollover adjustments lower in the list than Accrual Policy time, so it better reflects the real order.
+			$order = array( 'accrual_policy_account_id' => 'asc', 'date_stamp' => 'desc', 'b.last_name' => 'asc', 'b.first_name' => 'asc', 'a.created_date' => 'desc', 'type_id' => 'desc' ); //Sort by type_id last to try and put rollover adjustments lower in the list than Accrual Policy time, so it better reflects the real order.
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;

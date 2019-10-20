@@ -2814,5 +2814,24 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 3 );
 		$rdaf->Validator->resetErrors();
 	}
+
+	/**
+	 * @group testZeroDollarUserWage
+	 */
+	function testZeroDollarUserWage() {
+		$uwf = TTnew('UserWageFactory');
+		$uwf->setUser( $this->user_id );
+		$uwf->setType( 10 );
+		$uwf->setWageGroup( TTUUID::getZeroID() );
+		$uwf->setEffectiveDate( ( time() + 86400 ) );
+		$uwf->setWage( 0 ); //$0 wages should be accepted.
+
+		if ( $uwf->isValid() ) {
+			$result = $uwf->Save();
+			$this->assertEquals( TRUE, TTUUID::isUUID( $result ) );
+		} else {
+			$this->assertTrue( FALSE);
+		}
+	}
 }
 ?>

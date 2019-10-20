@@ -1789,7 +1789,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		var do_update = false;
 		var default_layout_id;
 		if ( this.search_panel.getLayoutsArray() && this.search_panel.getLayoutsArray().length > 0 ) {
-			default_layout_id = $( this.previous_saved_layout_selector ).children( 'option:contains("' + BaseViewController.default_layout_name + '")' ).attr( 'value' );
+			default_layout_id = $( this.previous_saved_layout_selector ).children( 'option:contains(\'' + BaseViewController.default_layout_name + '\')' ).attr( 'value' );
 			var layout_name = BaseViewController.default_layout_name;
 			this.clearSearchPanel();
 			this.filter_data = null;
@@ -1919,9 +1919,13 @@ TimeSheetViewController = BaseViewController.extend( {
 		var default_layout_id;
 		var layout_name;
 		if ( this.search_panel.getLayoutsArray() && this.search_panel.getLayoutsArray().length > 0 ) {
-			default_layout_id = $( this.previous_saved_layout_selector ).children( 'option:contains("' + BaseViewController.default_layout_name + '")' ).attr( 'value' );
+			default_layout_id = $( this.previous_saved_layout_selector ).children( 'option:contains(\'' + BaseViewController.default_layout_name + '\')' ).attr( 'value' );
 			layout_name = BaseViewController.default_layout_name;
 
+			if ( !default_layout_id ) {
+				this.onSaveNewLayout( BaseViewController.default_layout_name );
+				return;
+			}
 		} else {
 			this.onSaveNewLayout( BaseViewController.default_layout_name );
 			return;
@@ -3757,7 +3761,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			if ( $this.getPunchMode() === 'punch' ) {
 				//var selection = $this.grid.getSelection(); //provides memory of selected cells
-				$this.grid.setData( $this.timesheet_data_source, false );
+				$this.grid.setData( $this.timesheet_data_source, true );
 				//$this.grid.setTimesheetSelection( selection ); //resets selection after refreshing grid data -- currently broken, see setTimesheetSelection() for details.
 			}
 
@@ -3839,22 +3843,28 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			timesheet_grid_div = $( this.el ).find( '.manual-timesheet-inside-editor-div' );
 		}
+
 		var user = this.getSelectEmployee( true );
-		if ( Global.isObject( user ) && ( !user.pay_period_schedule_id || !user.policy_group_id || !payPeriodCheck() ) ) {
+		var user_pay_period_check = payPeriodCheck( user );
+
+		//There seems to be a race condition here where if the server hasn't returned all the user data for the dropdown box (due to being slow/including many columns), "user.id" will exist, but no other object properties will.
+		//  This could trigger the below error message(s) to show when they shouldn't. So now we check to make sure there is at least more than 1 object property, and we check that the object properties actually exist and are actually blank, as compared to just checking that they don't exist previously.
+		if ( Global.isObject( user ) && Object.keys( user ).length > 1 && ( ( user.hasOwnProperty('pay_period_schedule_id') && user.pay_period_schedule_id == '' ) || ( user.hasOwnProperty('policy_group_id') && user.policy_group_id == '' ) || user_pay_period_check == false ) ) {
 			warning_bar = $( '<div class=\'timesheet-warning-title-bar\'><span class=\'p-message\'></span><span class=\'g-message\'></span><span class=\'pp-message\'></span></div>' );
 			warning_bar.insertBefore( timesheet_grid_div );
-			if ( !user.pay_period_schedule_id ) {
+
+			if ( user.hasOwnProperty('pay_period_schedule_id') && user.pay_period_schedule_id == '' ) { //!user.pay_period_schedule_id
 				warning_bar.children().eq( 0 ).html( $.i18n._( 'WARNING: Employee is not assigned to a pay period schedule.' ) );
 			} else {
 				warning_bar.children().eq( 0 ).html( '' );
 			}
-			if ( !user.policy_group_id ) {
+			if ( user.hasOwnProperty('policy_group_id') && user.policy_group_id == '' ) { //!user.policy_group_id
 				warning_bar.children().eq( 1 ).html( $.i18n._( 'WARNING: Employee is not assigned to a policy group.' ) );
 			} else {
 				warning_bar.children().eq( 1 ).html( '' );
 			}
 
-			if ( !payPeriodCheck() ) {
+			if ( user_pay_period_check == false ) {
 				warning_bar.children().eq( 2 ).html( $.i18n._( 'WARNING: Employee has day(s) not assigned to a pay period. Please perform a pay period import to correct.' ) );
 			} else {
 				warning_bar.children().eq( 2 ).html( '' );
@@ -3866,17 +3876,20 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 		}
 
-		function payPeriodCheck() {
+		function payPeriodCheck( user ) {
 			if ( $this.start_date ) {
+				var hire_date = user.hire_date;
+				var termination_date = user.termination_date;
+
 				for ( var i = 0; i < 7; i++ ) {
 					var select_date = new Date( new Date( $this.start_date.getTime() ).setDate( $this.start_date.getDate() + i ) );
 					var select_date_str = select_date.format();
-					var hire_date = $this.getSelectEmployee( true ).hire_date;
-					var termination_date = $this.getSelectEmployee( true ).termination_date;
+
 					//Error: Uncaught TypeError: Cannot read property 'getTime' of null in interface/html5/index.php?user_name=dustin#!m=TimeSheet&date=20151214&user_id=38599&show_wage=0 line 2947
 					if ( !select_date ) {
 						continue;
 					}
+
 					if ( select_date.getTime() < new Date().getTime() && !$this.getPayPeriod( select_date_str ) &&
 						( !hire_date || select_date.getTime() >= Global.strToDate( hire_date ).getTime() ) &&
 						( !termination_date || select_date.getTime() <= Global.strToDate( termination_date ).getTime() ) ) {
@@ -7131,6 +7144,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
+			TTPromise.resolve( 'BaseViewController', 'onTabShow' ); //Since search() isn't called in this case, and we just display the "Please Save This Record ..." message, resolve the promise.
 			return;
 		}
 

@@ -4268,6 +4268,7 @@ Global.setVirtualDeviceViewport = function ( setting ) {
 
 //Clear all session and local cache data for logout.
 Global.Logout = function () {
+	ServiceCaller.abortAll(); //Abort any pending AJAX requests so their callbacks don't get triggered and cause all kind of weirdness.
 	Global.clearSessionCookie();
 	LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
 	LocalCacheData.setLoginUser( null );

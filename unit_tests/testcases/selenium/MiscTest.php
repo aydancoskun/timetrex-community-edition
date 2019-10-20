@@ -34,30 +34,32 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 require_once( 'TTSeleniumGlobal.php' );
+
 /**
  * @group UI
  */
-class UIMiscTest extends TTSeleniumGlobal  {
+class UIMiscTest extends TTSeleniumGlobal {
 
 	function testUIGetGlobalVariable() {
-		$this->Login('demoadmin2', 'demo.de');
+		$this->Login( 'demoadmin2', 'demo.de' );
 
-		$javascript = array( 'script' => 'return Global.getUIReadyStatus();', 'args' => array() );
-		$var = $this->execute($javascript);
-		Debug::text( 'Global variable 1 retrieved: '. print_r($var,true), __FILE__, __LINE__, __METHOD__, 10 );
+		$javascript = array('script' => 'return Global.getUIReadyStatus();', 'args' => array());
+		$var = $this->execute( $javascript );
+		Debug::text( 'Global variable 1 retrieved: ' . print_r( $var, TRUE ), __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->waitForUIInitComplete();
-		$this->byId('timesheetIcon')->click();
+		$this->byId( 'timesheetIcon' )->click();
 		$this->waitForUIInitComplete();
 
-		$javascript = array( 'script' => 'return Global.UIReadyStatus;', 'args' => array() );
-		$var2 = $this->execute($javascript);
-		Debug::text( 'Global variable 2 retrieved: '. print_r($var,true), __FILE__, __LINE__, __METHOD__, 10 );
+		$javascript = array('script' => 'return Global.UIReadyStatus;', 'args' => array());
+		$var2 = $this->execute( $javascript );
+		Debug::text( 'Global variable 2 retrieved: ' . print_r( $var, TRUE ), __FILE__, __LINE__, __METHOD__, 10 );
 
-		$this->assertNotEmpty($var);
-		$this->assertNotEmpty($var2);
+		$this->assertNotEmpty( $var );
+		$this->assertNotEmpty( $var2 );
 
 		$this->Logout();
 	}
 }
+
 ?>

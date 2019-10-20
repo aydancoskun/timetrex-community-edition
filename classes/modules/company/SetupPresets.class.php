@@ -1455,6 +1455,17 @@ class SetupPresets extends Factory {
 							'company_id'     => $this->getCompany(),
 							'status_id'      => 10,
 							'type_id'        => 10,
+							'name'           => 'Time Bank (Withdrawal)',
+							'ps_order'       => 119,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
+							'credit_account' => '',
+					)
+			);
+			$this->createPayStubAccount(
+					array(
+							'company_id'     => $this->getCompany(),
+							'status_id'      => 10,
+							'type_id'        => 10,
 							'name'           => 'Over Time 1',
 							'ps_order'       => 120,
 							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
@@ -9311,7 +9322,7 @@ class SetupPresets extends Factory {
 							'name'                      => 'Time Bank (Withdrawal)',
 							'code'                      => 'BANK',
 							'type_id'                   => 10, //PAID
-							'pay_stub_entry_account_id' => 0,
+							'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Time Bank (Withdrawal)' ),
 							'pay_formula_policy_id'     => $this->getPayFormulaPolicyByCompanyIDAndName( 'Time Bank (Withdrawal)' ),
 					)
 			);
@@ -9929,12 +9940,12 @@ class SetupPresets extends Factory {
 								'name'                             => strtoupper( $province ) . ' - Statutory Holiday',
 								'type_id'                          => 30, //Advanced: Average
 								'default_schedule_status_id'       => 20, //Absent
-								'minimum_employed_days'            => 0,
+								'minimum_employed_days'            => 30, //Employed at least 30 days prior to the holiday.
 
 								//Prior to the holiday
-								'minimum_worked_days'              => 1, //Employee must work at least
-								'minimum_worked_period_days'       => 1, //Of the last X days
-								'worked_scheduled_days'            => 1,
+								'minimum_worked_days'              => 5, //Employee must work at least
+								'minimum_worked_period_days'       => 9, //Of the last X days
+								'worked_scheduled_days'            => 2, //Holiday Week Days
 
 								'shift_on_holiday_type_id'         => 30, //Must work on the holiday if scheduled.
 

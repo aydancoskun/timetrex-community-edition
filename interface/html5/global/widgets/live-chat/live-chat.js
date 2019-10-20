@@ -1,4 +1,4 @@
-var current_company = LocalCacheData.getCurrentCompany();
+var current_company = LocalCacheData.getLocalCache( 'current_company', 'JSON' ); //Can't use LocalCacheData.getCurrentCompany(); as that uses getRequiredLocalCache() and if the user logs in, then logs out before this can load, it will cause a JS exception.
 var current_user = LocalCacheData.getLoginUser();
 
 if ( current_company && current_user ) {

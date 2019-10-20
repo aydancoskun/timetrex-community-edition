@@ -501,8 +501,9 @@ class PayCodeFactory extends Factory {
 				}
 			}
 
-			if ( $ignore_warning == FALSE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing, but must check when adding a new record..
+			if ( $ignore_warning == FALSE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing, but must check when adding a new record.
 				if ( $this->getType() != 20 AND $this->getPayStubEntryAccountId() == TTUUID::getZeroID()  ) {
+					//This could be changed to a validation error instead, but then it may require customers who don't use TimeTrex for payroll to have to maintain Pay Stub Accounts.
 					$this->Validator->Warning( 'pay_stub_entry_account_id', TTi18n::gettext('Pay Stub Account must be specified for amounts to appear on pay stubs') );
 				}
 			}

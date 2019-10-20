@@ -1217,16 +1217,20 @@ class LegalEntityFactory extends Factory {
 				//Update any contact information for the user.
 				global $current_user;
 				if ( PRODUCTION == TRUE AND isset( $current_user ) AND is_object( $current_user ) ) {
-					try {
-						$tt_ps_api = $this->getPaymentServicesAPIObject();
-						$retval = $tt_ps_api->setUser( $tt_ps_api->convertUserObjectToUserArray( $current_user, $this->getId() ) );
-						if ( $retval === FALSE ) {
-							Debug::Text( 'ERROR! Unable to upload user data... (a)', __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $current_user->getWorkEmail() == $this->getPaymentServicesUserName() ) {
+						try {
+							$tt_ps_api = $this->getPaymentServicesAPIObject();
+							$retval = $tt_ps_api->setUser( $tt_ps_api->convertUserObjectToUserArray( $current_user, $this->getId() ) );
+							if ( $retval === FALSE ) {
+								Debug::Text( 'ERROR! Unable to upload user data... (a)', __FILE__, __LINE__, __METHOD__, 10 );
 
-							return FALSE;
+								return FALSE;
+							}
+						} catch ( Exception $e ) {
+							Debug::Text( 'ERROR! Unable to upload user data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
 						}
-					} catch ( Exception $e ) {
-						Debug::Text( 'ERROR! Unable to upload user data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+					} else {
+						Debug::Text( 'WARNING: Current user is not the PaymentServices user, skipping updating information... Work Email: '. $current_user->getWorkEmail() .' PaymentServices User Name: '. $this->getPaymentServicesUserName(), __FILE__, __LINE__, __METHOD__, 10 );
 					}
 				}
 

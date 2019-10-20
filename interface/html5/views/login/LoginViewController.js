@@ -648,9 +648,10 @@ LoginViewController = BaseViewController.extend( {
 		var station_id = Global.getStationID();
 		//week of year and numeric digits of station_id.
 		if ( station_id.length > 0 ) {
-			station_id = station_id.substr( 0, 5 ).match( /\d+/g ).map( function ( n ) {
-				return parseInt( n );
-			} );
+			var station_id_arr = station_id.match( /\d{1,5}/g );
+			if ( $.isArray( station_id_arr ) ) {
+				station_id = station_id_arr.join('');
+			}
 		}
 		var seed = parseInt( moment().week() + '' + station_id );
 		var random_image_number = Math.floor( ( Math.abs( Math.sin( seed ) ) * seed ) % 2 ) + 1; // seeded random

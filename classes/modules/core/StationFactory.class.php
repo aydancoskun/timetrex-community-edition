@@ -321,9 +321,11 @@ class StationFactory extends Factory {
 
 										'-1160-time_zone' => TTi18n::gettext('Time Zone'),
 
-										'-1160-branch_selection_type' => TTi18n::gettext('Branch Selection Type'),
-										'-1160-department_selection_type' => TTi18n::gettext('Department Selection Type'),
-										'-1160-group_selection_type' => TTi18n::gettext('Group Selection Type'),
+										'-1170-branch_selection_type' => TTi18n::gettext('Branch Selection Type'),
+										'-1180-department_selection_type' => TTi18n::gettext('Department Selection Type'),
+										'-1190-group_selection_type' => TTi18n::gettext('Group Selection Type'),
+
+										'-1200-last_punch_time_stamp' => TTi18n::gettext('Last Punch'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -1734,11 +1736,11 @@ class StationFactory extends Factory {
 			//Do hostname lookups for TTA8 timeclocks as well.
 			Debug::text('Source is NOT an IP address, do hostname lookup: '. $source, __FILE__, __LINE__, __METHOD__, 10);
 
-			$hostname_lookup = $this->getCache( $remote_addr.$source );
+			$hostname_lookup = $this->getCache( 'station_source_dns_'. $this->getCompany().$source );
 			if ( $hostname_lookup === FALSE ) {
 				$hostname_lookup = gethostbyname( $source );
 
-				$this->saveCache($hostname_lookup, $remote_addr.$source );
+				$this->saveCache($hostname_lookup, 'station_source_dns_'. $this->getCompany().$source );
 			}
 
 			if ($hostname_lookup == $source ) {
@@ -2440,12 +2442,8 @@ class StationFactory extends Factory {
 	 */
 	function postSave() {
 		$this->removeCache( $this->getStation() );
-/*
-		foreach ($this->getUser() as $user_id ) {
-			$cache_id = 'station_checkAllowed_'.$this->getId().$user_id;
-			$this->removeCache( $cache_id );
-		}
-*/
+		$this->removeCache( 'station_source_dns_'. $this->getCompany().$this->getSource() ); //Clear DNS cache.
+
 		return TRUE;
 	}
 

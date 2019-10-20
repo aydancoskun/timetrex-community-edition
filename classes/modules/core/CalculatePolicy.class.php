@@ -942,6 +942,10 @@ class CalculatePolicy {
 			// So if start/end records don't exist, just pass FALSE so we still have a hope of matching schedule data.
 			if ( is_array($shift_udt_objs) AND ( isset($shift_udt_objs['start']) OR isset($shift_udt_objs['end']) ) ) {
 				$slf = $this->filterScheduleDataByShiftStartAndEnd( ( ( isset($shift_udt_objs['start']) ) ? $shift_udt_objs['start']->getStartTimeStamp() : FALSE ), ( ( isset($shift_udt_objs['end']) ) ? $shift_udt_objs['end']->getEndTimeStamp() : FALSE ) );
+			} else {
+				//If we are dealing with manual timesheet time without start/end timestamps, we still need to return a schedule whenever possible for example if the user needs to disable auto-deduct meals/breaks.
+				Debug::text('  Unable to match shift to schedule, perhaps using manual timesheet? Returning all scheduled shifts...', __FILE__, __LINE__, __METHOD__, 10);
+				$slf = $this->filterScheduleDataByStatus( $date_stamp, $date_stamp, array(10) );
 			}
 		}
 
@@ -983,7 +987,7 @@ class CalculatePolicy {
 				}
 			}
 
-			Debug::text('Maximum Schedule Policy Start/Stop Window: '. $this->schedule_policy_max_start_stop_window, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Maximum Schedule Policy Start/Stop Window: '. $this->schedule_policy_max_start_stop_window .' Rows: '. $splf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		} else {
 			Debug::text('aNo schedule policy rows...', __FILE__, __LINE__, __METHOD__, 10);

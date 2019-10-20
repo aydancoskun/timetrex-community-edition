@@ -359,7 +359,10 @@ InOutViewController = BaseViewController.extend( {
 			case 'job_id':
 				if ( ( Global.getProductEdition() >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.setJobItemValueWhenJobChanged( target.getValue() );
+					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'job_item_id', {
+						status_id: 10,
+						job_id: this.current_edit_record.job_id
+					} );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;

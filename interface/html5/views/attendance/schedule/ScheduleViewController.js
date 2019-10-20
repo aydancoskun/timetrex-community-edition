@@ -3771,7 +3771,7 @@ ScheduleViewController = BaseViewController.extend( {
 	onClearSearch: function() {
 		var do_update = false;
 		if ( this.search_panel.getLayoutsArray() && this.search_panel.getLayoutsArray().length > 0 ) {
-			var default_layout_id = $( this.previous_saved_layout_selector ).children( 'option:contains("' + BaseViewController.default_layout_name + '")' ).attr( 'value' );
+			var default_layout_id = $( this.previous_saved_layout_selector ).children( 'option:contains(\'' + BaseViewController.default_layout_name + '\')' ).attr( 'value' );
 			var layout_name = BaseViewController.default_layout_name;
 			this.clearSearchPanel();
 			this.filter_data = null;
@@ -3842,7 +3842,7 @@ ScheduleViewController = BaseViewController.extend( {
 		this.getSearchPanelFilter();
 
 		if ( this.search_panel.getLayoutsArray() && this.search_panel.getLayoutsArray().length > 0 ) {
-			var default_layout_id = $( this.previous_saved_layout_selector ).children( 'option:contains("' + BaseViewController.default_layout_name + '")' ).attr( 'value' );
+			var default_layout_id = $( this.previous_saved_layout_selector ).children( 'option:contains(\'' + BaseViewController.default_layout_name + '\')' ).attr( 'value' );
 
 			if ( !default_layout_id ) {
 				this.onSaveNewLayout( BaseViewController.default_layout_name );

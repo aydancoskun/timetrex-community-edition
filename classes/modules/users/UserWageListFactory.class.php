@@ -809,7 +809,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 									);
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == NULL ) {
-			$order = array( 'effective_date' => 'desc', 'wage_group_id' => 'asc', 'type_id' => 'asc', );
+			$order = array( 'effective_date' => 'desc', 'wage_group_id' => 'asc', 'type_id' => 'asc', 'b.last_name' => 'asc', 'b.first_name' => 'asc', 'a.created_date' => 'desc' );
 			$strict = FALSE;
 		} else {
 			//Always sort by last name, first name after other columns

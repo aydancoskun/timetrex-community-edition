@@ -333,7 +333,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
-			$order = array( 'last_name' => 'asc', 'accrual_policy_account_id' => 'asc', );
+			$order = array( 'last_name' => 'asc', 'first_name' => 'asc', 'accrual_policy_account_id' => 'asc', 'a.created_date' => 'asc' );
 			$strict = FALSE;
 		} else {
 			//Always sort by last name, first name after other columns

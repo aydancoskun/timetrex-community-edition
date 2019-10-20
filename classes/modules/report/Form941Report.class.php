@@ -226,16 +226,21 @@ class Form941Report extends Report {
 										'-2020-income_tax' => TTi18n::gettext('Income Tax'), //Line 3
 										'-2030-social_security_wages' => TTi18n::gettext('Taxable Social Security Wages'), //Line 5a
 										'-2032-social_security_tip_wages' => TTi18n::gettext('Taxable Social Security Tips'), //Line 5b
+										'-2033-social_security_total_wages' => TTi18n::gettext('Taxable Social Security Total Wages'), //Wages + Tip Wages.
 										'-2038-social_security_tax' => TTi18n::gettext('Social Security - Employee'),
-										'-2039-social_security_tax_employer' => TTi18n::gettext('Social Security - Employer'),
-										'-2039-social_security_tax_total' => TTi18n::gettext('Social Security'),
+										'-2039-social_security_tax_employee_deducted' => TTi18n::gettext('Social Security - Employee (Deducted)'),
+										'-2040-social_security_tax_employer' => TTi18n::gettext('Social Security - Employer'),
+										'-2041-social_security_tax_employer_deducted' => TTi18n::gettext('Social Security - Employer (Deducted)'),
+										'-2042-social_security_tax_total' => TTi18n::gettext('Social Security'),
 										'-2050-medicare_wages' => TTi18n::gettext('Taxable Medicare Wages'), //Line 5c
 										'-2051-medicare_additional_wages' => TTi18n::gettext('Taxable Medicare Additional Wages'), //Line 5d
 										'-2055-additional_medicare_tax' => TTi18n::gettext('Medicare (Additional)'),
 										'-2058-medicare_tax' => TTi18n::gettext('Medicare - Employee'),
-										'-2059-medicare_tax_employer' => TTi18n::gettext('Medicare - Employer'),
-										'-2058-medicare_tax_total' => TTi18n::gettext('Medicare'),
-										'-2060-sick_wages' => TTi18n::gettext('Sick Pay'), //Line 7b
+										'-2059-medicare_tax_employee_deducted' => TTi18n::gettext('Medicare - Employee (Deducted)'),
+										'-2060-medicare_tax_employer' => TTi18n::gettext('Medicare - Employer'),
+										'-2061-medicare_tax_employer_deducted' => TTi18n::gettext('Medicare - Employer (Deducted)'),
+										'-2062-medicare_tax_total' => TTi18n::gettext('Medicare'),
+										'-2080-sick_wages' => TTi18n::gettext('Sick Pay'), //Line 7b
 										'-2100-total_tax' => TTi18n::gettext('Total Taxes'), //Line 7b
 							);
 				break;
@@ -599,6 +604,7 @@ class Form941Report extends Report {
 		$pd_obj->setDate($filter_data['end_date']);
 
 		$social_security_wage_limit = $pd_obj->getSocialSecurityMaximumEarnings();
+		$social_security_maximum_contribution = $pd_obj->getSocialSecurityMaximumContribution( 'employee' );
 		$medicare_additional_threshold_limit = $pd_obj->getMedicareAdditionalEmployerThreshold();
 		Debug::Text('Social Security Wage Limit: '. $social_security_wage_limit .' Medicare Threshold: '. $medicare_additional_threshold_limit .' Date: '. TTDate::getDate('DATE', $filter_data['end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -678,6 +684,11 @@ class Form941Report extends Report {
 						//Combine Social Security and Tip wages.
 						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] );
 
+						if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax']) ) {
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] = 0;
+						}
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax']['include_pay_stub_entry_account'], $form_data['social_security_tax']['exclude_pay_stub_entry_account'] ) );
+
 						//Handle additional medicare wages in excess of 200,000
 						if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages']) ) {
 							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = 0;
@@ -750,6 +761,9 @@ class Form941Report extends Report {
 						if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages']) ) {
 							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = 0;
 						}
+						if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax']) ) {
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] = 0;
+						}
 
 						if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages']) ) {
 							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] = 0;
@@ -787,7 +801,14 @@ class Form941Report extends Report {
 
 						//Social Security Tax must be calculated after the wages are fully adjusted.
 						//Calculate the social security based on the wages, not what the employee actually had deducted as the IRS doesn't care about that for the 941 Form. The W2's reconcile that part.
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) ), 2 ); //Rate is employee & employer rate, so divide by two so we can split it up separately.
+						//  Make sure we cap the YTD social security amount at the proper maximum as well, since just basing it off wages can result in fractions of a cent difference per pay period when the employee reaches the cap.
+						//  The pay stubs handle it this way too, so this makes the two values match. Essentially this can result in positive fractions of a cent for the first 3 quarters (ie: 0.07) then a negative for the last quarter (ie: -0.07) if employees have reached the cap.
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) ), 2 ); //Rate is employee & employer rate, so divide by two so we can split it up separately.
+						if ( bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] ) > $social_security_maximum_contribution ) {
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] = bcsub( $social_security_maximum_contribution, $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] );
+						}
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'];
 
 
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employee_deducted'] = ( isset($form_data['medicare_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax']['include_pay_stub_entry_account'], $form_data['medicare_tax']['exclude_pay_stub_entry_account'] ) : 0;
@@ -837,6 +858,8 @@ class Form941Report extends Report {
 
 						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employee_deducted'] );
 						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer_deducted'] );
+						//Debug::Text('User: '. $user_id .' Date: '. TTDate::getDate('DATE', $date_stamp) .' SS Amounts: YTD Wages: '. $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] .' Wages: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] .' Pre-Rounded: '. bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) ) .' Rounded: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] .' Deducted: '. $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'], __FILE__, __LINE__, __METHOD__, 10);
+
 						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employee_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employee_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employee_deducted'] );
 						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer_deducted'] );
 
