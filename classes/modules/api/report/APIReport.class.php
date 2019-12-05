@@ -151,6 +151,14 @@ class APIReport extends APIFactory {
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Please try again later...') );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
+		if ( is_object( $this->getReportObject()->getUserObject() ) AND $this->getReportObject()->getUserObject()->getStatus() != 10 ) { //10=Active -- Make sure user record is active as well.
+			return $this->getPermissionObject()->PermissionDenied( FALSE, TTi18n::getText( 'Employee status must be Active to view reports' ) );
+		}
+
 		$format = Misc::trimSortPrefix( $format );
 		Debug::Text('Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 		$this->getReportObject()->setConfig( $config ); //Set config first, so checkPermissions can check/modify data in the config for Printing timesheets for regular employees.
@@ -194,6 +202,5 @@ class APIReport extends APIFactory {
 
 		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('PERMISSION DENIED') );
 	}
-
 }
 ?>

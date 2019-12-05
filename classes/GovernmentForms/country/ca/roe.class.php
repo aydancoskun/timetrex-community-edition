@@ -42,7 +42,6 @@ include_once( 'CA.class.php' );
  */
 class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
-	//public $xml_schema = 'BulkRoeHeader_Basic.xsd';
 	public $xml_schema = 'PayrollExtractXmlV2.xsd'; //http://www.esdc.gc.ca/en/ei/roe/user_requirements/appendix_d.page
 	public $pdf_template = 'roe.pdf';
 

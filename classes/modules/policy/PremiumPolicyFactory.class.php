@@ -73,6 +73,13 @@ class PremiumPolicyFactory extends Factory {
 										100 => TTi18n::gettext('Advanced'),
 									);
 				break;
+			case 'min_max_time_type':
+				$retval = array(
+						10 => TTi18n::gettext('Each Day'),
+						//20 => TTi18n::gettext('Each Shift'),
+						30 => TTi18n::gettext('Each Punch Pair'),
+				);
+				break;
 			case 'pay_type':
 				//How to calculate flat rate. Base it off the DIFFERENCE between there regular hourly rate
 				//and the premium. So the PS Account could be postitive or negative amount
@@ -187,6 +194,8 @@ class PremiumPolicyFactory extends Factory {
 										'company_id' => 'Company',
 										'type_id' => 'Type',
 										'type' => FALSE,
+										'min_max_time_type_id' => 'MinMaxTimeType',
+										'min_max_time_type' => FALSE,
 										'name' => 'Name',
 										'description' => 'Description',
 
@@ -762,6 +771,7 @@ class PremiumPolicyFactory extends Factory {
 		return $this->getGenericDataValue( 'minimum_shift_time' );
 	}
 
+
 	/**
 	 * @param $value
 	 * @return bool
@@ -771,6 +781,21 @@ class PremiumPolicyFactory extends Factory {
 		return $this->setGenericDataValue( 'minimum_shift_time', $value );
 	}
 
+
+	/**
+	 * @return bool|int
+	 */
+	function getMinMaxTimeType() {
+		return $this->getGenericDataValue( 'min_max_time_type_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMinMaxTimeType( $value ) {
+		return $this->setGenericDataValue( 'min_max_time_type_id', (int)trim($value) );
+	}
 
 	/**
 	 * @return bool|int
@@ -946,7 +971,11 @@ class PremiumPolicyFactory extends Factory {
 	 * @param string $ids UUID
 	 * @return bool
 	 */
-	function setBranch( $ids) {
+	function setBranch( $ids ) {
+		if ( !is_array( $ids ) AND $ids != '' AND TTUUID::isUUID( $ids ) ) { //Sometimes awesome box may pass through a zero UUID not as an array.
+			$ids = array( $ids );
+		}
+
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($ids, 'Setting Branch IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
@@ -965,6 +994,7 @@ class PremiumPolicyFactory extends Factory {
 					if ( !in_array($id, $ids) ) {
 						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
+						$obj->postSave(); //Clear cache.
 					} else {
 						//Save ID's that need to be updated.
 						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -988,7 +1018,7 @@ class PremiumPolicyFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'branch',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected Branch is invalid').' ('. $obj->getName() .')' )) {
 						$f->save();
 					}
@@ -1059,7 +1089,11 @@ class PremiumPolicyFactory extends Factory {
 	 * @param string $ids UUID
 	 * @return bool
 	 */
-	function setDepartment( $ids) {
+	function setDepartment( $ids ) {
+		if ( !is_array( $ids ) AND $ids != '' AND TTUUID::isUUID( $ids ) ) { //Sometimes awesome box may pass through a zero UUID not as an array.
+			$ids = array( $ids );
+		}
+
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
 			$tmp_ids = array();
@@ -1077,6 +1111,7 @@ class PremiumPolicyFactory extends Factory {
 					if ( !in_array($id, $ids) ) {
 						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
+						$obj->postSave(); //Clear cache.
 					} else {
 						//Save ID's that need to be updated.
 						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -1100,7 +1135,7 @@ class PremiumPolicyFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'department',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected Department is invalid').' ('. $obj->getName() .')' )) {
 						$f->save();
 					}
@@ -1161,9 +1196,13 @@ class PremiumPolicyFactory extends Factory {
 	 * @param string $ids UUID
 	 * @return bool
 	 */
-	function setJobGroup( $ids) {
+	function setJobGroup( $ids ) {
 		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
+		}
+
+		if ( !is_array( $ids ) AND $ids != '' AND TTUUID::isUUID( $ids ) ) { //Sometimes awesome box may pass through a zero UUID not as an array.
+			$ids = array( $ids );
 		}
 
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1183,6 +1222,7 @@ class PremiumPolicyFactory extends Factory {
 					if ( !in_array($id, $ids) ) {
 						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
+						$obj->postSave(); //Clear cache.
 					} else {
 						//Save ID's that need to be updated.
 						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -1206,7 +1246,7 @@ class PremiumPolicyFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'job_group',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected Job Group is invalid').' ('. $obj->getName() .')' )) {
 						$f->save();
 					}
@@ -1283,9 +1323,13 @@ class PremiumPolicyFactory extends Factory {
 	 * @param string $ids UUID
 	 * @return bool
 	 */
-	function setJob( $ids) {
+	function setJob( $ids ) {
 		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
+		}
+
+		if ( !is_array( $ids ) AND $ids != '' AND TTUUID::isUUID( $ids ) ) { //Sometimes awesome box may pass through a zero UUID not as an array.
+			$ids = array( $ids );
 		}
 
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1299,12 +1343,13 @@ class PremiumPolicyFactory extends Factory {
 
 				foreach ($lf_a as $obj) {
 					$id = $obj->getjob();
-					Debug::text('job ID: '. $obj->getJob() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Job ID: '. $obj->getJob() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Delete users that are not selected.
 					if ( !in_array($id, $ids) ) {
 						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
+						$obj->postSave(); //Clear cache.
 					} else {
 						//Save ID's that need to be updated.
 						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -1326,7 +1371,7 @@ class PremiumPolicyFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'job',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected Job is invalid').' ('. $obj->getName() .')' )) {
 						$f->save();
 					}
@@ -1402,9 +1447,13 @@ class PremiumPolicyFactory extends Factory {
 	 * @param string $ids UUID
 	 * @return bool
 	 */
-	function setJobItemGroup( $ids) {
+	function setJobItemGroup( $ids ) {
 		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
+		}
+
+		if ( !is_array( $ids ) AND $ids != '' AND TTUUID::isUUID( $ids ) ) { //Sometimes awesome box may pass through a zero UUID not as an array.
+			$ids = array( $ids );
 		}
 
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1424,6 +1473,7 @@ class PremiumPolicyFactory extends Factory {
 					if ( !in_array($id, $ids) ) {
 						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
+						$obj->postSave(); //Clear cache.
 					} else {
 						//Save ID's that need to be updated.
 						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -1445,7 +1495,7 @@ class PremiumPolicyFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'job_item_group',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected Task Group is invalid').' ('. $obj->getName() .')' )) {
 						$f->save();
 					}
@@ -1511,6 +1561,10 @@ class PremiumPolicyFactory extends Factory {
 			return FALSE;
 		}
 
+		if ( !is_array( $ids ) AND $ids != '' AND TTUUID::isUUID( $ids ) ) { //Sometimes awesome box may pass through a zero UUID not as an array.
+			$ids = array( $ids );
+		}
+
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
 			$tmp_ids = array();
@@ -1528,6 +1582,7 @@ class PremiumPolicyFactory extends Factory {
 					if ( !in_array($id, $ids) ) {
 						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
+						$obj->postSave(); //Clear cache.
 					} else {
 						//Save ID's that need to be updated.
 						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -1549,7 +1604,7 @@ class PremiumPolicyFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'job',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected JobItem is invalid').' ('. $obj->getName() .')' )) {
 						$f->save();
 					}
@@ -1696,7 +1751,8 @@ class PremiumPolicyFactory extends Factory {
 			}
 
 			$retval = 0;
-			for( $i = (TTDate::getMiddleDayEpoch($start_time_stamp) - 86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp) + 86400); $i += 86400 ) {
+			//for( $i = (TTDate::getMiddleDayEpoch($start_time_stamp) - 86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp) + 86400); $i += 86400 ) {
+			foreach( TTDate::getDatePeriod( TTDate::incrementDate( $start_time_stamp, -1, 'day' ), TTDate::incrementDate( $end_time_stamp, 1, 'day' ), 'P1D' ) as $i ) {
 				//Due to DST, we need to make sure we always lock time of day so its the exact same. Without this it can walk by one hour either way.
 				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), $i);
 				$next_i = ( $tmp_start_time_stamp + ($end_time_stamp - $start_time_stamp) ); //Get next date to base the end_time_stamp on, and to calculate if we need to adjust for DST.
@@ -1747,7 +1803,8 @@ class PremiumPolicyFactory extends Factory {
 		} else {
 			//If the premium policy start/end time spans midnight, there could be multiple windows to check
 			//where the premium policy applies, make sure we check all windows.
-			for( $i = (TTDate::getMiddleDayEpoch($start_time_stamp) - 86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp) + 86400); $i += 86400 ) {
+			//for( $i = (TTDate::getMiddleDayEpoch($start_time_stamp) - 86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp) + 86400); $i += 86400 ) {
+			foreach( TTDate::getDatePeriod( TTDate::incrementDate( $start_time_stamp, -1, 'day' ), TTDate::incrementDate( $end_time_stamp, 1, 'day' ), 'P1D' ) as $i ) {
 				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), TTDate::getBeginDayEpoch( $i ) );
 				$next_i = ( $tmp_start_time_stamp + ($end_time_stamp - $start_time_stamp) ); //Get next date to base the end_time_stamp on, and to calculate if we need to adjust for DST.
 				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, ( $next_i + ( TTDate::getDSTOffset( $tmp_start_time_stamp, $next_i ) * -1 ) ) ); //Use $end_time_stamp as it can be modified above due to being near midnight. Also adjust for DST by reversing it.
@@ -2054,6 +2111,14 @@ class PremiumPolicyFactory extends Factory {
 														TTi18n::gettext('Incorrect Maximum Time')
 													);
 		}
+		// Min/Max Time Type
+		if ( $this->getType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'min_max_time_type_id',
+											 $this->getMinMaxTimeType(),
+											 TTi18n::gettext('Incorrect Minimum/Maximum Reset'),
+											 $this->getOptions('min_max_time_type')
+			);
+		}
 		// Include Holiday Type
 		if ( $this->getIncludeHolidayType() !== FALSE ) {
 			$this->Validator->inArrayKey(	'include_holiday_type',
@@ -2162,7 +2227,7 @@ class PremiumPolicyFactory extends Factory {
 	/**
 	 * @return bool
 	 */
-	function preSave() {
+	function preValidate() {
 		if ( $this->getBranchSelectionType() === FALSE OR $this->getBranchSelectionType() < 10 ) {
 			$this->setBranchSelectionType(10); //All
 		}
@@ -2184,6 +2249,10 @@ class PremiumPolicyFactory extends Factory {
 
 		if ( $this->getPayType() === FALSE ) {
 			$this->setPayType( 10 );
+		}
+
+		if ( $this->getMinMaxTimeType() === FALSE ) {
+			$this->setMinMaxTimeType( 10 ); //10=Per Day
 		}
 
 		$this->data['rate'] = 0; //This is required until the schema removes the NOT NULL constraint.
@@ -2254,6 +2323,7 @@ class PremiumPolicyFactory extends Factory {
 							$data[$variable] = $this->getColumn( $variable );
 							break;
 						case 'type':
+						case 'min_max_time_type':
 						case 'pay_type':
 						case 'branch_selection_type':
 						case 'department_selection_type':

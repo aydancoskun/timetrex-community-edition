@@ -169,12 +169,12 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 				if ( $i == 0 ) {
 					$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-2019') );
 				} else {
-					$end_date = ($end_date + ( (86400 * 14) ));
+					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}

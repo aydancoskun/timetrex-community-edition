@@ -3018,6 +3018,7 @@ Global.formatGridData = function( grid_data, key_name ) {
 				case 'is_current_employer':
 				case 'is_contact_available':
 				case 'enable_pay_stub_balance_display':
+				case 'enable_login':
 				case 'ytd_adjustment':
 				case 'authorized':
 				case 'is_reimbursable':
@@ -3122,6 +3123,7 @@ Backbone.Model.prototype._super = function( funcName ) {
 
 //make backone support a simple super function
 Backbone.View.prototype._super = function( funcName ) {
+	// Note: If 'Maximum call stack size exceeded' error encountered, and view is extending twice (BaseView->ReportBaseView->SomeRandomView), then make sure you define `this.real_this` at the 2nd level extend. See reportBaseViewController init for example.
 	if ( this.real_this && this.real_this.constructor.__super__[funcName] ) {
 		return this.real_this.constructor.__super__[funcName].apply( this, _.rest( arguments ) );
 	} else {
@@ -4008,10 +4010,10 @@ Global.convertValidationErrorToString = function( object ) {
 };
 
 Global.APIFileDownload = function( class_name, method, post_data, url ) {
-
 	if ( url == undefined ) {
 		url = ServiceCaller.getURLWithSessionId( 'Class=' + class_name + '&Method=' + method );
 	}
+
 	var message_id = TTUUID.generateUUID();
 	url = url + '&MessageID=' + message_id;
 
@@ -4021,6 +4023,9 @@ Global.APIFileDownload = function( class_name, method, post_data, url ) {
 	tempForm.attr( 'action', url );
 
 	tempForm.attr( 'target', is_browser_iOS ? '_blank' : 'hideReportIFrame' ); //hideReportIFrame
+
+	tempForm.append( $( '<input type=\'hidden\' name=\'X-Client-ID\' value=\'Browser-TimeTrex\'>' ) );
+	tempForm.append( $( '<input type=\'hidden\' name=\'X-CSRF-Token\' value=\''+ getCookie( 'CSRF-Token' ) +'\'>' ) );
 
 	tempForm.css( 'display', 'none' );
 	if ( post_data ) {

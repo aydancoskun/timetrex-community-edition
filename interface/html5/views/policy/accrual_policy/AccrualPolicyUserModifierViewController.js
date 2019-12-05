@@ -26,9 +26,6 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' ))();
 		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.add] = true;
-
 		this.render();
 		if ( this.sub_view_mode ) {
 			this.buildContextMenu( true );
@@ -43,6 +40,15 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 		this.setSelectRibbonMenuIfNecessary();
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.add, ContextMenuIconName.copy],
+			include: ['default']
+		};
+
+		return context_menu_model;
 	},
 
 	initSubLogView: function( tab_id ) {
@@ -108,10 +114,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 	onAddClick: function() {
 		var $this = this;
-		this.is_viewing = false;
-		this.is_edit = false;
-		this.is_add = true;
-		LocalCacheData.current_doing_context_action = 'new';
+		this.setCurrentEditViewState('new');
 		$this.openEditView();
 
 		var user_id;
@@ -406,77 +409,19 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 		return column_filter;
 	},
-
-	onEditClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-		if ( Global.isSet( editId ) ) {
-			var selectedId = editId;
+	
+	doEditAPICall: function ( filter, api_args, _callback ) {
+		var record_id = this.getCurrentSelectedRecord();
+		if ( TTUUID.isUUID( record_id ) && record_id != TTUUID.not_exist_id && record_id != TTUUID.zero_id ) {
+			return this._super( 'doEditAPICall', filter, api_args, _callback );
 		} else {
-			if ( this.is_viewing ) {
-				selectedId = this.current_edit_record.id;
-			} else if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
-			}
-		}
-
-		this.is_viewing = false;
-		this.is_edit = true;
-		this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'edit';
-		$this.openEditView();
-
-		if ( TTUUID.isUUID( selectedId ) && selectedId != TTUUID.not_exist_id && selectedId != TTUUID.zero_id ) {
-
-			var filter = {};
-
-			filter.filter_data = {};
-			filter.filter_data.id = [selectedId];
-
-			this.api['get' + this.api.key_name]( filter, {
-				onResult: function( result ) {
-					var result_data = result.getResult();
-
-					if ( !result_data ) {
-						result_data = [];
-					}
-
-					result_data = result_data[0];
-
-					if ( !result_data ) {
-						TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-						$this.onCancelClick();
-						return;
-					}
-
-					if ( $this.sub_view_mode && $this.parent_key ) {
-						result_data[$this.parent_key] = $this.parent_value;
-					}
-
-					$this.current_edit_record = result_data;
-
-					$this.initEditView();
-
-				}
-			} );
-		} else {
-
-			var result_data = this.getRecordFromGridById( selectedId );
+			var result_data = this.getRecordFromGridById( record_id );
 
 			if ( result_data && result_data.id ) {
 				result_data.id = '';
 			}
-			if ( $this.sub_view_mode && $this.parent_key ) {
-				result_data[$this.parent_key] = $this.parent_value;
-			}
-
-			$this.current_edit_record = result_data;
-			$this.initEditView();
+			return this.handleEditAPICallbackResult( result_data );
 		}
-
 	},
 
 	onSaveResult: function( result ) {
@@ -1008,57 +953,14 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 	},
 
-	onViewClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		$this.is_viewing = true;
-		$this.is_edit = false;
-		$this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'view';
-		$this.openEditView();
-
-		var filter = {};
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-
-		if ( Global.isSet( editId ) ) {
-			var selectedId = editId;
-		} else {
-			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
-			}
-		}
-
-		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
+	getAPIFilters: function () {
+		var filter = this._super( 'getAPIFilters' );
 
 		if ( this.sub_view_mode && this.parent_key ) {
 			filter.filter_data[this.parent_key] = this.parent_value;
 		}
 
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-				if ( !result_data ) {
-					result_data = [];
-				}
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				$this.current_edit_record = result_data;
-
-				$this.initEditView();
-
-			}
-		} );
-
+		return filter;
 	},
 
 	onMassEditClick: function() {

@@ -49,10 +49,6 @@ PayStubViewController = BaseViewController.extend( {
 		this.pay_stub_transaction_api = new (APIFactory.getAPIClass( 'APIPayStubTransaction' ))();
 		this.remittance_destination_account_api = new (APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true; //Hide some context menus
-
 		var $this = this;
 		$.when(
 				this.preloadTransactionOptions( new $.Deferred() ),
@@ -159,277 +155,92 @@ PayStubViewController = BaseViewController.extend( {
 
 	},
 
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			groups: {
+				pay_stubs: {
+					label: $.i18n._( 'Pay Stubs' ),
+					id: this.script_name + 'Pay Stubs'
+				}
+			},
+			exclude: [
+				ContextMenuIconName.copy,
+				ContextMenuIconName.save_and_new,
+				ContextMenuIconName.save_and_copy,
+			],
+			include: [
+				{
+					label: $.i18n._( 'TimeSheet' ),
+					id: ContextMenuIconName.timesheet,
+					group: 'navigation',
+					icon: Icons.timesheet
+				},
+				{
+					label: $.i18n._( 'Schedule' ),
+					id: ContextMenuIconName.schedule,
+					group: 'navigation',
+					icon: Icons.schedule
+				},
+				{
+					label: $.i18n._( 'Pay Stub<br>Amendments' ),
+					id: ContextMenuIconName.pay_stub_amendment,
+					group: 'navigation',
+					icon: Icons.pay_stub_amendment
+				},
+				{
+					label: $.i18n._( 'Pay Stub<br>Transactions' ),
+					id: ContextMenuIconName.pay_stub_transaction,
+					group: 'navigation',
+					icon: Icons.pay_stub_transaction,
+					items: [],
+					permission_result: true,
+					permission: true,
+					sort_order: null
+				},
+				{
+					label: $.i18n._( 'Edit<br>Employee' ),
+					id: ContextMenuIconName.edit_employee,
+					group: 'navigation',
+					icon: Icons.employee
+				},
+				{
+					label: $.i18n._( 'Edit Pay<br>Period' ),
+					id: ContextMenuIconName.edit_pay_period,
+					group: 'navigation',
+					icon: Icons.pay_period
+				},
+				{
+					label: $.i18n._( 'Employee Pay<br>Stubs' ),
+					id: ContextMenuIconName.employee_pay_stubs,
+					group: 'pay_stubs',
+					icon: Icons.pay_stubs
+				},
+				{
+					label: $.i18n._( 'Employer Pay<br>Stubs' ),
+					id: ContextMenuIconName.employer_pay_stubs,
+					group: 'pay_stubs',
+					icon: Icons.pay_stubs
+				},
+				{
+					label: $.i18n._( 'Generate<br>Pay Stub' ),
+					id: ContextMenuIconName.generate_pay_stub,
+					group: 'pay_stubs',
+					icon: Icons.process_payroll
+				},
 
-	buildContextMenuModels: function() {
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
+				{
+					label: $.i18n._( 'Process<br>Transactions' ),
+					id: ContextMenuIconName.direct_deposit,
+					group: 'pay_stubs',
+					icon: 'direct_deposit-35x35.png',
+					items: [],
+					permission_result: true,
+					permission: true
+				}
+			]
+		};
 
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var navigation_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Navigation' ),
-			id: this.viewId + 'navigation',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var pay_stubs_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Pay Stubs' ),
-			id: this.script_name + 'Pay Stubs',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var other_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Other' ),
-			id: this.viewId + 'other',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var add = new RibbonSubMenu( {
-			label: $.i18n._( 'New' ),
-			id: ContextMenuIconName.add,
-			group: editor_group,
-			icon: Icons.new_add,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var mass_edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Mass<br>Edit' ),
-			id: ContextMenuIconName.mass_edit,
-			group: editor_group,
-			icon: Icons.mass_edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var del = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete' ),
-			id: ContextMenuIconName.delete_icon,
-			group: editor_group,
-			icon: Icons.delete_icon,
-			permission_result: true,
-			permission: null
-		} );
-
-		var delAndNext = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete<br>& Next' ),
-			id: ContextMenuIconName.delete_and_next,
-			group: editor_group,
-			icon: Icons.delete_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy' ),
-			id: ContextMenuIconName.copy,
-			group: editor_group,
-			icon: Icons.copy_as_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy_as_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy<br>as New' ),
-			id: ContextMenuIconName.copy_as_new,
-			group: editor_group,
-			icon: Icons.copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save,
-			group: editor_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_continue = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Continue' ),
-			id: ContextMenuIconName.save_and_continue,
-			group: editor_group,
-			icon: Icons.save_and_continue,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_next = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Next' ),
-			id: ContextMenuIconName.save_and_next,
-			group: editor_group,
-			icon: Icons.save_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Copy' ),
-			id: ContextMenuIconName.save_and_copy,
-			group: editor_group,
-			icon: Icons.save_and_copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& New' ),
-			id: ContextMenuIconName.save_and_new,
-			group: editor_group,
-			icon: Icons.save_and_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var timesheet = new RibbonSubMenu( {
-			label: $.i18n._( 'TimeSheet' ),
-			id: ContextMenuIconName.timesheet,
-			group: navigation_group,
-			icon: Icons.timesheet,
-			permission_result: true,
-			permission: null
-		} );
-
-		var schedule = new RibbonSubMenu( {
-			label: $.i18n._( 'Schedule' ),
-			id: ContextMenuIconName.schedule,
-			group: navigation_group,
-			icon: Icons.schedule,
-			permission_result: true,
-			permission: null
-		} );
-
-		var pay_stub_amendments = new RibbonSubMenu( {
-			label: $.i18n._( 'Pay Stub<br>Amendments' ),
-			id: ContextMenuIconName.pay_stub_amendment,
-			group: navigation_group,
-			icon: Icons.pay_stub_amendment,
-			permission_result: true,
-			permission: null
-		} );
-
-		var pay_stub_transactions = new RibbonSubMenu( {
-			label: $.i18n._( 'Pay Stub<br>Transactions' ),
-			id: ContextMenuIconName.pay_stub_transaction,
-			group: navigation_group,
-			icon: Icons.pay_stub_transaction,
-			items: [],
-			permission_result: true,
-			permission: true,
-			sort_order: null
-		} );
-
-		var edit_employee = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit<br>Employee' ),
-			id: ContextMenuIconName.edit_employee,
-			group: navigation_group,
-			icon: Icons.employee,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit_pay_period = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit Pay<br>Period' ),
-			id: ContextMenuIconName.edit_pay_period,
-			group: navigation_group,
-			icon: Icons.pay_period,
-			permission_result: true,
-			permission: null
-		} );
-
-		var employee_pay_stubs = new RibbonSubMenu( {
-			label: $.i18n._( 'Employee Pay<br>Stubs' ),
-			id: ContextMenuIconName.employee_pay_stubs,
-			group: pay_stubs_group,
-			icon: Icons.pay_stubs,
-			permission_result: true,
-			permission: null
-		} );
-
-		var employer_pay_stubs = new RibbonSubMenu( {
-			label: $.i18n._( 'Employer Pay<br>Stubs' ),
-			id: ContextMenuIconName.employer_pay_stubs,
-			group: pay_stubs_group,
-			icon: Icons.pay_stubs,
-			permission_result: true,
-			permission: null
-		} );
-
-		var generate_pay_stub = new RibbonSubMenu( {
-			label: $.i18n._( 'Generate<br>Pay Stub' ),
-			id: ContextMenuIconName.generate_pay_stub,
-			group: other_group,
-			icon: Icons.process_payroll,
-			permission_result: true,
-			permission: null
-		} );
-
-
-		var process_transactions = new RibbonSubMenu( {
-			label: $.i18n._( 'Process<br>Transactions' ),
-			id: ContextMenuIconName.direct_deposit,
-			group: other_group,
-			icon: 'direct_deposit-35x35.png',
-			items: [],
-			permission_result: true,
-			permission: true
-		} );
-
-
-		var export_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Export' ),
-			id: ContextMenuIconName.export_excel,
-			group: other_group,
-			icon: Icons.export_excel,
-			items: [],
-			permission_result: true,
-			permission: true,
-			sort_order: 9000
-		} );
-
-		return [menu];
+		return context_menu_model;
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
@@ -1632,70 +1443,24 @@ PayStubViewController = BaseViewController.extend( {
 	},
 
 	onSaveClick: function( ignoreWarning ) {
-		var $this = this;
-		var record;
-		if ( !Global.isSet( ignoreWarning ) ) {
-			ignoreWarning = false;
-		}
-		LocalCacheData.current_doing_context_action = 'save';
 		if ( this.is_mass_editing ) {
 			this.include_pay_stub_accounts = false;
-			var check_fields = {};
-			for ( var key in this.edit_view_ui_dic ) {
-				var widget = this.edit_view_ui_dic[key];
-
-				if ( Global.isSet( widget.isChecked ) ) {
-					if ( widget.isChecked() ) {
-						check_fields[key] = this.current_edit_record[key];
-					}
-				}
-			}
-
-			record = [];
-			$.each( this.mass_edit_record_ids, function( index, value ) {
-				var common_record = Global.clone( check_fields );
-				common_record.id = value;
-				common_record = $this.uniformVariable( common_record );
-				record.push( common_record );
-
-			} );
-		} else {
-			record = this.current_edit_record;
-			record = this.uniformVariable( record );
 		}
+		this._super( 'onSaveClick', ignoreWarning );
+	},
+
+	doSaveAPICall: function( record, ignoreWarning, callback ) {
+		var $this = this;
 		this.savePayStub( record, function() {
-			$this.api['set' + $this.api.key_name]( record, false, true, {
-				onResult: function( result ) {
-					$this.onSaveResult( result );
-				}
-			} );
+			// TODO: Could perhaps tidy this up further with a .call or .apply after some testing, rather than nested callbacks.
+			$this._super( 'doSaveAPICall', record, true, callback );
 		} );
 	},
 
-	onSaveResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			$this.is_add = false;
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-				$this.refresh_id = result_data;
-			}
-
-			if ( !$this.edit_only_mode ) {
-				$this.search();
-			}
-			$this.onSaveDone( result );
-			$this.current_edit_record = null;
-			$this.removeEditView();
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
+	onSaveDone: function ( result ) {
+		this.current_edit_record = null;
+		return true;
 	},
-
 
 	saveInsideTransactionEditorData: function( callBack ) {
 		//called by validation function
@@ -1717,8 +1482,7 @@ PayStubViewController = BaseViewController.extend( {
 	onCopyAsNewClick: function() {
 		var $this = this;
 		var reload_entries = false;
-		this.is_add = true;
-
+		this.setCurrentEditViewState('new');
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		if ( Global.isSet( this.edit_view ) ) {
 //			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
@@ -1922,25 +1686,25 @@ PayStubViewController = BaseViewController.extend( {
 		}
 	},
 
-	onSaveAndNextResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-				$this.refresh_id = result_data;
-			}
-			$this.editor.show_cover = true;
-			$this.onRightArrowClick();
-			$this.search( false );
-			$this.onSaveAndNextDone( result );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
+	// onSaveAndNextResult: function( result ) {
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+	// 			$this.refresh_id = result_data;
+	// 		}
+	// 		$this.editor.show_cover = true;
+	// 		$this.onRightArrowClick();
+	// 		$this.search( false );
+	// 		$this.onSaveAndNextDone( result );
+	//
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
 	saveInsideEntryEditorData: function( callBack ) {
 		//called by validation function

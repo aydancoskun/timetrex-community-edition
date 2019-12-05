@@ -59,33 +59,9 @@ class PermissionControlFactory extends Factory {
 				$retval = $pf->getOptions('preset');
 				break;
 			case 'level':
-				$retval = array(
-										1 => 1,
-										2 => 2,
-										3 => 3,
-										4 => 4,
-										5 => 5,
-										6 => 6,
-										7 => 7,
-										8 => 8,
-										9 => 9,
-										10 => 10,
-										11 => 11,
-										12 => 12,
-										13 => 13,
-										14 => 14,
-										15 => 15,
-										16 => 16,
-										17 => 17,
-										18 => 18,
-										19 => 19,
-										20 => 20,
-										21 => 21,
-										22 => 22,
-										23 => 23,
-										24 => 24,
-										25 => 25,
-							);
+				for( $i = 1; $i <= 100; $i++ ) { //100 Levels.
+					$retval[$i] = $i;
+				}
 				break;
 			case 'columns':
 				$retval = array(
@@ -554,6 +530,15 @@ class PermissionControlFactory extends Factory {
 										  TTi18n::gettext( 'This permission group is currently in use by employees' ) );
 			}
 			unset($users);
+
+			//Also check for users assigned by way of Terminated Permission Group
+			$ulf = TTnew('UserListFactory');
+			$ulf->getByCompanyIdAndTerminatedPermissionControl( $this->getCompany(), $this->getId(), 1 ); //Limit=1
+			if ( $ulf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE( 'in_use',
+										  FALSE,
+										  TTi18n::gettext( 'This permission group is currently in use by employees as their Terminated Permissions' ) );
+			}
 		}
 
 		return TRUE;

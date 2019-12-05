@@ -241,26 +241,26 @@ unset($argument_size);
 
 $api_auth = TTNew('APIAuthentication'); /** @var APIAuthentication $api_auth */ //Used to handle error cases and display error messages.
 $session_id = getSessionID( 600 );
-if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == FALSE ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) AND $session_id != '' AND !isset($_GET['disable_db']) AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
-	$authentication = new Authentication();
-
-	Debug::text('Session ID: '. $session_id .' Source IP: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
-	if ( $class_name != 'APIProgressBar' AND $authentication->Check( $session_id, 'QUICK_PUNCH_ID'  ) === TRUE ) { //Always treat APIProgressBar as unauthenticated as an optimization to avoid causing uncessary SQL queries.
-		if ( Misc::checkValidReferer() == TRUE ) { //Help prevent CSRF attacks with this, but this is only needed when the user is already logged in.
+$authentication = new Authentication();
+$authentication->setIdleTimeout( 900 ); //Force 15 minute timeout.
+if ( $authentication->checkValidCSRFToken() == TRUE ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
+	if ( ( isset( $config_vars['other']['installer_enabled'] ) AND $config_vars['other']['installer_enabled'] == FALSE ) AND ( !isset( $config_vars['other']['down_for_maintenance'] ) OR isset( $config_vars['other']['down_for_maintenance'] ) AND $config_vars['other']['down_for_maintenance'] == '' ) AND $session_id != '' AND !isset( $_GET['disable_db'] ) AND !in_array( strtolower( $method ), array('isloggedin', 'ping') ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
+		Debug::text( 'Session ID: ' . $session_id . ' Source IP: ' . Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10 );
+		if ( $class_name != 'APIProgressBar' AND $authentication->Check( $session_id, 'QUICK_PUNCH_ID' ) === TRUE ) { //Always treat APIProgressBar as unauthenticated as an optimization to avoid causing uncessary SQL queries.
 			authenticatedInvokeService( $class_name, $method, $arguments, $message_id, $authentication, $api_auth );
 		} else {
-			echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Invalid referrer, possible CSRF.' ) ) );
+			Debug::text( 'SessionID set but user not authenticated!', __FILE__, __LINE__, __METHOD__, 10 );
+			//echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('User is not authenticated.' ) ) );
+
+			//Rather than fail with session error, switch over to using unauthenticated calls, which if its calling to authenticated method will cause a SESSION error at that time.
+			unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth );
 		}
 	} else {
-		Debug::text('SessionID set but user not authenticated!', __FILE__, __LINE__, __METHOD__, 10);
-		//echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('User is not authenticated.' ) ) );
-
-		//Rather than fail with session error, switch over to using unauthenticated calls, which if its calling to authenticated method will cause a SESSION error at that time.
+		Debug::text( 'No SessionID or calling non-authenticated function...', __FILE__, __LINE__, __METHOD__, 10 );
 		unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth );
 	}
 } else {
-	Debug::text('No SessionID or calling non-authenticated function...', __FILE__, __LINE__, __METHOD__, 10);
-	unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth );
+	echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Invalid CSRF token, please refresh your browser and try again!' ) ) ); //Could potentially use a SESSION error so the front-end logs the user out so they can login again with a fresh CSRF token.
 }
 
 Debug::text('Server Response Time: '. ((float)microtime(TRUE) - $_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);

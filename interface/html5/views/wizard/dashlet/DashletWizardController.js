@@ -1,6 +1,6 @@
 DashletWizardController = BaseWizardController.extend( {
 
-	el: '.wizard',
+	el: '.wizard-bg',
 	user_generic_data_api: null,
 	api_user_report: null,
 	numArray: [

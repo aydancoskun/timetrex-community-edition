@@ -93,6 +93,10 @@ class APIKPI extends APIFactory {
 	function getKPI( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('kpi', 'enabled')
 				OR !( $this->getPermissionObject()->Check('kpi', 'view') OR $this->getPermissionObject()->Check('kpi', 'view_own') OR $this->getPermissionObject()->Check('kpi', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -158,6 +162,10 @@ class APIKPI extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('kpi', 'enabled')
@@ -268,6 +276,10 @@ class APIKPI extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('kpi', 'enabled')

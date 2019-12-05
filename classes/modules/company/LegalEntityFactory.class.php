@@ -420,9 +420,8 @@ class LegalEntityFactory extends Factory {
 	 * @return bool
 	 */
 	function setProvince( $value) {
-		$value = trim($value);
 		Debug::Text('Country: '. $this->getCountry() .' Province: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		return $this->setGenericDataValue( 'province', $value );
+		return $this->setGenericDataValue( 'province', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -437,8 +436,7 @@ class LegalEntityFactory extends Factory {
 	 * @return bool
 	 */
 	function setCountry( $value) {
-		$value = trim($value);
-		return $this->setGenericDataValue( 'country', $value );
+		return $this->setGenericDataValue( 'country', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -1216,7 +1214,7 @@ class LegalEntityFactory extends Factory {
 
 				//Update any contact information for the user.
 				global $current_user;
-				if ( PRODUCTION == TRUE AND isset( $current_user ) AND is_object( $current_user ) ) {
+				if ( isset( $current_user ) AND is_object( $current_user ) ) {
 					if ( $current_user->getWorkEmail() == $this->getPaymentServicesUserName() ) {
 						try {
 							$tt_ps_api = $this->getPaymentServicesAPIObject();

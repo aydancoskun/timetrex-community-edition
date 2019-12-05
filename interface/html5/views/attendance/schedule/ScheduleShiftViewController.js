@@ -44,8 +44,6 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
-
 		this.initPermission();
 		this.render();
 		this.buildContextMenu();
@@ -55,27 +53,51 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 	},
 
-    onSaveClick: function( ignoreWarning ) {
-        var $this = this;
-        var record = {};
-        if ( this.is_mass_editing ) {
-            var record = [];
-            for ( var i = 0; i < this.mass_edit_record_ids.length; i++ ) {
-                var mass_record = {};
-                mass_record['id'] = $this.mass_edit_record_ids[i];
-                for (var key in this.edit_view_ui_dic) {
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.copy],
+			include: []
+		};
 
-                    if (!this.edit_view_ui_dic.hasOwnProperty(key)) {
-                        continue;
-                    }
-                    var widget = this.edit_view_ui_dic[key];
-                    if (Global.isSet(widget.isChecked)) {
-                        if (widget.isChecked() && widget.getEnabled()) {
-                            mass_record[key] = widget.getValue();
-                        }
-                    }
-                }
-                record.push(mass_record);
+		return context_menu_model;
+	},
+
+	onSaveClick: function( ignoreWarning ) {
+		// this function will shortly be deprecated and replaced by BaseViewController.onViewClick(), but this intermediatiary step of reorganizing the code
+		// is to help debug in future by seeing how the current function was updated to match baseview.
+		// initially, the code looped over all the mass edit records, and then for each record, it would loop over the changed fields and set them on that record.
+		// instead, we will now just loop over the changed fields once, and then loop over the mass edit records, cloning this changed set of fields.
+        // The clone itself is probably yet another loop internally, but this at least makes it easier to read and also allows the merge to use the common base view controller function.
+
+		var $this = this;
+        var record;
+        if ( this.is_mass_editing ) {
+			record = [];
+
+			// loop over all fields on the form, and track the ones that have changed
+			var mass_record_shared = {};
+			for (var key in this.edit_view_ui_dic) {
+
+				if (!this.edit_view_ui_dic.hasOwnProperty(key)) {
+					continue;
+				}
+				var widget = this.edit_view_ui_dic[key];
+				if (Global.isSet(widget.isChecked)) {
+					if (widget.isChecked() && widget.getEnabled()) {
+						mass_record_shared[key] = widget.getValue();
+					}
+				}
+			}
+
+        	// loop over all the selected id's for the mass edit, and apply a copy of the changed fields to each
+
+            for ( var i = 0; i < this.mass_edit_record_ids.length; i++ ) {
+            	//create new copy of the fields that have changed.
+                var mass_record_single = Global.clone( mass_record_shared );
+				mass_record_single['id'] = $this.mass_edit_record_ids[i];
+
+				// push the single record into the array of mass edit records to be saved
+                record.push(mass_record_single);
             }
         } else {
             this.collectUIDataToCurrentEditRecord();

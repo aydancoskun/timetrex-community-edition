@@ -43,7 +43,6 @@ class Debug {
 	static protected $verbosity = 5;			//Display debug info with a verbosity level equal or lesser then this.
 	static protected $buffer_output = TRUE;		//Enable/Disable output buffering.
 	static protected $debug_buffer = NULL;		//Output buffer.
-	static protected $enable_tidy = FALSE;		//Enable/Disable tidying of output
 	static protected $enable_display = FALSE;	//Enable/Disable displaying of debug output
 	static protected $enable_log = FALSE;		//Enable/Disable logging of debug output
 	static protected $max_line_size = 200;		//Max line size in characters. This is used to break up long lines.

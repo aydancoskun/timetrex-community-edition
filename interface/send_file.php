@@ -43,18 +43,12 @@ require_once('HTTP/Download.php');
 extract        (FormVariables::GetVariables(
                                                                                array   (
                                                                                                'action',
-                                                                                               'api', //Called from Flex
+                                                                                               'api', //Called from JS
                                                                                                'object_type',
                                                                                                'parent_object_type_id',
                                                                                                'object_id',
                                                                                                'parent_id',
                                                                                                ) ) );
-
-if ( Misc::checkValidReferer() == FALSE ) { //Help prevent CSRF attacks with this.
-	echo TTi18n::getText( 'Invalid referrer, possible CSRF.' );
-	Debug::writeToLog();
-	exit;
-}
 
 //sendFormIFrameCall (js) passes json data
 //Make sure we accept it here GovernmentDocument uses this
@@ -75,6 +69,12 @@ $object_type = strtolower($object_type);
 if ( $object_type != 'primary_company_logo' AND $object_type != 'copyright' AND $object_type != 'smcopyright' AND $object_type != 'copyright_wide' ) {
 	$skip_message_check = TRUE;
 	require_once(Environment::getBasePath() .'includes/Interface.inc.php');
+
+	if ( $authentication->checkValidCSRFToken() == FALSE ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
+		echo TTi18n::getText( 'Invalid referrer, possible CSRF.' );
+		Debug::writeToLog();
+		exit;
+	}
 }
 
 switch ($object_type) {

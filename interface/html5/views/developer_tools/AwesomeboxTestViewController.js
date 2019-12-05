@@ -224,53 +224,17 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 
 	},
 
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				ContextMenuIconName.view,
+				ContextMenuIconName.edit,
+				ContextMenuIconName.cancel
+			]
+		};
 
-	buildContextMenuModels: function() {
-
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	initOptions: function( callBack ) {

@@ -121,9 +121,12 @@ class APIPayStub extends APIFactory {
 	function getPayStub( $data = NULL, $disable_paging = FALSE, $format = FALSE, $hide_employer_rows = TRUE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check( 'pay_stub', 'enabled' )
-				OR !( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) OR $this->getPermissionObject()->Check( 'pay_stub', 'view_own' ) OR $this->getPermissionObject()->Check( 'pay_stub', 'view_child' ) )
-		) {
+				OR !( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) OR $this->getPermissionObject()->Check( 'pay_stub', 'view_own' ) OR $this->getPermissionObject()->Check( 'pay_stub', 'view_child' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -198,7 +201,7 @@ class APIPayStub extends APIFactory {
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
 				$pslf->setProgressBarObject( $this->getProgressBarObject() ); //Expose progress bar object to pay stub object.
 
-				$output = $pslf->exportPayStubTransaction( $pslf, $format, NULL, $data['setup_last_check_number']);
+				$output = $pslf->exportPayStubTransaction( $pslf, NULL, $data['setup_last_check_number']);
 
 				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
@@ -288,6 +291,10 @@ class APIPayStub extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
@@ -626,6 +633,10 @@ class APIPayStub extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
 				OR !( $this->getPermissionObject()->Check('pay_stub', 'delete') OR $this->getPermissionObject()->Check('pay_stub', 'delete_own') OR $this->getPermissionObject()->Check('pay_stub', 'delete_child') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
@@ -713,6 +724,14 @@ class APIPayStub extends APIFactory {
 	function generatePayStubs( $pay_period_ids, $user_ids = NULL, $enable_correction = FALSE, $run_id = FALSE, $type_id = 10, $transaction_date = NULL ) {
 		global $profiler;
 		Debug::Text('Generate Pay Stubs!', __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
+		if ( $this->getCurrentUserObject()->getStatus() != 10 ) { //10=Active -- Make sure user record is active as well.
+			return $this->getPermissionObject()->PermissionDenied( FALSE, TTi18n::getText( 'Employee status must be Active to Generate Pay Stubs' ) );
+		}
 
 		if ( !( $this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
 				AND ( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_own') )

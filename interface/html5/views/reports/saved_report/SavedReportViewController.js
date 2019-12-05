@@ -20,7 +20,6 @@ SavedReportViewController = BaseViewController.extend( {
 
 		this.render();
 		if ( this.sub_view_mode ) {
-			this.invisible_context_menu_dic[ContextMenuIconName.view] = true;
 			this.buildContextMenu( true );
 
 			//call init data in parent view, don't call initData
@@ -86,114 +85,42 @@ SavedReportViewController = BaseViewController.extend( {
 
 	},
 
-	buildContextMenuModels: function() {
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			groups: {
+				share: {
+					label: $.i18n._( 'Share' ),
+					id: this.viewId + 'Share'
+				}
+			},
+			exclude: ['default'],
+			include: [
+				ContextMenuIconName.edit,
+				ContextMenuIconName.delete_icon,
+				ContextMenuIconName.delete_and_next,
+				ContextMenuIconName.save,
+				ContextMenuIconName.save_and_continue,
+				ContextMenuIconName.save_and_next,
+				ContextMenuIconName.cancel,
+				{
+					label: $.i18n._( 'Share<br>Report' ),
+					id: ContextMenuIconName.share_report,
+					group: 'share',
+					icon: Icons.copy_as_new
+				}
+			]
+		};
 
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
+		if ( !this.sub_view_mode ) {
+			context_menu_model.include.unshift({
+				label: $.i18n._( 'Report' ),
+				id: ContextMenuIconName.view,
+				group: 'editor',
+				icon: Icons.hr_reports
+			});
+		}
 
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'Report' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.hr_reports,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var del = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete' ),
-			id: ContextMenuIconName.delete_icon,
-			group: editor_group,
-			icon: Icons.delete_icon,
-			permission_result: true,
-			permission: null
-		} );
-
-		var delAndNext = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete<br>& Next' ),
-			id: ContextMenuIconName.delete_and_next,
-			group: editor_group,
-			icon: Icons.delete_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save,
-			group: editor_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_continue = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Continue' ),
-			id: ContextMenuIconName.save_and_continue,
-			group: editor_group,
-			icon: Icons.save_and_continue,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_next = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Next' ),
-			id: ContextMenuIconName.save_and_next,
-			group: editor_group,
-			icon: Icons.save_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		//menu group
-		var share_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Share' ),
-			id: this.viewId + 'Share',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var share = new RibbonSubMenu( {
-			label: $.i18n._( 'Share<br>Report' ),
-			id: ContextMenuIconName.share_report,
-			group: share_group,
-			icon: Icons.copy_as_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	removeEditView: function() {
@@ -544,10 +471,7 @@ SavedReportViewController = BaseViewController.extend( {
 
 		ProgressBar.closeOverlay();
 		var $this = this;
-		this.is_viewing = false;
-		this.is_edit = false;
-		this.is_add = true;
-		LocalCacheData.current_doing_context_action = 'new';
+		this.setCurrentEditViewState('new');
 		$this.openEditView();
 		$this.current_edit_record = reportData;
 		$this.initEditView();

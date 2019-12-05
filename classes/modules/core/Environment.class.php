@@ -97,11 +97,11 @@ class Environment {
 	/**
 	 * @return mixed|string
 	 */
-	static function getCookieBaseURL() {
+	static function getCookieBaseURL( $api = NULL ) {
 		//  "/timetrex/interface"
 		//  "/timetrex/api/json"
 		//  "/timetrex" <- cookie must go here.
-		$retval = str_replace( '\\', '/', dirname( dirname( self::getAPIBaseURL() ) ) ); //PHP5 compatible. dirname(self::getAPIBaseURL(), 2) only works in PHP7. Also Windows tends to use backslashes in some cases, since this is a URL switch to forward slash always.
+		$retval = str_replace( '\\', '/', dirname( dirname( self::getAPIBaseURL( $api ) ) ) ); //PHP5 compatible. dirname(self::getAPIBaseURL(), 2) only works in PHP7. Also Windows tends to use backslashes in some cases, since this is a URL switch to forward slash always.
 
 		if ( $retval == '' ) {
 			$retval = '/';

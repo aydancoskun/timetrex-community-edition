@@ -199,6 +199,10 @@ class APICompanyDeduction extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('company_tax_deduction', 'enabled')
 				OR !( $this->getPermissionObject()->Check('company_tax_deduction', 'edit') OR $this->getPermissionObject()->Check('company_tax_deduction', 'edit_own') OR $this->getPermissionObject()->Check('company_tax_deduction', 'edit_child') OR $this->getPermissionObject()->Check('company_tax_deduction', 'add') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();

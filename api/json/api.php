@@ -252,12 +252,17 @@ unset($argument_size);
 
 $api_auth = TTNew('APIAuthentication'); /** @var APIAuthentication $api_auth */ //Used to handle error cases and display error messages.
 $session_id = getSessionID();
-if ( Misc::checkValidReferer() == TRUE ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
+$authentication = new Authentication();
+if ( $authentication->checkValidCSRFToken() == TRUE ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
 	if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == FALSE ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) AND $session_id != '' AND !isset($_GET['disable_db']) AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
-		$authentication = new Authentication();
-
 		Debug::text('Session ID: '. $session_id .' Source IP: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
-		if ( $class_name != 'APIProgressBar' AND $authentication->Check( $session_id ) === TRUE ) { //Always treat APIProgressBar as unauthenticated as an optimization to avoid causing uncessary SQL queries.
+		if ( Misc::isMobileAppUserAgent() == TRUE ) {
+			$authentication_type_id = 605; //Phone ID - Mobile App
+		} else {
+			$authentication_type_id = 800; //USER_NAME
+		}
+
+		if ( $class_name != 'APIProgressBar' AND $authentication->Check( $session_id, $authentication_type_id ) === TRUE ) { //Always treat APIProgressBar as unauthenticated as an optimization to avoid causing uncessary SQL queries.
 			authenticatedInvokeService( $class_name, $method, $arguments, $message_id, $authentication, $api_auth );
 		} else {
 			Debug::text('SessionID set but user not authenticated!', __FILE__, __LINE__, __METHOD__, 10);
@@ -271,7 +276,7 @@ if ( Misc::checkValidReferer() == TRUE ) { //Help prevent CSRF attacks with this
 		unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth );
 	}
 } else {
-	echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Invalid referrer, possible CSRF.' ) ) );
+	echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Invalid CSRF token, please refresh your browser and try again!' ) ) ); //Could potentially use a SESSION error so the front-end logs the user out so they can login again with a fresh CSRF token.
 }
 
 Debug::text('Server Response Time: '. ((float)microtime(TRUE) - $_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);

@@ -119,8 +119,6 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 		}
 		this.api_absence_policy = new ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) )();
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
 		this.scroll_position = 0;
 		this.grid_dic = {};
 
@@ -388,319 +386,144 @@ TimeSheetViewController = BaseViewController.extend( {
 
 	},
 
-	buildContextMenuModels: function () {
-
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var drag_and_drop_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Drag & Drop' ),
-			id: this.viewId + 'drag_and_drop',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//navigation group
-		var navigation_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Navigation' ),
-			id: this.viewId + 'navigation',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//navigation group
-		var other_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Other' ),
-			id: this.viewId + 'other',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var add = new RibbonSubMenu( {
-			label: $.i18n._( 'New<br>Punch' ),
-			id: ContextMenuIconName.add_punch,
-			group: editor_group,
-			icon: Icons.new_add,
-			permission_result: true,
-			permission: null
-		} );
-
-		var add_absence = new RibbonSubMenu( {
-			label: $.i18n._( 'New<br>Absence' ),
-			id: ContextMenuIconName.add_absence,
-			group: editor_group,
-			icon: Icons.new_add,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var mass_edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Mass<br>Edit' ),
-			id: ContextMenuIconName.mass_edit,
-			group: editor_group,
-			icon: Icons.mass_edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var del = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete' ),
-			id: ContextMenuIconName.delete_icon,
-			group: editor_group,
-			icon: Icons.delete_icon,
-			permission_result: true,
-			permission: null
-		} );
-
-		var delAndNext = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete<br>& Next' ),
-			id: ContextMenuIconName.delete_and_next,
-			group: editor_group,
-			icon: Icons.delete_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy' ),
-			id: ContextMenuIconName.copy,
-			group: editor_group,
-			icon: Icons.copy_as_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy_as_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy<br>as New' ),
-			id: ContextMenuIconName.copy_as_new,
-			group: editor_group,
-			icon: Icons.copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save,
-			group: editor_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_continue = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Continue' ),
-			id: ContextMenuIconName.save_and_continue,
-			group: editor_group,
-			icon: Icons.save_and_continue,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_next = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Next' ),
-			id: ContextMenuIconName.save_and_next,
-			group: editor_group,
-			icon: Icons.save_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Copy' ),
-			id: ContextMenuIconName.save_and_copy,
-			group: editor_group,
-			icon: Icons.save_and_copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& New' ),
-			id: ContextMenuIconName.save_and_new,
-			group: editor_group,
-			icon: Icons.save_and_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var move = new RibbonSubMenu( {
-			label: $.i18n._( 'Move' ),
-			id: ContextMenuIconName.move,
-			group: drag_and_drop_group,
-			icon: Icons.move,
-			permission_result: true,
-			permission: null
-		} );
-
-		var drag_copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy' ),
-			id: ContextMenuIconName.drag_copy,
-			group: drag_and_drop_group,
-			icon: Icons.copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var in_out = new RibbonSubMenu( {
-			label: $.i18n._( 'In/Out' ),
-			id: ContextMenuIconName.in_out,
-			group: navigation_group,
-			icon: Icons.in_out,
-			permission_result: PermissionManager.checkTopLevelPermission( 'InOut' ),
-			permission: null
-		} );
-
-		var schedule_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Schedules' ),
-			id: ContextMenuIconName.schedule,
-			group: navigation_group,
-			icon: Icons.schedule,
-			permission_result: true,
-			permission: null
-		} );
-
-		var pay_stub_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Pay<br>Stubs' ),
-			id: ContextMenuIconName.pay_stub,
-			group: navigation_group,
-			icon: Icons.pay_stubs,
-			permission_result: true,
-			permission: null
-		} );
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			groups: {
+				drag_and_drop: {
+					label: $.i18n._( 'Drag & Drop' ),
+					id: this.viewId + 'drag_and_drop'
+				}
+			},
+			exclude: [
+				ContextMenuIconName.export_excel,
+				ContextMenuIconName.add,
+				ContextMenuIconName.copy,
+				ContextMenuIconName.copy_as_new
+			],
+			include: [
+				{
+					label: $.i18n._( 'New<br>Punch' ),
+					id: ContextMenuIconName.add_punch,
+					group: 'editor',
+					icon: Icons.new_add,
+					sort_order: 910
+				},
+				{
+					label: $.i18n._( 'New<br>Absence' ),
+					id: ContextMenuIconName.add_absence,
+					group: 'editor',
+					icon: Icons.new_add,
+					sort_order: 920
+				},
+				{
+					label: $.i18n._( 'Move' ),
+					id: ContextMenuIconName.move,
+					group: 'drag_and_drop',
+					icon: Icons.move
+				},
+				{
+					label: $.i18n._( 'Copy' ),
+					id: ContextMenuIconName.drag_copy,
+					group: 'drag_and_drop',
+					icon: Icons.copy
+				},
+				{
+					label: $.i18n._( 'In/Out' ),
+					id: ContextMenuIconName.in_out,
+					group: 'navigation',
+					icon: Icons.in_out,
+					permission_result: PermissionManager.checkTopLevelPermission( 'InOut' ),
+					permission: null
+				},
+				{
+					label: $.i18n._( 'Schedules' ),
+					id: ContextMenuIconName.schedule,
+					group: 'navigation',
+					icon: Icons.schedule
+				},
+				{
+					label: $.i18n._( 'Pay<br>Stubs' ),
+					id: ContextMenuIconName.pay_stub,
+					group: 'navigation',
+					icon: Icons.pay_stubs
+				},
+				{
+					label: $.i18n._( 'Edit<br>Employee' ),
+					id: ContextMenuIconName.edit_employee,
+					group: 'navigation',
+					icon: Icons.employee
+				},
+				{
+					label: $.i18n._( 'Edit Pay<br>Period' ),
+					id: ContextMenuIconName.edit_pay_period,
+					group: 'navigation',
+					icon: Icons.pay_period
+				},
+				{
+					label: $.i18n._( 'Accumulated<br>Time' ),
+					id: ContextMenuIconName.accumulated_time,
+					group: 'navigation',
+					icon: Icons.timesheet
+				},
+				{
+					label: $.i18n._( 'ReCalculate<br>TimeSheet' ),
+					id: ContextMenuIconName.re_calculate_timesheet,
+					group: 'other',
+					icon: Icons.re_cal_timesheet
+				},
+				{
+					label: $.i18n._( 'Generate<br>Pay Stub' ),
+					id: ContextMenuIconName.generate_pay_stub,
+					group: 'other',
+					icon: Icons.re_cal_pay_stub
+				},
+				{
+					label: $.i18n._( 'Print' ),
+					id: ContextMenuIconName.print,
+					group: 'other',
+					icon: Icons.print,
+					type: RibbonSubMenuType.NAVIGATION,
+					items: [ // Converted to new RibbonSubMenuNavItem() in BaseViewController.buildContextMenuModels().
+						{
+							label: $.i18n._( 'Summary' ),
+							id: 'print_summary'
+						},
+						{
+							label: $.i18n._( 'Detailed' ),
+							id: 'print_detailed'
+						}
+					],
+					permission_result: true,
+					permission: true
+				}
+			]
+		};
 
 		if ( ( Global.getProductEdition() >= 15 ) ) {
-			var map = new RibbonSubMenu( {
-				label: $.i18n._( 'Map' ),
-				id: ContextMenuIconName.map,
-				group: navigation_group,
-				icon: Icons.map,
-				permission_result: true,
-				permission: null
-			} );
+			context_menu_model.include.push(
+				{
+					label: $.i18n._( 'Map' ),
+					id: ContextMenuIconName.map,
+					group: 'navigation',
+					icon: Icons.map
+				}
+			);
 		}
-
-		var edit_employee = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit<br>Employee' ),
-			id: ContextMenuIconName.edit_employee,
-			group: navigation_group,
-			icon: Icons.employee,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit_pay_period = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit Pay<br>Period' ),
-			id: ContextMenuIconName.edit_pay_period,
-			group: navigation_group,
-			icon: Icons.pay_period,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit_accumulated_time = new RibbonSubMenu( {
-			label: $.i18n._( 'Accumulated<br>Time' ),
-			id: ContextMenuIconName.accumulated_time,
-			group: navigation_group,
-			icon: Icons.timesheet,
-			permission_result: true,
-			permission: null
-		} );
 
 		if ( PermissionManager.validate( 'request', 'add' ) ) {
-			var auto_request = new RibbonSubMenu( {
-				label: $.i18n._( 'Add<br>Request' ),
-				id: 'AddRequest',
-				group: navigation_group,
-				icon: Icons.request,
-				permission_result: true,
-				permission: true
-			} );
+			context_menu_model.include.push(
+				{
+					label: $.i18n._( 'Add<br>Request' ),
+					id: 'AddRequest',
+					group: 'navigation',
+					icon: Icons.request,
+					permission_result: true,
+					permission: true
+				}
+			);
 		}
 
-		var re_cal_timesheet = new RibbonSubMenu( {
-			label: $.i18n._( 'ReCalculate<br>TimeSheet' ),
-			id: ContextMenuIconName.re_calculate_timesheet,
-			group: other_group,
-			icon: Icons.re_cal_timesheet,
-			permission_result: true,
-			permission: null
-		} );
-
-		var generate_pay_stub = new RibbonSubMenu( {
-			label: $.i18n._( 'Generate<br>Pay Stub' ),
-			id: ContextMenuIconName.generate_pay_stub,
-			group: other_group,
-			icon: Icons.re_cal_pay_stub,
-			permission_result: true,
-			permission: null
-		} );
-
-		var print = new RibbonSubMenu( {
-			label: $.i18n._( 'Print' ),
-			id: ContextMenuIconName.print,
-			group: other_group,
-			icon: Icons.print,
-			type: RibbonSubMenuType.NAVIGATION,
-			items: [],
-			permission_result: true,
-			permission: true
-		} );
-
-		var summary = new RibbonSubMenuNavItem( {
-			label: $.i18n._( 'Summary' ),
-			id: 'print_summary',
-			nav: print
-		} );
-
-		var detail = new RibbonSubMenuNavItem( {
-			label: $.i18n._( 'Detailed' ),
-			id: 'print_detailed',
-			nav: print
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	openEditView: function () {
@@ -1990,7 +1813,8 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 		} );
 	},
-
+	// Dev Note: TODO/REFACTOR: search() params here differ from BaseViewController.search() this could cause confusion or issues,
+	// Currently means any search() calls in baseview using the callback param will not work here in TimeSheet.
 	search: function ( setDefaultMenu, force ) {
 
 		this.accumulated_time_cells_array = []; //reset array since the select cell is clean
@@ -2080,9 +1904,8 @@ TimeSheetViewController = BaseViewController.extend( {
 		var $this = this;
 
 		var columns = [];
-		var grid;
 		if ( !Global.isSet( this.verification_grid ) ) {
-			grid = $( this.el ).find( '#verification_grid' );
+			var grid = $( this.el ).find( '#verification_grid' );
 			grid.attr( 'id', this.ui_id + '_verification_grid' );  //Grid's id is ScriptName + _grid
 		}
 		var grid_id = this.ui_id + '_verification_grid';
@@ -2108,28 +1931,25 @@ TimeSheetViewController = BaseViewController.extend( {
 		columns.push( column );
 
 		if ( this.verification_grid ) {
-			this.verification_grid.grid.jqGrid( 'GridUnload' );
+			this.verification_grid.unload();
 			this.verification_grid = null;
-
+			this.grid_dic.verification_grid = null
 		}
 
-		this.verification_grid = new TTGrid( grid_id, {
+		this.verification_grid = this.grid_dic.verification_grid = new TTGrid( grid_id, {
 			hoverrows: false,
 			multiselectPosition: 'none',
 			verticalResize: false,
 			onResizeGrid: false
 		}, columns );
-
-		this.grid_dic.verification_grid = this.verification_grid;
 	},
 
 	buildPunchNoteGrid: function () {
 		var $this = this;
 
 		var columns = [];
-		var grid;
 		if ( !Global.isSet( this.punch_note_grid ) ) {
-			grid = $( this.el ).find( '#punch_note_grid' );
+			var grid = $( this.el ).find( '#punch_note_grid' );
 
 			//Grid's id is ScriptName + _grid
 			grid.attr( 'id', this.ui_id + '_punch_note_grid' );
@@ -2161,11 +1981,12 @@ TimeSheetViewController = BaseViewController.extend( {
 		columns.push( second_column );
 		var grid_id = this.ui_id + '_punch_note_grid';
 		if ( this.punch_note_grid ) {
-			this.punch_note_grid.grid.jqGrid( 'GridUnload' );
+			this.punch_note_grid.unload();
 			this.punch_note_grid = null;
+			this.grid_dic.punch_note_grid = null;
 		}
 
-		this.punch_note_grid = new TTGrid( grid_id, {
+		this.punch_note_grid = this.grid_dic.punch_note_grid = new TTGrid( grid_id, {
 			hoverrows: false,
 			multiselectPosition: 'none',
 			verticalResize: false,
@@ -2174,7 +1995,6 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 		}, columns );
 
-		this.grid_dic.punch_note_grid = this.punch_note_grid;
 		this.setGridHeaderBar( 'punch_note_grid', 'Punch Notes' );
 
 		// setGridHeaderBar() sets the width to 100vw (and sets grid title), but this causes issue as the grid is not full width of the screen unlike the others. Therefore, overide the default width of 100vw with 100%.
@@ -2208,9 +2028,8 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		var columns = [];
 
-		var grid;
 		if ( !Global.isSet( this.accumulated_total_grid ) ) {
-			grid = $( this.el ).find( '#accumulated_total_grid' );
+			var grid = $( this.el ).find( '#accumulated_total_grid' );
 
 			grid.attr( 'id', this.ui_id + '_accumulated_total_grid' );	//Grid's id is ScriptName + _grid
 
@@ -2266,19 +2085,17 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		var grid_id = this.ui_id + '_accumulated_total_grid';
 		if ( Global.isSet( this.accumulated_total_grid ) == true ) {
-			this.accumulated_total_grid.grid.jqGrid( 'GridUnload' );
+			this.accumulated_total_grid.unload();
 			this.accumulated_total_grid = null;
-			this.accumulated_total_grid = $( grid );
+			this.grid_dic.accumulated_total_grid = null;
 		}
 
-		this.accumulated_total_grid = new TTGrid( grid_id, {
+		this.accumulated_total_grid = this.grid_dic.accumulated_total_grid = new TTGrid( grid_id, {
 			hoverrows: false,
 			multiselectPosition: 'none',
 			verticalResize: false,
 			onResizeGrid: false
 		}, columns );
-
-		this.grid_dic.accumulated_total_grid = this.accumulated_total_grid;
 
 		var accumulated_total_grid_title = $( this.el ).find( '.accumulated-total-grid-title' );
 		accumulated_total_grid_title.css( 'display', 'block' );
@@ -2352,19 +2169,19 @@ TimeSheetViewController = BaseViewController.extend( {
 		var grid_id = 'absence_grid';
 		var title = $.i18n._( 'Absence' );
 
-		if ( this.absence_grid ) {
-			this.absence_grid.grid.jqGrid( 'GridUnload' );
-			this.absence_grid.grid = null;
-			this.absence_grid = null;
+		if ( this[grid_id] ) {
+			this[grid_id].unload();
+			this[grid_id] = null;
+			this.grid_dic[grid_id] = null;
 		} else {
-			grid = $( this.el ).find( '#absence_grid' );
+			var grid = $( this.el ).find( '#absence_grid' );
 
 			grid.attr( 'id', this.ui_id + '_absence_grid' );  //Grid's id is ScriptName + _grid
 
 			grid = $( this.el ).find( '#' + this.ui_id + '_absence_grid' );
 		}
 
-		this.absence_grid = new TTGrid( this.ui_id + '_absence_grid', {
+		this[grid_id] = this.grid_dic[grid_id] = new TTGrid( this.ui_id + '_absence_grid', {
 			sortable: false,
 			hoverrows: false,
 			ondblClickRow: function () {
@@ -2418,11 +2235,12 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		}, this.timesheet_columns, $.i18n._( 'Absence' ) );
 
-		this.grid_dic.absence_grid = this.absence_grid;
-
 		this.bindTimeSheetGridColumnEvents();
 		this.setGridHeaderBar( grid_id, title );
-		this.grid_dic.absence_grid.grid.setGridWidth( $( 'body' ).width() );
+
+		if ( this.grid_dic[grid_id] && this.grid_dic[grid_id].grid ) {
+			this.grid_dic.absence_grid.grid.setGridWidth( $( 'body' ).width() );
+		}
 	},
 
 	checkIsSelectedPunchCell: function ( row_id, cell_index ) {
@@ -2457,7 +2275,6 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	buildTimeSheetGrid: function () {
-		var grid;
 		var grid_id = this.ui_id + '_grid';
 		var $this = this;
 
@@ -2465,12 +2282,11 @@ TimeSheetViewController = BaseViewController.extend( {
 			$.jgrid.guid = 1;
 		} else {
 			if ( this.timesheet_grid ) {
-				this.timesheet_grid.grid.jqGrid( 'GridUnload' );
-				$.jgrid.guid = 1;
-				this.timesheet_grid.grid = null;
+				this.timesheet_grid.unload();
 				this.timesheet_grid = null;
+				$.jgrid.guid = 1;
 			}
-			grid = $( this.el ).find( '#timesheet_grid' );
+			var grid = $( this.el ).find( '#timesheet_grid' );
 			grid.attr( 'id', grid_id );	//Grid's id is ScriptName + _grid
 
 			var grid_setup_data = {
@@ -2631,11 +2447,14 @@ TimeSheetViewController = BaseViewController.extend( {
 		var title = $.i18n._( 'Accumulated Time' );
 
 		if ( this[grid_id] ) {
-			this[grid_id].grid.jqGrid( 'GridUnload' );
+			//Commenting out the next line replicates TypeError: Failed to execute 'replaceChild' on 'Node': parameter 2 is not of type 'Node'. when using Date left arrow on timesheet.
+			//  Also happens when clicking the top-right in-app refresh button too.
+			this[grid_id].unload();
 			this[grid_id] = null;
+			this.grid_dic[grid_id] = null;
 		}
 
-		this[grid_id] = new TTGrid( 'accumulated_time_grid', {
+		this[grid_id] = this.grid_dic[grid_id] = new TTGrid( 'accumulated_time_grid', {
 			sortable: false,
 			hoverrows: false,
 			ondblClickRow: function () {
@@ -2677,31 +2496,30 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		}, this.timesheet_columns );
 
-		this.grid_dic['accumulated_time_grid'] = this[grid_id];
 		this.setGridHeaderBar( grid_id, title );
-		this.grid_dic['accumulated_time_grid'].grid.setGridWidth( $( 'body' ).width() );
 
+		if ( this.grid_dic[grid_id] && this.grid_dic[grid_id].grid ) {
+			this.grid_dic[grid_id].grid.setGridWidth( $( 'body' ).width() );
+		}
 	},
 
 	buildSubGrid: function ( grid_id, title ) {
 		var $this = this;
-		var grid;
 
 		var html_grid_id = this.ui_id + '_' + grid_id;
 		if ( !Global.isSet( this[grid_id] ) ) {
-			grid = $( this.el ).find( '#' + grid_id );
+			var grid = $( this.el ).find( '#' + grid_id );
 			grid.attr( 'id', html_grid_id );	//Grid's id is ScriptName + _grid
+		}
 
-			//grid_element_id = $( this.el ).find( '#' + this.ui_id + '_' + grid_id );
+		if ( this[grid_id] ) {
+			this[grid_id].unload();
+			this[grid_id] = null;
+			this.grid_dic[grid_id] = null;
 		}
 
 		if ( grid_id === 'premium_grid' ) {
-			if ( this[grid_id] && this[grid_id].grid ) {
-				this[grid_id].grid.jqGrid( 'GridUnload' );
-				this[grid_id] = null;
-			}
-
-			this[grid_id] = new TTGrid( html_grid_id, {
+			this[grid_id] = this.grid_dic[grid_id] = new TTGrid( html_grid_id, {
 				hoverrows: false,
 				multiselectPosition: 'none',
 				winMultiSelect: false,
@@ -2738,12 +2556,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				this[grid_id].grid.addClass( 'premium-grid' );
 			}
 		} else {
-			if ( this[grid_id] && this[grid_id].grid ) {
-				this[grid_id].grid.jqGrid( 'GridUnload' );
-				this[grid_id] = null;
-			}
-
-			this[grid_id] = new TTGrid( html_grid_id, {
+			this[grid_id] = this.grid_dic[grid_id] = new TTGrid( html_grid_id, {
 				hoverrows: false,
 				multiselectPosition: 'none',
 				winMultiSelect: false,
@@ -2764,7 +2577,6 @@ TimeSheetViewController = BaseViewController.extend( {
 			}, this.timesheet_columns );
 		}
 
-		this.grid_dic[grid_id] = this[grid_id];
 		this.setGridHeaderBar( grid_id, title );
 
 		//this loop hits all possible grids. subgrids might not be rendered, so we need to check for them in the grid_dic first.
@@ -2774,16 +2586,18 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	setGridSExpendOrCollapseStatus: function ( grid_id, title ) {
-		var grid = this.grid_dic[grid_id].grid;
-		var table = $( $( this.el ).find( 'table[aria-labelledby=gbox_' + this.ui_id + '_' + grid_id + ']' )[0] );
-		var title_bar = table.find( '.title-bar' );
-		this.setGridHeight( grid_id );
+		if ( this.grid_dic[grid_id] ) {
+			var grid = this.grid_dic[grid_id].grid;
+			var table = $( $( this.el ).find( 'table[aria-labelledby=gbox_' + this.ui_id + '_' + grid_id + ']' )[0] );
+			var title_bar = table.find( '.title-bar' );
+			this.setGridHeight( grid_id );
 
-		if ( LocalCacheData.timesheet_sub_grid_expended_dic[grid_id] !== true ) {
-			grid.setGridHeight( 0 );
+			if ( LocalCacheData.timesheet_sub_grid_expended_dic[grid_id] !== true ) {
+				grid.setGridHeight( 0 );
+			}
+
+			this.updateGridHeaderBar( grid_id, title );
 		}
-
-		this.updateGridHeaderBar( grid_id, title );
 
 	},
 
@@ -3765,11 +3579,14 @@ TimeSheetViewController = BaseViewController.extend( {
 				//$this.grid.setTimesheetSelection( selection ); //resets selection after refreshing grid data -- currently broken, see setTimesheetSelection() for details.
 			}
 
-			$this.accumulated_time_grid.setData( $this.accumulated_time_source, false );
+			if ( typeof $this.accumulated_time_grid.setData == 'function' ) {
+				$this.accumulated_time_grid.setData( $this.accumulated_time_source, false );
+			}
 
 			if ( typeof $this.branch_grid.setData == 'function' ) {
 				$this.branch_grid.setData( $this.branch_source, false );
 			}
+
 
 			if ( typeof $this.department_grid.setData == 'function' ) {
 				$this.department_grid.setData( $this.department_source, false );
@@ -6834,86 +6651,38 @@ TimeSheetViewController = BaseViewController.extend( {
 		return retval;
 	},
 
-	onDeleteAndNextClick: function () {
+	onDeleteResult: function ( result ) {
 		var $this = this;
-
-		var current_api = this.getCurrentAPI();
-
-		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
-			var remove_ids = [];
-			if ( $this.edit_view ) {
-				remove_ids.push( $this.current_edit_record.id );
+		$this.timesheet_grid.grid.find( 'td.ui-state-highlight' ).removeClass( 'ui-state-highlight' );
+		ProgressBar.closeOverlay();
+		if ( result.isValid() ) {
+			if( $this.edit_view && LocalCacheData.current_doing_context_action === 'delete' ) {
+				$this.removeEditView();
 			}
-
-			if ( result ) {
-
-				ProgressBar.showOverlay();
-				current_api['delete' + current_api.key_name]( remove_ids, {
-					onResult: function ( result ) {
-						$this.timesheet_grid.grid.find( 'td.ui-state-highlight' ).removeClass( 'ui-state-highlight' );
-						ProgressBar.closeOverlay();
-						if ( result.isValid() ) {
-							$this.onRightArrowClick();
-
-							$this.first_build = true;
-							$this.search();
-						} else {
-							TAlertManager.showErrorAlert( result );
-						}
-					}
-				} );
-
-			} else {
-				ProgressBar.closeOverlay();
+			if( $this.edit_view && LocalCacheData.current_doing_context_action === 'delete_and_next' ) {
+				$this.onRightArrowClick();
 			}
-		} );
+		} else {
+			TAlertManager.showErrorAlert( result );
+		}
+
+		// refresh and rebuild search grid, as well as default menu
+		$this.first_build = true;
+		$this.search();
+		$this.setDefaultMenu(); //Default menu needs to be set as we need to deactivate icons that are valid for the predeletion selection
 	},
 
-	onDeleteClick: function () {
-		var $this = this;
-
-		var current_api = this.getCurrentAPI();
-		LocalCacheData.current_doing_context_action = 'delete';
-		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
-			var remove_ids = [];
-			if ( $this.edit_view ) {
-				remove_ids.push( $this.current_edit_record.id );
-			} else {
-				for ( var i in $this.select_punches_array ) {
-					var item = $this.select_punches_array[i];
-					remove_ids.push( item.id );
-				}
+	getDeleteSelectedRecordId: function() {
+		var retval = [];
+		if ( this.edit_view ) {
+			retval.push( this.current_edit_record.id );
+		} else {
+			for ( var i in this.select_punches_array ) {
+				var item = this.select_punches_array[i];
+				retval.push( item.id );
 			}
-
-			if ( result ) {
-				ProgressBar.showOverlay();
-				current_api['delete' + current_api.key_name]( remove_ids, {
-					onResult: function ( result ) {
-						$this.timesheet_grid.grid.find( 'td.ui-state-highlight' ).removeClass( 'ui-state-highlight' );
-						ProgressBar.closeOverlay();
-						if ( result.isValid() ) {
-							$this.search();
-							if ( $this.edit_view ) {
-								$this.removeEditView();
-							}
-						} else {
-							// If some valid records were deleted, we need to refresh the search grid.
-							if ( result.getRecordDetails().valid && result.getRecordDetails().valid > 0 ) {
-								$this.search();
-							}
-							TAlertManager.showErrorAlert( result );
-						}
-
-						$this.first_build = true;
-						$this.setDefaultMenu(); //Default menu needs to be set as we need to deactivate icons that are valid for the predeletion selection
-					}
-				} );
-
-			} else {
-				ProgressBar.closeOverlay();
-			}
-		} );
-
+		}
+		return retval;
 	},
 
 	reSetURL: function () {
@@ -6964,45 +6733,39 @@ TimeSheetViewController = BaseViewController.extend( {
 		} );
 	},
 
-	onSaveAndNextClick: function ( ignoreWarning ) {
-		var $this = this;
-		if ( !Global.isSet( ignoreWarning ) ) {
-			ignoreWarning = false;
-		}
-		this.is_add = false;
-		this.is_changed = false;
+	getSelectedRecordId: function ( record_id ) {
+		var retval = false;
 
-		var current_api = this.getCurrentAPI();
-		LocalCacheData.current_doing_context_action = 'save_and_next';
-		current_api['set' + current_api.key_name]( this.current_edit_record, false, ignoreWarning, {
-			onResult: function ( result ) {
-				if ( result.isValid() ) {
-					var result_data = result.getResult();
-					if ( result_data === true ) {
-						//Fix Uncaught TypeError: Cannot read property 'id' of null
-						if ( $this.current_edit_record ) {
-							$this.refresh_id = $this.current_edit_record.id;
-						}
-					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-						$this.refresh_id = result_data;
-					}
-					$this.onRightArrowClick();
-					$this.search( false );
-					$this.onSaveAndNextDone( result );
-
-				} else {
-					$this.setErrorMenu();
-					$this.setErrorTips( result );
-				}
-
+		if ( Global.isSet( record_id ) ) {
+			retval = record_id;
+		} else {
+			if ( this.select_punches_array.length > 0 ) {
+				retval = this.select_punches_array[0].id;
+			} else {
+				retval = null;
 			}
-		} );
+		}
+
+		return retval;
 	},
 
-	onViewClick: function ( editId, type ) {
-		var $this = this;
-		$this.is_viewing = true;
-		LocalCacheData.current_doing_context_action = 'view';
+	getViewSelectedRecordId: function ( record_id ) {
+		return this.getSelectedRecordId( record_id );
+	},
+
+	doViewAPICall: function ( filter, api_args ) {
+		var current_api = this.getCurrentAPI();
+		var callback = { onResult: this.handleViewAPICallbackResult.bind( this ) };
+		if ( api_args ) {
+			// If api_args specified, use api_args.filter, and ignore function filter parameter.
+			api_args.push( callback );
+			return current_api['get' + current_api.key_name].apply( current_api, api_args );
+		} else {
+			return current_api['get' + current_api.key_name]( filter, callback );
+		}
+	},
+
+	onViewClick: function ( record_id, type ) {
 		if ( type ) {
 			if ( type === 'absence' ) {
 				this.absence_model = true;
@@ -7010,47 +6773,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				this.absence_model = false;
 			}
 		}
-
-		$this.openEditView();
-
-		var current_api = this.getCurrentAPI();
-
-		var filter = {};
-		var selected_id;
-		if ( Global.isSet( editId ) ) {
-			selected_id = editId;
-		} else {
-
-			if ( this.select_punches_array.length > 0 ) {
-				selected_id = this.select_punches_array[0].id;
-			} else {
-				return;
-			}
-		}
-
-		filter.filter_data = {};
-		filter.filter_data.id = [selected_id];
-
-		current_api['get' + current_api.key_name]( filter, {
-			onResult: function ( result ) {
-
-				var result_data = result.getResult();
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				$this.current_edit_record = result_data;
-
-				$this.initEditView();
-
-			}
-		} );
-
+		this._super('onViewClick', record_id );
 	},
 
 	buildOtherFieldUI: function ( field, label ) {
@@ -7217,25 +6940,23 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 	},
 
-	onEditClick: function ( editId, type ) {
+	getEditSelectedRecordId: function ( record_id ) {
+		return this.getSelectedRecordId( record_id );
+	},
 
-		var $this = this;
-		var selected_id;
-		if ( Global.isSet( editId ) ) {
-			selected_id = editId;
+	doEditAPICall: function ( filter, api_args ) {
+		var current_api = this.getCurrentAPI();
+		var callback = { onResult: this.handleEditAPICallbackResult.bind( this ) };
+		if ( api_args ) {
+			// If api_args specified, use api_args.filter, and ignore function filter parameter.
+			api_args.push( callback );
+			return current_api['get' + current_api.key_name].apply( current_api, api_args );
 		} else {
-			if ( this.is_viewing ) {
-				selected_id = this.current_edit_record.id;
-			} else if ( this.select_punches_array.length > 0 ) {
-				selected_id = this.select_punches_array[0].id;
-			} else {
-				return;
-			}
-
+			return current_api['get' + current_api.key_name]( filter, callback );
 		}
-		this.is_mass_adding = false;
-		this.is_viewing = false;
-		LocalCacheData.current_doing_context_action = 'edit';
+	},
+
+	onEditClick: function ( record_id, type ) {
 		if ( type ) {
 			if ( type === 'absence' ) {
 				this.absence_model = true;
@@ -7243,35 +6964,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				this.absence_model = false;
 			}
 		}
-
-		$this.openEditView();
-
-		var current_api = this.getCurrentAPI();
-
-		var filter = {};
-
-		filter.filter_data = {};
-		filter.filter_data.id = [selected_id];
-
-		current_api['get' + current_api.key_name]( filter, {
-			onResult: function ( result ) {
-
-				var result_data = result.getResult();
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				$this.current_edit_record = result_data;
-
-				$this.initEditView();
-
-			}
-		} );
-
+		this._super('onEditClick', record_id );
 	},
 
 	setURL: function () {
@@ -7420,7 +7113,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			current_date = date;
 		}
 
-		if ( this.pay_period_map && this.pay_period_map[current_date] && TTUUID.isUUID( this.pay_period_map[current_date] ) == true ) {
+		if ( this.pay_period_map && this.pay_period_map[current_date] && this.pay_period_map[current_date] != TTUUID.zero_id && TTUUID.isUUID( this.pay_period_map[current_date] ) == true ) {
 			return this.pay_period_map[current_date];
 		} else {
 			return null;
@@ -8353,7 +8046,7 @@ TimeSheetViewController = BaseViewController.extend( {
 						var station_form_item = this.edit_view_form_item_dic['station_id'];
 						if ( this.current_edit_record['has_image'] ) {
 							this.attachElement( 'punch_image' );
-							widget.setValue( ServiceCaller.fileDownloadURL + '?object_type=punch_image&parent_id=' + this.current_edit_record.user_id + '&object_id=' + this.current_edit_record.id );
+							widget.setValue( ServiceCaller.fileDownloadURL + '&object_type=punch_image&parent_id=' + this.current_edit_record.user_id + '&object_id=' + this.current_edit_record.id );
 
 						} else {
 							this.detachElement( 'punch_image' );

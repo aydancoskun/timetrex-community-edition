@@ -448,7 +448,52 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	/**
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
-	 * @param string $run_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayStubListFactory
+	 */
+	function getFirstPayStubByUserIdAndStartDate( $user_id, $start_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		$strict_order = TRUE;
+		if ( $order == NULL ) {
+			$order = array( 'a.start_date' => 'asc', 'a.run_id' => 'asc' );
+			$strict_order = FALSE;
+		}
+
+		$ulf = new UserListFactory();
+		$pplf = new PayPeriodListFactory();
+
+		$ph = array(
+				'start_date' => $this->db->BindTimeStamp( $start_date ),
+				'start_date2' => $this->db->BindTimeStamp( $start_date ),
+		);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a,
+							'. $ulf->getTable() .' as b,
+							'. $pplf->getTable() .' as c
+					where	a.user_id = b.id
+						AND a.pay_period_id = c.id
+						AND ( a.start_date >= ? OR a.end_date >= ? )
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'uuid' ) .')
+						AND ( a.deleted = 0 AND c.deleted = 0)
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict_order );
+
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $user_id UUID
+	 * @param int $start_date EPOCH
+	 * @param int $run_id
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayStubListFactory
@@ -499,7 +544,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	/**
 	 * @param string $user_id UUID
 	 * @param int $transaction_date EPOCH
-	 * @param string $run_id INT
+	 * @param int $run_id
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayStubListFactory
@@ -898,7 +943,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	/**
 	 * @param string $company_id UUID
 	 * @param string $pay_period_id UUID
-	 * @param $run_id INT
+	 * @param int $run_id
 	 * @param int $limit Limit the number of records returned
 	 * @param int $page Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
@@ -1081,7 +1126,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	 * @param string $company_id UUID
 	 * @param string[] $pay_period_id UUID
 	 * @param int[] $status_id
-	 * @param string $run_id UUID
+	 * @param int $run_id
 	 * @param int $limit Limit the number of records returned
 	 * @param int $page Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )

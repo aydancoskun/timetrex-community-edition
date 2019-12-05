@@ -1058,13 +1058,12 @@ class PayStubTransactionFactory extends Factory {
 
 	/**
 	 * The export portion of this function is mirrored in APIRemittanceSourceAccount::testExport()
-	 * @param null $pstlf
-	 * @param null $export_type
+	 * @param object $pstlf ListFactory
 	 * @param object $company_obj
 	 * @param null $last_transaction_numbers
 	 * @return bool
 	 */
-	function exportPayStubTransaction( $pstlf = NULL, $export_type = NULL, $company_obj = NULL, $last_transaction_numbers = NULL ) {
+	function exportPayStubTransaction( $pstlf = NULL, $company_obj = NULL, $last_transaction_numbers = NULL ) {
 		require_once( Environment::getBasePath() . '/classes/ChequeForms/ChequeForms.class.php' );
 		$output = array();
 
@@ -1075,10 +1074,6 @@ class PayStubTransactionFactory extends Factory {
 		}
 
 		if ( is_a( $pstlf, 'PayStubTransactionListFactory' ) == FALSE ) {
-			return FALSE;
-		}
-
-		if ( $export_type == '' ) {
 			return FALSE;
 		}
 
@@ -1163,7 +1158,7 @@ class PayStubTransactionFactory extends Factory {
 						Debug::Text( 'RSA: name: [' . $rs_obj->getName() . '] Type: '. $rs_obj->getType() .' ID: ' . $rs_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 
 						//TimeTrex PaymentServices API loop
-						if ( ( $export_type == 'export_transactions' ) AND $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 ) { //3000=EFT/ACH 5=TimeTrex Payment Services
+						if ( $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 ) { //3000=EFT/ACH 5=TimeTrex Payment Services
 							//START BATCH
 							if ( $n == 0 ) {
 								//Send data to TimeTrex Remittances service.
@@ -1219,7 +1214,7 @@ class PayStubTransactionFactory extends Factory {
 						} //end TimeTrex Remittances API loop
 
 						//EFT loop
-						if ( ( $export_type == 'export_transactions' ) AND $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() != 5 ) {
+						if ( $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() != 5 ) {
 							//START BATCH
 							if ( $n == 0 ) {
 								$next_transaction_number = $rs_obj->getNextTransactionNumber();
@@ -1243,7 +1238,7 @@ class PayStubTransactionFactory extends Factory {
 						} //end EFT loop
 
 						//CHECK loop
-						if ( ( $export_type == 'export_transactions' ) AND $rs_obj->getType() == 2000 AND $rs_obj->getDataFormat() != 5 ) {
+						if ( $rs_obj->getType() == 2000 AND $rs_obj->getDataFormat() != 5 ) {
 							//START BATCH
 							if ( $n == 0 ) {
 								$data_format_type_id = $rs_obj->getDataFormat();
@@ -1354,7 +1349,7 @@ class PayStubTransactionFactory extends Factory {
 				$praelf = TTnew('PayrollRemittanceAgencyEventListFactory'); /** @var PayrollRemittanceAgencyEventListFactory $praelf */
 				$praelf->getByCompanyIdAndStatus( $company_obj->getId(), 15 ); //15=Full Service
 				if ( $praelf->getRecordCount() > 0 ) {
-					foreach ( $praelf as $prae_obj ) {
+					foreach ( $praelf as $prae_obj ) { /** @var PayrollRemittanceAgencyEventFactory $prae_obj */
 
 						$event_data = $prae_obj->getEventData();
 						if ( is_array($event_data) AND isset($event_data['flags']) AND $event_data['flags']['auto_pay'] == TRUE ) {
@@ -1421,7 +1416,7 @@ class PayStubTransactionFactory extends Factory {
 																	$output_data['agency_report_data']['pay_period_run'] = $run_id;
 
 																	//Check to see if transaction date is outside of the current agency event start/end period, if so then we want to use date from the next period.
-																	if ( $pp_obj->getTransactionDate() > $pp_obj->getEndDate() ) {
+																	if ( TTDate::getMiddleDayEpoch( $pp_obj->getTransactionDate() ) > TTDate::getMiddleDayEpoch( $prae_obj->getEndDate() ) ) {
 																		$event_next_dates = $prae_obj->calculateNextDate( $prae_obj->getDueDate() );
 																		if ( is_array( $event_next_dates ) ) {
 																			$output_data['agency_report_data']['period_start_date'] = TTDate::getISODateStamp( $event_next_dates['start_date'] );

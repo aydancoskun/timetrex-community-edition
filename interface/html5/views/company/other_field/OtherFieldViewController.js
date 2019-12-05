@@ -12,14 +12,21 @@ OtherFieldViewController = BaseViewController.extend( {
 		this.navigation_label = $.i18n._( 'Custom Field' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIOtherField' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
-
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.copy],
+			include: []
+		};
+
+		return context_menu_model;
 	},
 
 	initOptions: function( callBack ) {

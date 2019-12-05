@@ -66,8 +66,6 @@ LocalCacheData.appType = null;
 
 LocalCacheData.productEditionId = null;
 
-LocalCacheData.debuger = null;
-
 LocalCacheData.applicationName = null;
 
 LocalCacheData.loginUser = null;

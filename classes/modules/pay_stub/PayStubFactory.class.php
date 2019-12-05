@@ -1470,7 +1470,7 @@ class PayStubFactory extends Factory {
 			if ( isset($net_pay_arr['amount']) AND $net_pay_arr['amount'] > 0 ) {
 				$this->Validator->isTrue( 'transactions',
 						( ( $this->getTotalTransactions() > 0 ) ? TRUE : FALSE ),
-										  TTi18n::gettext( 'No transactions exists, or employee does not have any payment methods' ) );
+										  TTi18n::gettext( 'No transactions exists, or employee does not have any pay methods' ) );
 
 			}
 
@@ -1814,19 +1814,29 @@ class PayStubFactory extends Factory {
 			$this->tmp_data['previous_pay_stub'] = NULL;
 		}
 
+		$entries = array();
+
 		if ( $ps_entries == 'current' ) {
-			$entries = $this->tmp_data['current_pay_stub']['entries'];
+			if ( isset($this->tmp_data['current_pay_stub']['entries']) ) {
+				$entries = $this->tmp_data['current_pay_stub']['entries'];
+			}
+
 			//Only calculate temporary totals when specific ps_account_ids are specified, to avoid infinite recursion when calling get*Sum() functions that call this function with just type_ids.
 			if ( is_array( $ps_account_ids ) ) {
 				$entries = $this->calculateTemporaryTotals( $entries );
 			}
 		} elseif ( $ps_entries == 'previous' ) {
-			$entries = $this->tmp_data['previous_pay_stub']['entries'];
+			if ( isset($this->tmp_data['previous_pay_stub']['entries']) ) {
+				$entries = $this->tmp_data['previous_pay_stub']['entries'];
+			}
 		} elseif ( $ps_entries == 'previous+ytd_adjustment' ) {
-			$entries = $this->tmp_data['previous_pay_stub']['entries'];
+			if ( isset($this->tmp_data['previous_pay_stub']['entries']) ) {
+				$entries = $this->tmp_data['previous_pay_stub']['entries'];
+			}
+
 			//Include any YTD adjustment PS amendments in the current entries as if they occurred in the previous pay stub.
 			//This so we can account for the first pay stub having a YTD adjustment that exceeds a wage base amount, so no amount is calculated.
-			if ( is_array($this->tmp_data['current_pay_stub']['entries']) ) {
+			if ( isset($this->tmp_data['current_pay_stub']['entries']) AND is_array($this->tmp_data['current_pay_stub']['entries']) ) {
 				foreach( $this->tmp_data['current_pay_stub']['entries'] as $current_entry_arr ) {
 					if ( isset($current_entry_arr['ytd_adjustment']) AND $current_entry_arr['ytd_adjustment'] === TRUE ) {
 						Debug::Text('Found YTD Adjustment in current pay stub when calculating previous pay stub amounts... Amount: '. $current_entry_arr['amount'], __FILE__, __LINE__, __METHOD__, 10);
@@ -1839,9 +1849,17 @@ class PayStubFactory extends Factory {
 		}
 		//Debug::Arr( $entries, 'Sum Entries Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( !is_array($entries) ) {
-			Debug::text('Returning FALSE...', __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+		$retarr = array(
+				'rate' => 0,
+				'units' => 0,
+				'amount' => 0,
+				'ytd_units' => 0,
+				'ytd_amount' => 0,
+		);
+
+		if ( !is_array($entries) OR count($entries) == 0 ) {
+			Debug::text('  No entries, return all zeros...', __FILE__, __LINE__, __METHOD__, 10);
+			return $retarr;
 		}
 
 		if ( $type_ids != '' AND !is_array($type_ids) ) {
@@ -1851,14 +1869,6 @@ class PayStubFactory extends Factory {
 		if ( $ps_account_ids != '' AND !is_array($ps_account_ids) ) {
 			$ps_account_ids = array($ps_account_ids);
 		}
-
-		$retarr = array(
-				'rate' => 0,
-				'units' => 0,
-				'amount' => 0,
-				'ytd_units' => 0,
-				'ytd_amount' => 0,
-			);
 
 		foreach( $entries as $key => $entry_arr ) {
 			if ( $type_ids != '' AND is_array( $type_ids ) ) {
@@ -1916,8 +1926,6 @@ class PayStubFactory extends Factory {
 	 * @return array
 	 */
 	function calculateTemporaryTotals( $entries ) {
-		$retarr = $entries;
-
 		$totals = array( 'total_gross', 'employee_deduction', 'employer_deduction', 'net_pay');
 		foreach( $totals as $total_name ) {
 			switch( $total_name ) {
@@ -2257,7 +2265,7 @@ class PayStubFactory extends Factory {
 	 * @return bool
 	 */
 	function processEntries() {
-		Debug::Text('Processing PayStub ('. count( (array)$this->tmp_data['current_pay_stub']['entries'] ) .') Entries...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Processing PayStub ('. ( isset($this->tmp_data['current_pay_stub']['entries']) ? count( $this->tmp_data['current_pay_stub']['entries'] ) : 0 ) .') Entries...', __FILE__, __LINE__, __METHOD__, 10);
 		///Debug::Arr($this->tmp_data['current_pay_stub'], 'Current Entries...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->deleteZeroAmountEntries(); //Must occur before any other processing function is called, so we can remove $0 entries.
@@ -2481,6 +2489,7 @@ class PayStubFactory extends Factory {
 				//See if current pay stub entries have previous pay stub entries.
 				//Skip total entries, as they will be greated after anyways.
 				if ( $entry_arr['pay_stub_entry_type_id'] != 40
+						AND isset( $this->tmp_data['current_pay_stub']['entries'] )
 						AND Misc::inArrayByKeyAndValue( $this->tmp_data['current_pay_stub']['entries'], 'pay_stub_entry_account_id', $entry_arr['pay_stub_entry_account_id'] ) == FALSE ) {
 					Debug::Text('Adding UnUsed Entry: '. $entry_arr['pay_stub_entry_account_id'], __FILE__, __LINE__, __METHOD__, 10);
 					$this->addEntry( $entry_arr['pay_stub_entry_account_id'], 0, 0 );
@@ -2914,11 +2923,10 @@ class PayStubFactory extends Factory {
 	 */
 	function getEmailPayStubAddresses() {
 		$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
-		//$uplf->getByUserId( $this->getUser() );
-		$uplf->getByUserIdAndStatus( $this->getUser(), 10 ); //Only email ACTIVE employees/supervisors.
+		$uplf->getByUserIdAndEnableLogin( $this->getUser(), TRUE ); //Only email employees who can login still
 		if ( $uplf->getRecordCount() > 0 ) {
 			foreach( $uplf as $up_obj ) {
-				if ( $up_obj->getEnableEmailNotificationPayStub() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 ) {
+				if ( $up_obj->getEnableEmailNotificationPayStub() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getEnableLogin() == TRUE ) {
 					if ( $up_obj->getUserObject()->getWorkEmail() != '' AND $up_obj->getUserObject()->getWorkEmailIsValid() == TRUE ) {
 						$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getWorkEmail(), $up_obj->getUserObject() );
 					}
@@ -3187,7 +3195,7 @@ class PayStubFactory extends Factory {
 			foreach ($pslf as $pay_stub_obj) {
 				if ( $i == 0 ) {
 					$pdf = new TTPDF('P', 'mm', 'LETTER', $pay_stub_obj->getUserObject()->getCompanyObject()->getEncoding() );
-					$pdf->setMargins(0, 0);
+					$pdf->setMargins(0, 0); //Margins are ignored because we use setXY() to force the coordinates before each drawing and therefore ignores margins.
 					//$pdf->SetAutoPageBreak(TRUE, 30);
 					$pdf->SetAutoPageBreak(FALSE);
 

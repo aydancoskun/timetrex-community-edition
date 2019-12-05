@@ -86,9 +86,9 @@ class APINotification extends APIFactory {
 						if ( $license_validate === TRUE ) {
 							//License likely expires soon.
 							if (
-									( $license->getExpireDays() >= 15 AND $this->getPermissionObject()->getLevel() >= 20 ) //When expires in more than 15 days only show administrators.
+									( $license->getExpireDays() >= 15 AND $this->getPermissionObject()->getLevel() >= 80 ) //When expires in more than 15 days only show administrators.
 									OR
-									( $license->getExpireDays() <= 14 AND $this->getPermissionObject()->getLevel() >= 10 ) //When expires in less than 14 days show administrators/supervisors
+									( $license->getExpireDays() <= 14 AND $this->getPermissionObject()->getLevel() >= 40 ) //When expires in less than 14 days show administrators/supervisors
 									OR
 									( $license->getExpireDays() <= 7 ) //When expires in less than 7 days show all employees.
 								) {
@@ -123,7 +123,7 @@ class APINotification extends APIFactory {
 				}
 
 				//Warn that MySQL database support is deprecated.
-				if ( strncmp($config_vars['database']['type'], 'mysql', 5) == 0 AND ( time() > strtotime('22-Jan-2018') OR $this->getPermissionObject()->getLevel() >= 20 ) ) {
+				if ( strncmp($config_vars['database']['type'], 'mysql', 5) == 0 AND ( time() > strtotime('22-Jan-2018') OR $this->getPermissionObject()->getLevel() >= 80 ) ) {
 					$retarr[] = array(
 							'delay' => -1, //0= Show until clicked, -1 = Show until next getNotifications call.
 							'bg_color' => '#FF0000', //Red
@@ -183,13 +183,13 @@ class APINotification extends APIFactory {
 				$application_version_date_days_old = TTDate::getDays( (time() - (int)APPLICATION_VERSION_DATE) );
 				if (
 						//After 1yr, show message only to primary company, supervisors or higher permissions.
-						( $application_version_date_days_old > 365 AND $this->getPermissionObject()->getLevel() >= 15 AND ( $this->getCurrentCompanyObject()->getId() == 1 OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) )  )
+						( $application_version_date_days_old > 365 AND $this->getPermissionObject()->getLevel() >= 40 AND ( $this->getCurrentCompanyObject()->getId() == 1 OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) )  )
 
 						//After 1yr + 30 days, show message only to primary company, all employees.
 						OR ( $application_version_date_days_old > 395 AND ( $this->getCurrentCompanyObject()->getId() == 1 OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) )
 
 						//After 1yr + 60 days, show message only to all companies, supervisors or higher permissions.
-						OR ( $application_version_date_days_old > 425 AND $this->getPermissionObject()->getLevel() >= 15 )
+						OR ( $application_version_date_days_old > 425 AND $this->getPermissionObject()->getLevel() >= 40 )
 
 						//After 1yr + 90 days, show message to all companies, all employees
 						OR ( $application_version_date_days_old > 455 )
@@ -227,7 +227,7 @@ class APINotification extends APIFactory {
 				$new_version_notification_arr = UserSettingFactory::getUserSetting( $this->getCurrentUserObject()->getID(), 'new_version_notification' );
 				if (	DEMO_MODE == FALSE
 						AND ( !isset($config_vars['branding']['application_name']) OR ( $this->getCurrentCompanyObject()->getId() == 1 OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) )
-						AND $this->getPermissionObject()->getLevel() >= 20 //Payroll Admin
+						AND $this->getPermissionObject()->getLevel() >= 80 //Payroll Admin
 						AND $this->getCurrentUserObject()->getCreatedDate() <= APPLICATION_VERSION_DATE
 						AND ( !isset($new_version_notification_arr['value']) OR ( isset($new_version_notification_arr['value']) AND Misc::MajorVersionCompare( APPLICATION_VERSION, $new_version_notification_arr['value'], '>' ) ) ) ) {
 					UserSettingFactory::setUserSetting( $this->getCurrentUserObject()->getID(), 'new_version_notification', APPLICATION_VERSION );
@@ -333,7 +333,7 @@ class APINotification extends APIFactory {
 				}
 
 				if ( DEMO_MODE == FALSE
-						AND $this->getPermissionObject()->getLevel() >= 20 //Payroll Admin
+						AND $this->getPermissionObject()->getLevel() >= 80 //Payroll Admin
 						AND ( $this->getCurrentUserObject()->getWorkEmail() == '' AND $this->getCurrentUserObject()->getHomeEmail() == '' ) ) {
 					$retarr[] = array(
 										'delay' => 30,

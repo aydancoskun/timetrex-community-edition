@@ -39,16 +39,6 @@ RequestViewController = RequestViewCommonController.extend( {
 
 		this.authorization_api = new (APIFactory.getAPIClass( 'APIAuthorization' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-
-
 		this.initPermission();
 		this.render();
 		this.buildContextMenu();
@@ -481,140 +471,82 @@ RequestViewController = RequestViewCommonController.extend( {
 		];
 	},
 
-	buildContextMenuModels: function() {
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				{
+					label: $.i18n._( 'New' ),
+					id: ContextMenuIconName.add,
+					group: 'editor',
+					icon: Icons.new_add
+				},
+				{
+					label: $.i18n._( 'View' ),
+					id: ContextMenuIconName.view,
+					group: 'editor',
+					icon: Icons.view
+				},
+				{
+					label: $.i18n._( 'Reply' ),
+					id: ContextMenuIconName.edit,
+					group: 'editor',
+					icon: Icons.edit
+				},
+				{
+					label: $.i18n._( 'Delete' ),
+					id: ContextMenuIconName.delete_icon,
+					group: 'editor',
+					icon: Icons.delete_icon
+				},
+				{
+					label: $.i18n._( 'Delete<br>& Next' ),
+					id: ContextMenuIconName.delete_and_next,
+					group: 'editor',
+					icon: Icons.delete_and_next
+				},
+				{
+					label: $.i18n._( 'Send' ),
+					id: ContextMenuIconName.send,
+					group: 'editor',
+					icon: Icons.send
+				},
+				{
+					label: $.i18n._( 'Cancel' ),
+					id: ContextMenuIconName.cancel,
+					group: 'editor',
+					icon: Icons.cancel,
+					sort_order: 1990
+				},
+				{
+					label: $.i18n._( 'TimeSheet' ),
+					id: ContextMenuIconName.timesheet,
+					group: 'navigation',
+					icon: Icons.timesheet
+				},
+				{
+					label: $.i18n._( 'Schedule' ),
+					id: ContextMenuIconName.schedule,
+					group: 'navigation',
+					icon: Icons.schedule
+				},
+				{
+					label: $.i18n._( 'Edit<br>Employee' ),
+					id: ContextMenuIconName.edit_employee,
+					group: 'navigation',
+					icon: Icons.employee
+				},
+				{
+					label: $.i18n._( 'Export' ),
+					id: ContextMenuIconName.export_excel,
+					group: 'other',
+					icon: Icons.export_excel,
+					sort_order: 9000
+				}
+			]
+		};
 
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var navigation_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Navigation' ),
-			id: this.viewId + 'navigation',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var other_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Other' ),
-			id: this.viewId + 'other',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var add = new RibbonSubMenu( {
-			label: $.i18n._( 'New' ),
-			id: ContextMenuIconName.add,
-			group: editor_group,
-			icon: Icons.new_add,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var reply = new RibbonSubMenu( {
-			label: $.i18n._( 'Reply' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var del = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete' ),
-			id: ContextMenuIconName.delete_icon,
-			group: editor_group,
-			icon: Icons.delete_icon,
-			permission_result: true,
-			permission: null
-		} );
-
-		var delAndNext = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete<br>& Next' ),
-			id: ContextMenuIconName.delete_and_next,
-			group: editor_group,
-			icon: Icons.delete_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var send = new RibbonSubMenu( {
-			label: $.i18n._( 'Send' ),
-			id: ContextMenuIconName.send,
-			group: editor_group,
-			icon: Icons.send,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var timesheet = new RibbonSubMenu( {
-			label: $.i18n._( 'TimeSheet' ),
-			id: ContextMenuIconName.timesheet,
-			group: navigation_group,
-			icon: Icons.timesheet,
-			permission_result: true,
-			permission: null
-		} );
-
-		var schedule_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Schedule' ),
-			id: ContextMenuIconName.schedule,
-			group: navigation_group,
-			icon: Icons.schedule,
-			permission_result: true,
-			permission: null
-		} );
-
-		var employee = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit<br>Employee' ),
-			id: ContextMenuIconName.edit_employee,
-			group: navigation_group,
-			icon: Icons.employee,
-			permission_result: true,
-			permission: null
-		} );
-
-		var export_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Export' ),
-			id: ContextMenuIconName.export_excel,
-			group: other_group,
-			icon: Icons.export_excel,
-			permission_result: true,
-			permission: null,
-			sort_order: 9000
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	setCurrentEditRecordData: function( current_edit_record ) {
@@ -945,7 +877,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				} );
 			} else {
 				data.date_stamp = data.start_date;
-				data = $this.buildDataFromAPI( res.getResult() );
+				data = this.buildDataFromAPI( data );
 				//force = true is required to set the current_edit_record and populate edit_view_ui_dic
 				this.setDefaultData( data, true );
 				if ( callback_function ) {
@@ -1274,7 +1206,7 @@ RequestViewController = RequestViewCommonController.extend( {
 					$this.onAddResult( result );
 					$this.onDateStampChanged();
 					if ( result.type_id ) {
-						$this.onTypeChanged();
+						$this.onTypeChanged( result );
 					} else {
 						$this.getScheduleTotalTime(); //This is called as part of onTypeChanged(), so it doesn't need to be done twice.
 					}

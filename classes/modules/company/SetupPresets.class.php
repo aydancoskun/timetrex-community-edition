@@ -1894,31 +1894,36 @@ class SetupPresets extends Factory {
 	}
 
 	/**
-	 * NOTE: This is duplicated in Report class. If you change it here, change it there too.
+	 * NOTE: This was originally duplicated in Report class. If you change it here, check to see if changes are needed there too.
 	 * @param string $company_id UUID
 	 * @param object $report_obj
 	 * @param $data
 	 * @return bool
 	 */
 	function createUserReportData( $company_id, $report_obj, $data ) {
-		$urdf = TTnew( 'UserReportDataFactory' ); /** @var UserReportDataFactory $urdf */
 		$urdlf = TTnew( 'UserReportDataListFactory' ); /** @var UserReportDataListFactory $urdlf */
 		$urdlf->getByCompanyIdAndScriptAndDefault( $company_id, get_class( $report_obj ) );
-		if ( $urdlf->getRecordCount() > 0 ) {
-			$urdf->setID( $urdlf->getCurrent()->getID() );
-		}
-		$urdf->setCompany( $company_id );
-		$urdf->setScript( get_class( $report_obj ) );
-		$urdf->setName( $report_obj->title );
-		$urdf->setData( $data );
-		$urdf->setDefault( TRUE );
-		if ( $urdf->isValid() ) {
-			$urdf->Save();
 
-			return TRUE;
-		}
+		//Make sure we don't overwrite existing Form Setup if it has already been setup.
+		//  Otherwise when adding a new state for example could completely overwrite their tax form setup unexpectedly.
+		if ( $urdlf->getRecordCount() == 0 ) {
+			Debug::text( 'Form Setup does not exist, creating for the first time...', __FILE__, __LINE__, __METHOD__, 10 );
+			$urdf = TTnew( 'UserReportDataFactory' ); /** @var UserReportDataFactory $urdf */
+			$urdf->setCompany( $company_id );
+			$urdf->setScript( get_class( $report_obj ) );
+			$urdf->setName( $report_obj->title );
+			$urdf->setData( $data );
+			$urdf->setDefault( TRUE );
+			if ( $urdf->isValid() ) {
+				$urdf->Save();
 
-		Debug::text( 'Unable to save UserReportData!', __FILE__, __LINE__, __METHOD__, 10 );
+				return TRUE;
+			} else {
+				Debug::text( 'Unable to save UserReportData!', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		} else {
+			Debug::text( 'Form Setup already exists, not overwriting!', __FILE__, __LINE__, __METHOD__, 10 );
+		}
 
 		return FALSE;
 	}
@@ -2965,7 +2970,8 @@ class SetupPresets extends Factory {
 											'calculation_order'              => 100,
 											'country'                        => strtoupper( $country ),
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'US - Federal Income Tax' ),
-											'user_value1'                    => 0, //Allowances
+											'user_value1'                    => 10, //Marital Status: Single
+											'user_value2'                    => 0, //Allowances
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
 											'exclude_pay_stub_entry_account' => array(
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),

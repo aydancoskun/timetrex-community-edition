@@ -430,7 +430,8 @@ class RecurringHolidayFactory extends Factory {
 				//Get all day of weeks in the month. Determine which is less or greater then day.
 				$day_of_week_dates = array();
 				$week_interval = 0;
-				for ($i = $start_month_epoch; $i <= $end_month_epoch; $i += 86400) {
+				//for ($i = $start_month_epoch; $i <= $end_month_epoch; $i += 86400) {
+				foreach( TTDate::getDatePeriod( $start_month_epoch, $end_month_epoch, 'P1D' ) as $i ) {
 					if ( TTDate::getMonth( $i ) == $this->getMonth() ) {
 						$day_of_week = TTDate::getDayOfWeek( $i );
 						//Debug::text('I: '. $i .'('.TTDate::getDate('DATE+TIME', $i).') Current Day Of Week: '. $day_of_week .' Looking for Day Of Week: '. $this->getDayOfWeek(), __FILE__, __LINE__, __METHOD__, 10);

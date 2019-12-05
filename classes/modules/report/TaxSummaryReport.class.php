@@ -109,6 +109,7 @@ class TaxSummaryReport extends Report {
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
+										'-5040-page_break' => TTi18n::gettext('Page Break On'),
 								);
 				break;
 			case 'time_period':
@@ -895,26 +896,16 @@ class TaxSummaryReport extends Report {
 							foreach ( $level2 as $date_stamp => $level3 ) {
 								foreach ( $level3 as $run_id => $level4) {
 									foreach ( $level4 as $user_id => $row ) {
-										Debug::Text( 'Before Current Taxable Wages: ' . $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages'] . ' YTD: ' . $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages_ytd'], __FILE__, __LINE__, __METHOD__, 10 );
+										Debug::Text( 'Company Deduction ID: '. $company_deduction_id .' Before Current Taxable Wages: ' . $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages'] . ' YTD: ' . $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages_ytd'], __FILE__, __LINE__, __METHOD__, 10 );
+
 										if ( isset( $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages'] )
 												AND isset( $user_deduction_data[ $company_deduction_id ][ $user_id ] )
 												AND $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount'] > 0
-												AND $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages_ytd'] > $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount']
 										) {
 											//Make sure taxable wages abides by maximum amount properly.
-											$tmp_taxable_wages_ytd_diff = ( $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages_ytd'] - $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages'] );
-											$tmp_taxable_wages_max_diff = ( $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount'] - $tmp_taxable_wages_ytd_diff );
-											//Debug::Text('  Taxable Wages YTD Diff: '. $tmp_taxable_wages_ytd_diff .' Max Diff: '. $tmp_taxable_wages_max_diff, __FILE__, __LINE__, __METHOD__, 10);
-											if ( $tmp_taxable_wages_ytd_diff < $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount'] ) {
-												$this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages'] = $tmp_taxable_wages_max_diff;
-											} else {
-												$this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages'] = 0;
-											}
-
-											$this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages_ytd'] = $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount'];
-											unset( $tmp_taxable_wages_ytd_diff, $tmp_taxable_wages_max_diff );
+											$this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages'] = Misc::getAmountToLimit( Misc::getAmountDifferenceToLimit( $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages_ytd'], $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount'] ), $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages'] );
+											Debug::Text( '  After Current Taxable Wages: ' . $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages'] . ' YTD: ' . $this->tmp_data['pay_stub_entry'][ $remittance_agency_id ][ $company_deduction_id ][ $date_stamp ][ $run_id ][ $user_id ]['taxable_wages_ytd'] .' Maximum Amount: '. $user_deduction_data[ $company_deduction_id ][ $user_id ]['maximum_pay_stub_entry_amount'], __FILE__, __LINE__, __METHOD__, 10 );
 										}
-										//Debug::Text('After Current Taxable Wages: '. $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] .' YTD: '. $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'], __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 							}

@@ -1,12 +1,12 @@
 As Of Date      Name	                        Path	                                                                    TT V	    Dist V          License	Download URL	                                NOTE
-11-Apr-2018     autolinker	                    interface/html5/framework/autolinker/Autolinker.min.js	                    1.6.2	    1.6.2	        MIT	    https://github.com/gregjacobs/Autolinker.js
-12-Sep-2018     backbone	                    interface/html5/framework/backbone/backbone-min.js	                        1.3.3       1.3.3	        MIT	    backbonejs.org
-12-Sep-2018     json2.js	                    interface/html5/framework/backbone/json2.js	                                10-25-17                            backbonejs.org
-12-Sep-2018     underscore	                    interface/html5/framework/backbone/underscore-min.js	                    1.9.1	    1.9.1	        MIT	    http://underscorejs.org/
+16-Nov-2019     backbone	                    interface/html5/framework/backbone/backbone-min.js	                        1.4.0       1.4.0	        MIT	    backbonejs.org
+16-Nov-2019     json2.js	                    interface/html5/framework/backbone/json2.js	                                10-25-17                            backbonejs.org
+16-Nov-2019     json2.js	                    interface/html5/framework/json2.js	                                        ??		    ??              //there's 2 of these. not sure we need this one.
+16-Nov-2019     underscore	                    interface/html5/framework/backbone/underscore-min.js	                    1.9.1	    1.9.1	        MIT	    http://underscorejs.org/
 
-12-Sep-2018     bootstrap	                    interface/html5/framework/bootstrap/js/bootstrap.bundle.js                  4.1.3	    4.1.3      	    MIT	    http://getbootstrap.com
-12-Sep-2018     bootstrap-select	            interface/html5/framework/bootstrap-select/dist/js/bootstrap-select.js	    1.13.2	    1.13.2	        MIT	    https://silviomoreto.github.io/bootstrap-select/
-12-Sep-2018     bootstrap-toolkit	            interface/html5/framework/bootstrap-toolkit.min.js	                        2.6.3	    2.6.3	        MIT	    https://github.com/maciej-gurban/responsive-bootstrap-toolkit
+16-Nov-2019     bootstrap	                    interface/html5/framework/bootstrap/js/bootstrap.bundle.js                  4.3.1	    4.3.1      	    MIT	    http://getbootstrap.com
+16-Nov-2019     bootstrap-select	            interface/html5/framework/bootstrap-select/dist/js/bootstrap-select.js	    1.13.9	    1.13.9	        MIT	    https://silviomoreto.github.io/bootstrap-select/
+16-Nov-2019     bootstrap-toolkit	            interface/html5/framework/bootstrap-toolkit.min.js	                        2.6.3	    2.6.3	        MIT	    https://github.com/maciej-gurban/responsive-bootstrap-toolkit
 
 12-Sep-2018     leaflet	                        interface/html5/framework/leaflet/leaflet.js                                1.3.4   	1.3.4	        BSD 	http://leafletjs.com/download.html  **We override leaflet and leaflet-routing-machine, so can't use minified code.
 21-Sep-2018     leaflet-draw	                interface/html5/framework/leaflet/leaflet-draw	                            1.0.3	    1.0.3	        MIT	    https://github.com/Leaflet/Leaflet.draw     Notes: latest 'released' version tagged as v0.4.14 vs available 1.0.3
@@ -14,42 +14,41 @@ As Of Date      Name	                        Path	                              
 12-Sep-2018     leaflet-routing-machine	        interface/html5/framework/leaflet/leaflet-routing-machine	                3.2.11	    3.2.11	        ISC	    http://www.liedman.net/leaflet-routing-machine/ **We override leaflet and leaflet-routing-machine, so can't use minified code.
 17-Oct-2018     leaflet-markercluster           interface/html5/framework/leaflet/leaflet-markercluster                     1.4.1       1.4.1           MIT     https://github.com/Leaflet/Leaflet.markercluster
 
+11-Apr-2018     autolinker	                    interface/html5/framework/autolinker/Autolinker.min.js	                    1.6.2	    1.6.2	        MIT	    https://github.com/gregjacobs/Autolinker.js
 12-Sep-2018     pdfjs	                        interface/html5/framework/pdfjs	                                            1.9.426     1.9.426	        Apache	https://mozilla.github.io/pdf.js/getting_started/#download
-12-Apr-2018     qunit	                        interface/html5/framework/qunit/qunit.js	                                2.6.0	    2.6.0           MIT	    https://qunitjs.com/
-15-Oct-2018     rightclickmenu	                interface/html5/framework/rightclickmenu/rightclickmenu.js	                2.7.1       2.7.1           MIT 	http://swisnl.github.io/jQuery-contextMenu/index.html
-12-Sep-2018     tinymce	                        interface/html5/framework/tinymce/tinymce.min.js	                        4.8.1	    4.8.1           LGPL    https://www.tinymce.com/download/
+16-Nov-2019     qunit	                        interface/html5/framework/qunit/qunit.js	                                2.9.2	    2.9.2           MIT	    https://qunitjs.com/
+16-Nov-2019     rightclickmenu	                interface/html5/framework/rightclickmenu/rightclickmenu.js	                2.7.0       2.9.0           MIT 	http://swisnl.github.io/jQuery-contextMenu/index.html **Has Custom Modifications!
+16-Nov-2019     tinymce	                        interface/html5/framework/tinymce/tinymce.min.js	                        4.9.6	    4.9.6           LGPL    https://www.tinymce.com/download/
 
-12-Sep-2018     html2canvas.js	                interface/html5/framework/html2canvas.js	                                1.00-alpha.12 1.00-alpha.12 MIT	    https://github.com/niklasvh/html2canvas/releases
+16-Nov-2019     html2canvas.js	                interface/html5/framework/html2canvas.js	                                1.0.0-rc5 	1.0.0-rc5       MIT     https://github.com/niklasvh/html2canvas/releases
 
-12-Sep-2018     html5shiv	                    interface/html5/framework/html5shiv.min.js	                                3.7.3	    3.7.3	        MIT     https://github.com/aFarkas/html5shiv
-12-Sep-2018     interact.min.js	                interface/html5/framework/interact.min.js	                                1.3.4	    1.3.4	        ASIS	interactjs.io
-12-Sep-2018     masonry	                        interface/html5/framework/masonry.min.js	                                4.2.2	    4.2.2	        MIT	    http://masonry.desandro.com
-11-Apr-2018     json2.js	                    interface/html5/framework/json2.js	                                        ??		    ??              //there's 2 of these. not sure we need this one.
+16-Nov-2019     html5shiv	                    interface/html5/framework/html5shiv.min.js	                                3.7.3	    3.7.3	        MIT     https://github.com/aFarkas/html5shiv
+16-Nov-2019     interact.min.js	                interface/html5/framework/interact.min.js	                                1.7.1	    1.7.1	        ASIS	interactjs.io
+16-Nov-2019     masonry	                        interface/html5/framework/masonry.min.js	                                4.2.2	    4.2.2	        MIT	    http://masonry.desandro.com
 13-Apr-2018     measurement	                    interface/html5/framework/measurement.js	                                0.1	        0.1	            ??	    https://github.com/Philzen/measurement.js
-12-Sep-2018     moment	                        interface/html5/framework/moment.min.js	                                    2.22.2	    2.22.2	        MIT	    https://momentjs.com/
-12-Sep-2018     nanobar	                        interface/html5/framework/nanobar.min.js	                                0.4.2   	0.4.2	        MIT	    https://github.com/jacoborus/nanobar
-12-Sep-2018     r	                            interface/html5/framework/r.js	                                            2.3.6	    2.3.6	        BSD	    https://github.com/requirejs/r.js
-12-Sep-2018     require	                        interface/html5/framework/require.js	                                    2.3.6	    2.3.6	        BSD	    https://raw.githubusercontent.com/requirejs/r.js/master/require.js
-12-Sep-2018     require_async_plugin	        interface/html5/framework/require_async_plugin.js	                        0.1.2	    0.1.2	        MIT	    https://github.com/millermedeiros/requirejs-plugins/tree/master/src
-12-Sep-2018     respond	                        interface/html5/framework/respond.min.js	                                1.4.2	    1.4.2	        ASIS	https://github.com/scottjehl/Respond
-12-Sep-2018     sonic	                        interface/html5/framework/sonic.js	                                        0.3	        0.3 	        MIT	    https://github.com/padolsey/sonic.js
-11-Apr-2018     color-picker	                interface/html5/framework/widgets/color-picker	                            1.1.1	    1.1.1	        MIT	    https://github.com/PitPik/tinyColorPicker/blob/master/jqColorPicker.min.js
-11-Apr-2018     datepicker	                    interface/html5/framework/widgets/datepicker/jquery-ui-timepicker-addon.js  1.6.3       1.6.3	        MIT	    http://trentrichardson.com/examples/timepicker/ https://github.com/trentrichardson/jQuery-Timepicker-Addon
-12-Sep-2018     free-jqgrid	                    interface/html5/framework/widgets/jqgrid/jquery.jqGrid.min.js	            4.15.5	    4.15.5	        MIT     https://github.com/free-jqgrid/jqGrid/releases
-12-Sep-2018     jquery.jqgrid.winmultiselect    interface/html5/framework/widgets/jqgrid/jquery.jqgrid.winmultiselect.js    30-Oct-2017                 MIT     https://github.com/OlegKi/jqGrid-plugins
-11-Apr-2018     grid.locale-en.js	            interface/html5/framework/widgets/jqgrid/grid.locale-en.js	                ??	        ??	            ??	        ?
+16-Nov-2019     moment	                        interface/html5/framework/moment.min.js	                                    2.24.0	    2.24.0	        MIT	    https://momentjs.com/
+16-Nov-2019     nanobar	                        interface/html5/framework/nanobar.min.js	                                0.4.2   	0.4.2	        MIT	    https://github.com/jacoborus/nanobar
+16-Nov-2019     r	                            interface/html5/framework/r.js	                                            2.3.6	    2.3.6	        BSD	    https://github.com/requirejs/r.js
+16-Nov-2019     require	                        interface/html5/framework/require.js	                                    2.3.6	    2.3.6	        BSD	    https://raw.githubusercontent.com/requirejs/r.js/master/require.js
+16-Nov-2019     require_async_plugin	        interface/html5/framework/require_async_plugin.js	                        0.1.2	    0.1.2	        MIT	    https://github.com/millermedeiros/requirejs-plugins/tree/master/src
+16-Nov-2019     respond	                        interface/html5/framework/respond.min.js	                                1.4.2	    1.4.2	        ASIS	https://github.com/scottjehl/Respond
+16-Nov-2019     sonic	                        interface/html5/framework/sonic.js	                                        0.3	        0.3 	        MIT	    https://github.com/padolsey/sonic.js
+16-Nov-2019     color-picker	                interface/html5/framework/widgets/color-picker	                            1.1.1	    1.1.1	        MIT	    https://github.com/PitPik/tinyColorPicker/blob/master/jqColorPicker.min.js
+16-Nov-2019     datepicker	                    interface/html5/framework/widgets/datepicker/jquery-ui-timepicker-addon.js  1.6.3       1.6.3	        MIT	    http://trentrichardson.com/examples/timepicker/ https://github.com/trentrichardson/jQuery-Timepicker-Addon
+16-Nov-2019     free-jqgrid	                    interface/html5/framework/widgets/jqgrid/jquery.jqGrid.min.js	            4.15.5	    4.15.5	        MIT     https://github.com/free-jqgrid/jqGrid/releases
+16-Nov-2019     jquery.jqgrid.winmultiselect    interface/html5/framework/widgets/jqgrid/jquery.jqgrid.winmultiselect.js    30-Oct-2017                 MIT     https://github.com/OlegKi/jqGrid-plugins
+16-Nov-2019     grid.locale-en.js	            interface/html5/framework/widgets/jqgrid/grid.locale-en.js	                ??	        ??	            ??	        ?
 
-12-Sep-2018     jquery	                        interface/html5/framework/jquery.min.js	                                    3.3.1	    3.3.1           ASIS    https://github.com/jquery/jquery
-12-Sep-2018     jqueryui	                    interface/html5/framework/jqueryui/js/jquery-ui.custom.min.js	            1.12.1	    1.12.1	        MIT	    http://jqueryui.com/download/
+16-Nov-2019     jquery	                        interface/html5/framework/jquery.min.js	                                    3.4.1	    3.4.1           ASIS    https://github.com/jquery/jquery
+16-Nov-2019     jqueryui	                    interface/html5/framework/jqueryui/js/jquery-ui.custom.min.js	            1.12.1	    1.12.1	        MIT	    http://jqueryui.com/download/
 
-11-Apr-2018     jquery.qtip	                    interface/html5/framework/jquery.qtip.min.js	                            3.0.3   	3.0.3	        MIT     https://github.com/Craga89/qTip1  http://qtip2.com/
-11-Apr-2018     jquery-tagsinput.js	            interface/html5/framework/widgets/tag_input/jquery.tagsinput.min.js	        1.3.3	    1.3.3	        MIT	    http://xoxco.com/clickable/jquery-tags-input [SITE IS GONE]
-13-Apr-2018     jquery.stickytableheaders	    interface/html5/framework/jquery.stickytableheaders.min.js	                0.1.24      0.1.24	        ASIS	https://github.com/jmosbech/StickyTableHeaders [unused]
-11-Apr-2018     jquery-ba-resize	            interface/html5/framework/jquery.ba-resize.js	                            1.1	        1.1	            MIT     https://github.com/cowboy/jquery-resize
-11-Apr-2018     jquery.bridget	                interface/html5/framework/jquery.bridget.js	                                2.0.1	    2.0.1	        MIT	    https://github.com/desandro/jquery-bridget
-11-Apr-2018     jquery.i18n	                    interface/html5/framework/jquery.i18n.js	                                1.1.2       1.1.2	        AS IS	https://github.com/recurser/jquery-i18n
-11-Apr-2018     jquery.imageareaselect	        interface/html5/framework/jquery.imgareaselect.js	                        0.9.10	    0.9.10	        MIT     http://odyniec.net/projects/imgareaselect/
-11-Apr-2018     jquery.json	                    interface/html5/framework/jquery.json.js	                                2.6.0	    2.6.0	        MIT	    https://github.com/Krinkle/jquery-json
+16-Nov-2019     jquery.qtip	                    interface/html5/framework/jquery.qtip.min.js	                            3.0.3   	3.0.3	        MIT     https://github.com/Craga89/qTip1  http://qtip2.com/
+16-Nov-2019     jquery.stickytableheaders	    interface/html5/framework/jquery.stickytableheaders.min.js	                0.1.24      0.1.24	        ASIS	https://github.com/jmosbech/StickyTableHeaders [Used in HTML reports]
+16-Nov-2019     jquery-ba-resize	            interface/html5/framework/jquery.ba-resize.js	                            1.1	        1.1	            MIT     https://github.com/cowboy/jquery-resize
+16-Nov-2019     jquery.bridget	                interface/html5/framework/jquery.bridget.js	                                2.0.1	    2.0.1	        MIT	    https://github.com/desandro/jquery-bridget
+16-Nov-2019     jquery.i18n	                    interface/html5/framework/jquery.i18n.js	                                1.1.2       1.1.2	        AS IS	https://github.com/recurser/jquery-i18n
+16-Nov-2019     jquery.imageareaselect	        interface/html5/framework/jquery.imgareaselect.js	                        0.9.10	    0.9.10	        MIT     http://odyniec.net/projects/imgareaselect/
+16-Nov-2019     jquery.json	                    interface/html5/framework/jquery.json.js	                                2.6.0	    2.6.0	        MIT	    https://github.com/Krinkle/jquery-json
 13-Apr-2018     jquery.tablednd	                interface/html5/framework/jquery.tablednd.js	                            1.0.3       1.0.3	        MIT	    https://github.com/isocra/TableDnD
-11-Feb-2019     analytics.js                    interface/html5/framework/google/analytics/analytics.js                     11-Feb-2019   ??              ??      https://www.google-analytics.com/analytics.js -- We load this locally instead of remotely to catch script errors. Also see https://developers.google.com/analytics/devguides/changelog
-17-Dec-2018     decimal                         interface/html5/framework/decimal.min.js                                    10.0.2      10.0.2          MIT     https://github.com/MikeMcl/decimal.js/
+16-Nov-2019     analytics.js                    interface/html5/framework/google/analytics/analytics.js                     ??          ??              ??      https://www.google-analytics.com/analytics.js -- We load this locally instead of remotely to catch script errors. Also see https://developers.google.com/analytics/devguides/changelog
+16-Nov-2019     decimal                         interface/html5/framework/decimal.min.js                                    10.2.0      10.2.0          MIT     https://github.com/MikeMcl/decimal.js/

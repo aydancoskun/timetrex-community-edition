@@ -88,8 +88,6 @@ BaseViewController = Backbone.View.extend( {
 
 	parent_edit_record: null,
 
-	invisible_context_menu_dic: null,
-
 	total_display_span: null,
 
 	paging_widget: null,
@@ -148,11 +146,9 @@ BaseViewController = Backbone.View.extend( {
 
 	tab_model: null, //Tab definitions and a map to their callbacks.
 
-	context_menu_model: null,
-
 	grid_parent: null,
 
-	getRequiredFiles: function() {
+	getRequiredFiles: function () {
 		//override in child class
 		return [];
 	},
@@ -163,7 +159,7 @@ BaseViewController = Backbone.View.extend( {
 	 *
 	 * @returns {Array}
 	 */
-	filterRequiredFiles: function() {
+	filterRequiredFiles: function () {
 		var retval = [];
 		var required_files;
 
@@ -187,11 +183,11 @@ BaseViewController = Backbone.View.extend( {
 		return retval;
 	},
 
-	preInit: function() {
+	preInit: function () {
 		//override in child class
 	},
 
-	initialize: function( options ) {
+	initialize: function ( options ) {
 		Debug.Text( 'INITIALIZE', 'BaseViewController.js', 'BaseViewController', 'initialize', 10 );
 		Global.setUINotready();
 
@@ -203,7 +199,7 @@ BaseViewController = Backbone.View.extend( {
 		var $this = this;
 		this.layout_changed = false;
 		var required_files = this.filterRequiredFiles();
-		require( required_files, function() {
+		require( required_files, function () {
 
 			$this.preInit( options );
 
@@ -247,7 +243,7 @@ BaseViewController = Backbone.View.extend( {
 				$this.el = '#' + new_id;
 				$this.ui_id = new_id;
 
-				$this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+				$this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
 
 				$this.total_display_span = $( $( $this.el ).find( '.total-number-span' )[0] );
 
@@ -278,11 +274,10 @@ BaseViewController = Backbone.View.extend( {
 			$this.edit_view_ui_validation_field_dic = {};
 			$this.basic_search_field_ui_dic = {};
 			$this.adv_search_field_ui_dic = {};
-			$this.invisible_context_menu_dic = {};
 			$this.edit_view_tabs = [];
 			$this.context_menu_array = [];
 
-			$this.other_field_api = new (APIFactory.getAPIClass( 'APIOtherField' ))();
+			$this.other_field_api = new ( APIFactory.getAPIClass( 'APIOtherField' ) )();
 
 			$this.initKeyboardEvent(); // register keyboard events if it's a main view
 
@@ -295,15 +290,15 @@ BaseViewController = Backbone.View.extend( {
 
 	},
 
-	init: function() {
+	init: function () {
 		//override in child class
 	},
 
-	postInit: function() {
+	postInit: function () {
 		//override in child class
 	},
 
-	initKeyboardEvent: function() {
+	initKeyboardEvent: function () {
 
 		var $this = this;
 		if ( this.sub_view_mode || this.edit_only_mode ) {
@@ -318,7 +313,7 @@ BaseViewController = Backbone.View.extend( {
 //
 //		} );
 
-		$( this.el ).unbind( 'keyup' ).bind( 'keydown', function( e ) {
+		$( this.el ).unbind( 'keyup' ).bind( 'keydown', function ( e ) {
 
 			if ( e.keyCode === 13 && $this.search_panel && !$this.search_panel.isCollapsed() ) {
 
@@ -330,13 +325,12 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	//Speical permission check for views, need override
-	initPermission: function() {
+	initPermission: function () {
 
 	},
 
-
 	//Set this when setDefault menu
-	setTotalDisplaySpan: function() {
+	setTotalDisplaySpan: function () {
 		if ( !this.total_display_span ) {
 			return;
 		}
@@ -374,10 +368,10 @@ BaseViewController = Backbone.View.extend( {
 				if ( this.pager_data.last_page_number > 1 ) {
 					if ( !this.pager_data.is_last_page ) {
 
-						start = (this.pager_data.current_page - 1) * items_per_page + 1;
+						start = ( this.pager_data.current_page - 1 ) * items_per_page + 1;
 						end = start + items_per_page - 1;
 					} else {
-						start = (this.pager_data.current_page - 1) * items_per_page + 1;
+						start = ( this.pager_data.current_page - 1 ) * items_per_page + 1;
 						end = totalRows;
 					}
 
@@ -404,7 +398,7 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	//For Browser back/forward to set correct menu
-	setSelectRibbonMenuIfNecessary: function() {
+	setSelectRibbonMenuIfNecessary: function () {
 		//Try to fixed  Cannot read property 'setSelectMenu' of null，add TopMenuManager.ribbon_view_controlle
 
 		if ( TopMenuManager.ribbon_view_controller && TopMenuManager.selected_sub_menu_id !== this.viewId && !this.sub_view_mode && !this.edit_only_mode ) {
@@ -414,7 +408,7 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
-	getContextIconByName: function( name ) {
+	getContextIconByName: function ( name ) {
 		var len = this.context_menu_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
@@ -434,7 +428,7 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	//Set right click menu for list view grid
-	initRightClickMenu: function( target_type ) {
+	initRightClickMenu: function ( target_type ) {
 		//Error: Object doesn't support property or method 'contextMenu' in /interface/html5/views/BaseViewController.js?v=7.4.6-20141027-132733 line 393
 		if ( !$.hasOwnProperty( 'contextMenu' ) ) {
 			return;
@@ -477,11 +471,11 @@ BaseViewController = Backbone.View.extend( {
 		$.contextMenu( 'destroy', selector );
 		$.contextMenu( {
 			selector: selector,
-			callback: function( key, options ) {
+			callback: function ( key, options ) {
 				$this.onContextMenuClick( null, key );
 			},
 
-			onContextMenu: function() {
+			onContextMenu: function () {
 				return false;
 			},
 			items: items
@@ -522,7 +516,7 @@ BaseViewController = Backbone.View.extend( {
 		return items;
 	},
 
-	replaceRightClickLabel: function( html_content ) {
+	replaceRightClickLabel: function ( html_content ) {
 		var label = html_content.children().eq( 1 ).html();
 
 		label = Global.htmlDecode( label.replace( '<br>', ' ' ) );
@@ -531,7 +525,7 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	//Don't initOptions if edit_only_mode. Do it in sub views
-	initData: function() {
+	initData: function () {
 		var $this = this;
 
 		//Work around to init sub view after tab is shown.
@@ -539,17 +533,17 @@ BaseViewController = Backbone.View.extend( {
 		ProgressBar.showOverlay();
 		if ( !$this.edit_only_mode ) {
 			$this.initOptions();
-			$this.getAllColumns( function() {
+			$this.getAllColumns( function () {
 				$this.initLayout();
 			} );
 		}
 
 	},
 
-	initLayout: function() {
+	initLayout: function () {
 		var $this = this;
-		$this.getAllLayouts( function() {
-			$this.getDefaultDisplayColumns( function() {
+		$this.getAllLayouts( function () {
+			$this.getDefaultDisplayColumns( function () {
 				$this.setSelectLayout();
 				//$this.setGridColumnsWidth(); //This is done in setSelectLayout() and searchDone(), so no point in doing it multiple times.
 				$this.search();
@@ -558,23 +552,174 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	// edit_only_mode call this when open edit view. Not in initData
-	initOptions: function() {
+	initOptions: function () {
 
 	},
 
-	getContextMenuModel: function() {
-		return this.context_menu_model;
+	getDefaultContextMenuModel: function () {
+
+		var default_context_menu_model = {
+			'groups': {
+				'editor': {
+					label: $.i18n._( 'Editor' ),
+					id: 'editor',
+					sort_order: 1000
+				},
+				'navigation': {
+					label: $.i18n._( 'Navigation' ),
+					id: 'navigation',
+					sort_order: 8000
+				},
+				'other': {
+					label: $.i18n._( 'Other' ),
+					id: 'other',
+					sort_order: 9000
+				}
+			},
+
+			'icons': {}
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.add] = {
+			label: $.i18n._( 'New' ),
+			id: ContextMenuIconName.add,
+			group: 'editor',
+			icon: Icons.new_add,
+			sort_order: 1000
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.view] = {
+			label: $.i18n._( 'View' ),
+			id: ContextMenuIconName.view,
+			group: 'editor',
+			icon: Icons.view,
+			sort_order: 1010
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.edit] = {
+			label: $.i18n._( 'Edit' ),
+			id: ContextMenuIconName.edit,
+			group: 'editor',
+			icon: Icons.edit,
+			sort_order: 1020
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.mass_edit] = {
+			label: $.i18n._( 'Mass<br>Edit' ),
+			id: ContextMenuIconName.mass_edit,
+			group: 'editor',
+			icon: Icons.mass_edit,
+			sort_order: 1030
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.delete_icon] = {
+			label: $.i18n._( 'Delete' ),
+			id: ContextMenuIconName.delete_icon,
+			group: 'editor',
+			icon: Icons.delete_icon,
+			sort_order: 1040
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.delete_and_next] = {
+			label: $.i18n._( 'Delete<br>& Next' ),
+			id: ContextMenuIconName.delete_and_next,
+			group: 'editor',
+			icon: Icons.delete_and_next,
+			sort_order: 1050
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.copy] = {
+			label: $.i18n._( 'Copy' ),
+			id: ContextMenuIconName.copy,
+			group: 'editor',
+			icon: Icons.copy_as_new,
+			sort_order: 1060
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.copy_as_new] = {
+			label: $.i18n._( 'Copy<br>as New' ),
+			id: ContextMenuIconName.copy_as_new,
+			group: 'editor',
+			icon: Icons.copy,
+			sort_order: 1070
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.save] = {
+			label: $.i18n._( 'Save' ),
+			id: ContextMenuIconName.save,
+			group: 'editor',
+			icon: Icons.save,
+			sort_order: 1080
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.save_and_continue] = {
+			label: $.i18n._( 'Save<br>& Continue' ),
+			id: ContextMenuIconName.save_and_continue,
+			group: 'editor',
+			icon: Icons.save_and_continue,
+			sort_order: 1090
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.save_and_next] = {
+			label: $.i18n._( 'Save<br>& Next' ),
+			id: ContextMenuIconName.save_and_next,
+			group: 'editor',
+			icon: Icons.save_and_next,
+			sort_order: 1100
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.save_and_copy] = {
+			label: $.i18n._( 'Save<br>& Copy' ),
+			id: ContextMenuIconName.save_and_copy,
+			group: 'editor',
+			icon: Icons.save_and_copy,
+			sort_order: 1110
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.save_and_new] = {
+			label: $.i18n._( 'Save<br>& New' ),
+			id: ContextMenuIconName.save_and_new,
+			group: 'editor',
+			icon: Icons.save_and_new,
+			sort_order: 1120
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.cancel] = {
+			label: $.i18n._( 'Cancel' ),
+			id: ContextMenuIconName.cancel,
+			group: 'editor',
+			icon: Icons.cancel,
+			sort_order: 1130
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.export_excel] = {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: 'other',
+			icon: Icons.export_excel,
+			sort_order: 9000
+		};
+
+		return default_context_menu_model;
 	},
-	setContextMenuModel: function( model ) {
-		this.context_menu_model = model;
 
-		return true;
+	// Overriden by ViewControllers with custom context menus.
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			groups: {},
+			exclude: [],
+			include: ['default']
+		};
+
+		return context_menu_model;
 	},
 
-	buildContextMenuModels: function() {
-		var context_menu_model = this.getContextMenuModel();
+	buildContextMenuModels: function () {
+		// Note: Currently icons might still be hidden by the permissions code, due to the 'invisible-image' class, especially with this.edit_only_mode. See BaseViewController.setDefaultMenuAddIcon() as an example.
 
-		if ( context_menu_model != null ) {
+		var context_menu_model = this.getCustomContextMenuModel();
+
+		if ( context_menu_model && ( context_menu_model.include || context_menu_model.exclude ) ) {
 			//Context Menu
 			var menu = new RibbonMenu( {
 				label: this.context_menu_name,
@@ -582,132 +727,7 @@ BaseViewController = Backbone.View.extend( {
 				sub_menu_groups: []
 			} );
 
-			var default_context_menu_model = {
-				'groups': {
-					'editor': {
-						label: $.i18n._( 'Editor' ),
-						id: 'editor',
-					},
-					'navigation': {
-						label: $.i18n._( 'Navigation' ),
-						id: 'navigation',
-						sort_order: 8000
-					},
-					'other': {
-						label: $.i18n._( 'Other' ),
-						id: 'other',
-						sort_order: 9000
-					},
-				},
-
-				'icons': {},
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.add] = {
-				label: $.i18n._( 'New' ),
-				id: ContextMenuIconName.add,
-				group: 'editor',
-				icon: Icons.new_add,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.view] = {
-				label: $.i18n._( 'View' ),
-				id: ContextMenuIconName.view,
-				group: 'editor',
-				icon: Icons.view,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.edit] = {
-				label: $.i18n._( 'Edit' ),
-				id: ContextMenuIconName.edit,
-				group: 'editor',
-				icon: Icons.edit,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.mass_edit] = {
-				label: $.i18n._( 'Mass<br>Edit' ),
-				id: ContextMenuIconName.mass_edit,
-				group: 'editor',
-				icon: Icons.mass_edit,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.delete_icon] = {
-				label: $.i18n._( 'Delete' ),
-				id: ContextMenuIconName.delete_icon,
-				group: 'editor',
-				icon: Icons.delete_icon,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.delete_and_next] = {
-				label: $.i18n._( 'Delete<br>& Next' ),
-				id: ContextMenuIconName.delete_and_next,
-				group: 'editor',
-				icon: Icons.delete_and_next,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.copy] = {
-				label: $.i18n._( 'Copy' ),
-				id: ContextMenuIconName.copy,
-				group: 'editor',
-				icon: Icons.copy_as_new,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.copy_as_new] = {
-				label: $.i18n._( 'Copy<br>as New' ),
-				id: ContextMenuIconName.copy_as_new,
-				group: 'editor',
-				icon: Icons.copy,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.save] = {
-				label: $.i18n._( 'Save' ),
-				id: ContextMenuIconName.save,
-				group: 'editor',
-				icon: Icons.save,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.save_and_continue] = {
-				label: $.i18n._( 'Save<br>& Continue' ),
-				id: ContextMenuIconName.save_and_continue,
-				group: 'editor',
-				icon: Icons.save_and_continue,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.save_and_next] = {
-				label: $.i18n._( 'Save<br>& Next' ),
-				id: ContextMenuIconName.save_and_next,
-				group: 'editor',
-				icon: Icons.save_and_next,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.save_and_copy] = {
-				label: $.i18n._( 'Save<br>& Copy' ),
-				id: ContextMenuIconName.save_and_copy,
-				group: 'editor',
-				icon: Icons.save_and_copy,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.save_and_new] = {
-				label: $.i18n._( 'Save<br>& New' ),
-				id: ContextMenuIconName.save_and_new,
-				group: 'editor',
-				icon: Icons.save_and_new,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.cancel] = {
-				label: $.i18n._( 'Cancel' ),
-				id: ContextMenuIconName.cancel,
-				group: 'editor',
-				icon: Icons.cancel,
-			};
-
-			default_context_menu_model['icons'][ContextMenuIconName.export_excel] = {
-				label: $.i18n._( 'Export' ),
-				id: ContextMenuIconName.export_excel,
-				group: 'other',
-				icon: Icons.export_excel,
-				sort_order: 9000
-			};
+			var default_context_menu_model = this.getDefaultContextMenuModel();
 
 			var final_context_menu_model = { 'icons': {}, 'groups': {} };
 
@@ -715,24 +735,25 @@ BaseViewController = Backbone.View.extend( {
 				context_menu_model['groups'] = {};
 			}
 
-			//Default to including all icons.
+			//Default to including all default icons.
 			if ( !context_menu_model['include'] ) {
-				context_menu_model['include'] = [ 'all' ];
+				context_menu_model['include'] = ['default'];
 			}
 
-			if ( context_menu_model['include'].indexOf('all') === -1 ) {
-				context_menu_model['include'].push('all');
+			//If we don't include default, assume we want to include all default icons.
+			if ( context_menu_model['include'].indexOf( 'default' ) === -1 ) {
+				context_menu_model['include'].unshift( 'default' ); // Add to front, so custom icons can override a default icon id.
 			}
 
 			//Assign default groups.
-			for( x in default_context_menu_model['groups'] ) {
+			for ( x in default_context_menu_model['groups'] ) {
 				default_context_menu_model['groups'][x]['ribbon_menu'] = menu;
 				default_context_menu_model['groups'][x]['sub_menus'] = [];
 
 				final_context_menu_model['groups'][x] = default_context_menu_model['groups'][x];
 			}
 
-			for( x in context_menu_model['groups'] ) {
+			for ( x in context_menu_model['groups'] ) {
 				context_menu_model['groups'][x]['ribbon_menu'] = menu;
 				context_menu_model['groups'][x]['sub_menus'] = [];
 
@@ -740,16 +761,16 @@ BaseViewController = Backbone.View.extend( {
 			}
 
 			//Filter groups/icons
-			if ( context_menu_model.hasOwnProperty('include') ) {
+			if ( context_menu_model.hasOwnProperty( 'include' ) ) {
 				if ( context_menu_model.include.constructor !== Array ) {
 					context_menu_model.include = Array( context_menu_model.include );
 				}
 
-				for( i in context_menu_model.include ) {
-					if ( context_menu_model.include[i] == 'all' ) {
+				for ( i in context_menu_model.include ) {
+					if ( context_menu_model.include[i] == 'default' ) {
 						Debug.Text( 'Including All Default Icons...', 'BaseViewController.js', 'BaseViewController', 'buildContextMenuModels', 10 );
 
-						for( x in default_context_menu_model['icons'] ) {
+						for ( x in default_context_menu_model['icons'] ) {
 							final_context_menu_model['icons'][x] = default_context_menu_model['icons'][x];
 						}
 					} else {
@@ -762,21 +783,29 @@ BaseViewController = Backbone.View.extend( {
 					}
 				}
 
-
 			}
 
+			// #2644 Include array is a mix of icon id strings and objects, this function flattens it to an array of strings for id comparision.
+			function flattenMixedIdObjectArray( array ) {
+				return array.map( function ( item ) {
+					return item.id || item;
+				} );
+			}
+
+			var tmp_included_icon_ids = flattenMixedIdObjectArray( context_menu_model.include );
+
 			//Must go after include, so they can include a few icons, then exclude all.
-			if ( context_menu_model.hasOwnProperty('exclude') ) {
+			if ( context_menu_model.hasOwnProperty( 'exclude' ) ) {
 				if ( context_menu_model.exclude.constructor !== Array ) {
 					context_menu_model.exclude = Array( context_menu_model.exclude );
 				}
 
-				for( i in context_menu_model.exclude ) {
-					if ( context_menu_model.exclude[i] == 'all' ) {
+				for ( i in context_menu_model.exclude ) {
+					if ( context_menu_model.exclude[i] == 'default' ) {
 						Debug.Text( 'Excluding All Default Icons...', 'BaseViewController.js', 'BaseViewController', 'buildContextMenuModels', 10 );
 
-						for( x in default_context_menu_model['icons'] ) {
-							if ( context_menu_model.include.indexOf(x) === -1 ) { //Make sure we don't exclude one that is included.
+						for ( x in default_context_menu_model['icons'] ) {
+							if ( tmp_included_icon_ids.indexOf( x ) === -1 ) { //Make sure we don't exclude one that is included. Compare against flattened/extracted include array, otherwise types do not match and all default icons are removed regardless if they exist in include.
 								if ( final_context_menu_model['icons'][x] ) {
 									delete final_context_menu_model['icons'][x];
 								}
@@ -793,12 +822,12 @@ BaseViewController = Backbone.View.extend( {
 
 			//Build Menu
 			var groups = {};
-			for( x in final_context_menu_model['groups'] ) {
+			for ( x in final_context_menu_model['groups'] ) {
 				groups[x] = new RibbonSubMenuGroup( final_context_menu_model['groups'][x] );
-				Debug.Text( 'Creating Ribbon Menu Group: '+ final_context_menu_model['groups'][x]['label'], 'BaseViewController.js', 'BaseViewController', 'buildContextMenuModels', 10 );
+				Debug.Text( 'Creating Ribbon Menu Group: ' + final_context_menu_model['groups'][x]['label'], 'BaseViewController.js', 'BaseViewController', 'buildContextMenuModels', 10 );
 			}
 
-			for( x in final_context_menu_model['icons'] ) {
+			for ( x in final_context_menu_model['icons'] ) {
 
 				//Replace group string with object.
 				if ( final_context_menu_model['icons'][x] && final_context_menu_model['icons'][x]['group'] ) {
@@ -806,186 +835,52 @@ BaseViewController = Backbone.View.extend( {
 						final_context_menu_model['icons'][x]['group'] = groups[final_context_menu_model['icons'][x]['group']];
 					} else if ( typeof final_context_menu_model['icons'][x]['group'] === 'object' ) {
 						//The 2nd time the edit view is opened, icons manually passed in through 'include' already have the groups converted to objects, but the icons don't appear until we re-assign the group object again.
-						final_context_menu_model['icons'][x]['group'] = groups[final_context_menu_model['icons'][x]['group'].get('id')];
+						final_context_menu_model['icons'][x]['group'] = groups[final_context_menu_model['icons'][x]['group'].get( 'id' )];
 					}
 				}
 
 				if ( !final_context_menu_model['icons'][x]['permission_result'] ) {
 					final_context_menu_model['icons'][x]['permission_result'] = true;
 				}
-				if ( !final_context_menu_model['icons'][x].hasOwnProperty('permission') == false ) {
+				if ( !final_context_menu_model['icons'][x].hasOwnProperty( 'permission' ) == false ) {
 					final_context_menu_model['icons'][x]['permission'] = null;
 				}
 
-				Debug.Text( 'Creating Ribbon Menu Icon: '+ final_context_menu_model['icons'][x]['label'], 'BaseViewController.js', 'BaseViewController', 'buildContextMenuModels', 10 );
-				new RibbonSubMenu( final_context_menu_model['icons'][x] );
+				Debug.Text( 'Creating Ribbon Menu Icon: ' + final_context_menu_model['icons'][x]['label'], 'BaseViewController.js', 'BaseViewController', 'buildContextMenuModels', 10 );
+
+				// TODO: This not an ideal way to do it, but not worth changing until a bigger refactor of the context menu is done at a later date.
+				if ( final_context_menu_model['icons'][x].items && final_context_menu_model['icons'][x].items.length > 0 ) {
+					// We use item to store the pre conversion and post conversion data. Therefore we must re-assign to a temp var, and reset.
+					var items_to_add = final_context_menu_model['icons'][x].items;
+
+					// Reset the items attribute to an empty array, ready for RibbonSubMenuNavItem to use later on.
+					final_context_menu_model['icons'][x].items = [];
+
+					var icon = new RibbonSubMenu( final_context_menu_model['icons'][x] );
+
+					for ( var t = 0; t < items_to_add.length; t++ ) {
+						var item = items_to_add[t];
+
+						// This tells RibbonSubMenuNavItem which main icon this nav icon must be attached to.
+						item.nav = icon;
+
+						// This adds the converted nav item to the main icon's item attribute.
+						new RibbonSubMenuNavItem( item );
+						Debug.Text( 'Added Ribbon Menu Nav Icon: ' + item.label + ' to ' + icon.get( 'label' ), 'BaseViewController.js', 'BaseViewController', 'buildContextMenuModels', 10 );
+					}
+				} else {
+					new RibbonSubMenu( final_context_menu_model['icons'][x] );
+				}
 			}
 
 			return [menu];
 		} else {
-			//Context Menu
-			var menu = new RibbonMenu( {
-				label: this.context_menu_name,
-				id: this.viewId + 'ContextMenu',
-				sub_menu_groups: []
-			} );
-
-			//menu group
-			var editor_group = new RibbonSubMenuGroup( {
-				label: $.i18n._( 'Editor' ),
-				id: this.viewId + 'Editor',
-				ribbon_menu: menu,
-				sub_menus: []
-			} );
-
-			var other_group = new RibbonSubMenuGroup( {
-				label: $.i18n._( 'Other' ),
-				id: this.viewId + 'other',
-				ribbon_menu: menu,
-				sub_menus: [],
-				sort_order: 9000
-			} );
-			var add = new RibbonSubMenu( {
-				label: $.i18n._( 'New' ),
-				id: ContextMenuIconName.add,
-				group: editor_group,
-				icon: Icons.new_add,
-				permission_result: true,
-				permission: null
-			} );
-
-			var view = new RibbonSubMenu( {
-				label: $.i18n._( 'View' ),
-				id: ContextMenuIconName.view,
-				group: editor_group,
-				icon: Icons.view,
-				permission_result: true,
-				permission: null
-			} );
-
-			var edit = new RibbonSubMenu( {
-				label: $.i18n._( 'Edit' ),
-				id: ContextMenuIconName.edit,
-				group: editor_group,
-				icon: Icons.edit,
-				permission_result: true,
-				permission: null
-			} );
-
-			var mass_edit = new RibbonSubMenu( {
-				label: $.i18n._( 'Mass<br>Edit' ),
-				id: ContextMenuIconName.mass_edit,
-				group: editor_group,
-				icon: Icons.mass_edit,
-				permission_result: true,
-				permission: null
-			} );
-
-			var del = new RibbonSubMenu( {
-				label: $.i18n._( 'Delete' ),
-				id: ContextMenuIconName.delete_icon,
-				group: editor_group,
-				icon: Icons.delete_icon,
-				permission_result: true,
-				permission: null
-			} );
-
-			var delAndNext = new RibbonSubMenu( {
-				label: $.i18n._( 'Delete<br>& Next' ),
-				id: ContextMenuIconName.delete_and_next,
-				group: editor_group,
-				icon: Icons.delete_and_next,
-				permission_result: true,
-				permission: null
-			} );
-
-			var copy = new RibbonSubMenu( {
-				label: $.i18n._( 'Copy' ),
-				id: ContextMenuIconName.copy,
-				group: editor_group,
-				icon: Icons.copy_as_new,
-				permission_result: true,
-				permission: null
-			} );
-
-			var copy_as_new = new RibbonSubMenu( {
-				label: $.i18n._( 'Copy<br>as New' ),
-				id: ContextMenuIconName.copy_as_new,
-				group: editor_group,
-				icon: Icons.copy,
-				permission_result: true,
-				permission: null
-			} );
-
-			var save = new RibbonSubMenu( {
-				label: $.i18n._( 'Save' ),
-				id: ContextMenuIconName.save,
-				group: editor_group,
-				icon: Icons.save,
-				permission_result: true,
-				permission: null
-			} );
-
-			var save_and_continue = new RibbonSubMenu( {
-				label: $.i18n._( 'Save<br>& Continue' ),
-				id: ContextMenuIconName.save_and_continue,
-				group: editor_group,
-				icon: Icons.save_and_continue,
-				permission_result: true,
-				permission: null
-			} );
-
-			var save_and_next = new RibbonSubMenu( {
-				label: $.i18n._( 'Save<br>& Next' ),
-				id: ContextMenuIconName.save_and_next,
-				group: editor_group,
-				icon: Icons.save_and_next,
-				permission_result: true,
-				permission: null
-			} );
-
-			var save_and_copy = new RibbonSubMenu( {
-				label: $.i18n._( 'Save<br>& Copy' ),
-				id: ContextMenuIconName.save_and_copy,
-				group: editor_group,
-				icon: Icons.save_and_copy,
-				permission_result: true,
-				permission: null
-			} );
-
-			var save_and_new = new RibbonSubMenu( {
-				label: $.i18n._( 'Save<br>& New' ),
-				id: ContextMenuIconName.save_and_new,
-				group: editor_group,
-				icon: Icons.save_and_new,
-				permission_result: true,
-				permission: null
-			} );
-
-			var cancel = new RibbonSubMenu( {
-				label: $.i18n._( 'Cancel' ),
-				id: ContextMenuIconName.cancel,
-				group: editor_group,
-				icon: Icons.cancel,
-				permission_result: true,
-				permission: null
-			} );
-
-			var export_csv = new RibbonSubMenu( {
-				label: $.i18n._( 'Export' ),
-				id: ContextMenuIconName.export_excel,
-				group: other_group,
-				icon: Icons.export_excel,
-				permission_result: true,
-				permission: null,
-				sort_order: 9000
-			} );
-
-			return [menu];
+			//Legacy fallback when no context menu model is defined.
+			Global.sendErrorReport( 'ContextMenuModel error. No valid contextmenu model defined.' );
 		}
 	},
 
-	buildContextMenu: function( setFocus ) {
+	buildContextMenu: function ( setFocus ) {
 		if ( this.current_edit_record && this.edit_only_mode == true && LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.viewId != LocalCacheData.current_open_edit_only_controller.viewId ) { // #2542 - prevent early menu setup for views that have not been loaded into memory yet.
 			return null;
 		}
@@ -1044,10 +939,6 @@ BaseViewController = Backbone.View.extend( {
 
 					var ribbon_sub_menu = ribbon_sub_menu_array[y];
 
-					//Do not add context menu which in invisible_context_menu_dic
-					if ( this.invisible_context_menu_dic[ribbon_sub_menu.get( 'id' )] ) {
-						continue;
-					}
 //					var sub_menu_ui_node = $( '<li ><div class="ribbon-sub-menu-icon" id="' + ribbon_sub_menu.get( 'id' ) + '"><img src="' + ribbon_sub_menu.get( 'icon' ) + '" ><span class="ribbon-label">' + ribbon_sub_menu.get( 'label' ) + '</span></div></li>' );
 					if ( ribbon_sub_menu.get( 'selected' ) ) {
 
@@ -1063,7 +954,7 @@ BaseViewController = Backbone.View.extend( {
 						sub_menu_ui_node.children().eq( 0 ).addClass( 'ribbon-sub-menu-nav-icon' );
 						$this.subMenuNavMap[ribbon_sub_menu.get( 'id' )] = ribbon_sub_menu;
 
-						sub_menu_ui_node.click( function( e ) {
+						sub_menu_ui_node.click( function ( e ) {
 							var id = $( $( this ).find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 							$this.onSubMenuNavClick( this, id );
 						} );
@@ -1071,7 +962,7 @@ BaseViewController = Backbone.View.extend( {
 					} else {
 						//defend empty block error when comments following codes
 
-						sub_menu_ui_node.click( function( e ) {
+						sub_menu_ui_node.click( function ( e ) {
 							var id = $( $( this ).find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 							$this.onContextMenuClick( this );
 						} );
@@ -1096,7 +987,7 @@ BaseViewController = Backbone.View.extend( {
 				default_tab_label_state = 'active';
 			}
 
-			ribbon_menu_label_node.append( $( '<li class="context-menu ui-state-'+ default_tab_label_state +' ui-corner-top"><a ref="' + ribbon_menu.get( 'id' ) + '" href="#' + ribbon_menu.get( 'id' ) + '">' + ribbon_menu.get( 'label' ) + '</a></li>' ) );
+			ribbon_menu_label_node.append( $( '<li class="context-menu ui-state-' + default_tab_label_state + ' ui-corner-top"><a ref="' + ribbon_menu.get( 'id' ) + '" href="#' + ribbon_menu.get( 'id' ) + '">' + ribbon_menu.get( 'label' ) + '</a></li>' ) );
 			ribbon_menu_root_node.append( ribbon_menu_ui );
 		}
 
@@ -1122,7 +1013,7 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
-	getContextMenuGroupByName: function( menu, name, name_prefix ) {
+	getContextMenuGroupByName: function ( menu, name, name_prefix ) {
 		var group;
 		if ( name_prefix == undefined ) {
 			name_prefix = this.viewId;
@@ -1137,7 +1028,7 @@ BaseViewController = Backbone.View.extend( {
 		return group;
 	},
 
-	onSubMenuNavClick: function( target, id ) {
+	onSubMenuNavClick: function ( target, id ) {
 		var $this = this;
 		var sub_menu = this.subMenuNavMap[id];
 
@@ -1163,7 +1054,7 @@ BaseViewController = Backbone.View.extend( {
 				var item_node = $( '<li class=\'ribbon-sub-menu-nav-item\' id=\'' + item.get( 'id' ) + '\'><span class=\'label\'>' + item.get( 'label' ) + '</span></li>' );
 				box.append( item_node );
 
-				item_node.unbind( 'click' ).click( function() {
+				item_node.unbind( 'click' ).click( function () {
 					var id = $( this ).attr( 'id' );
 					$this.onReportMenuClick( id );
 				} );
@@ -1183,12 +1074,12 @@ BaseViewController = Backbone.View.extend( {
 
 	},
 
-	onReportMenuClick: function( id ) {
+	onReportMenuClick: function ( id ) {
 
 	},
 
 	//Overridden in ReportBaseViewController.
-	onContextMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function ( context_btn, menu_name ) {
 		var id;
 		if ( Global.isSet( menu_name ) ) {
 			id = menu_name;
@@ -1209,7 +1100,7 @@ BaseViewController = Backbone.View.extend( {
 			return;
 		} else {
 			window.clickProcessing = true;
-			window.clickProcessingHandle = window.setTimeout( function() {
+			window.clickProcessingHandle = window.setTimeout( function () {
 				if ( window.clickProcessing == true ) {
 					window.clickProcessing = false;
 					ProgressBar.closeOverlay();
@@ -1286,15 +1177,19 @@ BaseViewController = Backbone.View.extend( {
 		Global.triggerAnalyticsContextMenuClick( context_btn, menu_name );
 	},
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick: function ( id ) {
 		return false; //FALSE tells onContextMenuClick() to keep processing.
 	},
 
-	onNavigationClick: function( id ) {
+	onNavigationClick: function ( id ) {
 		this.onContextMenuClick( id );
 	},
 
-	setCurrentEditViewState: function( state ) {
+	getCurrentAPI: function () {
+		return this.api;
+	},
+
+	setCurrentEditViewState: function ( state ) {
 		this.is_viewing = false;
 		this.is_edit = false;
 		this.is_add = false;
@@ -1313,25 +1208,31 @@ BaseViewController = Backbone.View.extend( {
 			case 'mass_edit':
 				this.is_mass_editing = true;
 				break;
+			// case 'mass_add':
+			// 	//this.is_add = true;
+			// 	this.is_mass_adding = true;
+			// 	break;
+
 		}
+
 		LocalCacheData.current_doing_context_action = state;
 	},
 
-	onAddClick: function() {
+	onAddClick: function () {
 		var $this = this;
 		this.setCurrentEditViewState( 'new' );
 		$this.openEditView();
 		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
 		if ( $this.api && typeof $this.api['get' + $this.api.key_name + 'DefaultData'] === 'function' ) {
 			$this.api['get' + $this.api.key_name + 'DefaultData']( {
-				onResult: function( result ) {
+				onResult: function ( result ) {
 					$this.onAddResult( result );
 				}
 			} );
 		}
 	},
 
-	onAddResult: function( result ) {
+	onAddResult: function ( result ) {
 		var $this = this;
 		var result_data = {};
 
@@ -1357,108 +1258,105 @@ BaseViewController = Backbone.View.extend( {
 		$this.initEditView();
 	},
 
-	onDeleteAndNextClick: function() {
-		var $this = this;
-		$this.is_add = false;
-
-		TAlertManager.showConfirmAlert( $.i18n._( Global.delete_confirm_message ), null, function( result ) {
-
-			var remove_ids = [];
-			if ( $this.edit_view ) {
-				remove_ids.push( $this.current_edit_record.id );
-			}
-
-			if ( result ) {
-
-				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, {
-					onResult: function( result ) {
-						$this.onDeleteAndNextResult( result, remove_ids );
-
-					}
-				} );
-
-			} else {
-				ProgressBar.closeOverlay();
-			}
-		} );
+	onDeleteAndNextClick: function () {
+		this.setCurrentEditViewState( 'delete_and_next' );
+		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
+			// Using an anonymous function instead of reference, to ensure during debugging it is clear this function is called from DeleteAndNext, and not just Delete.
+			this.doDeleteClick( result );
+		}.bind(this) );
 	},
 
-	onDeleteAndNextResult: function( result, remove_ids ) {
-		var $this = this;
-		ProgressBar.closeOverlay();
-		if ( result.isValid() ) {
-			var next_select_item = $this.navigation.getSelectIndex() + 1;
-			var source_data = $this.navigation.getSourceData();
-			if ( source_data && next_select_item < source_data.length ) {
-				$this.refresh_id = $this.navigation.getItemByIndex( next_select_item );
+	resetNavigationSourceData: function () {
+
+	},
+
+	getDeleteSelectedRecordId: function() {
+		var retval = [];
+		if ( this.edit_view && this.current_edit_record ) {
+			retval.push( this.current_edit_record.id );
+		} else {
+			var grid_selected_id_array = this.getGridSelectIdArray().slice(); //Use .slice() to make a copy of the IDs.
+			if( grid_selected_id_array.length ) {
+				retval = grid_selected_id_array;
 			} else {
-				$this.refresh_id = null;
+				retval = null;
 			}
 
-			$this.search( false, null, null, function( result ) {
-				var current_grid_source = result.getResult();
+		}
+		return retval;
+	},
+	doDeleteClick: function ( result ) {
+		if ( result ) {
+			ProgressBar.showOverlay();
+			var remove_ids = this.getDeleteSelectedRecordId();
+			if( remove_ids === [] ) {
+				return;
+			}
+			return this.doDeleteAPICall( remove_ids );
 
-				if ( $.type( current_grid_source ) !== 'array' || current_grid_source.length < 1 ) {
-					$this.removeEditView();
-					$this.setDefaultMenu();
-				} else {
-					$this.navigation.setSourceData( current_grid_source );
-					$this.navigation.setPagerData( $this.pager_data );
-
-					if ( $this.refresh_id ) {
-						$this.onRightOrLeftArrowClickCallBack( $this.refresh_id );
-					} else {
-						$this.onCancelClick();
-					}
-
-					$this.onDeleteAndNextDone( result );
-				}
-			} );
 		} else {
-			TAlertManager.showErrorAlert( result );
+			ProgressBar.closeOverlay();
 		}
 	},
 
-	resetNavigationSourceData: function() {
+	doDeleteAPICall: function( remove_ids, callback ) {
+		var current_api = this.getCurrentAPI();
 
+		if ( !callback ) {
+			callback = {
+				onResult: function ( result ) {
+					this.onDeleteResult( result, remove_ids );
+				}.bind(this)
+			};
+		}
+		return current_api['delete' + current_api.key_name]( remove_ids, callback );
+	},
+	onDeleteClick: function () {
+		this.setCurrentEditViewState( 'delete' );
+		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, this.doDeleteClick.bind( this ) );
 	},
 
-	onDeleteClick: function() {
-		var $this = this;
-		$this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'delete';
-		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
-
-			var remove_ids = [];
-			if ( $this.edit_view ) {
-				remove_ids.push( $this.current_edit_record.id );
-			} else {
-				remove_ids = $this.getGridSelectIdArray().slice(); //Use .slice() to make a copy of the IDs.
-			}
-			if ( result ) {
-				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, {
-					onResult: function( result ) {
-						$this.onDeleteResult( result, remove_ids );
-					}
-				} );
-
-			} else {
-				ProgressBar.closeOverlay();
-			}
-		} );
-
-	},
-
-	onDeleteResult: function( result, remove_ids ) {
+	onDeleteResult: function ( result, remove_ids ) {
 		var $this = this;
 		ProgressBar.closeOverlay();
 		if ( result.isValid() ) {
-			$this.search();
-			$this.onDeleteDone( result );
-			if ( $this.edit_view ) {
-				$this.removeEditView();
+
+			if( LocalCacheData.current_doing_context_action === 'delete_and_next' ) {
+				// store the index of the current item, before refreshing the search and losing the current context due to the deleted records
+				$this.refresh_id = this.navigation.getNextSelectItemId();
+
+				// refresh the grid to get the current dataset now that records have been deleted
+				$this.search( false, null, null, function ( result ) {
+					var current_grid_source = result.getResult();
+
+					if ( $.type( current_grid_source ) !== 'array' || current_grid_source.length < 1 ) {
+						// if after delete, there are no more records in the search, close edit view
+						$this.removeEditView();
+						$this.setDefaultMenu();
+						// TODO: Should the above not simulate a cancel click? Could be an area for further refactor.
+					} else {
+						// there are still records, load the new data
+						$this.navigation.setSourceData( current_grid_source );
+						$this.navigation.setPagerData( $this.pager_data );
+
+						// if there is a valid id on the next record to load, do it
+						if ( $this.refresh_id ) {
+							$this.onRightOrLeftArrowClickCallBack( $this.refresh_id );
+						} else {
+							// no valid next record, simulate a cancel click.
+							$this.onCancelClick();
+						}
+
+						$this.onDeleteAndNextDone( result );
+					}
+				} );
+			} else {
+				$this.search();
+				$this.onDeleteDone( result );
+				if ( $this.edit_view && LocalCacheData.current_doing_context_action === 'delete' ) {
+					$this.removeEditView();
+					$this.setDefaultMenu();
+				}
 			}
 		} else {
 			// If some valid records were deleted, we need to refresh the search grid.
@@ -1469,9 +1367,9 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
-	removeDeletedRows: function( remove_ids ) {
+	removeDeletedRows: function ( remove_ids ) {
 		var $this = this;
-		$.each( remove_ids, function( index, value ) {
+		$.each( remove_ids, function ( index, value ) {
 			$this.grid.grid.deleteRow( value );
 			$this.paging_widget.minus();
 
@@ -1492,13 +1390,13 @@ BaseViewController = Backbone.View.extend( {
 
 	},
 
-	clearNavigationData: function() {
+	clearNavigationData: function () {
 		if ( this.navigation && this.navigation.setSourceData ) {
 			this.navigation.setSourceData( null );
 		}
 	},
 
-	onSaveAndCopy: function( ignoreWarning ) {
+	onSaveAndCopy: function ( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -1511,14 +1409,14 @@ BaseViewController = Backbone.View.extend( {
 
 		this.clearNavigationData();
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				$this.onSaveAndCopyResult( result );
 
 			}
 		} );
 	},
 
-	onSaveAndCopyResult: function( result ) {
+	onSaveAndCopyResult: function ( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -1536,35 +1434,37 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
-	onSaveAndNewClick: function( ignoreWarning ) {
+	onSaveAndNewClick: function ( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
 		}
-		this.is_add = true;
+		this.setCurrentEditViewState( 'new' );
 		var record = this.current_edit_record;
-		LocalCacheData.current_doing_context_action = 'new';
 		record = this.uniformVariable( record );
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				$this.onSaveAndNewResult( result );
 
 			}
 		} );
 	},
 
-	onSaveAndNewResult: function( result ) {
+	onSaveAndNewResult: function ( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
 			if ( result_data === true && $this.current_edit_record && $this.current_edit_record.id ) {
 				$this.refresh_id = $this.current_edit_record.id;
 
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
 				$this.refresh_id = result_data;
 			}
-			$this.search( false );
-			$this.onAddClick( true );
+
+			$this.saveInsideEditorData( function() {
+				$this.search( false );
+				$this.onAddClick( true );
+			} );
 		} else {
 			$this.setErrorMenu();
 			$this.setErrorTips( result );
@@ -1572,7 +1472,7 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
-	onSaveAndContinue: function( ignoreWarning ) {
+	onSaveAndContinue: function ( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -1582,36 +1482,40 @@ BaseViewController = Backbone.View.extend( {
 		LocalCacheData.current_doing_context_action = 'save_and_continue';
 		var record = this.current_edit_record;
 		record = this.uniformVariable( record );
-		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
+
+		this.doSaveAPICall( record, ignoreWarning, {
+			onResult: function ( result ) {
 				$this.onSaveAndContinueResult( result );
 
 			}
 		} );
 	},
 
-	onSaveAndContinueResult: function( result ) {
+	onSaveAndContinueResult: function ( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
 			if ( result_data === true && $this.current_edit_record && $this.current_edit_record.id ) {
 				$this.refresh_id = $this.current_edit_record.id;
 
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+			} else if ( result_data && TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 
 			}
-			$this.onEditClick( $this.refresh_id, true );
-			$this.onSaveAndContinueDone( result );
-			$this.search( false );
-		} else {
-			$this.setErrorMenu();
-			$this.setErrorTips( result );
 
+			$this.saveInsideEditorData( function() {
+				$this.search( false );
+				$this.onEditClick( $this.refresh_id, true );
+				$this.onSaveAndContinueDone( result );
+			} );
+
+		} else {
+			$this.setErrorTips( result );
+			$this.setErrorMenu();
 		}
 	},
 
-	onSaveAndNextClick: function( ignoreWarning ) {
+	onSaveAndNextClick: function ( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -1619,29 +1523,33 @@ BaseViewController = Backbone.View.extend( {
 		this.is_add = false;
 		this.is_changed = false;
 
+		var current_api = this.getCurrentAPI();
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'save_and_next';
 		record = this.uniformVariable( record );
-		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
+		current_api['set' + current_api.key_name]( record, false, ignoreWarning, {
+			onResult: function ( result ) {
 				$this.onSaveAndNextResult( result );
 
 			}
 		} );
 	},
 
-	onSaveAndNextResult: function( result ) {
+	onSaveAndNextResult: function ( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
 			if ( result_data === true && $this.current_edit_record && $this.current_edit_record.id ) {
 				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+			} else if ( result_data && TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 			}
-			$this.onRightArrowClick();
-			$this.search( false );
-			$this.onSaveAndNextDone( result );
+
+			$this.saveInsideEditorData( function() {
+				$this.onRightArrowClick();
+				$this.search( false );
+				$this.onSaveAndNextDone( result );
+			} );
 
 		} else {
 			$this.setErrorMenu();
@@ -1650,52 +1558,114 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
-	uniformVariable: function( records ) {
+	uniformVariable: function ( records ) {
 		return records;
 	},
 
-	onSaveClick: function( ignoreWarning ) {
+	saveInsideEditorData: function( callback ) {
+		//override this stub function where neeed. Brought in to consolidate those view controllers that used this.
+		/* Dev Note: #2644 If issues happen, read this:
+		 * Functions such as onSaveAndNextResult() had a saveInsideEditorData call, but the base view did not, but the rest of the function was the same.
+		 * During refactor of these functions like save and next result into the base view, a stub of saveInsideEditor had to be created as it was not there previously.
+		 */
+
+		if ( callback ) {
+			callback();
+		}
+	},
+
+	getChangedFields: function () {
+		var retval = {};
+		for ( var key in this.edit_view_ui_dic ) {
+			if (!this.edit_view_ui_dic.hasOwnProperty(key)) {
+				continue;
+			}
+			var widget = this.edit_view_ui_dic[key];
+
+			if ( Global.isSet( widget.isChecked ) ) {
+				if ( widget.isChecked() && widget.getEnabled() ) {
+					retval[key] = this.current_edit_record[key]; // Note: Some view controllers use widget.getValue() instead of current_edit_record[key]
+				}
+			}
+		}
+
+		return retval;
+	},
+
+	// overridden in view controllers where needed
+	// this base version will simply extract and duplicate current edit record if an array of user_id's exist
+	// parent function should check to confirm this.is_mass_adding is true
+	buildMassAddRecord: function ( record ) {
+		var retval;
+		if ( Global.isArray( record.user_id ) && record.user_id.length > 0 ) {
+			retval = [];
+			$.each( this.current_edit_record.user_id, function( index, value ) {
+
+				var commonRecord = Global.clone( record );
+				commonRecord.user_id = value;
+				retval.push( commonRecord );
+
+			} );
+		} else {
+			retval = record;
+		}
+
+		return retval;
+	},
+
+	buildMassEditSaveRecord: function ( mass_edit_record_ids, changed_fields ) {
 		var $this = this;
+		var mass_records = [];
+
+		$.each( mass_edit_record_ids, function ( index, value ) {
+			var common_record = Global.clone( changed_fields );
+			common_record.id = value;
+			common_record = $this.uniformVariable( common_record );
+			mass_records.push( common_record );
+		} );
+
+		return mass_records;
+	},
+
+	onSaveClick: function ( ignoreWarning ) {
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
 		}
+
 		var record;
+		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save';
+
 		if ( this.is_mass_editing ) {
+			var changed_fields = this.getChangedFields();
+			record = this.buildMassEditSaveRecord( this.mass_edit_record_ids, changed_fields );
 
-			var check_fields = {};
-			for ( var key in this.edit_view_ui_dic ) {
-				var widget = this.edit_view_ui_dic[key];
+		}  else if ( this.is_mass_adding ) {
+			record = this.buildMassAddRecord( this.current_edit_record );
 
-				if ( Global.isSet( widget.isChecked ) ) {
-					if ( widget.isChecked() ) {
-						check_fields[key] = this.current_edit_record[key];
-					}
-				}
-			}
-
-			record = [];
-			$.each( this.mass_edit_record_ids, function( index, value ) {
-				var common_record = Global.clone( check_fields );
-				common_record.id = value;
-				common_record = $this.uniformVariable( common_record );
-				record.push( common_record );
-
-			} );
 		} else {
 			record = this.current_edit_record;
 			record = this.uniformVariable( record );
 		}
 
-		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
-				$this.onSaveResult( result );
-
-			}
-		} );
+		this.doSaveAPICall( record, ignoreWarning );
 	},
 
-	onSaveResult: function( result ) {
+	doSaveAPICall: function( record, ignoreWarning, callback ) {
+		var current_api = this.getCurrentAPI();
+
+		if ( !callback ) {
+			callback = {
+				onResult: function ( result ) {
+					this.onSaveResult( result );
+				}.bind(this)
+			}
+		}
+
+		return current_api['set' + current_api.key_name]( record, false, ignoreWarning, callback );
+	},
+
+	onSaveResult: function ( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			$this.is_add = false;
@@ -1717,33 +1687,33 @@ BaseViewController = Backbone.View.extend( {
 				$this.removeEditView();
 			}
 		} else {
-			$this.setErrorMenu();
 			$this.setErrorTips( result );
+			$this.setErrorMenu();
 		}
 	},
 
 	//post hook for onSaveResult
-	onSaveDone: function( result ) {
+	onSaveDone: function ( result ) {
 		return true;
 	},
 
-	onSaveAndContinueDone: function( result ) {
+	onSaveAndContinueDone: function ( result ) {
 
 	},
 
-	onSaveAndNextDone: function( result ) {
+	onSaveAndNextDone: function ( result ) {
 
 	},
 
-	onDeleteDone: function( result ) {
+	onDeleteDone: function ( result ) {
 		this.removeDeletedRows()
 	},
 
-	onDeleteAndNextDone: function( result ) {
+	onDeleteAndNextDone: function ( result ) {
 
 	},
 
-	onMassEditClick: function() {
+	onMassEditClick: function () {
 
 		var $this = this;
 		this.setCurrentEditViewState( 'mass_edit' );
@@ -1753,7 +1723,7 @@ BaseViewController = Backbone.View.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 		this.mass_edit_record_ids = [];
 
-		$.each( grid_selected_id_array, function( index, value ) {
+		$.each( grid_selected_id_array, function ( index, value ) {
 			$this.mass_edit_record_ids.push( value );
 		} );
 
@@ -1761,7 +1731,7 @@ BaseViewController = Backbone.View.extend( {
 		filter.filter_data.id = this.mass_edit_record_ids;
 
 		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				var result_data = result.getResult();
 
 				if ( !result_data ) {
@@ -1769,10 +1739,10 @@ BaseViewController = Backbone.View.extend( {
 				}
 
 				$this.api['getOptions']( 'unique_columns', {
-					onResult: function( result ) {
+					onResult: function ( result ) {
 						$this.unique_columns = result.getResult();
 						$this.api['getOptions']( 'linked_columns', {
-							onResult: function( result1 ) {
+							onResult: function ( result1 ) {
 								$this.linked_columns = result1.getResult();
 								if ( $this.linked_columns === true ) {
 									//there are no columns, you should be an empty array.
@@ -1796,102 +1766,215 @@ BaseViewController = Backbone.View.extend( {
 
 	},
 
-	onViewClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		this.setCurrentEditViewState( 'view' );
-		$this.openEditView();
-
-		var filter = {};
+	/*
+	 * View Click handlers - Start
+	 */
+	getViewSelectedRecordId: function ( record_id ) {
+		var retval = false;
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var grid_selected_length = grid_selected_id_array.length;
 
-		if ( Global.isSet( editId ) ) {
-			var selectedId = editId;
+		if ( Global.isSet( record_id ) ) {
+			retval = record_id;
 		} else {
 			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
+				retval = grid_selected_id_array[0];
 			} else {
-				return;
+				retval = null;
 			}
 		}
 
-		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-				if ( !result_data ) {
-					result_data = [];
-				}
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist.' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				$this.current_edit_record = result_data;
-
-				$this.initEditView();
-
-			}
-		} );
-
+		return retval;
 	},
 
-	onEditClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-		if ( Global.isSet( editId ) ) {
-			var selectedId = editId;
+	doViewAPICall: function ( filter, api_args ) {
+		var callback = { onResult: this.handleViewAPICallbackResult.bind( this ) };
+		if ( api_args ) {
+			// If api_args specified, use api_args.filter, and ignore function filter parameter.
+			api_args.push( callback );
+			return this.api['get' + this.api.key_name].apply( this.api, api_args );
 		} else {
-			if ( this.is_viewing ) {
-				selectedId = this.current_edit_record.id;
-			} else if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
+			return this.api['get' + this.api.key_name]( filter, callback );
+		}
+	},
+	handleViewAPICallbackResult: function ( result ) {
+		var result_data;
+		if ( result.getResult ) {
+			result_data = result.getResult();
+
+			//Do any result manipulation processes here, such as combining IDs together into a composite.
+			result_data = this.processAPICallbackResult( result_data );
+
+			if ( !result_data ) {
+				result_data = [];
 			}
+
+			result_data = result_data[0];
+		} else {
+			//Do not call processAPICallbackResult() here as we assume all processing has been completed earlier.
+			result_data = result;
 		}
 
-		this.setCurrentEditViewState( 'edit' );
-		$this.openEditView();
+		if ( !result_data ) {
+			TAlertManager.showAlert( $.i18n._( 'Record does not exist.' ) );
+			return this.onCancelClick();
+		} else {
+			return this.doViewClickResult( result_data );
+		}
+	},
+
+	doViewClickResult: function ( result_data ) {
+		this.current_edit_record = result_data;
+		this.initEditView();
+		return this.clearCurrentSelectedRecord();
+	},
+	onViewClick: function ( record_id, noRefreshUI ) {
+		this.setCurrentEditViewState( 'view' );
+		this.openEditView();
+
+		record_id = this.getViewSelectedRecordId( record_id );
+		if ( Global.isFalseOrNull( record_id ) ) {
+			return;
+		}
+		this.setCurrentSelectedRecord( record_id );
+
+		var filter = this.getAPIFilters();
+
+		return this.doViewAPICall( filter );
+	},
+
+	setCurrentSelectedRecord: function( record ) {
+		if ( record ) {
+			this.current_selected_record = record;
+			return true;
+		}
+
+		return false;
+	},
+	getCurrentSelectedRecord: function() {
+		return this.current_selected_record;
+	},
+	clearCurrentSelectedRecord: function() {
+		delete this.current_selected_record;
+		return true;
+	},
+	// do we need this, Mike created it but check with him, as it may have just been a potential idea, not used.
+	getRecordIdFromRecord: function( object ) {
+		if ( Global.isObject( object ) ) {
+			return object_id;
+		} else if ( Global.isString( object ) ) {
+			return object;
+		}
+
+		return false;
+	},
+
+	/*
+	 * View Click handlers - End
+	 */
+
+	/*
+	 * Common between View and Edit
+	 */
+	processAPICallbackResult: function ( result_data ) {
+		return result_data;
+	},
+
+	getAPIFilters: function () {
+		// override this function if view requires more filters
+		var record_id = this.getCurrentSelectedRecord();
 		var filter = {};
 
 		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
+		filter.filter_data.id = [ record_id ];
 
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
+		return filter;
+	},
+	/*
+	 * Edit Click handlers - Start
+	 */
+	getEditSelectedRecordId: function( record_id ) {
+		var retval = false;
+		var grid_selected_id_array = this.getGridSelectIdArray();
+		var grid_selected_length = grid_selected_id_array.length;
+
+		if ( Global.isSet( record_id ) ) {
+			retval = record_id;
+		} else {
+			if ( this.is_viewing && this.current_edit_record && this.current_edit_record.id ) {
+				retval = this.current_edit_record.id;
+			} else if ( grid_selected_length > 0 ) {
+				retval = grid_selected_id_array[0];
+			} else {
+				retval = null;
+			}
+		}
+		return retval;
+	},
+
+	doEditAPICall: function ( filter, api_args, callback ) {
+		if ( !callback ) {
+			callback = { onResult: this.handleEditAPICallbackResult.bind( this ) };
+		}
+		if ( api_args ) {
+			// If api_args specified, use api_args.filter, and ignore function filter parameter.
+			api_args.push( callback );
+			return this.api['get' + this.api.key_name].apply( this.api, api_args );
+		} else {
+			return this.api['get' + this.api.key_name]( filter, callback );
+		}
+	},
+	handleEditAPICallbackResult: function ( result ) {
+		var result_data;
+		if ( result.getResult ) {
+				result_data = result.getResult();
+
+				//Do any result manipulation processes here, such as combining IDs together into a composite.
+				result_data = this.processAPICallbackResult( result_data );
 
 				if ( !result_data ) {
 					result_data = [];
 				}
 
 				result_data = result_data[0];
+		} else {
+			//Do not call processAPICallbackResult() here as we assume all processing has been completed earlier.
+			result_data = result;
+		}
+		if ( !result_data ) {
+			TAlertManager.showAlert( $.i18n._( 'Record does not exist.' ) );
+			return this.onCancelClick();
+		}
 
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist.' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				if ( $this.sub_view_mode && $this.parent_key ) {
-					result_data[$this.parent_key] = $this.parent_value;
-				}
-
-				$this.current_edit_record = result_data;
-
-				$this.initEditView();
-
-			}
-		} );
-
+		if ( this.sub_view_mode && this.parent_key ) {
+			result_data[this.parent_key] = this.parent_value;
+		}
+		return this.doEditClickResult( result_data );
 	},
+
+	doEditClickResult: function ( result_data ) {
+		this.current_edit_record = result_data;
+		this.initEditView();
+	},
+
+	onEditClick: function( record_id, noRefreshUI ) {
+		this.setCurrentEditViewState( 'edit' );
+		this.openEditView();
+
+		record_id = this.getEditSelectedRecordId( record_id );
+		if ( Global.isFalseOrNull( record_id ) ) {
+			return;
+		}
+		this.setCurrentSelectedRecord( record_id );
+
+		var filter = this.getAPIFilters();
+
+		return this.doEditAPICall( filter );
+	},
+
+	/*
+	 * Edit Click handlers - End
+	 */
 
 	onCopyClick: function() {
 		var $this = this;
@@ -1973,7 +2056,7 @@ BaseViewController = Backbone.View.extend( {
 
 	_continueDoCopyAsNew: function() {
 		var $this = this;
-		this.is_add = true;
+		this.setCurrentEditViewState('new');
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 
 		if ( Global.isSet( this.edit_view ) ) {
@@ -2593,7 +2676,7 @@ BaseViewController = Backbone.View.extend( {
 					var widget = this.edit_view_ui_dic[key];
 					if ( Global.isSet( widget.isChecked ) ) {
 						if ( widget.isChecked() && widget.getEnabled() ) {
-							record[key] = widget.getValue();
+							record[key] = this.current_edit_record[key]; // Note: Some view controllers use widget.getValue() instead of current_edit_record[key]
 						}
 					}
 				}
@@ -2666,10 +2749,12 @@ BaseViewController = Backbone.View.extend( {
 		if ( !Global.isSet( show_warning ) ) {
 			show_warning = true;
 		}
+
 		//Error: Unable to get property 'find' of undefined or null reference in http://timeclock:8085/interface/html5/views/BaseViewController.js?v=7.4.3-20140926-105827 line 1769
 		if ( !this.edit_view_tab ) {
 			return;
 		}
+
 		var details = result.getDetails();
 		// Only check first item
 		// Error: Uncaught TypeError: Cannot call method 'hasOwnProperty' of undefined in /interface/html5/views/BaseViewController.js?v=9.0.0-20150822-134259 line 1879
@@ -2686,6 +2771,8 @@ BaseViewController = Backbone.View.extend( {
 				this.setErrorTipsWarning( result );
 			}
 			this.setEditMenu();
+		} else if ( result.getCode() == 'PERMISSION' ) {
+			TAlertManager.showErrorAlert( result );
 		} else {
 			// Make sure current codes work.
 			this.setErrorTipsError( result );
@@ -4188,7 +4275,13 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 		// reset parent context menu if edit only mode
+
 		if ( !this.edit_only_mode ) {
+			//#2777 - If the user goes to Employee -> Employees, click on Wage tab, then goes to Employee -> Employees again, the Context Menu will be incorrect and still be for the "Wage" record and not the proper "Employee" record.
+			//This tries to detect when the context menu doesn't match the view and forces it to be rebuilt completely.
+			if ( TopMenuManager.selected_menu_id + 'ContextMenu' != LocalCacheData.currentShownContextMenuName ) {
+				this.buildContextMenu( true );
+			}
 			this.setDefaultMenu();
 		} else {
 			this.setParentContextMenuAfterSubViewClose();
@@ -4372,7 +4465,9 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	setDefaultMenuExportIcon: function( context_btn, grid_selected_length, pId ) {
-		if ( grid_selected_length == 0 ||this.is_add ||this.is_viewing || this.is_mass_adding || this.is_edit || this. grid == undefined ) {
+		if ( this.edit_only_mode ) {
+			context_btn.addClass( 'invisible-image' );
+		} else if ( grid_selected_length == 0 ||this.is_add ||this.is_viewing || this.is_mass_adding || this.is_edit || this.grid == undefined ) {
 			context_btn.addClass('disable-image');
 		}
 	},
@@ -7529,12 +7624,19 @@ BaseViewController = Backbone.View.extend( {
 	getBalanceHandler: function( result, last_date_stamp ) {
 		var $this = this;
 		var available_balance_value, current_time_value, remaining_balance_value, summary_available_value;
-		var result_data = result.getResult();
+
 		//Error: TypeError: this.edit_view_ui_dic.available_balance is undefined in /interface/html5/framework/jquery.min.js?v=8.0.0-20141117-091433 line 2 > eval line 6570
 		if ( !$this.edit_view_ui_dic || !$this.edit_view_ui_dic['available_balance'] ) {
 			return;
 		}
-		if ( !result_data ) {
+
+		if ( Global.isObject( result ) ) {
+			var result_data = result.getResult();
+			if ( !result_data ) {
+				$this.detachElement( 'available_balance' );
+				return;
+			}
+		} else {
 			$this.detachElement( 'available_balance' );
 			return;
 		}
@@ -7551,6 +7653,13 @@ BaseViewController = Backbone.View.extend( {
 			summary_available_value = summary_available_value + ' / ' + LocalCacheData.getCurrentCurrencySymbol() + result_data.remaining_dollar_balance;
 		}
 		$this.edit_view_ui_dic['available_balance'].setValue( summary_available_value );
+
+		//If available balance is negative, change font color to red so its more noticable.
+		if ( result_data.projected_remaining_balance < 0 ) {
+			$this.edit_view_ui_dic['available_balance'].css('color', 'red'); //Font color to red.
+		} else {
+			$this.edit_view_ui_dic['available_balance'].css('color', 'black');
+		}
 
 		$this.available_balance_info.qtip(
 				{

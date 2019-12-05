@@ -19,133 +19,27 @@ PayStubTransactionSummaryReportViewController = ReportBaseViewController.extend(
 		this.processTransactions( id );
 	},
 
-	buildContextMenuModels: function() {
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			groups: {
+				export: {
+					label: $.i18n._( 'Export' ),
+					id: this.viewId + 'Export'
+				}
+			},
+			exclude: [],
+			include: [
+				{
+					label: $.i18n._( 'Process<br>Transactions' ),
+					id: ContextMenuIconName.direct_deposit,
+					group: 'export',
+					icon: 'direct_deposit-35x35.png',
+					items: []
+				}
+			]
+		};
 
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var saved_report_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Saved Report' ),
-			id: this.viewId + 'SavedReport',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var pay_stub_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Pay Stub' ),
-			id: this.script_name + 'PayStub',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var export_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Export' ),
-			id: this.viewId + 'Export',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var view_html = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view_html,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view_pdf = new RibbonSubMenu( {
-			label: $.i18n._( 'PDF' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.print,
-			permission_result: true,
-			permission: null
-		} );
-
-		var excel = new RibbonSubMenu( {
-			label: $.i18n._( 'Excel' ),
-			id: ContextMenuIconName.export_excel,
-			group: editor_group,
-			icon: Icons.export_excel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_existed_report = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save_existed_report,
-			group: saved_report_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_new_report = new RibbonSubMenu( {
-			label: $.i18n._( 'Save as New' ),
-			id: ContextMenuIconName.save_new_report,
-			group: saved_report_group,
-			icon: Icons.save_and_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		/**
-		 var employee_pay_stubs = new RibbonSubMenu( {
-			label: $.i18n._( 'Employee<br>Pay Stubs' ),
-			id: ContextMenuIconName.employee_pay_stubs,
-			group: pay_stub_group,
-			icon: Icons.pay_stubs,
-			permission_result: true,
-			permission: null
-		} );
-
-		 var employer_pay_stubs = new RibbonSubMenu( {
-			label: $.i18n._( 'Employer<br>Pay Stubs' ),
-			id: ContextMenuIconName.employer_pay_stubs,
-			group: pay_stub_group,
-			icon: Icons.pay_stubs,
-			permission_result: true,
-			permission: null
-		} );
-		 **/
-
-		var direct_deposit = new RibbonSubMenu( {
-			label: $.i18n._( 'Process<br>Transactions' ),
-			id: ContextMenuIconName.direct_deposit,
-			group: export_group,
-			icon: 'direct_deposit-35x35.png',
-			items: [],
-			permission_result: true,
-			permission: true
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	onCustomContextClick: function( id ) {

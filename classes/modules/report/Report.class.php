@@ -618,6 +618,10 @@ class Report {
 				$this->setSubTotalConfig( (array)$data['sub_total'] );
 			}
 
+			if ( isset($data['page_break']) ) {
+				$this->setPageBreakConfig( (array)$data['page_break'] );
+			}
+
 			//Work around bug in Flex that sends config sort data as "sort_" array element.
 			if ( isset($data['sort_']) AND !isset($data['sort']) ) {
 				$data['sort'] = $data['sort_'];
@@ -640,7 +644,7 @@ class Report {
 			$this->setCustomColumnConfig( $custom_columns );
 
 			//Remove special data, then the remaining is all filter data.
-			unset($data['columns'], $data['group'], $data['sub_total'], $data['sort'], $data['other'], $data['chart'], $data['form'], $data['custom_filter']);
+			unset($data['columns'], $data['group'], $data['sub_total'], $data['sort'], $data['page_break'], $data['other'], $data['chart'], $data['form'], $data['custom_filter']);
 			if ( isset($data['filter']) ) {
 				$data = array_merge( $data, (array)$data['filter'] );
 				unset($data['filter']);
@@ -962,6 +966,33 @@ class Report {
 	function getGroupConfig() {
 		if ( isset($this->config['group']) ) {
 			return $this->config['group'];
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Page Break On options - Use a single re-orderable dropdown for page break options.
+	 * @param $data
+	 * @return bool
+	 */
+	function setPageBreakConfig( $data ) {
+		if ( !is_array($data) OR ( is_array($data) AND ( count($data) == 0 OR $data[0] === FALSE OR $data[0] === TTUUID::getZeroID() ) ) ) {
+			return FALSE;
+		}
+
+		//$data should be a basic array of: 0 => 'first_name', 1 => 'last_name', etc... Convert to this to a
+		$this->config['page_break'] = $data;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getPageBreakConfig() {
+		if ( isset($this->config['page_break']) ) {
+			return $this->config['page_break'];
 		}
 
 		return FALSE;
@@ -1382,6 +1413,19 @@ class Report {
 			}
 		}
 
+		if ( isset($config['page_break']) AND is_array($config['page_break']) AND isset($config['columns']) AND is_array( $config['columns'] ) ) {
+			$page_break_diff = array_diff( $config['page_break'], array_keys( $config['columns'] ) );
+			if ( is_array($page_break_diff) AND count($page_break_diff) > 0 ) {
+				foreach( $page_break_diff as $page_break_bad_column ) {
+					if ( !isset($column_options[$page_break_bad_column]) ) { //Prevent PHP warning.
+						$column_options[$page_break_bad_column] = $page_break_bad_column; //If column doesn't exist, at least show the column key rather than NULL so we have something to go on.
+					}
+
+					$this->validator->isTrue( 'page_break', FALSE, TTi18n::gettext('Page Break On defines column that is not being displayed on the report').': '. $column_options[$page_break_bad_column] );
+				}
+			}
+		}
+
 		//Debug::Arr( $config, 'Config: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr( $this->validator, 'Validate Report Config: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $this->validator;
@@ -1651,6 +1695,33 @@ class Report {
 		}
 
 		$this->profiler->stopTimer( 'subTotal' );
+		Debug::Text(' Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
+
+		return TRUE;
+	}
+
+	/**
+	 * Calculate page break points - This must be done *after* sub-totaling and sorting, as the data may need to be re-sorted to properly merge page break points back into main array.
+	 * @return bool
+	 */
+	function pageBreak() {
+		$this->profiler->startTimer( 'pageBreak' );
+		if ( is_array( $this->getPageBreakConfig() ) AND count( $this->getPageBreakConfig() ) > 0 ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0, NULL, TTi18n::getText('Inserting Page Breaks...') );
+
+			$this->data = array_values( $this->data );
+			$page_break_data = Group::PageBreakBy( $this->data, $this->getPageBreakConfig() );
+			if ( is_array($page_break_data) ) {
+				foreach ( $page_break_data as $key => $value ) {
+					$this->data[ $key ]['_page_break'] = TRUE;
+				}
+			}
+			unset($page_break_data);
+
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0 );
+		}
+
+		$this->profiler->stopTimer( 'pageBreak' );
 		Debug::Text(' Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
@@ -2344,6 +2415,13 @@ class Report {
 			}
 		}
 
+		if ( $format == 'pdf' OR $format == 'html' ) {  //Only page break for PDF/HTML formats.
+			if ( $this->isSystemLoadValid() == TRUE ) {
+				$this->PageBreak();
+			} else {
+				return FALSE;
+			}
+		}
 
 		//Rekey data array starting at 0 sequentially.
 		//This prevents the progress bar from jumping all over or moving in reverse.
@@ -3231,27 +3309,20 @@ class Report {
 						$is_gray_background_color = TRUE;
 					}
 
+					$tr_class = array();
 					if ( isset($row['_total']) AND $row['_total'] == TRUE ) {
-						if ( $is_white_background_color ) {
-							$this->html .= ' class="content-tbody bg-white grand-border font-weight-td">';
-						} else if ( $is_gray_background_color ) {
-							$this->html .= ' class="content-tbody bg-gray grand-border font-weight-td">';
-						}
-
+						$tr_class = array('content-tbody', 'grand-border', 'font-weight-td');
 					} elseif ( isset($row['_subtotal']) AND $row['_subtotal'] == TRUE ) {
-						if ( $is_white_background_color ) {
-							$this->html .= ' class="content-tbody bg-white top-border-thin font-weight-td">';
-						} else if ( $is_gray_background_color ) {
-							$this->html .= ' class="content-tbody bg-gray top-border-thin font-weight-td">';
-						}
-
-					} else {
-						if ( $is_white_background_color ) {
-							$this->html .= ' class="content-tbody bg-white">';
-						} else if ( $is_gray_background_color ) {
-							$this->html .= ' class="content-tbody bg-gray">';
-						}
+						$tr_class = array('content-tbody', 'top-border-thin', 'font-weight-td');
 					}
+
+					if ( $is_white_background_color ) {
+						$tr_class[] = 'bg-white';
+					} else if ( $is_gray_background_color ) {
+						$tr_class[] = 'bg-gray';
+					}
+
+					$this->html .= ' class="'. implode( ' ', $tr_class ) .'">';
 
 					if ( ( isset($row['_subtotal']) AND $row['_subtotal'] == TRUE ) ) {
 						//Figure out how many subtotal columns are set, so we can merge the cells
@@ -3308,6 +3379,7 @@ class Report {
 							//Update $row[$column] so the blank value gets put into the prev_row variable so we can check for it in the next loop.
 							$value = $row[$column] = $this->config['other']['blank_value_placeholder'];
 						}
+
 						if ( !isset($row['_total']) AND $blank_row == TRUE AND $value == '' ) {
 							//$this->html .= '<td>';
 							//$this->html .= '&nbsp;';
@@ -3334,6 +3406,10 @@ class Report {
 
 							$this->html .= '>';
 
+//							if ( isset($row['_page_break']) AND $row['_page_break'] == TRUE AND $c <= ( $columns_count - 1 ) ) { //This isn't quite working correctly yet.
+//								$this->html .= '<div class="page-break"></div>';
+//							}
+
 							if ( is_object( $value ) ) {
 								$this->html .= $value->display( 'html', 52, 25 );
 								$this->html .= '</td>';
@@ -3341,14 +3417,14 @@ class Report {
 								$this->html .= $value;
 								$this->html .= '</td>';
 							}
-
 						}
 
 						$c++;
 					}
-					unset($tmp);//code standards
+					unset($tmp); //code standards
 
 					$this->html .= '</tr>';
+
 				}
 
 				//UnBold after sub-total rows, but NOT grand total row.
@@ -3627,6 +3703,7 @@ class Report {
 		$css .= 'body{ font-size: 100%, font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;padding: 15px;}';
 		$css .= '.report table{ border-collapse: collapse; border-spacing:0;}';
 		$css .= '.report th, .report td{ padding: 2;}';
+		$css .= 'div.page-break{ page-break-after: always; page-break-inside: avoid; }'; //Handle page breaks when <div class="page-break"></div> is specified.
 		$css .= '.header{ width: 100%}';
 		$css .= '.full-width{ width: 100%}';
 //		$css .= '.header tbody{font-size: 14px;}';
@@ -3645,7 +3722,7 @@ class Report {
 		$css .= '.content-thead td{ padding: 0; }';
 		$css .= '.content-thead tbody{ font-size: '. $this->_html_fontSize( 100 ) .'%;}';
 		$css .= '.content-tbody{ white-space: nowrap; font-size: '. $this->_html_fontSize( 100 ) .'%;}';
-		$css .= '.content-tbody td{ padding: 6px; width: 1%;}';
+		$css .= '.content-tbody td{ padding: 2px; width: 1%;}';
 		$css .= '.exceeded-error{ text-align:center; font-size: ' . $this->_html_fontSize( 250 ) . '%; font-weight: bold; color: #FF0000}';
 		$css .= '.exceeded-warning{ text-align:center; font-size: ' . $this->_html_fontSize( 200 ) . '%; font-weight: bold;}';
 		$css .= '.blank-row{ height: 10px}';
@@ -3730,7 +3807,7 @@ class Report {
 			$this->pdf->SetTitle( $this->getDescription('report_name') );
 			$this->pdf->SetSubject( APPLICATION_NAME .' '. TTi18n::getText('Report') );
 
-			$this->pdf->setMargins( $this->config['other']['left_margin'], $this->config['other']['top_margin'], $this->config['other']['right_margin'] );
+			$this->pdf->setMargins( $this->config['other']['left_margin'], $this->config['other']['top_margin'], $this->config['other']['right_margin'] ); //Margins are ignored because we use setXY() to force the coordinates before each drawing and therefore ignores margins.
 			$this->pdf->SetAutoPageBreak(FALSE);
 
 			$column_options = (array)Misc::trimSortPrefix( $this->getOptions('columns') );
@@ -3813,10 +3890,12 @@ class Report {
 		$this->html .= '</td>';
 		$this->html .= '</tr>';
 		$this->html .= '</table>';
-		$this->html .= '<script>var startTime = -1;</script>';
-		if ( isset($this->config['other']['auto_refresh']) AND $this->config['other']['auto_refresh'] > 0) {
-			$this->html .= '<script>startTime = ' . $this->config['other']['auto_refresh'] . ';</script>';
+		if ( isset($this->config['other']['auto_refresh']) AND $this->config['other']['auto_refresh'] > 0 ) {
+			$this->html .= '<script>auto_refresh_time = ' . $this->config['other']['auto_refresh'] . ';</script>'; //Must be global variable
+		} else {
+			$this->html .= '<script>auto_refresh_time = -1;</script>'; //Must be global variable
 		}
+
 		$this->html .= '<script>$("table.content").stickyTableHeaders();</script>';
 	}
 
@@ -3973,6 +4052,7 @@ class Report {
 				$this->html .= '<td>' .htmlspecialchars($description, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 			}
+
 			//Custom Filter:
 			$description = $this->getDescription('custom_filter');
 			if ( $description != '' ) {
@@ -4112,6 +4192,7 @@ class Report {
 
 		$column_widths = $this->data_column_widths;
 
+		$force_page_break = FALSE;
 		$prev_row = array();
 		$r = 0;
 		$total_rows = 0; //Count all rows included in grand total
@@ -4122,7 +4203,8 @@ class Report {
 				//If the next row is a subtotal or total row, do a page break early, so we don't show just a subtotal/total by itself.
 				if ( isset($this->data[($key + 1)])
 						AND ( ( isset($this->data[($key + 1)]['_subtotal']) AND $this->data[($key + 1)]['_subtotal'] == TRUE )
-								OR ( isset($this->data[($key + 1)]['_total']) AND $this->data[($key + 1)]['_total'] == TRUE ) ) ) {
+								OR ( isset($this->data[($key + 1)]['_total']) AND $this->data[($key + 1)]['_total'] == TRUE )
+								OR ( isset($this->data[($key + 1)]['_page_break]']) AND $this->data[($key + 1)]['_page_break'] == TRUE )) ) {
 					$page_break_row_height = ($row_cell_height * 2.5);
 				} else {
 					$page_break_row_height = $row_cell_height;
@@ -4133,7 +4215,17 @@ class Report {
 					$this->_pdf_displayMaximumPageLimitError();
 					break;
 				}
-				$new_page = $this->_pdf_checkPageBreak( $page_break_row_height, TRUE );
+
+				if ( $force_page_break == TRUE ) {
+					$new_page = $this->_pdf_AddPage();
+					$force_page_break = FALSE;
+				}
+
+				if ( isset($row['_page_break']) AND $row['_page_break'] == TRUE ) {
+					$force_page_break = TRUE;
+				} else {
+					$new_page = $this->_pdf_checkPageBreak( $page_break_row_height, TRUE );
+				}
 
 				//Reset all styles/fills after page break.
 				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize( $this->config['other']['table_row_font_size'] ) );

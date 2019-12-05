@@ -1,6 +1,6 @@
 ImportCSVWizardController = BaseWizardController.extend( {
 
-	el: '.wizard',
+	el: '.wizard-bg',
 
 	api_import: null,
 
@@ -224,7 +224,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		}
 
 		this.last_id = id;
-		select_data = this.setSampleRowBaseOnImportFile( select_data );
+
+		//Clone this array because its currently a reference to the raw grid data itself and grid.setData() clears out the grid before rendering it again, which results in a blank grid when switching from a saved mapping, then back to the original.
+		select_data = this.setSampleRowBaseOnImportFile( select_data ).slice(0);
 
 		grid.setData( select_data );
 
@@ -241,20 +243,21 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			item.row_1 = '';
 			for ( var j = 0; j < this.import_data.length; j++ ) {
 				var import_data = this.import_data[j];
+
 				//#2132 - match based on map_column_name
-				if ( item.map_column_name.trim() === import_data.map_column_name.trim() ) {
-					item.row_1 = import_data.row_1;
-					break;
+				if ( item && item.map_column_name && import_data && import_data.map_column_name ) {
+					if ( item.map_column_name.trim() === import_data.map_column_name.trim() ) {
+						item.row_1 = import_data.row_1;
+						break;
+					}
 				}
 			}
 		}
 
 		return grid_data;
-
 	},
 
 	getSavedMapping: function( select_layout_id ) {
-
 		var $this = this;
 		var args = {};
 		var filter_data = {};
@@ -265,20 +268,27 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			onResult: function( result ) {
 				var res_data = result.getResult();
 				if ( $.type( res_data ) !== 'array' ) {
-					$this.saveNewMapping( $.i18n._( '-- Default --' ) );
+					$this.saveNewMapping( BaseViewController.default_layout_name, true );
 				} else {
-
+					//Force sorting by name so -- DEFAULT -- record appears at the top.
 					res_data.sort( function( a, b ) {
 								return Global.compare( a, b, 'name' );
-
 							}
 					);
 
 					$this.saved_layout_array = res_data;
-					//if not set select layout, default to first one and update it to current upload columns
+
+					//If not set select layout, default to first one and update it to current upload columns
 					if ( !select_layout_id ) {
 						select_layout_id = res_data[0].id;
-						$this.updateSelectMapping( select_layout_id );
+
+						//Only update the first saved import data record if it is infact the DEFAULT one, otherwise it could overwrite some other random saved mapping, especially if they happen to the delete the default one.
+						//  It has to update the DEFAULT saved mapping, otherwise if the user changes to a different mapping, then changes back, all the settings will be lost.
+						if ( res_data[0].is_default == true || res_data[0].name == BaseViewController.default_layout_name ) {
+							$this.updateSelectMapping( select_layout_id );
+						} else {
+							$this.saveNewMapping( BaseViewController.default_layout_name, true );
+						}
 					}
 
 					$this.setSavedMappingOptions( res_data, select_layout_id );
@@ -304,10 +314,10 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	},
 
 	deleteSelectMapping: function( select_id ) {
-		var select_layout = this.getLayoutById( select_id );
 		var $this = this;
+		var select_layout = this.getLayoutById( select_id );
 
-		if ( select_layout.name === $.i18n._( '-- Default --' ) ) {
+		if ( select_layout.is_default == true || select_layout.name === BaseViewController.default_layout_name ) {
 			TAlertManager.showAlert( $.i18n._( 'Can\'t delete default layout' ) );
 			return;
 		}
@@ -326,6 +336,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	},
 
 	updateSelectMapping: function( select_id ) {
+		var $this = this;
+
 		this.saveCurrentStep();
 		var select_layout = this.getLayoutById( select_id );
 
@@ -333,19 +345,21 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().setUserGenericData( select_layout, {
 			onResult: function( result ) {
-
+				//Refresh saved mapping data once it has been saved on the server.
+				// This makes it so if the user clicks the UPDATE button, then switches to another saved mapping, then switches back, they will see their most recent settings.
+				$this.getSavedMapping( select_id );
 			}
 		} );
 	},
 
-	saveNewMapping: function( name ) {
+	saveNewMapping: function( name, is_default ) {
 		this.saveCurrentStep();
 
 		var $this = this;
 		var args = {};
 		args.script = 'import_wizard' + this.stepsDataDic[1].import_class;
 		args.name = name;
-		args.is_default = false;
+		args.is_default = ( is_default && is_default == true ? true : false );
 		args.data = this.stepsDataDic[this.current_step].import_data_for_layout;
 
 		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().setUserGenericData( args, {

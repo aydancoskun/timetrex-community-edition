@@ -58,7 +58,7 @@ Wizard = Backbone.View.extend( {
 	events: {
 		'click .close-btn': 'onCloseClick',
 		'click .close-icon': 'onCloseClick',
-		'click .wizard-overlay': 'onCloseClick',
+		'click .wizard-overlay.onclick-close': 'onCloseClick',
 		'click .forward-btn': 'onNextClick',
 		'click .back-btn': 'onPrevClick',
 		'click .done-btn': 'onDone'

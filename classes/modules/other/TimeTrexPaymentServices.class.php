@@ -346,7 +346,7 @@ class TimeTrexPaymentServices {
 				'home_phone' => $u_obj->getHomePhone(),
 				'mobile_phone' => $u_obj->getMobilePhone(),
 
-				'birth_date' =>  TTDate::getISODateStamp( $u_obj->getBirthDate() ),
+				'birth_date' => ( $u_obj->getBirthDate() != '' ) ? TTDate::getISODateStamp( $u_obj->getBirthDate() ) : '',
 				'sin' => $u_obj->getSIN(),
 
 				'work_email' => $u_obj->getWorkEmail(),

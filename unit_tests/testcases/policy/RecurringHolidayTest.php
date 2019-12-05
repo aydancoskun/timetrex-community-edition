@@ -189,7 +189,8 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 		$start_date = strtotime('29-Nov-2013 12:00PM');
 		$end_date = strtotime('27-Nov-2014 12:00PM');
 		$n = 0;
-		for( $i = $start_date; $i < $end_date; $i += 86400 ) {
+		//for( $i = $start_date; $i < $end_date; $i += 86400 ) {
+		foreach( TTDate::getDatePeriod( $start_date, $end_date, 'P1D', FALSE ) as $i ) {
 			$next_date = $rhf->getNextDate( $i );
 			Debug::text('N: '. $n .' Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
 			$this->assertEquals( $next_date, strtotime('27-Nov-2014 12:00PM PST') );
@@ -199,7 +200,8 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 		$start_date = strtotime('28-Nov-2014 12:00PM');
 		$end_date = strtotime('26-Nov-2015 12:00PM');
 		$n = 0;
-		for( $i = $start_date; $i < $end_date; $i += 86400 ) {
+		//for( $i = $start_date; $i < $end_date; $i += 86400 ) {
+		foreach( TTDate::getDatePeriod( $start_date, $end_date, 'P1D', FALSE ) as $i ) {
 			$next_date = $rhf->getNextDate( $i );
 			Debug::text('N: '. $n .' Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
 			$this->assertEquals( $next_date, strtotime('26-Nov-2015 12:00PM PST') );

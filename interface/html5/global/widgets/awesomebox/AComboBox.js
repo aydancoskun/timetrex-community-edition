@@ -359,6 +359,20 @@
 			return 0;
 		};
 
+		this.getNextSelectItemId = function() {
+			var retval = null;
+			// This function is commonly used by edit views to get the id of the next record from the navigation box, such as during Delete&Next
+			var next_select_item = this.getSelectIndex() + 1;
+			var source_data = this.getSourceData();
+			if ( source_data && next_select_item < source_data.length ) {
+				retval = this.getItemByIndex( next_select_item );
+			} else {
+				retval = null;
+			}
+
+			return retval;
+		};
+
 		this.setErrorStyle = function( errStr, show, isWarning ) {
 			if ( isWarning ) {
 				$( this ).addClass( 'a-warning-tip' );

@@ -83,19 +83,18 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	},
 
-	buildContextMenuModels: function() {
-		var menu = this._super( 'buildContextMenuModels' )[0];
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [],
+			include: [{
+				label: $.i18n._( 'Migrate<br>PS Accounts' ),
+				id: ContextMenuIconName.migrate_pay_stub_account,
+				group: 'other',
+				icon: Icons.wizard
+			}]
+		};
 
-		var wizard = new RibbonSubMenu( {
-			label: $.i18n._( 'Migrate<br>PS Accounts' ),
-			id: ContextMenuIconName.migrate_pay_stub_account,
-			group: this.getContextMenuGroupByName( menu, 'other' ),
-			icon: Icons.wizard,
-			permission_result: true,
-			permission: null
-		} );
-
-		return [menu];
+		return context_menu_model;
 	},
 
 	onCustomContextClick: function( id ) {

@@ -1643,7 +1643,7 @@ class PunchFactory extends Factory {
 	 * @param object $permission_obj
 	 * @return array
 	 */
-	function getDefaultPunchSettings( $user_obj, $epoch, $station_obj = NULL, $permission_obj = NULL ) {
+	function getDefaultPunchSettings( $user_obj, $epoch, $station_obj = NULL, $permission_obj = NULL, $latitude = NULL, $longitude = NULL, $position_accuracy = NULL ) {
 		$branch_id = $department_id = $job_id = $job_item_id = TTUUID::getZeroID();
 		$transfer = FALSE;
 		$is_previous_punch = FALSE;
@@ -1676,21 +1676,30 @@ class PunchFactory extends Factory {
 				OR $department_id == '' OR empty($department_id) OR $department_id == TTUUID::getZeroID()
 				OR $job_id == '' OR empty($job_id) OR $job_id == TTUUID::getZeroID()
 				OR $job_item_id == '' OR empty($job_item_id) OR $job_item_id == TTUUID::getZeroID() ) {
-			Debug::Text(' Null values: Branch: '. $branch_id .' Department: '. $department_id .' Job: '. $job_id .' Task: '. $job_item_id, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text(' NULL values: Branch: '. $branch_id .' Department: '. $department_id .' Job: '. $job_id .' Task: '. $job_item_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
 			$s_obj = $slf->getScheduleObjectByUserIdAndEpoch( $user_obj->getId(), $epoch );
+
+			//Get all GEO fences that this coordinates fall within.
+			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+				$gflf = TTnew( 'GEOFenceListFactory' ); /** @var GEOFenceListFactory $gflf */
+				$geo_fence_default_object_ids = $gflf->getBranchAndDepartmentAndJobAndJobItemArrayByCompanyIdAndGEOLocation( $user_obj->getCompany(), $latitude, $longitude, $position_accuracy );
+			}
 
 			if ( $branch_id == '' OR empty($branch_id) OR $branch_id == TTUUID::getZeroID() ) {
 				if ( is_object($station_obj) AND $station_obj->getDefaultBranch() !== FALSE AND $station_obj->getDefaultBranch() != TTUUID::getZeroID() ) {
 					$branch_id = $station_obj->getDefaultBranch();
 					//Debug::Text(' aOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
+				} elseif ( isset($geo_fence_default_object_ids) AND isset($geo_fence_default_object_ids['branch_id']) AND isset($geo_fence_default_object_ids['branch_id'][0]) AND count($geo_fence_default_object_ids['branch_id']) == 1 ) { //If more than one record matches GEO coordinates, ignore it since we will never know which one to choose.
+					$branch_id = $geo_fence_default_object_ids['branch_id'][0];
+					//Debug::Text(' bOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
 				} elseif ( is_object($s_obj) AND $s_obj->getBranch() != TTUUID::getZeroID() ) {
 					$branch_id = $s_obj->getBranch();
-					//Debug::Text(' bOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::Text(' cOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
 				} elseif ( $user_obj->getDefaultBranch() != TTUUID::getZeroID() ) {
 					$branch_id = $user_obj->getDefaultBranch();
-					//Debug::Text(' cOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::Text(' dOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
 				}
 				Debug::Text(' Overriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
 			}
@@ -1698,6 +1707,8 @@ class PunchFactory extends Factory {
 			if ( $department_id == '' OR empty($department_id) OR $department_id == TTUUID::getZeroID() ) {
 				if ( is_object($station_obj) AND $station_obj->getDefaultDepartment() !== FALSE AND $station_obj->getDefaultDepartment() != TTUUID::getZeroID() ) {
 					$department_id = $station_obj->getDefaultDepartment();
+				} elseif ( isset($geo_fence_default_object_ids) AND isset($geo_fence_default_object_ids['department_id']) AND isset($geo_fence_default_object_ids['department_id'][0]) AND count($geo_fence_default_object_ids['department_id']) == 1 ) {
+					$department_id = $geo_fence_default_object_ids['department_id'][0];
 				} elseif ( is_object($s_obj) AND $s_obj->getDepartment() != TTUUID::getZeroID() ) {
 					$department_id = $s_obj->getDepartment();
 				} elseif ( $user_obj->getDefaultDepartment() != TTUUID::getZeroID() ) {
@@ -1709,6 +1720,8 @@ class PunchFactory extends Factory {
 			if ( $job_id == '' OR empty($job_id) OR $job_id == TTUUID::getZeroID() ) {
 				if ( is_object($station_obj) AND $station_obj->getDefaultJob() !== FALSE AND $station_obj->getDefaultJob() != TTUUID::getZeroID() ) {
 					$job_id = $station_obj->getDefaultJob();
+				} elseif ( isset($geo_fence_default_object_ids) AND isset($geo_fence_default_object_ids['job_id']) AND isset($geo_fence_default_object_ids['job_id'][0]) AND count($geo_fence_default_object_ids['job_id']) == 1 ) {
+					$job_id = $geo_fence_default_object_ids['job_id'][0];
 				} elseif ( is_object($s_obj) AND $s_obj->getJob() != TTUUID::getZeroID() ) {
 					$job_id = $s_obj->getJob();
 				} elseif ( $user_obj->getDefaultJob() != TTUUID::getZeroID() ) {
@@ -1720,6 +1733,8 @@ class PunchFactory extends Factory {
 			if ( $job_item_id == '' OR empty($job_item_id) OR $job_item_id == TTUUID::getZeroID() ) {
 				if ( is_object($station_obj) AND $station_obj->getDefaultJobItem() !== FALSE AND $station_obj->getDefaultJobItem() != TTUUID::getZeroID() ) {
 					$job_item_id = $station_obj->getDefaultJobItem();
+				} elseif ( isset($geo_fence_default_object_ids) AND isset($geo_fence_default_object_ids['job_item_id']) AND isset($geo_fence_default_object_ids['job_item_id'][0]) AND count($geo_fence_default_object_ids['job_item_id']) == 1 ) {
+					$job_item_id = $geo_fence_default_object_ids['job_item_id'][0];
 				} elseif ( is_object($s_obj) AND $s_obj->getJobItem() != TTUUID::getZeroID() ) {
 					$job_item_id = $s_obj->getJobItem();
 				} elseif ( $user_obj->getDefaultJobItem() != TTUUID::getZeroID() ) {

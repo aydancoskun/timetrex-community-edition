@@ -122,7 +122,7 @@ class GovernmentForms {
 					$i++;
 				}
 				unset($errors, $error);
-				
+
 				return array(
 								'api_retval' => FALSE,
 								//'api_request'
@@ -131,7 +131,7 @@ class GovernmentForms {
 												'code' => 'VALIDATION',
 												'description' => $error_msg,
 												)
-								);				
+								);
 			}
 		} else {
 			Debug::Text('DomDocument not available!', __FILE__, __LINE__, __METHOD__, 10);
@@ -161,9 +161,11 @@ class GovernmentForms {
 			}
 
 			$pdf = new FPDI( 'P', 'pt' );
-			$pdf->setMargins(0, 0, 0, 0);
+			$pdf->setMargins( 0, 0 ); //Margins are ignored because we use setXY() to force the coordinates before each drawing and therefore ignores margins.
 			$pdf->SetAutoPageBreak(FALSE);
 			$pdf->setFontSubsetting(FALSE);
+			$pdf->setPrintHeader(FALSE); //Removes the thin horizontal line from top of each page.
+			$pdf->setPrintFooter(FALSE);
 
 			foreach( $this->objs as $obj ) {
 				$obj->setPDFObject( $pdf );
@@ -200,7 +202,7 @@ class GovernmentForms {
 				$output = $xml->asXML();
 
 				$xml_validation_retval = $this->validateXML( $output, $xml_schema );
-				if ( $xml_validation_retval !== TRUE ) {					
+				if ( $xml_validation_retval !== TRUE ) {
 					Debug::text('XML Schema is invalid! Malformed XML!', __FILE__, __LINE__, __METHOD__, 10);
 					//$output = FALSE;
 					$output = $xml_validation_retval;

@@ -1813,6 +1813,9 @@ class PunchControlFactory extends Factory {
 			if ( $plf->getRecordCount() == 1 ) {
 				$src_punch_obj = $plf->getCurrent();
 
+				$src_time_stamp = $src_punch_obj->getTimeStamp(); //Save this so we can add it to the audit log.
+				$src_status_name = ( $src_punch_obj->getStatus() == 10 ? TTi18n::getText('In') : TTi18n::getText('Out') );
+
 				//Get the PunchControlObject as early as possible, before the punch is deleted, as it will be cleared even if Save(FALSE) is called below.
 				$src_punch_control_obj = clone $src_punch_obj->getPunchControlObject();
 
@@ -1885,12 +1888,22 @@ class PunchControlFactory extends Factory {
 								$src_punch_obj->setHasImage( FALSE );
 								$src_punch_obj->setLongitude( NULL ); //Make sure we clear out long/lat as the location shouldn't carry across with copies.
 								$src_punch_obj->setLatitude( NULL ); //Make sure we clear out long/lat as the location shouldn't carry across with copies.
+
+								//When copying, make sure we clear the original created information to avoid confusion in the audit log.
+								$src_punch_obj->setCreatedBy( NULL );
+								$src_punch_obj->setCreatedDate( NULL );
 							} elseif ( isset( $punch_image_data ) AND $punch_image_data != '' ) {
 								$src_punch_obj->setImage( $punch_image_data );
 							}
 
+							//When moving or copying, always touch the updated information.
+							$src_punch_obj->setUpdatedBy( NULL );
+							$src_punch_obj->setUpdatedDate( NULL );
+
 							if ( $src_punch_obj->isValid() == TRUE ) {
 								$insert_id = $src_punch_obj->Save( FALSE );
+
+								TTLog::addEntry( $src_punch_obj->getID(), 500, TTi18n::getText('Drag & Drop').': '. TTi18n::getText( 'Action' ) .': '. ( $action == 0 ? TTi18n::getText( 'Copy' ) : TTi18n::getText( 'Move' ) ) .' '. TTi18n::getText( 'From' ) .': '. TTDate::getDate('DATE+TIME', $src_time_stamp ) .' '. TTi18n::getText( 'Status' ) .': '. $src_status_name, NULL, $src_punch_obj->getTable() );
 
 								$src_punch_control_obj->shift_data = NULL; //Need to clear the shift data so its obtained from the DB again, otherwise shifts will appear on strange days.
 								$src_punch_control_obj->user_date_obj = NULL; //Need to clear user_date_obj from cache so a new one is obtained.
@@ -1925,6 +1938,8 @@ class PunchControlFactory extends Factory {
 							if ( $src_punch_obj->isValid() == TRUE ) {
 								//Return punch_id, so Flex can base other actions on it.
 								$retval = $src_punch_obj->Save( FALSE );
+
+								TTLog::addEntry( $src_punch_obj->getId(), 500, TTi18n::getText('Drag & Drop').': '. TTi18n::getText( 'Action' ) .': '. ( $action == 0 ? TTi18n::getText( 'Copy' ) : TTi18n::getText( 'Move' ) ) .' '. TTi18n::getText( 'From' ) .': '. TTDate::getDate('DATE+TIME', $src_time_stamp ) .' '. TTi18n::getText( 'Status' ) .': '. $src_status_name, NULL, $src_punch_obj->getTable() );
 
 								$src_punch_control_obj->shift_data = NULL; //Need to clear the shift data so its obtained from the DB again, otherwise shifts will appear on strange days.
 								$src_punch_control_obj->user_date_obj = NULL; //Need to clear user_date_obj from cache so a new one is obtained.
@@ -2008,13 +2023,21 @@ class PunchControlFactory extends Factory {
 
 							//When drag&drop copying punches, clear some fields that shouldn't be copied.
 							if ( $action == 0 ) { //Copy
-								$src_punch_obj->setStation( NULL );
-								$src_punch_obj->setHasImage( FALSE );
-								$src_punch_obj->setLongitude( NULL ); //Make sure we clear out long/lat as the location shouldn't carry across with copies.
-								$src_punch_obj->setLatitude( NULL ); //Make sure we clear out long/lat as the location shouldn't carry across with copies.
+								$punch_obj->setStation( NULL );
+								$punch_obj->setHasImage( FALSE );
+								$punch_obj->setLongitude( NULL ); //Make sure we clear out long/lat as the location shouldn't carry across with copies.
+								$punch_obj->setLatitude( NULL ); //Make sure we clear out long/lat as the location shouldn't carry across with copies.
+
+								//When copying, make sure we clear the original created information to avoid confusion in the audit log.
+								$punch_obj->setCreatedBy( NULL );
+								$punch_obj->setCreatedDate( NULL );
 							} elseif ( isset( $punch_image_data ) AND $punch_image_data != '' ) {
-								$src_punch_obj->setImage( $punch_image_data );
+								$punch_obj->setImage( $punch_image_data );
 							}
+
+							//When moving or copying, always touch the updated information.
+							$punch_obj->setUpdatedBy( NULL );
+							$punch_obj->setUpdatedDate( NULL );
 
 							//Need to take into account copying a Out punch and inserting it BEFORE another Out punch in a punch pair.
 							//In this case a split needs to occur, and the status needs to stay the same.
@@ -2024,8 +2047,11 @@ class PunchControlFactory extends Factory {
 								Debug::text( 'Changing punch status to opposite: ' . $dst_punch_obj->getNextStatus(), __FILE__, __LINE__, __METHOD__, 10 );
 								$punch_obj->setStatus( $dst_punch_obj->getNextStatus() ); //Change the status to fit in the proper place.
 							}
+
 							if ( $punch_obj->isValid() == TRUE ) {
 								$insert_id = $punch_obj->Save( FALSE );
+
+								TTLog::addEntry( $punch_obj->getId(), 500, TTi18n::getText('Drag & Drop').': '. TTi18n::getText( 'Action' ) .': '. ( $action == 0 ? TTi18n::getText( 'Copy' ) : TTi18n::getText( 'Move' ) ) .' '. TTi18n::getText( 'From' ) .': '. TTDate::getDate('DATE+TIME', $src_time_stamp ) .' '. TTi18n::getText( 'Status' ) .': '. $src_status_name, NULL, $punch_obj->getTable() );
 
 								$dst_punch_control_obj->shift_data = NULL; //Need to clear the shift data so its obtained from the DB again, otherwise shifts will appear on strange days, or cause strange conflicts.
 								$dst_punch_control_obj->setID( $punch_obj->getPunchControlID() );

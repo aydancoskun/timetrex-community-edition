@@ -20,14 +20,21 @@ HierarchyControlViewController = BaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIHierarchyControl' ))();
 		this.hierarchy_level_api = new (APIFactory.getAPIClass( 'APIHierarchyLevel' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true; //Hide some context menus
-
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'HierarchyControl' );
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.mass_edit],
+			include: []
+		};
+
+		return context_menu_model;
 	},
 
 	initOptions: function() {
@@ -289,7 +296,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 			}
-			$this.saveInsideEditorData( result, function() {
+			$this.saveInsideEditorData( function() {
 				$this.search();
 				$this.onSaveDone( result );
 
@@ -303,54 +310,54 @@ HierarchyControlViewController = BaseViewController.extend( {
 		}
 	},
 
-	onSaveAndContinueResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
+	// onSaveAndContinueResult: function( result ) {
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	//
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+	// 			$this.refresh_id = result_data;
+	//
+	// 		}
+	//
+	// 		$this.saveInsideEditorData( function() {
+	//
+	// 			$this.search( false );
+	// 			$this.onEditClick( $this.refresh_id, true );
+	//
+	// 			$this.onSaveAndContinueDone( result );
+	//
+	// 		} );
+	//
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-				$this.refresh_id = result_data;
-
-			}
-
-			$this.saveInsideEditorData( result, function() {
-
-				$this.search( false );
-				$this.onEditClick( $this.refresh_id, true );
-
-				$this.onSaveAndContinueDone( result );
-
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
-
-	onSaveAndNewResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-				$this.refresh_id = result_data;
-			}
-
-			$this.saveInsideEditorData( result, function() {
-				$this.search( false );
-				$this.onAddClick( true );
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
+	// onSaveAndNewResult: function( result ) {
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	//
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+	// 			$this.refresh_id = result_data;
+	// 		}
+	//
+	// 		$this.saveInsideEditorData( function() {
+	// 			$this.search( false );
+	// 			$this.onAddClick( true );
+	// 		} );
+	//
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
 	onSaveAndCopyResult: function( result ) {
 		var $this = this;
@@ -364,7 +371,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 			}
 			$this.copied_record_id = $this.refresh_id;
 
-			$this.saveInsideEditorData( result, function() {
+			$this.saveInsideEditorData( function() {
 				$this.search( false );
 				$this.onCopyAsNewClick();
 			} );
@@ -375,7 +382,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 		}
 	},
 
-	saveInsideEditorData: function( result, callBack ) {
+	saveInsideEditorData: function( callBack ) {
 
 		var $this = this;
 
@@ -398,7 +405,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 				$this.hierarchy_level_api.setHierarchyLevel( res_data, {
 					onResult: function( re ) {
 
-						callBack( result );
+						callBack();
 					}
 				} );
 			}

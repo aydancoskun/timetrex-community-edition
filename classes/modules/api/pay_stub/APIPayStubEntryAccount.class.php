@@ -96,6 +96,10 @@ class APIPayStubEntryAccount extends APIFactory {
 	function getPayStubEntryAccount( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('pay_stub_account', 'enabled')
 				OR !( $this->getPermissionObject()->Check('pay_stub_account', 'view') OR $this->getPermissionObject()->Check('pay_stub_account', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -163,6 +167,10 @@ class APIPayStubEntryAccount extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('pay_stub_account', 'enabled')
@@ -272,6 +280,10 @@ class APIPayStubEntryAccount extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('pay_stub_account', 'enabled')
@@ -384,6 +396,10 @@ class APIPayStubEntryAccount extends APIFactory {
 	 * @internal param bool $user_ids Users to affect.
 	 */
 	function migratePayStubEntryAccount( $src_ids, $dst_id, $effective_date ) {
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('pay_stub_account', 'enabled')
 				OR !( $this->getPermissionObject()->Check('pay_stub_account', 'edit') OR $this->getPermissionObject()->Check('pay_stub_account', 'edit_own') OR $this->getPermissionObject()->Check('pay_stub_account', 'edit_child') OR $this->getPermissionObject()->Check('pay_stub_account', 'add') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();

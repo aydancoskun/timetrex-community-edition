@@ -23,43 +23,21 @@ AboutViewController = BaseViewController.extend( {
 
 	},
 
-	buildContextMenuModels: function() {
+	getCustomContextMenuModel: function() {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				{
+					label: $.i18n._( 'Check For<br>Updates' ),
+					id: ContextMenuIconName.check_updates,
+					group: 'editor',
+					icon: Icons.check_updates
+				},
+				ContextMenuIconName.cancel
+			]
+		};
 
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.script_name + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var check = new RibbonSubMenu( {
-			label: $.i18n._( 'Check For<br>Updates' ),
-			id: ContextMenuIconName.check_updates,
-			group: editor_group,
-			icon: Icons.check_updates,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	onCustomContextClick: function( id ) {

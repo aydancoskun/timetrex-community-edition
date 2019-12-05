@@ -170,6 +170,10 @@ class APIPayPeriod extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
 				OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_own') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_child') OR $this->getPermissionObject()->Check('pay_period_schedule', 'add') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
@@ -287,6 +291,10 @@ class APIPayPeriod extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
 				OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'delete') OR $this->getPermissionObject()->Check('pay_period_schedule', 'delete_own') OR $this->getPermissionObject()->Check('pay_period_schedule', 'delete_child') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
@@ -368,6 +376,15 @@ class APIPayPeriod extends APIFactory {
 	 * @return array|bool
 	 */
 	function importData( $pay_period_ids = array() ) {
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
+		if ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_own') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_child') OR $this->getPermissionObject()->Check('pay_period_schedule', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
+		}
+
 		if ( !is_array($pay_period_ids) ) {
 			$pay_period_ids = array( $pay_period_ids );
 		}
@@ -397,6 +414,15 @@ class APIPayPeriod extends APIFactory {
 	 * @return array|bool
 	 */
 	function deleteData( $pay_period_ids = array() ) {
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
+		if ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_own') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_child') OR $this->getPermissionObject()->Check('pay_period_schedule', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
+		}
+
 		if ( !is_array($pay_period_ids) ) {
 			$pay_period_ids = array( $pay_period_ids );
 		}
@@ -419,6 +445,5 @@ class APIPayPeriod extends APIFactory {
 
 		return TRUE;
 	}
-
 }
 ?>

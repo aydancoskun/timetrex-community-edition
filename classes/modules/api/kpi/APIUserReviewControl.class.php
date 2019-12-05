@@ -88,6 +88,10 @@ class APIUserReviewControl extends APIFactory {
 	function getUserReviewControl( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('user_review', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_review', 'view') OR $this->getPermissionObject()->Check('user_review', 'view_own') OR $this->getPermissionObject()->Check('user_review', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -152,6 +156,10 @@ class APIUserReviewControl extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('user_review', 'enabled')
@@ -275,6 +283,10 @@ class APIUserReviewControl extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('user_review', 'enabled')

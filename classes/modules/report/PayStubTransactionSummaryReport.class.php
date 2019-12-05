@@ -141,6 +141,7 @@ class PayStubTransactionSummaryReport extends Report {
 							'-5010-group' => TTi18n::gettext('Group By'),
 							'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 							'-5030-sort' => TTi18n::gettext('Sort By'),
+							'-5040-page_break' => TTi18n::gettext('Page Break On'),
 							);
 				break;
 			case 'time_period':

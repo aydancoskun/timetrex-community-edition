@@ -940,7 +940,7 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
-		$pd_obj->setFormulaType( 20 ); //Periodic
+		$pd_obj->setFormulaType( 20 ); //Non-Periodic
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
 		$pd_obj->setFederalAllowance( 0 );
 		$pd_obj->setFederalTaxExempt( FALSE );

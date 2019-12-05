@@ -150,12 +150,12 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 					//$end_date = TTDate::getBeginYearEpoch();
 					$end_date = (strtotime('01-Jan-06') - 86400);
 				} else {
-					$end_date = ($end_date + ( (86400 * 14) ));
+					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -1489,7 +1489,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pay_stub->setDefaultDates();
 
-		$pay_stub->setTransactionDate( ( TTDate::getEndYearEpoch( $pay_stub->getTransactionDate() ) + 86400 ) ); //Push transaction date into new year to zero YTD values.
+		$pay_stub->setTransactionDate( TTDate::incrementDate( TTDate::getEndYearEpoch( $pay_stub->getTransactionDate() ), 1, 'day' ) ); //Push transaction date into new year to zero YTD values.
 
 		$pay_stub->loadPreviousPayStub();
 		$pse_accounts = array(
@@ -2823,7 +2823,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$uwf->setUser( $this->user_id );
 		$uwf->setType( 10 );
 		$uwf->setWageGroup( TTUUID::getZeroID() );
-		$uwf->setEffectiveDate( ( time() + 86400 ) );
+		$uwf->setEffectiveDate( TTDate::incrementDate( time(), 1, 'day' ) );
 		$uwf->setWage( 0 ); //$0 wages should be accepted.
 
 		if ( $uwf->isValid() ) {

@@ -66,6 +66,7 @@ class UserDefaultFactory extends Factory {
 						'-1106-currency' => TTi18n::gettext('Currency'),
 
 						'-1108-permission_control' => TTi18n::gettext('Permission Group'),
+						'-1109-terminated_permission_control' => TTi18n::gettext('Terminated Permission Group'),
 						'-1110-pay_period_schedule' => TTi18n::gettext('Pay Period Schedule'),
 						'-1112-policy_group' => TTi18n::gettext('Policy Group'),
 
@@ -96,6 +97,7 @@ class UserDefaultFactory extends Factory {
 											'company_id' => 'Company',
 											'legal_entity_id' => 'LegalEntity',
 											'permission_control_id' => 'PermissionControl',
+											'terminated_permission_control_id' => 'TerminatedPermissionControl',
 											'pay_period_schedule_id' => 'PayPeriodSchedule',
 											'policy_group_id' => 'PolicyGroup',
 											'employee_number' => 'EmployeeNumber',
@@ -214,6 +216,21 @@ class UserDefaultFactory extends Factory {
 	function setPermissionControl( $value ) {
 		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'permission_control_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getTerminatedPermissionControl() {
+		return $this->getGenericDataValue( 'terminated_permission_control_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setTerminatedPermissionControl( $value ) {
+		return $this->setGenericDataValue( 'terminated_permission_control_id', TTUUID::castUUID( $value ) );
 	}
 
 	/**
@@ -360,8 +377,7 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setCountry( $value ) {
-		$value = trim($value);
-		return $this->setGenericDataValue( 'country', $value );
+		return $this->setGenericDataValue( 'country', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -376,10 +392,9 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setProvince( $value  ) {
-		$value = trim($value);
 		Debug::Text('Country: '. $this->getCountry() .' Province: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		//If country isn't set yet, accept the value and re-validate on save.
-		return $this->setGenericDataValue( 'province', $value );
+		return $this->setGenericDataValue( 'province', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -765,6 +780,15 @@ class UserDefaultFactory extends Factory {
 			$this->Validator->isResultSetWithRows( 'permission_control_id',
 												   $pclf->getByID( $this->getPermissionControl() ),
 												   TTi18n::gettext( 'Permission Group is invalid' )
+			);
+		}
+
+		// Termianted Permission Group
+		if ( $this->getTerminatedPermissionControl() != '' AND $this->getTerminatedPermissionControl() != TTUUID::getZeroID() ) {
+			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
+			$this->Validator->isResultSetWithRows( 'terminated_permission_control_id',
+												   $pclf->getByID( $this->getTerminatedPermissionControl() ),
+												   TTi18n::gettext( 'Terminated Permission Group is invalid' )
 			);
 		}
 

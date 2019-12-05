@@ -18,19 +18,6 @@ ChangePasswordViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Passwords' );
 		this.api = new (APIFactory.getAPIClass( 'APIUser' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.add] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.view] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_icon] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-
 		this.initPermission();
 
 		this.render();
@@ -59,43 +46,16 @@ ChangePasswordViewController = BaseViewController.extend( {
 		this._super( 'render' );
 	},
 
-	buildContextMenuModels: function() {
+	getCustomContextMenuModel: function() {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				ContextMenuIconName.save,
+				ContextMenuIconName.cancel
+			]
+		};
 
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var save = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save,
-			group: editor_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	saveValidate: function( context_btn, p_id ) {
@@ -290,7 +250,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 	saveWebPassword: function( record, callBack ) {
 		var $this = this;
-		this.api['changePassword']( record['web.current_password'], record['web.password'], record['web.password2'], 'web', {
+		this.api['changePassword']( record['web.current_password'], record['web.password'], record['web.password2'], 'user_name', {
 			onResult: function( result ) {
 				callBack( result );
 			}
@@ -299,7 +259,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 	savePhonePassword: function( record, callBack ) {
 		var $this = this;
-		this.api['changePassword']( record['phone.current_password'], record['phone.password'], record['phone.password2'], 'phone', {
+		this.api['changePassword']( record['phone.current_password'], record['phone.password'], record['phone.password2'], 'quick_punch_id', {
 			onResult: function( result ) {
 				callBack( result );
 			}
@@ -344,7 +304,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 		// New Password(confirm)
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 		form_item_input.TPasswordInput( { field: 'web.password2', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'New Password(confirm)' ), form_item_input, tab_web_password_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'New Password (Confirm)' ), form_item_input, tab_web_password_column1, '' );
 
 		//Tab 1 start
 
@@ -369,12 +329,12 @@ ChangePasswordViewController = BaseViewController.extend( {
 		// New Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 		form_item_input.TPasswordInput( { field: 'phone.password', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'New Password' ), form_item_input, tab_quick_punch_password_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'New Quick Punch Password' ), form_item_input, tab_quick_punch_password_column1 );
 
 		// New Password(confirm)
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 		form_item_input.TPasswordInput( { field: 'phone.password2', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'New Password(confirm)' ), form_item_input, tab_quick_punch_password_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'New Quick Punch Password (Confirm)' ), form_item_input, tab_quick_punch_password_column1, '' );
 	}
 
 

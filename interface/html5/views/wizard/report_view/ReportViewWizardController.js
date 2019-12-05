@@ -1,6 +1,6 @@
 ReportViewWizardController = BaseWizardController.extend( {
 
-	el: '.wizard-bg',
+	el: '#report-view-wizard',
 
 	init: function( options ) {
 		//this._super('initialize', options );

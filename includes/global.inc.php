@@ -36,11 +36,6 @@
 
 date_default_timezone_set('GMT'); //Default timezone to UTC until we can at least determine or set another one. This should also prevent: PHP ERROR - WARNING(2): getdate(): It is not safe to rely on the system's timezone settings. You are *required* to use the date.timezone setting or the date_default_timezone_set() function
 
-//PHP v5.1.0 introduced $_SERVER['REQUEST_TIME'], but it doesn't include microseconds until v5.4.0.
-if ( !isset($_SERVER['REQUEST_TIME_FLOAT']) OR version_compare(PHP_VERSION, '5.4.0', '<') == TRUE ) {
-	$_SERVER['REQUEST_TIME_FLOAT'] = microtime( TRUE );
-}
-
 //BUG in PHP 5.2.2 that causes $HTTP_RAW_POST_DATA not to be set. Work around it.
 //This is deprecated in PHP v5.6 and removed in PHP v7, so switch to just always populating it.
 $HTTP_RAW_POST_DATA = file_get_contents('php://input');
@@ -54,12 +49,9 @@ ob_start(); //Take care of GZIP in Apache
 if ( ini_get('max_execution_time') < 1800 ) {
 	ini_set( 'max_execution_time', 1800 );
 }
-//Disable magic quotes at runtime. Require magic_quotes_gpc to be disabled during install.
-//Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
-ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '11.6.1' );
-define('APPLICATION_VERSION_DATE', 1570604400 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("09-Oct-2019")."\n\n";'
+define('APPLICATION_VERSION', '12.0.0' );
+define('APPLICATION_VERSION_DATE', 1574409600 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("22-Nov-2019")."\n\n";'
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
 	define('OPERATING_SYSTEM', 'WIN' );
@@ -267,7 +259,6 @@ function TTnew( $class_name ) { //Unlimited arguments are supported.
 
 //Force no caching of file.
 function forceNoCacheHeaders() {
-
 	//CSP headers break many things at this stage, unless "unsafe" is used for almost everything.
 	//Header('Content-Security-Policy: default-src *; script-src \'self\' *.google-analytics.com *.google.com');
 	header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com; img-src \'self\' map.timetrex.com:3128 *.timetrex.com *.google-analytics.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com data: blob:');
@@ -281,20 +272,22 @@ function forceNoCacheHeaders() {
 
 	//Turn caching off.
 	header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-	header('Last-Modified: ' . gmdate("D, d M Y H:i:s") . ' GMT');
+	header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 	//Can Break IE with downloading PDFs over SSL.
 	// IE gets: "file could not be written to cache"
 	// It works on some IE installs though.
 	header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0');
-	if ( isset($_SERVER['HTTP_USER_AGENT']) AND stripos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE ) {
-		header('Pragma: token'); //If set to no-cache it breaks IE downloading reports, with error that the site is not available.
-		//20-Jan-16: Re-enable keepalive requests on IE to see if the issue persists after we have (mostly) fixed the duplicate request issue when users double-click icons.
-		//if ( preg_match('/(?i)MSIE [5-9]/i', $_SERVER['HTTP_USER_AGENT'] ) ) {
-		//	header('Connection: close'); //ie6-9 may send empty POST requests causing API errors due to poor keepalive handling, so force all connections to close instead.
-		//}
-	} else {
+	//Don't bother with Pragma: token now that IE will be discontinued soon and it seems to function correctly with IE11 at least anyways.
+//	if ( isset($_SERVER['HTTP_USER_AGENT']) AND stripos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE ) {
+//		//header('Pragma: token'); //If set to no-cache it breaks IE downloading reports, with error that the site is not available.
+//		header('Pragma: no-cache');
+//		//20-Jan-16: Re-enable keepalive requests on IE to see if the issue persists after we have (mostly) fixed the duplicate request issue when users double-click icons.
+//		//if ( preg_match('/(?i)MSIE [5-9]/i', $_SERVER['HTTP_USER_AGENT'] ) ) {
+//		//	header('Connection: close'); //ie6-9 may send empty POST requests causing API errors due to poor keepalive handling, so force all connections to close instead.
+//		//}
+//	} else {
 		header('Pragma: no-cache');
-	}
+//	}
 
 	//Only when force_ssl is enabled and the user is using SSL, include the STS header.
 	global $config_vars;
@@ -347,6 +340,12 @@ function forceCacheHeaders( $file_name = NULL, $mtime = NULL, $etag = NULL ) {
 	}
 
 	return TRUE;
+}
+
+//See Authentication::checkValidCSRFToken() for more comments on how this is checked.
+function sendCSRFTokenCookie() {
+	$csrf_token = sha1( TTUUID::generateUUID() );
+	setcookie( 'CSRF-Token', $csrf_token .'-'. sha1( $csrf_token . TTPassword::getPasswordSalt() ), ( time() + 9999999 ), Environment::getCookieBaseURL( 'json' ), NULL, Misc::isSSL( TRUE ) ); //Must not be HTTP only, as javascript needs to read this. Really should send the "SameSite=strict" flag, however PHP v7.3 and older handle this in different ways: https://stackoverflow.com/questions/39750906/php-setcookie-samesite-strict
 }
 
 define('TT_PRODUCT_COMMUNITY', 10 ); define('TT_PRODUCT_PROFESSIONAL', 15 ); define('TT_PRODUCT_CORPORATE', 20 ); define('TT_PRODUCT_ENTERPRISE', 25 );

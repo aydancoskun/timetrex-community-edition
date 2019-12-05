@@ -981,7 +981,7 @@ class PurgeDatabase {
 							$query[] = 'DELETE FROM '. $table .' as a USING company as e WHERE a.company_id = e.id AND ( a.deleted = 1 OR e.deleted = 1 OR e.status_id = 30 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 
 							//Disable iButton/Fingerprint/Barcode stations that have never been used.
-							$query[] = 'update '. $table .' set status_id = 10 WHERE type_id in (30, 40, 50) AND status_id = 20 AND allowed_date is NULL AND updated_date <= '. (time() - (86400 * (120))) .' AND ( deleted = 0 )';
+							$query[] = 'UPDATE '. $table .' SET status_id = 10 WHERE type_id in (30, 40, 50) AND status_id = 20 AND allowed_date is NULL AND updated_date <= '. (time() - (86400 * (120))) .' AND ( deleted = 0 )';
 							break;
 						case 'permission_control':
 							$query[] = 'DELETE FROM '. $table .' as a USING company as c WHERE a.company_id = c.id AND ( c.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND c.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
@@ -995,6 +995,9 @@ class PurgeDatabase {
 						case 'bank_account':
 						case 'user_generic_data':
 						case 'user_report_data':
+							//Delete all rows that are already deleted, since this isn't done in the DEFAULT case statement below
+							$query[] = 'DELETE FROM '. $table .' WHERE deleted = 1 AND updated_date <= '. (time() - (86400 * ($expire_days)));
+
 							//user_id column can be NULL for company wide data, make sure we leave that alone.
 							$query[] = 'DELETE FROM '. $table .' as a USING company as b WHERE a.company_id = b.id AND ( b.deleted = 1 AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 							$query[] = 'DELETE FROM '. $table .' as a USING users as b WHERE a.user_id = b.id AND ( b.deleted = 1 AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';

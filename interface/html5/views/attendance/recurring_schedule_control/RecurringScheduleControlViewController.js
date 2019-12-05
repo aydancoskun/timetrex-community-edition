@@ -22,8 +22,6 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
 		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
 
-//		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-
 		this.render();
 		this.buildContextMenu();
 
@@ -333,37 +331,26 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		return source_data;
 	},
 
-	buildContextMenuModels: function() {
-		//Context Menu
-		var menu = this._super( 'buildContextMenuModels' )[0];
-		//menu group
-		var navigation_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Navigation' ),
-			id: this.viewId + 'navigation',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [],
+			include: [
+				{
+					label: $.i18n._( 'Recurring<br>Templates' ),
+					id: ContextMenuIconName.recurring_template,
+					group: 'navigation',
+					icon: Icons.recurring_template
+				},
+				{
+					label: $.i18n._( 'Schedules' ),
+					id: ContextMenuIconName.schedule,
+					group: 'navigation',
+					icon: Icons.schedule
+				}
+			]
+		};
 
-		var recurring_template = new RibbonSubMenu( {
-			label: $.i18n._( 'Recurring<br>Templates' ),
-			id: ContextMenuIconName.recurring_template,
-			group: navigation_group,
-			icon: Icons.recurring_template,
-			permission_result: true,
-			permission: null
-		} );
-
-		var schedule_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Schedules' ),
-			id: ContextMenuIconName.schedule,
-			group: navigation_group,
-			icon: Icons.schedule,
-			permission_result: true,
-			permission: null
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	onCustomContextClick: function( id ) {
@@ -426,66 +413,42 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		return records;
 	},
 
-	onViewClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		$this.is_viewing = true;
-		$this.is_edit = false;
-		$this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'view';
-		$this.openEditView();
+	/*
+ 	* Common functions used by view and edit onclick logic
+ 	*/
 
-		var filter = {};
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
+	processAPICallbackResult: function ( result_data ) {
+		var composite_id = this.getCurrentSelectedRecord();
+		var	user_id = this.parseToUserId( composite_id );
 
-		if ( Global.isSet( editId ) ) {
-			var selectedId = editId;
-		} else {
-			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
+		if ( !result_data ) {
+			result_data = [];
+		}
+		var index = 0;
+
+		for ( var i = 0; i < result_data.length; i++ ) {
+			//FIXES: js error id is undefined.
+			//weird because id is always set as a filter. we don't need it in this if.
+			//if ( result_data[i].id == id && result_data[i].user_id == user_id ) {
+			if ( result_data[i].user_id == user_id ) {
+				index = i;
 			}
 		}
+		result_data[index].id = composite_id; // Copied from edit in #2644, not needed in view, but test if actually used in edit. testing shows no errors.
 
-		user_id = this.parseToUserId( selectedId );
-		selectedId = this.parseToRecordId( selectedId );
+		return [result_data[index]]; // Wrapped in array as BaseViewController.handleViewAPICallbackResult() pulls off the first record after getting this result back.
+	},
+
+	getAPIFilters: function () {
+		var composite_id = this.getCurrentSelectedRecord();
+		var record_id = this.parseToRecordId( composite_id );
+
+		var filter = {};
 
 		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
+		filter.filter_data.id = [record_id];
 
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-
-				if ( !result_data ) {
-					result_data = [];
-				}
-				var index = 0;
-
-				for ( var i = 0; i < result_data.length; i++ ) {
-					//FIXES: js error id is undefined.
-					//weird because id is always set as a filter. we don't need it in this if.
-					//if ( result_data[i].id == id && result_data[i].user_id == user_id ) {
-					if ( result_data[i].user_id == user_id ) {
-						index = i;
-					}
-				}
-				result_data = result_data[index];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				$this.current_edit_record = result_data;
-
-				$this.initEditView();
-
-			}
-		} );
-
+		return filter;
 	},
 
 	onMassEditClick: function() {
@@ -548,74 +511,6 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	},
 
-	onEditClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-		var selectedId;
-		if ( Global.isSet( editId ) ) {
-			var selectedId = editId;
-		} else {
-			if ( this.is_viewing ) {
-				selectedId = this.current_edit_record.id;
-			} else if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
-			}
-		}
-
-		this.is_viewing = false;
-		this.is_edit = true;
-		this.is_add = false;
-		this.is_mass_editing = false;
-		LocalCacheData.current_doing_context_action = 'edit';
-		$this.openEditView();
-		var filter = {};
-
-		var user_id = this.parseToUserId( selectedId );
-		selectedId = this.parseToRecordId( selectedId );
-
-		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
-
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				$this.onEditClickResult( result, selectedId, user_id );
-			}
-		} );
-
-	},
-
-	onEditClickResult: function( result, id, user_id ) {
-		var $this = this;
-		var result_data = result.getResult();
-		var index = 0;
-
-		for ( var i = 0; i < result_data.length; i++ ) {
-			if ( result_data[i].id == id && result_data[i].user_id == user_id ) {
-				index = i;
-			}
-		}
-		result_data = result_data[index];
-
-		if ( !result_data ) {
-			TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-			$this.onCancelClick();
-			return;
-		}
-
-		if ( $this.sub_view_mode && $this.parent_key ) {
-			result_data[$this.parent_key] = $this.parent_value;
-		}
-
-		result_data.id = result_data.id + '_' + result_data.user_id;
-
-		$this.current_edit_record = result_data;
-
-		$this.initEditView();
-	},
-
 	getCopyAsNewFilter: function ( filter ) {
 		var old_selected_id = filter.filter_data.id[0];
 		filter.filter_data.id = [ this.parseToRecordId( old_selected_id )];
@@ -649,71 +544,25 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		}
 	},
 
-	onDeleteAndNextClick: function() {
-		var $this = this;
-		$this.is_add = false;
+	getDeleteSelectedRecordId: function() {
+		var retval = {};
+		if ( this.edit_view ) {
+			retval[ this.parseToRecordId( this.current_edit_record.id ) ] = [ this.parseToUserId( this.current_edit_record.id ) ];
+		} else {
+			var grid_selected_id_array = this.getGridSelectIdArray().slice();
+			for ( var i = 0; i < grid_selected_id_array.length; i++ ) {
+				var record_id = this.parseToRecordId( grid_selected_id_array[i] );
+				var user_id = this.parseToUserId( grid_selected_id_array[i] );
 
-		TAlertManager.showConfirmAlert( $.i18n._( Global.delete_confirm_message ), null, function( result ) {
-
-			var remove_ids = [];
-			if ( $this.edit_view ) {
-				remove_ids[$this.current_edit_record.id] = [$this.current_edit_record.user_id];
-			}
-
-			if ( result ) {
-
-				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, {
-					onResult: function( result ) {
-						$this.onDeleteAndNextResult( result, remove_ids );
-
-					}
-				} );
-
-			} else {
-				ProgressBar.closeOverlay();
-			}
-		} );
-	},
-
-	onDeleteClick: function() {
-		var $this = this;
-		$this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'delete';
-		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
-
-			var remove_ids = {};
-			if ( $this.edit_view ) {
-				remove_ids[$this.current_edit_record.id] = [$this.current_edit_record.user_id];
-			} else {
-				var ids = $this.getGridSelectIdArray().slice();
-
-				for ( var i = 0; i < ids.length; i++ ) {
-					var record_id = ids[i].split( '_' )[0];
-					var user_id = ids[i].split( '_' )[1];
-
-					if ( remove_ids[record_id] ) {
-						remove_ids[record_id].push( user_id );
-					} else {
-						remove_ids[record_id] = [user_id];
-					}
-
+				if ( retval[record_id] ) {
+					retval[record_id].push( user_id );
+				} else {
+					retval[record_id] = [user_id];
 				}
-
 			}
-			if ( result ) {
-				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, {
-					onResult: function( result ) {
-						$this.onDeleteResult( result, remove_ids );
-					}
-				} );
+		}
 
-			} else {
-				ProgressBar.closeOverlay();
-			}
-		} );
-
+		return retval;
 	},
 
 	onNavigationClick: function( iconName ) {

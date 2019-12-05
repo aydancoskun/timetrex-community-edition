@@ -32,7 +32,6 @@ UserReviewControlViewController = BaseViewController.extend( {
 		this.user_review_api = new (APIFactory.getAPIClass( 'APIUserReview' ))();
 		this.kpi_api = new (APIFactory.getAPIClass( 'APIKPI' ))();
 		this.document_object_type_id = 220;
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true; //Hide some context menus
 		this.render();
 
 		if ( this.sub_view_mode ) {
@@ -48,6 +47,14 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 		this.setSelectRibbonMenuIfNecessary( 'UserReviewControl' );
 
+	},
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.mass_edit],
+			include: []
+		};
+
+		return context_menu_model;
 	},
 
 	initOptions: function() {
@@ -822,29 +829,29 @@ UserReviewControlViewController = BaseViewController.extend( {
 		}
 	},
 
-	onSaveAndContinueResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-				$this.refresh_id = result_data;
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.search( false );
-				$this.onEditClick( $this.refresh_id, true );
-
-				$this.onSaveAndContinueDone( result );
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
+	// onSaveAndContinueResult: function( result ) {
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	//
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+	// 			$this.refresh_id = result_data;
+	// 		}
+	//
+	// 		$this.saveInsideEditorData( function() {
+	// 			$this.search( false );
+	// 			$this.onEditClick( $this.refresh_id, true );
+	//
+	// 			$this.onSaveAndContinueDone( result );
+	// 		} );
+	//
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
 	onEditClick: function( editId, noRefreshUI ) {
 		var $this = this;
@@ -968,27 +975,27 @@ UserReviewControlViewController = BaseViewController.extend( {
 		}
 	},
 
-	onSaveAndNextResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-				$this.refresh_id = result_data;
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.onRightArrowClick();
-				$this.search( false );
-				$this.onSaveAndNextDone( result );
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
+	// onSaveAndNextResult: function( result ) {
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+	// 			$this.refresh_id = result_data;
+	// 		}
+	//
+	// 		$this.saveInsideEditorData( function() {
+	// 			$this.onRightArrowClick();
+	// 			$this.search( false );
+	// 			$this.onSaveAndNextDone( result );
+	// 		} );
+	//
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
 	onRightArrowClick: function() {
 		if ( this.editor ) {

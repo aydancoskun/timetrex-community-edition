@@ -99,6 +99,8 @@ WizardStep = Backbone.View.extend( {
 			allMultipleSelection = false;
 		}
 
+		$( '#' + gridId ).remove(); //Remove the grid to prevent JS Exception: Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': parameter 2 is not of type 'Node'.
+
 		this.append( grid_div );
 
 		var grid = $( '#' + gridId );

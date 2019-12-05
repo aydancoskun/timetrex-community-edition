@@ -28,8 +28,8 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		this.viewId = 'RemittanceDestinationAccount';
 		this.script_name = 'RemittanceDestinationAccountView';
 		this.table_name_key = 'remittance_destination_account';
-		this.context_menu_name = $.i18n._( 'Payment Methods' );
-		this.navigation_label = $.i18n._( 'Payment Methods' ) + ':';
+		this.context_menu_name = $.i18n._( 'Pay Methods' );
+		this.navigation_label = $.i18n._( 'Pay Methods' ) + ':';
 		this.document_object_type_id = 320;
 		this.api = new (APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ))();
 		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
@@ -493,7 +493,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		var $this = this;
 
 		var tab_model = {
-			'tab_remittance_destination_account': { 'label': $.i18n._( 'Payment Methods' ) },
+			'tab_remittance_destination_account': { 'label': $.i18n._( 'Pay Methods' ) },
 			'tab_attachment': true,
 			'tab_audit': true,
 		};

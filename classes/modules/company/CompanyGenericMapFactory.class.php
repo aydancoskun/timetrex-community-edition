@@ -89,27 +89,27 @@ class CompanyGenericMapFactory extends Factory {
 										//Premium Policy mapping
 										510 => 'premium_policy_branch',
 										520 => 'premium_policy_department',
-										530 => 'premium_policy_job',
-										540 => 'premium_policy_job_group',
-										550 => 'premium_policy_job_item',
-										560 => 'premium_policy_job_item_group',
+										530 => 'premium_policy_job_group',
+										540 => 'premium_policy_job',
+										550 => 'premium_policy_job_item_group',
+										560 => 'premium_policy_job_item',
 */
 
 										//Regular Policy mapping
 										581 => 'regular_time_policy_branch',
 										582 => 'regular_time_policy_department',
-										583 => 'regular_time_policy_job',
-										584 => 'regular_time_policy_job_group',
-										585 => 'regular_time_policy_job_item',
-										586 => 'regular_time_policy_job_item_group',
+										583 => 'regular_time_policy_job_group',
+										584 => 'regular_time_policy_job',
+										585 => 'regular_time_policy_job_item_group',
+										586 => 'regular_time_policy_job_item',
 
 										//Overtime Policy mapping
 										591 => 'over_time_policy_branch',
 										592 => 'over_time_policy_department',
-										593 => 'over_time_policy_job',
-										594 => 'over_time_policy_job_group',
-										595 => 'over_time_policy_job_item',
-										596 => 'over_time_policy_job_item_group',
+										593 => 'over_time_policy_job_group',
+										594 => 'over_time_policy_job',
+										595 => 'over_time_policy_job_item_group',
+										596 => 'over_time_policy_job_item',
 
 										//Contributing Shift Policy mapping
 										610 => 'contributing_shift_policy_branch',
@@ -274,6 +274,7 @@ class CompanyGenericMapFactory extends Factory {
 					if ( !in_array($id, $ids) OR in_array( $id, $tmp_ids ) ) {
 						//Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
+						$obj->postSave(); //Clear cache.
 					} else {
 						//Save ID's that need to be updated.
 						//Debug::text('NOT Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -344,7 +345,7 @@ class CompanyGenericMapFactory extends Factory {
 	 * @return bool
 	 */
 	function postSave() {
-		$this->removeCache( md5( $this->getCompany() . serialize( $this->getObjectType() ) . serialize( $this->getId() ) ) );
+		$this->removeCache( md5( $this->getCompany() . serialize( $this->getObjectType() ) . serialize( $this->getObjectId() ) ) );
 
 		return TRUE;
 	}

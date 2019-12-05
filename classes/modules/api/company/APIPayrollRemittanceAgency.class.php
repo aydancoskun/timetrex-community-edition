@@ -96,6 +96,10 @@ class APIPayrollRemittanceAgency extends APIFactory {
 	function getPayrollRemittanceAgency( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('payroll_remittance_agency', 'enabled')
 			OR !( $this->getPermissionObject()->Check('payroll_remittance_agency', 'view') OR $this->getPermissionObject()->Check('payroll_remittance_agency', 'view_own') ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
@@ -157,6 +161,10 @@ class APIPayrollRemittanceAgency extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('payroll_remittance_agency', 'enabled')
@@ -268,6 +276,10 @@ class APIPayrollRemittanceAgency extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('payroll_remittance_agency', 'enabled')

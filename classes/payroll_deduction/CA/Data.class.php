@@ -951,18 +951,20 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 	private function getRateArray( $income, $type ) {
 		Debug::text( 'Calculating ' . $type . ' Taxes on: $' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
+		$blank_arr = array( 'rate' => NULL, 'constant' => NULL );
+
 		if ( isset( $this->income_tax_rates[ $type ] ) ) {
 			$rates = $this->income_tax_rates[ $type ];
 		} else {
 			Debug::text( 'aNO INCOME TAX RATES FOUND!!!!!! ' . $type . ' Taxes on: $' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
-			return FALSE;
+			return $blank_arr;
 		}
 
 		if ( count( $rates ) == 0 ) {
 			Debug::text( 'bNO INCOME TAX RATES FOUND!!!!!! ' . $type . ' Taxes on: $' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
-			return FALSE;
+			return $blank_arr;
 		}
 
 		$prev_value = 0;
@@ -983,7 +985,7 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 			$i++;
 		}
 
-		return FALSE;
+		return $blank_arr;
 	}
 
 	function getFederalLowestRate() {

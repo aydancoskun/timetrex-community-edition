@@ -61,12 +61,12 @@ echo " 3...";
 
 echo " 4...";
 $redir = TRUE;
-if ( version_compare( PHP_VERSION, '5.4.0', '<') == 1 ) {
-	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.4</b> or greater!<br><br>\n";
+if ( version_compare( PHP_VERSION, '7.0.0', '<') == 1 ) {
+	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v7.0</b> or greater!<br><br>\n";
 	$redir = FALSE;
 }
-if ( version_compare( PHP_VERSION, '7.3.99', '>') == 1 ) {
-	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v7.3.x</b> or earlier!<br><br>\n";
+if ( version_compare( PHP_VERSION, '7.4.99', '>') == 1 ) {
+	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v7.4.x</b> or earlier!<br><br>\n";
 	$redir = FALSE;
 }
 

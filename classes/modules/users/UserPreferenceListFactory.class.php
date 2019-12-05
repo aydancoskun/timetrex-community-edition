@@ -217,6 +217,50 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 	}
 
 	/**
+	 * @param string $id UUID
+	 * @param int $status_id
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserPreferenceListFactory
+	 */
+	function getByUserIdAndEnableLogin( $id, $enable_login = TRUE, $where = NULL, $order = NULL) {
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		if ( is_array($id) ) {
+			$this->rs = FALSE;
+		} else {
+			$this->rs = $this->getCache($id);
+		}
+
+		if ( $this->rs === FALSE ) {
+			$uf = new UserFactory();
+
+			$ph = array( 'enable_login' => (bool)$enable_login );
+
+			$query = '
+						SELECT	*
+						FROM	'. $this->getTable() .' as a
+						LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id )
+						WHERE	
+							b.enable_login = ?
+							AND a.user_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
+							AND ( a.deleted = 0 AND b.deleted = 0 ) ';
+			$query .= $this->getWhereSQL( $where );
+			$query .= $this->getSortSQL( $order );
+
+			$this->rs = $this->ExecuteSQL( $query, $ph );
+
+			if ( !is_array($id) ) {
+				$this->saveCache($this->rs, $id);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
 	 * @param string $company_id UUID
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserPreferenceListFactory

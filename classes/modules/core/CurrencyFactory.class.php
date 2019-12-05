@@ -924,11 +924,13 @@ class CurrencyFactory extends Factory {
 							//As an optimization, do quick inserts if we're more than 30 days old.
 							if ( TTDate::getDays( ( time() - $latest_currency_rate_date ) ) > 30 ) {
 								$crf = TTnew('CurrencyRateFactory'); /** @var CurrencyRateFactory $crf */
-								for( $x = TTDate::getMiddleDayEpoch( $latest_currency_rate_date ); $x <= TTDate::getMiddleDayEpoch( time() ); $x += 86400 ) {
+								//for( $x = TTDate::getMiddleDayEpoch( $latest_currency_rate_date ); $x <= TTDate::getMiddleDayEpoch( time() ); $x += 86400 ) {
+								foreach( TTDate::getDatePeriod( TTDate::getMiddleDayEpoch( $latest_currency_rate_date ), TTDate::getMiddleDayEpoch( time() ), 'P1D' ) as $x ) {
 									$crf->ExecuteSQL('INSERT INTO '. $crf->getTable() .' (id,currency_id,date_stamp,conversion_rate,created_date) VALUES(\''. TTUUID::generateUUID() .'\',\''. $active_currency_id .'\',\''. $crf->db->BindDate($x) .'\', '. $last_conversion_rate .','. time() .')');
 								}
 							} else {
-								for( $x = TTDate::getMiddleDayEpoch( $latest_currency_rate_date ); $x <= TTDate::getMiddleDayEpoch( time() ); $x += 86400 ) {
+								//for( $x = TTDate::getMiddleDayEpoch( $latest_currency_rate_date ); $x <= TTDate::getMiddleDayEpoch( time() ); $x += 86400 ) {
+								foreach( TTDate::getDatePeriod( TTDate::getMiddleDayEpoch( $latest_currency_rate_date ), TTDate::getMiddleDayEpoch( time() ), 'P1D' ) as $x ) {
 									$crf = TTnew('CurrencyRateFactory'); /** @var CurrencyRateFactory $crf */
 									$crf->setCurrency( $active_currency_id );
 									$crf->setDateStamp( $x );
@@ -1170,7 +1172,7 @@ class CurrencyFactory extends Factory {
 				if ( $splf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE( 'in_use',
 											  FALSE,
-											  TTi18n::gettext( 'This currency is currently in use' ) . ' ' . TTi18n::gettext( 'by employee payment methods' ) );
+											  TTi18n::gettext( 'This currency is currently in use' ) . ' ' . TTi18n::gettext( 'by employee pay methods' ) );
 				}
 			}
 			if ( $this->Validator->isError( 'in_use' ) == FALSE ) {

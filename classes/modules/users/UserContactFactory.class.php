@@ -44,7 +44,7 @@ class UserContactFactory extends Factory {
 	protected $pk_sequence_name = 'user_contact_id_seq'; //PK Sequence name
 
 	protected $user_obj = NULL;
-	protected $name_validator_regex = '/^[a-zA-Z- \.\'|\x{0080}-\x{FFFF}]{1,250}$/iu';
+	protected $name_validator_regex = '/^[a-zA-Z- ,\.\'()\[\]|\x{0080}-\x{FFFF}]{1,250}$/iu'; //Allow ()/[] so nicknames can be specified. Allow "," so names can be: Doe, Jr. or: Doe, III
 	protected $address_validator_regex = '/^[a-zA-Z0-9-,_\/\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $city_validator_regex = '/^[a-zA-Z0-9-,_\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 
@@ -480,8 +480,7 @@ class UserContactFactory extends Factory {
 	 * @return bool
 	 */
 	function setCountry( $value ) {
-		$value = trim($value);
-		return $this->setGenericDataValue( 'country', $value );
+		return $this->setGenericDataValue( 'country', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -496,10 +495,9 @@ class UserContactFactory extends Factory {
 	 * @return bool
 	 */
 	function setProvince( $value ) {
-		$value = trim($value);
 		//Debug::Text('Country: '. $this->getCountry() .' Province: '. $province, __FILE__, __LINE__, __METHOD__, 10);
 		//If country isn't set yet, accept the value and re-validate on save.
-		return $this->setGenericDataValue( 'province', $value );
+		return $this->setGenericDataValue( 'province', strtoupper( trim($value) ) );
 	}
 
 	/**

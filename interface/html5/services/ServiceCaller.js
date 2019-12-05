@@ -104,7 +104,13 @@ var ServiceCaller = Backbone.Model.extend( {
 		ProgressBar.changeProgressBarMessage( 'File Uploading' );
 		$.ajax( {
 			url: ServiceCaller.uploadURL + '?' + paramaters + '&' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID(), //Server script to process data
+			headers: {
+				//Handle CSRF tokens and related headers here.
+				'X-Client-ID': 'Browser-TimeTrex',
+				'X-CSRF-Token': getCookie( 'CSRF-Token' ),
+			},
 			type: 'POST',
+
 //			xhr: function() {     // Custom XMLHttpRequest
 //				var myXhr = $.ajaxSettings.xhr();
 //				if ( myXhr.upload ) { // Check if upload property exists
@@ -318,6 +324,10 @@ var ServiceCaller = Backbone.Model.extend( {
 					//This caused the corrupted requests for things like: "POST_/api/json/api_php?Class"
 					//Also it must use dashes instead of underscores for separators.
 					'Request-Uri-Fragment': encodeURIComponent( LocalCacheData.fullUrlParameterStr ),
+
+					//Handle CSRF tokens and related headers here.
+					'X-Client-ID': 'Browser-TimeTrex',
+					'X-CSRF-Token': getCookie( 'CSRF-Token' ),
 				},
 				type: 'POST',
 				async: async,

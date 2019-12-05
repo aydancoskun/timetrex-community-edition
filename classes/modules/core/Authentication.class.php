@@ -41,12 +41,16 @@
  */
 class Authentication {
 	protected $name = 'SessionID';
-	protected $idle = 14400; //Max IDLE time
+	protected $idle_timeout = NULL; //Max IDLE time
 	protected $expire_session; //When TRUE, cookie is expired when browser closes.
 	protected $type_id = 800; //USER_NAME
+	protected $end_point_id = NULL;
+	protected $client_id = NULL;
 	protected $object_id = NULL;
 	protected $session_id = NULL;
 	protected $ip_address = NULL;
+	protected $user_agent = NULL;
+	protected $flags = NULL;
 	protected $created_date = NULL;
 	protected $updated_date = NULL;
 
@@ -86,7 +90,8 @@ class Authentication {
 						510 => 'SessionID-HW',
 						520 => 'SessionID-HW',
 
-						600 => 'SessionID-QP', //QuickPunch
+						600 => 'SessionID-QP', //QuickPunch - Web Browser
+						605 => 'SessionID',    //QuickPunch - Phone ID (Mobile App expects SessionID)
 						610 => 'SessionID-PC', //ClientPC
 
 						700 => 'SessionID',
@@ -157,9 +162,8 @@ class Authentication {
 					'finger_print' => 520,
 
 					//QuickPunch
-					//'phone_id' => 600,
-					'phone_id' => 800, //Make Phone_ID same as user_name for now, as that is how it used to work and this causes problems with the Mobile App.
 					'quick_punch_id' => 600,
+					'phone_id' => 605, //This used to have to be 800 otherwise the Desktop PC app and touch-tone AGI scripts would fail, however that should be resolved now with changes to soap/server.php
 					'client_pc' => 610,
 
 					//SSO or alternitive methods
@@ -231,18 +235,126 @@ class Authentication {
 	/**
 	 * @return int
 	 */
-	function getIdle() {
-		//Debug::text('Idle Seconds Allowed: '. $this->idle, __FILE__, __LINE__, __METHOD__, 10);
-		return $this->idle;
+	function getIdleTimeout() {
+		if ( $this->idle_timeout == NULL ) {
+			global $config_vars;
+			if ( isset($config_vars['other']['web_session_timeout']) AND $config_vars['other']['web_session_timeout'] != '' ) {
+				$this->idle_timeout = (int)$config_vars['other']['web_session_timeout'];
+			} else {
+				$this->idle_timeout = 14400; //Default to 4-hours.
+			}
+		}
+
+		Debug::text('Idle Seconds Allowed: '. $this->idle_timeout, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->idle_timeout;
 	}
 
 	/**
 	 * @param $secs
 	 * @return bool
 	 */
-	function setIdle( $secs) {
-		if ( is_int($secs) ) {
-			$this->idle = $secs;
+	function setIdleTimeout( $secs) {
+		if ( $secs != '' AND is_int($secs) ) {
+			$this->idle_timeout = $secs;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function parseEndPointID( $value = NULL ) {
+		if ( $value == NULL AND isset($_SERVER['SCRIPT_NAME']) AND $_SERVER['SCRIPT_NAME'] != '' ) {
+			$value = Environment::stripDuplicateSlashes( $_SERVER['SCRIPT_NAME'] );
+		}
+
+		//If the SCRIPT_NAME is something like upload_file.php, or APIGlobal.js.php, assume its the JSON API
+		// soap/server.php is a SOAP end-point.
+		//   This is also set in parseEndPointID() and getClientIDHeader()
+		if ( $value == '' OR ( strpos( $value, 'api' ) === FALSE AND strpos( $value, 'soap/server.php' ) === FALSE ) ) {
+			$value = 'json/api';
+		} else {
+			$value = Environment::stripDuplicateSlashes( str_replace( array( dirname( Environment::getAPIBaseURL() ) . '/', '.php'), '', $value ) );
+		}
+
+		$value = strtolower( trim( $value, '/' ) ); //Strip leading and trailing slashes.
+		//Debug::text('End Point: '. $value .' API Base URL: '. Environment::getAPIBaseURL(), __FILE__, __LINE__, __METHOD__, 10);
+
+		return $value;
+	}
+
+	/**
+	 * @return string
+	 */
+	function getEndPointID() {
+		if ( $this->end_point_id == NULL ) {
+			$this->end_point_id = $this->parseEndPointID();
+		}
+
+		return $this->end_point_id;
+	}
+
+	/**
+	 * @param $secs
+	 * @return bool
+	 */
+	function setEndPointID( $value ) {
+		if ( $value != '' ) {
+			$this->end_point_id = substr( $value, 0, 30);
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @return string
+	 */
+	function getClientID() {
+		if ( $this->client_id == NULL ) {
+			$this->client_id = strtolower( $this->getClientIDHeader() );
+		}
+
+		return $this->client_id;
+	}
+
+	/**
+	 * @param $secs
+	 * @return bool
+	 */
+	function setClientID( $value ) {
+		if ( $value != '' ) {
+			$this->client_id = strtolower( substr( $value, 0, 30 ) );
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @return string
+	 */
+	function getUserAgent() {
+		if ( $this->user_agent == NULL ) {
+			$this->user_agent = sha1( ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : NULL ) . TTPassword::getPasswordSalt() ); //Hash the user agent so its not as long.
+		}
+
+		return $this->user_agent;
+	}
+
+	/**
+	 * @param $secs
+	 * @return bool
+	 */
+	function setUserAgent( $value, $hash = FALSE ) {
+		if ( $value != '' ) {
+			if ( $hash == TRUE ) {
+				$value = sha1( $value . TTPassword::getPasswordSalt() ); //Hash the user agent so its not as long.
+			}
+
+			$this->user_agent = substr( $value, 0, 40 );
 
 			return TRUE;
 		}
@@ -320,7 +432,7 @@ class Authentication {
 	 * @param null $ip_address
 	 * @return null
 	 */
-	function newSession( $object_id = NULL, $ip_address = NULL ) {
+	function newSession( $object_id = NULL, $ip_address = NULL, $user_agent = NULL, $client_id = NULL, $end_point_id = NULL ) {
 		if ( $object_id == '' AND $this->getObjectID() != '' ) {
 			$object_id = $this->getObjectID();
 		}
@@ -332,6 +444,9 @@ class Authentication {
 		$authentication->setType( $this->getType() );
 		$authentication->setSessionID( $new_session_id );
 		$authentication->setIPAddress( $ip_address );
+		$authentication->setEndPointID( $end_point_id );
+		$authentication->setClientID( $client_id );
+		$authentication->setUserAgent( $user_agent, TRUE ); //Force hash the user agent.
 		$authentication->setCreatedDate();
 		$authentication->setUpdatedDate();
 		$authentication->setObjectID( $object_id );
@@ -425,21 +540,6 @@ class Authentication {
 		}
 
 		return FALSE;
-		/*
-		if ( !empty($object_id) ) {
-			$ulf = TTnew( 'UserListFactory' );
-			$ulf->getByID($object_id);
-			if ( $ulf->getRecordCount() == 1 ) {
-				foreach ($ulf as $user) {
-					$this->obj = $user;
-
-					return TRUE;
-				}
-			}
-		}
-
-		return FALSE;
-		*/
 	}
 
 	/**
@@ -605,9 +705,7 @@ class Authentication {
 					'session_id' => $this->encryptSessionID( $this->getSessionID() ),
 					);
 
-		//Can't use IdleTime here, as some users have different idle times.
-		//Assume none are longer then one day though.
-		$query = 'DELETE FROM authentication WHERE session_id = ? OR (updated_date - created_date) > '. (86400 * 2) .' OR ('. TTDate::getTime() .' - updated_date) > 86400';
+		$query = 'DELETE FROM authentication WHERE session_id = ? OR ('. TTDate::getTime() .' - updated_date) > idle_timeout';
 
 		try {
 			$this->db->Execute($query, $ph);
@@ -628,11 +726,15 @@ class Authentication {
 					'type_id' => (int)$this->getType(),
 					'object_id' => TTUUID::castUUID($this->getObjectID()),
 					'ip_address' => $this->getIPAddress(),
+					'idle_timeout' => $this->getIdleTimeout(),
+					'end_point_id' => $this->getEndPointID(),
+					'client_id' => $this->getClientID(),
+					'user_agent' => $this->getUserAgent(),
 					'created_date' => $this->getCreatedDate(),
 					'updated_date' => $this->getUpdatedDate()
 					);
 
-		$query = 'INSERT INTO authentication (session_id, type_id, object_id, ip_address, created_date, updated_date) VALUES( ?, ?, ?, ?, ?, ? )';
+		$query = 'INSERT INTO authentication (session_id, type_id, object_id, ip_address, idle_timeout, end_point_id, client_id, user_agent, created_date, updated_date) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )';
 		try {
 			$this->db->Execute($query, $ph);
 		} catch (Exception $e) {
@@ -647,20 +749,20 @@ class Authentication {
 	 */
 	private function Read() {
 		$ph = array(
-					'session_id' => $this->encryptSessionID( $this->getSessionID() ),
-					//'ip_address' => $this->getIPAddress(),
-					'type_id' => (int)$this->getType(),
-					'updated_date' => ( TTDate::getTime() - $this->getIdle() ),
-					);
+				'session_id'   => $this->encryptSessionID( $this->getSessionID() ),
+				'type_id'      => (int)$this->getType(),
+				'end_point_id' => $this->getEndPointID(),
+				'client_id'    => $this->getClientID(),
+				'updated_date' => TTDate::getTime(),
+		);
 
 		//Need to handle IP addresses changing during the session.
 		//When using SSL, don't check for IP address changing at all as we use secure cookies.
 		//When *not* using SSL, always require the same IP address for the session.
 		//However we need to still allow multiple sessions for the same user, using different IPs.
-		$query = 'SELECT type_id, session_id, object_id, ip_address, created_date, updated_date FROM authentication WHERE session_id = ? AND type_id = ? AND updated_date >= ?';
-
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		$query = 'SELECT type_id, session_id, object_id, ip_address, idle_timeout, end_point_id, client_id, user_agent, created_date, updated_date FROM authentication WHERE session_id = ? AND type_id = ? AND end_point_id = ? AND client_id = ? AND updated_date >= ( ? - idle_timeout )';
 		$result = $this->db->GetRow($query, $ph);
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( count($result) > 0) {
 			if ( PRODUCTION == TRUE AND $result['ip_address'] != $this->getIPAddress() ) {
@@ -673,16 +775,28 @@ class Authentication {
 					return FALSE;
 				}
 			}
-			$this->setType($result['type_id']);
+
+			if ( $result['user_agent'] != $this->getUserAgent() ) {
+				Debug::text('WARNING: User Agent changed! Original: '. $result['user_agent'] .' Current: '. $this->getUserAgent(), __FILE__, __LINE__, __METHOD__, 10);
+				//return FALSE; //Disable USER AGENT checking until v12 is fully released, and end-user have a chance to update their APIs to handle passing the user agent if using switchUser() or newSession()
+			}
+
+			$this->setType( $result['type_id'] );
+			$this->setIdleTimeout( $result['idle_timeout'] );
+			$this->setEndPointID( $result['end_point_id'] );
+			$this->setClientID( $result['client_id'] );
+			$this->setUserAgent( $result['user_agent'] );
 			$this->setSessionID( $this->getSessionID() ); //Make sure this is *not* the encrypted session_id
-			$this->setIPAddress($result['ip_address']);
-			$this->setCreatedDate($result['created_date']);
-			$this->setUpdatedDate($result['updated_date']);
-			$this->setObjectID($result['object_id']);
+			$this->setIPAddress( $result['ip_address'] );
+			$this->setCreatedDate( $result['created_date'] );
+			$this->setUpdatedDate( $result['updated_date'] );
+			$this->setObjectID( $result['object_id'] );
 
 			if ( $this->setObject( $this->getObjectById( $this->getObjectID() ) ) ) {
 				return TRUE;
 			}
+		} else {
+			Debug::text('Session ID not found in the DB... End Point: '. $this->getEndPointID() .' Client ID: '. $this->getClientID() .' Type: '. $this->getType(), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;
@@ -826,7 +940,7 @@ class Authentication {
 									Debug::text('UserIdentification match failed: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
 								}
 							} else {
-								Debug::text('Station is DISABLED: '. $station_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('Station is DISABLED... UUID: '. $station_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 							}
 						} else {
 							Debug::text('StationID not specifed on URL or not found...', __FILE__, __LINE__, __METHOD__, 10);
@@ -868,7 +982,7 @@ class Authentication {
 				//Write data to db.
 				$this->Write();
 
-				Debug::text('Login Succesful for User Name: '. $user_name .' Session ID: Cookie: '. $this->getSessionID() .' DB: '. $this->encryptSessionID( $this->getSessionID() ), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('Login Succesful for User Name: '. $user_name .' End Point ID: '. $this->getEndPointID() .' Client ID: '. $this->getClientID() .' Type: '. $type .' Session ID: Cookie: '. $this->getSessionID() .' DB: '. $this->encryptSessionID( $this->getSessionID() ), __FILE__, __LINE__, __METHOD__, 10);
 
 				//Only update last_login_date when using user_name to login to the web interface.
 				if ( $type == 'user_name' ) {
@@ -877,7 +991,7 @@ class Authentication {
 
 				//Truncate SessionID for security reasons, so someone with access to the audit log can't steal sessions.
 				if ( $this->isUser() == TRUE ) {
-					TTLog::addEntry( $this->getObjectID(), 100, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.	TTi18n::getText('SessionID') .': '. $this->getSecureSessionID() .' '.	TTi18n::getText('ObjectID').': '. $this->getObjectID(), $this->getObjectID(), 'authentication'); //Login
+					TTLog::addEntry( $this->getObjectID(), 100, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.	TTi18n::getText('SessionID') .': '. $this->getSecureSessionID() .' '. TTi18n::getText('Client') .': '. $this->getClientID() .' '. TTi18n::getText('End Point') .': '. $this->getEndPointID() .' '. TTi18n::getText('ObjectID').': '. $this->getObjectID(), $this->getObjectID(), 'authentication'); //Login
 				}
 
 				$this->rl->delete(); //Clear failed password rate limit upon successful login.
@@ -911,6 +1025,33 @@ class Authentication {
 	}
 
 	/**
+	 * Gets the current session ID from the COOKIE, POST or GET variables.
+	 * @param string $type
+	 * @return string|bool
+	 */
+	function getCurrentSessionID( $type ) {
+		$session_name = $this->getName( $type );
+
+		//There appears to be a bug with Flex when uploading files (upload_file.php) that sometimes the browser sends an out-dated sessionID in the cookie
+		//that differs from the sessionID sent in the POST variable. This causes a Flex I/O error because TimeTrex thinks the user isn't authenticated.
+		//To fix this check to see if BOTH a COOKIE and POST variable contain SessionIDs, and if so use the POST one.
+		if ( ( isset($_COOKIE[$session_name]) AND $_COOKIE[$session_name] != '' ) AND ( isset($_POST[$session_name]) AND $_POST[$session_name] != '' ) ) {
+			$session_id = $_POST[$session_name];
+		} elseif ( isset($_COOKIE[$session_name]) AND $_COOKIE[$session_name] != '' ) {
+			$session_id = $_COOKIE[$session_name];
+		} elseif ( isset($_POST[$session_name]) AND $_POST[$session_name] != '' ) {
+			$session_id = $_POST[$session_name];
+		} elseif ( isset($_GET[$session_name]) AND $_GET[$session_name] != '' ) {
+			$session_id = $_GET[$session_name];
+		} else {
+			$session_id = FALSE;
+		}
+
+		Debug::text('Session ID: '. $session_id .' IP Address: '. Misc::getRemoteIPAddress() .' URL: '. $_SERVER['REQUEST_URI'], __FILE__, __LINE__, __METHOD__, 10);
+		return $session_id;
+	}
+
+	/**
 	 * @param string $session_id UUID
 	 * @param string $type
 	 * @param bool $touch_updated_date
@@ -925,25 +1066,10 @@ class Authentication {
 
 		//Support session_ids passed by cookie, post, and get.
 		if ( $session_id == '' ) {
-			$session_name = $this->getName( $type );
-
-			//There appears to be a bug with Flex when uploading files (upload_file.php) that sometimes the browser sends an out-dated sessionID in the cookie
-			//that differs from the sessionID sent in the POST variable. This causes a Flex I/O error because TimeTrex thinks the user isn't authenticated.
-			//To fix this check to see if BOTH a COOKIE and POST variable contain SessionIDs, and if so use the POST one.
-			if ( ( isset($_COOKIE[$session_name]) AND $_COOKIE[$session_name] != '' ) AND ( isset($_POST[$session_name]) AND $_POST[$session_name] != '' ) ) {
-				$session_id = $_POST[$session_name];
-			} elseif ( isset($_COOKIE[$session_name]) AND $_COOKIE[$session_name] != '' ) {
-				$session_id = $_COOKIE[$session_name];
-			} elseif ( isset($_POST[$session_name]) AND $_POST[$session_name] != '' ) {
-				$session_id = $_POST[$session_name];
-			} elseif ( isset($_GET[$session_name]) AND $_GET[$session_name] != '' ) {
-				$session_id = $_GET[$session_name];
-			} else {
-				$session_id = FALSE;
-			}
+			$session_id = $this->getCurrentSessionID( $type );
 		}
 
-		Debug::text('Session ID: '. $session_id .' IP Address: '. Misc::getRemoteIPAddress() .' URL: '. $_SERVER['REQUEST_URI'] .' Touch Updated Date: '. (int)$touch_updated_date, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Session ID: '. $session_id .' Type: '. $type .' IP Address: '. Misc::getRemoteIPAddress() .' URL: '. $_SERVER['REQUEST_URI'] .' Touch Updated Date: '. (int)$touch_updated_date, __FILE__, __LINE__, __METHOD__, 10);
 		//Checks session cookie, returns object_id;
 		if ( isset( $session_id ) ) {
 			/*
@@ -1015,22 +1141,32 @@ class Authentication {
 	}
 
 	/**
-	 * When user resets password, logout all sessions for that user.
+	 * When user resets or changes their password, logout all sessions for that user.
 	 * @param string $object_id UUID
+	 * @param string $type_id
+	 * @param bool $ignore_current_session Avoid logging out existing session, for example when the user is changing their own password.
 	 * @return bool
 	 * @throws DBError
 	 */
-	function logoutUser( $object_id ) {
+	function logoutUser( $object_id, $type_id = 'USER_NAME', $ignore_current_session = TRUE ) {
+		if ( $ignore_current_session == TRUE ) {
+			$session_id = $this->encryptSessionID( $this->getCurrentSessionId( $type_id ) );
+		} else {
+			$session_id = NULL;
+		}
+
 		$ph = array(
 					'object_id' => TTUUID::castUUID($object_id),
-					'type_id' => (int)$this->getTypeIDByName( 'USER_NAME' ),
+					'type_id' => (int)$this->getTypeIDByName( $type_id ),
+					'session_id' => $session_id,
 					);
 
-		$query = 'DELETE FROM authentication WHERE object_id = ? AND type_id = ?';
+		$query = 'DELETE FROM authentication WHERE object_id = ? AND type_id = ? AND session_id != ?';
 
 		try {
-			Debug::text('Logging out all user sessions: '. $object_id, __FILE__, __LINE__, __METHOD__, 10);
 			$this->db->Execute($query, $ph);
+			//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Logging out all sessions for User ID: '. $object_id .' Affected Rows: '. $this->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 		} catch (Exception $e) {
 			throw new DBError($e);
 		}
@@ -1093,8 +1229,7 @@ class Authentication {
 	function checkUsername( $user_name ) {
 		//Use UserFactory to set name.
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-
-		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
+		$ulf->getByUserNameAndEnableLogin( $user_name, TRUE ); //Login Enabled
 		foreach ($ulf as $user) {
 			if ( TTi18n::strtolower( $user->getUsername() ) == TTi18n::strtolower( trim($user_name) ) ) {
 				$this->setObjectID( $user->getID() );
@@ -1117,7 +1252,7 @@ class Authentication {
 	function checkPassword( $user_name, $password) {
 		//Use UserFactory to set name.
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
+		$ulf->getByUserNameAndEnableLogin( $user_name, TRUE ); //Login Enabled
 		foreach ($ulf as $user) { /** @var UserFactory $user */
 			if ( $user->checkPassword($password) ) {
 				$this->setObjectID( $user->getID() );
@@ -1273,5 +1408,137 @@ class Authentication {
 		return FALSE;
 	}
 
+	/**
+	 * Returns the value of the X-Client-ID HTTP header so we can determine what type of front-end we are using and if CSRF checks should be enabled or not.
+	 * @return bool|string
+	 */
+	function getClientIDHeader() {
+		if ( isset($_SERVER['HTTP_X_CLIENT_ID']) AND $_SERVER['HTTP_X_CLIENT_ID'] != '' ) {
+			return trim( $_SERVER['HTTP_X_CLIENT_ID'] );
+		} elseif ( isset($_POST['X-Client-ID']) AND $_POST['X-Client-ID'] != '' ) { //Need to read X-Client-ID from POST variables so Global.APIFileDownload() works.
+			return trim( $_POST['X-Client-ID'] );
+		} elseif ( Misc::isMobileAppUserAgent() == TRUE ) {
+			return 'App-TimeTrex';
+		} else {
+			if ( isset($_SERVER['SCRIPT_NAME']) AND $_SERVER['SCRIPT_NAME'] != '' ) {
+				$script_name = $_SERVER['SCRIPT_NAME'];
+
+				//If the SCRIPT_NAME is something like upload_file.php, or APIGlobal.js.php, assume its the JSON API
+				//   This is also set in parseEndPointID() and getClientIDHeader()
+				if ( $script_name == '' OR ( strpos( $script_name, 'api' ) === FALSE AND strpos( $script_name, 'soap/server.php' ) === FALSE ) ) {
+					return 'Browser-TimeTrex';
+				}
+			}
+		}
+
+		return 'API'; //Default to API Client-ID
+	}
+
+	/**
+	 * Checks that the CSRF token header matches the CSRF token cookie that was originally sent.
+	 *   This uses the Cookie-To-Header method explained here: https://en.wikipedia.org/w/index.php?title=Cross-site_request_forgery#Cookie-to-header_token
+	 *   Also explained further here: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html -- "Double Submit Cookie" method.
+	 * @return bool
+	 */
+	function checkValidCSRFToken() {
+		global $config_vars;
+
+		$client_id_header = $this->getClientIDHeader();
+
+		if ( $client_id_header != 'API' AND $client_id_header != 'App-TimeTrex' AND $client_id_header != 'App-TimeTrex-AGI'
+				AND ( !isset($config_vars['other']['enable_csrf_validation']) OR ( isset($config_vars['other']['enable_csrf_validation']) AND $config_vars['other']['enable_csrf_validation'] == TRUE ) )
+				AND ( !isset($config_vars['other']['installer_enabled']) OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] != TRUE ) ) //Disable CSRF if installer is enabled, because TTPassword::getPasswordSalt() has the potential to change at anytime.
+		) {
+			if ( isset($_SERVER['HTTP_X_CSRF_TOKEN']) AND $_SERVER['HTTP_X_CSRF_TOKEN'] != '' ) {
+				$csrf_token_header = trim( $_SERVER['HTTP_X_CSRF_TOKEN'] );
+			} else {
+				if ( isset($_POST['X-CSRF-Token']) AND $_POST['X-CSRF-Token'] != '' ) { //Global.APIFileDownload() needs to be able to send the token by POST or GET.
+					$csrf_token_header = trim( $_POST['X-CSRF-Token'] );
+				} elseif ( isset($_GET['X-CSRF-Token']) AND $_GET['X-CSRF-Token'] != '' ) { //Some send_file.php calls need to be able to send the token by GET.
+					$csrf_token_header = trim( $_GET['X-CSRF-Token'] );
+				} else {
+					$csrf_token_header = FALSE;
+				}
+			}
+
+			if ( isset($_COOKIE['CSRF-Token']) AND $_COOKIE['CSRF-Token'] != '' ) {
+				$csrf_token_cookie = trim( $_COOKIE['CSRF-Token'] );
+			} else {
+				$csrf_token_cookie = FALSE;
+			}
+
+			if ( $csrf_token_header != '' AND $csrf_token_header == $csrf_token_cookie ) {
+				//CSRF token is hashed with a secret key, so full token is: <TOKEN>-<HASHED WITH SECRET KEY TOKEN> -- Therefore make sure that the hashed token matches with our secret key.
+				$split_csrf_token = explode('-', $csrf_token_header ); //0=Token value, 1=Salted token value.
+				if ( is_array( $split_csrf_token ) AND count( $split_csrf_token ) == 2 AND $split_csrf_token[1] == sha1( $split_csrf_token[0] . TTPassword::getPasswordSalt() ) ) {
+					return TRUE;
+				} else {
+					Debug::Text( ' CSRF token value does not match hashed value! Client-ID: ' . $client_id_header . ' CSRF Token: Header: ' . $csrf_token_header . ' Cookie: ' . $csrf_token_cookie, __FILE__, __LINE__, __METHOD__, 10 );
+					return FALSE;
+				}
+			} else {
+				Debug::Text( ' CSRF token does not match! Client-ID: ' . $client_id_header.' CSRF Token: Header: '. $csrf_token_header .' Cookie: '. $csrf_token_cookie, __FILE__, __LINE__, __METHOD__, 10 );
+				return FALSE;
+			}
+		} else {
+			return TRUE; //Not a CSRF vulnerable end-point
+		}
+	}
+
+	/**
+	 * Checks refer to help mitigate CSRF attacks.
+	 * @param bool $referer
+	 * @return bool
+	 */
+//	static function checkValidReferer( $referer = FALSE ) {
+//		global $config_vars;
+//
+//		if ( PRODUCTION == TRUE AND isset($config_vars['other']['enable_csrf_validation']) AND $config_vars['other']['enable_csrf_validation'] == TRUE ) {
+//			if ( $referer == FALSE ) {
+//				if ( isset($_SERVER['HTTP_ORIGIN']) AND $_SERVER['HTTP_ORIGIN'] != '' ) {
+//					//IE9 doesn't send this, but if it exists use it instead as its likely more trustworthy.
+//					//Debug::Text( 'Using Referer from Origin header...', __FILE__, __LINE__, __METHOD__, 10);
+//					$referer = $_SERVER['HTTP_ORIGIN'];
+//					if ( $referer == 'file://' ) { //Mobile App and some browsers can send the origin as: file://
+//						return TRUE;
+//					}
+//				} elseif ( isset($_SERVER['HTTP_REFERER']) AND $_SERVER['HTTP_REFERER'] != '' ) {
+//					Debug::Text( 'WARNING: CSRF check falling back for legacy browser... Referer: '. $_SERVER['HTTP_REFERER'], __FILE__, __LINE__, __METHOD__, 10);
+//					$referer = $_SERVER['HTTP_REFERER'];
+//				} else {
+//					Debug::Text( 'WARNING: No HTTP_ORIGIN or HTTP_REFERER headers specified...', __FILE__, __LINE__, __METHOD__, 10);
+//					$referer = '';
+//				}
+//			}
+//
+//			//Debug::Text( 'Raw Referer: '. $referer, __FILE__, __LINE__, __METHOD__, 10);
+//			$referer = strtolower( parse_url( $referer, PHP_URL_HOST ) ); //Make sure we lowercase it, so case doesn't prevent a match.
+//
+//			//Use HTTP_HOST rather than getHostName() as the same site can be referenced with multiple different host names
+//			//Especially considering on-site installs that default to 'localhost'
+//			//If deployment ondemand is set, then we assume SERVER_NAME is correct and revert to using that instead of HTTP_HOST which has potential to be forged.
+//			//Apache's UseCanonicalName On configuration directive can help ensure the SERVER_NAME is always correct and not masked.
+//			if ( DEPLOYMENT_ON_DEMAND == FALSE AND isset( $_SERVER['HTTP_HOST'] ) ) {
+//				$host_name = $_SERVER['HTTP_HOST'];
+//			} elseif ( isset( $_SERVER['SERVER_NAME'] ) ) {
+//				$host_name = $_SERVER['SERVER_NAME'];
+//			} elseif ( isset( $_SERVER['HOSTNAME'] ) ) {
+//				$host_name = $_SERVER['HOSTNAME'];
+//			} else {
+//				$host_name = '';
+//			}
+//			$host_name = ( $host_name != '' ) ? strtolower( parse_url( 'http://'.$host_name, PHP_URL_HOST ) ) : ''; //Need to add 'http://' so parse_url() can strip it off again. Also lowercase it so case differences don't prevent a match.
+//			//Debug::Text( 'Parsed Referer: '. $referer .' Hostname: '. $host_name, __FILE__, __LINE__, __METHOD__, 10);
+//
+//			if ( $referer == $host_name OR $host_name == '' ) {
+//				return TRUE;
+//			}
+//
+//			Debug::Text( 'CSRF check failed... Parsed Referer: '. $referer .' Hostname: '. $host_name, __FILE__, __LINE__, __METHOD__, 10);
+//			return FALSE;
+//		}
+//
+//		return TRUE;
+//	}
 }
 ?>

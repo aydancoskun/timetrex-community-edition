@@ -108,6 +108,7 @@ class ExceptionReport extends Report {
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
+										'-5040-page_break' => TTi18n::gettext('Page Break On'),
 								);
 				break;
 			case 'time_period':
@@ -208,6 +209,7 @@ class ExceptionReport extends Report {
 			case 'dynamic_columns':
 				$retval = array(
 										//Dynamic - Aggregate functions can be used
+										'-2040-demerit' => TTi18n::gettext('Demerit Points'),
 										'-2050-total_exception' => TTi18n::gettext('Total Exceptions'),
 							);
 
@@ -225,7 +227,7 @@ class ExceptionReport extends Report {
 							$retval[$column] = 'currency';
 						} elseif ( strpos($column, 'amount') !== FALSE ) {
 							$retval[$column] = 'time_unit';
-						} elseif ( strpos($column, 'total_exception') !== FALSE ) {
+						} elseif ( strpos($column, 'total_exception') !== FALSE OR strpos($column, 'demerit') !== FALSE ) {
 							$retval[$column] = 'numeric';
 						}
 					}
@@ -269,6 +271,7 @@ class ExceptionReport extends Report {
 
 							$retval['columns'][] = 'exception_policy_type_id';
 							$retval['columns'][] = 'exception_policy_type';
+							$retval['columns'][] = 'demerit';
 							$retval['columns'][] = 'total_exception';
 
 							$retval['group'][] = 'severity';
@@ -283,6 +286,7 @@ class ExceptionReport extends Report {
 							$retval['columns'][] = 'severity';
 							$retval['columns'][] = 'exception_policy_type_id';
 							$retval['columns'][] = 'exception_policy_type';
+							$retval['columns'][] = 'demerit';
 							$retval['columns'][] = 'total_exception';
 
 							$retval['group'][] = 'severity';
@@ -297,6 +301,7 @@ class ExceptionReport extends Report {
 
 							$retval['columns'][] = 'exception_policy_type_id';
 							$retval['columns'][] = 'exception_policy_type';
+							$retval['columns'][] = 'demerit';
 							$retval['columns'][] = 'total_exception';
 
 							$retval['group'][] = 'pay_period';
@@ -315,6 +320,7 @@ class ExceptionReport extends Report {
 
 							$retval['columns'][] = 'exception_policy_type_id';
 							$retval['columns'][] = 'exception_policy_type';
+							$retval['columns'][] = 'demerit';
 							$retval['columns'][] = 'total_exception';
 
 							$retval['group'][] = 'full_name';
@@ -332,6 +338,7 @@ class ExceptionReport extends Report {
 							$retval['columns'][] = 'exception_policy_type_id';
 							$retval['columns'][] = 'exception_policy_type';
 							$retval['columns'][] = 'full_name';
+							$retval['columns'][] = 'demerit';
 							$retval['columns'][] = 'total_exception';
 
 
@@ -351,6 +358,7 @@ class ExceptionReport extends Report {
 							$retval['columns'][] = 'exception_policy_type_id';
 							$retval['columns'][] = 'exception_policy_type';
 							$retval['columns'][] = 'date_dow';
+							$retval['columns'][] = 'demerit';
 							$retval['columns'][] = 'total_exception';
 
 							$retval['group'][] = 'severity';
@@ -444,6 +452,7 @@ class ExceptionReport extends Report {
 		foreach ( $elf as $key => $e_obj ) {
 			$user_id = $e_obj->getUser();
 			$this->tmp_data['exception'][$user_id][$e_obj->getID()] = (array)$e_obj->getObjectAsArray( array_merge( array( 'date_stamp' => TRUE ), $columns) );
+			$this->tmp_data['exception'][$user_id][$e_obj->getID()]['demerit'] = $e_obj->getColumn('demerit');
 			$this->tmp_data['exception'][$user_id][$e_obj->getID()]['total_exception'] = 1;
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}

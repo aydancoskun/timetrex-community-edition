@@ -176,6 +176,14 @@ class APIAuthorization extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
+		if ( $this->getCurrentUserObject()->getStatus() != 10 ) { //10=Active -- Make sure user record is active as well.
+			return $this->getPermissionObject()->PermissionDenied( FALSE, TTi18n::getText( 'Employee status must be Active to Authorize/Decline Requests' ) );
+		}
+
 		if ( !( $this->getPermissionObject()->Check('request', 'authorize') OR $this->getPermissionObject()->Check('punch', 'authorize') OR $this->getPermissionObject()->Check('user_expense', 'authorize') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
@@ -332,6 +340,10 @@ class APIAuthorization extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !( $this->getPermissionObject()->Check('request', 'authorize') OR $this->getPermissionObject()->Check('punch', 'authorize') OR $this->getPermissionObject()->Check('user_expense', 'authorize') ) ) {

@@ -48,14 +48,6 @@ UserPreferenceViewController = BaseViewController.extend( {
 		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
 		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.add] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_icon] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
-
 		this.render();
 
 		this.buildContextMenu();
@@ -66,6 +58,23 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 		//this.setSelectRibbonMenuIfNecessary( 'UserContact' )
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [
+				ContextMenuIconName.add,
+				ContextMenuIconName.copy,
+				ContextMenuIconName.copy_as_new,
+				ContextMenuIconName.save_and_copy,
+				ContextMenuIconName.save_and_new,
+				ContextMenuIconName.delete_icon,
+				ContextMenuIconName.delete_and_next
+			],
+			include: []
+		};
+
+		return context_menu_model;
 	},
 
 	initOptions: function() {

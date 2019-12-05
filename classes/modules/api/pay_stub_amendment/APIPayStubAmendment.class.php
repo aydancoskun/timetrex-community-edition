@@ -80,6 +80,10 @@ class APIPayStubAmendment extends APIFactory {
 	function getPayStubAmendment( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('pay_stub_amendment', 'enabled')
 				OR !( $this->getPermissionObject()->Check('pay_stub_amendment', 'view') OR $this->getPermissionObject()->Check('pay_stub_amendment', 'view_own') OR $this->getPermissionObject()->Check('pay_stub_amendment', 'view_child')	 ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -153,6 +157,10 @@ class APIPayStubAmendment extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('pay_stub_amendment', 'enabled')
@@ -268,6 +276,10 @@ class APIPayStubAmendment extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('pay_stub_amendment', 'enabled')

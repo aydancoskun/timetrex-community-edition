@@ -18,20 +18,6 @@ LoginUserContactViewController = BaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIUser' ))();
 		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.add] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.view] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_icon] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
-
 		this.render();
 		this.buildContextMenu();
 
@@ -55,6 +41,18 @@ LoginUserContactViewController = BaseViewController.extend( {
 			}
 		} );
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				ContextMenuIconName.save,
+				ContextMenuIconName.cancel
+			]
+		};
+
+		return context_menu_model;
 	},
 
 	getUserContactData: function( callBack ) {
@@ -134,35 +132,8 @@ LoginUserContactViewController = BaseViewController.extend( {
 	},
 
 	onSaveClick: function( ignoreWarning ) {
-		var $this = this;
-		var record = this.current_edit_record;
-		// if ( !Global.isSet( ignoreWarning ) ) {
-		// 	ignoreWarning = false;
-		// }
 		ignoreWarning = true; //When login user is saving their own contact information, always ignore warnings because in most cases there isn't much they can do anyways.
-
-		LocalCacheData.current_doing_context_action = 'save';
-		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
-
-				if ( result.isValid() ) {
-					var result_data = result.getResult();
-					if ( result_data === true ) {
-						$this.refresh_id = $this.current_edit_record.id;
-					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-						$this.refresh_id = result_data;
-					}
-
-
-					$this.removeEditView();
-
-				} else {
-					$this.setErrorTips( result );
-					$this.setErrorMenu();
-				}
-
-			}
-		} );
+		this._super( 'onSaveClick', ignoreWarning );
 	},
 
 	setErrorMenu: function() {
@@ -204,6 +175,11 @@ LoginUserContactViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[0].push( tab_contact_information_column1 );
 
+		// Current Password
+		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
+		form_item_input.TPasswordInput( { field: 'current_password', width: 200 } );
+		this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab_contact_information_column1 );
+
 		// First Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'first_name' } );
@@ -220,13 +196,6 @@ LoginUserContactViewController = BaseViewController.extend( {
 
 		form_item_input.TText( { field: 'last_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Last Name' ), form_item_input, tab_contact_information_column1 );
-
-		// Gender
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
-		form_item_input.TComboBox( { field: 'sex_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.sex_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab_contact_information_column1 );
 
 		// Home Address (Line 1)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -266,6 +235,12 @@ LoginUserContactViewController = BaseViewController.extend( {
 		var tab_contact_information_column2 = tab_contact_information.find( '.second-column' );
 
 		this.edit_view_tabs[0].push( tab_contact_information_column2 );
+
+		// Gender
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( { field: 'sex_id' } );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.sex_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab_contact_information_column2 );
 
 		// Work Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );

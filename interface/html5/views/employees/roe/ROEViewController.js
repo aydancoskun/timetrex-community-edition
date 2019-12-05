@@ -23,6 +23,7 @@ ROEViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Record Of Employment' );
 		this.navigation_label = $.i18n._( 'Record Of Employment' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIROE' ))();
+		this.report_api = new (APIFactory.getAPIClass( 'APIROEReport' ))();
 		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
 		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 		this.pay_period_schedule_api = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
@@ -56,227 +57,71 @@ ROEViewController = BaseViewController.extend( {
 		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
 	},
 
-	buildContextMenuModels: function() {
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			groups: {
+				form: {
+					label: $.i18n._( 'Form' ),
+					id: this.viewId + 'Form'
+				}
+			},
+			exclude: [ContextMenuIconName.view],
+			include: [
+				{
+					label: $.i18n._( 'View' ),
+					id: 'view_roe', //Don't bother with constant here, as its only used once.
+					group: 'form',
+					icon: Icons.view,
+					sort_order: 2000
+				},
+				{
+					label: $.i18n._( 'eFile' ),
+					id: ContextMenuIconName.e_file,
+					group: 'form',
+					icon: Icons.e_file,
+					sort_order: 2200
+				},
+				{
+					label: $.i18n._( 'Save Setup' ),
+					id: ContextMenuIconName.save_setup,
+					group: 'form',
+					icon: Icons.save_setup,
+					sort_order: 2900
+				},
+				{
+					label: $.i18n._( 'Pay Stubs' ),
+					id: ContextMenuIconName.pay_stub,
+					group: 'navigation',
+					icon: Icons.pay_stubs
+				},
+				{
+					label: $.i18n._( 'Edit<br>Employee' ),
+					id: ContextMenuIconName.edit_employee,
+					group: 'navigation',
+					icon: Icons.employee
+				},
+				{
+					label: $.i18n._( 'TimeSheet' ),
+					id: ContextMenuIconName.timesheet,
+					group: 'navigation',
+					icon: Icons.timesheet
+				}
+			]
+		};
 
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
+		if ( ( Global.getProductEdition() >= 15 ) ) {
+			var publish = {
+				label: $.i18n._( 'Publish' ),
+				id: 'publish_roe', //Don't bother with constant here, as its only used once.
+				group: 'form',
+				icon: 'payroll_remittance_agency-35x35.png',
+				sort_order: 2100
+			};
 
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
+			context_menu_model.include.unshift( publish );
+		}
 
-		var form_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Form' ),
-			id: this.viewId + 'Form',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var navigation_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Navigation' ),
-			id: this.viewId + 'navigation',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var other_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Other' ),
-			id: this.viewId + 'other',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var add = new RibbonSubMenu( {
-			label: $.i18n._( 'New' ),
-			id: ContextMenuIconName.add,
-			group: editor_group,
-			icon: Icons.new_add,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var mass_edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Mass<br>Edit' ),
-			id: ContextMenuIconName.mass_edit,
-			group: editor_group,
-			icon: Icons.mass_edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var del = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete' ),
-			id: ContextMenuIconName.delete_icon,
-			group: editor_group,
-			icon: Icons.delete_icon,
-			permission_result: true,
-			permission: null
-		} );
-
-		var delAndNext = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete<br>& Next' ),
-			id: ContextMenuIconName.delete_and_next,
-			group: editor_group,
-			icon: Icons.delete_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy' ),
-			id: ContextMenuIconName.copy,
-			group: editor_group,
-			icon: Icons.copy_as_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy_as_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy<br>as New' ),
-			id: ContextMenuIconName.copy_as_new,
-			group: editor_group,
-			icon: Icons.copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save,
-			group: editor_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_continue = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Continue' ),
-			id: ContextMenuIconName.save_and_continue,
-			group: editor_group,
-			icon: Icons.save_and_continue,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_next = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Next' ),
-			id: ContextMenuIconName.save_and_next,
-			group: editor_group,
-			icon: Icons.save_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Copy' ),
-			id: ContextMenuIconName.save_and_copy,
-			group: editor_group,
-			icon: Icons.save_and_copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& New' ),
-			id: ContextMenuIconName.save_and_new,
-			group: editor_group,
-			icon: Icons.save_and_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view_roe = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: 'view_roe', //Don't bother with constant here, as its only used once.
-			group: form_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var efile = new RibbonSubMenu( {
-			label: $.i18n._( 'eFile' ),
-			id: ContextMenuIconName.e_file,
-			group: form_group,
-			icon: Icons.e_file,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_setup = new RibbonSubMenu( {
-			label: $.i18n._( 'Save Setup' ),
-			id: ContextMenuIconName.save_setup,
-			group: form_group,
-			icon: Icons.save_setup,
-			permission_result: true,
-			permission: null
-		} );
-
-		var pay_stubs = new RibbonSubMenu( {
-			label: $.i18n._( 'Pay Stubs' ),
-			id: ContextMenuIconName.pay_stub,
-			group: navigation_group,
-			icon: Icons.pay_stubs,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit_employee = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit<br>Employee' ),
-			id: ContextMenuIconName.edit_employee,
-			group: navigation_group,
-			icon: Icons.employee,
-			permission_result: true,
-			permission: null
-		} );
-
-		var timesheet = new RibbonSubMenu( {
-			label: $.i18n._( 'TimeSheet' ),
-			id: ContextMenuIconName.timesheet,
-			group: navigation_group,
-			icon: Icons.timesheet,
-			permission_result: true,
-			permission: null
-		} );
-
-		var export_excel = new RibbonSubMenu( {
-			label: $.i18n._( 'Export' ),
-			id: ContextMenuIconName.export_excel,
-			group: navigation_group,
-			icon: Icons.export_excel,
-			permission_result: true,
-			permission: null,
-			sort_order: 9000
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
@@ -342,16 +187,13 @@ ROEViewController = BaseViewController.extend( {
 				case ContextMenuIconName.copy_as_new:
 					this.setDefaultMenuCopyAsNewIcon( context_btn, grid_selected_length );
 					break;
-				case ContextMenuIconName.login:
-					this.setDefaultMenuLoginIcon( context_btn, grid_selected_length );
-					break;
 				case ContextMenuIconName.cancel:
 					this.setDefaultMenuCancelIcon( context_btn, grid_selected_length );
 					break;
-				case ContextMenuIconName.import_icon:
-					this.setDefaultMenuImportIcon( context_btn, grid_selected_length );
-					break;
 				case 'view_roe':
+					this.setDefaultMenuViewIcon( context_btn, grid_selected_length );
+					break;
+				case 'publish_roe':
 					this.setDefaultMenuViewIcon( context_btn, grid_selected_length );
 					break;
 				case ContextMenuIconName.print:
@@ -374,13 +216,10 @@ ROEViewController = BaseViewController.extend( {
 				case ContextMenuIconName.export_excel:
 					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
 					break;
-
 			}
-
 		}
 
 		this.setContextMenuGroupVisibility();
-
 	},
 
 	setDefaultMenuPrintIcon: function( context_btn, grid_selected_length, pId ) {
@@ -921,6 +760,7 @@ ROEViewController = BaseViewController.extend( {
 			case 'view_roe':
 			case ContextMenuIconName.print:
 			case ContextMenuIconName.e_file:
+			case 'publish_roe':
 			case ContextMenuIconName.export_excel:
 				this.onNavigationClick( id );
 				break;
@@ -1079,6 +919,20 @@ ROEViewController = BaseViewController.extend( {
 			case 'view_roe':
 				post_data = { 0: args, 1: 'pdf_form' };
 				this.doFormIFrameCall( post_data );
+				break;
+			case 'publish_roe':
+				this.report_api.getROEReport( args, 'pdf_form_publish_employee', {
+					onResult: function( result ) {
+						if ( result.isValid() ) {
+							var retval = result.getResult();
+							if ( retval ) {
+								UserGenericStatusWindowController.open( retval, LocalCacheData.getLoginUser().id );
+							}
+						} else {
+							TAlertManager.showErrorAlert( result );
+						}
+					}
+				} );
 				break;
 			case ContextMenuIconName.print:
 				post_data = { 0: args, 1: 'pdf_form_print' };

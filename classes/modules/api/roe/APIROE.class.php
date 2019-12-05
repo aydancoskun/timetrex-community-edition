@@ -200,6 +200,10 @@ class APIROE extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('roe', 'enabled')
 				OR !( $this->getPermissionObject()->Check('roe', 'edit') OR $this->getPermissionObject()->Check('roe', 'edit_own') OR $this->getPermissionObject()->Check('roe', 'edit_child') OR $this->getPermissionObject()->Check('roe', 'add') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
@@ -333,6 +337,10 @@ class APIROE extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('roe', 'enabled')

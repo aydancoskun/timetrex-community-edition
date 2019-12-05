@@ -110,10 +110,11 @@ class AccrualBalanceSummaryReport extends Report {
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
+										'-5040-page_break' => TTi18n::gettext('Page Break On'),
 								);
 				break;
 			case 'time_period':
-				$retval = TTDate::getTimePeriodOptions();
+				$retval = TTDate::getTimePeriodOptions( FALSE );
 				break;
 			case 'date_columns':
 				$retval = array_merge(
@@ -271,6 +272,8 @@ class AccrualBalanceSummaryReport extends Report {
 										'-1290-by_employee_by_date+accrual' => TTi18n::gettext('Accruals By Account/Type/Employee/Date'),
 										'-1300-by_date+accrual' => TTi18n::gettext('Accruals By Account/Type/Date'),
 
+										'-1310-by_employee_by_policy+accrual' => TTi18n::gettext('Accruals By Employee/Account'),
+
 										'-1320-overall_balance_to_date' => TTi18n::gettext('Overall Balance To Date'),
 										'-1350-overall_balance' => TTi18n::gettext('Overall Balance'),
 								);
@@ -335,6 +338,20 @@ class AccrualBalanceSummaryReport extends Report {
 							$retval['sort'][] = array('accrual_policy_account' => 'asc');
 							$retval['sort'][] = array('last_name' => 'asc');
 							$retval['sort'][] = array('first_name' => 'asc');
+							break;
+						case 'by_employee_by_policy+accrual':
+							$retval['columns'][] = 'full_name';
+							$retval['columns'][] = 'accrual_policy_account';
+
+							$retval['columns'][] = 'amount';
+
+							$retval['group'][] = 'full_name';
+							$retval['group'][] = 'accrual_policy_account';
+
+							$retval['sub_total'][] = 'full_name';
+
+							$retval['sort'][] = array('full_name' => 'asc');
+							$retval['sort'][] = array('accrual_policy_account' => 'asc');
 							break;
 						case 'by_policy_by_type_by_employee+accrual':
 							$retval['columns'][] = 'accrual_policy_account';

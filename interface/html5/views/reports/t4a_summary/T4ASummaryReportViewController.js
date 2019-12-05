@@ -15,164 +15,61 @@ T4ASummaryReportViewController = ReportBaseViewController.extend( {
 		this.include_form_setup = true;
 	},
 
-	buildContextMenuModels: function() {
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			groups: {
+				form: {
+					label: $.i18n._( 'Form' ),
+					id: this.viewId + 'Form'
+				}
+			},
+			exclude: [],
+			include: [
+				{
+					label: $.i18n._( 'eFile' ),
+					id: ContextMenuIconName.e_file_xml,
+					group: 'form',
+					icon: Icons.e_file
+				},
+				{
+					label: $.i18n._( 'Save Setup' ),
+					id: ContextMenuIconName.save_setup,
+					group: 'form',
+					icon: Icons.save_setup
+				}
+			]
+		};
 
-
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var saved_report_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Saved Report' ),
-			id: this.viewId + 'SavedReport',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var form_setup_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Form' ),
-			id: this.viewId + 'Form',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var view_html = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view_html,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view_pdf = new RibbonSubMenu( {
-			label: $.i18n._( 'PDF' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.print,
-			permission_result: true,
-			permission: null
-		} );
-
-		var excel = new RibbonSubMenu( {
-			label: $.i18n._( 'Excel' ),
-			id: ContextMenuIconName.export_excel,
-			group: editor_group,
-			icon: Icons.export_excel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_existed_report = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save_existed_report,
-			group: saved_report_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_new_report = new RibbonSubMenu( {
-			label: $.i18n._( 'Save as New' ),
-			id: ContextMenuIconName.save_new_report,
-			group: saved_report_group,
-			icon: Icons.save_and_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view_print = new RibbonSubMenu( {
+		var view_print = {
 			label: $.i18n._( 'View' ),
 			id: ContextMenuIconName.view_print,
-			group: form_setup_group,
+			group: 'form',
 			icon: 'view-35x35.png',
 			type: RibbonSubMenuType.NAVIGATION,
-			items: [],
+			items: [
+				{
+					label: $.i18n._( 'Government (Multiple Employees/Page)' ),
+					id: 'pdf_form_government'
+				},
+				{
+					label: $.i18n._( 'Employee (One Employee/Page)' ),
+					id: 'pdf_form'
+				}
+			],
 			permission_result: true,
 			permission: true
-		} );
-
-		var pdf_form_government = new RibbonSubMenuNavItem( {
-			label: $.i18n._( 'Government (Multiple Employees/Page)' ),
-			id: 'pdf_form_government',
-			nav: view_print
-		} );
-
-		var pdf_form = new RibbonSubMenuNavItem( {
-			label: $.i18n._( 'Employee (One Employee/Page)' ),
-			id: 'pdf_form',
-			nav: view_print
-		} );
+		};
 
 		if ( ( Global.getProductEdition() >= 15 ) ) {
-			var pdf_form_publish_employee = new RibbonSubMenuNavItem( {
+			view_print.items.push( {
 				label: $.i18n._( 'Publish Employee Forms' ),
-				id: 'pdf_form_publish_employee',
-				nav: view_print
+				id: 'pdf_form_publish_employee'
 			} );
 		}
 
-		// var print_print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
-		// 	id: ContextMenuIconName.print,
-		// 	group: form_setup_group,
-		// 	icon: 'print-35x35.png',
-		// 	type: RibbonSubMenuType.NAVIGATION,
-		// 	items: [],
-		// 	permission_result: true,
-		// 	permission: true} );
-		//
-		// var pdf_form_print_government = new RibbonSubMenuNavItem( {label: $.i18n._( 'Government (Multiple Employees/Page)' ),
-		// 	id: 'pdf_form_print_government',
-		// 	nav: print_print
-		// } );
-		//
-		// var pdf_form_print = new RibbonSubMenuNavItem( {label: $.i18n._( 'Employee (One Employee/Page)' ),
-		// 	id: 'pdf_form_print',
-		// 	nav: print_print
-		// } );
+		context_menu_model.include.unshift( view_print );
 
-		var eFile = new RibbonSubMenu( {
-			label: $.i18n._( 'eFile' ),
-			id: ContextMenuIconName.e_file_xml,
-			group: form_setup_group,
-			icon: Icons.e_file,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_setup = new RibbonSubMenu( {
-			label: $.i18n._( 'Save Setup' ),
-			id: ContextMenuIconName.save_setup,
-			group: form_setup_group,
-			icon: Icons.save_setup,
-			permission_result: true,
-			permission: null
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	initOptions: function( callBack ) {

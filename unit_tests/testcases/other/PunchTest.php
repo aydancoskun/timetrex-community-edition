@@ -174,7 +174,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setStartWeekDay( 0 );
 
 
-		$anchor_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) ); //Start 6 weeks ago
+		$anchor_date = TTDate::getBeginWeekEpoch( TTDate::incrementDate( time(), -42, 'day' ) ); //Start 6 weeks ago
 
 		$ppsf->setAnchorDate( $anchor_date );
 
@@ -221,16 +221,15 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 					if ( $initial_date !== FALSE ) {
 						$end_date = $initial_date;
 					} else {
-						//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
-						$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) );
+						$end_date = TTDate::getBeginWeekEpoch( TTDate::incrementDate( time(), -42, 'day' ) );
 					}
 				} else {
-					$end_date = ( $end_date + ( (86400 * 14) ) );
+					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -857,7 +856,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -901,7 +900,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1036,12 +1035,12 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$date_epoch2 = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
-		$date_epoch3 = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch3 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp3 = TTDate::getDate('DATE', $date_epoch3 );
-		$date_epoch4 = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch4 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp4 = TTDate::getDate('DATE', $date_epoch4 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1181,7 +1180,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1228,7 +1227,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1335,7 +1334,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1379,7 +1378,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1428,7 +1427,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//First punch pair
@@ -1553,7 +1552,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
@@ -1603,7 +1602,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
@@ -1649,7 +1648,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
@@ -1686,7 +1685,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
@@ -1721,7 +1720,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ); //Start weeks on Monday so DST change doesn't affect this.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
@@ -2030,7 +2029,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2090,7 +2089,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN and Lunch Out punch.
@@ -2163,7 +2162,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN and Lunch Out punch.
@@ -2225,7 +2224,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2304,7 +2303,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2399,7 +2398,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2493,7 +2492,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2588,7 +2587,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2682,7 +2681,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2776,7 +2775,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2880,7 +2879,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2985,7 +2984,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -3017,7 +3016,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		TTDate::setTimeZone('MST7MDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		//After the timezone has been changed, re-get the date_epoch2 so it matches in the correct timezone.
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -3090,7 +3089,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -3170,7 +3169,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -6024,7 +6023,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( $date_epoch + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -6082,7 +6081,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( $date_epoch + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -6143,7 +6142,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( $date_epoch + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -6202,7 +6201,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( $date_epoch + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -6268,7 +6267,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( $date_epoch + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -6847,7 +6846,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								 TRUE
 		);
 
-		$date_epoch = ( TTDate::getBeginWeekEpoch( time() ) + ( 86400 + 3601 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
@@ -6918,7 +6917,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								  TRUE
 		);
 
-		$date_epoch = ( TTDate::getBeginWeekEpoch( time() ) + ( 86400 + 3601 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
@@ -8094,7 +8093,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ); //Start weeks on Monday so DST switchover does cause problems.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8139,7 +8138,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8179,7 +8178,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create two punch pairs with the minimum time between shifts, so they both fall on the same day, but are considered two separate shifts.
@@ -8243,7 +8242,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create two punch pairs with LESS than the minimum time between shifts, so they both fall on the same day, but are considered ONE shift and therefore fails.
@@ -8314,6 +8313,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$fail_transaction = FALSE;
 		$pf = TTnew( 'PunchFactory' ); /** @var PunchFactory $pf */
+		$pf->StartTransaction();
 		$pf->setTransfer( FALSE );
 		$pf->setUser( $this->user_id );
 		$pf->setType( 10 );
@@ -8328,7 +8328,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_control_id = $pf->findPunchControlID();
 		$pf->setPunchControlID( $punch_control_id );
 		if ( $pf->isValid() ) {
-			if ( $punch_id = $pf->Save( FALSE ) === FALSE ) {
+			$punch_id = $pf->Save( FALSE );
+			if ( $punch_id === FALSE ) {
 				Debug::Text(' aFail Transaction: ', __FILE__, __LINE__, __METHOD__, 10);
 				$fail_transaction = TRUE;
 			}
@@ -8354,7 +8355,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 				if ( $fail_transaction == FALSE ) {
 					Debug::Text('Punch Control ID: '. $punch_control_id, __FILE__, __LINE__, __METHOD__, 10);
-					$pf->CommitTransaction();
 				}
 			}
 		}
@@ -8367,15 +8367,18 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$db2->Connect( $config_vars['database']['host'], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name']);
 
 		try {
-			$db2->Execute('INSERT INTO punch ( ID, PUNCH_CONTROL_ID, STATION_ID, TYPE_ID, STATUS_ID, TIME_STAMP, ORIGINAL_TIME_STAMP, ACTUAL_TIME_STAMP, CREATED_DATE, CREATED_BY, UPDATED_DATE, UPDATED_BY, LONGITUDE, LATITUDE, POSITION_ACCURACY )
-							VALUES ( 3'. ( $punch_id + 1 ) .', '. (int)$punch_control_id .', 111125, 10, 10, \'2013-11-02 8:00:00\', \'2013-11-02 8:00:00\', \'2013-11-02 8:00:00\', 1461089023, 178455, 1461089023, 178455, 0.0000000000, 0.0000000000, 0.0000000000 )');
+			$query = 'INSERT INTO punch ( ID, PUNCH_CONTROL_ID, STATION_ID, TYPE_ID, STATUS_ID, TIME_STAMP, ORIGINAL_TIME_STAMP, ACTUAL_TIME_STAMP, CREATED_DATE, CREATED_BY, UPDATED_DATE, UPDATED_BY, LONGITUDE, LATITUDE, POSITION_ACCURACY ) VALUES ( '. $db2->qstr( TTUUID::generateUUID() ) .', '. $db2->qstr( $punch_control_id ) .', '. $db2->qstr( TTUUID::generateUUID() ) .', 10, 10, \'2013-11-02 8:00:00\', \'2013-11-02 8:00:00\', \'2013-11-02 8:00:00\', 1461089023, '. $db2->qstr( TTUUID::generateUUID() ) .', 1461089023, '. $db2->qstr( TTUUID::generateUUID() ) .', 0.0000000000, 0.0000000000, 0.0000000000 )';
+			$db2->Execute( $query );
+
+			$this->assertTRUE( FALSE ); //Should never get here
 		} catch (Exception $e) {
-			try {
-				$this->assertEquals( $e->getCode(), -5 );
-				throw new DBError($e);
-			} catch (Exception $e) {
-				$this->assertEquals( $e->getCode(), 0 );
-			}
+			$this->assertEquals( $e->getCode(), -5 );
+//			try {
+//				$this->assertEquals( $e->getCode(), -5 );
+//				throw new DBError($e);
+//			} catch (Exception $e) {
+//				$this->assertEquals( $e->getCode(), 0 );
+//			}
 		}
 
 		$pf->FailTransaction();

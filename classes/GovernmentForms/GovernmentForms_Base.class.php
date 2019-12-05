@@ -53,11 +53,20 @@ class GovernmentForms_Base {
 	public $pdf_object = NULL;
 	public $template_index = array();
 	public $current_template_index = NULL;
-	public $page_offsets = array( 0, 0 ); //x, y
-	public $template_offsets = array( 0, 0 ); //x, y
+
+	public $page_margins = array( 0, 43 ); //x, y - 43pt = 15mm Absolute margins that affect all drawing and templates.
+	public $page_offsets = array(0, 0 ); //x, y - Only affects drawing.
+	public $template_offsets = array( 0, 0 ); //x, y - Only affects templates.
+
+	public $temp_page_offsets = array(0, 0 ); //x, y - Only affects drawing and is reset based on page_offets above.
+
 	public $show_background = TRUE; //Shows the PDF background
 	public $default_font = 'helvetica';
 
+	function __construct() {
+		$this->temp_page_offsets = $this->page_offsets; //Default temp page offets to whatever page offsets is originally set to.
+		return TRUE;
+	}
 
 	function setDebug( $bool ) {
 		$this->debug = $bool;
@@ -349,8 +358,46 @@ class GovernmentForms_Base {
 		return $this->show_background;
 	}
 
+	function setPageMargins( $x, $y ) {
+		$this->page_margins = array( $x, $y );
+		return TRUE;
+	}
+	function getPageMargins( $type = NULL ) {
+		switch ( strtolower($type) ) {
+			case 'x':
+				return $this->page_margins[0];
+				break;
+			case 'y':
+				return $this->page_margins[1];
+				break;
+			default:
+				return $this->page_margins;
+				break;
+		}
+	}
+
+	function setTempPageOffsets( $x, $y ) {
+		$this->temp_page_offsets = array( $x, $y );
+		return TRUE;
+	}
+	function getTempPageOffsets( $type = NULL ) {
+		switch ( strtolower($type) ) {
+			case 'x':
+				return $this->temp_page_offsets[0];
+				break;
+			case 'y':
+				return $this->temp_page_offsets[1];
+				break;
+			default:
+				return $this->temp_page_offsets;
+				break;
+		}
+	}
+
 	function setPageOffsets( $x, $y ) {
 		$this->page_offsets = array( $x, $y );
+
+		$this->setTempPageOffsets( $x, $y ); //Update temp page offsets each time this is called.
 		return TRUE;
 	}
 	function getPageOffsets( $type = NULL ) {
@@ -366,6 +413,7 @@ class GovernmentForms_Base {
 				break;
 		}
 	}
+
 	function setTemplateOffsets( $x, $y ) {
 		$this->template_offsets = array( $x, $y );
 		return TRUE;
@@ -631,9 +679,9 @@ class GovernmentForms_Base {
 				//Handle combining multiple template together with a X,Y offset.
 				foreach( $schema['combine_templates'] as $combine_template ) {
 					//Debug::text('Combining Template Pages... Template: '. $combine_template['template_page'] .' Y: '. $combine_template['y'], __FILE__, __LINE__, __METHOD__, 10);
-					$pdf->useTemplate( $this->template_index[$combine_template['template_page']], $combine_template['x']+$this->getTemplateOffsets('x'), $combine_template['y']+$this->getTemplateOffsets('y') );
+					$pdf->useTemplate( $this->template_index[$combine_template['template_page']], ( $combine_template['x'] + $this->getTemplateOffsets('x') + $this->getPageMargins('x') ), ( $combine_template['y'] + $this->getTemplateOffsets('y') + $this->getPageMargins('y') ) );
 
-					$this->setPageOffsets( $combine_template['x'], $combine_template['y']);
+					$this->setTempPageOffsets( ( $combine_template['x'] + $this->getPageOffsets('x') ), ( $combine_template['y'] + $this->getPageOffsets('y') ) );
 					$this->current_template_index = $combine_template['template_page'];
 
 					//For things like W2 instruction templates at the bottom half of the page, allow the initPage() function to be disabled for the template.
@@ -642,9 +690,9 @@ class GovernmentForms_Base {
 					}
 				}
 				unset($combine_templates);
-				$this->setPageOffsets( 0, 0 ); //Reset page offsets after each template is initialized.
+				$this->setTempPageOffsets( $this->getPageOffsets('x'), $this->getPageOffsets('y') ); //Reset page offsets after each template is initialized.
 			} else {
-				$pdf->useTemplate( $this->template_index[$schema['template_page']], $this->getTemplateOffsets('x'), $this->getTemplateOffsets('y') );
+				$pdf->useTemplate( $this->template_index[$schema['template_page']], ( $this->getTemplateOffsets('x') + $this->getPageMargins('x') ), ( $this->getTemplateOffsets('y') + $this->getPageMargins('y') ) );
 			}
 		}
 		$this->current_template_index = $schema['template_page'];
@@ -755,7 +803,7 @@ class GovernmentForms_Base {
 				$coordinates['fill'] = 0;
 			}
 
-			$pdf->setXY( $coordinates['x']+$this->getPageOffsets('x'), $coordinates['y']+$this->getPageOffsets('y') );
+			$pdf->setXY( ( $coordinates['x'] + $this->getTempPageOffsets( 'x') + $this->getPageMargins( 'x') ), ( $coordinates['y'] + $this->getTempPageOffsets( 'y') + $this->getPageMargins( 'y') ) );
 
 			if ( $this->getDebug() == TRUE ) {
 				$pdf->setDrawColor( 0, 0, 255 );

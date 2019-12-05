@@ -1111,7 +1111,7 @@ progress::-moz-progress-bar {
     margin: 5px auto;
     width: 98%;
     min-width: 900px;
-    max-width: 1300px;
+    max-width: 1380px;
     border-radius: 4px;
     height: 96%;
 }
@@ -2145,12 +2145,12 @@ progress::-moz-progress-bar {
     top: 0;
     text-align: center;
     width: 100%;
-    background: yellow;
+    background: red;
     vertical-align: middle
 }
 
 .browser-banner .label {
-    color: #ae0000;
+    color: black;
 }
 
 .browser-banner a {

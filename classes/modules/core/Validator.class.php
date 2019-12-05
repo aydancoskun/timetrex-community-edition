@@ -1125,20 +1125,30 @@ class Validator {
 			$errors_arr = $this->errors;
 		}
 
-		if ( count( $errors_arr ) > 0) {
+		if ( is_array( $errors_arr ) AND count( $errors_arr ) > 0) {
 			$output = '';
 			$number_prefix = NULL;
 			$i = 1;
-			foreach ( $errors_arr as $label) {
-				foreach ($label as $msg) {
+			foreach ( $errors_arr as $label ) {
+				foreach ( $label as $msgs ) {
 					if ( $numbered_list == TRUE ) {
 						$number_prefix = $i .'. ';
 					}
-					$output .= $number_prefix . $msg . "\n";
-				}
 
-				$i++;
+					if ( is_array( $msgs ) ) {
+						foreach( $msgs as $msg ) {
+							$output .= $number_prefix . $msg . "\n";
+
+							$i++;
+						}
+					} else {
+						$output .= $number_prefix . $msgs . "\n";
+
+						$i++;
+					}
+				}
 			}
+
 			return $output;
 		}
 

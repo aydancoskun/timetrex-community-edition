@@ -473,11 +473,11 @@ class APIAbsencePolicy extends APIFactory {
 	 * @return array
 	 */
 	function getProjectedAbsencePolicyBalance( $absence_policy_id, $user_id, $epoch, $amount, $previous_amount = 0, $previous_absence_policy_id = FALSE ) {
-		if ( $absence_policy_id == '' ) {
+		if ( $absence_policy_id == '' OR $absence_policy_id == TTUUID::getZeroID() ) {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( $user_id == '' ) {
+		if ( $user_id == '' OR $absence_policy_id == TTUUID::getZeroID() ) {
 			return $this->returnHandler( FALSE );
 		}
 

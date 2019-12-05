@@ -2274,7 +2274,8 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
-			$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc', 'a.time_stamp' => 'asc', 'a.punch_control_id' => 'asc', 'a.status_id' => 'asc' );
+			$order = array( 'a.time_stamp' => 'desc', 'd.last_name' => 'asc', 'd.first_name' => 'asc', 'b.user_id' => 'asc', 'a.status_id' => 'asc' );
+
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -2285,14 +2286,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		if ( isset($filter_data['exclude_user_ids']) ) {
 			$filter_data['exclude_id'] = $filter_data['exclude_user_ids'];
 		}
-/*
-		if ( isset($filter_data['user_id']) ) {
-			$filter_data['id'] = $filter_data['user_id'];
-		}
-		if ( isset($filter_data['include_user_ids']) ) {
-			$filter_data['id'] = $filter_data['include_user_ids'];
-		}
-*/
 		if ( isset($filter_data['user_status_ids']) ) {
 			$filter_data['user_status_id'] = $filter_data['user_status_ids'];
 		}
@@ -2314,25 +2307,10 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		if ( isset($filter_data['punch_department_ids']) ) {
 			$filter_data['department_id'] = $filter_data['punch_department_ids'];
 		}
-
 		if ( isset($filter_data['pay_period_ids']) ) {
 			$filter_data['pay_period_id'] = $filter_data['pay_period_ids'];
 		}
 
-/*
-		if ( isset($filter_data['exclude_job_ids']) ) {
-			$filter_data['exclude_id'] = $filter_data['exclude_job_ids'];
-		}
-		if ( isset($filter_data['include_job_ids']) ) {
-			$filter_data['include_job_id'] = $filter_data['include_job_ids'];
-		}
-		if ( isset($filter_data['job_group_ids']) ) {
-			$filter_data['job_group_id'] = $filter_data['job_group_ids'];
-		}
-		if ( isset($filter_data['job_item_ids']) ) {
-			$filter_data['job_item_id'] = $filter_data['job_item_ids'];
-		}
-*/
 		$uf = new UserFactory();
 		$pcf = new PunchControlFactory();
 		$uwf = new UserWageFactory();

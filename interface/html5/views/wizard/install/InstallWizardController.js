@@ -643,7 +643,7 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 
 				form_item_input.TTextInput( { field: 'password2', width: 200 } );
-				this.addEditFieldToColumn( $.i18n._( 'Password(confirm)' ), form_item_input, user_column1 );
+				this.addEditFieldToColumn( $.i18n._( 'Password (Confirm)' ), form_item_input, user_column1 );
 
 				// First Name
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );

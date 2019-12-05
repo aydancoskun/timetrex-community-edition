@@ -27,14 +27,21 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
 		this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
 		this.render();
 		this.buildContextMenu();
 		this.initData();
 
 		this.setSelectRibbonMenuIfNecessary( 'PayPeriodSchedule' );
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.copy, ContextMenuIconName.mass_edit],
+			include: []
+		};
+
+		return context_menu_model;
 	},
 
 	openEditView: function( id ) {

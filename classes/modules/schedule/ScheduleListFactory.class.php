@@ -1384,7 +1384,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
-			$order = array( 'a.pay_period_id' => 'asc', 'a.user_id' => 'asc', 'a.start_time' => 'asc' );
+			$order = array( 'a.start_time' => 'desc', 'd.last_name' => 'asc', 'd.first_name' => 'asc', 'a.user_id' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;

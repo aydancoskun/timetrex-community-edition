@@ -564,8 +564,8 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 
 				if ( $this->getType() == 'government' AND count( $records ) > 1 ) {
 					$template_schema[0]['combine_templates'] = array(
-							array('template_page' => $form_template_page, 'x' => 0, 'y' => 0),
-							array('template_page' => $form_template_page, 'x' => 0, 'y' => 400) //Place two templates on the same page.
+							array('template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets('x') ), 'y' => ( 0 + $this->getTemplateOffsets('y') ) ),
+							array('template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets('x') ), 'y' => ( 380 + $this->getTemplateOffsets('y') ) ) //Place two templates on the same page.
 					);
 				} else {
 					Debug::Text( 'zTemplate Page: ' . $form_template_page . ' C: ' . count( $records ) . ' B: ' . $this->getShowBackground() . ' D: ' . $this->getType() . ' X: ' . $this->_type, __FILE__, __LINE__, __METHOD__, 10 );
@@ -578,12 +578,12 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					$this->arrayToObject( $employee_data ); //Convert record array to object
 
 					for ( $i = 0; $i < $n; $i++ ) {
-						$this->setPageOffsets( 0, 0 );
+						$this->setTempPageOffsets( $this->getPageOffsets('x'), $this->getPageOffsets('y') );
 
 						if ( ( $employees_per_page == 1 AND $i > 0 )
 								OR ( $employees_per_page == 2 AND $e % 2 != 0 )
 						) {
-							$this->setPageOffsets( 0, $template_schema[0]['combine_templates'][1]['y'] );
+							$this->setTempPageOffsets( $this->getPageOffsets('x'), ( $template_schema[0]['combine_templates'][1]['y'] + $this->getPageOffsets('y') ) );
 						}
 
 						foreach ( $template_schema as $field => $schema ) {

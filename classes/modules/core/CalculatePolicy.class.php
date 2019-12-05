@@ -910,6 +910,11 @@ class CalculatePolicy {
 								'status_id' => $status_ids,
 								'exclude_id' => array_keys( (array)$this->schedule ),
 							);
+
+		if ( $order == NULL ) {
+			$order = array( 'a.date_stamp' => 'asc', 'a.start_time' => 'asc' );
+		}
+
 		Debug::text('Getting Schedule Data for Start Date: '. TTDate::getDate('DATE+TIME', $filter_data['start_date'] ) .' End: '. TTDate::getDate('DATE+TIME', $filter_data['end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 		$slf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, $limit, NULL, NULL, $order );
 		if ( $slf->getRecordCount() > 0 ) {
@@ -2811,9 +2816,13 @@ class CalculatePolicy {
 					//Even if the combined_rate is lower, if the input UDT record is not overtime, then we know some UDT records were skipped over likely due to differential criteria OT policies that only matched the middle of a shift.
 					//  See Unit Test: OvertimePolicy_testDifferentialDailyOverTimePolicyE1
 					//  Some of these checks are also in: $this->calculateOverTimePolicy()
-					if (	$current_trigger_time_arr['combined_rate'] > $prev_policy_data['combined_rate']
-							OR
-							( $current_trigger_time_arr['combined_rate'] == $prev_policy_data['combined_rate'] AND $current_trigger_time_arr['calculation_order'] <= $prev_policy_data['calculation_order'] )
+					if (	(
+								!is_array( $prev_policy_data ) //On the first run, prev_policy_data is always FALSE, so don't bother checking $prev_policy_data['combined_rate'] as it doesn't exist and triggers PHP NOTICE errors.
+								OR
+								( $current_trigger_time_arr['combined_rate'] > $prev_policy_data['combined_rate'] )
+								OR
+								( $current_trigger_time_arr['combined_rate'] == $prev_policy_data['combined_rate'] AND $current_trigger_time_arr['calculation_order'] <= $prev_policy_data['calculation_order'] )
+							)
 							OR
 							//This may cause problems with banked time, as there wouldn't be an hourly rate associated with it, but there would be a combined_rate (accrual rate)
 							$hourly_rate >= $udt_obj->getHourlyRate() ) {
@@ -6522,7 +6531,8 @@ class CalculatePolicy {
 			Debug::Text('Currency Rates rows before gaps filled: '. count( $this->currency_rates ), __FILE__, __LINE__, __METHOD__, 10);
 
 			//Loop through all days and fill in any currency gaps.
-			for( $x = TTDate::getBeginDayEpoch( $start_date ); $x <= TTDate::getBeginDayEpoch( $end_date ); $x += 86400 ) {
+			//for( $x = TTDate::getBeginDayEpoch( $start_date ); $x <= TTDate::getBeginDayEpoch( $end_date ); $x += 86400 ) {
+			foreach( TTDate::getDatePeriod( TTDate::getBeginDayEpoch( $start_date ), TTDate::getBeginDayEpoch( $end_date ), 'P1D' ) as $x ) {
 				if ( !isset($this->currency_rates[$x]) ) {
 					Debug::Text(' Filling in gap: Date: '. TTDate::getDate('DATE', $x ) .' with Rate: 1', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -6827,19 +6837,27 @@ class CalculatePolicy {
 
 										$total_time = $punch_total_time;
 										if ( $pp_obj->getMinimumTime() > 0 OR $pp_obj->getMaximumTime() > 0 ) {
-											$premium_policy_daily_total_time = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByPayCodeIDs( $date_stamp, $date_stamp, $pp_obj->getPayCode() ) );
+											if ( $pp_obj->getMinMaxTimeType() == 30 ) { //30=Punch Pair - Resets Min/Max time each punch pair.
+												$premium_policy_daily_total_time = 0;
+											} else {
+												$premium_policy_daily_total_time = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByPayCodeIDs( $date_stamp, $date_stamp, $pp_obj->getPayCode() ) );
+											}
 											Debug::text(' Premium Policy Daily Total Time: '. $premium_policy_daily_total_time .' Minimum Time: '. $pp_obj->getMinimumTime() .' Maximum Time: '. $pp_obj->getMaximumTime() .' Total Time: '. $total_time, __FILE__, __LINE__, __METHOD__, 10);
 
 											if ( $pp_obj->getMinimumTime() > 0 ) {
-												//FIXME: Split the minimum time up between all the punches somehow.
-												//Apply the minimum time on the last punch, otherwise if there are two punch pairs of 15min each
-												//and a 1hr minimum time, if the minimum time is applied to the first, it will be 1hr and 15min
-												//for the day. If its applied to the last it will be just 1hr.
-												//Min & Max time is based on the shift time, rather then per punch pair time.
-												//FIXME: If there is a minimum time set to say 9hrs, and the punches go like this:
-												// In: 7:00AM Out: 3:00:PM, Out: 3:30PM (missing 2nd In Punch), the minimum time won't be calculated due to the invalid punch pair.
-												if ( $i == $user_date_total_rows_count AND bcadd( $premium_policy_daily_total_time, $total_time ) < $pp_obj->getMinimumTime() ) {
-													$total_time = bcsub( $pp_obj->getMinimumTime(), $premium_policy_daily_total_time );
+												if ( $pp_obj->getMinMaxTimeType() == 30 ) { //30=Punch Pair - Resets Min/Max time each punch pair.
+													$total_time = $pp_obj->getMinimumTime();
+												} else {
+													//FIXME: Split the minimum time up between all the punches somehow.
+													//Apply the minimum time on the last punch, otherwise if there are two punch pairs of 15min each
+													//and a 1hr minimum time, if the minimum time is applied to the first, it will be 1hr and 15min
+													//for the day. If its applied to the last it will be just 1hr.
+													//Min & Max time is based on the shift time, rather then per punch pair time.
+													//FIXME: If there is a minimum time set to say 9hrs, and the punches go like this:
+													// In: 7:00AM Out: 3:00:PM, Out: 3:30PM (missing 2nd In Punch), the minimum time won't be calculated due to the invalid punch pair.
+													if ( $i == $user_date_total_rows_count AND bcadd( $premium_policy_daily_total_time, $total_time ) < $pp_obj->getMinimumTime() ) {
+														$total_time = bcsub( $pp_obj->getMinimumTime(), $premium_policy_daily_total_time );
+													}
 												}
 											}
 
@@ -6976,13 +6994,21 @@ class CalculatePolicy {
 
 														$total_time = $punch_total_time;
 														if ( $pp_obj->getMinimumTime() > 0 OR $pp_obj->getMaximumTime() > 0 ) {
-															$premium_policy_daily_total_time = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByPayCodeIDs( $date_stamp, $date_stamp, $pp_obj->getPayCode() ) );
+															if ( $pp_obj->getMinMaxTimeType() == 30 ) { //30=Punch Pair - Resets Min/Max time each punch pair.
+																$premium_policy_daily_total_time = 0;
+															} else {
+																$premium_policy_daily_total_time = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByPayCodeIDs( $date_stamp, $date_stamp, $pp_obj->getPayCode() ) );
+															}
 															Debug::text(' Premium Policy Daily Total Time: '. $premium_policy_daily_total_time .' Minimum Time: '. $pp_obj->getMinimumTime() .' Maximum Time: '. $pp_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
 
 															if ( $pp_obj->getMinimumTime() > 0 ) {
-																//FIXME: Split the minimum time up between all the punches somehow.
-																if ( $i == $user_date_total_rows_count AND bcadd( $premium_policy_daily_total_time, $total_time ) < $pp_obj->getMinimumTime() ) {
-																	$total_time = bcsub( $pp_obj->getMinimumTime(), $premium_policy_daily_total_time );
+																if ( $pp_obj->getMinMaxTimeType() == 30 ) { //30=Punch Pair - Resets Min/Max time each punch pair.
+																	$total_time = $pp_obj->getMinimumTime();
+																} else {
+																	//FIXME: Split the minimum time up between all the punches somehow.
+																	if ( $i == $user_date_total_rows_count AND bcadd( $premium_policy_daily_total_time, $total_time ) < $pp_obj->getMinimumTime() ) {
+																		$total_time = bcsub( $pp_obj->getMinimumTime(), $premium_policy_daily_total_time );
+																	}
 																}
 															} else {
 																$total_time = $punch_total_time;
@@ -7215,19 +7241,27 @@ class CalculatePolicy {
 
 													$premium_policy_daily_total_time = 0;
 													if ( $pp_obj->getMinimumTime() > 0 OR $pp_obj->getMaximumTime() > 0 ) {
-														$premium_policy_daily_total_time = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByPayCodeIDs( $date_stamp, $date_stamp, $pp_obj->getPayCode() ) );
+														if ( $pp_obj->getMinMaxTimeType() == 30 ) { //30=Punch Pair - Resets Min/Max time each punch pair.
+															$premium_policy_daily_total_time = 0;
+														} else {
+															$premium_policy_daily_total_time = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByPayCodeIDs( $date_stamp, $date_stamp, $pp_obj->getPayCode() ) );
+														}
 														Debug::text('X: '. $x .'/'. $user_date_total_rows_count .' Premium Policy Daily Total Time: '. $premium_policy_daily_total_time .' Minimum Time: '. $pp_obj->getMinimumTime() .' Maximum Time: '. $pp_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
 
 														if ( $pp_obj->getMinimumTime() > 0 ) {
-															//FIXME: Split the minimum time up between all the punches somehow.
-															//Apply the minimum time on the last punch, otherwise if there are two punch pairs of 15min each
-															//and a 1hr minimum time, if the minimum time is applied to the first, it will be 1hr and 15min
-															//for the day. If its applied to the last it will be just 1hr.
-															//Min & Max time is based on the shift time, rather then per punch pair time.
-															if ( ( $force_minimum_time_calculation == TRUE OR $x == $user_date_total_rows_count ) AND bcadd( $premium_policy_daily_total_time, $punch_total_time ) < $pp_obj->getMinimumTime() ) {
-																$total_time = bcsub( $pp_obj->getMinimumTime(), $premium_policy_daily_total_time );
+															if ( $pp_obj->getMinMaxTimeType() == 30 ) { //30=Punch Pair - Resets Min/Max time each punch pair.
+																$total_time = $pp_obj->getMinimumTime();
 															} else {
-																$total_time = $punch_total_time;
+																//FIXME: Split the minimum time up between all the punches somehow.
+																//Apply the minimum time on the last punch, otherwise if there are two punch pairs of 15min each
+																//and a 1hr minimum time, if the minimum time is applied to the first, it will be 1hr and 15min
+																//for the day. If its applied to the last it will be just 1hr.
+																//Min & Max time is based on the shift time, rather then per punch pair time.
+																if ( ( $force_minimum_time_calculation == TRUE OR $x == $user_date_total_rows_count ) AND bcadd( $premium_policy_daily_total_time, $punch_total_time ) < $pp_obj->getMinimumTime() ) {
+																	$total_time = bcsub( $pp_obj->getMinimumTime(), $premium_policy_daily_total_time );
+																} else {
+																	$total_time = $punch_total_time;
+																}
 															}
 														} else {
 															$total_time = $punch_total_time;
@@ -7361,19 +7395,27 @@ class CalculatePolicy {
 
 										$premium_policy_daily_total_time = 0;
 										if ( $pp_obj->getMinimumTime() > 0 OR $pp_obj->getMaximumTime() > 0 ) {
-											$premium_policy_daily_total_time = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByPayCodeIDs( $date_stamp, $date_stamp, $pp_obj->getPayCode() ) );
+											if ( $pp_obj->getMinMaxTimeType() == 30 ) { //30=Punch Pair - Resets Min/Max time each punch pair.
+												$premium_policy_daily_total_time = 0;
+											} else {
+												$premium_policy_daily_total_time = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByPayCodeIDs( $date_stamp, $date_stamp, $pp_obj->getPayCode() ) );
+											}
 											Debug::text('X: '. $x .'/'. $total_shifts .' Premium Policy Daily Total Time: '. $premium_policy_daily_total_time .' Minimum Time: '. $pp_obj->getMinimumTime() .' Maximum Time: '. $pp_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
 
 											if ( $pp_obj->getMinimumTime() > 0 ) {
-												//FIXME: Split the minimum time up between all the punches somehow.
-												//Apply the minimum time on the last punch, otherwise if there are two punch pairs of 15min each
-												//and a 1hr minimum time, if the minimum time is applied to the first, it will be 1hr and 15min
-												//for the day. If its applied to the last it will be just 1hr.
-												//Min & Max time is based on the shift time, rather then per punch pair time.
-												if ( $x == $total_shifts AND bcadd( $premium_policy_daily_total_time, $punch_total_time ) < $pp_obj->getMinimumTime() ) {
-													$total_time = bcsub( $pp_obj->getMinimumTime(), $premium_policy_daily_total_time );
+												if ( $pp_obj->getMinMaxTimeType() == 30 ) { //30=Punch Pair - Resets Min/Max time each punch pair.
+													$total_time = $pp_obj->getMinimumTime();
 												} else {
-													$total_time = $punch_total_time;
+													//FIXME: Split the minimum time up between all the punches somehow.
+													//Apply the minimum time on the last punch, otherwise if there are two punch pairs of 15min each
+													//and a 1hr minimum time, if the minimum time is applied to the first, it will be 1hr and 15min
+													//for the day. If its applied to the last it will be just 1hr.
+													//Min & Max time is based on the shift time, rather then per punch pair time.
+													if ( $x == $total_shifts AND bcadd( $premium_policy_daily_total_time, $punch_total_time ) < $pp_obj->getMinimumTime() ) {
+														$total_time = bcsub( $pp_obj->getMinimumTime(), $premium_policy_daily_total_time );
+													} else {
+														$total_time = $punch_total_time;
+													}
 												}
 											} else {
 												$total_time = $punch_total_time;
@@ -7598,6 +7640,12 @@ class CalculatePolicy {
 					//   So essentially 4hrs of accrual time is being transferred from Vacation to OT Bank, and the difference is paid.
 					$this->sortUserDateTotalData( $tmp_user_date_total, 'sortUserDateTotalDataByObjectTypeDescAndID' ); //Sorting is inplace.
 					foreach( $tmp_user_date_total as $udt_key => $udt_obj ) {
+						//If total time is 0, there is no point in calculating accrual amounts, so this just avoids creating a 0 hour accrual record.
+						if ( $udt_obj->getTotalTime() == 0 ) {
+							Debug::text('  Total Time is 0, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+							continue;
+						}
+
 						$date_stamp = TTDate::getMiddleDayEpoch( $udt_obj->getDateStamp() ); //Optimization - Move outside loop.
 						//Debug::text('bKey: '. $udt_key .' UDT ID: '. $udt_obj->getID() .' Object Type ID: '. $udt_obj->getObjectType() .' Date: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -7638,7 +7686,7 @@ class CalculatePolicy {
 								$af->setUserDateTotalID( $udt_obj->getID() );
 
 								$accrual_amount = bcmul( $udt_obj->getTotalTime(), $pay_formula_policy_obj->getAccrualRate() );
-								if ( $accrual_amount > 0 ) {
+								if ( $accrual_amount >= 0 ) {
 									$af->setType(10); //Banked
 								} else {
 									$af->setType(20); //Used
@@ -7879,6 +7927,18 @@ class CalculatePolicy {
 	 * @return bool
 	 */
 	function isEligibleForHoliday( $date_stamp, $holiday_policy_obj, $ignore_after_eligibility = FALSE ) {
+		//There can be cases where an infinite loop is caused if a holiday policy references a contributing policy, which itself references the same holiday policy.
+		//  Because this function calls $this->filterUserDateTotalDataByContributingShiftPolicy() which itself calls back into here ( $this->isEligibleForHoliday() )
+		//  This will detect that case and break out of the loop.
+		if ( isset($this->is_calculating_eligible_for_holiday_policy_id) AND $this->is_calculating_eligible_for_holiday_policy_id == $holiday_policy_obj->getId() ) {
+			Debug::text('  WARNING: Infinite Loop detected while trying to determine if eligible for Holiday Policy ID: '. $holiday_policy_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		} else {
+			$this->is_calculating_eligible_for_holiday_policy_id = $holiday_policy_obj->getId();
+		}
+
+		$retval = FALSE;
+
 		//Make sure the employee has been employed long enough according to labor standards
 		//Also make sure that the employee hasn't been terminated on or before the holiday.
 		$this->is_eligible_holiday_description = NULL;
@@ -7896,6 +7956,7 @@ class CalculatePolicy {
 				//Or to disable the holiday policy when the employee does work so overtime policies can just be used instead.
 				if ( $holiday_policy_obj->getShiftOnHolidayType() > 0 ) {
 					$shift_on_holiday = count( $this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $date_stamp, $date_stamp, $this->contributing_shift_policy[$holiday_policy_obj->getEligibleContributingShiftPolicy()], array( 10, 20, 25, 30 ) ) ) );
+
 					$scheduled_working_on_holiday = 0;
 					$scheduled_absent_on_holiday = 0;
 					if ( in_array( $holiday_policy_obj->getShiftOnHolidayType(), array(30, 70, 72, 75 ) ) ) {
@@ -7912,7 +7973,8 @@ class CalculatePolicy {
 						} else {
 							$this->is_eligible_holiday_description = TTi18n::getText('Did not work on the holiday');
 							Debug::text( 'Employee has NOT worked on the holiday!', __FILE__, __LINE__, __METHOD__, 10 );
-							return FALSE;
+							$retval = FALSE;
+							goto END;
 						}
 					} elseif ( $holiday_policy_obj->getShiftOnHolidayType() == 20 ) { //Must NOT work on Holiday
 						if ( $shift_on_holiday == 0 ) {
@@ -7920,7 +7982,8 @@ class CalculatePolicy {
 						} else {
 							//$this->is_eligible_holiday_description = TTi18n::getText('Worked on holiday'); //Hide this, as this case can often be used to disable holiday policy so overtime policy can be used instead.
 							Debug::text( 'Employee has worked on the holiday!', __FILE__, __LINE__, __METHOD__, 10 );
-							return FALSE;
+							$retval = FALSE;
+							goto END;
 						}
 					} elseif ( $holiday_policy_obj->getShiftOnHolidayType() == 30 ) { //If scheduled to work, they must work. Otherwise if not scheduled (or scheduled absent) and they don't work its fine too.
 						if ( $shift_on_holiday > 0 AND $scheduled_working_on_holiday > 0 ) {
@@ -7930,7 +7993,8 @@ class CalculatePolicy {
 						} else {
 							$this->is_eligible_holiday_description = TTi18n::getText('Not worked on holiday when scheduled');
 							Debug::text( 'Employee has NOT worked on the holiday when scheduled!', __FILE__, __LINE__, __METHOD__, 10 );
-							return FALSE;
+							$retval = FALSE;
+							goto END;
 						}
 					} elseif ( $holiday_policy_obj->getShiftOnHolidayType() == 40 ) { //If scheduled absent, they must not work. Otherwise if not scheduled, or scheduled to work and they work that is fine too.
 						if ( $shift_on_holiday == 0 AND $scheduled_absent_on_holiday > 0 ) {
@@ -7940,7 +8004,8 @@ class CalculatePolicy {
 						} else {
 							$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when scheduled absent');
 							Debug::text( 'Employee has worked on the holiday or not scheduled absent!', __FILE__, __LINE__, __METHOD__, 10 );
-							return FALSE;
+							$retval = FALSE;
+							goto END;
 						}
 //					} elseif ( $holiday_policy_obj->getShiftOnHolidayType() == 70 ) { //Must not work, and must be scheduled to work.
 //						if ( $shift_on_holiday == 0 AND $scheduled_working_on_holiday > 0 ) {
@@ -7948,7 +8013,8 @@ class CalculatePolicy {
 //						} else {
 //							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when not scheduled');
 //							Debug::text( 'Employee has worked on the holiday when scheduled, or scheduled absent!', __FILE__, __LINE__, __METHOD__, 10 );
-//							return FALSE;
+//							$retval = FALSE;
+//							goto END;
 //						}
 					} elseif ( $holiday_policy_obj->getShiftOnHolidayType() == 72 ) { //Must not work, and must be scheduled absent. This is useful for holidays that fall on a day that the employee *is* normally scheduled to work.
 						if ( $shift_on_holiday == 0 AND $scheduled_absent_on_holiday > 0 ) {
@@ -7956,15 +8022,18 @@ class CalculatePolicy {
 						} elseif ( $shift_on_holiday == 0 AND $scheduled_working_on_holiday > 0 ) {
 							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when not scheduled');
 							Debug::text( 'Employee has NOT worked and is scheduled to work on holiday!!', __FILE__, __LINE__, __METHOD__, 10 );
-							return FALSE;
+							$retval = FALSE;
+							goto END;
 						} elseif ( $shift_on_holiday == 0 AND $scheduled_absent_on_holiday == 0 AND $scheduled_working_on_holiday == 0 ) {
 							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when scheduled absent');
 							Debug::text( 'Employee has NOT worked on the holiday and NOT scheduled!', __FILE__, __LINE__, __METHOD__, 10 );
-							return FALSE;
+							$retval = FALSE;
+							goto END;
 						} elseif ( $shift_on_holiday > 0 ) {
 							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday');
 							Debug::text( 'Employee has worked on holiday!!', __FILE__, __LINE__, __METHOD__, 10 );
-							return FALSE;
+							$retval = FALSE;
+							goto END;
 						}
 					} elseif ( $holiday_policy_obj->getShiftOnHolidayType() == 75 ) { //Must not work and must not be scheduled to work, or scheduled absent. This is useful for holidays that fall on a day that the employee is not normally scheduled to work.
 						if ( $shift_on_holiday == 0 AND $scheduled_working_on_holiday == 0 AND $scheduled_absent_on_holiday == 0 ) {
@@ -7972,15 +8041,18 @@ class CalculatePolicy {
 						} elseif ( $shift_on_holiday > 0  ) {
 							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when not scheduled');
 							Debug::text( 'Employee has worked on the holiday when not scheduled!', __FILE__, __LINE__, __METHOD__, 10 );
-							return FALSE;
+							$retval = FALSE;
+							goto END;
 						} elseif ( $shift_on_holiday == 0 AND $scheduled_working_on_holiday > 0 ) {
 							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when not scheduled');
 							Debug::text( 'Employee is scheduled to work on holiday!!', __FILE__, __LINE__, __METHOD__, 10 );
-							return FALSE;
+							$retval = FALSE;
+							goto END;
 						} elseif ( $shift_on_holiday == 0 AND $scheduled_absent_on_holiday > 0 ) {
 							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when not scheduled');
 							Debug::text( 'Employee is scheduled absent on holiday!!', __FILE__, __LINE__, __METHOD__, 10 );
-							return FALSE;
+							$retval = FALSE;
+							goto END;
 						}
 					}
 
@@ -7992,7 +8064,7 @@ class CalculatePolicy {
 						Debug::text('BEFORE: Using scheduled days!', __FILE__, __LINE__, __METHOD__, 10);
 
 						//Use 30days as the upper limit. We are passing getScheduleData() a limit option, so performance should be decent.
-						$this->getScheduleData( ( $date_stamp - ( 86400 * 30 ) ), ( $date_stamp - 86400 ), 10, $holiday_policy_obj->getMinimumWorkedPeriodDays(), array( 'a.date_stamp' => 'desc' ) );
+						$this->getScheduleData( ( $date_stamp - ( 86400 * 30 ) ), ( $date_stamp - 86400 ), 10, $holiday_policy_obj->getMinimumWorkedPeriodDays(), array( 'a.date_stamp' => 'desc', 'a.start_time' => 'desc' ) );
 
 						$scheduled_date_stamps_before = $this->getScheduleDates( $this->filterScheduleDataByDateAndDirection( $date_stamp, 10, 'desc', $holiday_policy_obj->getMinimumWorkedPeriodDays() ) );
 						//Debug::Arr( (array)$scheduled_date_stamps_before, 'Scheduled DateStamps Before: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -8022,7 +8094,7 @@ class CalculatePolicy {
 						Debug::text('AFTER: Using scheduled days!', __FILE__, __LINE__, __METHOD__, 10);
 
 						//Use 30days as the upper limit. We are passing getScheduleData() a limit option, so performance should be decent.
-						$this->getScheduleData( ( $date_stamp + 86400 ), ( $date_stamp + ( 86400 * 30 ) ), 10, $holiday_policy_obj->getMinimumWorkedAfterPeriodDays(), array( 'a.date_stamp' => 'asc' ) );
+						$this->getScheduleData( ( $date_stamp + 86400 ), ( $date_stamp + ( 86400 * 30 ) ), 10, $holiday_policy_obj->getMinimumWorkedAfterPeriodDays(), array( 'a.date_stamp' => 'asc', 'a.start_time' => 'asc' ) );
 
 						$scheduled_date_stamps_after = $this->getScheduleDates( $this->filterScheduleDataByDateAndDirection( $date_stamp, 10, 'asc', $holiday_policy_obj->getMinimumWorkedAfterPeriodDays() ) );
 						//Debug::Arr( (array)$scheduled_date_stamps_after, 'Scheduled DateStamps After: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -8081,7 +8153,8 @@ class CalculatePolicy {
 				if ( $worked_before_days_count >= $holiday_policy_obj->getMinimumWorkedDays()
 						AND $worked_after_days_count >= $holiday_policy_obj->getMinimumWorkedAfterDays() ) {
 					Debug::text('Employee has worked enough prior and following days!', __FILE__, __LINE__, __METHOD__, 10);
-					return TRUE;
+					$retval = TRUE;
+					goto END;
 				} else {
 					Debug::text('Employee has NOT worked enough days prior or following the holiday!', __FILE__, __LINE__, __METHOD__, 10);
 					if ( $worked_after_days_count < $holiday_policy_obj->getMinimumWorkedAfterDays() ) {
@@ -8090,18 +8163,31 @@ class CalculatePolicy {
 					if ( $worked_before_days_count < $holiday_policy_obj->getMinimumWorkedDays() ) {
 						$this->is_eligible_holiday_description = TTi18n::getText('Only worked %1 of the required %2 %3 prior to the holiday', array( $worked_before_days_count, $holiday_policy_obj->getMinimumWorkedDays(), TTi18n::strtolower( Option::getByKey( $holiday_policy_obj->getWorkedScheduledDays(), $holiday_policy_obj->getOptions( 'scheduled_day' ) ) ) ) );
 					}
+					$retval = FALSE;
+					goto END;
 				}
 			} else {
 				Debug::text('Standard Holiday Policy type, returning TRUE', __FILE__, __LINE__, __METHOD__, 10);
-				return TRUE;
+				$retval = TRUE;
+				goto END;
 			}
 		} else {
 			Debug::text('Employee has NOT been employed long enough!', __FILE__, __LINE__, __METHOD__, 10);
 			$this->is_eligible_holiday_description = TTi18n::getText('Only employed %1 of the required %2 days', array( floor($current_employed_days), $holiday_policy_obj->getMinimumEmployedDays() ) );
+			$retval = FALSE;
+			goto END;
 		}
 
-		Debug::text('Not eligible for holiday: '. TTDate::getDate('DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		goto END; //Just in case a GOTO call is missed, put a catchall here.
+
+		END: //Always need to be called when finishing this calculation to make sure we always reset is_calculating_eligible_for_holiday_policy_id
+			if ( $retval == FALSE ) {
+				Debug::text( 'Not eligible for holiday: ' . TTDate::getDate( 'DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10 );
+			}
+
+			$this->is_calculating_eligible_for_holiday_policy_id = NULL; //Since we have already called $this->filterUserDateTotalDataByContributingShiftPolicy() we can clear this variable since there is no other way to get into the infinite loop after this point.
+
+			return $retval;
 	}
 
 	/**

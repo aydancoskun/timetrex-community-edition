@@ -42,20 +42,23 @@ BranchViewController = BaseViewController.extend( {
 
 	},
 
-	buildContextMenuModels: function() {
-		var menu = this._super( 'buildContextMenuModels' )[0];
+	getCustomContextMenuModel: function() {
+		var context_menu_model = {
+			exclude: [],
+			include: [
+				{
+					label: $.i18n._( 'Import' ),
+					id: ContextMenuIconName.import_icon,
+					group: 'other',
+					icon: Icons.import_icon,
+					permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVBranch' ),
+					permission: null,
+					sort_order: 8000
+				}
+			]
+		};
 
-		var import_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Import' ),
-			id: ContextMenuIconName.import_icon,
-			group: this.getContextMenuGroupByName( menu, 'other' ),
-			icon: Icons.import_icon,
-			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVBranch' ),
-			permission: null,
-			sort_order: 8000
-		} );
-
-		return [menu];
+		return context_menu_model;
 	},
 
 	onSetSearchFilterFinished: function() {

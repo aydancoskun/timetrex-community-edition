@@ -754,12 +754,12 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 				$template_page = NULL;
 
 				for ( $i = 0; $i < $n; $i++ ) {
-					$this->page_offsets = array(0, 0);
+					$this->setTempPageOffsets( $this->getPageOffsets('x'), $this->getPageOffsets('y') );
 
 					if ( ( $employees_per_page == 1 AND $i > 0 )
 							OR ( $employees_per_page == 2 AND $e % 2 != 0 )
 					) {
-						$this->page_offsets = array(0, 396);
+						$this->setTempPageOffsets( $this->getPageOffsets('x'), ( 396 + $this->getPageOffsets('y') ) );
 					}
 
 					foreach ( $template_schema as $field => $schema ) {

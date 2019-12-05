@@ -85,6 +85,10 @@ class APIUserLicense extends APIFactory {
 	function getUserLicense( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('user_license', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_license', 'view') OR $this->getPermissionObject()->Check('user_license', 'view_own') OR $this->getPermissionObject()->Check('user_license', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -168,6 +172,10 @@ class APIUserLicense extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('user_license', 'enabled')
@@ -294,6 +302,10 @@ class APIUserLicense extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('user_license', 'enabled')

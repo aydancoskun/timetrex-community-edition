@@ -33,20 +33,6 @@ InOutViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'In/Out' );
 		this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.add] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.view] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_icon] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
-
 		//Tried to fix  Cannot call method 'getJobItem' of null. Use ( Global.getProductEdition() >= 20 )
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
@@ -60,6 +46,15 @@ InOutViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.is_changed == true;
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [ContextMenuIconName.save, ContextMenuIconName.cancel]
+		};
+
+		return context_menu_model;
 	},
 
 	addPermissionValidate: function( p_id ) {
@@ -484,39 +479,26 @@ InOutViewController = BaseViewController.extend( {
 		} );
 	},
 
-	onSaveClick: function( ignoreWarning ) {
-		var $this = this;
-		if ( !Global.isSet( ignoreWarning ) ) {
-			ignoreWarning = false;
-		}
-		var record = this.current_edit_record;
-		LocalCacheData.current_doing_context_action = 'save';
-		this.api.setUserPunch( record, false, ignoreWarning, {
-			onResult: function( result ) {
+	// Overrides BaseViewController
+	doSaveAPICall: function( record, ignoreWarning, callback ) {
+		var current_api = this.getCurrentAPI();
 
-				if ( result.isValid() ) {
-					var result_data = result.getResult();
-					// Error: TypeError: $this.current_edit_record is null in /interface/html5/framework/jquery.min.js?v=8.0.6-20150417-082707 line 2 > eval line 550
-					if ( result_data === true && $this.current_edit_record ) {
-						$this.refresh_id = $this.current_edit_record.id;
-					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-						$this.refresh_id = result_data;
-					}
-
-
-					$this.removeEditView();
-
-					if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
-						LocalCacheData.current_open_primary_controller.search();
-					}
-
-				} else {
-					$this.setErrorTips( result );
-					$this.setErrorMenu();
-				}
-
+		if ( !callback ) {
+			callback = {
+				onResult: function ( result ) {
+					this.onSaveResult( result );
+				}.bind(this)
 			}
-		} );
+		}
+
+		return current_api.setUserPunch( record, false, ignoreWarning, callback );
+	},
+
+	onSaveResult: function( result ) {
+		this._super( 'onSaveResult', result );
+		if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
+			LocalCacheData.current_open_primary_controller.search();
+		}
 	},
 
 	setErrorMenu: function() {

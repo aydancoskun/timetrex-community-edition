@@ -215,6 +215,10 @@ class APIStation extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('station', 'enabled')
 				OR !( $this->getPermissionObject()->Check('station', 'edit') OR $this->getPermissionObject()->Check('station', 'edit_own') OR $this->getPermissionObject()->Check('station', 'edit_child') OR $this->getPermissionObject()->Check('station', 'add') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();

@@ -77,6 +77,7 @@ abstract class APIFactory {
 			return (int)$_GET['v'];	 //1=Initial, 2=Always return detailed
 		}
 
+		//NOTE: Mobile app currently requires API v1, but older versions of the app don't send the protocol version. So we can't default to v2 without breaking the app.
 		return 1;
 	}
 
@@ -497,7 +498,15 @@ abstract class APIFactory {
 
 			//Handle progress bar here, make sure they are stopped and if an error occurs display the error.
 			if ( $retval === FALSE ) {
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), 9999, 9999, $description );
+				//Try to show detailed validation error messages if at all possible.
+				// Check for $details[0] because returnHandlers that lead into this seem to force an array with '0' key as per:
+				//   $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), array( 0 => $validation_obj->getErrorsArray() ), array('total_records' => 1, 'valid_records' => 0 ) );
+				if ( isset( $details ) AND is_array( $details ) AND isset($details[0]) ) {
+					$validator = new Validator();
+					$description .= "<br>\n<br>\n". $validator->getTextErrors( TRUE, $details[0] );
+					unset( $validator );
+				}
+				$this->getProgressBarObject()->error( $this->getAMFMessageID(), $description );
 			} else {
 				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 			}

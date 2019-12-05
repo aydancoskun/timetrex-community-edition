@@ -196,7 +196,7 @@ class UserGenericDataFactory extends Factory {
 	 * @return bool|mixed
 	 */
 	function getData() {
-		$retval = @unserialize( $this->getGenericDataValue( 'data' ) ); //If the data is corrupted, stop any PHP warning.
+		$retval = json_decode( $this->getGenericDataValue( 'data' ), TRUE ); //If the data is corrupted, stop any PHP warning.
 		if ( $retval !== FALSE ) {
 			return $retval;
 		}
@@ -210,9 +210,7 @@ class UserGenericDataFactory extends Factory {
 	 * @return bool
 	 */
 	function setData( $value) {
-		$value = serialize($value);
-
-		$this->setGenericDataValue( 'data', $value );
+		$this->setGenericDataValue( 'data', json_encode($value) );
 
 		return TRUE;
 	}

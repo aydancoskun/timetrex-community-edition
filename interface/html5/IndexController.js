@@ -641,6 +641,7 @@ IndexViewController.openWizardController = function( wizardName, filter_data, so
 							//if the current wizard is a PayrollRemittanceAgencyEventWizard, we need to remember the cards that were clicked because it's just minimized.
 							if ( LocalCacheData.current_open_wizard_controller.wizard_id == 'PayrollRemittanceAgencyEventWizard' ) {
 								var wizard = LocalCacheData.current_open_wizard_controller;
+								wizard.remove(); // #2768 Removes the existing wizard DOM element if it exists, to avoid duplicate wizards. Causes issue when user double clicks on Wizard icon (without overlay) or Tax Wizard opened when already open. TODO: Add overlay to prevent background clicks.
 								wizard.getStepObject().initialize( wizard );
 							} else {
 								LocalCacheData.current_open_wizard_controller.onCloseClick();

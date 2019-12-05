@@ -216,6 +216,55 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 	}
 
 	/**
+	 * @param string $id UUID
+	 * @param string $remittance_agency_id UUID
+	 * @param int $status_id
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayrollRemittanceAgencyEventListFactory
+	 */
+	function getByLegalEntityIdAndRemittanceAgencyIdAndStatus( $id, $remittance_agency_id, $status_id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $remittance_agency_id == '') {
+			return FALSE;
+		}
+
+		if ( $status_id == '') {
+			return FALSE;
+		}
+
+
+		$lef = new LegalEntityFactory();
+		$praf = new PayrollRemittanceAgencyFactory();
+
+		$ph = array(
+				'legal_entity_id' => TTUUID::castUUID($id),
+				'remittance_agency_id' => TTUUID::castUUID($remittance_agency_id),
+				'status_id' => (int)$status_id,
+		);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN	'. $praf->getTable() .' as b ON ( a.payroll_remittance_agency_id = b.id )
+						LEFT JOIN	'. $lef->getTable() .' as c ON ( b.legal_entity_id = c.id )
+					where	b.legal_entity_id = ?
+						AND a.payroll_remittance_agency_id = ?
+						AND a.status_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+
+		$this->rs = $this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
 	 * @param string $company_id UUID
 	 * @param int $status_id
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )

@@ -605,12 +605,11 @@ class MessageControlFactory extends Factory {
 			Debug::Arr($user_ids, 'Recipient User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
-			//$uplf->getByUserId( $user_ids );
-			$uplf->getByUserIdAndStatus( $user_ids, 10 ); //Only email ACTIVE employees/supervisors.
+			$uplf->getByUserIdAndEnableLogin( $user_ids, TRUE ); //Only email employees/supervisors who can still login.
 			if ( $uplf->getRecordCount() > 0 ) {
 				$retarr = array();
 				foreach( $uplf as $up_obj ) {
-					if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 ) {
+					if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getEnableLogin() == 10 ) {
 						if ( $up_obj->getUserObject()->getWorkEmail() != '' AND $up_obj->getUserObject()->getWorkEmailIsValid() == TRUE ) {
 							$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getWorkEmail(), $up_obj->getUserObject() );
 						}

@@ -491,7 +491,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		if ( $P_times_C > $this->getCPPEmployeeMaximumContribution() ) {
 			$P_times_C = $this->getCPPEmployeeMaximumContribution();
 		}
-		Debug::text( 'P_times_C: ' . $P_times_C, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'P_times_C: ' . $P_times_C .' C: '. $C .' P: '. $P, __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( ( $this->getYearToDateCPPContribution() + $this->getEmployeeCPPForPayPeriod() ) >= $this->getCPPEmployeeMaximumContribution() ) {
 			Debug::text( 'P_times_C in or after PP where maximum contribution is reached: ' . ( $this->getYearToDateCPPContribution() + $this->getEmployeeCPPForPayPeriod() ), __FILE__, __LINE__, __METHOD__, 10 );
@@ -661,7 +661,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 	function getEmployeeCPPForPayPeriod() {
 		/*
-				ii) 0.495 * [I - (3500 / P)
+				ii) 0.0510 * [PI - (3500 / P)
 					if the result is negative, C = 0
 		*/
 		//If employee is CPP exempt, return 0 dollars.
@@ -671,7 +671,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 		if ( isset( $this->data['employee_cpp_for_pp'] ) AND $this->data['employee_cpp_for_pp'] != NULL ) {
 			Debug::text( 'Using manually passed in Employee CPP for PP: ' . $this->data['employee_cpp_for_pp'], __FILE__, __LINE__, __METHOD__, 10 );
-			$tmp2_C = $this->data['employee_cpp_for_pp'];
+			$CII = $this->data['employee_cpp_for_pp'];
 		} else {
 			$P = $this->getAnnualPayPeriods();
 			$I = $this->getGrossPayPeriodIncome();
@@ -688,23 +688,23 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 			Debug::text( 'P: ' . $P .' I: '. $I, __FILE__, __LINE__, __METHOD__, 10 );
 
-			$tmp2_C = bcmul( $this->getCPPEmployeeRate(), bcsub( $I, $exemption ) );
+			$CII = bcmul( $this->getCPPEmployeeRate(), bcsub( $I, $exemption ) );
 		}
 
-		if ( $tmp2_C > $this->getCPPEmployeeMaximumContribution() ) {
-			$tmp2_C = $this->getCPPEmployeeMaximumContribution();
+		if ( $CII > $this->getCPPEmployeeMaximumContribution() ) {
+			$CII = $this->getCPPEmployeeMaximumContribution();
 		}
 
-		Debug::text( 'Tmp2_C: ' . $tmp2_C, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'C.II: ' . $CII, __FILE__, __LINE__, __METHOD__, 10 );
 
-		return $tmp2_C;
+		return $CII;
 	}
 
 	function getEmployeeCPP() {
 		/*
 			C = The lesser of
-				i) $1801.80 - D; and
-				ii) 0.495 * [I - (3500 / P)
+				i) $2748.90 - D; and
+				ii) 0.0510 * [PI - (3500 / P)
 					if the result is negative, C = 0
 		*/
 
@@ -714,27 +714,21 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		}
 
 		$D = $this->getYearToDateCPPContribution();
-//		Debug::text( 'D: ' . $D, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$tmp1_C = bcsub( $this->getCPPEmployeeMaximumContribution(), $D );
-		$tmp2_C = $this->getEmployeeCPPForPayPeriod();
+		$CI = bcsub( $this->getCPPEmployeeMaximumContribution(), $D );
+		$CII = $this->getEmployeeCPPForPayPeriod();
 
-//		Debug::text( 'Tmp1_C: ' . $tmp1_C, __FILE__, __LINE__, __METHOD__, 10 );
-//		Debug::text( 'Tmp2_C: ' . $tmp2_C, __FILE__, __LINE__, __METHOD__, 10 );
-
-		if ( $tmp1_C < $tmp2_C ) {
-			$C = $tmp1_C;
+		if ( $CI < $CII ) {
+			$C = $CI;
 		} else {
-			$C = $tmp2_C;
+			$C = $CII;
 		}
 
 		if ( $C < 0 ) {
 			$C = 0;
 		}
 
-//		Debug::text( 'C: ' . $C, __FILE__, __LINE__, __METHOD__, 10 );
-
-		Debug::text( 'D: '. $D .' Tmp1_C: '. $tmp1_C .' Tmp2_C: '. $tmp2_C .' C: ' . $C, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'D: '. $D .' C.I: '. $CI .' C.II: '. $CII .' C: ' . $C, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $C;
 	}

@@ -670,11 +670,11 @@ class T4ASummaryReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess( $format = NULL ) {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
-
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
+
 			$sort_columns = $this->getSortConfig();
 
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $row ) {

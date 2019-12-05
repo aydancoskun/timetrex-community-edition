@@ -166,7 +166,7 @@ class System_SharedMemory_Redis extends System_SharedMemory_Common
      */
     function rm($name, $ttl = false)
     {
-		return $this->_mc->delete($name);
+		return $this->_mc->del($name);
     }
     // }}}
 }

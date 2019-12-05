@@ -357,8 +357,7 @@ class RemittanceSourceAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setCountry( $value ) {
-		$value = trim($value);
-		return $this->setGenericDataValue( 'country', $value );
+		return $this->setGenericDataValue( 'country', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -1472,7 +1471,7 @@ class RemittanceSourceAccountFactory extends Factory {
 			if ( $linked_remittance_destination_records > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
 											FALSE,
-											TTi18n::gettext('This remittance source account is currently in use') .' '. TTi18n::gettext('by employee payment methods') );
+											TTi18n::gettext('This remittance source account is currently in use') .' '. TTi18n::gettext('by employee pay methods') );
 			}
 
 			$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $pralf */
@@ -1629,7 +1628,7 @@ class RemittanceSourceAccountFactory extends Factory {
 		if ( is_array($data_diff) AND $this->isDataDifferent( 'type_id', $data_diff ) AND $linked_remittance_destination_records > 0 ) { //Type has changed
 			$this->Validator->isTRUE(	'type_id',
 										 FALSE,
-										 TTi18n::gettext( 'This remittance source account is currently in use by employee payment methods of a different type' ) );
+										 TTi18n::gettext( 'This remittance source account is currently in use by employee pay methods of a different type' ) );
 		}
 
 		if ( is_array($data_diff) AND $this->isDataDifferent( 'legal_entity_id', $data_diff ) ) { //Legal entity has changed
@@ -1644,7 +1643,7 @@ class RemittanceSourceAccountFactory extends Factory {
 				if ( $rdalf->getRecordCount() > 0 ) {
 					$this->Validator->isTrue( 'legal_entity_id',
 											  FALSE,
-											  TTi18n::gettext( 'This remittance source account is currently in use by employee payment methods' ) );
+											  TTi18n::gettext( 'This remittance source account is currently in use by employee pay methods' ) );
 				}
 			} elseif ( $this->getLegalEntity() != TTUUID::getNotExistID() AND $data_diff['legal_entity_id'] == TTUUID::getNotExistID() ) { //Switching from ANY legal entity to a specific legal entity.
 				//Make sure all destination accounts users are assigned to the same legal entity and they are trying to switch to.
@@ -1653,7 +1652,7 @@ class RemittanceSourceAccountFactory extends Factory {
 					foreach( $rdalf as $rda_obj ) {
 							$this->Validator->isTrue( 'legal_entity_id',
 													  FALSE,
-													  TTi18n::gettext( 'This remittance source account is currently in use by employee payment methods assigned to a different legal entity. (%1)', $rda_obj->getUserObject()->getFullName() ) );
+													  TTi18n::gettext( 'This remittance source account is currently in use by employee pay methods assigned to a different legal entity. (%1)', $rda_obj->getUserObject()->getFullName() ) );
 							break;
 					}
 				}
@@ -1670,7 +1669,7 @@ class RemittanceSourceAccountFactory extends Factory {
 			if ( $rdalf->getRecordCount() > 0 ) {
 				$this->Validator->isTrue( 'country',
 										  FALSE,
-										  TTi18n::gettext( 'This remittance source account is currently in use by employee payment methods in a different country' ) );
+										  TTi18n::gettext( 'This remittance source account is currently in use by employee pay methods in a different country' ) );
 			}
 			unset( $rdalf );
 		}

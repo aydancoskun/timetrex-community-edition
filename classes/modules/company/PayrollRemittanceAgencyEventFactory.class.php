@@ -996,7 +996,15 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 					}
 				}
 
-				if ( $this->getDeleted() == FALSE AND is_object( $this->getPayrollRemittanceAgencyObject() ) AND is_object( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject() )  ) {
+				//Make sure the remittance agency has a contact specified.
+				if ( is_object( $this->getPayrollRemittanceAgencyObject() )
+						AND ( $this->getPayrollRemittanceAgencyObject()->getContactUser() == FALSE OR $this->getPayrollRemittanceAgencyObject()->getContactUser() == TTUUID::getZeroID() ) ) { //5=TimeTrex Payment Services
+					$this->Validator->isTrue( 'status_id',
+											  FALSE,
+											  TTi18n::gettext( 'Remittance Agency must have a contact person specified' ) );
+				}
+
+				if ( is_object( $this->getPayrollRemittanceAgencyObject() ) AND is_object( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject() )  ) {
 					$this->Validator->isTrue( 'status_id',
 											  $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject()->checkPaymentServicesCredentials(),
 											  TTi18n::gettext( 'Payment Services User Name or API Key is incorrect, or service not activated' ) );
@@ -1924,11 +1932,11 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	function getPayrollRemittanceAgencyEventReminderAddresses() {
 		if ( $this->getReminderUser() != '' ) {
 			$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
-			$uplf->getByUserIdAndStatus( $this->getReminderUser(), 10 ); //Only email ACTIVE employees/supervisors.
+			$uplf->getByUserIdAndStatus( $this->getReminderUser(), 10 ); //Only email ACTIVE employees/supervisors when login is enabled. (checked below)
 			if ( $uplf->getRecordCount() > 0 ) {
 				$retarr = array();
 				foreach ( $uplf as $up_obj ) {
-					if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 ) {
+					if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 AND $up_obj->getUserObject()->getEnableLogin() == TRUE ) {
 						if ( $up_obj->getUserObject()->getWorkEmail() != '' AND $up_obj->getUserObject()->getWorkEmailIsValid() == TRUE ) {
 							$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getWorkEmail(), $up_obj->getUserObject() );
 						}
@@ -1957,6 +1965,30 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 */
 	function emailReminder() {
 		Debug::Text('Email PayrollRemittanceAgencyEvent reminder: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$u_obj = $this->getReminderUserObject();
+		if ( is_object($u_obj) === FALSE ) {
+			return FALSE;
+		}
+
+		if ( $u_obj->getStatus() != 10 ) {
+			Debug::Text('User ID: '. $u_obj->getId() .' Login is disabled, or user record is not active, so not emailing...', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		$pra_obj = $this->getPayrollRemittanceAgencyObject();
+		if ( is_object($pra_obj) === FALSE ) {
+			return FALSE;
+		}
+		$company_obj = $u_obj->getCompanyObject();
+		if ( is_object($company_obj) === FALSE ) {
+			return FALSE;
+		}
+		$legal_entity_obj = $pra_obj->getLegalEntityObject();
+		if ( is_object($legal_entity_obj) === FALSE ) {
+			return FALSE;
+		}
+
 		$email_to_arr = $this->getPayrollRemittanceAgencyEventReminderAddresses();
 		if ( $email_to_arr == FALSE ) {
 			return FALSE;
@@ -1973,23 +2005,6 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 			$bcc = NULL;
 		}
 		Debug::Text('Bcc: '. $bcc, __FILE__, __LINE__, __METHOD__, 10);
-
-		$u_obj = $this->getReminderUserObject();
-		if ( is_object($u_obj) === FALSE ) {
-			return FALSE;
-		}
-		$pra_obj = $this->getPayrollRemittanceAgencyObject();
-		if ( is_object($pra_obj) === FALSE ) {
-			return FALSE;
-		}
-		$company_obj = $u_obj->getCompanyObject();
-		if ( is_object($company_obj) === FALSE ) {
-			return FALSE;
-		}
-		$legal_entity_obj = $pra_obj->getLegalEntityObject();
-		if ( is_object($legal_entity_obj) === FALSE ) {
-			return FALSE;
-		}
 
 		$event_data = $this->getEventData();
 

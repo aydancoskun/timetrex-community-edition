@@ -71,7 +71,7 @@ function postToURL( $url, $data = NULL, $raw_result = FALSE ) {
 	curl_setopt( $curl_connection, CURLOPT_RETURNTRANSFER, TRUE );
 	curl_setopt( $curl_connection, CURLOPT_SSL_VERIFYPEER, FALSE );
 	curl_setopt( $curl_connection, CURLOPT_FOLLOWLOCATION, 1 );
-	curl_setopt( $curl_connection, CURLOPT_REFERER, $url ); //Referred is required is CSRF checks are enabled on the server.
+	curl_setopt( $curl_connection, CURLOPT_REFERER, $url ); //**IMPORTANT: Referer should always be sent to avoid requests being rejected due to CSRF security checks.
 
 	//When sending JSON data to POST, it must be sent as JSON=<JSON DATA>
 	//<JSON DATA> should be an associative array with the first level being the number of arguments, where each argument can be of mixed type. ie:
@@ -99,7 +99,14 @@ function postToURL( $url, $data = NULL, $raw_result = FALSE ) {
 	return handleResult( json_decode( $result, TRUE ), $raw_result );
 }
 
-$arguments = array('user_name' => $TIMETREX_USERNAME, 'password' => $TIMETREX_PASSWORD);
+//IMPORTANT: When passing separate arguments to a function the order must be maintained and proper.
+//           So when passing named key => value pairs always ensure that the order is preserved when the data is JSON encoded.
+$arguments = array( 'user_name' => $TIMETREX_USERNAME, 'password' => $TIMETREX_PASSWORD );
+
+//      Alternatively you can send integer key => value pairs, similar to the below which may help to ensure order is maintained.
+//$arguments = array( $TIMETREX_USERNAME, $TIMETREX_PASSWORD);  //Or
+//$arguments = array( 0 => $TIMETREX_USERNAME, 1 => $TIMETREX_PASSWORD);
+
 $TIMETREX_SESSION_ID = postToURL( buildURL( 'APIAuthentication', 'Login' ), $arguments );
 if ( $TIMETREX_SESSION_ID == FALSE ) {
 	echo "Login Failed!<br>\n";

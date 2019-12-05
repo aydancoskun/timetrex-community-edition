@@ -82,8 +82,20 @@ class PayPeriodScheduleFactory extends Factory {
 						53 => 100, //Weekly (53/year)
 						27 => 200, //Bi-Weekly (27/year)
 				);
+				break;
+			case 'annual_pay_periods_maximum_days':
+				//Mostly used for ROEs to determine the maximum number of days from the final pay period ending date and the last day for which paid.
+				$retval = array(
+						52 => 7, //Weekly (52/year)
+						26 => 14, //Bi-Weekly (26/year)
+						24 => 16, //Semi-Monthly (24/year)
+						12 => 31, //Monthly (12/year)
+						53 => 7, //Weekly (53/year)
+						27 => 14, //Bi-Weekly (27/year)
+				);
 
 				break;
+
 			case 'start_week_day':
 				$retval = array(
 											0 => TTi18n::gettext('Sunday-Saturday'),
@@ -1222,11 +1234,17 @@ class PayPeriodScheduleFactory extends Factory {
 	 * @return bool|float|int|mixed
 	 */
 	function getHireAdjustedAnnualPayPeriods( $epoch = NULL, $hire_date = NULL ) {
-		$hired_pay_period_number = $this->getHiredPayPeriodNumberAdjustment( $epoch, $hire_date );
-		$retval = ( $this->getAnnualPayPeriods() - $hired_pay_period_number );
-		if ( $retval < 1 ) {
-			$retval = 1;
-		}
+		//According to the CRA computer formula document, this should always be the total pay periods in the year (ie: 26), and only the divisor is changed to always start at 1 from the hire date.
+		//  This avoids the case of someone getting hired in the last month or two of the year and not having any taxes deducted because S=(4/1), and the annual income is showing less than the minimum claim amount.
+		//  Whenever its a partial year due to hire date, always assume they are getting paid that amount for the full year.
+		//  Updated unit tests such as: testHireAdjustedPayPeriodNumberA(), testHireAdjustedPayPeriodNumberB()
+		$retval = $this->getAnnualPayPeriods();
+
+//		$hired_pay_period_number = $this->getHiredPayPeriodNumberAdjustment( $epoch, $hire_date );
+//		$retval = ( $this->getAnnualPayPeriods() - $hired_pay_period_number );
+//		if ( $retval < 1 ) {
+//			$retval = 1;
+//		}
 
 		return $retval;
 	}

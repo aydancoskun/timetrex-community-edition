@@ -727,7 +727,7 @@ class ExceptionPolicyFactory extends Factory {
 												'active' => FALSE,
 												'severity_id' => 25,
 												'email_notification_id' => 100,
-												'demerit' => 3,
+												'demerit' => 15,
 												'grace' => 0,
 												'is_enabled_grace' => $this->isEnabledGrace( $type_id ),
 												'watch_window' => 0,
@@ -855,8 +855,7 @@ class ExceptionPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setDemerit( $value) {
-		$value = trim($value);
-		return $this->setGenericDataValue( 'demerit', $value );
+		return $this->setGenericDataValue( 'demerit', trim($value) );
 	}
 
 	/**
@@ -1094,6 +1093,17 @@ class ExceptionPolicyFactory extends Factory {
 														$this->getDemerit(),
 														TTi18n::gettext('Incorrect demerit value')
 													);
+			$this->Validator->isGreaterThan(		'demerit',
+												$this->getDemerit(),
+												TTi18n::gettext('Demerit must be greater than -9999'),
+												-9999
+			);
+			$this->Validator->isLessThan(		'demerit',
+													$this->getDemerit(),
+													TTi18n::gettext('Demerit must be less than 9999'),
+													9999
+			);
+
 		}
 		// Email Notification
 		$this->Validator->inArrayKey(	'email_notification',
@@ -1141,6 +1151,9 @@ class ExceptionPolicyFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
+						case 'demerit':
+							$this->$function( TTi18n::parseFloat( $data[$key] ) );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -1175,6 +1188,9 @@ class ExceptionPolicyFactory extends Factory {
 						case 'is_enabled_grace':
 							$function = str_replace('_', '', $variable);
 							//Must not place a break here, as we just change the funtion name for the below default case.
+						case 'demerit':
+							$data[$variable] = Misc::removeTrailingZeros( $this->$function(), 2 );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();

@@ -529,6 +529,10 @@ class APIPunch extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getCurrentUserObject()->getStatus() != 10 ) { //10=Active -- Make sure user record is active as well.
+			return $this->getPermissionObject()->PermissionDenied( FALSE, TTi18n::getText( 'Employee status must be Active to modify punches' ) );
+		}
+
 		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
 				OR !( $this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_own') OR $this->getPermissionObject()->Check('punch', 'edit_child') OR $this->getPermissionObject()->Check('punch', 'add') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();

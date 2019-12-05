@@ -44,7 +44,7 @@ class TimeTrexClientAPI {
 	protected $session_hash = NULL; //Used to determine if we need to login again because the URL or Session changed.
 	protected $class_factory = NULL;
 	protected $namespace = 'urn:api';
-	protected $protocol_version = 1;
+	protected $protocol_version = 2;
 
 	protected $soap_obj = NULL; //Persistent SOAP object.
 

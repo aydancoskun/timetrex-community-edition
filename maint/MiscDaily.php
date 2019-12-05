@@ -264,6 +264,12 @@ if ( $clf->getRecordCount() > 0 ) {
 }
 unset($clf, $c_obj, $default_company_contact_user_id, $user_obj);
 
+//
+// Expire Logins
+//
+$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
+$ulf->disableExpiredLogins( time() );
+
 Debug::writeToLog();
 Debug::Display();
 ?>

@@ -213,7 +213,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setType( 20 );
 		$ppsf->setStartWeekDay( 0 );
 
-		$anchor_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) ); //Start 6 weeks ago
+		$anchor_date = TTDate::getBeginWeekEpoch( TTDate::incrementDate( time(), -42, 'day' ) ); //Start 6 weeks ago
 
 		$ppsf->setAnchorDate( $anchor_date );
 
@@ -257,16 +257,14 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
-					//$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
 					$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginWeekEpoch( time() ) - (86400 * (7 * 52) ) ) ); //Go back 52 weeks.
 				} else {
-					$end_date = ($end_date + ( (86400 * 14) ));
+					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -1303,6 +1301,186 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 				$hpf->setEligibleContributingShiftPolicy( $this->policy_ids['contributing_shift_policy'][10] );
 
 				break;
+			case 400:
+				$hpf->setName( 'Must Work On Holiday' );
+				$hpf->setType( 20 );
+
+				$hpf->setDefaultScheduleStatus( 10 );
+				$hpf->setMinimumEmployedDays( 0 );
+				$hpf->setMinimumWorkedPeriodDays( 0 );
+				$hpf->setMinimumWorkedDays( 0 );
+				$hpf->setAverageTimeDays( 0 );
+				$hpf->setAverageTimeWorkedDays( FALSE );
+
+				$hpf->setWorkedScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedDays( 0 ); //Before
+				$hpf->setMinimumWorkedPeriodDays( 0 ); //Before
+
+				$hpf->setWorkedAfterScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedAfterDays( 0 ); //After
+				$hpf->setMinimumWorkedAfterPeriodDays( 0 ); //After
+
+				$hpf->setShiftOnHolidayType( 10 ); //10=Must Always Work
+
+				$hpf->setForceOverTimePolicy( TRUE );
+
+				$hpf->setMinimumTime( (3600 * 8) );
+				$hpf->setMaximumTime( (3600 * 8) );
+
+				$hpf->setAbsencePolicyID( $this->policy_ids['absence'][10] );
+				$hpf->setEligibleContributingShiftPolicy( $this->policy_ids['contributing_shift_policy'][10] );
+
+				break;
+			case 420:
+				$hpf->setName( 'Must Never Work' );
+				$hpf->setType( 20 );
+
+				$hpf->setDefaultScheduleStatus( 10 );
+				$hpf->setMinimumEmployedDays( 0 );
+				$hpf->setMinimumWorkedPeriodDays( 0 );
+				$hpf->setMinimumWorkedDays( 0 );
+				$hpf->setAverageTimeDays( 0 );
+				$hpf->setAverageTimeWorkedDays( FALSE );
+
+				$hpf->setWorkedScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedDays( 0 ); //Before
+				$hpf->setMinimumWorkedPeriodDays( 0 ); //Before
+
+				$hpf->setWorkedAfterScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedAfterDays( 0 ); //After
+				$hpf->setMinimumWorkedAfterPeriodDays( 0 ); //After
+
+				$hpf->setShiftOnHolidayType( 20 ); //30=Must Never Work
+
+				$hpf->setForceOverTimePolicy( TRUE );
+
+				$hpf->setMinimumTime( (3600 * 8) );
+				$hpf->setMaximumTime( (3600 * 8) );
+
+				$hpf->setAbsencePolicyID( $this->policy_ids['absence'][10] );
+				$hpf->setEligibleContributingShiftPolicy( $this->policy_ids['contributing_shift_policy'][10] );
+
+				break;
+			case 430:
+				$hpf->setName( 'Must Work Only If Schedule' );
+				$hpf->setType( 20 );
+
+				$hpf->setDefaultScheduleStatus( 10 );
+				$hpf->setMinimumEmployedDays( 0 );
+				$hpf->setMinimumWorkedPeriodDays( 0 );
+				$hpf->setMinimumWorkedDays( 0 );
+				$hpf->setAverageTimeDays( 0 );
+				$hpf->setAverageTimeWorkedDays( FALSE );
+
+				$hpf->setWorkedScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedDays( 0 ); //Before
+				$hpf->setMinimumWorkedPeriodDays( 0 ); //Before
+
+				$hpf->setWorkedAfterScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedAfterDays( 0 ); //After
+				$hpf->setMinimumWorkedAfterPeriodDays( 0 ); //After
+
+				$hpf->setShiftOnHolidayType( 30 ); //30=Must Work Only If Scheduled
+
+				$hpf->setForceOverTimePolicy( TRUE );
+
+				$hpf->setMinimumTime( (3600 * 8) );
+				$hpf->setMaximumTime( (3600 * 8) );
+
+				$hpf->setAbsencePolicyID( $this->policy_ids['absence'][10] );
+				$hpf->setEligibleContributingShiftPolicy( $this->policy_ids['contributing_shift_policy'][10] );
+
+				break;
+			case 440:
+				$hpf->setName( 'Must Not Work Only If Scheduled Absent' );
+				$hpf->setType( 20 );
+
+				$hpf->setDefaultScheduleStatus( 10 );
+				$hpf->setMinimumEmployedDays( 0 );
+				$hpf->setMinimumWorkedPeriodDays( 0 );
+				$hpf->setMinimumWorkedDays( 0 );
+				$hpf->setAverageTimeDays( 0 );
+				$hpf->setAverageTimeWorkedDays( FALSE );
+
+				$hpf->setWorkedScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedDays( 0 ); //Before
+				$hpf->setMinimumWorkedPeriodDays( 0 ); //Before
+
+				$hpf->setWorkedAfterScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedAfterDays( 0 ); //After
+				$hpf->setMinimumWorkedAfterPeriodDays( 0 ); //After
+
+				$hpf->setShiftOnHolidayType( 40 ); //40=Must Not Work (Only if Scheduled Absent)
+
+				$hpf->setForceOverTimePolicy( TRUE );
+
+				$hpf->setMinimumTime( (3600 * 8) );
+				$hpf->setMaximumTime( (3600 * 8) );
+
+				$hpf->setAbsencePolicyID( $this->policy_ids['absence'][10] );
+				$hpf->setEligibleContributingShiftPolicy( $this->policy_ids['contributing_shift_policy'][10] );
+
+				break;
+			case 472:
+				$hpf->setName( 'Must Not Work (Must be Scheduled Absent)' );
+				$hpf->setType( 20 );
+
+				$hpf->setDefaultScheduleStatus( 10 );
+				$hpf->setMinimumEmployedDays( 0 );
+				$hpf->setMinimumWorkedPeriodDays( 0 );
+				$hpf->setMinimumWorkedDays( 0 );
+				$hpf->setAverageTimeDays( 0 );
+				$hpf->setAverageTimeWorkedDays( FALSE );
+
+				$hpf->setWorkedScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedDays( 0 ); //Before
+				$hpf->setMinimumWorkedPeriodDays( 0 ); //Before
+
+				$hpf->setWorkedAfterScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedAfterDays( 0 ); //After
+				$hpf->setMinimumWorkedAfterPeriodDays( 0 ); //After
+
+				$hpf->setShiftOnHolidayType( 72 ); //72=Must Not Work (Must be Scheduled Absent)
+
+				$hpf->setForceOverTimePolicy( TRUE );
+
+				$hpf->setMinimumTime( (3600 * 8) );
+				$hpf->setMaximumTime( (3600 * 8) );
+
+				$hpf->setAbsencePolicyID( $this->policy_ids['absence'][10] );
+				$hpf->setEligibleContributingShiftPolicy( $this->policy_ids['contributing_shift_policy'][10] );
+
+				break;
+			case 475:
+				$hpf->setName( 'Must Not Work (Must not be Scheduled)' );
+				$hpf->setType( 20 );
+
+				$hpf->setDefaultScheduleStatus( 10 );
+				$hpf->setMinimumEmployedDays( 0 );
+				$hpf->setMinimumWorkedPeriodDays( 0 );
+				$hpf->setMinimumWorkedDays( 0 );
+				$hpf->setAverageTimeDays( 0 );
+				$hpf->setAverageTimeWorkedDays( FALSE );
+
+				$hpf->setWorkedScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedDays( 0 ); //Before
+				$hpf->setMinimumWorkedPeriodDays( 0 ); //Before
+
+				$hpf->setWorkedAfterScheduledDays( 0 ); //0=Calendar Day
+				$hpf->setMinimumWorkedAfterDays( 0 ); //After
+				$hpf->setMinimumWorkedAfterPeriodDays( 0 ); //After
+
+				$hpf->setShiftOnHolidayType( 75 ); //75=Must Not Work (Must not be Scheduled)
+
+				$hpf->setForceOverTimePolicy( TRUE );
+
+				$hpf->setMinimumTime( (3600 * 8) );
+				$hpf->setMaximumTime( (3600 * 8) );
+
+				$hpf->setAbsencePolicyID( $this->policy_ids['absence'][10] );
+				$hpf->setEligibleContributingShiftPolicy( $this->policy_ids['contributing_shift_policy'][10] );
+
+				break;
 		}
 
 		if ( $hpf->isValid() ) {
@@ -1921,7 +2099,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1953,7 +2131,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1985,7 +2163,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2022,7 +2200,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2059,7 +2237,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2168,7 +2346,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2200,7 +2378,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2232,7 +2410,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2274,7 +2452,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2307,7 +2485,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3212,7 +3390,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2 (Absence to be included in Weekly OT)
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (0 * 3600) );
@@ -3236,7 +3414,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3268,7 +3446,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3305,7 +3483,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3342,7 +3520,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3446,7 +3624,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3481,7 +3659,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3513,7 +3691,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3550,7 +3728,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3587,7 +3765,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3703,7 +3881,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3735,7 +3913,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3768,7 +3946,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4 (Absence to be included in Weekly OT)
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (0 * 3600) );
@@ -3797,7 +3975,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5 (Absence to be included in Weekly OT)
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, (12 * 3600), $this->policy_ids['absence'][10] );
@@ -3825,7 +4003,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6 (Absence to be included in Weekly OT)
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (12 * 3600), $this->policy_ids['absence'][10] );
@@ -3939,7 +4117,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3971,7 +4149,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4004,7 +4182,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4 (Absence to be included in Weekly OT)
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 
@@ -4042,7 +4220,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5 (Absence to be included in Weekly OT)
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//$dd->createAbsence( $this->user_id, $date_epoch, (12 * 3600), $this->policy_ids['absence'][10] );
@@ -4078,7 +4256,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6 (Absence to be included in Weekly OT)
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -4199,7 +4377,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4231,7 +4409,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4263,7 +4441,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4300,7 +4478,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (0 * 3600) );
@@ -4324,7 +4502,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4437,7 +4615,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2 (Absence to be included in Weekly OT)
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (0 * 3600) );
@@ -4461,7 +4639,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4497,7 +4675,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4534,7 +4712,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4571,7 +4749,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5169,7 +5347,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5201,7 +5379,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5233,7 +5411,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5266,7 +5444,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5301,7 +5479,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1 - Beginning of next week...
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5334,7 +5512,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (6 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5371,7 +5549,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (7 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 7, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5410,7 +5588,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (8 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 8, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5525,7 +5703,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5557,7 +5735,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5589,7 +5767,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5622,7 +5800,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5655,7 +5833,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5693,7 +5871,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 7
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (6 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5731,7 +5909,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1 - Beginning of next week...
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (7 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 7, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5764,7 +5942,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (8 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 8, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5797,7 +5975,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (9 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 9, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5910,7 +6088,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5942,7 +6120,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5974,7 +6152,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6007,7 +6185,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6040,7 +6218,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6081,7 +6259,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 7
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (6 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6149,7 +6327,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		);
 
 		//Start four weeks ago...
-		$start_epoch = $date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( ( time() - ( 86400 * 24 ) ) ) );
+		$start_epoch = $date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -24, 'day' );
 
 		$current_pay_period_obj = $this->getCurrentPayPeriod( $date_epoch );
 		if ( is_object($current_pay_period_obj) ) {
@@ -6192,7 +6370,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (1 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6224,7 +6402,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (2 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6256,7 +6434,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (3 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6289,7 +6467,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (4 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6324,7 +6502,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2 - Beginning of next week...
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (7 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 7, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6357,7 +6535,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (8 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 8, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6390,7 +6568,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (9 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 9, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6423,7 +6601,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (10 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 10, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6457,7 +6635,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (11 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 11, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6493,7 +6671,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3 - Beginning of next week...
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (14 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 14, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6526,7 +6704,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (15 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 15, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6559,7 +6737,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (16 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 16, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6592,7 +6770,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (17 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 17, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6626,7 +6804,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (18 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 18, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6662,7 +6840,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4 - Beginning of next week...
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (21 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 21, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6695,7 +6873,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (22 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 22, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6728,7 +6906,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (23 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 23, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6761,7 +6939,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (24 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 24, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6795,7 +6973,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ) + (25 * 86400 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $start_epoch  ), 25, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6926,7 +7104,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6970,7 +7148,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7014,7 +7192,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7063,7 +7241,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7112,7 +7290,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7247,7 +7425,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7283,7 +7461,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7319,7 +7497,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7460,7 +7638,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7501,7 +7679,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7542,7 +7720,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7588,7 +7766,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Test split shift where the first part of the shift doesn't cross into overtime and only the 2nd half does.
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7729,7 +7907,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7770,7 +7948,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7811,7 +7989,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7857,7 +8035,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Test split shift where the first part of the shift doesn't cross into overtime and only the 2nd half does.
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7996,7 +8174,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8037,7 +8215,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8078,7 +8256,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8124,7 +8302,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Test split shift where the first part of the shift doesn't cross into overtime and only the 2nd half does.
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8262,7 +8440,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8299,7 +8477,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8336,7 +8514,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8374,7 +8552,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Test split shift where the first part of the shift doesn't cross into overtime and only the 2nd half does.
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8497,7 +8675,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8534,7 +8712,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8571,7 +8749,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8608,7 +8786,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8721,7 +8899,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8758,7 +8936,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8795,7 +8973,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8832,7 +9010,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8952,7 +9130,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8993,7 +9171,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9034,7 +9212,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9080,7 +9258,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Test split shift where the first part of the shift doesn't cross into overtime and only the 2nd half does.
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9139,7 +9317,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9286,7 +9464,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9330,7 +9508,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9374,7 +9552,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9419,7 +9597,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9468,7 +9646,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9517,7 +9695,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 7
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (6 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10189,7 +10367,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12241,7 +12419,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12275,7 +12453,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12309,7 +12487,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12344,7 +12522,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12516,7 +12694,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12550,7 +12728,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12584,7 +12762,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12619,7 +12797,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -13507,7 +13685,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -13541,7 +13719,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -13575,7 +13753,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -13609,7 +13787,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -13750,7 +13928,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -13787,7 +13965,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -13824,7 +14002,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -13865,7 +14043,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -13902,7 +14080,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14025,7 +14203,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14062,7 +14240,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14099,7 +14277,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14140,7 +14318,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14177,7 +14355,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14300,7 +14478,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14337,7 +14515,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14374,7 +14552,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14415,7 +14593,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14452,7 +14630,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14575,7 +14753,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14612,7 +14790,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14649,7 +14827,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14690,7 +14868,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14727,7 +14905,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14863,7 +15041,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14913,7 +15091,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -14963,7 +15141,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15017,7 +15195,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15067,7 +15245,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15215,7 +15393,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15265,7 +15443,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15315,7 +15493,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15369,7 +15547,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15419,7 +15597,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15567,7 +15745,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15622,7 +15800,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15678,7 +15856,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15733,7 +15911,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15789,7 +15967,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -15970,7 +16148,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16030,7 +16208,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16150,7 +16328,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16210,7 +16388,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16269,7 +16447,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 7
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (6 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16328,7 +16506,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 8
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (7 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 7, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16387,7 +16565,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 9
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (8 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 8, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16446,7 +16624,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 10
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (9 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 9, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16505,7 +16683,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 11
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (10 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 10, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16576,7 +16754,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 12
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (11 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 11, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16639,7 +16817,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 13
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) + (12 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $start_epoch ) ), 12, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16829,7 +17007,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16882,7 +17060,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16937,7 +17115,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -16989,7 +17167,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -17060,7 +17238,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -17146,7 +17324,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
 
 		//Day 2
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
@@ -17166,7 +17344,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
 
 		//Day 3
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
@@ -17186,7 +17364,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
 
 		//Day 4
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
@@ -17206,7 +17384,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
 
 		//Day 5
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
@@ -17258,7 +17436,8 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 			Debug::text('PP Start Date: '. TTDate::getDate('DATE', $pp_start_date) .' End Date: '. TTDate::getDate('DATE', $pp_end_date), __FILE__, __LINE__, __METHOD__, 10);
 
 			$x = 1;
-			for( $i = $pp_start_date; $i <= $pp_end_date; $i += 86400 ) {
+			//for( $i = $pp_start_date; $i <= $pp_end_date; $i += 86400 ) {
+			foreach( TTDate::getDatePeriod( $pp_start_date, $pp_end_date, 'P1D' ) as $i ) {
 				$i = TTDate::getMiddleDayEpoch( $i ); //Make sure DST doesn't make the date walk causing failures after 4-5years.
 
 				if ( $x >= 8 AND $x <= 14 ) {
@@ -17294,7 +17473,8 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 			Debug::text('PP Start Date: '. TTDate::getDate('DATE+TIME', $pp_start_date) .' End Date: '. TTDate::getDate('DATE+TIME', $pp_end_date), __FILE__, __LINE__, __METHOD__, 10);
 
 			$x = 1;
-			for( $i = $pp_start_date; $i <= $pp_end_date; $i += 86400 ) {
+			//for( $i = $pp_start_date; $i <= $pp_end_date; $i += 86400 ) {
+			foreach( TTDate::getDatePeriod( $pp_start_date, $pp_end_date, 'P1D' ) as $i ) {
 				$i = TTDate::getMiddleDayEpoch( $i ); //Make sure DST doesn't make the date walk causing failures after 4-5years.
 
 				if ( $x >= 8 AND $x <= 14 ) {
@@ -17679,7 +17859,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createUserDateTotal( $this->user_id, $date_epoch, (3600 * 12), 0 );
@@ -17703,7 +17883,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createUserDateTotal( $this->user_id, $date_epoch, (3600 * 12), 0 );
@@ -17727,7 +17907,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createUserDateTotal( $this->user_id, $date_epoch, (3600 * 12), 0 );
@@ -17758,7 +17938,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createUserDateTotal( $this->user_id, $date_epoch, (3600 * 12), 0 );
@@ -17790,7 +17970,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createUserDateTotal( $this->user_id, $date_epoch, (3600 * 12), 0 );
@@ -17896,7 +18076,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -17933,7 +18113,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -17970,7 +18150,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18014,7 +18194,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18058,7 +18238,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18135,7 +18315,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -18157,7 +18337,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -18179,7 +18359,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -18208,7 +18388,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -18237,7 +18417,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -18339,7 +18519,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18371,7 +18551,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18403,7 +18583,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18436,7 +18616,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18469,7 +18649,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18502,7 +18682,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 7
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (6 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18535,7 +18715,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 8
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (7 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 7, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18639,7 +18819,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18671,7 +18851,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18703,7 +18883,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18736,7 +18916,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18769,7 +18949,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18802,7 +18982,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 7
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (6 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18835,7 +19015,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 8
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (7 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 7, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18939,7 +19119,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -18971,7 +19151,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19003,7 +19183,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19036,7 +19216,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19069,7 +19249,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19102,7 +19282,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 7
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (6 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19135,7 +19315,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 8
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (7 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 7, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19239,7 +19419,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19271,7 +19451,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19303,7 +19483,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19336,7 +19516,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19369,7 +19549,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19402,7 +19582,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 7
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (6 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19435,7 +19615,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 8
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (7 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 7, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19540,7 +19720,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-//		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+//		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 //		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 //
 //		$dd->createPunchPair( 	$this->user_id,
@@ -19572,7 +19752,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19604,7 +19784,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19637,7 +19817,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19670,7 +19850,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19703,7 +19883,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 7
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (6 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19736,7 +19916,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 8
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (7 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 7, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19840,7 +20020,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-//		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+//		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 //		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 //
 //		$dd->createPunchPair( 	$this->user_id,
@@ -19872,7 +20052,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 3
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19904,7 +20084,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 4
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19937,7 +20117,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 5
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -19970,7 +20150,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 6
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601)) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -20003,7 +20183,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 7
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (6 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 6, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -20036,7 +20216,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 8
 		//
-		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (7 * 86400 + 3601) ) ;
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 7, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -20537,14 +20717,14 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (1 * 3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['start_time_stamp'], strtotime($date_stamp.' 12:00AM') );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['end_time_stamp'], strtotime($date_stamp.' 1:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), NULL, 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//Holiday Absence -- Calculated by the Holiday Policy, so its less than the scheduled time.
 		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Absence
 		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (1 * 3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime($date_stamp.' 12:00AM') );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime($date_stamp.' 1:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), NULL, 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
@@ -20632,7 +20812,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (8 * 3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['start_time_stamp'], strtotime($date_stamp.' 12:00AM') );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime($date_stamp.' 8:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime($date_stamp.' 8:00AM'), NULL, 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
@@ -20720,7 +20900,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (8 * 3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['start_time_stamp'], strtotime($date_stamp.' 12:00AM') );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime($date_stamp.' 8:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime($date_stamp.' 8:00AM'), NULL, 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
@@ -20789,14 +20969,14 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (1 * 3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['start_time_stamp'], strtotime($date_stamp.' 12:00AM') );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['end_time_stamp'], strtotime($date_stamp.' 1:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['end_time_stamp'], strtotime($date_stamp.' 1:00AM'), NULL, 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//TimeSheet Absence -- Taken from the timesheet and overrides the schedule.
 		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Absence
 		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (1 * 3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime($date_stamp.' 12:00AM') );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime($date_stamp.' 1:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime($date_stamp.' 1:00AM'), NULL, 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
@@ -20872,7 +21052,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (1 * 3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime($date_stamp.' 12:00AM') );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime($date_stamp.' 1:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime($date_stamp.' 1:00AM'), NULL, 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//TimeSheet Absence -- Taken from the timesheet
 		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 25 ); //Absence
@@ -20896,7 +21076,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 1 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -1, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 100 ); //Calendar Days before and after
@@ -20922,7 +21102,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 2 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -20956,7 +21136,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -21013,7 +21193,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 3 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -21039,7 +21219,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 5 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -5, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21078,7 +21258,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21139,7 +21319,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 1 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -1, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -21165,7 +21345,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 2 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21204,7 +21384,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21265,7 +21445,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 1 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -1, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -21291,7 +21471,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 2 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21303,7 +21483,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21357,7 +21537,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 1 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -1, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -21383,7 +21563,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 2 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21422,7 +21602,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21448,7 +21628,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 1 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -1, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -21474,7 +21654,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 3 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21512,7 +21692,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 2 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21524,7 +21704,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21578,7 +21758,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 1 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -1, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -21604,7 +21784,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 3 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21642,7 +21822,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 2 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -2, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21655,7 +21835,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21719,7 +21899,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 2 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -2, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -21745,7 +21925,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 3 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21783,7 +21963,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 1 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21795,7 +21975,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21849,7 +22029,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 2 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -2, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -21875,7 +22055,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 3 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -3, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21913,7 +22093,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 1 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21926,7 +22106,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -21987,7 +22167,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 3 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -22013,7 +22193,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 14 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -14, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -22052,7 +22232,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) + ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -22113,7 +22293,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 14 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -14, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -22139,7 +22319,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 28 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -28, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -22178,7 +22358,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) + ( 86400 * 0 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 0, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -22239,8 +22419,8 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 3 ) );
-		$holiday_epoch2 = ( $date_epoch - ( 86400 * 0 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+		$holiday_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -0, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 200 ); //Scheduled Days before and after
@@ -22269,7 +22449,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 4 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -22308,7 +22488,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) + ( 86400 * 1 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -22382,7 +22562,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$holiday_epoch = ( $date_epoch - ( 86400 * 3 ) );
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
 
 		//Holiday
 		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 300 ); //Scheduled Days before and after
@@ -22408,7 +22588,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 1
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) - ( 86400 * 10 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -22442,7 +22622,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Day of Week: 2
 		//
-		$date_epoch = ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ) + ( 86400 * 4 ) );
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 4, 'day' );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -22485,6 +22665,1185 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$holiday_epoch][1]['object_type_id'], 25 ); //Holiday Time
 		$this->assertEquals( $udt_arr[$holiday_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Holiday Time
 		$this->assertEquals( $udt_arr[$holiday_epoch][1]['total_time'], (8 * 3600) );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayA1
+	 */
+	function testHolidayShiftOnHolidayA1() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 400 ); //Must Work On Holiday
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 4:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (16 * 3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+		//Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 25 ); //Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayA2
+	 */
+	function testHolidayShiftOnHolidayA2() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 400 ); //Must Work On Holiday
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Check holiday time
+		//
+		$udt_arr = $this->getUserDateTotalArray( $holiday_epoch, $holiday_epoch );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr), 0 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayB1
+	 */
+	function testHolidayShiftOnHolidayB1() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 420 ); //Must Never Work
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 4:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayB2
+	 */
+	function testHolidayShiftOnHolidayB2() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 420 ); //Must Never Work
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+
+		//
+		//Recalculate timesheet and recheck all start/end timestamps now.
+		//
+		$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+		$ulf->getById( $this->user_id );
+		if ( $ulf->getRecordCount() > 0 ) {
+			UserDateTotalFactory::reCalculateDay( $ulf->getCurrent(), TTDate::getDateArray( TTDate::getBeginWeekEpoch( $date_epoch ), TTDate::getEndWeekEpoch( $date_epoch ) ) );
+		} else {
+			$this->assertTrue( FALSE );
+		}
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayC1
+	 */
+	function testHolidayShiftOnHolidayC1() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 430 ); //Must Work Only If Scheduled
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+
+		//
+		//Recalculate timesheet and recheck all start/end timestamps now.
+		//
+		$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+		$ulf->getById( $this->user_id );
+		if ( $ulf->getRecordCount() > 0 ) {
+			UserDateTotalFactory::reCalculateDay( $ulf->getCurrent(), TTDate::getDateArray( TTDate::getBeginWeekEpoch( $date_epoch ), TTDate::getEndWeekEpoch( $date_epoch ) ) );
+		} else {
+			$this->assertTrue( FALSE );
+		}
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayC2
+	 */
+	function testHolidayShiftOnHolidayC2() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 430 ); //Must Work Only If Scheduled
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 4:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (16 * 3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+		//Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 25 ); //Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayC3
+	 */
+	function testHolidayShiftOnHolidayC3() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 430 ); //Must Work Only If Scheduled
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 10, //Working
+				//'absence_policy_id' => $this->policy_ids['absence'][10],
+				//'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 4:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (16 * 3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+		//Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 25 ); //Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
+
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayC4
+	 */
+	function testHolidayShiftOnHolidayC4() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 430 ); //Must Work Only If Scheduled
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 10, //Working
+				//'absence_policy_id' => $this->policy_ids['absence'][10],
+				//'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr), 0 );
+
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayD1
+	 */
+	function testHolidayShiftOnHolidayD1() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 440 ); //Must Not Work (Only if Scheduled Absent)
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->policy_ids['absence'][10], $this->policy_ids['absence'][11]), //Absence, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 20, //Absent
+				'absence_policy_id' => $this->policy_ids['absence'][10],
+				'schedule_policy_id' => TTUUID::getZeroID(),
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayD2
+	 */
+	function testHolidayShiftOnHolidayD2() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 440 ); //Must Not Work (Only if Scheduled Absent)
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->policy_ids['absence'][10], $this->policy_ids['absence'][11]), //Absence, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 10, //Working
+				//'absence_policy_id' => $this->policy_ids['absence'][10],
+				'schedule_policy_id' => TTUUID::getZeroID(),
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayD3
+	 */
+	function testHolidayShiftOnHolidayD3() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 440 ); //Must Not Work (Only if Scheduled Absent)
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->policy_ids['absence'][10], $this->policy_ids['absence'][11]), //Absence, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 20, //Absent
+				'absence_policy_id' => $this->policy_ids['absence'][10],
+				'schedule_policy_id' => TTUUID::getZeroID(),
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 4:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayE1
+	 */
+	function testHolidayShiftOnHolidayE1() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 472 ); //Must Not Work (Must be Scheduled Absent)
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->policy_ids['absence'][10], $this->policy_ids['absence'][11]), //Absence, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 20, //Absent
+				'absence_policy_id' => $this->policy_ids['absence'][10],
+				'schedule_policy_id' => TTUUID::getZeroID(),
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayE2
+	 */
+	function testHolidayShiftOnHolidayE2() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 472 ); //Must Not Work (Must be Scheduled Absent)
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->policy_ids['absence'][10], $this->policy_ids['absence'][11]), //Absence, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 10, //Working
+				//'absence_policy_id' => $this->policy_ids['absence'][10],
+				'schedule_policy_id' => TTUUID::getZeroID(),
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr), 0 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayE3
+	 */
+	function testHolidayShiftOnHolidayE3() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 472 ); //Must Not Work (Must be Scheduled Absent)
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->policy_ids['absence'][10], $this->policy_ids['absence'][11]), //Absence, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 20, //Absent
+				'absence_policy_id' => $this->policy_ids['absence'][10],
+				'schedule_policy_id' => TTUUID::getZeroID(),
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 4:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayF1
+	 */
+	function testHolidayShiftOnHolidayF1() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 475 ); //Must Not Work (Must not be Scheduled)
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->policy_ids['absence'][10], $this->policy_ids['absence'][11]), //Absence, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 20, //Absent
+				'absence_policy_id' => $this->policy_ids['absence'][10],
+				'schedule_policy_id' => TTUUID::getZeroID(),
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr), 0 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayF2
+	 */
+	function testHolidayShiftOnHolidayF2() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 475 ); //Must Not Work (Must not be Scheduled)
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->policy_ids['absence'][10], $this->policy_ids['absence'][11]), //Absence, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 10, //Working
+				//'absence_policy_id' => $this->policy_ids['absence'][10],
+				'schedule_policy_id' => TTUUID::getZeroID(),
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr), 0 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayF3
+	 */
+	function testHolidayShiftOnHolidayF3() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 475 ); //Must Not Work (Must not be Scheduled)
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->policy_ids['absence'][10], $this->policy_ids['absence'][11]), //Absence, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, array(
+				'status_id' => 20, //Absent
+				'absence_policy_id' => $this->policy_ids['absence'][10],
+				'schedule_policy_id' => TTUUID::getZeroID(),
+				'start_time' => '8:00AM',
+				'end_time' => '4:00PM',
+		) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 4:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testHolidayShiftOnHolidayF4
+	 */
+	function testHolidayShiftOnHolidayF4() {
+		global $dd;
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$holiday_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), -3, 'day' );
+
+		//Holiday
+		$policy_ids['holiday'][] = $this->createHolidayPolicy( $this->company_id, 475 ); //Must Not Work (Must not be Scheduled)
+		$this->createHoliday( $this->company_id, 10, $holiday_epoch, $policy_ids['holiday'][0] ); //Thu of previous week
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   $policy_ids['holiday'],
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->policy_ids['absence'][10], $this->policy_ids['absence'][11]), //Absence, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		//
+		//Day of Week: 1
+		//
+		//$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), -10, 'day' );
+		$date_epoch = $holiday_epoch;
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		//
+		//Recalculate timesheet and recheck all start/end timestamps now.
+		//
+		$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+		$ulf->getById( $this->user_id );
+		if ( $ulf->getRecordCount() > 0 ) {
+			UserDateTotalFactory::reCalculateDay( $ulf->getCurrent(), TTDate::getDateArray( TTDate::getBeginWeekEpoch( $date_epoch ), TTDate::getEndWeekEpoch( $date_epoch ) ) );
+		} else {
+			$this->assertTrue( FALSE );
+		}
+
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Holiday Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
 
 		return TRUE;
 	}

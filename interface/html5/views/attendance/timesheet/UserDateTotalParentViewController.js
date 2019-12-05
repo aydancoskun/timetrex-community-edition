@@ -39,25 +39,8 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 		}
 	},
 
-	buildContextMenuModels: function() {
-
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		return [menu];
-
+	getCustomContextMenuModel: function () {
+		return { include: ['default'] };
 	},
 
 	openEditView: function( date_str ) {

@@ -7,6 +7,7 @@ CompanyViewController = BaseViewController.extend( {
 	country_array: null,
 	province_array: null,
 	e_province_array: null,
+	terminated_user_disable_login_type_array: null,
 	password_policy_type_array: null,
 	password_minimum_permission_level_array: null,
 	password_minimum_strength_array: null,
@@ -24,29 +25,29 @@ CompanyViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Company Information' );
 		this.api = new (APIFactory.getAPIClass( 'APICompany' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.add] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.view] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_icon] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 	},
 
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				ContextMenuIconName.save,
+				ContextMenuIconName.cancel
+			]
+		};
+
+		return context_menu_model;
+	},
+
 	initOptions: function( callBack ) {
 
 		var options = [
 			{ option_name: 'product_edition' },
+			{ option_name: 'terminated_user_disable_login_type' },
 			{ option_name: 'industry' },
 			{ option_name: 'country' },
 			{ option_name: 'password_policy_type' },
@@ -213,40 +214,12 @@ CompanyViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveClick: function( ignoreWarning ) {
-		var $this = this;
-		var record = this.current_edit_record;
-		if ( !Global.isSet( ignoreWarning ) ) {
-			ignoreWarning = false;
+	onSaveDone: function ( result ) {
+		if ( result.isValid() && result.getResult() === true ) {
+			this.updateCurrentCompanyCache();
+			return true;
 		}
-		LocalCacheData.current_doing_context_action = 'save';
-		doNext();
-
-		function doNext() {
-			$this.api['set' + $this.api.key_name]( record, false, ignoreWarning, {
-				onResult: function( result ) {
-
-					if ( result.isValid() ) {
-						var result_data = result.getResult();
-						if ( result_data === true ) {
-							$this.refresh_id = $this.current_edit_record.id;
-						} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-							$this.refresh_id = result_data;
-						}
-
-						$this.removeEditView();
-
-						$this.updateCurrentCompanyCache();
-
-					} else {
-						$this.setErrorTips( result );
-						$this.setErrorMenu();
-					}
-
-				}
-			} );
-		}
-
+		return false;
 	},
 
 	updateCurrentCompanyCache: function() {
@@ -394,7 +367,6 @@ CompanyViewController = BaseViewController.extend( {
 
 		// Product Edition
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'product_edition_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.product_edition_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Product Edition' ), form_item_input, tab_company_column1, '' );
@@ -403,7 +375,6 @@ CompanyViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Full Name' ), form_item_input, tab_company_column1 );
-
 		form_item_input.parent().width( '45%' );
 
 		// Short Name
@@ -412,9 +383,7 @@ CompanyViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Short Name' ), form_item_input, tab_company_column1 );
 
 		// Industry
-
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'industry_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.industry_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Industry' ), form_item_input, tab_company_column1 );
@@ -431,53 +400,45 @@ CompanyViewController = BaseViewController.extend( {
 		form_item_input.parent().width( '45%' );
 
 		// Address (Line 2)
-
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'address2', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Address (Line 2)' ), form_item_input, tab_company_column1 );
-
 		form_item_input.parent().width( '45%' );
+
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'city', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_company_column1 );
 
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'country', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_company_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'province' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_company_column1 );
 
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'postal_code', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_company_column1, '' );
 
 		// Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'work_phone', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Phone' ), form_item_input, tab_company_column2, '' );
 
 		// Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'fax_phone', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_company_column2 );
 
 		// Administrative Contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUser' )),
 			allow_multiple_selection: false,
@@ -490,7 +451,6 @@ CompanyViewController = BaseViewController.extend( {
 
 		// billing contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUser' )),
 			allow_multiple_selection: false,
@@ -500,9 +460,9 @@ CompanyViewController = BaseViewController.extend( {
 			field: 'billing_contact'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Billing Contact' ), form_item_input, tab_company_column2 );
+
 		// Primary Support contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUser' )),
 			allow_multiple_selection: false,
@@ -513,34 +473,25 @@ CompanyViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Primary Support Contact' ), form_item_input, tab_company_column2 );
 
-		// //Direct Deposit (EFT)
-		// form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		// form_item_input.SeparatedBox( {label: $.i18n._( 'Direct Deposit (EFT)' )} );
-		// this.addEditFieldToColumn( null, form_item_input, tab_company_column2 );
-		//
-		// // Originator ID / Immediate Origin
-		// form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		//
-		// form_item_input.TTextInput( {field: 'originator_id', width: 149} );
-		// this.addEditFieldToColumn( $.i18n._( 'Originator ID / Immediate Origin' ), form_item_input, tab_company_column2 );
-		//
-		// // Data Center / Immediate Destination
-		// form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		//
-		// form_item_input.TTextInput( {field: 'data_center_id', width: 149} );
-		// this.addEditFieldToColumn( $.i18n._( 'Data Center / Immediate Destination' ), form_item_input, tab_company_column2 );
-
 		// Company Settings
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( { label: $.i18n._( 'Company Settings' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_company_column2 );
 
-		// Data Center / Immediate Destination
-//		form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER );
-//
-//		this.file_browser = form_item_input.TImageBrowser( {field: ''} );
-//
-//		this.addEditFieldToColumn( $.i18n._( 'Logo' ), form_item_input, tab_company_column2, '', null, false, true );
+		// Terminated User Disable Login Type
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( { field: 'terminated_user_disable_login_type_id' } );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.terminated_user_disable_login_type_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Disable Terminated Employees' ), form_item_input, tab_company_column2, '' );
+
+
+		// Terminated User Disable Login After Days
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'terminated_user_disable_login_after_days', width: 25 } );
+		terminated_user_disable_login_after_days_description = $( '<div class=\'widget-h-box\'></div>' );
+		terminated_user_disable_login_after_days_description.append( form_item_input );
+		terminated_user_disable_login_after_days_description.append( $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'Days' ) + ' )</span>' ) );
+		this.addEditFieldToColumn( $.i18n._( 'Disable Terminated Employees Login After' ), form_item_input, tab_company_column2, '', terminated_user_disable_login_after_days_description );
 
 		// Logo
 

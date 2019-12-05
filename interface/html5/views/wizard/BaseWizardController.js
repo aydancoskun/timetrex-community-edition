@@ -36,7 +36,7 @@ BaseWizardController = BaseWindowController.extend( {
 	events: {
 		'click .close-btn': 'onCloseClick',
 		'click .close-icon': 'onCloseClick',
-		'click .wizard-overlay': 'onCloseClick',
+		'click .wizard-overlay.onclick-close': 'onCloseClick',
 		'click .forward-btn': 'onNextClick',
 		'click .back-btn': 'onBackClick',
 		'click .done-btn': 'onDoneClick'
@@ -351,7 +351,7 @@ BaseWizardController = BaseWindowController.extend( {
 
 					$this.current_step = $this.saved_user_generic_data.data.current_step;
 
-					if ( $this.current_step > $this.steps ) {
+					if ( $this.current_step > $this.steps || $this.current_step < 1 ) { //Make sure current_step isn't outside the range of the wizard.
 						$this.current_step = 1;
 					}
 

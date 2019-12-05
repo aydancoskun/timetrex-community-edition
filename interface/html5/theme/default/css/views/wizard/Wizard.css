@@ -17,7 +17,7 @@
     max-height: 700px;
     font-size: 12px;
     text-align: center;
-    z-index: 95;
+    z-index: 95; /* #2768 Update .wizard-overlay if changing this z-index. */
     border-radius: 4px;
     
     /* For IE 8 */
@@ -613,7 +613,7 @@ progress::-moz-progress-bar {
     top: 0;
     width: 100%;
     height: 100%;
-    z-index: 149;
+    z-index: 92; /* #2768 Wizards 95, edit-views 90, so 92 is inbetween to allow flexibility either side. Search code for 'z-index:' before adjusting. */
 }
 
 /*.wizard .edit-view-form-item-label-div-first-row {*/
@@ -761,7 +761,7 @@ progress::-moz-progress-bar {
     height: 122px;
     margin: 0;
     padding: 0;
-    top: 45%;
+    top: 35%;
     width: 500px;
 }
 

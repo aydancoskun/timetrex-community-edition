@@ -263,6 +263,7 @@ class HierarchyControlFactory extends Factory {
 					if ( !in_array($id, $ids) ) {
 						Debug::text('Deleting: Object Type: '. $id .' ID: '. $obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
+						$obj->postSave(); //Clear cache.
 					} else {
 						//Save ID's that need to be updated.
 						Debug::text('NOT Deleting: Object Type: '. $id .' ID: '. $obj->getID(), __FILE__, __LINE__, __METHOD__, 10);

@@ -44,17 +44,6 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		}
 		this.message_control_api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.add] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_icon] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-
 		this.initPermission();
 		this.render();
 
@@ -133,182 +122,122 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		}
 	},
 
-	/* jshint ignore:end */
-	buildContextMenuModels: function() {
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			groups: {
+				action: {
+					label: $.i18n._( 'Action' ),
+					id: this.script_name + 'action'
+				},
+				authorization: {
+					label: $.i18n._( 'Authorization' ),
+					id: this.script_name + 'authorization'
+				},
+				objects: {
+					label: $.i18n._( 'Objects' ),
+					id: this.script_name + 'objects'
+				}
+			},
+			exclude: ['default'],
+			include: [
+				{
+					label: $.i18n._( 'View' ),
+					id: ContextMenuIconName.view,
+					group: 'action',
+					icon: Icons.view,
+					sort_order: 1011
+				},
+				{
+					label: $.i18n._( 'Reply' ),
+					id: ContextMenuIconName.edit,
+					group: 'action',
+					icon: Icons.edit,
+					sort_order: 1021
+				},
+				{
+					label: $.i18n._( 'Send' ),
+					id: ContextMenuIconName.send,
+					group: 'action',
+					icon: Icons.send,
+					sort_order: 1031
+				},
+				{
+					label: $.i18n._( 'Cancel' ),
+					id: ContextMenuIconName.cancel,
+					group: 'action',
+					icon: Icons.cancel,
+					sort_order: 1131
+				},
+				{
+					label: $.i18n._( 'Authorize' ),
+					id: ContextMenuIconName.authorization,
+					group: 'authorization',
+					icon: Icons.authorization
+				},
+				{
+					label: $.i18n._( 'Pass' ),
+					id: ContextMenuIconName.pass,
+					group: 'authorization',
+					icon: Icons.pass
+				},
+				{
+					label: $.i18n._( 'Decline' ),
+					id: ContextMenuIconName.decline,
+					group: 'authorization',
+					icon: Icons.decline
+				},
+				{
+					label: $.i18n._( 'Request<br>Authorizations' ),
+					id: ContextMenuIconName.authorization_request,
+					group: 'objects',
+					icon: Icons.authorization_request,
+					selected: true,
+					permission_result: PermissionManager.checkTopLevelPermission( 'RequestAuthorization' )
+				},
+				{
+					label: $.i18n._( 'TimeSheet<br>Authorizations' ),
+					id: ContextMenuIconName.authorization_timesheet,
+					group: 'objects',
+					icon: Icons.authorization_timesheet,
+					permission_result: PermissionManager.checkTopLevelPermission( 'TimeSheetAuthorization' )
+				},
+				{
+					label: $.i18n._( 'Expense<br>Authorizations' ),
+					id: ContextMenuIconName.authorization_expense,
+					group: 'objects',
+					icon: Icons.authorization_expense,
+					selected: false,
+					permission_result: PermissionManager.checkTopLevelPermission( 'ExpenseAuthorization' )
+				},
+				{
+					label: $.i18n._( 'TimeSheet' ),
+					id: ContextMenuIconName.timesheet,
+					group: 'navigation',
+					icon: Icons.timesheet
+				},
+				{
+					label: $.i18n._( 'Schedule' ),
+					id: ContextMenuIconName.schedule,
+					group: 'navigation',
+					icon: Icons.schedule
+				},
+				{
+					label: $.i18n._( 'Edit<br>Employee' ),
+					id: ContextMenuIconName.edit_employee,
+					group: 'navigation',
+					icon: Icons.employee
+				},
+				{
+					label: $.i18n._( 'Export' ),
+					id: ContextMenuIconName.export_excel,
+					group: 'other',
+					icon: Icons.export_excel,
+					sort_order: 9000
+				}
+			]
+		};
 
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Action' ),
-			id: this.script_name + 'action',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var authorization_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Authorization' ),
-			id: this.script_name + 'authorization',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var objects_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Objects' ),
-			id: this.script_name + 'objects',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var navigation_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Navigation' ),
-			id: this.viewId + 'navigation',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var other_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Other' ),
-			id: this.viewId + 'other',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var reply = new RibbonSubMenu( {
-			label: $.i18n._( 'Reply' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var send = new RibbonSubMenu( {
-			label: $.i18n._( 'Send' ),
-			id: ContextMenuIconName.send,
-			group: editor_group,
-			icon: Icons.send,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var authorization = new RibbonSubMenu( {
-			label: $.i18n._( 'Authorize' ),
-			id: ContextMenuIconName.authorization,
-			group: authorization_group,
-			icon: Icons.authorization,
-			permission_result: true,
-			permission: null
-		} );
-
-		var pass = new RibbonSubMenu( {
-			label: $.i18n._( 'Pass' ),
-			id: ContextMenuIconName.pass,
-			group: authorization_group,
-			icon: Icons.pass,
-			permission_result: true,
-			permission: null
-		} );
-
-		var decline = new RibbonSubMenu( {
-			label: $.i18n._( 'Decline' ),
-			id: ContextMenuIconName.decline,
-			group: authorization_group,
-			icon: Icons.decline,
-			permission_result: true,
-			permission: null
-		} );
-
-		var authorization_request = new RibbonSubMenu( {
-			label: $.i18n._( 'Request<br>Authorizations' ),
-			id: ContextMenuIconName.authorization_request,
-			group: objects_group,
-			icon: Icons.authorization_request,
-			selected: true,
-			permission_result: PermissionManager.checkTopLevelPermission( 'RequestAuthorization' ),
-			permission: null
-		} );
-
-		var authorization_timesheet = new RibbonSubMenu( {
-			label: $.i18n._( 'TimeSheet<br>Authorizations' ),
-			id: ContextMenuIconName.authorization_timesheet,
-			group: objects_group,
-			icon: Icons.authorization_timesheet,
-			permission_result: PermissionManager.checkTopLevelPermission( 'TimeSheetAuthorization' ),
-			permission: null
-		} );
-
-		var authorization_expense = new RibbonSubMenu( {
-			label: $.i18n._( 'Expense<br>Authorizations' ),
-			id: ContextMenuIconName.authorization_expense,
-			group: objects_group,
-			icon: Icons.authorization_expense,
-			selected: false,
-			permission_result: PermissionManager.checkTopLevelPermission( 'ExpenseAuthorization' ),
-			permission: null
-		} );
-
-		var timesheet = new RibbonSubMenu( {
-			label: $.i18n._( 'TimeSheet' ),
-			id: ContextMenuIconName.timesheet,
-			group: navigation_group,
-			icon: Icons.timesheet,
-			permission_result: true,
-			permission: null
-		} );
-
-		var schedule_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Schedule' ),
-			id: ContextMenuIconName.schedule,
-			group: navigation_group,
-			icon: Icons.schedule,
-			permission_result: true,
-			permission: null
-		} );
-
-		var employee = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit<br>Employee' ),
-			id: ContextMenuIconName.edit_employee,
-			group: navigation_group,
-			icon: Icons.employee,
-			permission_result: true,
-			permission: null
-		} );
-
-		var export_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Export' ),
-			id: ContextMenuIconName.export_excel,
-			group: other_group,
-			icon: Icons.export_excel,
-			permission_result: true,
-			permission: null,
-			sort_order: 9000
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {

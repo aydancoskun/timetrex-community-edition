@@ -161,6 +161,89 @@ class Group {
 	}
 
 	/**
+	 * Usage: $arr2 = Group::GroupBy($arr1, array( 'name' => array('aggregate' => 'count', 'output' => 'MoneyFormat'), array( 'name' => array('aggregate' => 'count', 'output' => 'MoneyFormat') ) );
+	 * Aggregate values: 'count', 'sum', 'min', 'max', 'avg'
+	 * @param $array
+	 * @param $cols
+	 * @param bool $subtotal
+	 * @return array
+	 */
+	static function PageBreakBy( $array, $cols ) {
+		global $profiler;
+		$profiler->startTimer( 'PageBreak()' );
+
+		$group_by_cols = array();
+		if ( is_array( $cols ) ) {
+			foreach ( $cols as $key => $col ) {
+				$group_by_cols[$col] = $col; //Use $col as the key so we can use isset() instead of in_array() later on.
+			}
+		}
+		//Debug::Arr( $group_by_cols, 'Group By Columns: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr( $aggregate_cols, 'Aggregate Columns: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$retarr = array();
+		$row_map = array();
+		if ( is_array($array) ) {
+			$i = 0;
+			foreach ( $array as $row ) {
+				if ( !is_array($row) ) {
+					continue;
+				}
+
+				$group_by_key_val = NULL;
+				foreach ( $group_by_cols as $group_by_element ) {
+					if ( isset($row[$group_by_element]) ) {
+						//Check if the value is an array with a 'sort' column, ie: array('sort' => 12345678, 'display' => '01-Jan-10' )
+						if ( is_array($row[$group_by_element]) AND isset($row[$group_by_element]['sort']) ) {
+							$group_by_key_val .= $row[$group_by_element]['sort'];
+						} else {
+							$group_by_key_val .= $row[$group_by_element];
+						}
+					}
+				}
+				//Debug::Text('Group By Key Val: '. $group_by_key_val, __FILE__, __LINE__, __METHOD__, 10);
+
+				if ( !isset($retarr[$group_by_key_val]) ) {
+					$retarr[$group_by_key_val] = array();
+				}
+
+				//Map the last row that each group_by_key_val was seen. Assume that the array is properly sorted first of course.
+				$row_map[$group_by_key_val] = $i;
+
+				foreach ( $row as $key => $val ) {
+					//Debug::text(' aKey: '. $key .' Value: '. $val, __FILE__, __LINE__, __METHOD__, 10);
+					if ( isset($group_by_cols[$key]) ) {
+						//Only include a single key => value pair for the grouped columns to save memory.
+						//If we are subtotaling, ignore all static columns.
+						//Keep all columns even when sub-totalling so we can provide more information regarding the sub-total itself.
+						if ( !isset($retarr[$group_by_key_val][$key]) ) {
+							$retarr[$group_by_key_val][$key] = $val;
+						}
+					} elseif ( isset($aggregate_cols[$key]) ) {
+						$retarr[$group_by_key_val][$key][] = $val;
+					} // else { //Ignore data that isn't in grouping or aggregate.
+				}
+
+				$i++;
+			}
+		}
+
+		//Substitude group_by_key_val with sparse row values so we know where to insert totals within the main array if sub-totaling.
+		//Debug::Arr($row_map, ' Row Map: ', __FILE__, __LINE__, __METHOD__, 10);
+		if ( is_array($retarr) AND is_array($row_map) ) {
+			foreach ( $row_map as $key => $count ) {
+				//$retarr[$count] = $retarr[$key];  //Uncomment this to show the columns that are causing it to insert a page break.
+				$retarr[$count]['_page_break'] = TRUE;
+				unset($retarr[$key]);
+			}
+		}
+
+		$profiler->stopTimer( 'PageBreak()' );
+
+		return $retarr;
+	}
+
+	/**
 	 * Need to use bcmath for large numbers, especially on 32bit PHP installs.
 	 * @param $array
 	 * @return int|string

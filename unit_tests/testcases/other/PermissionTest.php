@@ -93,7 +93,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setStartWeekDay( 0 );
 
 
-		$anchor_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) ); //Start 6 weeks ago
+		$anchor_date = TTDate::getBeginWeekEpoch( TTDate::incrementDate( time(), -42, 'day' ) ); //Start 6 weeks ago
 
 		$ppsf->setAnchorDate( $anchor_date );
 
@@ -140,16 +140,15 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 					if ( $initial_date !== FALSE ) {
 						$end_date = $initial_date;
 					} else {
-						//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
-						$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) );
+						$end_date = TTDate::getBeginWeekEpoch( TTDate::incrementDate( time(), -42, 'day' ) );
 					}
 				} else {
-					$end_date = ( $end_date + ( (86400 * 14) ) );
+					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -232,11 +231,11 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 		//Check permission levels
 		$retval = $permission->getLevel( $this->user_id, $this->company_id );
-		$this->assertEquals( 25, $retval );
+		$this->assertEquals( 100, $retval );
 
 		//Check twice just in case of caching.
 		$retval = $permission->getLevel( $this->user_id, $this->company_id );
-		$this->assertEquals( 25, $retval );
+		$this->assertEquals( 100, $retval );
 
 		return TRUE;
 	}

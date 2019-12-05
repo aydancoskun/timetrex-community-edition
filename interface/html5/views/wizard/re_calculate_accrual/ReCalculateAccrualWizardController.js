@@ -1,6 +1,6 @@
 ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
-	el: '.wizard',
+	el: '.wizard-bg',
 	_required_files: ['APIAccrualPolicy', 'APIPayPeriod', 'APITimesheetSummaryReport', 'APIPayPeriodSchedule', 'APIUser'],
 
 	init: function( options ) {

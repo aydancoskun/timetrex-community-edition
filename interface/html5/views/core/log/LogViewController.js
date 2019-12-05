@@ -242,7 +242,7 @@ LogViewController = BaseViewController.extend( {
 			filter.filter_page = 1;
 		}
 
-		if ( this.sub_view_mode && this.parent_key ) {
+		if ( this.sub_view_mode && this.parent_key && this.select_layout && this.select_layout.data ) {
 			this.select_layout.data.filter_data[this.parent_key] = this.parent_value;
 		}
 
@@ -760,41 +760,21 @@ LogViewController = BaseViewController.extend( {
 
 	},
 
-	buildContextMenuModels: function() {
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				{
+					label: $.i18n._( 'View Details' ),
+					id: ContextMenuIconName.view_detail,
+					group: 'editor',
+					icon: Icons.view_detail
+				},
+				ContextMenuIconName.cancel
+			]
+		};
 
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var view_detail = new RibbonSubMenu( {
-			label: $.i18n._( 'View Details' ),
-			id: ContextMenuIconName.view_detail,
-			group: editor_group,
-			icon: Icons.view_detail,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		return [menu];
+		return context_menu_model;
 	},
 
 	getSubViewFilter: function( filter ) {

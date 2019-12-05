@@ -1,6 +1,6 @@
 ProcessPayrollWizardController = BaseWizardController.extend( {
 
-	el: '.wizard',
+	el: '.wizard-bg',
 
 	_required_files: ['APIPayPeriod', 'APIPayStub', 'APIPayStubTransaction'],
 
@@ -803,6 +803,8 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 									$this.buildCurrentStepData();
 								} );
 							}
+						} else {
+							TAlertManager.showErrorAlert( result );
 						}
 					}
 				} );

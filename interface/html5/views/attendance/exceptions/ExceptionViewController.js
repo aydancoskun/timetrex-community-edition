@@ -186,87 +186,51 @@ ExceptionViewController = BaseViewController.extend( {
 
 	},
 
-	buildContextMenuModels: function() {
+	getCustomContextMenuModel: function() {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				{
+					label: $.i18n._( 'TimeSheet' ),
+					id: ContextMenuIconName.timesheet,
+					group: 'navigation',
+					icon: Icons.timesheet
+				},
+				{
+					label: $.i18n._( 'Schedules' ),
+					id: ContextMenuIconName.schedule,
+					group: 'navigation',
+					icon: Icons.schedule
+				},
+				{
+					label: $.i18n._( 'Edit<br>Employee' ),
+					id: ContextMenuIconName.edit_employee,
+					group: 'navigation',
+					icon: Icons.employee
+				},
+				{
+					label: $.i18n._( 'Edit Pay<br>Period' ),
+					id: ContextMenuIconName.edit_pay_period,
+					group: 'navigation',
+					icon: Icons.pay_period
+				},
+				{
+					label: $.i18n._( 'Edit PP<br>Schedule' ),
+					id: ContextMenuIconName.edit_pay_period_schedule,
+					group: 'navigation',
+					icon: Icons.pay_period_schedule
+				},
+				{
+					label: $.i18n._( 'Export' ),
+					id: ContextMenuIconName.export_excel,
+					group: 'other',
+					icon: Icons.export_excel,
+					sort_order: 9000
+				}
+			]
+		};
 
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//navigation group
-		var navigation_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Navigation' ),
-			id: this.viewId + 'navigation',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-		var other_navigation_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Other' ),
-			id: this.viewId + 'other',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var schedule_view = new RibbonSubMenu( {
-			label: $.i18n._( 'TimeSheet' ),
-			id: ContextMenuIconName.timesheet,
-			group: navigation_group,
-			icon: Icons.timesheet,
-			permission_result: true,
-			permission: null
-		} );
-
-		var timesheet_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Schedules' ),
-			id: ContextMenuIconName.schedule,
-			group: navigation_group,
-			icon: Icons.schedule,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit_employee = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit<br>Employee' ),
-			id: ContextMenuIconName.edit_employee,
-			group: navigation_group,
-			icon: Icons.employee,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit_pay_period = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit Pay<br>Period' ),
-			id: ContextMenuIconName.edit_pay_period,
-			group: navigation_group,
-			icon: Icons.pay_period,
-			permission_result: true,
-			permission: null
-		} );
-
-		var pay_stub_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit PP<br>Schedule' ),
-			id: ContextMenuIconName.edit_pay_period_schedule,
-			group: navigation_group,
-			icon: Icons.pay_period_schedule,
-			permission_result: true,
-			permission: null
-		} );
-
-
-		var export_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Export' ),
-			id: ContextMenuIconName.export_excel,
-			group: other_navigation_group,
-			icon: Icons.export_excel,
-			permission_result: true,
-			permission: null,
-			sort_order: 9000
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	getSearchPanelFilter: function( getFromTabIndex, save_temp_filter ) {

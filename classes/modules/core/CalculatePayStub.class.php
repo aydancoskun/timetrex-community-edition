@@ -495,15 +495,18 @@ class CalculatePayStub extends PayStubFactory {
 					if ( $ud_obj->getCompanyDeductionObject()->getStatus() == 10 ) {
 						$global_id = substr(get_class( $ud_obj ), 0, 1) . $ud_obj->getId();
 						$deduction_order_arr[$global_id] = $this->getDeductionObjectArrayForSorting( $ud_obj );
+						if ( is_array( $deduction_order_arr[$global_id] ) ) {
+							//Debug::Arr( array($deduction_order_arr[$global_id]['require_accounts'], $deduction_order_arr[$global_id]['affect_accounts']), 'Deduction Name: '. $deduction_order_arr[$global_id]['name'], __FILE__, __LINE__, __METHOD__, 10);
 
-						//Debug::Arr( array($deduction_order_arr[$global_id]['require_accounts'], $deduction_order_arr[$global_id]['affect_accounts']), 'Deduction Name: '. $deduction_order_arr[$global_id]['name'], __FILE__, __LINE__, __METHOD__, 10);
-
-						//If the calculation uses lookback, that utilizes previous pay stubs and should be calculated first so it doesn't
-						//contribute to circular dependancies when calculating current pay stub amounts.
-						if ( $ud_obj->getCompanyDeductionObject()->isLookbackCalculation() == TRUE ) {
-							$dependency_tree->addNode( $global_id, array(), array(), $deduction_order_arr[$global_id]['order'] );
+							//If the calculation uses lookback, that utilizes previous pay stubs and should be calculated first so it doesn't
+							//contribute to circular dependancies when calculating current pay stub amounts.
+							if ( $ud_obj->getCompanyDeductionObject()->isLookbackCalculation() == TRUE ) {
+								$dependency_tree->addNode( $global_id, array(), array(), $deduction_order_arr[ $global_id ]['order'] );
+							} else {
+								$dependency_tree->addNode( $global_id, $deduction_order_arr[ $global_id ]['require_accounts'], $deduction_order_arr[ $global_id ]['affect_accounts'], $deduction_order_arr[ $global_id ]['order'] );
+							}
 						} else {
-							$dependency_tree->addNode( $global_id, $deduction_order_arr[$global_id]['require_accounts'], $deduction_order_arr[$global_id]['affect_accounts'], $deduction_order_arr[$global_id]['order']);
+							Debug::text('Company Deduction is not setup correctly, skipping...', __FILE__, __LINE__, __METHOD__, 10);
 						}
 					} else {
 						Debug::text('Company Deduction is DISABLED!', __FILE__, __LINE__, __METHOD__, 10);

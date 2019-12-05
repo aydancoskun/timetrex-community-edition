@@ -64,18 +64,10 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
 		this.payroll_remittance_agency_api = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' ))();
 		this.month_of_quarter_array = Global.buildRecordArray( { 1: 1, 2: 2, 3: 3 } );
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
 		this.document_object_type_id = 300;
 
 		this.render();
 		if ( this.sub_view_mode ) {
-			this.invisible_context_menu_dic[ContextMenuIconName.view] = true;
-			this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-			this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-			this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-			this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-			this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-
 			this.buildContextMenu( true );
 		} else {
 			//Load the FormulaBuilder as early as possible to help avoid some race conditions with input box not appearing, or appearing out of order when clicking "new" after a fresh reload.
@@ -93,6 +85,25 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		this.setSelectRibbonMenuIfNecessary();
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.mass_edit],
+			include: []
+		};
+
+		if ( this.sub_view_mode ) {
+			context_menu_model.exclude.push(
+				ContextMenuIconName.view,
+				ContextMenuIconName.save_and_new,
+				ContextMenuIconName.save_and_copy,
+				ContextMenuIconName.copy_as_new,
+				ContextMenuIconName.copy
+			);
+		}
+
+		return context_menu_model;
 	},
 
 	initOptions: function() {
@@ -196,6 +207,9 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 	saveInsideEditorData: function( callBack ) {
 		var $this = this;
+
+		// #2764 do not check for this.sub_view_mode as Save icon will fail to save. Save and Save&Continue should have the same logic regardless of sub_view. See issue or commit ee0102be0f45f954a78b7f96b6cf2f2350b73dd7 context on this.sub_view_mode and save&continue.
+		// if ( !this.current_edit_record || !this.current_edit_record.id || this.sub_view_mode ) {
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			if ( Global.isSet( callBack ) ) {
 				callBack();
@@ -249,114 +263,46 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		return this._super( 'onContextMenuClick', context_btn, menu_name );
 	},
 
-	onDeleteAndNextClick: function() {
-		var $this = this;
-		$this.is_add = false;
+	getDeleteSelectedRecordId: function() {
+		if ( !this.sub_view_mode ) {
+			return this._super('getDeleteSelectedRecordId');
+		} else {
+			var retval = [];
 
-		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
-
-			var remove_ids = [];
-
-			if ( !$this.sub_view_mode ) {
-				if ( $this.edit_view ) {
-					remove_ids.push( $this.current_edit_record.id );
-				}
-
-				if ( result ) {
-
-					ProgressBar.showOverlay();
-					$this.api['delete' + $this.api.key_name]( remove_ids, {
-						onResult: function( result ) {
-							$this.onDeleteAndNextResult( result, remove_ids );
-
-						}
-					} );
-
-				} else {
-					ProgressBar.closeOverlay();
-				}
+			if ( this.edit_view ) {
+				retval.push( this.employee_setting_result[0].id );
 			} else {
-				if ( $this.edit_view ) {
-					remove_ids.push( $this.employee_setting_result[0].id );
-				}
+				var args = { filter_data: {} };
+				var tax_ids = this.getGridSelectIdArray().slice();
+				args.filter_data.company_deduction_id = tax_ids;
+				args.filter_data.user_id = this.parent_value;
 
-				if ( result ) {
+				var res = this.user_deduction_api.getUserDeduction( args, true, { async: false } ).getResult();
 
-					ProgressBar.showOverlay();
-					$this.user_deduction_api.deleteUserDeduction( remove_ids, {
-						onResult: function( result ) {
-							$this.onDeleteAndNextResult( result, remove_ids );
-
-						}
-					} );
-
-				} else {
-					ProgressBar.closeOverlay();
+				for ( var i = 0; i < res.length; i++ ) {
+					var item = res[i];
+					retval.push( item.id );
 				}
 			}
 
-		} );
+			return retval;
+		}
 	},
 
-	onDeleteClick: function() {
-		var $this = this;
-		$this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'delete';
-		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
-
-			var remove_ids = [];
-
-			if ( !$this.sub_view_mode ) {
-				if ( $this.edit_view ) {
-					remove_ids.push( $this.current_edit_record.id );
-				} else {
-					remove_ids = $this.getGridSelectIdArray().slice();
-				}
-				if ( result ) {
-					ProgressBar.showOverlay();
-					$this.api['delete' + $this.api.key_name]( remove_ids, {
-						onResult: function( result ) {
-							$this.onDeleteResult( result, remove_ids );
-						}
-					} );
-
-				} else {
-					ProgressBar.closeOverlay();
-				}
-			} else {
-				if ( $this.edit_view ) {
-					remove_ids.push( $this.employee_setting_result[0].id );
-				} else {
-					var args = { filter_data: {} };
-					var tax_ids = $this.getGridSelectIdArray().slice();
-					args.filter_data.company_deduction_id = tax_ids;
-					args.filter_data.user_id = $this.parent_value;
-
-					var res = $this.user_deduction_api.getUserDeduction( args, true, { async: false } ).getResult();
-
-					for ( var i = 0; i < res.length; i++ ) {
-						var item = res[i];
-						remove_ids.push( item.id );
-
-					}
-
-				}
-
-				if ( result ) {
-					ProgressBar.showOverlay();
-					$this.user_deduction_api.deleteUserDeduction( remove_ids, {
-						onResult: function( result ) {
-							$this.onDeleteResult( result, remove_ids );
-						}
-					} );
-
-				} else {
-					ProgressBar.closeOverlay();
-				}
+	doDeleteAPICall: function( remove_ids, callback ) {
+		if ( !this.sub_view_mode ) {
+			return this._super( 'doDeleteAPICall', remove_ids, callback );
+		} else {
+			if( !callback ) {
+				callback = {
+					onResult: function ( result ) {
+						this.onDeleteResult( result, remove_ids );
+					}.bind( this )
+				};
 			}
-
-		} );
-
+			// return this.api['delete' + this.api.key_name]( remove_ids, callback );
+			return this.user_deduction_api.deleteUserDeduction( remove_ids, callback );
+		}
 	},
 
 	onSaveClick: function( ignoreWarning ) {
@@ -368,23 +314,25 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save';
 		if ( this.is_mass_editing ) {
-			var check_fields = {};
-			for ( var key in this.edit_view_ui_dic ) {
-				var widget = this.edit_view_ui_dic[key];
-
-				if ( Global.isSet( widget.isChecked ) ) {
-					if ( widget.isChecked() ) {
-						check_fields[key] = this.current_edit_record[key];
-					}
-				}
-			}
-			record = [];
-			$.each( this.mass_edit_record_ids, function( index, value ) {
-				var common_record = Global.clone( check_fields );
-				common_record.id = value;
-				record.push( common_record );
-
-			} );
+			var changed_fields = this.getChangedFields();
+			record = this.buildMassEditSaveRecord( this.mass_edit_record_ids, changed_fields );
+			// var check_fields = {};
+			// for ( var key in this.edit_view_ui_dic ) {
+			// 	var widget = this.edit_view_ui_dic[key];
+			//
+			// 	if ( Global.isSet( widget.isChecked ) ) {
+			// 		if ( widget.isChecked() ) {
+			// 			check_fields[key] = this.current_edit_record[key];
+			// 		}
+			// 	}
+			// }
+			// record = [];
+			// $.each( this.mass_edit_record_ids, function( index, value ) {
+			// 	var common_record = Global.clone( check_fields );
+			// 	common_record.id = value;
+			// 	record.push( common_record );
+			//
+			// } );
 		} else {
 			record = this.current_edit_record;
 		}
@@ -555,51 +503,50 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		}
 	},
 
-	onSaveAndContinueResult: function( result ) {
+	// onSaveAndContinueResult: function( result ) {
+	//
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
+	// 			$this.refresh_id = result_data;
+	// 		}
+	//
+	// 		$this.saveInsideEditorData( function() {
+	// 			$this.search( false );
+	// 			$this.onEditClick( $this.refresh_id, true );
+	// 			$this.onSaveAndContinueDone( result );
+	// 		} );
+	//
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
-				$this.refresh_id = result_data;
-			}
-			if ( !this.sub_view_mode ) {
-				$this.saveInsideEditorData( function() {
-					$this.search( false );
-					$this.onEditClick( $this.refresh_id, true );
-					$this.onSaveAndContinueDone( result );
-				} );
-			}
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
-
-	onSaveAndNewResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
-				$this.refresh_id = result_data;
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.search( false );
-				$this.onAddClick( true );
-
-			} );
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
+	// onSaveAndNewResult: function( result ) {
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	//
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
+	// 			$this.refresh_id = result_data;
+	// 		}
+	//
+	// 		$this.saveInsideEditorData( function() {
+	// 			$this.search( false );
+	// 			$this.onAddClick( true );
+	//
+	// 		} );
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
 	onSaveAndCopyResult: function( result ) {
 		var $this = this;
@@ -625,7 +572,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	},
 
 	_continueDoCopyAsNew: function() {
-		this.is_add = true;
+		this.setCurrentEditViewState('new');
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 
 		if ( Global.isSet( this.edit_view ) ) {
@@ -653,27 +600,27 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveAndNextResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-				$this.refresh_id = result_data;
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.onRightArrowClick();
-				$this.search( false );
-				$this.onSaveAndNextDone( result );
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
+	// onSaveAndNextResult: function( result ) {
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+	// 			$this.refresh_id = result_data;
+	// 		}
+	//
+	// 		$this.saveInsideEditorData( function() {
+	// 			$this.onRightArrowClick();
+	// 			$this.search( false );
+	// 			$this.onSaveAndNextDone( result );
+	// 		} );
+	//
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
 	checkTabPermissions: function( tab ) {
 		retval = false;

@@ -44,8 +44,6 @@ StationViewController = BaseViewController.extend( {
 
 		}
 
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
-
 		this.render();
 		this.buildContextMenu();
 
@@ -53,6 +51,16 @@ StationViewController = BaseViewController.extend( {
 		this.setSelectRibbonMenuIfNecessary();
 
 	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.copy],
+			include: []
+		};
+
+		return context_menu_model;
+	},
+
 	initOptions: function( callBack ) {
 
 		var $this = this;
@@ -395,56 +403,6 @@ StationViewController = BaseViewController.extend( {
 		if ( !this.is_viewing || !this.editOwnerOrChildPermissionValidate( pId ) ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
-
-	onEditClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-		if ( Global.isSet( editId ) ) {
-			var selectedId = editId;
-		} else {
-			if ( this.is_viewing ) {
-				selectedId = this.current_edit_record.id;
-			} else if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
-			}
-		}
-		this.is_viewing = false;
-		this.is_edit = true;
-		this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'edit';
-		if ( !this.edit_only_mode ) {
-			$this.openEditView();
-		} else {
-
-		}
-		var filter = {};
-		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-				if ( !result_data ) {
-					result_data = [];
-				}
-				result_data = result_data[0];
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-				if ( $this.sub_view_mode && $this.parent_key ) {
-					result_data[$this.parent_key] = $this.parent_value;
-				}
-				$this.current_edit_record = result_data;
-				$this.initEditView();
-
-			}
-		} );
-
 	},
 
 	openEditView: function( id ) {

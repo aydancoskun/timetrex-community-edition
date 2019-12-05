@@ -73,10 +73,44 @@ class TTUUID {
 	}
 
 	/**
+	 * Create an ORDERED UUID https://www.percona.com/blog/2014/12/19/store-uuid-optimized-way/
+	 *   This is about 20-30% faster than generateUUIDOld() and should contain more random data, reducing chance of collisions when running in parallel (ie: unit tests)
 	 * @param null $seed
 	 * @return string
 	 */
 	static function generateUUID( $seed = NULL ) {
+		if ( $seed == NULL OR strlen( $seed ) !== 12 ) {
+			$seed = self::getSeed( TRUE );
+		}
+
+		// 7 bit micro-time using real microsecond precision, as both microtime(1) and array_sum(explode(' ', microtime())) are limited by php.ini precision
+		$split_time = explode( ' ', microtime( FALSE ) );
+		$time_micro_second = $split_time[1] . substr( $split_time[0], 2, 6 ); //Remove precision on the microsecond portion.
+
+		//On 32bit PHP installs (especially Windows), the microtime() resolution isn't high enough (only 1/64 of a second) and can cause many UUID duplicates in tight loops. Supplement the timer with a counter instead.
+		if ( PHP_INT_SIZE === 4 ) { //32bit
+			$time_micro_second += self::$uuid_counter;
+			self::$uuid_counter++;
+		}
+
+		// Convert to 56-bit integer (7 bytes), enough to store micro time is enough up to 4253-05-31 22:20:37
+		$time = base_convert( $time_micro_second, 10, 16 );
+
+		// Left pad the eventual gap and to make sure its always an even number of characters, append 3 random bytes (2^24 = 16 777 216 combinations), then finally convert to hex. This should be 20 characters in total, as the seed appended below is 12 = 32.
+		$uuid = str_pad( $time, 14, '0', STR_PAD_LEFT ) . bin2hex( openssl_random_pseudo_bytes( 3 ) );
+
+		//Add separators so its human readable.
+		$uuid = substr( $uuid, 0, 8 ) . '-' . substr( $uuid, 7, 4 ) . '-' . substr( $uuid, 11, 4 ) . '-' . substr( $uuid, 15, 4 ) . '-' . $seed; //$seed could be replaced by: substr( $uuid, 16, 12 )
+
+		return $uuid;
+	}
+
+	/**
+	 * Create an ORDERED UUID https://www.percona.com/blog/2014/12/19/store-uuid-optimized-way/
+	 * @param null $seed
+	 * @return string
+	 */
+	static function generateUUIDOld( $seed = NULL ) {
 		if ( $seed == NULL OR strlen( $seed ) !== 12 ) {
 			$seed = self::getSeed( TRUE );
 		}

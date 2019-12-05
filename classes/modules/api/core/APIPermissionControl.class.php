@@ -214,6 +214,10 @@ class APIPermissionControl extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('permission', 'enabled')
 				OR !( $this->getPermissionObject()->Check('permission', 'edit') OR $this->getPermissionObject()->Check('permission', 'edit_own') OR $this->getPermissionObject()->Check('permission', 'edit_child') OR $this->getPermissionObject()->Check('permission', 'add') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();

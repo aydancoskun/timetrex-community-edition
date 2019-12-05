@@ -1265,9 +1265,8 @@ class PayrollRemittanceAgencyFactory extends Factory {
 	 * @return bool
 	 */
 	function setProvince( $value) {
-		$value = trim($value);
 		Debug::Text('Country: '. $this->getCountry() .' Province: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		return $this->setGenericDataValue( 'province', $value );
+		return $this->setGenericDataValue( 'province', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -1282,8 +1281,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 	 * @return bool
 	 */
 	function setCountry( $value) {
-		$value = trim($value);
-		return $this->setGenericDataValue( 'country', $value );
+		return $this->setGenericDataValue( 'country', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -1624,6 +1622,17 @@ class PayrollRemittanceAgencyFactory extends Factory {
 			}
 		}
 
+		//Check to see if there are any full service events.
+		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
+		$praelf->getByLegalEntityIdAndRemittanceAgencyIdAndStatus( $this->getLegalEntity(), $this->getId(), 15 );
+		if ( $praelf->getRecordCount() > 0 ) {
+			$has_full_service_events = TRUE;
+		} else {
+			$has_full_service_events = FALSE;
+		}
+		Debug::Text('  Has Full Service Events: '. (int)$has_full_service_events .' Total Full Service Events: '. $praelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		unset( $praelf );
+
 		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
 			if ( $this->getName() == FALSE AND $this->Validator->hasError('name') == FALSE ) {
 				$this->Validator->isTrue(		'name',
@@ -1660,14 +1669,27 @@ class PayrollRemittanceAgencyFactory extends Factory {
 												 FALSE,
 												 TTi18n::gettext('Please specify a contact'));
 			}
+
+			//Only if full service events exist must there be a contact person specified. Otherwise impounding won't work.
+			if ( $has_full_service_events == TRUE AND ( $this->getContactUser() == FALSE OR $this->getContactUser() == TTUUID::getZeroID() ) ) {
+				$this->Validator->isTrue(		'contact_user_id',
+												 FALSE,
+												 TTi18n::gettext('Contact person must be specified'));
+
+			}
 		}
 
 		//RemittanceSourceAccount must be optional, as we won't know it during SetupPresets.
 		//Change this to a warning instead perhaps?
 		if ( $ignore_warning == FALSE ) {
-			if ( $this->getRemittanceSourceAccount() == FALSE ) {
+			if ( $this->getRemittanceSourceAccount() == FALSE OR $this->getRemittanceSourceAccount() == TTUUID::getZeroID() ) {
 				$this->Validator->Warning( 'remittance_source_account_id', TTi18n::gettext('It is recommended that a remittance source account be specified') );
 			}
+
+			if ( $has_full_service_events == FALSE AND ( $this->getContactUser() == FALSE OR $this->getContactUser() == TTUUID::getZeroID() ) ) {
+				$this->Validator->Warning( 'contact_user_id', TTi18n::gettext('It is recommended that a contact person is always specified') );
+			}
+
 		}
 
 		return TRUE;

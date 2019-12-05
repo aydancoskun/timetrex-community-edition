@@ -2515,10 +2515,12 @@ class TTDate {
 
 		$prev_month = NULL;
 		$x = 0;
+		$retarr = array();
+
 		//Gotta add more then 86400 because of day light savings time. Causes infinite loop without it.
 		//Don't add 7200 to Cal End Date because that could cause more then one week to be displayed.
-		$retarr = array();
-		for($i = $cal_start_date; $i <= ($cal_end_date); $i += 93600) {
+		//for($i = $cal_start_date; $i <= ($cal_end_date); $i += 93600) {
+		foreach( TTDate::getDatePeriod( $cal_start_date, $cal_end_date, 'P1D' ) as $i ) {
 			if ( $x > 200 ) {
 				break;
 			}
@@ -2571,6 +2573,59 @@ class TTDate {
 		}
 
 		return $retarr;
+	}
+
+	/**
+	 * Generator to loop over any date/time interval and properly handles spanning DST switch-overs.
+	 * @param int|DateTime $start Epoch or DateTime object
+	 * @param int|DateTime $end Epoch or DateTime object
+	 * @param string|DateInterval $interval string interval or DateInterval object
+	 * @return bool|Generator
+	 * @throws Exception
+	 */
+	public static function getDatePeriod( $start, $end, $interval = 'P1D', $include_end_date = TRUE ) {
+		if ( is_object( $start ) ) {
+			$start_date_obj = $start;
+		} else {
+			$start_date_obj = new DateTime( '@' . $start );
+			$start_date_obj->setTimeZone( new DateTimeZone( TTDate::getTimeZone() ) );
+		}
+
+		if ( is_object( $end ) ) {
+			$end_date_obj = $end;
+		} else {
+			$end_date_obj = new DateTime( '@' . $end );
+			$end_date_obj->setTimeZone( new DateTimeZone( TTDate::getTimeZone() ) );
+		}
+
+		if ( !is_object( $interval ) ) {
+			$interval = new DateInterval( $interval );
+		}
+
+		//Add 1 second to the end date so this becomes a $start_date <= $end_date check, so it includes both the start and end dates.
+		//  If you want it to be a $start_date < $end_date check, no need to make any modifications.
+		if ( $include_end_date == TRUE ) {
+			$end_date_obj->modify( '+1 second' );
+		}
+		$period = new DatePeriod( $start_date_obj, $interval, $end_date_obj );
+
+		//Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $start_date_obj->format('U') ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date_obj->format('U') ), __FILE__, __LINE__, __METHOD__, 10);
+		foreach ( $period as $date_obj ) {
+			//Force hour,min,second to always be the same on every iteration. This is important when considering DST so its not +/-3600
+			if ( $interval->format('d') > 1 ) {
+				$date_obj->setTime( $start_date_obj->format( 'H' ), $start_date_obj->format( 'i' ), $start_date_obj->format( 's' ) );
+			}
+
+			//Debug::text('  Iteration Date: '. TTDate::getDate('DATE+TIME', $date_obj->format('U') ), __FILE__, __LINE__, __METHOD__, 10);
+
+			if ( !is_object( $start ) ) {
+				$date_obj = $date_obj->format('U');
+			}
+
+			yield $date_obj;
+		}
+
+		return TRUE;
 	}
 
 	/**
@@ -2746,7 +2801,8 @@ class TTDate {
 
 			$loop_start = ( TTDate::getEndDayEpoch( $start_epoch ) + 1 );
 			$loop_end = TTDate::getBeginDayEpoch( $end_epoch );
-			for( $x = $loop_start; $x < $loop_end; $x += 86400 ) {
+			//for( $x = $loop_start; $x < $loop_end; $x += 86400 ) {
+			foreach( TTDate::getDatePeriod( $loop_start, $loop_end, 'P1D', FALSE ) as $x ) {
 				$retval[TTDate::getBeginDayEpoch($x)] = 86400;
 			}
 
@@ -2964,33 +3020,37 @@ class TTDate {
 	 * @param int $epoch EPOCH
 	 * @return string
 	 */
-	public static function getHumanTimeSince( $epoch) {
-		if ( time() >= $epoch ) {
-			$epoch_since = ( time() - $epoch );
+	public static function getHumanTimeSince( $epoch, $current_time = NULL ) {
+		if ( $current_time == '' ) { //Needed for unit tests, so we have a consistent date to compare to.
+			$current_time = time();
+		}
+
+		if ( $current_time >= $epoch ) {
+			$epoch_since = ( $current_time - $epoch );
 		} else {
-			$epoch_since = ( $epoch - time() );
+			$epoch_since = ( $epoch - $current_time );
 		}
 
 		//Debug::text(' Epoch Since: '. $epoch_since, __FILE__, __LINE__, __METHOD__, 10);
 		switch ( TRUE ) {
 			case ($epoch_since > ( 31536000 * 2 ) ):
 					//Years
-					$num = ( ( ( ( ($epoch_since / 60) / 60) / 24 ) / 30 ) / 12 );
+					$num = TTDate::getYearDifference( $current_time, $epoch );
 					$suffix = TTi18n::getText('yr');
 					break;
 			case ($epoch_since > ( ((3600 * 24) * 60) * 2) ):
 					//Months the above number should be 2 months, so we don't get 0 months showing up.
-					$num = ( ( ( ( ($epoch_since / 60) / 60) / 24 ) / 30 ) );
+					$num = TTDate::getMonthDifference( $current_time, $epoch );
 					$suffix = TTi18n::getText('mth');
 					break;
 			case ($epoch_since > (604800 * 2) ):
 					//Weeks
-					$num = ( ( ( ($epoch_since / 60) / 60) / 24 ) / 7 ) ;
+					$num = TTDate::getWeekDifference( $current_time, $epoch );
 					$suffix = TTi18n::getText('wk');
 					break;
 			case ($epoch_since > (86400 * 2) ):
 					//Days
-					$num = ( ( ($epoch_since / 60) / 60) / 24 );
+					$num = TTDate::getDayDifference( $current_time, $epoch );
 					$suffix = TTi18n::getText('day');
 					break;
 			case ($epoch_since > (3600 * 2) ):
@@ -3009,6 +3069,8 @@ class TTDate {
 					$suffix = TTi18n::getText('sec');
 					break;
 		}
+
+		$num = abs( $num );
 
 		if ( $num > 1.1 ) { //1.01 Days gets rounded to 1.0 and should not have "s" on the end.
 			$suffix .= TTi18n::getText('s');
@@ -4319,7 +4381,8 @@ class TTDate {
 					if ( ($end_date - $start_date) > (86400 * 7) ) {
 						$retval = TRUE;
 					} else {
-						for( $i = TTDate::getMiddleDayEpoch($start_date); $i <= TTDate::getMiddleDayEpoch($end_date); $i += 86400 ) {
+						//for( $i = TTDate::getMiddleDayEpoch($start_date); $i <= TTDate::getMiddleDayEpoch($end_date); $i += 86400 ) {
+						foreach( TTDate::getDatePeriod( TTDate::getMiddleDayEpoch($start_date), TTDate::getMiddleDayEpoch($end_date), 'P1D' ) as $i ) {
 							if ( self::getDayOfWeek($i) == $frequency_criteria['day_of_week'] ) {
 								$retval = TRUE;
 								break;
@@ -4339,7 +4402,5 @@ class TTDate {
 		Debug::Text('Retval '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
-
 }
-
 ?>

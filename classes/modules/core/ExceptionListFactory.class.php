@@ -762,6 +762,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 							a.pay_period_id as pay_period_id,
 							h.pay_period_schedule_id as pay_period_schedule_id,
 							i.severity_id as severity_id,
+							i.demerit as demerit,
 							i.type_id as exception_policy_type_id,
 							a.user_id as user_id,
 							h.start_date as pay_period_start_date,
@@ -859,7 +860,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 

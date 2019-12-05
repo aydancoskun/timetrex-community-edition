@@ -983,33 +983,35 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function isActiveDate( $ud_obj, $pp_end_date = NULL, $pp_transaction_date = NULL ) {
+		if ( $ud_obj->getStartDate() == '' AND $ud_obj->getEndDate() == '' AND $this->getStartDate() == '' AND $this->getEndDate() == '' ) {
+			return TRUE;
+		}
+
 		$pp_end_date = TTDate::getBeginDayEpoch( $pp_end_date );
 
-		if ( $ud_obj->getStartDate() == '' AND $ud_obj->getEndDate() == '' ) {
-			return TRUE;
-		}
+		//If user specific settings are not defined, fall back to company deduction specific settings.
+		$start_date = (int)( ( $ud_obj->getStartDate() == '' ) ? $this->getStartDate() : $ud_obj->getStartDate() );
+		$end_date = (int)( ( $ud_obj->getEndDate() == '' ) ? $this->getEndDate() : $ud_obj->getEndDate() );
 
 		if ( $this->getCalculation() == 90 AND $pp_transaction_date != '' ) { //CPP
-			if ( TTDate::getEndDayEpoch( $pp_transaction_date ) > TTDate::getEndMonthEpoch( (int)$ud_obj->getStartDate() )
-					AND ( TTDate::getEndDayEpoch( $pp_transaction_date ) <= TTDate::getEndMonthEpoch( (int)$ud_obj->getEndDate() ) OR $ud_obj->getEndDate() == '' ) ) {
-				Debug::text('CPP: Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10);
-
-			return TRUE;
-		}
-
-			Debug::text('CPP: Epoch: '. TTDate::getDate('DATE+TIME', $pp_transaction_date) .' is outside Start: '. TTDate::getDate('DATE+TIME', $ud_obj->getStartDate()) .' and End Date: '. TTDate::getDate('DATE+TIME', $ud_obj->getEndDate()), __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
-		} else {
-			if ( $pp_end_date >= (int)$ud_obj->getStartDate()
-					AND ( $pp_end_date <= (int)$ud_obj->getEndDate() OR $ud_obj->getEndDate() == '' ) ) {
-				Debug::text('Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10);
-
+			if ( ( $start_date == '' OR TTDate::getEndDayEpoch( $pp_transaction_date ) > TTDate::getEndMonthEpoch( $start_date ) )
+					AND ( $end_date == '' OR TTDate::getEndDayEpoch( $pp_transaction_date ) <= TTDate::getEndMonthEpoch( $end_date ) ) ) {
+				Debug::text( 'CPP: Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10 );
 				return TRUE;
 			}
 
-			Debug::text('Epoch: '. TTDate::getDate('DATE+TIME', $pp_end_date) .' is outside Start: '. TTDate::getDate('DATE+TIME', $ud_obj->getStartDate()) .' and End Date: '. TTDate::getDate('DATE+TIME', $ud_obj->getEndDate()), __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
-	}
+			Debug::text( 'CPP: Epoch: ' . TTDate::getDate( 'DATE+TIME', $pp_transaction_date ) . ' is outside Start: ' . TTDate::getDate( 'DATE+TIME', $start_date ) . ' and End Date: ' . TTDate::getDate( 'DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
+			return FALSE;
+		} else {
+			if ( ( $start_date == '' OR $pp_end_date >= $start_date )
+					AND ( $end_date == '' OR $pp_end_date <= $end_date ) ) {
+				Debug::text( 'Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10 );
+				return TRUE;
+			}
+
+			Debug::text( 'Epoch: ' . TTDate::getDate( 'DATE+TIME', $pp_end_date ) . ' is outside Start: ' . TTDate::getDate( 'DATE+TIME', $ud_obj->getStartDate() ) . ' and End Date: ' . TTDate::getDate( 'DATE+TIME', $ud_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
+			return FALSE;
+		}
 	}
 
 	/**
@@ -1665,7 +1667,7 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setCountry( $value) {
-		$value = trim($value);
+		$value = strtoupper( trim($value) );
 		if( $value == TTUUID::getZeroID() ) {
 			$value = '';
 		}
@@ -1684,9 +1686,8 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setProvince( $value) {
-		$value = trim($value);
 		Debug::Text('Country: '. $this->getCountry() .' Province: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		return $this->setGenericDataValue( 'province', $value );
+		return $this->setGenericDataValue( 'province', strtoupper( trim($value) ) );
 	}
 
 	/**

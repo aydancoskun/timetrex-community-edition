@@ -1,6 +1,6 @@
 ForgotPasswordWizardController = BaseWizardController.extend( {
 
-	el: '.wizard',
+	el: '.wizard-bg',
 
 	init: function() {
 		//this._super('initialize' );

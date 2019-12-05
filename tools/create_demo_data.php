@@ -39,6 +39,9 @@ ini_set( 'max_execution_time', 86400 );
 ini_set( 'memory_limit', '1024M' );
 
 if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
+	require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
+	require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+
 	$help_output = "Usage: create_demo_data.php [OPTIONS]\n";
 	$help_output .= "  Options:\n";
 	$help_output .= "    -f (Force creating data even if DEMO_MODE is not enabled. *NOT RECOMMENDED*)\n";

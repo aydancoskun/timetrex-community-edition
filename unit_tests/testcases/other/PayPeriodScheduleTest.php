@@ -152,8 +152,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		$hired_pay_period_number = $ret_obj->getHiredPayPeriodNumberAdjustment($ret_obj->getNextTransactionDate(), $hire_date );
 		$hire_adjusted_annual_pay_periods = $ret_obj->getHireAdjustedAnnualPayPeriods($ret_obj->getNextTransactionDate(), $hire_date );
 		$this->assertEquals( $hired_pay_period_number, 40, 'Hired Pay Period Number');
-		$this->assertEquals( $hire_adjusted_annual_pay_periods, 13, 'Hire Adjusted Annual Pay Periods');
-		$this->assertEquals( ( $hired_pay_period_number + $hire_adjusted_annual_pay_periods), $ret_obj->getAnnualPayPeriods(), 'Compare Hire Adjusted to Annual PPs');
+		//$this->assertEquals( $hire_adjusted_annual_pay_periods, 13, 'Hire Adjusted Annual Pay Periods');
+		$this->assertEquals( $hire_adjusted_annual_pay_periods, 53, 'Hire Adjusted Annual Pay Periods'); //This should always be the total number of pay periods in the year. Only the hire adjusted current pay period gets modified.
+		//$this->assertEquals( ( $hired_pay_period_number + $hire_adjusted_annual_pay_periods), $ret_obj->getAnnualPayPeriods(), 'Compare Hire Adjusted to Annual PPs');
 
 
 		//var_dump($ret_obj->getNextStartDate());
@@ -314,8 +315,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		$hired_pay_period_number = $ret_obj->getHiredPayPeriodNumberAdjustment($ret_obj->getNextTransactionDate(), $hire_date );
 		$hire_adjusted_annual_pay_periods = $ret_obj->getHireAdjustedAnnualPayPeriods($ret_obj->getNextTransactionDate(), $hire_date );
 		$this->assertEquals( $hired_pay_period_number, 6, 'Hired Pay Period Number');
-		$this->assertEquals( $hire_adjusted_annual_pay_periods, 6, 'Hire Adjusted Annual Pay Periods');
-		$this->assertEquals( ( $hired_pay_period_number + $hire_adjusted_annual_pay_periods), $ret_obj->getAnnualPayPeriods(), 'Compare Hire Adjusted to Annual PPs');
+		//$this->assertEquals( $hire_adjusted_annual_pay_periods, 6, 'Hire Adjusted Annual Pay Periods');
+		$this->assertEquals( $hire_adjusted_annual_pay_periods, 12, 'Hire Adjusted Annual Pay Periods'); //This should always be the total number of pay periods in the year. Only the hire adjusted current pay period gets modified.
+		//$this->assertEquals( ( $hired_pay_period_number + $hire_adjusted_annual_pay_periods), $ret_obj->getAnnualPayPeriods(), 'Compare Hire Adjusted to Annual PPs');
 
 		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Jul-05', '1- Start Date');
 		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Jul-05', '1- End Date');

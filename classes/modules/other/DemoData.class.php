@@ -299,46 +299,46 @@ class DemoData {
 								'Business Administration',
 							);
 
-	protected $coordinates = array(
-								array(40.7331043902,-74.01754796505), // new york
-								array(40.7314133588,-73.970341086388),
-								array(40.727014849905,-74.017800092697),
+	protected $coordinates = array( //NOTE: If these change update array_slice() calls on this to correspond.
+								array(40.7331043902,-74.01004796505), // New York
+								array(40.7314133588,-73.990341086388),
+								array(40.727014849905,-74.007800092697),
 								array(40.704895945126,-73.981407880783),
-								array(40.722071261881,-74.012993574142),
+								array(40.722071261881,-74.010993574142),
 								array(40.718688595346,-73.935745954514),
 								array(40.763478722865,-73.930070400238),
-								array(40.656778234208,-73.972642421722),
-								array(40.723112047769,-74.028443098068),
+								array(40.656778234208,-73.975642421722),
+								array(40.723112047769,-74.058443098068),
 								array(40.693963891348,-74.057968854904),
 
-								array(47.773829,-122.38306), // seattle
-								array(47.473010966814,-122.51257896423),
+								array(47.773829,-122.38306), // Seattle
+								array(47.473010966814,-122.11257896423),
 								array(47.785653130062,-122.12741374969),
 								array(47.708086640739,-121.9173002243),
-								array(47.759983573294,-122.75153160095),
-								array(47.765522347356,-121.58972740173),
+								array(47.759983573294,-122.65153160095),
+								array(47.765522347356,-122.021),
 								array(47.721397737032,-122.30561971664),
-								array(47.578552237571,-122.27298259735),
+								array(47.578552237571,-122.29298259735),
 								array(47.503460631986,-122.25512981415),
 								array(47.755367,-122.715569),
-								array(47.337310405077,-122.8613948822),
+								array(47.537310405077,-122.8613948822),
 								array(47.783635,-122.652912),
 
-								array(34.256081384717,-100.73295593262), // outside new york,seattle
-								array(34.037866684604,-90.603561401367),
-								array(31.825065081209,-92.471237182617),
-								array(30.679258712559,-95.679244995117),
-								array(29.634352258877,-101.50199890137),
-								array(30.186683090608,-104.55619812012),
-								array(30.754818309502,-107.96195983887),
-								array(32.938386363885,-108.75297546387),
-								array(34.019656697326,-107.30278015137),
-								array(34.509951580711,-105.25932312012),
-								array(33.141000944017,-104.00688171387),
-								array(31.338389926759,-104.09477233887),
-								array(31.30084828737,-99.436569213867),
-								array(33.067376841084,-100.22758483887),
-								array(33.910314751383,-103.76518249512)
+								array(34.256081384717,-100.73295593262), // outside New York, Seattle
+								array(34.037866684604,-90.626561401367),
+								array(31.858065081209,-92.281237182617),
+								array(30.6931993,-95.6455915),
+								array(29.4068375,-98.5181916),
+								array(28.6415717,-106.0785596),
+								array(33.474184,-112.1011934),
+								array(40.8230805,-96.7074882),
+								array(40.7160846,-111.9110708),
+								array(35.4674472,-97.5480777),
+								array(42.8376525,-106.3263868),
+								array(39.5306376,-119.7937269),
+								array(32.7949408,-96.9466828),
+								array(34.7198707,-92.2848841),
+								array(37.7802258,-81.1810323)
 							);
 
 	protected $generated_sins = array();
@@ -1654,120 +1654,84 @@ class DemoData {
 				$pcf->setName( 'Regular Time' );
 				$pcf->setCode( 'REG' );
 				$pcf->setType( 10 ); //Paid
-				//$pcf->setRate( 1.0 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Regular Time') );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 101:
 				$pcf->setName( 'Regular Time (B)' );
 				$pcf->setCode( 'REG' );
 				$pcf->setType( 10 ); //Paid
-				//$pcf->setRate( 1.0 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Regular Time') );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 102:
 				$pcf->setName( 'Regular Time (C)' );
 				$pcf->setCode( 'REG' );
 				$pcf->setType( 10 ); //Paid
-				//$pcf->setRate( 1.0 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Regular Time') );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 190:
 				$pcf->setName( 'Lunch Time' );
 				$pcf->setCode( 'LNH' );
 				$pcf->setType( 10 ); //Paid
-				//$pcf->setRate( 1.0 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Regular Time') );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 192:
 				$pcf->setName( 'Break Time' );
 				$pcf->setCode( 'BRK' );
 				$pcf->setType( 10 ); //Paid
-				//$pcf->setRate( 1.0 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Regular Time') );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 200:
 				$pcf->setName( 'Overtime Time (1.5x)' );
 				$pcf->setCode( 'OT15' );
 				$pcf->setType( 10 ); //Paid
-				//$pcf->setRate( 1.5 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Over Time 1') );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 210:
 				$pcf->setName( 'Overtime Time (2.0x)' );
 				$pcf->setCode( 'OT20' );
 				$pcf->setType( 10 ); //Paid
-				//$pcf->setRate( 1.5 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Over Time 2') );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 300:
-				$pcf->setName( 'Premium 1' );
+				$pcf->setName( 'Weekend' );
 				$pcf->setCode( 'PRE1' );
 				$pcf->setType( 10 ); //Paid
-				//$pcf->setRate( 1.5 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Premium 1') );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 310:
-				$pcf->setName( 'Premium 2' );
+				$pcf->setName( 'Evening' );
 				$pcf->setCode( 'PRE2' );
 				$pcf->setType( 10 ); //Paid
-				//$pcf->setRate( 1.5 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Premium 2') );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 900:
 				$pcf->setName( 'PTO/Vacation' );
 				$pcf->setCode( 'PTO' );
 				$pcf->setType( 10 ); //Paid
-				//$pcf->setRate( 1.0 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Vacation - Accrual Release') );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 910:
 				$pcf->setName( 'Bank Time' );
 				$pcf->setCode( 'BANK' );
 				$pcf->setType( 20 ); //Not Paid
-				//$pcf->setRate( 1.0 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( TTUUID::getZeroID() );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 			case 920:
 				$pcf->setName( 'Sick Time' );
 				$pcf->setCode( 'SICK' );
 				$pcf->setType( 20 ); //Not Paid
-				//$pcf->setRate( 1.0 );
-				//$pcf->setAccrualPolicyID( $accrual_policy_id );
 				$pcf->setPayStubEntryAccountID( TTUUID::getZeroID() );
-				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
 		}
@@ -2695,8 +2659,7 @@ class DemoData {
 		$ppsf->setStartWeekDay( 0 );
 		$ppsf->setTimeZone( TTDate::getTimeZone() );
 
-		//$anchor_date = TTDate::getBeginWeekEpoch( ($this->getDate()-(86400 * 42)) ); //Start 6 weeks ago
-		$anchor_date = TTDate::getBeginWeekEpoch( ($this->getDate() - (86400 * 14)) ); //Start 6 weeks ago
+		$anchor_date = TTDate::getBeginWeekEpoch( ($this->getDate() - (86400 * 28)) ); //Start 6 weeks ago
 
 		$ppsf->setAnchorDate( $anchor_date );
 
@@ -3570,14 +3533,14 @@ class DemoData {
 				$payments[$key]['counter'] = $key;
 				$payments[$key]['payment_type_id'] = 10;
 				$payments[$key]['currency_id'] = $default_currency;
-				$payments[$key]['amount'] = Misc::MoneyFormat( $transactions[$key]['amount'] );
+				$payments[$key]['amount'] = Misc::MoneyRound( $transactions[$key]['amount'] );
 
 				$taxes_arr = $if->calcTaxes( array( $transactions[$key] ) );
 
 				//Debug::Arr($taxes_arr, 'Taxes...: ', __FILE__, __LINE__, __METHOD__, 10);
 				if ( is_array( $taxes_arr ) ) {
 					foreach( $taxes_arr as $ptp_data ) {
-						$payments[$key]['amount'] = Misc::MoneyFormat( bcadd( $payments[$key]['amount'], $ptp_data['amount'] ) );
+						$payments[$key]['amount'] = Misc::MoneyRound( bcadd( $payments[$key]['amount'], $ptp_data['amount'] ) );
 					}
 				}
 			}
@@ -4286,9 +4249,11 @@ class DemoData {
 			//Assign Taxes to user
 			$this->createUserDeduction( $company_id, $legal_entity_id, $insert_id );
 
-			$this->createRemittanceDestinationAccount( $insert_id, $default_currency_id, $legal_entity_id, $remittance_source_account_ids[$legal_entity_id][0], 10 );
-			$this->createRemittanceDestinationAccount( $insert_id, $default_currency_id, $legal_entity_id, $remittance_source_account_ids[$legal_entity_id][1], 20 );
-			$this->createRemittanceDestinationAccount( $insert_id, $default_currency_id, $legal_entity_id, $remittance_source_account_ids[$legal_entity_id][2], 30 );
+			if ( is_array( $remittance_source_account_ids ) ) {
+				$this->createRemittanceDestinationAccount( $insert_id, $default_currency_id, $legal_entity_id, $remittance_source_account_ids[ $legal_entity_id ][0], 10 );
+				$this->createRemittanceDestinationAccount( $insert_id, $default_currency_id, $legal_entity_id, $remittance_source_account_ids[ $legal_entity_id ][1], 20 );
+				$this->createRemittanceDestinationAccount( $insert_id, $default_currency_id, $legal_entity_id, $remittance_source_account_ids[ $legal_entity_id ][2], 30 );
+			}
 
 			//5 contacts per user.
 			$x = 1;
@@ -4950,8 +4915,8 @@ class DemoData {
 	 * @param int $absence_policy_id
 	 * @return bool
 	 */
-	function createRequest( $type, $user_id, $date_stamp, $absence_policy_id = 0 ) {
-		if ( $absence_policy_id === 0 ) {
+	function createRequest( $type, $user_id, $date_stamp, $absence_policy_id = NULL ) {
+		if ( $absence_policy_id == '' ) {
 			$absence_policy_id = TTUUID::getZeroID();
 		}
 
@@ -4975,7 +4940,7 @@ class DemoData {
 			case 30: //Try to match setType()
 				$rf->setType( 30 ); //Vacation Request
 				$rf->setStatus( 30 );
-				$rf->setMessage( 'I would like to request 1 week vacation starting this friday.' );
+				$rf->setMessage( 'I would like to request vacation.' );
 				$rf->setCreatedBy( $user_id );
 
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
@@ -4983,8 +4948,46 @@ class DemoData {
 					$rsf->setRequest( $rf->getId() );
 					$rsf->setUser( $rf->getUser() );
 					$rsf->setStatus( 20 ); //Absent
-					$rsf->setStartDate( TTDate::getBeginWeekEpoch( $date_stamp ) );
-					$rsf->setEndDate( TTDate::getEndWeekEpoch( $date_stamp ) );
+					//$rsf->setStartDate( ( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $date_stamp ) ) + 86400 ) );
+					$rsf->setStartDate( $date_stamp );
+					$rsf->setEndDate( ( TTDate::getMiddleDayEpoch( $date_stamp ) + ( 86400 * 2 ) ) );
+					$rsf->setStartTime( strtotime( '8:00AM' ) );
+					$rsf->setEndTime( strtotime( '5:00PM' ) );
+					$rsf->setSun( FALSE );
+					$rsf->setMon( TRUE );
+					$rsf->setTue( TRUE );
+					$rsf->setWed( TRUE );
+					$rsf->setThu( TRUE );
+					$rsf->setFri( TRUE );
+					$rsf->setSat( FALSE );
+					$rsf->setBranch( $u_obj->getDefaultBranch() );
+					$rsf->setDepartment( $u_obj->getDefaultDepartment() );
+					$rsf->setJob( $u_obj->getDefaultJob() );
+					$rsf->setJobItem( $u_obj->getDefaultJobItem() );
+					$rsf->setAbsencePolicy( $absence_policy_id );
+					if ( $rsf->isValid() ) {
+						$rsf_insert_id = $rsf->Save();
+						Debug::Text( 'RequestSchedule ID: ' . $rsf_insert_id, __FILE__, __LINE__, __METHOD__, 10 );
+					} else {
+						Debug::Text( 'Failed Creating Request Schedule!', __FILE__, __LINE__, __METHOD__, 10 );
+					}
+					unset($rsf);
+				}
+
+				break;
+			case 32: //Try to match setType()
+				$rf->setType( 30 ); //Sick Request
+				$rf->setStatus( 30 );
+				$rf->setMessage( 'I would like to request a sick day.' );
+				$rf->setCreatedBy( $user_id );
+
+				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+					$rsf = TTnew( 'RequestScheduleFactory' ); /** @var RequestScheduleFactory $rsf */
+					$rsf->setRequest( $rf->getId() );
+					$rsf->setUser( $rf->getUser() );
+					$rsf->setStatus( 20 ); //Absent
+					$rsf->setStartDate( $date_stamp );
+					$rsf->setEndDate( $date_stamp );
 					$rsf->setStartTime( strtotime( '8:00AM' ) );
 					$rsf->setEndTime( strtotime( '5:00PM' ) );
 					$rsf->setSun( FALSE );
@@ -6329,7 +6332,7 @@ class DemoData {
 				$jf->setName( 'House 1' );
 				$jf->setDescription( rand(100, 9999). ' Main St' );
 
-				$jf->setStartDate( $this->getDate() - (86400 * 14) );
+				$jf->setStartDate( $this->getDate() - (86400 * 28) );
 				$jf->setEndDate( '' );
 
 				$jf->setEstimateTime( (3600 * 500) );
@@ -6699,7 +6702,7 @@ class DemoData {
 				$jf->setName( 'Project F' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( $this->getDate() - (86400 * 14) );
+				$jf->setStartDate( $this->getDate() - (86400 * 28) );
 				$jf->setEndDate( $this->getDate() + (86400 * 1) );
 
 				$jf->setEstimateTime( (3600 * 760) );
@@ -7349,8 +7352,10 @@ class DemoData {
 		$pf->setStatus( $status_id );
 		$pf->setTimeStamp( $time_stamp );
 
-		$pf->setLatitude( $coordinates[0] );
-		$pf->setLongitude( $coordinates[1] );
+		if ( is_array( $coordinates ) ) {
+			$pf->setLatitude( $coordinates[0] );
+			$pf->setLongitude( $coordinates[1] );
+		}
 
 		if ( $pf->isNew() ) {
 			$pf->setActualTimeStamp( $time_stamp );
@@ -7615,7 +7620,7 @@ class DemoData {
 	 * @param null $coordinates
 	 * @return bool
 	 */
-	function createPunchPair( $user_id, $in_time_stamp, $out_time_stamp, $data = NULL, $calc_total_time = TRUE, $coordinates = NULL ) {
+	function createPunchPair( $user_id, $in_time_stamp, $out_time_stamp, $data = NULL, $calc_total_time = TRUE, $disable_rounding = FALSE ) {
 		$fail_transaction = FALSE;
 
 		Debug::Text('Punch Full In Time Stamp: ('.$in_time_stamp.') '. TTDate::getDate('DATE+TIME', $in_time_stamp) .' Out: ('.$out_time_stamp.') '. TTDate::getDate('DATE+TIME', $out_time_stamp), __FILE__, __LINE__, __METHOD__, 10);
@@ -7626,16 +7631,16 @@ class DemoData {
 		//Out Punch
 		if ( $out_time_stamp !== NULL ) {
 			$pf_in = TTnew( 'PunchFactory' ); /** @var PunchFactory $pf_in */
-			$pf_in->setTransfer( FALSE );
+			$pf_in->setTransfer( $disable_rounding );
 			$pf_in->setEnableAutoTransfer( FALSE );
 			$pf_in->setUser( $user_id );
 			$pf_in->setType( $data['out_type_id'] );
 			$pf_in->setStatus( 20 );
-			$pf_in->setTimeStamp( $out_time_stamp );
+			$pf_in->setTimeStamp( $out_time_stamp, !$disable_rounding );
 			$pf_in->setPositionAccuracy( mt_rand(10, 100) );
-			if ( isset( $coordinates ) AND is_array( $coordinates) ) {
-				$pf_in->setLatitude( $coordinates[0] );
-				$pf_in->setLongitude( $coordinates[1] );
+			if ( isset( $data['in_coordinates'] ) AND is_array( $data['in_coordinates'] ) ) {
+				$pf_in->setLatitude( $data['in_coordinates'][0] );
+				$pf_in->setLongitude( $data['in_coordinates'][1] );
 			} else {
 				$pf_in->setLongitude( $this->getRandomCoordinates('longitude' ) );
 				$pf_in->setLatitude( $this->getRandomCoordinates('latitude' ) );
@@ -7646,6 +7651,10 @@ class DemoData {
 			}
 
 			$pf_in->setPunchControlID( $pf_in->findPunchControlID() );
+
+			$pf_in->setUpdatedBy( $user_id ); //Prevent punches being flagged as tainted.
+			$pf_in->setCreatedBy( $user_id ); //Prevent punches being flagged as tainted.
+
 			if ( $pf_in->isValid() ) {
 				if ( $pf_in->Save( FALSE ) === FALSE ) {
 					Debug::Text(' aFail Transaction: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -7659,16 +7668,16 @@ class DemoData {
 		//In Punch
 		if ( $in_time_stamp !== NULL ) {
 			$pf_out = TTnew( 'PunchFactory' ); /** @var PunchFactory $pf_out */
-			$pf_out->setTransfer( FALSE );
+			$pf_out->setTransfer( $disable_rounding );
 			$pf_out->setEnableAutoTransfer( FALSE );
 			$pf_out->setUser( $user_id );
 			$pf_out->setType( $data['in_type_id'] );
 			$pf_out->setStatus( 10 );
-			$pf_out->setTimeStamp( $in_time_stamp );
+			$pf_out->setTimeStamp( $in_time_stamp, !$disable_rounding );
 			$pf_out->setPositionAccuracy( mt_rand(10, 100) );
-			if ( isset( $coordinates ) AND is_array( $coordinates) ) {
-				$pf_out->setLatitude( $coordinates[0] );
-				$pf_out->setLongitude( $coordinates[1] );
+			if ( isset( $data['out_coordinates'] ) AND is_array( $data['out_coordinates'] ) ) {
+				$pf_out->setLatitude( $data['out_coordinates'][0] );
+				$pf_out->setLongitude( $data['out_coordinates'][1] );
 			} else {
 				$pf_out->setLongitude( $this->getRandomCoordinates('longitude' ) );
 				$pf_out->setLatitude( $this->getRandomCoordinates('latitude' ) );
@@ -7683,6 +7692,9 @@ class DemoData {
 			} else {
 				$pf_out->setPunchControlID( $pf_out->findPunchControlID() );
 			}
+
+			$pf_out->setUpdatedBy( $user_id ); //Prevent punches being flagged as tainted.
+			$pf_out->setCreatedBy( $user_id ); //Prevent punches being flagged as tainted.
 
 			if ( $pf_out->isValid() ) {
 				if ( $pf_out->Save( FALSE ) === FALSE ) {
@@ -7720,6 +7732,9 @@ class DemoData {
 			if ( isset($data['bad_quantity']) ) {
 				$pcf->setBadQuantity( $data['bad_quantity'] );
 			}
+
+			$pcf->setUpdatedBy( $user_id ); //Prevent punches being flagged as tainted.
+			$pcf->setCreatedBy( $user_id ); //Prevent punches being flagged as tainted.
 
 			$pcf->setEnableCalcUserDateID( TRUE );
 			$pcf->setEnableCalcTotalTime( TRUE ); //This always needs to be called.
@@ -8341,8 +8356,9 @@ class DemoData {
 			$policy_ids['contributing_pay_code_policy'][90] = $this->createContributingPayCodePolicy( $company_id, 90, array( $policy_ids['pay_code'][900] ) ); //Absence
 			$policy_ids['contributing_pay_code_policy'][99] = $this->createContributingPayCodePolicy( $company_id, 99, $policy_ids['pay_code'] ); //All Time
 
-			$policy_ids['contributing_shift_policy'][10] = $this->createContributingShiftPolicy( $company_id, 10, $policy_ids['contributing_pay_code_policy'][14] ); //Regular
-			$policy_ids['contributing_shift_policy'][20] = $this->createContributingShiftPolicy( $company_id, 20, $policy_ids['contributing_pay_code_policy'][20] ); //Regular+OT+Meal/Break
+			$policy_ids['contributing_shift_policy'][10] = $this->createContributingShiftPolicy( $company_id, 10, $policy_ids['contributing_pay_code_policy'][10] ); //Regular
+			$policy_ids['contributing_shift_policy'][20] = $this->createContributingShiftPolicy( $company_id, 20, $policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break
+			$policy_ids['contributing_shift_policy'][30] = $this->createContributingShiftPolicy( $company_id, 30, $policy_ids['contributing_pay_code_policy'][20] ); //Regular+OT+Meal/Break
 
 			$policy_ids['regular'][] = $this->createRegularTimePolicy( $company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][100] );
 
@@ -8363,8 +8379,8 @@ class DemoData {
 				$policy_ids['expense'] = array();
 			}
 
-			$policy_ids['premium'][] = $this->createPremiumPolicy( $company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][300] );
-			$policy_ids['premium'][] = $this->createPremiumPolicy( $company_id, 20, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][310] );
+			$policy_ids['premium'][] = $this->createPremiumPolicy( $company_id, 10, $policy_ids['contributing_shift_policy'][30], $policy_ids['pay_code'][300] );
+			$policy_ids['premium'][] = $this->createPremiumPolicy( $company_id, 20, $policy_ids['contributing_shift_policy'][30], $policy_ids['pay_code'][310] );
 
 			$policy_ids['absence'][] = $this->createAbsencePolicy( $company_id, 10, $policy_ids['pay_code'][900] ); //Vacation
 			$policy_ids['absence'][] = $this->createAbsencePolicy( $company_id, 20, $policy_ids['pay_code'][910] ); //Bank
@@ -8591,8 +8607,8 @@ class DemoData {
 				$job_ids[] = $this->createJob( $company_id, 25, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1], $client_ids[7], array( $geo_fence_ids[3], $geo_fence_ids[4], $geo_fence_ids[5] ) );
 
 			} else {
-				$task_ids[] = 0;
-				$job_ids[] = 0;
+				$task_ids[] = TTUUID::getZeroID();
+				$job_ids[] = TTUUID::getZeroID();
 			}
 
 			if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
@@ -8802,7 +8818,7 @@ class DemoData {
 						}
 					}
 
-					// Attach document to Jobs
+					// Attach document to jobs
 					foreach ( $job_ids as $job_id ) {
 						$x = 1;
 						while ( $x <= rand( 2, 3 ) ) {
@@ -8901,33 +8917,42 @@ class DemoData {
 				);
 
 				//Create schedule for each employee.
-				$x = 0;
+				$x = 1;
 				foreach ( $user_ids as $user_id ) {
 					//Create schedule starting 6 weeks ago, up to the end of the week.
 					Debug::Text( 'Creating schedule for User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-					$schedule_date = ( $current_epoch - ( 86400 * 14 ) );
+					$schedule_date = TTDate::getBeginWeekEpoch( ( $current_epoch - ( 86400 * 28 ) ) );
 					$schedule_end_date = TTDate::getEndWeekEpoch( $current_epoch );
+
+					$y = 1;
 					while ( $schedule_date <= $schedule_end_date ) {
-						if ( ( $x % 5 ) == 0 ) {
-							$schedule_options_key = 3; //Common shift
-						} else {
-							$schedule_options_key = array_rand( $schedule_options_arr );
-						}
-
-						Debug::Text( '  Schedule Date: ' . $schedule_date . ' Schedule Options Key: ' . $schedule_options_key, __FILE__, __LINE__, __METHOD__, 10 );
-
-						//Random departments/branches
-						$schedule_options_arr[$schedule_options_key]['branch_id'] = $branch_ids[array_rand( $branch_ids )];
-						$schedule_options_arr[$schedule_options_key]['department_id'] = $department_ids[array_rand( $department_ids )];
-
 						//Schedule just weekdays for users 1-4, then weekends and not mon/tue for user 5.
 						if ( ( ( $x % 5 ) != 0 AND date( 'w', $schedule_date ) != 0 AND date( 'w', $schedule_date ) != 6 )
 								OR ( ( $x % 5 ) == 0 AND date( 'w', $schedule_date ) != 1 AND date( 'w', $schedule_date ) != 2 )
 						) {
+							if ( ( $x % 5 ) == 0 ) {
+								$schedule_options_key = 3; //Common shift
+							} else {
+								$schedule_options_key = array_rand( $schedule_options_arr );
+							}
+
+							Debug::Text( '  Schedule Date: ' . $schedule_date . ' Schedule Options Key: ' . $schedule_options_key, __FILE__, __LINE__, __METHOD__, 10 );
+
+							//Random departments/branches
+							$schedule_options_arr[ $schedule_options_key ]['branch_id'] = TTUUID::getNotExistID(); //Default
+							$schedule_options_arr[ $schedule_options_key ]['department_id'] = TTUUID::getNotExistID(); //Default
+
+							if ( ( $x % 3 ) == 0  AND ( $y % 5 ) == 0 ) { //Every 3rd employee, only every 5th day.
+								$schedule_options_arr[$schedule_options_key]['branch_id'] = $branch_ids[array_rand( $branch_ids )];
+								$schedule_options_arr[$schedule_options_key]['department_id'] = $department_ids[array_rand( $department_ids )];
+							}
+
 							$this->createSchedule( $company_id, $user_id, $schedule_date, $schedule_options_arr[$schedule_options_key] );
 						}
+
 						$schedule_date += 86400;
+						$y++;
 					}
 					//break;
 
@@ -8943,125 +8968,180 @@ class DemoData {
 				//Punch users in/out randomly.
 				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
+				$x = 1;
 				foreach ( $user_ids as $user_id ) {
-					//Pick random jobs/tasks that are used for the entire date range.
-					//So one employee isn't punching into 15 jobs.
-					srand( $this->getDate() );
-					$user_random_job_ids = (array)array_flip( (array)array_rand( $job_ids, 2 ) );
+					srand( $this->getDate() + $x ); //Different seed for each user.
+
+					//Pick random jobs/tasks that are used for the entire date range. So one employee isn't punching into 15 jobs.
+					$user_random_branch_ids = (array)array_flip( (array)array_rand( $branch_ids, 2 ) );
+					$user_random_department_ids = (array)array_flip( (array)array_rand( $department_ids, 2 ) );
+
+					$user_random_new_york_job_ids = (array)array_flip( (array)array_rand( (array)array_slice($job_ids, 0, 7 ), 2 ) ); // New York
+					$user_random_seattle_job_ids = (array)array_flip( (array)array_rand( (array)array_slice($job_ids, 8 ), 2 ) ); // Seattle
+					$user_random_other_job_ids = (array)array_flip( (array)array_rand( $job_ids, 2 ) );
+
 					$user_random_task_ids = (array)array_flip( (array)array_rand( $task_ids, 3 ) );
+
 					//Create punches starting 6 weeks ago, up to the end of the week.
-					$start_date = $punch_date = ( $current_epoch - ( 86400 * 14 ) );
+					$start_date = $punch_date = TTDate::getBeginWeekEpoch( ( $current_epoch - ( 86400 * 28 ) ) );
 					$end_date = TTDate::getEndWeekEpoch( $current_epoch );
-					$i = 0;
+					$exception_cutoff_date = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $start_date ) + (86400 * 14) ) );
+
+					$i = 1; //Start at 1 so $i % 5 == 0 doesn't match on the first iteration every time.
 					while ( $punch_date <= $end_date ) {
+						srand( $this->getDate() + $x + $i ); //Different seed for each user/date
+
 						$date_stamp = TTDate::getDate( 'DATE', $punch_date );
-						//$punch_full_time_stamp = strtotime($pc_data['date_stamp'].' '.$pc_data['time_stamp']);
-						$exception_cutoff_date = ( $current_epoch - (86400 * 14) );
-						if ( ($i % 25) == 0 ) {
-							$user_random_coordinates = $coordinates['00']; // outside new york, seattle
-							$user_random_job_ids = $job_ids;
+
+						if ( ( $i % 25 ) == 0 ) {
+							$user_random_job_ids = $user_random_other_job_ids;
+							$user_random_coordinates = $coordinates['00']; // outside New York, Seattle
 						} else {
-							if ( ($i % 2) == 0 ) {
-								$user_random_job_ids = (array)array_slice($job_ids, 0, 7); // new york
-								$user_random_coordinates = $coordinates['NY']; // inside new york
+							if ( ( $i % 2 ) == 0 ) {
+								$user_random_job_ids = $user_random_new_york_job_ids; // New York
+								$user_random_coordinates = $coordinates['NY']; // inside New York
 							} else {
-								$user_random_job_ids = (array)array_slice($job_ids, 8); // seattle
-								$user_random_coordinates = $coordinates['WA']; // inside seattle
+								$user_random_job_ids = $user_random_seattle_job_ids; // Seattle
+								$user_random_coordinates = $coordinates['WA']; // inside Seattle
 							}
 						}
-						if ( date('w', $punch_date) != 0 AND date('w', $punch_date) != 6 ) {
-							if ( $punch_date >= $exception_cutoff_date AND ( $i % 4 ) == 0 ) {
-								$first_punch_in = rand( 7, 8 ) . ':' . str_pad( rand( 0, 30 ), 2, '0', STR_PAD_LEFT ) . 'AM';
-								$last_punch_out = strtotime( $date_stamp . ' ' . rand( 4, 5 ) . ':' . str_pad( rand( 0, 30 ), 2, '0', STR_PAD_LEFT ) . 'PM' );
 
-								if ( $punch_date >= $exception_cutoff_date
-										AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-										AND ( $i % 200 ) == 0
-								) {
-									//Create request
-									$request_id = $this->createRequest( 40, $user_id, $date_stamp ); //These change the schedule and add a lot of absences, so keep them to a minimum.
-									if ( rand( 0, 99 ) < 25 ) { //25% chance
-										$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
-										$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
-										$this->createAuthorization( 1020, $request_id, $superior_user_ids[0], TRUE );
-									}
-								}
-								if ( $punch_date >= $exception_cutoff_date
-										AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-										AND ( $i % 160 ) == 0
-								) {
-									//Create request
-									$request_id = $this->createRequest( 30, $user_id, $date_stamp, $policy_ids['absence'][0] ); //These change the schedule and add a lot of absences, so keep them to a minimum.
-									if ( rand( 0, 99 ) < 25 ) { //25% chance
-										$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
-										$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
-									}
-								}
+						if ( date('w', $punch_date) != 0 AND date('w', $punch_date) != 6 ) {
+							$first_punch_in = '8:00AM';
+							if ( date('w', $punch_date) == 5 ) { //5=Friday - Don't adjust punch after this on fridays as we want to show Evening premium.
+								$last_punch_out = strtotime( $date_stamp . ' ' . rand( 5, 7 ) . ':' . str_pad( rand( 0, 59 ), 2, '0', STR_PAD_LEFT ) . 'PM' );
 							} else {
-								$first_punch_in = '08:00AM';
-								if ( $punch_date >= $exception_cutoff_date
-										AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-										AND ( $i % 20 ) == 0
-								) {
+								$last_punch_out = strtotime( $date_stamp . ' 5:00PM' );
+							}
+
+							if ( $punch_date >= $exception_cutoff_date AND in_array( $user_id, $hierarchy_user_ids ) AND date( 'w', $punch_date ) != 5 ) { //Make sure requests are only created when supervisors exist.
+								if ( rand( 0, 99 ) < 30 ) { //30% chance
+									$first_punch_in = rand( 7, 8 ) . ':' . str_pad( rand( 0, 30 ), 2, '0', STR_PAD_LEFT ) . 'AM';
+									$last_punch_out = strtotime( $date_stamp . ' ' . rand( 4, 5 ) . ':' . str_pad( rand( 0, 59 ), 2, '0', STR_PAD_LEFT ) . 'PM' );
+
+									if ( rand( 0, 99 ) < 25 ) { //25% chance
+										//Create request
+										$request_id = $this->createRequest( 40, $user_id, $date_stamp ); //40=Leave Early. These change the schedule and add a lot of absences, so keep them to a minimum.
+										if ( rand( 0, 99 ) < 40 ) { //40% chance
+											$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
+											$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
+											$this->createAuthorization( 1020, $request_id, $superior_user_ids[0], TRUE );
+										}
+									}
+								} elseif ( rand( 0, 99 ) < 10 ) { //10% chance
 									//Don't punch out to generate exception.
 									$last_punch_out = NULL;
 
-									//Forgot to punch out request
-									$request_id = $this->createRequest( 10, $user_id, $date_stamp );
-									if ( rand( 0, 99 ) < 50 ) { //50% chance
+									$request_id = $this->createRequest( 10, $user_id, $date_stamp ); //10=Forgot to punch out request
+									if ( rand( 0, 99 ) < 40 ) { //40% chance
 										$this->createAuthorization( 1010, $request_id, $superior_user_ids[2], TRUE );
 									}
-								} else {
-									$last_punch_out = strtotime( $date_stamp . ' 5:00PM' );
+								} elseif ( rand( 0, 99 ) < 25 ) { //25% chance
+									//Create request
+									if ( rand( 0, 99 ) < 60 ) { //60% chance
+										$request_id = $this->createRequest( 32, $user_id, $date_stamp, $policy_ids['absence'][2] ); //30=Multi-day Sick. These change the schedule and add a lot of absences, so keep them to a minimum.
+									} else {
+										$request_id = $this->createRequest( 30, $user_id, $date_stamp, $policy_ids['absence'][0] ); //30=Multi-day Vacation. These change the schedule and add a lot of absences, so keep them to a minimum.
+									}
+
+									if ( rand( 0, 99 ) < 75 ) { //75% chance
+										$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
+										$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
+									}
 								}
 							}
 
 							//Weekdays
-							$this->createPunchPair( $user_id,
-													strtotime( $date_stamp . ' ' . $first_punch_in ),
-													strtotime( $date_stamp . ' 11:00AM' ),
-													array(
-															'in_type_id'    => 10,
-															'out_type_id'   => 10,
-															'branch_id' => $branch_ids[array_rand($branch_ids)],
-															'department_id' => $department_ids[array_rand($department_ids)],
-															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
-															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
-															//'job_item_id' => $task_ids[array_rand($task_ids)],
-													),
-													FALSE, //Calculate at end of loop.
-													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
-							);
-							$this->createPunchPair( $user_id,
-													strtotime( $date_stamp . ' 11:00AM' ),
-													strtotime( $date_stamp . ' 1:00PM' ),
-													array(
-															'in_type_id'    => 10,
-															'out_type_id'   => 20,
-															'branch_id' => $branch_ids[array_rand($branch_ids)],
-															'department_id' => $department_ids[array_rand($department_ids)],
-															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
-															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
-													),
-													FALSE, //Calculate at end of loop.
-													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
-							);
-							//Calc total time on last punch pair only.
-							$this->createPunchPair( $user_id,
-													strtotime( $date_stamp . ' 2:00PM' ),
-													$last_punch_out,
-													array(
-															'in_type_id'    => 20,
-															'out_type_id'   => 10,
-															'branch_id' => $branch_ids[array_rand($branch_ids)],
-															'department_id' => $department_ids[array_rand($department_ids)],
-															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
-															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
-													),
-													FALSE, //Calculate at end of loop.
-													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
-							);
-						} elseif ( $punch_date > $exception_cutoff_date AND date( 'w', $punch_date ) == 6 AND ( $i % 10 ) == 0 ) {
+							if ( rand( 0, 99 ) < 60 ) { //60% chance (at least 3 out of 5 days)
+								//Transfer punches.
+
+								//Choose random transfer punch hour/minutes.
+								$transfer_punch_time = str_pad( rand( 10, 11 ), 2, '0', STR_PAD_LEFT ).':'. str_pad( rand( 0, 59 ), 2, '0', STR_PAD_LEFT ) .'AM';
+
+								$this->createPunchPair( $user_id,
+														strtotime( $date_stamp . ' ' . $first_punch_in ),
+														strtotime( $date_stamp . ' '. $transfer_punch_time ),
+														array(
+																'in_type_id'    => 10,
+																'out_type_id'   => 10,
+																'branch_id' => $branch_ids[array_rand($user_random_branch_ids)],
+																'department_id' => $department_ids[array_rand($user_random_department_ids)],
+																'job_id' => $job_ids[array_rand($user_random_job_ids)],
+																'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
+																'in_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+																'out_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+														),
+														FALSE, //Calculate at end of loop.
+														TRUE //Disable rounding due to transfer punch.
+								);
+								$this->createPunchPair( $user_id,
+														strtotime( $date_stamp . ' '. $transfer_punch_time ),
+														strtotime( $date_stamp . ' 1:00PM' ),
+														array(
+																'in_type_id'    => 10,
+																'out_type_id'   => 20,
+																'branch_id' => $branch_ids[array_rand($user_random_branch_ids)],
+																'department_id' => $department_ids[array_rand($user_random_department_ids)],
+																'job_id' => $job_ids[array_rand($user_random_job_ids)],
+																'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
+																'in_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+																'out_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+														),
+														FALSE, //Calculate at end of loop.
+														TRUE //Disable rounding due to transfer punch.
+								);
+								//Calc total time on last punch pair only.
+								$this->createPunchPair( $user_id,
+														strtotime( $date_stamp . ' 2:00PM' ),
+														$last_punch_out,
+														array(
+																'in_type_id'    => 20,
+																'out_type_id'   => 10,
+																'branch_id' => $branch_ids[array_rand($user_random_branch_ids)],
+																'department_id' => $department_ids[array_rand($user_random_department_ids)],
+																'job_id' => $job_ids[array_rand($user_random_job_ids)],
+																'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
+																'in_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+																'out_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+														),
+														FALSE //Calculate at end of loop.
+								);
+							} else {
+								//No transfer punches.
+								$this->createPunchPair( $user_id,
+														strtotime( $date_stamp . ' ' . $first_punch_in ),
+														strtotime( $date_stamp . ' 12:00PM' ),
+														array(
+																'in_type_id'    => 10,
+																'out_type_id'   => 20,
+																'branch_id' => $branch_ids[array_rand($user_random_branch_ids)],
+																'department_id' => $department_ids[array_rand($user_random_department_ids)],
+																'job_id' => $job_ids[array_rand($user_random_job_ids)],
+																'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
+																'in_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+																'out_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+														),
+														FALSE //Calculate at end of loop.
+								);
+								//Calc total time on last punch pair only.
+								$this->createPunchPair( $user_id,
+														strtotime( $date_stamp . ' 1:00PM' ),
+														$last_punch_out,
+														array(
+																'in_type_id'    => 20,
+																'out_type_id'   => 10,
+																'branch_id' => $branch_ids[array_rand($user_random_branch_ids)],
+																'department_id' => $department_ids[array_rand($user_random_department_ids)],
+																'job_id' => $job_ids[array_rand($user_random_job_ids)],
+																'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
+																'in_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+																'out_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+														),
+														FALSE //Calculate at end of loop.
+								);
+							}
+
+						} elseif ( date( 'w', $punch_date ) == 6 AND rand( 0, 99 ) < 40 ) { //40% chance.
 							//Sat.
 							$this->createPunchPair( $user_id,
 													strtotime( $date_stamp . ' 10:00AM' ),
@@ -9069,13 +9149,14 @@ class DemoData {
 													array(
 															'in_type_id'    => 10,
 															'out_type_id'   => 10,
-															'branch_id' => $branch_ids[array_rand($branch_ids)],
-															'department_id' => $department_ids[array_rand($department_ids)],
-															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
+															'branch_id' => $branch_ids[array_rand($user_random_branch_ids)],
+															'department_id' => $department_ids[array_rand($user_random_department_ids)],
+															'job_id' => $job_ids[array_rand($user_random_job_ids)],
 															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
+															'in_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
+															'out_coordinates' => $user_random_coordinates[array_rand($user_random_coordinates)],
 													),
-													FALSE,
-													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
+													FALSE
 							);
 						}
 
@@ -9098,6 +9179,7 @@ class DemoData {
 
 					unset($punch_options_arr, $punch_date, $user_id, $user_obj, $cp);
 
+					$x++;
 				}
 				Debug::Text(' c.Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -9131,16 +9213,16 @@ class DemoData {
 							$cps->calculate();
 						}
 
-						if ( $n == 0 ) { //Pay and close only the first pay period
+						if ( $n <= 1 ) { //Pay and close the first two pay periods.
 							Debug::Text('  Processing PayStub Transactions and closing the pay period... Pay Period: '. $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 							//Process Payments for all transactions.
-							$data['filter_data']['transaction_status_id'] = array(10, 200); //10=Pending, 200=ReIssue
+							$data['filter_data']['transaction_status_id'] = array( 10, 200 ); //10=Pending, 200=ReIssue
 							$data['filter_data']['transaction_type_id'] = 10; //10=Valid (Enabled)
 							$data['filter_data']['pay_period_id'] = $pp_obj->getId();
 
 							$pslf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pslf */
 							$pslf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'] );
-							$pslf->exportPayStubTransaction( $pslf, 10 ); //10=Both EFT/CHeck
+							$pslf->exportPayStubTransaction( $pslf );
 							unset($pslf, $data);
 
 							$pp_obj->setStatus( 20 );

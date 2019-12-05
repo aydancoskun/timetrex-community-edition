@@ -79,177 +79,21 @@ WageViewController = BaseViewController.extend( {
 
 	},
 
-	buildContextMenuModels: function() {
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.copy],
+			include: [{
+				label: $.i18n._( 'Import' ),
+				id: ContextMenuIconName.import_icon,
+				group: 'other',
+				icon: Icons.import_icon,
+				permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVWage' ),
+				permission: null,
+				sort_order: 8000
+			}]
+		};
 
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var other_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Other' ),
-			id: this.viewId + 'other',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var add = new RibbonSubMenu( {
-			label: $.i18n._( 'New' ),
-			id: ContextMenuIconName.add,
-			group: editor_group,
-			icon: Icons.new_add,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var mass_edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Mass<br>Edit' ),
-			id: ContextMenuIconName.mass_edit,
-			group: editor_group,
-			icon: Icons.mass_edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var del = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete' ),
-			id: ContextMenuIconName.delete_icon,
-			group: editor_group,
-			icon: Icons.delete_icon,
-			permission_result: true,
-			permission: null
-		} );
-
-		var delAndNext = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete<br>& Next' ),
-			id: ContextMenuIconName.delete_and_next,
-			group: editor_group,
-			icon: Icons.delete_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		// var copy = new RibbonSubMenu( {
-		// 	label: $.i18n._( 'Copy' ),
-		// 	id: ContextMenuIconName.copy,
-		// 	group: editor_group,
-		// 	icon: Icons.copy_as_new,
-		// 	permission_result: true,
-		// 	permission: null
-		// } );
-
-		var copy_as_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy<br>as New' ),
-			id: ContextMenuIconName.copy_as_new,
-			group: editor_group,
-			icon: Icons.copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save,
-			group: editor_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_continue = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Continue' ),
-			id: ContextMenuIconName.save_and_continue,
-			group: editor_group,
-			icon: Icons.save_and_continue,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_next = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Next' ),
-			id: ContextMenuIconName.save_and_next,
-			group: editor_group,
-			icon: Icons.save_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Copy' ),
-			id: ContextMenuIconName.save_and_copy,
-			group: editor_group,
-			icon: Icons.save_and_copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& New' ),
-			id: ContextMenuIconName.save_and_new,
-			group: editor_group,
-			icon: Icons.save_and_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var import_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Import' ),
-			id: ContextMenuIconName.import_icon,
-			group: other_group,
-			icon: Icons.import_icon,
-			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVWage' ),
-			permission: null,
-			sort_order: 8000
-		} );
-
-		var export_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Export' ),
-			id: ContextMenuIconName.export_excel,
-			group: other_group,
-			icon: Icons.export_excel,
-			permission_result: true,
-			permission: null,
-			sort_order: 9000
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	onFormItemChange: function( target, doNotValidate ) {
@@ -277,7 +121,6 @@ WageViewController = BaseViewController.extend( {
 				break;
 		}
 
-		LocalCacheData.debuger = this.current_edit_record;
 		if ( !doNotValidate ) {
 			this.validate();
 		}
@@ -428,68 +271,11 @@ WageViewController = BaseViewController.extend( {
 		} );
 	},
 
-	onSaveClick: function( ignoreWarning ) {
-		var $this = this;
-		var record;
-		if ( !Global.isSet( ignoreWarning ) ) {
-			ignoreWarning = false;
-		}
-		LocalCacheData.current_doing_context_action = 'save';
-		if ( this.is_mass_editing ) {
-
-			var checkFields = {};
-			for ( var key in this.edit_view_ui_dic ) {
-				var widget = this.edit_view_ui_dic[key];
-
-				if ( Global.isSet( widget.isChecked ) ) {
-					if ( widget.isChecked() ) {
-						checkFields[key] = widget.getValue();
-					}
-				}
-			}
-
-			record = [];
-			$.each( this.mass_edit_record_ids, function( index, value ) {
-				var commonRecord = Global.clone( checkFields );
-				commonRecord.id = value;
-				record.push( commonRecord );
-
-			} );
-		} else {
-			if ( Global.isArray( this.current_edit_record.user_id ) && this.current_edit_record.user_id.length > 0 ) {
-				record = [];
-				$.each( this.current_edit_record.user_id, function( index, value ) {
-
-					var commonRecord = Global.clone( $this.current_edit_record );
-					commonRecord.user_id = value;
-					record.push( commonRecord );
-
-				} );
-			} else {
-				record = this.current_edit_record;
-			}
-
-		}
-
-		this.api['set' + this.api.key_name]( record, false, ignoreWarning, false, ignoreWarning, {
-			onResult: function( result ) {
-
-				if ( result.isValid() ) {
-					var result_data = result.getResult();
-					if ( result_data === true ) {
-						$this.refresh_id = $this.current_edit_record.id;
-					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-						$this.refresh_id = result_data;
-					}
-					$this.search();
-
-					$this.removeEditView();
-				} else {
-					$this.setErrorMenu();
-					$this.setErrorTips( result );
-				}
-			}
-		} );
+	doSaveAPICall: function ( record, ignoreWarning, callback ) {
+		// #2644: We have to handle the record as though its a mass_add, as the awesomebox will always return an array of user_id's. See 733f709e287626070b84e39ca67f78e69a3fcee6.
+		// Normal handling results in 'Invalid Employee' errors for single records. Cannot force is_mass_adding flag, as this affects the save&continue button disabling.
+		record = this.buildMassAddRecord( record );
+		this._super( 'doSaveAPICall', record, ignoreWarning, callback );
 	},
 
 	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {

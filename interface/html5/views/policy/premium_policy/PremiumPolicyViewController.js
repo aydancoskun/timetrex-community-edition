@@ -7,7 +7,8 @@ PremiumPolicyViewController = BaseViewController.extend( {
 	},
 
 	type_array: null,
-	//pay_type_array: null,
+	min_max_time_type_array: null,
+
 	include_holiday_type_array: null,
 
 	branch_selection_type_array: null,
@@ -54,7 +55,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 	initOptions: function() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
-		this.initDropDownOption( 'pay_type' );
+		this.initDropDownOption( 'min_max_time_type' );
 		this.initDropDownOption( 'include_holiday_type' );
 		this.initDropDownOption( 'branch_selection_type' );
 		this.initDropDownOption( 'department_selection_type' );
@@ -173,6 +174,12 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Maximum Time' ), form_item_input, tab_premium_policy_column1, '', widgetContainer );
+
+		//Min/Max Time Type
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( { field: 'min_max_time_type_id', set_empty: false } );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.min_max_time_type_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Min/Max Time Resets' ), form_item_input, tab_premium_policy_column1 );
 
 		//Include Partial Punches
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );

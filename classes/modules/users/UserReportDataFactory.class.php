@@ -291,7 +291,7 @@ class UserReportDataFactory extends Factory {
 	 * @return mixed
 	 */
 	function getData() {
-		return unserialize( $this->getGenericDataValue( 'data' ) );
+		return json_decode( $this->getGenericDataValue( 'data' ), TRUE );
 	}
 
 	/**
@@ -299,9 +299,7 @@ class UserReportDataFactory extends Factory {
 	 * @return bool
 	 */
 	function setData( $value) {
-		$value = serialize($value);
-
-		$this->setGenericDataValue( 'data', $value );
+		$this->setGenericDataValue( 'data', json_encode($value) );
 
 		return TRUE;
 	}

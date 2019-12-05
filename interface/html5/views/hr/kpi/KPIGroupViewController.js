@@ -23,17 +23,28 @@ KPIGroupViewController = BaseTreeViewController.extend( {
 		this.primary_tab_key = 'tab_kpi_group';
 
 		this.api = new (APIFactory.getAPIClass( 'APIKPIGroup' ))();
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
 		this.grid_select_id_array = [];
 
 		this.render();
 		this.buildContextMenu();
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [
+				ContextMenuIconName.copy,
+				ContextMenuIconName.mass_edit,
+				ContextMenuIconName.delete_and_next,
+				ContextMenuIconName.save_and_continue,
+				ContextMenuIconName.save_and_next,
+				ContextMenuIconName.export_excel
+			],
+			include: []
+		};
+
+		return context_menu_model;
 	}
+
 } );

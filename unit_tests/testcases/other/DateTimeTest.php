@@ -298,8 +298,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( TTDate::getTimeUnit( bcmul(PHP_INT_MAX, PHP_INT_MAX) ), '9223372036854775807:00:49' );
 
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX, PHP_INT_MAX), 0.99999) ), '9223372036854775807:00:49' );
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX, PHP_INT_MAX), 0.00001) ), '9223372036854775807:00:49' );
+		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX, PHP_INT_MAX), '0.99999') ), '9223372036854775807:00:49' );
+		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX, PHP_INT_MAX), '0.00001') ), '9223372036854775807:00:49' ); // (float)0.00001 gets converted to scientific notation when casted to string, resulting in bcadd() throwing a non-well formed argument error.
 
 
 		TTDate::setTimeUnitFormat(12);
@@ -1360,16 +1360,16 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('01-Jan-2010'), strtotime('03-Jan-2010'), $frequency_criteria ), TRUE );
 		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('02-Jan-2010 12:00PM'), strtotime('02-Jan-2010 12:00PM'), $frequency_criteria ), TRUE );
 		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('02-Jan-2010 12:00AM'), strtotime('02-Jan-2010 11:59PM'), $frequency_criteria ), TRUE );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, ( strtotime('01-Jan-2010') - (86400 * 7) ), strtotime('01-Jan-2010'), $frequency_criteria ), FALSE ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, ( strtotime('02-Jan-2010') - (86400 * 7) ), strtotime('02-Jan-2010'), $frequency_criteria ), TRUE ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, ( strtotime('03-Jan-2010') - (86400 * 7) ), strtotime('03-Jan-2010'), $frequency_criteria ), TRUE ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, ( strtotime('04-Jan-2010') - (86400 * 7) ), strtotime('04-Jan-2010'), $frequency_criteria ), TRUE ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, ( strtotime('05-Jan-2010') - (86400 * 7) ), strtotime('05-Jan-2010'), $frequency_criteria ), TRUE ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, ( strtotime('06-Jan-2010') - (86400 * 7) ), strtotime('06-Jan-2010'), $frequency_criteria ), TRUE ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, ( strtotime('07-Jan-2010') - (86400 * 7) ), strtotime('07-Jan-2010'), $frequency_criteria ), TRUE ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, ( strtotime('08-Jan-2010') - (86400 * 7) ), strtotime('08-Jan-2010'), $frequency_criteria ), TRUE ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, ( strtotime('09-Jan-2010') - (86400 * 7) ), strtotime('09-Jan-2010'), $frequency_criteria ), TRUE ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, ( strtotime('10-Jan-2010') - (86400 * 7) ), strtotime('10-Jan-2010'), $frequency_criteria ), FALSE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime('01-Jan-2010'), -7, 'day' ), strtotime('01-Jan-2010'), $frequency_criteria ), FALSE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime('02-Jan-2010'), -7, 'day' ), strtotime('02-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime('03-Jan-2010'), -7, 'day' ), strtotime('03-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime('04-Jan-2010'), -7, 'day' ), strtotime('04-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime('05-Jan-2010'), -7, 'day' ), strtotime('05-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime('06-Jan-2010'), -7, 'day' ), strtotime('06-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime('07-Jan-2010'), -7, 'day' ), strtotime('07-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime('08-Jan-2010'), -7, 'day' ), strtotime('08-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime('09-Jan-2010'), -7, 'day' ), strtotime('09-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime('10-Jan-2010'), -7, 'day' ), strtotime('10-Jan-2010'), $frequency_criteria ), FALSE ); //Range
 
 
 		//Quarterly
@@ -1937,27 +1937,28 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setTimeFormat('g:i A T');
 
 		TTDate::setTimeZone('PST8PDT', TRUE); //Force to timezone that observes DST.
-		$time_stamp = 1457859600;
+		$time_stamp = 1457859600; //13-Mar-2016 1:00AM
 		$this->assertEquals( strtotime('13-Mar-2016 1:00AM'), $time_stamp );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', $time_stamp), '13-Mar-16 1:00 AM PST' );
 
 		$this->assertEquals( strtotime('13-Mar-2016 2:00AM'), ( $time_stamp + 3600 ) );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 3600 ) ), '13-Mar-16 3:00 AM PDT' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', TTDate::incrementDate( $time_stamp, 1, 'day' ) ), '14-Mar-16 1:00 AM PDT' );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 86400 ) ), '14-Mar-16 2:00 AM PDT' );
 
 		TTDate::setTimeFormat('g:i A');
 		TTDate::setTimeZone('Etc/GMT+8', TRUE); //Force to timezone that does not observe DST.
-		$time_stamp = 1457859600;
+		$time_stamp = 1457859600; //13-Mar-2016 1:00AM
 		$this->assertEquals( strtotime('13-Mar-2016 1:00AM PST'), $time_stamp );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', $time_stamp), '13-Mar-16 1:00 AM' ); //Was: GMT+8 - But some versions of PHP return "-08", so just ignore the timezone setting for this case.
 
 		$this->assertEquals( strtotime('13-Mar-2016 2:00AM PST'), ( $time_stamp + 3600 ) );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 3600 ) ), '13-Mar-16 2:00 AM' ); //Was: GMT+8
-		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 86400 ) ), '14-Mar-16 1:00 AM' ); //Was: GMT+8
+		$this->assertEquals( TTDate::getDate('DATE+TIME', TTDate::incrementDate( $time_stamp, 1, 'day' ) ), '14-Mar-16 1:00 AM' ); //Was: GMT+8
 
 		TTDate::setTimeFormat('g:i A T');
 		TTDate::setTimeZone('PST8PDT', TRUE); //Force to timezone that observes DST.
-		$time_stamp = 1478419200;
+		$time_stamp = 1478419200; //13-Mar-2016 1:00AM
 		$this->assertEquals( strtotime('06-Nov-2016 1:00AM'), $time_stamp );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', $time_stamp), '06-Nov-16 1:00 AM PDT' );
 
@@ -1965,6 +1966,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( strtotime('06-Nov-2016 2:00AM'), ($time_stamp + 7200) );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 7200 ) ), '06-Nov-16 2:00 AM PST' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', TTDate::incrementDate( $time_stamp, 1, 'day' ) ), '07-Nov-16 1:00 AM PST' );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 86400 ) ), '07-Nov-16 12:00 AM PST' );
 
 
@@ -1995,14 +1997,567 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		//illustrating that +86400 will not always give you tomorrow, but the middle day epoch will dodge the issue.
 		//if we do all the math on the middle of day epoch and continually force it back to noon we can avoid problems with dst
 		$time_stamp = TTDate::getMiddleDayEpoch(strtotime('04-Nov-2016 12:00AM'));
-		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
+		$time_stamp = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $time_stamp ), 1, 'day' );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '05-Nov-16 12:00 PM PDT'); //normal operation
-		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
+		$time_stamp = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $time_stamp ), 1, 'day' );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '06-Nov-16 12:00 PM PST'); //normal operation
-		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
+		$time_stamp = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $time_stamp ), 1, 'day' );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '07-Nov-16 12:00 PM PST'); //normal operation
-		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
+		$time_stamp = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $time_stamp ), 1, 'day' );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '08-Nov-16 12:00 PM PST'); //normal operation
+	}
+
+	function testCalendarArr() {
+		$calendar_arr = TTDate::getCalendarArray( strtotime('09-Mar-2019 12:00:00 PM'), strtotime('11-Mar-2019 12:00:00 PM') );
+
+		$match_arr = array(
+				0  =>
+						array(
+								'epoch'             => 1551600000,
+								'date_stamp'        => '2019-03-03',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => TRUE,
+						),
+				1  =>
+						array(
+								'epoch'             => 1551686400,
+								'date_stamp'        => '2019-03-04',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				2  =>
+						array(
+								'epoch'             => 1551772800,
+								'date_stamp'        => '2019-03-05',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				3  =>
+						array(
+								'epoch'             => 1551859200,
+								'date_stamp'        => '2019-03-06',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				4  =>
+						array(
+								'epoch'             => 1551945600,
+								'date_stamp'        => '2019-03-07',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				5  =>
+						array(
+								'epoch'             => 1552032000,
+								'date_stamp'        => '2019-03-08',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				6  =>
+						array(
+								'epoch'             => 1552118400,
+								'date_stamp'        => '2019-03-09',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				7  =>
+						array(
+								'epoch'             => 1552204800,
+								'date_stamp'        => '2019-03-10',
+								'start_day_of_week' => 0,
+								'day_of_week'       => 'Sun',
+								'day_of_month'      => '10',
+								'month_name'        => 'March',
+								'month_short_name'  => 'Mar',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => TRUE,
+						),
+				8  =>
+						array(
+								'epoch'             => 1552291200,
+								'date_stamp'        => '2019-03-11',
+								'start_day_of_week' => 0,
+								'day_of_week'       => 'Mon',
+								'day_of_month'      => '11',
+								'month_name'        => 'March',
+								'month_short_name'  => 'Mar',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				9  =>
+						array(
+								'epoch'             => 1552377600,
+								'date_stamp'        => '2019-03-12',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				10 =>
+						array(
+								'epoch'             => 1552464000,
+								'date_stamp'        => '2019-03-13',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				11 =>
+						array(
+								'epoch'             => 1552550400,
+								'date_stamp'        => '2019-03-14',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				12 =>
+						array(
+								'epoch'             => 1552636800,
+								'date_stamp'        => '2019-03-15',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+				13 =>
+						array(
+								'epoch'             => 1552723200,
+								'date_stamp'        => '2019-03-16',
+								'start_day_of_week' => 0,
+								'day_of_week'       => NULL,
+								'day_of_month'      => NULL,
+								'month_name'        => NULL,
+								'month_short_name'  => '',
+								'month'             => '3',
+								'isNewMonth'        => FALSE,
+								'isNewWeek'         => FALSE,
+						),
+		);
+
+		$this->assertEquals( $calendar_arr, $match_arr );
+	}
+
+	function testIncrementDate() {
+		TTDate::setTimeZone('PST8PDT', TRUE); //Force to timezone that observes DST.
+
+		//Increment date across DST switch-over
+		$this->assertEquals( TTDate::incrementDate( strtotime('09-Mar-2019 12:00:00 PM'), 1, 'day' ), strtotime('10-Mar-2019 12:00:00 PM'));
+		$this->assertEquals( TTDate::incrementDate( strtotime('09-Mar-2019 12:00:00 PM'), 2, 'day' ), strtotime('11-Mar-2019 12:00:00 PM'));
+
+		$this->assertEquals( TTDate::incrementDate( strtotime('02-Nov-2019 12:00:00 PM'), 1, 'day' ), strtotime('03-Nov-2019 12:00:00 PM'));
+		$this->assertEquals( TTDate::incrementDate( strtotime('02-Nov-2019 12:00:00 PM'), 2, 'day' ), strtotime('04-Nov-2019 12:00:00 PM'));
+
+		//General increments
+		$this->assertEquals( TTDate::incrementDate( strtotime('02-Nov-2019 12:00:00 PM'), 1, 'week' ), strtotime('09-Nov-2019 12:00:00 PM'));
+		$this->assertEquals( TTDate::incrementDate( strtotime('02-Nov-2019 12:00:00 PM'), 1, 'month' ), strtotime('02-Dec-2019 12:00:00 PM'));
+		$this->assertEquals( TTDate::incrementDate( strtotime('02-Nov-2019 12:00:00 PM'), 1, 'year' ), strtotime('02-Nov-2020 12:00:00 PM'));
+
+		$this->assertEquals( TTDate::incrementDate( strtotime('09-Nov-2019 12:00:00 PM'), -1, 'week' ), strtotime('02-Nov-2019 12:00:00 PM'));
+		$this->assertEquals( TTDate::incrementDate( strtotime('02-Dec-2019 12:00:00 PM'), -1, 'month' ), strtotime('02-Nov-2019 12:00:00 PM'));
+		$this->assertEquals( TTDate::incrementDate( strtotime('02-Nov-2020 12:00:00 PM'), -1, 'year' ), strtotime('02-Nov-2019 12:00:00 PM'));
+	}
+
+	function testDatePeriodGenerator() {
+		TTDate::setTimeZone('PST8PDT', TRUE); //Force to timezone that observes DST.
+
+		//Test original loop code vs. new loop code.
+		$original_date_arr = $new_date_arr = array();
+		$x = 0;
+		for( $date = TTDate::getMiddleDayEpoch(strtotime('27-Oct-19 12:00 PM')); $date < strtotime('28-Oct-19 11:59:59 PM'); $date += 86400) {
+			switch ( $x ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '27-Oct-19 12:00 PM PDT');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '28-Oct-19 12:00 PM PDT');
+					break;
+			}
+
+			$original_date_arr[] = $x;
+			$x++;
+		}
+		$this->assertEquals( $x, 2 );
+
+		$period = TTDate::getDatePeriod( TTDate::getMiddleDayEpoch(strtotime('27-Oct-19 12:00 PM')), strtotime('28-Oct-19 11:59:59 PM'), 'P1D', FALSE );
+		$x = 0;
+		foreach( $period as $i => $date ) {
+			switch ( $x ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '27-Oct-19 12:00 PM PDT');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '28-Oct-19 12:00 PM PDT');
+					break;
+			}
+
+			$new_date_arr[] = $x;
+			$x++;
+		}
+		$this->assertEquals( $x, 2 );
+		$this->assertEquals( $original_date_arr, $new_date_arr );
+
+		//Test original loop code vs. new loop code.
+		$original_date_arr = $new_date_arr = array();
+		$x = 0;
+		for( $date = TTDate::getMiddleDayEpoch(strtotime('27-Oct-19 12:00 AM')); $date < strtotime('28-Oct-19 12:00 PM'); $date += 86400) {
+			switch ( $x ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '27-Oct-19 12:00 PM PDT');
+					break;
+			}
+
+			$original_date_arr[] = $x;
+			$x++;
+		}
+		$this->assertEquals( $x, 1 );
+
+		$period = TTDate::getDatePeriod( TTDate::getMiddleDayEpoch(strtotime('27-Oct-19 12:00 AM')), strtotime('28-Oct-19 12:00 PM'), 'P1D', FALSE );
+		$x = 0;
+		foreach( $period as $i => $date ) {
+			switch ( $x ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '27-Oct-19 12:00 PM PDT');
+					break;
+			}
+
+			$new_date_arr[] = $x;
+			$x++;
+		}
+		$this->assertEquals( $x, 1 );
+		$this->assertEquals( $original_date_arr, $new_date_arr );
+
+
+		//Test original loop code vs. new loop code.
+		$original_date_arr = $new_date_arr = array();
+		$x = 0;
+		for( $date = (TTDate::getMiddleDayEpoch(strtotime('20-Nov-2018 00:00:00')) - 86400); $date <= (TTDate::getMiddleDayEpoch( strtotime('20-Nov-2018 23:59:59') ) + 86400); $date += 86400 ) {
+			switch ( $x ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '19-Nov-18 12:00 PM PST');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '20-Nov-18 12:00 PM PST');
+					break;
+				case 2:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '21-Nov-18 12:00 PM PST');
+					break;
+			}
+
+			$original_date_arr[] = $x;
+			$x++;
+		}
+		$this->assertEquals( $x, 3 );
+
+		$period = TTDate::getDatePeriod( (TTDate::getMiddleDayEpoch(strtotime('20-Nov-2018 00:00:00')) - 86400), (TTDate::getMiddleDayEpoch( strtotime('20-Nov-2018 23:59:59') ) + 86400) );
+		$x = 0;
+		foreach( $period as $i => $date ) {
+			switch ( $x ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '19-Nov-18 12:00 PM PST');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '20-Nov-18 12:00 PM PST');
+					break;
+				case 2:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '21-Nov-18 12:00 PM PST');
+					break;
+			}
+
+			$new_date_arr[] = $x;
+			$x++;
+		}
+		$this->assertEquals( $x, 3 );
+		$this->assertEquals( $original_date_arr, $new_date_arr );
+
+
+		//Test original loop code vs. new loop code across DST(a).
+		$original_date_arr = $new_date_arr = array();
+		$x = 0;
+		for( $i = (TTDate::getMiddleDayEpoch(strtotime('09-Mar-2019 12:00:00 PM')) - 86400); $i <= (TTDate::getMiddleDayEpoch( strtotime('11-Mar-2019 12:00:00 PM') ) + 86400); $i += 86400 ) {
+			$original_date_arr[] = $x;
+		    $x++;
+		}
+		$this->assertEquals( $x, 4 ); //4 iterations is *incorrect* due to DST
+
+		$period = TTDate::getDatePeriod( (TTDate::getMiddleDayEpoch(strtotime('09-Mar-2019 12:00:00 PM')) - 86400), (TTDate::getMiddleDayEpoch( strtotime('11-Mar-2019 12:00:00 PM') ) + 86400) );
+		$x = 0;
+		foreach( $period as $i => $date ) {
+			$new_date_arr[] = $x;
+			$x++;
+		}
+		$this->assertEquals( $x, 5 ); //5 iterations is correct due to DST
+
+		array_pop( $new_date_arr );
+		$this->assertEquals( $original_date_arr, $new_date_arr );
+
+
+		//Test original loop code vs. new loop code across DST(b).
+		$original_date_arr = $new_date_arr = array();
+		$x = 0;
+		for( $i = (TTDate::getMiddleDayEpoch(strtotime('03-Nov-2013 00:00:00')) - 86400); $i <= (TTDate::getMiddleDayEpoch( strtotime('03-Nov-2013 10:00:00') ) + 86400); $i += 86400 ) {
+			$original_date_arr[] = $x;
+			$x++;
+		}
+		$this->assertEquals( $x, 3 ); //3 iterations is *correct* due to DST
+
+		//$period = TTDate::getDatePeriod( (TTDate::getMiddleDayEpoch(strtotime('03-Nov-2013 00:00:00')) - 86400), (TTDate::getMiddleDayEpoch( strtotime('03-Nov-2013 10:00:00') ) + 86400) ); //This only returns 2 days.
+		$period = TTDate::getDatePeriod( TTDate::incrementDate(strtotime('03-Nov-2013 00:00:00'), -1, 'day' ), TTDate::incrementDate( strtotime('03-Nov-2013 10:00:00'), 1, 'day' ) );
+		$x = 0;
+		foreach( $period as $i => $date ) {
+			switch ( $i ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-13 12:00 AM PDT');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-13 12:00 AM PDT');
+					break;
+				case 2:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '04-Nov-13 12:00 AM PST');
+					break;
+			}
+
+			$new_date_arr[] = $x;
+			$x++;
+		}
+		$this->assertEquals( $x, 3 ); //3 iterations is correct due to DST
+
+		$this->assertEquals( $original_date_arr, $new_date_arr );
+
+
+		$period = TTDate::getDatePeriod( strtotime('09-Mar-2019 12:00:00 PM'), strtotime('10-Mar-2019 12:00:00 PM') );
+		$x = 0;
+		foreach( $period as $i => $date ) {
+			switch ( $i ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '09-Mar-19 12:00 PM PST');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '10-Mar-19 12:00 PM PDT');
+					break;
+
+			}
+			$x++;
+		}
+		$this->assertEquals( $x, 2 );
+
+		$period = TTDate::getDatePeriod( strtotime('09-Mar-2019 12:00:00 PM'), strtotime('10-Mar-2019 12:00:01 PM') );
+		$x = 0;
+		foreach( $period as $i => $date ) {
+			switch ( $i ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '09-Mar-19 12:00 PM PST');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '10-Mar-19 12:00 PM PDT');
+					break;
+			}
+			$x++;
+		}
+		$this->assertEquals( $x, 2 );
+
+
+		$period = TTDate::getDatePeriod( strtotime('09-Mar-2019 12:00:00 PM'), strtotime('11-Mar-2019 12:00:00 PM') );
+		foreach( $period as $i => $date ) {
+			switch ( $i ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '09-Mar-19 12:00 PM PST');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '10-Mar-19 12:00 PM PDT');
+					break;
+				case 2:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '11-Mar-19 12:00 PM PDT');
+					break;
+			}
+		}
+
+		$period = TTDate::getDatePeriod( strtotime('09-Mar-2019 12:00 AM'), strtotime('11-Mar-2019 12:00 AM') );
+		foreach( $period as $i => $date ) {
+			switch ( $i ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '09-Mar-19 12:00 AM PST');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '10-Mar-19 12:00 AM PST');
+					break;
+				case 2:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '11-Mar-19 12:00 AM PDT');
+					break;
+			}
+		}
+
+
+		$period = TTDate::getDatePeriod( strtotime('02-Nov-2019 12:00:00 PM'), strtotime('04-Nov-2019 12:00:00 PM') );
+		foreach( $period as $i => $date ) {
+			switch ( $i ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 12:00 PM PDT');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 12:00 PM PST');
+					break;
+				case 2:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '04-Nov-19 12:00 PM PST');
+					break;
+			}
+		}
+
+		$period = TTDate::getDatePeriod( strtotime('02-Nov-2019 12:00:00 AM'), strtotime('04-Nov-2019 12:00:00 AM') );
+		foreach( $period as $i => $date ) {
+			switch ( $i ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 12:00 AM PDT');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 12:00 AM PDT');
+					break;
+				case 2:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '04-Nov-19 12:00 AM PST');
+					break;
+			}
+		}
+
+		$period = TTDate::getDatePeriod( strtotime('02-Nov-2019 12:00:00 PM'), strtotime('03-Nov-2019 12:00:00 PM'), 'PT1H' ); //Every hour.
+		foreach( $period as $i => $date ) {
+			switch ( $i ) {
+				case 0:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 12:00 PM PDT');
+					break;
+				case 1:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 1:00 PM PDT');
+					break;
+				case 2:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 2:00 PM PDT');
+					break;
+				case 3:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 3:00 PM PDT');
+					break;
+				case 4:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 4:00 PM PDT');
+					break;
+				case 5:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 5:00 PM PDT');
+					break;
+				case 6:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 6:00 PM PDT');
+					break;
+				case 7:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 7:00 PM PDT');
+					break;
+				case 8:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 8:00 PM PDT');
+					break;
+				case 9:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 9:00 PM PDT');
+					break;
+				case 10:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 10:00 PM PDT');
+					break;
+				case 11:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '02-Nov-19 11:00 PM PDT');
+					break;
+				case 12:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 12:00 AM PDT');
+					break;
+				case 13:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 1:00 AM PDT');
+					break;
+				case 14:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 2:00 AM PST');
+					break;
+				case 15:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 3:00 AM PST');
+					break;
+				case 16:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 4:00 AM PST');
+					break;
+				case 17:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 5:00 AM PST');
+					break;
+				case 18:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 6:00 AM PST');
+					break;
+				case 19:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 7:00 AM PST');
+					break;
+				case 20:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 8:00 AM PST');
+					break;
+				case 21:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 9:00 AM PST');
+					break;
+				case 22:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 10:00 AM PST');
+					break;
+				case 23:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 11:00 AM PST');
+					break;
+				case 24:
+					$this->assertEquals( TTDate::getDate('DATE+TIME', $date ), '03-Nov-19 12:00 PM PST');
+					break;
+			}
+		}
 	}
 
 	function testDateOfNextQuarter() {
@@ -2150,6 +2705,28 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$test_date = TTDate::getISOTimeStamp( strtotime( '31-Jan-2019 22:22:22') ); //As if we are passing a string date through an API
 		TTDate::setTimeZone('PST8PDT', TRUE); //Change timezone to something different as its an API server.
 		$this->assertEquals( strtotime( $test_date ), strtotime( 'Thu, 31 Jan 2019 22:22:22 -0500') ); //Parse string date to the same value on the API server.
+	}
+
+	function testHumanTimeSince() {
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2019 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '0.0 sec' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2019 12:00:02'), strtotime('01-Dec-2019 12:00:00') ), '2.0 secs' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2019 11:59:58'), strtotime('01-Dec-2019 12:00:00') ), '2.0 secs' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2019 12:01:02'), strtotime('01-Dec-2019 12:00:00') ), '62.0 secs' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2019 11:57:02'), strtotime('01-Dec-2019 12:00:00') ), '3.0 mins' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2019 09:57:02'), strtotime('01-Dec-2019 12:00:00') ), '2.0 hrs' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('29-Nov-2019 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '48.0 hrs' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('28-Nov-2019 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '3.0 days' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('04-Dec-2019 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '3.0 days' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('23-Nov-2019 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '8.0 days' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('16-Nov-2019 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '2.1 wks' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Nov-2019 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '4.3 wks' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Aug-2019 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '4.0 mths' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2018 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '12.0 mths' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2017 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '24.0 mths' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2016 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '3.0 yrs' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2000 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '19.0 yrs' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-1905 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '114.0 yrs' );
+		$this->assertEquals( TTDate::getHumanTimeSince( strtotime('01-Dec-2100 12:00:00'), strtotime('01-Dec-2019 12:00:00') ), '81.0 yrs' );
 	}
 }
 ?>

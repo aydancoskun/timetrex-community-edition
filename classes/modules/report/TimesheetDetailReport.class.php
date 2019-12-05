@@ -145,6 +145,7 @@ class TimesheetDetailReport extends Report {
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
+										'-5040-page_break' => TTi18n::gettext('Page Break On'),
 							);
 
 				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -1990,7 +1991,10 @@ class TimesheetDetailReport extends Report {
 	function timesheetHandleDayGaps( $start_date, $end_date, $format, $columns, $column_widths, $user_data, $data, $prev_data ) {
 		//Debug::Text('FOUND GAP IN DAYS!', __FILE__, __LINE__, __METHOD__, 10);
 		$blank_row_data = FALSE;
-		for( $d = TTDate::getMiddleDayEpoch($start_date); $d < $end_date; $d += 86400) {
+
+		//Do not put $end_date through TTDate::getMiddleDayEpoch() because when filling the gap from the last day to the end of the pay period, the pay_period_end_date is 11:59:59 and if we used the middle day epoch it would be skipped.
+		//for( $date = TTDate::getMiddleDayEpoch($start_date); $date < $end_date; $date += 86400) {
+		foreach( TTDate::getDatePeriod( TTDate::getMiddleDayEpoch( $start_date ), $end_date, 'P1D', FALSE ) as $date ) {
 			if ( $this->_pdf_checkMaximumPageLimit() == FALSE ) {
 				Debug::Text('Exceeded maximum page count...', __FILE__, __LINE__, __METHOD__, 10);
 				//Exceeded maximum pages, stop processing.
@@ -1999,7 +2003,7 @@ class TimesheetDetailReport extends Report {
 			}
 
 			//Need to handle pay periods switching in the middle of a string of blank rows.
-			$blank_row_time_stamp = TTDate::getMiddleDayEpoch($d);
+			$blank_row_time_stamp = TTDate::getMiddleDayEpoch($date);
 			//Debug::Text('Blank row timestamp: '. TTDate::getDate('DATE+TIME', $blank_row_time_stamp ) .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $prev_data['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $blank_row_time_stamp >= $prev_data['pay_period_end_date'] ) {
 				//Debug::Text('aBlank row timestamp: '. TTDate::getDate('DATE+TIME', $blank_row_time_stamp ) .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $prev_data['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
@@ -2033,7 +2037,7 @@ class TimesheetDetailReport extends Report {
 			unset($tmp_data);
 
 			//Don't increase max_i if the last day is a gap. However if there are gaps in the middle of the pay period will cause a problem?
-			if ( $d != TTDate::getMiddleDayEpoch($end_date) ) {
+			if ( $date != TTDate::getMiddleDayEpoch($end_date) ) {
 				$this->max_i++;
 			}
 			$this->timesheetDayRow( $format, $columns, $column_widths, $user_data, $blank_row_data, $prev_data ); //Prev data is actually the current data for a blank row.
@@ -2081,7 +2085,7 @@ class TimesheetDetailReport extends Report {
 			$this->pdf->SetTitle( $this->title );
 			$this->pdf->SetSubject( APPLICATION_NAME .' '. TTi18n::getText('Report') );
 
-			$this->pdf->setMargins( $this->config['other']['left_margin'], $this->config['other']['top_margin'], $this->config['other']['right_margin'] );
+			$this->pdf->setMargins( $this->config['other']['left_margin'], $this->config['other']['top_margin'], $this->config['other']['right_margin'] ); //Margins are ignored because we use setXY() to force the coordinates before each drawing and therefore ignores margins.
 			//Debug::Arr($this->config['other'], 'Margins: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$this->pdf->SetAutoPageBreak(FALSE);

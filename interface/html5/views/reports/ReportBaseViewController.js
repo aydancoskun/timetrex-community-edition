@@ -45,7 +45,6 @@ ReportBaseViewController = BaseViewController.extend( {
 	do_validate_after_create_ui: false, //Do validate if there is a saved report
 
 	form_setup_changed: false,
-	invisible_context_menu_dic: [],
 
 	preInit: function( options ) {
 		this.preInitReport();
@@ -57,8 +56,6 @@ ReportBaseViewController = BaseViewController.extend( {
 		this.real_this = this.constructor.__super__;
 
 		this.permission_id = 'report';
-
-		this.invisible_context_menu_dic[ContextMenuIconName.save] = true;
 
 		LocalCacheData.current_open_report_controller = this;
 
@@ -109,6 +106,72 @@ ReportBaseViewController = BaseViewController.extend( {
 		data && data.length > 0 && !item && (item = data[0]);
 
 		return item;
+	},
+
+	// overrides BaseViewController.getDefaultContextMenuModel()
+	getDefaultContextMenuModel: function() {
+
+		var default_context_menu_model = {
+			// only put groups that are used in default here, others go in the relevant view controller to avoid confusion on which are obsolete.
+			groups: {
+				editor: {
+					label: $.i18n._( 'Editor' ),
+					id: 'editor'
+				},
+				saved_report: {
+					label: $.i18n._( 'Saved Report' ),
+					id: this.viewId + 'SavedReport'
+				}
+			},
+
+			'icons': {}
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.view_html] = {
+			label: $.i18n._( 'View' ),
+			id: ContextMenuIconName.view_html,
+			group: 'editor',
+			icon: Icons.view
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.view] = {
+			label: $.i18n._( 'PDF' ),
+			id: ContextMenuIconName.view,
+			group: 'editor',
+			icon: Icons.print
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.export_excel] = {
+			label: $.i18n._( 'Excel' ),
+			id: ContextMenuIconName.export_excel,
+			group: 'editor',
+			icon: Icons.export_excel,
+			sort_order: 1800
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.cancel] = {
+			label: $.i18n._( 'Cancel' ),
+			id: ContextMenuIconName.cancel,
+			group: 'editor',
+			icon: Icons.cancel,
+			sort_order: 1990
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.save_existed_report] = {
+			label: $.i18n._( 'Save' ),
+			id: ContextMenuIconName.save_existed_report,
+			group: 'saved_report',
+			icon: Icons.save
+		};
+
+		default_context_menu_model['icons'][ContextMenuIconName.save_new_report] = {
+			label: $.i18n._( 'Save as New' ),
+			id: ContextMenuIconName.save_new_report,
+			group: 'saved_report',
+			icon: Icons.save_and_new
+		};
+
+		return default_context_menu_model;
 	},
 
 	//this prevents the function of the same name in base class from hiding all of the export to excel buttons on all reports due to their lack of a grid.
@@ -1289,6 +1352,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				case 'columns':
 				case 'sub_total':
 				case 'group':
+				case 'page_break':
 				case 'user_review_control_type_id':
 				case 'user_review_control_status_id':
 				case 'severity_id':
@@ -1768,10 +1832,9 @@ ReportBaseViewController = BaseViewController.extend( {
 				break;
 			case 'group':
 			case 'sub_total':
-
+			case 'page_break':
 				api_instance = this.api;
 				option = 'static_columns';
-
 				break;
 			case 'pay_period_time_sheet_verify_status_id':
 				api_instance = new (APIFactory.getAPIClass( 'APITimeSheetVerify' ))();
@@ -3278,7 +3341,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	onViewClick: function( key, new_window, message_override ) {
 //		Global.loadPage('temp_page.html',function(result){
-//			IndexViewController.openWizard( 'ReportViewWizard', result);
+//			IndexViewController.openizard( 'ReportViewWizard', result);
 //		});
 		if ( !key ) {
 			key = 'pdf';
@@ -3315,15 +3378,15 @@ ReportBaseViewController = BaseViewController.extend( {
 			url = url + '&MessageID=' + message_id;
 
 			var refresh_request = '<script>';
-			refresh_request += 'var Account;';
-			refresh_request += 'function RemainTime(){';
-			refresh_request += '	if (startTime && startTime >= 0){';
-			refresh_request += '		if(startTime==0){';
-			refresh_request += '			clearTimeout(Account);';
+			refresh_request += 'var timeout_handler;';
+			refresh_request += 'function remainTime() {';
+			refresh_request += '	if ( auto_refresh_time >= 0 ) {';
+			refresh_request += '		if ( auto_refresh_time == 0 ) {';
+			refresh_request += '			clearTimeout( timeout_handler );';
 			refresh_request += '			startRefresh();';
-			refresh_request += '		}else{';
-			refresh_request += '			Account = setTimeout("RemainTime()",1000);';
-			refresh_request += '			startTime=startTime-1;';
+			refresh_request += '		} else {';
+			refresh_request += '			timeout_handler = setTimeout( "remainTime()", 1000 );';
+			refresh_request += '			auto_refresh_time = ( auto_refresh_time - 1 );';
 			refresh_request += '		}';
 			refresh_request += '	}';
 			refresh_request += '}';
@@ -3335,13 +3398,13 @@ ReportBaseViewController = BaseViewController.extend( {
 			refresh_request += '			type: "POST",';
 			refresh_request += '            url: \'' + url + '\',';
 			refresh_request += '			success: function(result) {';
-			refresh_request += '			if(console){ console.log( "Auto refreshing report..." ) }';
+			refresh_request += '			if(console){ console.log( "Auto refreshing report: "+ Date() ) }';
 			refresh_request += '			var newDoc = result.api_retval + $(\'body\').children(\':last\')[0].outerHTML; document.open("text/html"); document.write(newDoc); document.close(); ';
 			refresh_request += '			}';
 			refresh_request += '		})';
-			refresh_request += '	}  catch(e) {}';
+			refresh_request += '	} catch(e) {}';
 			refresh_request += '}';
-			refresh_request += 'RemainTime();';
+			refresh_request += 'remainTime();';
 			refresh_request += '$( "body" ).mousemove( function( e ) {';
 			refresh_request += '	window.parent.Global.doPingIfNecessary()';
 			refresh_request += '} );';

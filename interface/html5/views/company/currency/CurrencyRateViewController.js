@@ -15,8 +15,6 @@ CurrencyRateViewController = BaseViewController.extend( {
 		this.navigation_label = $.i18n._( 'Rate' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APICurrencyRate' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
-
 		this.render();
 
 		if ( this.sub_view_mode ) {
@@ -32,6 +30,15 @@ CurrencyRateViewController = BaseViewController.extend( {
 
 		this.setSelectRibbonMenuIfNecessary( 'CurrencyRate' );
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.copy],
+			include: []
+		};
+
+		return context_menu_model;
 	},
 
 	buildEditViewUI: function() {

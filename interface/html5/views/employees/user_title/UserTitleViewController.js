@@ -14,14 +14,21 @@ UserTitleViewController = BaseViewController.extend( {
 		this.navigation_label = $.i18n._( 'Job Title' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIUserTitle' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true; //Hide some context menus
-
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'UserTitle' );
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.mass_edit],
+			include: []
+		};
+
+		return context_menu_model;
 	},
 
 	buildEditViewUI: function() {

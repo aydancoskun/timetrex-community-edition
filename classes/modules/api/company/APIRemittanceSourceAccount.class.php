@@ -112,6 +112,10 @@ class APIRemittanceSourceAccount extends APIFactory {
 	function getRemittanceSourceAccount( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('remittance_source_account', 'enabled')
 			OR !( $this->getPermissionObject()->Check('remittance_source_account', 'view') OR $this->getPermissionObject()->Check('remittance_source_account', 'view_own') ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
@@ -173,6 +177,10 @@ class APIRemittanceSourceAccount extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('remittance_source_account', 'enabled')
@@ -283,6 +291,10 @@ class APIRemittanceSourceAccount extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('remittance_source_account', 'enabled')
@@ -397,63 +409,76 @@ class APIRemittanceSourceAccount extends APIFactory {
 	 * @return array|bool
 	 */
 	function testExport( $ids ) {
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
+		if ( !$this->getPermissionObject()->Check('remittance_source_account', 'enabled')
+				OR !( $this->getPermissionObject()->Check('remittance_source_account', 'edit') OR $this->getPermissionObject()->Check('remittance_source_account', 'edit_own') OR $this->getPermissionObject()->Check('remittance_source_account', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
+		}
+
 		require_once( Environment::getBasePath() . '/classes/ChequeForms/ChequeForms.class.php' );
 
 		$output = array();
+
 		$filter_data = array(
 				'id' => $ids,
 		);
 
 		$rsalf = TTnew('RemittanceSourceAccountListFactory'); /** @var RemittanceSourceAccountListFactory $rsalf */
 		$rsalf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $filter_data );
+		if ( $rsalf->getRecordCount() > 0 ) {
+			foreach ( $rsalf as $rs_obj ) {
+				if ( $rs_obj->getDataFormat() != 5 ) { //5=TimeTrex Payment Services
+					$pstf = TTnew( 'PayStubTransactionFactory' ); /** @var PayStubTransactionFactory $pstf */
+					$pstf->setAmount( 0.01 );
+					$pstf->setCurrency( $rs_obj->getCurrency() );
+					$pstf->setType( $rs_obj->getType() );
+					$pstf->setRemittanceSourceAccount( $rs_obj->getId() );
 
-		foreach ( $rsalf as $rs_obj ) {
-			$pstf = TTnew('PayStubTransactionFactory'); /** @var PayStubTransactionFactory $pstf */
-			$pstf->setAmount( 0.01 );
-			$pstf->setCurrency( $rs_obj->getCurrency() );
-			$pstf->setType( $rs_obj->getType() );
-			$pstf->setRemittanceSourceAccount( $rs_obj->getId() );
+					$ps_obj = TTnew( 'PayStubFactory' ); /** @var PayStubFactory $ps_obj */
+					$ps_obj->setTransactionDate( TTDate::getBeginDayEpoch( time() ) );
+					$ps_obj->setStartDate( mktime( 0, 0, 0, TTDate::getMonth( time() ), TTDate::getDayOfMonth( TTDate::incrementDate( time(), -14, 'day' ) ), TTDate::getYear( time() ) ) );
+					$ps_obj->setEndDate( mktime( 0, 0, 0, TTDate::getMonth( time() ), TTDate::getDayOfMonth( TTDate::incrementDate( time(), -1, 'day' ) ), TTDate::getYear( time() ) ) );
+					$ps_obj->setCurrency( $rs_obj->getCurrency() );
 
-			$ps_obj = TTnew('PayStubFactory'); /** @var PayStubFactory $ps_obj */
-			$ps_obj->setTransactionDate ( TTDate::getBeginDayEpoch(time()) );
-			$ps_obj->setStartDate( mktime(0, 0, 0, TTDate::getMonth(time()), TTDate::getDayOfMonth( TTDate::incrementDate( time(), -14, 'day') ), TTDate::getYear( time() ) ) );
-			$ps_obj->setEndDate( mktime(0, 0, 0, TTDate::getMonth(time()), TTDate::getDayOfMonth( TTDate::incrementDate( time(), -1, 'day') ), TTDate::getYear( time() ) ) );
-			$ps_obj->setCurrency( $rs_obj->getCurrency() );
+					//This mirrors PayStubTransaction::exportPayStubTransaction()
+					if ( $rs_obj->getType() == 3000 ) {
+						$next_transaction_number = $rs_obj->getNextTransactionNumber();
+						$eft = $pstf->startEFTFile( $rs_obj );
+						$confirmation_number = strtoupper( substr( sha1( TTUUID::generateUUID() ), -8 ) );
+						$record = $pstf->getEFTRecord( $eft, $pstf, $ps_obj, $rs_obj, $this->getCurrentUserObject(), $confirmation_number );
 
-			//This mirrors PayStubTransaction::exportPayStubTransaction()
-			if ( $rs_obj->getType() == 3000 ) {
-				$next_transaction_number = $rs_obj->getNextTransactionNumber();
-				$eft = $pstf->startEFTFile( $rs_obj );
-				$confirmation_number = strtoupper( substr( sha1( TTUUID::generateUUID() ), -8 ) );
-				$record = $pstf->getEFTRecord( $eft, $pstf, $ps_obj, $rs_obj, $this->getCurrentUserObject(), $confirmation_number );
+						//Make the destination the same as the source for the sample file, at least then its not 0's and the bank is likely to verify more information.
+						$record->setInstitution( $rs_obj->getValue1() );
+						$record->setTransit( $rs_obj->getValue2() );
+						$record->setAccount( $rs_obj->getValue3() );
 
-				//Make the destination the same as the source for the sample file, at least then its not 0's and the bank is likely to verify more information.
-				$record->setInstitution( $rs_obj->getValue1() );
-				$record->setTransit( $rs_obj->getValue2() );
-				$record->setAccount( $rs_obj->getValue3() );
+						$eft->setRecord( $record );
+						$output = $pstf->endEFTFile( $eft, $rs_obj, $this->getCurrentUserObject(), $ps_obj, $this->getCurrentCompanyObject()->getId(), $pstf->getAmount(), $next_transaction_number, $output );
+					}
 
-				$eft->setRecord( $record );
-				$output = $pstf->endEFTFile( $eft, $rs_obj, $this->getCurrentUserObject(), $ps_obj, $this->getCurrentCompanyObject()->getId(), $pstf->getAmount(), $next_transaction_number, $output );
-			}
+					if ( $rs_obj->getType() == 2000 ) {
+						$data_format_types = $rs_obj->getOptions( 'data_format_check_form' );
 
-			if ( $rs_obj->getType() == 2000 ) {
-				$data_format_types = $rs_obj->getOptions('data_format_check_form');
+						$data_format_type_id = $rs_obj->getDataFormat();
+						$check_file_obj = TTnew( 'ChequeForms' ); /** @var ChequeForms $check_file_obj */
+						$check_obj = $check_file_obj->getFormObject( strtoupper( $data_format_types[ $data_format_type_id ] ) );
+//						if ( PRODUCTION == FALSE AND Debug::getEnable() == TRUE ) {
+//							$check_obj->setDebug( TRUE );
+//						}
 
-				$data_format_type_id = $rs_obj->getDataFormat();
-				$check_file_obj = TTnew('ChequeForms'); /** @var ChequeForms $check_file_obj */
-				$check_obj = $check_file_obj->getFormObject( strtoupper( $data_format_types[$data_format_type_id] ) );
-//				if ( PRODUCTION == FALSE AND Debug::getEnable() == TRUE ) {
-//					$check_obj->setDebug( TRUE );
-//				}
+						$check_obj->setPageOffsets( $rs_obj->getValue6(), $rs_obj->getValue5() ); //Value5=Vertical, Value6=Horizontal
 
-				$check_obj->setPageOffsets( $rs_obj->getValue6(), $rs_obj->getValue5() ); //Value5=Vertical, Value6=Horizontal
-
-				$transaction_number = $rs_obj->getNextTransactionNumber();
-				$ps_data = $pstf->getChequeData( $ps_obj, $pstf, $rs_obj, $this->getCurrentUserObject(), $transaction_number, TRUE ); //Draw alignment grid when testing check format.
-				$check_obj->addRecord( $ps_data );
-				$check_file_obj->addForm( $check_obj );
-				$transaction_number++;
-				$output = $pstf->endChequeFile( $rs_obj, $ps_obj, $transaction_number, $output, $check_file_obj );
+						$transaction_number = $rs_obj->getNextTransactionNumber();
+						$ps_data = $pstf->getChequeData( $ps_obj, $pstf, $rs_obj, $this->getCurrentUserObject(), $transaction_number, TRUE ); //Draw alignment grid when testing check format.
+						$check_obj->addRecord( $ps_data );
+						$check_file_obj->addForm( $check_obj );
+						$transaction_number++;
+						$output = $pstf->endChequeFile( $rs_obj, $ps_obj, $transaction_number, $output, $check_file_obj );
+					}
+				}
 			}
 		}
 
@@ -472,6 +497,10 @@ class APIRemittanceSourceAccount extends APIFactory {
 	 * @return bool
 	 */
 	function deleteImage( $id ) {
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		//permissions match setRemittanceSourceAccount()
 		if ( !$this->getPermissionObject()->Check('remittance_source_account', 'enabled')
 				OR !( $this->getPermissionObject()->Check('remittance_source_account', 'edit') OR $this->getPermissionObject()->Check('remittance_source_account', 'edit_own') OR $this->getPermissionObject()->Check('remittance_source_account', 'add') ) ) {

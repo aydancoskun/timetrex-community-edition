@@ -86,6 +86,12 @@ class CompanyFactory extends Factory {
 					}
 				}
 				break;
+			case 'terminated_user_disable_login_type':
+				$retval = array(
+						10 => TTi18n::gettext('Following Year of Termination'),
+						20 => TTi18n::gettext('Following Termination Date'),
+				);
+				break;
 			case 'country':
 				$retval = array(
 										'CA' => TTi18n::gettext('Canada'),
@@ -1603,6 +1609,10 @@ class CompanyFactory extends Factory {
 											'admin_user_feedback_rating' => FALSE,
 											'all_user_feedback_rating' => FALSE,
 
+											'terminated_user_disable_login_type_id' => 'TerminatedUserDisableLoginType',
+											'terminated_user_disable_login_type' => FALSE,
+											'terminated_user_disable_login_after_days' => 'TerminatedUserDisableLoginAfterDays',
+
 											'application_build' => FALSE,
 											'deleted' => 'Deleted',
 											);
@@ -1921,8 +1931,7 @@ class CompanyFactory extends Factory {
 	 * @return bool
 	 */
 	function setCountry( $value) {
-		$value = trim($value);
-		return $this->setGenericDataValue( 'country', $value );
+		return $this->setGenericDataValue( 'country', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -1937,9 +1946,8 @@ class CompanyFactory extends Factory {
 	 * @return bool
 	 */
 	function setProvince( $value) {
-		$value = trim($value);
 		Debug::Text('Country: '. $this->getCountry() .' Province: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		return $this->setGenericDataValue( 'province', $value );
+		return $this->setGenericDataValue( 'province', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -2173,6 +2181,38 @@ class CompanyFactory extends Factory {
 		}
 
 		return FALSE;
+	}
+
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTerminatedUserDisableLoginType( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'terminated_user_disable_login_type_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getTerminatedUserDisableLoginType() {
+		return $this->getGenericDataValue( 'terminated_user_disable_login_type_id' );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getTerminatedUserDisableLoginAfterDays() {
+		return $this->getGenericDataValue( 'terminated_user_disable_login_after_days' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setTerminatedUserDisableLoginAfterDays( $value) {
+		return $this->setGenericDataValue( 'terminated_user_disable_login_after_days', (int)trim( $value ) );
 	}
 
 	/**
@@ -2909,6 +2949,7 @@ class CompanyFactory extends Factory {
 											TTi18n::gettext('Incorrect Product Edition'),
 											$this->getOptions('product_edition')
 										);
+
 		// Name
 		if ( DEMO_MODE == FALSE AND $this->getName() !== FALSE ) {
 			$this->Validator->isLength(		'name',
@@ -2935,24 +2976,7 @@ class CompanyFactory extends Factory {
 											200
 										);
 		}
-		// Originator ID
-		if ( $this->getOriginatorID() != '' ) {
-			$this->Validator->isLength(	'originator_id',
-											$this->getOriginatorID(),
-											TTi18n::gettext('Originator ID is too short or too long'),
-											2,
-											200
-										);
-		}
-		// Data Center ID
-		if ( $this->getDataCenterID() != '' ) {
-			$this->Validator->isLength(	'data_center_id',
-											$this->getDataCenterID(),
-											TTi18n::gettext('Data Center ID is too short or too long'),
-											2,
-											200
-										);
-		}
+
 		// Short name
 		if ( $this->getShortName() != '' ) {
 			//Short name must only allow characters available in domain names.
@@ -3071,6 +3095,28 @@ class CompanyFactory extends Factory {
 											$this->getFaxPhone(),
 											TTi18n::gettext('Fax phone number is invalid')
 										);
+		}
+
+		// Terminated User Disable Login Type
+		if ( $this->getTerminatedUserDisableLoginType() != '' ) {
+			$this->Validator->inArrayKey( 'terminated_user_disable_login_type',
+										  $this->getTerminatedUserDisableLoginType(),
+										  TTi18n::gettext( 'Incorrect Disable Terminated Employees Type' ),
+										  $this->getOptions( 'terminated_user_disable_login_type' )
+			);
+		}
+
+		// Terminated User Disable Login After Days
+		if ( $this->getTerminatedUserDisableLoginAfterDays() != '' ) {
+			$this->Validator->isNumeric(		'terminated_user_disable_login_after_days',
+													$this->getTerminatedUserDisableLoginAfterDays(),
+													TTi18n::gettext('Disable Terminated Employees must be a number')
+			);
+			$this->Validator->isGreaterThan(		'terminated_user_disable_login_after_days',
+												$this->getTerminatedUserDisableLoginAfterDays(),
+												TTi18n::gettext('Disable Terminated Employees must be a positive number'),
+												0
+			);
 		}
 
 		// Longitude
@@ -3322,6 +3368,10 @@ class CompanyFactory extends Factory {
 
 		if ( $this->getIndustry() == FALSE ) {
 			$this->setIndustry(0);
+		}
+
+		if ( $this->getTerminatedUserDisableLoginType() == FALSE ) {
+			$this->setTerminatedUserDisableLoginType(10);
 		}
 
 		//Delete users before deleting the company, otherwise the company doesn't exist and validation functions fail.

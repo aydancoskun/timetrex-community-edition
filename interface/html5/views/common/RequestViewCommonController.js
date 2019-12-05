@@ -463,66 +463,37 @@ RequestViewCommonController = BaseViewController.extend( {
 		return false;
 	},
 
+	processAPICallbackResult: function ( result_data ) {
+		this.current_edit_record = this.buildDataFromAPI( result_data[0] );
+		this.current_edit_record.total_time = Global.getTimeUnit( this.current_edit_record.total_time );
+
+		return result_data;
+	},
+
+	doViewClickResult: function ( result_data ) {
+		if ( Global.isSet( this.current_edit_record.start_date ) && this.edit_view_tab ) {
+			this.edit_view_tab.find( '#tab_request' ).find( '.third-column' ).show();
+		}
+
+		this.initEditView();
+		this.initViewingView();
+
+		//This line is required to avoid problems with the absence policy box not showing properly on initial load.
+		this.onWorkingStatusChanged();
+
+		var $this = this;
+		EmbeddedMessage.init( this.current_edit_record.id, 50, this, this.edit_view, this.edit_view_tab, this.edit_view_ui_dic, function() {
+			$this.authorization_history = AuthorizationHistory.init( $this );
+		} );
+		return this.clearCurrentSelectedRecord();
+	},
+
 	onViewClick: function( editId, clear_edit_view ) {
+		this.real_this = this.constructor.__super__; // this seems first entry point. needed where view controller is extended twice, Base->Tree-View, used with onViewClick _super
 		if ( clear_edit_view ) {
 			this.clearEditView();
-			this.onViewClick( editId );
-			return;
 		}
-		var $this = this;
-		this.setCurrentEditViewState( 'view' );
-		this.openEditView(); //Make sure that this isn't in a callback or it causes navigation dropdown problems.
-
-		var filter = {};
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-
-		if ( Global.isSet( editId ) ) {
-			var selectedId = editId;
-		} else {
-			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
-			}
-		}
-
-		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-				if ( !result_data ) {
-					result_data = [];
-				}
-
-				result_data = result_data[0];
-				$this.current_edit_record = $this.buildDataFromAPI( result_data );
-				$this.current_edit_record.total_time = Global.getTimeUnit( $this.current_edit_record.total_time );
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				if ( Global.isSet( $this.current_edit_record.start_date ) && $this.edit_view_tab ) {
-					$this.edit_view_tab.find( '#tab_request' ).find( '.third-column' ).show();
-				}
-
-				$this.initEditView();
-				$this.initViewingView();
-
-				//This line is required to avoid problems with the absence policy box not showing properly on initial load.
-				$this.onWorkingStatusChanged();
-
-				EmbeddedMessage.init( $this.current_edit_record.id, 50, $this, $this.edit_view, $this.edit_view_tab, $this.edit_view_ui_dic, function() {
-					$this.authorization_history = AuthorizationHistory.init( $this );
-				} );
-			}
-		} );
-
-
+		this._super( 'onViewClick', editId );
 	},
 
 	initSubLogView: function( tab_id ) {
@@ -640,11 +611,8 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	onEditClick: function( editId, noRefreshUI ) {
-		this.is_viewing = false;
-		this.is_edit = true;
-		this.is_add = false;
+		this.setCurrentEditViewState('edit');
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
-		LocalCacheData.current_doing_context_action = 'edit';
 		this.initEditView();
 		//Clear last sent message body value.
 		this.edit_view_ui_dic.body.setValue( '' );

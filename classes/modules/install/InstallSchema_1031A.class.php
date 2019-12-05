@@ -178,7 +178,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 							if ( isset($paths_to_root) AND count($paths_to_root) > 0 ) {
 								$decoded_paths = array();
 								foreach( $paths_to_root as $serialized_path => $children ) {
-									$path_arr = unserialize( $serialized_path );
+									$path_arr = unserialize( $serialized_path, array( 'allowed_classes' => FALSE ) );
 									$decoded_paths[] = array( 'hierarchy_control_id' => $hierarchy_id, 'path' => $path_arr, 'children' => $children );
 								}
 								unset($path_arr, $children);

@@ -730,7 +730,7 @@ class StationFactory extends Factory {
 					$obj = $lf_b->getById( $id )->getCurrent();
 
 					if ($this->Validator->isTrue(		'group',
-														$f->Validator->isValid(),
+														$f->isValid(),
 														TTi18n::gettext('Selected Group is invalid').' ('. $obj->getName() .')' )) {
 						$f->save();
 					}

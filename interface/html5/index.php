@@ -43,7 +43,9 @@ if ( isset( $_SERVER['REQUEST_URI'] ) AND strpos( $_SERVER['REQUEST_URI'], '//' 
 	Redirect::Page( Environment::stripDuplicateSlashes( $_SERVER['REQUEST_URI'] ) );
 }
 
+sendCSRFTokenCookie();
 forceNoCacheHeaders(); //Send headers to disable caching.
+
 
 //PreLoad CSS
 header('Link: <theme/default/css/application.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);

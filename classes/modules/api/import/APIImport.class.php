@@ -86,7 +86,7 @@ class APIImport extends APIFactory {
 			$retarr['-1010-user'] = TTi18n::getText('Employees');
 		}
 		if ( $this->getPermissionObject()->Check('remittance_destination_account', 'edit') OR $this->getPermissionObject()->Check('remittance_destination_account', 'edit_child')) {
-			$retarr['-1015-remittance_destination_account'] = TTi18n::getText('Employee Payment Methods');
+			$retarr['-1015-remittance_destination_account'] = TTi18n::getText('Employee Pay Methods');
 		}
 		if ( $this->getPermissionObject()->Check('branch', 'add') AND $this->getPermissionObject()->Check('branch', 'edit') ) {
 			$retarr['-1020-branch'] = TTi18n::getText('Branches');

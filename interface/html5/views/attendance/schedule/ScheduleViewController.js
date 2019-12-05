@@ -73,7 +73,9 @@ ScheduleViewController = BaseViewController.extend( {
 
 	selected_user_ids: [],
 
-	pre_total_time: 0,
+	prev_total_time: 0,
+
+	prev_status_id: null,
 
 	is_mass_adding: false,
 
@@ -110,10 +112,6 @@ ScheduleViewController = BaseViewController.extend( {
 		}
 
 		this.api_absence_policy = new (APIFactory.getAPIClass( 'APIAbsencePolicy' ))();
-
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
 
 		this.scroll_position = 0;
 
@@ -483,61 +481,30 @@ ScheduleViewController = BaseViewController.extend( {
 
 	},
 
-	onViewClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		this.is_viewing = true;
-		this.is_edit = false;
-		this.is_mass_adding = false;
-		this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'view';
-		var filter = {};
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-		var selectedId;
+	onViewClick: function ( record_id, noRefreshUI ) {
+		this.setCurrentEditViewState( 'view' );
 
-		if ( Global.isSet( editId ) ) {
-			selectedId = editId;
-		} else {
-			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				TTPromise.add( 'Schedule', 'init' );
-				$this.openEditView();
-				var select_shift = Global.clone( $this.select_all_shifts_array[0] );
-				select_shift = $this.resetSomeFields( select_shift );
-				$this.current_edit_record = select_shift;
+		record_id = this.getViewSelectedRecordId( record_id );
+		if ( Global.isFalseOrNull( record_id ) ) {
+			TTPromise.add( 'Schedule', 'init' );
+			this.openEditView();
+			var select_shift = Global.clone( this.select_all_shifts_array[0] );
+			select_shift = this.resetSomeFields( select_shift );
+			this.current_edit_record = select_shift;
 
-				TTPromise.wait( 'Schedule', 'init', function() {
-					$this.initEditView();
-				});
-				return;
-			}
-		}
-
-		$this.openEditView();
-
-		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
-
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				$this.current_edit_record = result_data;
-
+			var $this = this;
+			TTPromise.wait( 'Schedule', 'init', function() {
 				$this.initEditView();
+			});
+			return;
+		}
+		this.setCurrentSelectedRecord( record_id );
 
-			}
-		} );
+		this.openEditView();
 
+		var filter = this.getAPIFilters();
+
+		return this.doViewAPICall( filter );
 	},
 
 	getCommonFields: function() {
@@ -624,451 +591,217 @@ ScheduleViewController = BaseViewController.extend( {
 
 	},
 
-	onEditClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		this.is_add = false;
-		this.is_edit = true;
-		this.is_mass_adding = false;
-		LocalCacheData.current_doing_context_action = 'edit';
-		var filter = {};
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-		var selectedId;
-		var select_shift;
-		if ( Global.isSet( editId ) ) {
-			selectedId = editId;
-		} else {
-			if ( this.is_viewing ) {
-				if ( this.current_edit_record.id && this.current_edit_record.id != TTUUID.zero_id ) {
-					selectedId = this.current_edit_record.id;
-				} else {
-					$this.current_edit_record = this.current_edit_record;
-					this.is_viewing = false;
-					$this.initEditView();
-					return;
-				}
-			} else if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				TTPromise.add( 'Schedule', 'init' );
-				$this.openEditView();
-				select_shift = Global.clone( $this.select_all_shifts_array[0] );
-				select_shift = $this.resetSomeFields( select_shift );
-				$this.current_edit_record = select_shift;
-				$this.current_edit_record.user_ids = [ $this.current_edit_record.user_id ]; //#2610 - ensure that edit record is properly formed in respect to user_ids
-				this.is_viewing = false;
-				TTPromise.wait( 'Schedule', 'init', function() {
-					$this.initEditView();
-				} );
-				return;
-			}
+	onEditClick: function( record_id, noRefreshUI ) {
+		// #2644: Note: This code fixes a bug where the edit screen is not opened on first try, but is on second. Likely due to the TTPromise and potential race conditions. See commit history for details.
+		TTPromise.add( 'Schedule', 'init' );
+		this.setCurrentEditViewState( 'edit' );
+		this.openEditView();
 
+		record_id = this.getEditSelectedRecordId( record_id );
+		if ( Global.isFalseOrNull( record_id ) ) {
+			this.openEditView();
+			select_shift = Global.clone( this.select_all_shifts_array[0] );
+			select_shift = this.resetSomeFields( select_shift );
+			this.current_edit_record = select_shift;
+			this.current_edit_record.user_ids = [ this.current_edit_record.user_id ]; //#2610 - ensure that edit record is properly formed in respect to user_ids
 			this.is_viewing = false;
-		}
-
-		$this.openEditView();
-		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
-
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-
-				if ( !result_data ) {
-					result_data = [];
-				}
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				if ( $this.sub_view_mode && $this.parent_key ) {
-					result_data[$this.parent_key] = $this.parent_value;
-				}
-
-				$this.current_edit_record = result_data;
-
+			var $this = this;
+			TTPromise.wait( 'Schedule', 'init', function() {
 				$this.initEditView();
+			} );
+			return;
+		}
+		this.setCurrentSelectedRecord( record_id );
 
-			}
-		} );
+		var filter = this.getAPIFilters();
 
+		return this.doEditAPICall( filter );
 	},
 
-	onDeleteClick: function() {
-		var $this = this;
-		LocalCacheData.current_doing_context_action = 'delete';
-		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
-			if (result) {
-				var remove_ids = [];
-				//#2571 - $this.current_edit_record is null
-				if ( $this.edit_view && $this.current_edit_record ) {
-					remove_ids.push( $this.current_edit_record.id );
-				} else {
-					remove_ids = $this.getGridSelectIdArray().slice(); //Use .slice() to make a copy of the IDs.
-				}
-				ProgressBar.showOverlay();
-				if ( remove_ids.length > 0 ) {
-					$this.api['delete' + $this.api.key_name](remove_ids, {
-						onResult: function (result) {
-
-							ProgressBar.closeOverlay();
-							doNext(result);
-							if (result.isValid()) {
-								$this.onDeleteDone(result);
-								if ($this.edit_view) {
-									$this.removeEditView();
-								}
-							} else {
-								TAlertManager.showErrorAlert(result);
-							}
-
+	doDeleteAPICall: function( remove_ids, callback ) {
+		if ( !callback ) {
+			callback = {
+				onResult: function ( result ) {
+					ProgressBar.closeOverlay();
+					doNext.call( this, result );
+					if (result.isValid()) {
+						this.onDeleteDone(result);
+						if (this.edit_view) {
+							this.removeEditView();
 						}
-					});
-				} else {
-					doNext({
-						isValid: function(){
-							return false;
-						}
-					});
+					} else {
+						TAlertManager.showErrorAlert(result);
+					}
+				}.bind(this)
+			};
+		}
+		if( remove_ids && remove_ids.length > 0 ) {
+			return this.api['delete' + this.api.key_name]( remove_ids, callback );
+		} else {
+			doNext.call( this, {
+				isValid: function(){
+					return false;
 				}
-
-			} else {
-				ProgressBar.closeOverlay();
-			}
-		});
+			});
+		}
 
 		function doNext( result ) {
 			//Since we can't delete recurring schedules, we need to override them as absent without a absence policy instead.
 			var recurring_delete_shifts_array = [];
-			for ( var i = 0; i < $this.select_cells_Array.length; i++ ) {
-				if ( $this.select_cells_Array[i].shift ) {
-					$this.select_cells_Array[i].shift.status_id = '20'; //Set shift to absent.
-					recurring_delete_shifts_array.push($this.select_cells_Array[i].shift);
+			for ( var i = 0; i < this.select_cells_Array.length; i++ ) {
+				if ( this.select_cells_Array[i].shift ) {
+					this.select_cells_Array[i].shift.status_id = '20'; //Set shift to absent.
+					recurring_delete_shifts_array.push(this.select_cells_Array[i].shift);
 				}
 			}
 
 			if ( recurring_delete_shifts_array.length > 0 ) {
-				$this.api.setSchedule( recurring_delete_shifts_array, {
+				this.api.setSchedule( recurring_delete_shifts_array, {
 					onResult: function() {
-						$this.search();
-					}
+						this.search();
+					}.bind(this)
 				} );
 			} else {
 				if ( result.isValid() ) {
-					$this.search();
+					this.search();
 				}
 			}
 		}
-
 	},
 
-	buildContextMenuModels: function() {
-
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var drag_and_drop_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Drag & Drop' ),
-			id: this.viewId + 'drag_and_drop',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//navigation group
-		var navigation_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Navigation' ),
-			id: this.viewId + 'navigation',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//navigation group
-		var other_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Other' ),
-			id: this.viewId + 'other',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var add = new RibbonSubMenu( {
-			label: $.i18n._( 'New' ),
-			id: ContextMenuIconName.add,
-			group: editor_group,
-			icon: Icons.new_add,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var mass_edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Mass<br>Edit' ),
-			id: ContextMenuIconName.mass_edit,
-			group: editor_group,
-			icon: Icons.mass_edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var del = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete' ),
-			id: ContextMenuIconName.delete_icon,
-			group: editor_group,
-			icon: Icons.delete_icon,
-			permission_result: true,
-			permission: null
-		} );
-
-		var delAndNext = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete<br>& Next' ),
-			id: ContextMenuIconName.delete_and_next,
-			group: editor_group,
-			icon: Icons.delete_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy' ),
-			id: ContextMenuIconName.copy,
-			group: editor_group,
-			icon: Icons.copy_as_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy_as_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy<br>as New' ),
-			id: ContextMenuIconName.copy_as_new,
-			group: editor_group,
-			icon: Icons.copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save,
-			group: editor_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_continue = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Continue' ),
-			id: ContextMenuIconName.save_and_continue,
-			group: editor_group,
-			icon: Icons.save_and_continue,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_next = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Next' ),
-			id: ContextMenuIconName.save_and_next,
-			group: editor_group,
-			icon: Icons.save_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Copy' ),
-			id: ContextMenuIconName.save_and_copy,
-			group: editor_group,
-			icon: Icons.save_and_copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& New' ),
-			id: ContextMenuIconName.save_and_new,
-			group: editor_group,
-			icon: Icons.save_and_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var move = new RibbonSubMenu( {
-			label: $.i18n._( 'Move' ),
-			id: ContextMenuIconName.move,
-			group: drag_and_drop_group,
-			icon: Icons.move,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy_drag = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy' ),
-			id: ContextMenuIconName.drag_copy,
-			group: drag_and_drop_group,
-			icon: Icons.copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var swap = new RibbonSubMenu( {
-			label: $.i18n._( 'Swap' ),
-			id: ContextMenuIconName.swap,
-			group: drag_and_drop_group,
-			icon: Icons.swap,
-			permission_result: true,
-			permission: null
-		} );
-
-		var override = new RibbonSubMenu( {
-			label: $.i18n._( 'Overwrite' ),
-			id: ContextMenuIconName.override,
-			group: drag_and_drop_group,
-			icon: Icons.override,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit_employee = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit<br>Employee' ),
-			id: ContextMenuIconName.edit_employee,
-			group: navigation_group,
-			icon: Icons.employee,
-			permission_result: true,
-			permission: null
-		} );
-
-		var timesheet_view = new RibbonSubMenu( {
-			label: $.i18n._( 'TimeSheet' ),
-			id: ContextMenuIconName.timesheet,
-			group: navigation_group,
-			icon: Icons.timesheet,
-			permission_result: true,
-			permission: null
-		} );
-
-		var find_available = new RibbonSubMenu( {
-			label: $.i18n._( 'Find<br>Available' ),
-			id: ContextMenuIconName.find_available,
-			group: other_group,
-			icon: Icons.find_available,
-			permission_result: true,
-			permission: null
-		} );
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			groups: {
+				drag_and_drop: {
+					label: $.i18n._( 'Drag & Drop' ),
+					id: this.viewId + 'drag_and_drop'
+				}
+			},
+			exclude: [
+				ContextMenuIconName.export_excel,
+				ContextMenuIconName.save_and_next,
+				ContextMenuIconName.delete_and_next,
+				ContextMenuIconName.copy
+			],
+			include: [
+				{
+					label: $.i18n._( 'Move' ),
+					id: ContextMenuIconName.move,
+					group: 'drag_and_drop',
+					icon: Icons.move,
+					permission_result: true
+				},
+				{
+					label: $.i18n._( 'Copy' ),
+					id: ContextMenuIconName.drag_copy,
+					group: 'drag_and_drop',
+					icon: Icons.copy,
+					permission_result: true
+				},
+				{
+					label: $.i18n._( 'Swap' ),
+					id: ContextMenuIconName.swap,
+					group: 'drag_and_drop',
+					icon: Icons.swap,
+					permission_result: true
+				},
+				{
+					label: $.i18n._( 'Overwrite' ),
+					id: ContextMenuIconName.override,
+					group: 'drag_and_drop',
+					icon: Icons.override,
+					permission_result: true
+				},
+				{
+					label: $.i18n._( 'Edit<br>Employee' ),
+					id: ContextMenuIconName.edit_employee,
+					group: 'navigation',
+					icon: Icons.employee,
+					permission_result: true
+				},
+				{
+					label: $.i18n._( 'TimeSheet' ),
+					id: ContextMenuIconName.timesheet,
+					group: 'navigation',
+					icon: Icons.timesheet,
+					permission_result: true
+				},
+				{
+					label: $.i18n._( 'Find<br>Available' ),
+					id: ContextMenuIconName.find_available,
+					group: 'other',
+					icon: Icons.find_available,
+					permission_result: true
+				},
+				{
+					label: $.i18n._( 'Import' ),
+					id: ContextMenuIconName.import_icon,
+					group: 'other',
+					icon: Icons.import_icon,
+					permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVSchedule' ),
+					sort_order: 8000
+				}
+			]
+		};
 
 		if ( ( PermissionManager.validate( 'punch', 'add' ) && (PermissionManager.validate( 'punch', 'edit' ) || PermissionManager.validate( 'punch', 'edit_child' ) ) ) ) {
-			var autopunch = new RibbonSubMenu( {
+			context_menu_model.include.push({
 				label: $.i18n._( 'Auto<br>Punch' ),
 				id: 'AutoPunch',
-				group: other_group,
+				group: 'other',
 				icon: Icons.in_out,
 				permission_result: true,
 				permission: true
-			} );
+			});
 		}
 
-
 		if ( PermissionManager.validate( 'request', 'add' ) ) {
-			var auto_request = new RibbonSubMenu( {
+			context_menu_model.include.push({
 				label: $.i18n._( 'Add<br>Request' ),
 				id: 'AddRequest',
-				group: other_group,
+				group: 'other',
 				icon: Icons.request,
 				permission_result: true,
 				permission: true
-			} );
+			});
 		}
 
-		var print = new RibbonSubMenu( {
+		var print_icon = {
 			label: $.i18n._( 'Print' ),
 			id: ContextMenuIconName.print,
-			group: other_group,
+			group: 'other',
 			icon: Icons.print,
 			type: RibbonSubMenuType.NAVIGATION,
-			items: [],
+			items: [
+				{
+					label: $.i18n._( 'Individual Schedules' ),
+					id: 'pdf_schedule'
+				}
+			],
 			permission_result: true,
 			permission: true
-		} );
-
-		var individual_schedules = new RibbonSubMenuNavItem( {
-			label: $.i18n._( 'Individual Schedules' ),
-			id: 'pdf_schedule',
-			nav: print
-		} );
+		};
 
 		if ( PermissionManager.validate( 'schedule', 'view' ) || PermissionManager.validate( 'schedule', 'view_child' ) ) {
-			var group_combined = new RibbonSubMenuNavItem( {
-				label: $.i18n._( 'Group - Combined' ),
-				id: 'pdf_schedule_group_combined',
-				nav: print
-			} );
-
-			var group_separated = new RibbonSubMenuNavItem( {
-				label: $.i18n._( 'Group - Separated' ),
-				id: 'pdf_schedule_group',
-				nav: print
-			} );
-
-			var group_separated_page_breaks = new RibbonSubMenuNavItem( {
-				label: $.i18n._( 'Group - Separated (Page Breaks)' ),
-				id: 'pdf_schedule_group_pagebreak',
-				nav: print
-			} );
-
+			print_icon.items.push(
+				{
+					label: $.i18n._( 'Group - Combined' ),
+					id: 'pdf_schedule_group_combined'
+				},
+				{
+					label: $.i18n._( 'Group - Separated' ),
+					id: 'pdf_schedule_group'
+				},
+				{
+					label: $.i18n._( 'Group - Separated (Page Breaks)' ),
+					id: 'pdf_schedule_group_pagebreak'
+				}
+			);
 		}
 
-		var import_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Import' ),
-			id: ContextMenuIconName.import_icon,
-			group: other_group,
-			icon: Icons.import_icon,
-			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVSchedule' ),
-			permission: null,
-			sort_order: 8000
-		} );
-		return [menu];
+		context_menu_model.include.push( print_icon );
 
+		return context_menu_model;
 	},
 
 	onReportMenuClick: function( id ) {
@@ -1821,11 +1554,7 @@ ScheduleViewController = BaseViewController.extend( {
 	onAddClick: function( doing_save_and_new ) {
 
 		var $this = this;
-		this.is_viewing = false;
-		this.is_edit = false;
-		this.is_mass_adding = false;
-		this.is_add = true;
-		LocalCacheData.current_doing_context_action = 'new';
+		this.setCurrentEditViewState('new');
 
 		if ( this.select_cells_Array.length > 1 ) {
 			this.is_mass_adding = true;
@@ -2135,7 +1864,7 @@ ScheduleViewController = BaseViewController.extend( {
 					commonRecord.id = '';
 					commonRecord.user_id = value.user_id;
 					commonRecord.start_date_stamp = value.date;
-					commonRecord = $this.processMassAddRecord( commonRecord );
+					commonRecord = $this.buildMassAddRecord( commonRecord );
 					record.push( commonRecord );
 				}
 			} );
@@ -2313,11 +2042,10 @@ ScheduleViewController = BaseViewController.extend( {
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
 		}
-		this.is_add = true;
+		this.setCurrentEditViewState('new');
 		var record = this.current_edit_record;
 		record = this.processAddRecord( record );
 		record = this.getRecordsFromUserIDs( [record] );
-		LocalCacheData.current_doing_context_action = 'new';
 
 		if ( this.current_edit_record.start_date_stamp.indexOf( ' - ' ) > 0 ||
 				$.type( this.current_edit_record.start_date_stamp ) === 'array' ) {
@@ -2343,7 +2071,28 @@ ScheduleViewController = BaseViewController.extend( {
 		} );
 	},
 
-	processMassAddRecord: function( record ) {
+	buildSelectedCellsRecord: function() {
+		var $this = this;
+		var retval = [];
+		$.each( this.select_cells_Array, function( index, value ) {
+			if ( value.hasOwnProperty( 'user_id' ) && value.hasOwnProperty( 'date' ) && value.date ) {
+				var commonRecord = Global.clone( $this.current_edit_record );
+				delete commonRecord.user_ids;
+				delete commonRecord.start_dates;
+				commonRecord.id = '';
+				commonRecord.user_id = value.user_id;
+				commonRecord.start_date_stamp = value.date;
+				commonRecord = $this.buildMassAddRecord( commonRecord );
+
+				retval.push( commonRecord );
+			}
+
+		} );
+
+		return retval;
+	},
+
+	buildMassAddRecord: function( record ) {
 		var massAddArgs = this._createParametersForAdd();
 		for ( var i = 0, n = massAddArgs.length; i < n; i++ ) {
 			var item = massAddArgs[i];
@@ -2426,34 +2175,10 @@ ScheduleViewController = BaseViewController.extend( {
 		LocalCacheData.current_doing_context_action = 'save';
 
 		if ( this.is_mass_adding ) {
-			record = [];
-			$.each( this.select_cells_Array, function( index, value ) {
-				if ( value.hasOwnProperty( 'user_id' ) && value.hasOwnProperty( 'date' ) && value.date ) {
-					var commonRecord = Global.clone( $this.current_edit_record );
-					delete commonRecord.user_ids;
-					delete commonRecord.start_dates;
-					commonRecord.id = '';
-					commonRecord.user_id = value.user_id;
-					commonRecord.start_date_stamp = value.date;
-					commonRecord = $this.processMassAddRecord( commonRecord );
-
-					record.push( commonRecord );
-				}
-
-			} );
-
+			record = this.buildSelectedCellsRecord();
 		} else if ( this.is_mass_editing ) {
 
-			var checkFields = {};
-			for ( var key in this.edit_view_ui_dic ) {
-				var widget = this.edit_view_ui_dic[key];
-
-				if ( Global.isSet( widget.isChecked ) ) {
-					if ( widget.isChecked() ) {
-						checkFields[key] = widget.getValue();
-					}
-				}
-			}
+			var checkFields = this.getChangedFields();
 
 			record = [];
 
@@ -2579,7 +2304,6 @@ ScheduleViewController = BaseViewController.extend( {
 			this.attachElement( 'absence_policy_id' );
 		} else {
 			this.detachElement( 'absence_policy_id' );
-
 		}
 	},
 
@@ -2934,9 +2658,9 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	onAvailableBalanceChange: function() {
-
-		if ( this.current_edit_record.hasOwnProperty( 'absence_policy_id' ) &&
-				this.current_edit_record.absence_policy_id && !this.is_mass_editing ) {
+		if ( this.current_edit_record.status_id == 20
+				&& this.current_edit_record.hasOwnProperty( 'absence_policy_id' )
+				&& this.current_edit_record.absence_policy_id && !this.is_mass_editing ) {
 			this.getAvailableBalance();
 		} else {
 			this.detachElement( 'available_balance' );
@@ -3027,7 +2751,6 @@ ScheduleViewController = BaseViewController.extend( {
 
 		//For mass adding case, select multiple cells and click new
 		if ( this.is_mass_adding ) {
-
 			if ( this.current_edit_record.user_ids.length > 1 ) {
 				this.detachElement( 'available_balance' );
 				return;
@@ -3041,12 +2764,9 @@ ScheduleViewController = BaseViewController.extend( {
 
 			total_time = total_time * this.current_edit_record.start_dates.length;
 			last_date_stamp = this.current_edit_record.start_dates[this.current_edit_record.start_dates.length - 1];
-
 		} else {
 			//get dates from date ranger
-			if ( last_date_stamp.indexOf( ' - ' ) > 0 ||
-					$.type( last_date_stamp ) === 'array' ) {
-
+			if ( last_date_stamp.indexOf( ' - ' ) > 0 || $.type( last_date_stamp ) === 'array' ) {
 				if ( last_date_stamp.indexOf( ' - ' ) > 0 ) {
 					last_date_stamp = this.parserDatesRange( last_date_stamp );
 				}
@@ -3055,11 +2775,9 @@ ScheduleViewController = BaseViewController.extend( {
 					total_time = total_time * last_date_stamp.length;
 					last_date_stamp = last_date_stamp[last_date_stamp.length - 1];
 				}
-
 			}
 
 			if ( ( !this.current_edit_record || !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id ) && !this.is_mass_editing ) {
-
 				if ( this.current_edit_record.user_ids.length < 1 || this.current_edit_record.user_ids.length > 1 ) {
 					this.detachElement( 'available_balance' );
 					return;
@@ -3073,19 +2791,27 @@ ScheduleViewController = BaseViewController.extend( {
 			}
 		}
 
-		this.api_absence_policy.getProjectedAbsencePolicyBalance(
+		//Check if the user is editing a existing record that was originally Status=Working, and changing it to Status=Absent, in that case we can't adjust for the existing total time and must clear it out.
+		if ( this.current_edit_record && this.current_edit_record.id && this.prev_status_id == 10 && this.edit_view_ui_dic['status_id'].getValue() == 20 ) {
+			this.prev_total_time = 0;
+		}
+
+		if ( this.current_edit_record.absence_policy_id != TTUUID.zero_id ) {
+			this.api_absence_policy.getProjectedAbsencePolicyBalance(
 				this.current_edit_record.absence_policy_id,
 				user_id,
 				last_date_stamp,
 				total_time,
-				this.pre_total_time,
+				this.prev_total_time,
 				this.previous_absence_policy_id, {
-					onResult: function( result ) {
-
+					onResult: function ( result ) {
 						$this.getBalanceHandler( result, last_date_stamp );
 					}
 				}
-		);
+			);
+		} else {
+			this.getBalanceHandler( false, last_date_stamp );
+		}
 
 	},
 
@@ -3209,7 +2935,13 @@ ScheduleViewController = BaseViewController.extend( {
 
 		}
 
-		this.pre_total_time = 0;
+		this.prev_total_time = 0;
+
+		//When editing an existing record, store the original status_id so we can later use it when calculating available balance.
+		if ( this.current_edit_record.id && this.current_edit_record.id != TTUUID.zero_id ) {
+			this.prev_status_id = this.current_edit_record['status_id'];
+		}
+
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -3233,7 +2965,7 @@ ScheduleViewController = BaseViewController.extend( {
 					case 'total_time':
 						//Don't set when copy as new
 						if ( this.current_edit_record.id && this.current_edit_record.id != TTUUID.zero_id ) {
-							this.pre_total_time = this.current_edit_record[key];
+							this.prev_total_time = this.current_edit_record[key];
 						}
 						var startTime = this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['start_time'];
 						var endTime = this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['end_time'];
@@ -4246,7 +3978,12 @@ ScheduleViewController = BaseViewController.extend( {
 			//case where one user is selected in include_users but does not have a schedule attributed to them (new users for example)
 			default_user_id = this.filter_data.include_user_ids.value[0];
 		} else {
-			default_user_id = LocalCacheData.getLoginUser().id;
+			// #2740 Before defaulting to logged in user, check to see if user_id is set on the current_edit_record, as Save&Copy clears grid selection, so we need to re-set it.
+			if ( this.current_edit_record.user_id && this.current_edit_record.user_id != '' ) {
+				default_user_id = this.current_edit_record.user_id;
+			} else {
+				default_user_id = LocalCacheData.getLoginUser().id;
+			}
 		}
 
 		return default_user_id;

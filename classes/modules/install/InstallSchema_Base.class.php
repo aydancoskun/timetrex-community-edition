@@ -232,7 +232,7 @@ class InstallSchema_Base {
 
 		$schema_failure_state = array();
 		if ( file_exists( $this->schema_failure_state_file ) AND strncmp( $this->getDatabaseConnection()->databaseType, 'mysql', 5) == 0 ) {
-			$schema_failure_state = unserialize( file_get_contents( $this->schema_failure_state_file ) );
+			$schema_failure_state = unserialize( file_get_contents( $this->schema_failure_state_file ), array( 'allowed_classes' => FALSE ) );
 			Debug::Arr($schema_failure_state, 'Schema Failure State: '. $this->schema_failure_state_file, __FILE__, __LINE__, __METHOD__, 9);
 		} else {
 			Debug::text('No previous Schema failure state file: '. $this->schema_failure_state_file, __FILE__, __LINE__, __METHOD__, 9);

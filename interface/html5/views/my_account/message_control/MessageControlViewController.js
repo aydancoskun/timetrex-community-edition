@@ -30,14 +30,6 @@ MessageControlViewController = BaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
 		this.request_api = new (APIFactory.getAPIClass( 'APIRequest' ))();
 		this.folder_id = 10;
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
 
 		this.render();
 		this.buildContextMenu();
@@ -133,149 +125,128 @@ MessageControlViewController = BaseViewController.extend( {
 		return filter;
 	},
 
-	buildContextMenuModels: function() {
+	getCustomContextMenuModel: function() {
+		var context_menu_model = {
+			groups: {
+				view: {
+					label: $.i18n._( 'View' ),
+					id: this.script_name + 'View',
+					sort_order: 900
+				},
+				editor: {
+					label: $.i18n._( 'Editor' ),
+					id: this.viewId + 'Editor',
+					sort_order: 1000
+				},
+				folder: {
+					label: $.i18n._( 'Folder' ),
+					id: this.script_name + 'Folder',
+					sort_order: 2000
+				},
+				other: {
+					label: $.i18n._( 'Other' ),
+					id: this.script_name + 'other',
+					sort_order: 9000
 
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
+				}
+			},
+			exclude: ['default'],
+			include: [
+				{
+					label: $.i18n._( 'New' ),
+					id: ContextMenuIconName.add,
+					group: 'view',
+					icon: Icons.new_add,
+					permission_result: true,
+					permission: null
+				},
+				{
+					label: $.i18n._( 'View' ),
+					id: ContextMenuIconName.view,
+					group: 'view',
+					icon: Icons.view,
+					permission_result: true,
+					permission: null
+				},
+				{
+					label: $.i18n._( 'Reply' ),
+					id: ContextMenuIconName.edit,
+					group: 'view',
+					icon: Icons.edit,
+					permission_result: true,
+					permission: null
+				},
+				{
+					label: $.i18n._( 'Delete' ),
+					id: ContextMenuIconName.delete_icon,
+					group: 'view',
+					icon: Icons.delete_icon,
+					permission_result: true,
+					permission: null
+				},
+				{
+					label: $.i18n._( 'Delete<br>& Next' ),
+					id: ContextMenuIconName.delete_and_next,
+					group: 'view',
+					icon: Icons.delete_and_next,
+					permission_result: true,
+					permission: null
+				},
+				{
+					label: $.i18n._( 'Close' ),
+					id: ContextMenuIconName.close_misc,
+					group: 'view',
+					icon: Icons.close_misc,
+					permission_result: true,
+					permission: null
+				},
+				{
+					label: $.i18n._( 'Send' ),
+					id: ContextMenuIconName.send,
+					group: 'editor',
+					icon: Icons.send,
+					permission_result: true,
+					permission: null
+				},
+				{
+					label: $.i18n._( 'Cancel' ),
+					id: ContextMenuIconName.cancel,
+					group: 'editor',
+					icon: Icons.cancel,
+					permission_result: true,
+					permission: null,
+					sort_order: 1990
+				},
+				{
+					label: $.i18n._( 'Inbox' ),
+					id: ContextMenuIconName.inbox,
+					group: 'folder',
+					icon: Icons.inbox,
+					selected: true,
+					permission_result: true,
+					permission: null
+				},
+				{
+					label: $.i18n._( 'Sent' ),
+					id: ContextMenuIconName.sent,
+					group: 'folder',
+					icon: Icons.sent,
+					permission_result: true,
+					permission: null
+				},
+				{
+					label: $.i18n._( 'Export' ),
+					id: ContextMenuIconName.export_excel,
+					group: 'other',
+					icon: Icons.export_excel,
+					permission_result: true,
+					permission: null,
+					sort_order: 9000
+				}
+			]
+		};
 
-		//menu group
-		var view_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'View' ),
-			id: this.script_name + 'View',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var folder_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Folder' ),
-			id: this.script_name + 'Folder',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		//menu group
-		var other_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Other' ),
-			id: this.script_name + 'other',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var add = new RibbonSubMenu( {
-			label: $.i18n._( 'New' ),
-			id: ContextMenuIconName.add,
-			group: view_group,
-			icon: Icons.new_add,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
-			group: view_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var reply = new RibbonSubMenu( {
-			label: $.i18n._( 'Reply' ),
-			id: ContextMenuIconName.edit,
-			group: view_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var del = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete' ),
-			id: ContextMenuIconName.delete_icon,
-			group: view_group,
-			icon: Icons.delete_icon,
-			permission_result: true,
-			permission: null
-		} );
-
-		var delAndNext = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete<br>& Next' ),
-			id: ContextMenuIconName.delete_and_next,
-			group: view_group,
-			icon: Icons.delete_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var close = new RibbonSubMenu( {
-			label: $.i18n._( 'Close' ),
-			id: ContextMenuIconName.close_misc,
-			group: view_group,
-			icon: Icons.close_misc,
-			permission_result: true,
-			permission: null
-		} );
-
-		var send = new RibbonSubMenu( {
-			label: $.i18n._( 'Send' ),
-			id: ContextMenuIconName.send,
-			group: editor_group,
-			icon: Icons.send,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var inbox = new RibbonSubMenu( {
-			label: $.i18n._( 'Inbox' ),
-			id: ContextMenuIconName.inbox,
-			group: folder_group,
-			icon: Icons.inbox,
-			selected: true,
-			permission_result: true,
-			permission: null
-		} );
-
-		var sent = new RibbonSubMenu( {
-			label: $.i18n._( 'Sent' ),
-			id: ContextMenuIconName.sent,
-			group: folder_group,
-			icon: Icons.sent,
-			permission_result: true,
-			permission: null
-		} );
-
-		var export_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Export' ),
-			id: ContextMenuIconName.export_excel,
-			group: other_group,
-			icon: Icons.export_excel,
-			permission_result: true,
-			permission: null,
-			sort_order: 9000
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
@@ -640,6 +611,10 @@ MessageControlViewController = BaseViewController.extend( {
 
 	setDefaultMenuSentIcon: function( context_btn, grid_selected_length, pId ) {
 
+	},
+
+	openEditView: function() {
+		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 	},
 
 	setGridCellBackGround: function() {
@@ -1065,10 +1040,7 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	onEditClick: function( editId, noRefreshUI ) {
-		this.is_viewing = false;
-		this.is_edit = true;
-		this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'edit';
+		this.setCurrentEditViewState('edit');
 
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var selected_item = {};
@@ -1444,7 +1416,6 @@ MessageControlViewController = BaseViewController.extend( {
 
 	onSaveClick: function( ignoreWarning ) {
 		LocalCacheData.current_doing_context_action = 'save';
-		var $this = this;
 		this.collectUIDataToCurrentEditRecord();
 		var record = this.current_edit_record;
 		if ( !Global.isSet( ignoreWarning ) ) {
@@ -1456,13 +1427,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 		record = this.uniformVariable( record );
 
-		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
-
-				$this.onSaveResult( result );
-
-			}
-		} );
+		this.doSaveAPICall( record, ignoreWarning);
 	},
 
 	uniformVariable: function( records ) {
@@ -1585,67 +1550,28 @@ MessageControlViewController = BaseViewController.extend( {
 
 	},
 
-	onDeleteClick: function() {
-		var $this = this;
-		$this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'delete';
-		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
-
-			var remove_ids = [];
-			if ( $this.edit_view ) {
-				if ( !$this.current_select_message_control_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Invalid Message id' ) );
-					return;
-				}
-				remove_ids.push( $this.current_select_message_control_data.id );
-			} else {
-				remove_ids = $this.getGridSelectIdArray().slice();
+	getDeleteSelectedRecordId: function() {
+		var retval = [];
+		if ( this.edit_view ) {
+			if ( !this.current_select_message_control_data ) {
+				TAlertManager.showAlert( $.i18n._( 'Invalid Message id' ) );
+				return;
 			}
-			if ( result ) {
-				//Add folder
-				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, $this.folder_id, {
-					onResult: function( result ) {
-						$this.isReloadViewUI = false;
-						$this.onDeleteResult( result, remove_ids );
-					}
-				} );
-
-			} else {
-				ProgressBar.closeOverlay();
-			}
-		} );
-
+			retval.push( this.current_select_message_control_data.id );
+		} else {
+			retval = this._super('getDeleteSelectedRecordId');
+		}
+		return retval;
 	},
 
-	onDeleteAndNextClick: function() {
-		var $this = this;
-		$this.is_add = false;
-
-		TAlertManager.showConfirmAlert( Global.delete_confirm_message, null, function( result ) {
-
-			var remove_ids = [];
-			if ( $this.edit_view ) {
-				remove_ids.push( $this.current_select_message_control_data.id );
-			}
-
-			if ( result ) {
-
-				//Add folder
-				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, $this.folder_id, {
-					onResult: function( result ) {
-
-						$this.isReloadViewUI = false;
-						$this.onDeleteAndNextResult( result, remove_ids );
-
-					}
-				} );
-
-			} else {
-				ProgressBar.closeOverlay();
-			}
-		} );
+	doDeleteAPICall: function( remove_ids, _callback ) {
+		var callback = _callback || {
+			onResult: function ( result ) {
+				this.isReloadViewUI = false;
+				this.onDeleteResult( result, remove_ids );
+			}.bind(this)
+		};
+		return this.api['delete' + this.api.key_name]( remove_ids, this.folder_id, callback );
 	},
 
 	setEditViewDataDone: function() {

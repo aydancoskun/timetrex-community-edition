@@ -21,19 +21,6 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
 		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.edit] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_icon] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save] = true;
-
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.cancel] = true;
 		this.initPermission();
 		this.render();
 		this.buildContextMenu();
@@ -105,6 +92,19 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 		this.setNavigation();
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				ContextMenuIconName.add,
+				ContextMenuIconName.view,
+				ContextMenuIconName.export_excel
+			]
+		};
+
+		return context_menu_model;
 	},
 
 	buildSearchFields: function() {
@@ -197,10 +197,15 @@ AccrualBalanceViewController = BaseViewController.extend( {
 	},
 
 	__createRowId: function( data ) {
-		for ( var i = 0; i < data.length; i++ ) {
-			data[i].id = data[i]['user_id'] + '_' + data[i]['accrual_policy_account_id'];
+		if ( Array.isArray( data ) ) {
+			for ( var i = 0; i < data.length; i++ ) {
+				data[i].id = data[i]['user_id'] + '_' + data[i]['accrual_policy_account_id'];
+			}
+		} else if( data && data['user_id'] && data['accrual_policy_account_id']) {
+			data.id = data['user_id'] + '_' + data['accrual_policy_account_id'];
+		} else {
+			Debug.Text( 'ERROR: Data format is invalid.', 'AccrualBalanceViewController.js', 'AccrualBalanceViewController', '__createRowId', 1 );
 		}
-
 		return data;
 	},
 
@@ -284,76 +289,71 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 	},
 
-	onViewClick: function( view_id ) {
-		var $this = this;
-		this.setCurrentEditViewState( 'view' );
-		$this.openEditView();
-
-		var selected_item = null;
-		var grid_selected_id_array = this.getGridSelectIdArray();
-
-		var grid_selected_length = grid_selected_id_array.length;
-
-		if ( grid_selected_length > 0 ) {
-			selected_item = this.getRecordFromGridById( grid_selected_id_array[0] );
-		} else {
-			var grid_source_data = $this.grid.getGridParam( 'data' );
-			selected_item = grid_source_data[0];
+	parseToUserId: function( id ) {
+		if ( !id ) {
+			return false;
 		}
 
+		id = id.toString();
+
+		if ( id.indexOf( '_' ) > 0 ) {
+			return id.split( '_' )[0];
+		}
+
+		return id;
+	},
+
+	parseToAccrualPolicyAccountId: function( id ) {
+		if ( !id ) {
+			return false;
+		}
+
+		id = id.toString();
+
+		if ( id.indexOf( '_' ) > 0 ) {
+			return id.split( '_' )[1];
+		}
+
+		return id;
+	},
+
+	getAPIFilters: function () {
+		var composite_id = this.getCurrentSelectedRecord();
+
+		var filter = {};
+
+		filter.filter_data = {};
+		filter.filter_data.user_id = this.parseToUserId( composite_id );
+		filter.filter_data.accrual_policy_account_id = this.parseToAccrualPolicyAccountId( composite_id );
+
+		return filter;
+	},
+
+	doViewClickResult: function ( result_data ) {
+		var $this = this;
 		var filter = {};
 		filter.filter_data = {};
 
-		if ( Global.isSet( view_id ) ) {
-			var filter_data = view_id.toString().split( '_' );
-			filter.filter_data.user_id = filter_data[0];
-			filter.filter_data.accrual_policy_account_id = filter_data[1];
-		} else {
-			filter.filter_data.user_id = selected_item.user_id;
-			filter.filter_data.accrual_policy_account_id = selected_item.accrual_policy_account_id;
+		result_data = $this.__createRowId( result_data );
+		$this.current_edit_record = result_data;
+		if ( $this.current_edit_record && $this.current_edit_record.user_id && $this.current_edit_record.accrual_policy_account_id ) {
+			filter.filter_data.user_id = $this.current_edit_record.user_id;
+			filter.filter_data.accrual_policy_account_id = $this.current_edit_record.accrual_policy_account_id;
 		}
 
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-
-				if ( !result_data ) {
-					result_data = [];
+		// get the accrual data with the same filter data in order to be used for the audit tab.
+		return $this.accrual_api['get' + $this.accrual_api.key_name]( filter, {
+			onResult: function( res ) {
+				var result = res.getResult();
+				$this.log_object_ids = [];
+				for ( var i = 0; i < result.length; i++ ) {
+					$this.log_object_ids.push( result[i]['id'] );
 				}
 
-				result_data = $this.__createRowId( result_data );
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				$this.current_edit_record = result_data;
-				if ( $this.current_edit_record && $this.current_edit_record.user_id && $this.current_edit_record.accrual_policy_account_id ) {
-					filter.filter_data.user_id = $this.current_edit_record.user_id;
-					filter.filter_data.accrual_policy_account_id = $this.current_edit_record.accrual_policy_account_id;
-				}
-
-				// get the accrual data with the same filter data in order to be used for the audit tab.
-				$this.accrual_api['get' + $this.accrual_api.key_name]( filter, {
-					onResult: function( res ) {
-						var result = res.getResult();
-						$this.log_object_ids = [];
-						for ( var i = 0; i < result.length; i++ ) {
-							$this.log_object_ids.push( result[i]['id'] );
-						}
-
-						$this.initEditView();
-
-					}
-				} );
+				return $this.initEditView();
 
 			}
 		} );
-
 	},
 
 	setEditViewData: function() {

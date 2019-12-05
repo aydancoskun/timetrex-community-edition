@@ -649,12 +649,12 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 				if ( $i == 0 ) {
 					$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-06') );
 				} else {
-					$end_date = ($end_date + ( (86400 * 14) ));
+					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -1488,7 +1488,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		//First Wage Entry
 		$this->createUserSalaryWage( $this->user_id, 1, strtotime('01-Jan-2001') );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[0]->getStartDate() - (86400) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[0]->getStartDate(), -1, 'day' ) );
 
 		$this->addPayStubAmendments();
 		$this->createPayStub();
@@ -1531,9 +1531,9 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		//First Wage Entry
 		$this->createUserSalaryWage( $this->user_id, 1, strtotime('01-Jan-2001') );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[0]->getStartDate() - (86400) ) );
-		$this->createUserSalaryWage( $this->user_id, 1500, ( $this->pay_period_objs[0]->getStartDate() + (86400 * 4) ) );
-		$this->createUserSalaryWage( $this->user_id, 2000, ( $this->pay_period_objs[0]->getStartDate() + (86400 * 8) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[0]->getStartDate(), -1, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1500, TTDate::incrementDate( $this->pay_period_objs[0]->getStartDate(), 4, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 2000, TTDate::incrementDate( $this->pay_period_objs[0]->getStartDate(), 8, 'day' ) );
 
 		$this->addPayStubAmendments();
 		$this->createPayStub();
@@ -1587,22 +1587,22 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		//First Wage Entry
 		$this->createUserSalaryWage( $this->user_id, 1, strtotime('01-Jan-2001') );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() - (86400) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 1) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 2) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 3) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 4) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 5) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 6) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 7) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 8) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 9) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 10) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 11) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 12) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 13) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 14) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 15) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), -1, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 1, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 2, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 3, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 4, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 5, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 6, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 7, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 8, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 9, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 10, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 11, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 12, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 13, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 14, 'day' ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, TTDate::incrementDate( $this->pay_period_objs[1]->getStartDate(), 15, 'day' ) );
 
 
 		//Create one punch in the next pay period so we can test pro-rating without any regular time.

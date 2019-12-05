@@ -175,6 +175,7 @@ require.config( {
 		'APIUserDateTotal': 'services/core/APIUserDateTotal',
 		'APIPunchControl': 'services/core/APIPunchControl',
 		'APIROE': 'services/users/APIROE',
+		'APIROEReport': 'services/reports/APIROEReport',
 		'APIClient': 'services/invoice/APIClient',
 		'APIClientGroup': 'services/invoice/APIClientGroup',
 		'APIClientContact': 'services/invoice/APIClientContact',
@@ -850,12 +851,14 @@ require( [
 
 			$.i18n.load( LocalCacheData.getI18nDic() );
 			Global.initStaticStrings();
+
+
 			ServiceCaller.import_csv_emample = ServiceCaller.rootURL + loginData.base_url + 'html5/views/wizard/import_csv/';
-			ServiceCaller.fileDownloadURL = ServiceCaller.rootURL + loginData.base_url + 'send_file.php';
+			ServiceCaller.fileDownloadURL = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&X-CSRF-Token='+ getCookie( 'CSRF-Token' );
 			ServiceCaller.uploadURL = ServiceCaller.rootURL + loginData.base_url + 'upload_file.php';
-			ServiceCaller.companyLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=company_logo';
-			ServiceCaller.invoiceLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=invoice_config';
-			ServiceCaller.userPhoto = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=user_photo';
+			ServiceCaller.companyLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=company_logo&X-CSRF-Token='+ getCookie( 'CSRF-Token' );
+			ServiceCaller.invoiceLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=invoice_config&X-CSRF-Token='+ getCookie( 'CSRF-Token' );
+			ServiceCaller.userPhoto = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=user_photo&X-CSRF-Token='+ getCookie( 'CSRF-Token' );
 			ServiceCaller.mainCompanyLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=primary_company_logo';
 			ServiceCaller.poweredByLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=smcopyright';
 			ServiceCaller.login_page_powered_by_logo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=copyright';

@@ -109,6 +109,7 @@ class RemittanceSummaryReport extends Report {
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
+										'-5040-page_break' => TTi18n::gettext('Page Break On'),
 								);
 				break;
 			case 'time_period':
@@ -781,11 +782,11 @@ class RemittanceSummaryReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
-
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
+
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				foreach( $level_1 as $date_stamp => $row ) {
 					$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );

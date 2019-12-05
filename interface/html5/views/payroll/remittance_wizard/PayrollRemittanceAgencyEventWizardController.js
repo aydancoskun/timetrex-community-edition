@@ -1,6 +1,6 @@
 PayrollRemittanceAgencyEventWizardController = BaseWindowController.extend( {
 
-	el: '.wizard',
+	el: '.wizard-bg',
 
 	wizard_obj: null,
 

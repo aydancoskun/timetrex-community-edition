@@ -56,7 +56,7 @@ class ROEFactory extends Factory {
 
 		$retval = NULL;
 		switch( $name ) {
-			case 'code':
+			case 'code': //See: https://www.unemploymentcanada.ca/record-of-employment-reason-for-issuing-roe/
 				$retval = array(
 											'A'		=> TTi18n::gettext('(A) Shortage of Work'),
 											'B'		=> TTi18n::gettext('(B) Strike Or Lockout'),
@@ -623,10 +623,21 @@ class ROEFactory extends Factory {
 			$first_date = $user_obj->getHireDate();
 		}
 
+		//Find first pay stub after this date, to ensure they actually did get paid and have insurable earnings. Essentially the first pay period can't be $0.00.
+		$pslf = TTnew('PayStubListFactory');
+		$pslf->getFirstPayStubByUserIdAndStartDate( $user_id, $first_date, 1 );
+		if ( $pslf->getRecordCount() > 0 ) {
+			if ( $pslf->getCurrent()->getStartDate() > $first_date ) {
+				$first_date = $pslf->getCurrent()->getStartDate();
+			}
+		}
+
 		$udlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udlf */
 		$udlf->getNextByUserIdAndObjectTypeAndEpoch( $user_id, array( 10 ), $first_date ); //10=Worked time only. This needs to include punches and manual timesheet entries. FIXME: Should probably include insurable absence policies too like calculateLastDate()
 		if ( $udlf->getRecordCount() > 0 ) {
-			$first_date = $udlf->getCurrent()->getDateStamp();
+			if ( $udlf->getCurrent()->getDateStamp() > $first_date ) {
+				$first_date = $udlf->getCurrent()->getDateStamp();
+			}
 		}
 
 		Debug::Text('First Date: '. TTDate::getDate('DATE+TIME', $first_date), __FILE__, __LINE__, __METHOD__, 10);
@@ -763,12 +774,22 @@ class ROEFactory extends Factory {
 		$plf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $plf */
 		$pay_period_obj = $plf->getByUserIdAndEndDate( $user_id, $date )->getCurrent();
 
+		$annual_pay_periods_days = NULL;
 		$pay_period_type_id = FALSE;
 		if ( is_object( $pay_period_obj->getPayPeriodScheduleObject() ) ) {
 			$pay_period_type_id = $pay_period_obj->getPayPeriodScheduleObject()->getType();
+
+			$annual_pay_periods_per_type = $pay_period_obj->getPayPeriodScheduleObject()->getOptions('annual_pay_periods_per_type');
+			$annual_pay_periods_per_type_reversed = array_flip( $annual_pay_periods_per_type );
+
+			$annual_pay_periods_days_options = $pay_period_obj->getPayPeriodScheduleObject()->getOptions('annual_pay_periods_maximum_days');
+			if ( isset($annual_pay_periods_per_type_reversed[$pay_period_type_id]) AND isset($annual_pay_periods_days_options[ $annual_pay_periods_per_type_reversed[$pay_period_type_id] ]) ) {
+				$annual_pay_periods_days = $annual_pay_periods_days_options[ $annual_pay_periods_per_type_reversed[$pay_period_type_id] ];
+			}
+
 			if ( $pay_period_type_id == 5 ) { //5=Manual
 				$annual_pay_periods = (int)$pay_period_obj->getPayPeriodScheduleObject()->getAnnualPayPeriods();
-				$annual_pay_periods_per_type = $pay_period_obj->getPayPeriodScheduleObject()->getOptions('annual_pay_periods_per_type');
+
 				if ( isset($annual_pay_periods_per_type[$annual_pay_periods]) ) {
 					$pay_period_type_id = $annual_pay_periods_per_type[$annual_pay_periods];
 				} else {
@@ -784,9 +805,7 @@ class ROEFactory extends Factory {
 			Debug::Text('  Defaulting to Weekly PP schedule, as nothing else was found...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		$pay_period_end_date = $pay_period_obj->getEndDate();
-
-		return array( 'pay_period_type_id' => $pay_period_type_id, 'pay_period_end_date' => $pay_period_end_date );
+		return array( 'pay_period_type_id' => $pay_period_type_id, 'pay_period_start_date' => $pay_period_obj->getStartDate(), 'pay_period_end_date' => $pay_period_obj->getEndDate(), 'pay_period_maximum_days' => $annual_pay_periods_days );
 	}
 
 	/**
@@ -1188,6 +1207,24 @@ class ROEFactory extends Factory {
 													TTi18n::gettext('Invalid final pay period end date')
 												);
 		}
+
+		// Make sure last day for which paid and final pay period ending date does not exceed the maximum number of days in a pay period minus 1.
+		// Max days that can elapse in the same pay period upon termination. ie: if they were terminated on the first day of a pay period, then only 13 days could lapse after that in a bi-weekly pay period.
+		//   Alternatively we could just check to make sure that Last Day for Which Paid is in the same pay period as Final Pay Period Ending Date?
+		if ( $this->getLastDate() !== FALSE AND $this->getPayPeriodEndDate() !== FALSE ) {
+			$pay_period_data = $this->calculatePayPeriodType( $this->getLastDate() );
+			$pay_period_data['pay_period_maximum_days'] = ( $pay_period_data['pay_period_maximum_days'] - 1 );
+			$days_between_pay_period_and_end_date = (int)( TTDate::getDayDifference( TTDate::getMiddleDayEpoch( $this->getLastDate() ), TTDate::getMiddleDayEpoch( $this->getPayPeriodEndDate() ) ) );
+
+			$this->Validator->isGreaterThan( 'pay_period_end_date',
+											 $pay_period_data['pay_period_maximum_days'],
+											 TTi18n::gettext( 'Final Pay Period End Date cannot be more than %1 days after the Last Day For Which Paid, based on this pay period type', array( $pay_period_data['pay_period_maximum_days'] ) ),
+											 $days_between_pay_period_and_end_date
+			);
+			unset( $pay_period_data, $days_between_pay_period_and_end_date );
+		}
+
+
 		// Recall date
 		if ( $this->getRecallDate() != '' ) {
 			$this->Validator->isDate(		'recall_date',

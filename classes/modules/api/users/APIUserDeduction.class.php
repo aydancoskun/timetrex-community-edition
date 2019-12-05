@@ -72,6 +72,10 @@ class APIUserDeduction extends APIFactory {
 	function getUserDeduction( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('user_tax_deduction', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_tax_deduction', 'view') OR $this->getPermissionObject()->Check('user_tax_deduction', 'view_own') OR $this->getPermissionObject()->Check('user_tax_deduction', 'view_child')	 ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -132,6 +136,10 @@ class APIUserDeduction extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('user_tax_deduction', 'enabled')
@@ -262,6 +270,10 @@ class APIUserDeduction extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('user_tax_deduction', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_tax_deduction', 'delete') OR $this->getPermissionObject()->Check('user_tax_deduction', 'delete_own') OR $this->getPermissionObject()->Check('user_tax_deduction', 'delete_child') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
@@ -340,39 +352,5 @@ class APIUserDeduction extends APIFactory {
 
 		return $this->returnHandler( FALSE );
 	}
-
-	/**
-	 * Copy one or more user_deductiones.
-	 * @param array $data user_deduction IDs
-	 * @return array
-	 */
-/*
-	function copyUserDeduction( $data ) {
-		if ( !is_array($data) ) {
-			$data = array($data);
-		}
-
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
-		}
-
-		Debug::Text('Received data for: '. count($data) .' UserDeductions', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		$src_rows = $this->stripReturnHandler( $this->getUserDeduction( array('filter_data' => array('id' => $data) ), TRUE ) );
-		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
-			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
-			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
-				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
-			}
-			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
-
-			return $this->setUserDeduction( $src_rows ); //Save copied rows
-		}
-
-		return $this->returnHandler( FALSE );
-	}
-*/
 }
 ?>

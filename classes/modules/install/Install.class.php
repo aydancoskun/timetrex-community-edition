@@ -544,6 +544,34 @@ class Install {
 	}
 
 	/**
+	 * Get all the schema groups available for the current product edition. This helps avoid issues where database schema files may exist for ENTERPRISE edition, but we only want to apply PROFESSIONAL edition schema changes.
+	 * @return array
+	 */
+	function getSchemaGroupsForProductEdition() {
+		$product_edition = getTTProductEdition();
+
+		$retarr = array( 'A' ); //Community
+
+		if ( $product_edition >= TT_PRODUCT_ENTERPRISE ) {
+			$retarr[] = 'D';
+		}
+
+		if ( $product_edition >= TT_PRODUCT_CORPORATE ) {
+			$retarr[] = 'C';
+		}
+
+		if ( $product_edition >= TT_PRODUCT_PROFESSIONAL ) {
+			$retarr[] = 'B';
+		}
+
+		sort($retarr);
+
+		Debug::Arr($retarr, 'Available Schema Groups: ', __FILE__, __LINE__, __METHOD__, 9);
+		return $retarr;
+	}
+
+
+	/**
 	 * Get all schema versions
 	 * A=Community, B=Professional, C=Corporate, D=Enterprise, T=Tax
 	 * @param array $group
@@ -636,11 +664,15 @@ class Install {
 	 * @param array $group
 	 * @return bool
 	 */
-	function createSchemaRange( $start_version = NULL, $end_version = NULL, $group = array('A', 'B', 'C', 'D') ) {
+	function createSchemaRange( $start_version = NULL, $end_version = NULL, $group = NULL ) {
 		global $cache, $config_vars, $PRIMARY_KEY_IS_UUID;
 
 		if ( $this->checkDatabaseSchema() == 1 ) {
 			return FALSE;
+		}
+
+		if ( $group == NULL ) {
+			$group = $this->getSchemaGroupsForProductEdition();
 		}
 
 		//Some schema changes can take a very long time to complete, make sure PHP doesn't cancel out on us.
@@ -930,7 +962,7 @@ class Install {
 
 		/*
 		 *
-		 *  *** UPDATE APINotification.class.php when minimum PHP version changes, as it gives early warning to users. ***
+		 *  *** UPDATE APINotification.class.php, install.php when minimum PHP version changes, as it gives early warning to users. ***
 		 *
 		 */
 
@@ -939,8 +971,8 @@ class Install {
 		}
 		Debug::text('Comparing with Version: '. $php_version, __FILE__, __LINE__, __METHOD__, 9);
 
-		$min_version = '5.4.0';
-		$max_version = '7.3.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
+		$min_version = '7.0.0'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
+		$max_version = '7.4.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
 
 		$unsupported_versions = array('');
 

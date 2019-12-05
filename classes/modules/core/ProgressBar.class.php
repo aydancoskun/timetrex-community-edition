@@ -232,7 +232,7 @@ class ProgressBar {
 				if ( $progress_bar_arr != FALSE
 						AND is_array( $progress_bar_arr )
 						AND $current_iteration >= 0
-						AND $current_iteration <= $progress_bar_arr['total_iterations']) {
+						AND ( isset( $progress_bar_arr['total_iterations'] ) AND $current_iteration <= $progress_bar_arr['total_iterations'] ) ) {
 
 					/*
 					if ( PRODUCTION == FALSE AND isset($progress_bar_arr['total_iterations']) AND $progress_bar_arr['total_iterations'] >= 1 ) {

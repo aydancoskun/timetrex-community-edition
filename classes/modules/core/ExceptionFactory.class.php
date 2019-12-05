@@ -431,7 +431,7 @@ class ExceptionFactory extends Factory {
 				if ( ( $ep_obj->getEmailNotification() == 10 OR $ep_obj->getEmailNotification() == 100 )
 						AND is_object( $u_obj->getUserPreferenceObject() )
 						AND $u_obj->getUserPreferenceObject()->getEnableEmailNotificationException() == TRUE
-						AND $u_obj->getStatus() == 10 ) {
+						AND $u_obj->getStatus() == 10 AND $u_obj->getEnableLogin() == TRUE ) {
 					Debug::Text(' Emailing exception to user!', __FILE__, __LINE__, __METHOD__, 10);
 					if ( $u_obj->getWorkEmail() != '' AND $u_obj->getWorkEmailIsValid() == TRUE ) {
 						$retarr[] = Misc::formatEmailAddress( $u_obj->getWorkEmail(), $u_obj );
@@ -457,7 +457,7 @@ class ExceptionFactory extends Factory {
 								//Make sure supervisor has exception notifications enabled and is *not* terminated
 								if ( is_object( $parent_user_obj->getUserPreferenceObject() )
 										AND $parent_user_obj->getUserPreferenceObject()->getEnableEmailNotificationException() == TRUE
-										AND $parent_user_obj->getStatus() == 10 ) {
+										AND $parent_user_obj->getStatus() == 10 AND $parent_user_obj->getEnableLogin() == TRUE ) {
 									Debug::Text(' Emailing exception to supervisor!', __FILE__, __LINE__, __METHOD__, 10);
 									if ( $parent_user_obj->getWorkEmail() != '' AND $parent_user_obj->getWorkEmailIsValid() == TRUE ) {
 										$retarr[] = Misc::formatEmailAddress( $parent_user_obj->getWorkEmail(), $parent_user_obj );

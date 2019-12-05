@@ -56,7 +56,7 @@ class UserFactory extends Factory {
 	public $username_validator_regex = '/^[a-z0-9-_\.@\+]{1,250}$/i'; //Authentication class needs to access this.
 	public $phoneid_validator_regex = '/^[0-9]{1,250}$/i';
 	protected $phonepassword_validator_regex = '/^[0-9]{1,250}$/i';
-	protected $name_validator_regex = '/^[a-zA-Z- \.\'()\[\]|\x{0080}-\x{FFFF}]{1,250}$/iu'; //Allow ()/[] so nicknames can be specified.
+	protected $name_validator_regex = '/^[a-zA-Z- ,\.\'()\[\]|\x{0080}-\x{FFFF}]{1,250}$/iu'; //Allow ()/[] so nicknames can be specified. Allow "," so names can be: Doe, Jr. or: Doe, III
 	protected $address_validator_regex = '/^[a-zA-Z0-9-,_\/\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $city_validator_regex = '/^[a-zA-Z0-9-,_\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 
@@ -143,6 +143,11 @@ class UserFactory extends Factory {
 										'-1401-hierarchy_level_display' => TTi18n::gettext('Hierarchy Superiors'),
 										'-1500-last_login_date' => TTi18n::gettext('Last Login Date'),
 										'-1510-max_punch_time_stamp' => TTi18n::gettext('Last Punch Time'),
+
+										'-1600-enable_login' => TTi18n::gettext('Login Enabled'),
+										'-1610-login_expire_date' => TTi18n::gettext('Login Expires'),
+										'-1620-terminated_permission_control' => TTi18n::gettext('Terminated Permission Group'),
+
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
 										'-2020-updated_by' => TTi18n::gettext('Updated By'),
@@ -298,6 +303,11 @@ class UserFactory extends Factory {
 										'hierarchy_control_display' => FALSE,
 										'hierarchy_level_display' => FALSE,
 
+										'enable_login' => 'EnableLogin',
+										'login_expire_date' => 'LoginExpireDate',
+										'terminated_permission_control_id' => 'TerminatedPermissionControl',
+
+										'current_password' => 'CurrentPassword', //Must go near the end, so we can validate based on other info.
 										'password' => 'Password', //Must go near the end, so we can validate based on other info.
 										'phone_password' => 'PhonePassword', //Must go near the end, so we can validate based on other info.
 
@@ -472,6 +482,16 @@ class UserFactory extends Factory {
 	 */
 	function getPermissionLevel() {
 		return $this->getPermissionObject()->getLevel( $this->getID(), $this->getCompany() );
+	}
+
+	function getTerminatedPermissionLevel() {
+		$pclf = TTnew('PermissionControlListFactory'); /** @var PermissionControlListFactory $pclf */
+		$pclf->getByIdAndCompanyId( $this->getTerminatedPermissionControl(), $this->getCompany() );
+		if ( $pclf->getRecordCount() > 0 ) {
+			return $pclf->getCurrent()->getLevel();
+		}
+
+		return FALSE;
 	}
 
 	/**
@@ -793,7 +813,7 @@ class UserFactory extends Factory {
 	 * @param bool $check_password_policy
 	 * @return bool
 	 */
-	function checkPassword( $password, $check_password_policy = TRUE ) {
+	function checkPassword( $password, $check_password_policy = TRUE, $delay_failed_attempt = TRUE ) {
 		global $config_vars;
 
 		$password = trim( html_entity_decode( $password ) );
@@ -842,7 +862,9 @@ class UserFactory extends Factory {
 
 
 		//Don't check local TT passwords if LDAP Only authentication is enabled. Still accept override passwords though.
-		if ( $ldap_authentication_type_id != 2 AND TTPassword::checkPassword( $encrypted_password, $this->getPassword() ) ) {
+		//  *NOTE: When changing passwords we have to check against the old (current) password. Since by the time we get here setPassword() would have already been called and the password changed and getPassword() is now the new password.
+		if ( $ldap_authentication_type_id != 2 AND ( $this->getPassword() == $this->getGenericOldDataValue('password') AND TTPassword::checkPassword( $encrypted_password, $this->getPassword() )
+						OR ( $this->getPassword() != $this->getGenericOldDataValue('password') AND TTPassword::checkPassword( $encrypted_password, $this->getGenericOldDataValue('password') ) ) ) ) {
 			//If the passwords match, confirm that the password hasn't exceeded its maximum age.
 			//Allow override passwords always.
 			if ( $check_password_policy == TRUE AND $this->isFirstLogin() == TRUE AND $this->isCompromisedPassword() == TRUE ) { //Need to check for compromised password, as last_login_date doesn't get updated until they can actually login fully.
@@ -879,7 +901,43 @@ class UserFactory extends Factory {
 			$retval = FALSE;
 		}
 
+		//If password was incorrect, sleep for some specified period of time to help delay brute force attacks.
+		if ( PRODUCTION == TRUE AND $delay_failed_attempt == TRUE AND $retval == FALSE ) {
+			Debug::Text('Password was incorrect, sleeping for random amount of time...', __FILE__, __LINE__, __METHOD__, 10);
+			usleep( rand( 750000, 1500000 ) );
+		}
+
 		return $retval;
+	}
+
+	/**
+	 * @param bool $value
+	 * @return bool
+	 */
+	function setIsRequiredCurrentPassword( $value ) {
+		return $this->setGenericTempDataValue( 'is_required_current_password', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
+	function getIsRequiredCurrentPassword() {
+		return $this->getGenericTempDataValue( 'is_required_current_password' );
+	}
+
+	/**
+	 * @param string $value
+	 * @return bool
+	 */
+	function setCurrentPassword( $value ) {
+		return $this->setGenericTempDataValue( 'current_password', $value );
+	}
+
+	/**
+	 * @return bool
+	 */
+	function getCurrentPassword() {
+		return $this->getGenericTempDataValue( 'current_password' );
 	}
 
 	/**
@@ -1025,8 +1083,23 @@ class UserFactory extends Factory {
 	 */
 	function isFirstLogin() {
 		if ( DEMO_MODE == FALSE AND $this->getLastLoginDate() == '' ) {
-			Debug::Text('is First Login: TRUE', __FILE__, __LINE__, __METHOD__, 10);
-			return TRUE;
+			Debug::Text( 'is First Login: TRUE', __FILE__, __LINE__, __METHOD__, 10 );
+
+			//In cases where the employer creates the user record, then tells the user to reset their password, prevent them from triggering the first login change password prompt since they just changed their password anyways.
+			//  When creating a new user, if no password is specified we set it to a random one, which causes the password updated date to always be set.
+			//  Also make sure that the password reset key is blank, so we know they aren't in the process of resetting their password when they remember it.
+			// Test cases:
+			// 1. Create a user without a password, have them reset their password, then login. Should not trigger first login and therefore not ask them to change their password.
+			// 2. Create a user with a password, when the user logs-in, it should detect first login and ask them to change password.
+			//   2b. After first login, if administrator changes password, it should trigger compromised password and ask them to change it again. Only if password policies are enabled though.
+			// 3. Create a user with a password, have them attempt to reset password but not click on the link, then login with their password. Should ask to change the password.
+			if ( $this->getPasswordResetDate() != FALSE AND $this->getPasswordResetKey() == '' AND $this->getPasswordResetDate() < $this->getPasswordUpdatedDate() AND $this->getPasswordResetDate() > TTDate::incrementDate( time(), -1, 'day' ) ) {
+				Debug::Text( 'is First Login: TRUE but password was just reset, so not triggering first login password change...', __FILE__, __LINE__, __METHOD__, 10 );
+				return FALSE;
+			} else {
+				Debug::Text( 'is First Login: TRUE and password wasnt just recently reset...', __FILE__, __LINE__, __METHOD__, 10 );
+				return TRUE;
+			}
 		}
 
 		return FALSE;
@@ -1128,10 +1201,18 @@ class UserFactory extends Factory {
 		$password = trim($password);
 
 		if ( $password == $this->getPhonePassword() ) {
-			return TRUE;
+			$retval = TRUE;
+		} else {
+			$retval = FALSE;
 		}
 
-		return FALSE;
+		//If password was incorrect, sleep for some specified period of time to help delay brute force attacks.
+		if ( PRODUCTION == TRUE AND $retval == FALSE ) {
+			Debug::Text('Phone Password was incorrect, sleeping for random amount of time...', __FILE__, __LINE__, __METHOD__, 10);
+			usleep( rand( 750000, 1500000 ) );
+		}
+
+		return $retval;
 	}
 
 	/**
@@ -1567,8 +1648,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setCountry( $value ) {
-		$value = trim($value);
-		return $this->setGenericDataValue( 'country', $value );
+		return $this->setGenericDataValue( 'country', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -1583,10 +1663,9 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setProvince( $value ) {
-		$value = trim($value);
 		//Debug::Text('Country: '. $this->getCountry() .' Province: '. $province, __FILE__, __LINE__, __METHOD__, 10);
 		//If country isn't set yet, accept the value and re-validate on save.
-		return $this->setGenericDataValue( 'province', $value );
+		return $this->setGenericDataValue( 'province', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -2216,6 +2295,67 @@ class UserFactory extends Factory {
 		return $this->setGenericDataValue( 'note', $value );
 	}
 
+
+	/**
+	 * @param bool $value
+	 * @return bool
+	 */
+	function setEnableLogin( $value = TRUE ) {
+		return $this->setGenericDataValue( 'enable_login', $this->toBool($value) );
+	}
+
+	/**
+	 * @return bool
+	 */
+	function getEnableLogin() {
+		return $this->fromBool( $this->getGenericDataValue( 'enable_login' ) );
+	}
+
+	/**
+	 * @param bool $raw
+	 * @return bool|mixed
+	 */
+	function getLoginExpireDate( $raw = FALSE ) {
+		$value = $this->getGenericDataValue( 'login_expire_date' );
+		if ( $value !== FALSE ) {
+			if ( $raw === TRUE ) {
+				return $value;
+			} else {
+				return TTDate::strtotime( $value );
+			}
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setLoginExpireDate( $value ) {
+		//Assumed to be end of day of the the expire date.
+		if ( $value == '' ) {
+			$value = NULL; //Force to NULL if no expire date is set, this prevents "0" from being entered and causing problems with "is NULL" SQL queries.
+		}
+
+		return $this->setGenericDataValue( 'login_expire_date', ( $value != 0 AND $value != '' ) ? TTDate::getISODateStamp( $value ) : NULL );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getTerminatedPermissionControl() {
+		return $this->getGenericDataValue( 'terminated_permission_control_id' );
+	}
+
+	/**
+	 * @param string $value UUID
+	 * @return bool
+	 */
+	function setTerminatedPermissionControl( $value ) {
+		return $this->setGenericDataValue( 'terminated_permission_control_id', TTUUID::castUUID( $value ) );
+	}
+
 	/**
 	 * @param string $type
 	 * @return bool
@@ -2567,11 +2707,25 @@ class UserFactory extends Factory {
 	}
 
 	/**
+	 * Check if the current user record is also for the currently logged in user.
+	 * @param bool $ignore_warning
+	 * @return bool
+	 */
+	function isCurrentlyLoggedInUser() {
+		global $current_user;
+		if ( is_object($current_user) AND $current_user->getID() == $this->getID() ) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
 	function Validate( $ignore_warning = TRUE ) {
-		global $current_user;
+		$data_diff = $this->getDataDifferences();
 
 		//
 		// BELOW: Validation code moved from set*() functions.
@@ -2628,18 +2782,19 @@ class UserFactory extends Factory {
 														);
 		}
 
+		//Used for validating Permission and TerminatedPermissions below.
+		$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
+		$current_user_permission_level = $this->getCurrentUserPermissionLevel();
+
+		$modify_permissions = FALSE;
+		if ( $current_user_permission_level >= $this->getPermissionLevel() ) {
+			$modify_permissions = TRUE;
+		}
+
 		// Permission Group
 		//Don't allow permissions to be modified if the currently logged in user has a lower permission level.
 		//As such if someone with a lower level is able to edit the user of higher level, they must not call this function at all, or use a blank value.
 		if ( $this->getPermissionControl() != '' ) {
-			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
-
-			$current_user_permission_level = $this->getCurrentUserPermissionLevel();
-
-			$modify_permissions = FALSE;
-			if ( $current_user_permission_level >= $this->getPermissionLevel() ) {
-				$modify_permissions = TRUE;
-			}
 			if ( $this->Validator->isError('permission_control_id') == FALSE ) {
 				$this->Validator->isTrue(		'permission_control_id',
 												 $modify_permissions,
@@ -2647,7 +2802,7 @@ class UserFactory extends Factory {
 				);
 			}
 
-			if ( is_object($current_user) AND $current_user->getID() == $this->getID() AND $this->getPermissionControl() != $this->getPermissionControl( TRUE ) ) { //Acting on currently logged in user.
+			if ( $this->isCurrentlyLoggedInUser() == TRUE AND $this->getPermissionControl() != $this->getPermissionControl( TRUE ) ) { //Acting on currently logged in user.
 				$logged_in_modify_permissions = FALSE; //Must be false for validation to fail.
 			} else {
 				$logged_in_modify_permissions = TRUE;
@@ -2666,6 +2821,24 @@ class UserFactory extends Factory {
 				);
 			}
 		}
+
+		//Allow Terminated Permission Group to be NONE (Zero UUID) only if the user is active.
+		if ( $this->getTerminatedPermissionControl() != '' AND ( ( $this->getStatus() == 10 AND $this->getTerminatedPermissionControl() != TTUUID::getZeroID() ) OR $this->getStatus() != 10 ) ) {
+			if ( $this->Validator->isError('terminated_permission_control_id') == FALSE AND $this->getTerminatedPermissionLevel() > $this->getPermissionLevel() ) {
+				$this->Validator->isTrue( 'terminated_permission_control_id',
+										  FALSE,
+										  TTi18n::gettext( 'Terminated Permission Group cannot be a higher level than Permission Group' )
+				);
+			}
+
+			if ( $this->Validator->isError('terminated_permission_control_id') == FALSE ) {
+				$this->Validator->isResultSetWithRows( 'terminated_permission_control_id',
+													   $pclf->getByIDAndLevel( $this->getTerminatedPermissionControl(), $current_user_permission_level ),
+													   TTi18n::gettext( 'Terminated Permission Group is invalid' )
+				);
+			}
+		}
+
 
 		// Pay Period schedule
 		if ( $this->getPayPeriodSchedule() !== FALSE AND $this->getPayPeriodSchedule() != TTUUID::getZeroID() ) {
@@ -3194,6 +3367,7 @@ class UserFactory extends Factory {
 										TTi18n::gettext('Hire date must be on or after the employees first wage entry, you may need to change their wage effective date first'));
 			}
 		}
+
 		// Termination date
 		if ( $this->getTerminationDate() != '' ) {
 			$this->Validator->isDate(		'termination_date',
@@ -3201,6 +3375,35 @@ class UserFactory extends Factory {
 													TTi18n::gettext('Termination date is invalid')
 												);
 		}
+
+		// Login Expire date
+		if ( $this->getLoginExpireDate() != '' ) {
+			$this->Validator->isDate(		'login_expire_date',
+											 $this->getLoginExpireDate(),
+											 TTi18n::gettext('Login Expire date is invalid')
+			);
+
+			if ( $this->getEnableLogin() == TRUE AND TTDate::getMiddleDayEpoch( $this->getLoginExpireDate() ) < TTDate::getMiddleDayEpoch( time() ) ) {
+				$this->Validator->isTrue(		'login_expire_date',
+												FALSE,
+												 TTi18n::gettext('Login Expire Date must be in the future when Login is Enabled'));
+			}
+
+			//Avoid having the login expire date too far in the future due to mistakenly added dates. As well to avoid logins from being actively used for long periods of time while the user record is non-active.
+			if ( $this->getEnableLogin() == TRUE AND TTDate::getMiddleDayEpoch( $this->getLoginExpireDate() ) > TTDate::getMiddleDayEpoch( TTDate::incrementDate( time(), 2, 'year' ) ) ) {
+				$this->Validator->isTrue(		'login_expire_date',
+												 FALSE,
+												 TTi18n::gettext('Login Expire Date can not be more than two years in the future'));
+			}
+		}
+
+		//Avoid logins from being actively used for long periods of time while the user record is non-active.
+		if ( $this->getStatus() != 10 AND $this->getLoginExpireDate() == '' ) {
+			$this->Validator->isTrue(		'login_expire_date',
+											 FALSE,
+											 TTi18n::gettext('Login Expire Date must be specified for all non-Active employees'));
+		}
+
 		// Last Login date
 		if ( $this->getLastLoginDate() != '' ) {
 			$this->Validator->isDate(		'last_login_date',
@@ -3208,7 +3411,8 @@ class UserFactory extends Factory {
 													TTi18n::gettext('Last Login date is invalid')
 												);
 		}
-		// currency
+
+		// Currency
 		if ( $this->getCurrency() !== FALSE ) {
 			$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
 			$this->Validator->isResultSetWithRows(	'currency_id',
@@ -3322,7 +3526,26 @@ class UserFactory extends Factory {
 											TTi18n::gettext('Employee number must be specified for ACTIVE employees') );
 		}
 
-		if ( is_object($current_user) AND $current_user->getID() == $this->getID() ) { //Acting on currently logged in user.
+		if ( $this->isCurrentlyLoggedInUser() == TRUE ) { //Acting on currently logged in user -- This is FALSE when the user is resetting their password by email.
+			//Require currently logged in user to specify their current password if they are updating secure fields. This is to ensure they don't leave their computer unattended and have a evil party come along and try to change their password or email address.
+			if ( ( $this->isDataDifferent( 'password_updated_date', $data_diff ) OR $this->isDataDifferent( 'work_email', $data_diff ) OR $this->isDataDifferent( 'home_email', $data_diff ) OR $this->isDataDifferent( 'phone_id', $data_diff ) OR $this->isDataDifferent( 'phone_password', $data_diff ) OR $this->isDataDifferent( 'user_name', $data_diff ) ) ) {
+				$this->setIsRequiredCurrentPassword( TRUE );
+			}
+
+			if ( $this->getIsRequiredCurrentPassword() == TRUE ) {
+				if ( $this->getCurrentPassword() == '' ) {
+					$this->Validator->isTrue( 'current_password',
+											  FALSE,
+											  TTi18n::gettext( 'Current password must be specified to change secure fields' ) );
+				}
+
+				if ( $this->getCurrentPassword() != '' AND $this->checkPassword( $this->getCurrentPassword(), FALSE ) == FALSE ) {
+					$this->Validator->isTrue( 'current_password',
+											  FALSE,
+											  TTi18n::gettext( 'Current password is incorrect' ) );
+				}
+			}
+
 			if ( $this->getDeleted() == TRUE ) {
 				$this->Validator->isTrue(		'user_name',
 													FALSE,
@@ -3334,6 +3557,12 @@ class UserFactory extends Factory {
 													FALSE,
 													TTi18n::gettext('Unable to change status of your own record') );
 			}
+
+			if ( $this->getEnableLogin() == FALSE ) {
+				$this->Validator->isTrue(		'enable_login',
+												 FALSE,
+												 TTi18n::gettext('Unable to disable login on your own record') );
+			}
 		}
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND $this->is_new == FALSE ) {
@@ -3344,13 +3573,13 @@ class UserFactory extends Factory {
 					$j_obj = $jlf->getCurrent();
 
 					if ( $j_obj->isAllowedUser( $this->getID() ) == FALSE ) {
-						$this->Validator->isTRUE(	'job',
+						$this->Validator->isTRUE(	'default_job_id',
 													FALSE,
 													TTi18n::gettext('Employee is not assigned to this job') );
 					}
 
 					if ( $j_obj->isAllowedItem( $this->getDefaultJobItem() ) == FALSE ) {
-						$this->Validator->isTRUE(	'job_item',
+						$this->Validator->isTRUE(	'default_job_item_id',
 													FALSE,
 													TTi18n::gettext('Task is not assigned to this job') );
 					}
@@ -3415,7 +3644,7 @@ class UserFactory extends Factory {
 
 			//Check if birth date is not specified and payroll is being processed (some pay stubs do exist for this legal entity) to remind the user to specify a birth date.
 			//  This is critical especially in Canada for CPP eligibility.
-			if ( $this->getBirthDate() == '' ) {
+			if ( $this->getBirthDate() == '' AND $this->getStatus() == 10 ) { //10=Active
 				$pslf = TTnew( 'PayStubListFactory'); /** @var PayStubListFactory $pslf */
 				$pslf->getByCompanyIdAndLegalEntityId( $this->getCompany(), $this->getLegalEntity(), 1 ); //limit 1
 				if ( $pslf->getRecordCount() > 0 ) {
@@ -3490,6 +3719,8 @@ class UserFactory extends Factory {
 	function preValidate() {
 		$this->is_new = $this->isNew( TRUE ); //Remember if this is a new user for postSave(), as well as optimize for Validate()
 
+		$data_diff = $this->getDataDifferences();
+
 		if ( $this->getDefaultBranch() == FALSE ) {
 			$this->setDefaultBranch( TTUUID::getZeroID() );
 		}
@@ -3512,7 +3743,34 @@ class UserFactory extends Factory {
 		if ( $this->getEnableClearPasswordResetData() == TRUE ) {
 			Debug::text('Clearing password reset data...', __FILE__, __LINE__, __METHOD__, 10);
 			$this->setPasswordResetKey('');
-			$this->setPasswordResetDate('');
+			//$this->setPasswordResetDate(''); //Don't reset password reset date, as it can be used in isFirstLogin() to determine if they just recently reset their password.
+		}
+
+		if ( $this->getTerminatedPermissionControl() == FALSE ) {
+			$this->setTerminatedPermissionControl( TTUUID::getZeroID() );
+		}
+
+		//Check if we need to set the Login Expire Date.
+		if ( is_array( $data_diff ) AND $this->isDataDifferent( 'status_id', $data_diff ) ) {
+			if ( is_object( $this->getCompanyObject() ) AND $this->getStatus() >= 11 ) { // 11=In-Active
+				if ( $this->getTerminationDate() != '' ) {
+					$terminated_date = $this->getTerminationDate();
+				} else {
+					$terminated_date = time();
+				}
+
+				if ( $this->getLoginExpireDate() == '' OR $this->getLoginExpireDate() <= $terminated_date ) {
+					$this->setLoginExpireDate( TTDate::incrementDate( ( ( $this->getCompanyObject()->getTerminatedUserDisableLoginType() == 10 ) ? TTDate::getEndYearEpoch( $terminated_date ) : $terminated_date ), $this->getCompanyObject()->getTerminatedUserDisableLoginAfterDays(), 'day' ) );
+					Debug::text( 'User is no longer active, setting login expire date to: ' . TTDate::getDate( 'DATE+TIME', $this->getLoginExpireDate() ), __FILE__, __LINE__, __METHOD__, 10 );
+				}
+				unset( $terminated_date );
+			} elseif ( $this->getStatus() == 10 ) { //10=Active
+				if ( $this->getLoginExpireDate() != '' ) {
+					$this->setEnableLogin( TRUE ); //Re-enable login
+					$this->setLoginExpireDate( NULL ); //Clear login expire date.
+					Debug::text( 'User is active again, clearing Login Expire Date...', __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			}
 		}
 
 		return TRUE;
@@ -3524,6 +3782,13 @@ class UserFactory extends Factory {
 	function postSave() {
 		$data_diff = $this->getDataDifferences();
 		$this->removeCache( $this->getId() );
+		$this->removeCache( $this->getId(), 'user_preference' ); //Clear user preference cache as user status/enable_login values can be cached there.
+
+		//If Status changes, clear permission cache so terminated permissions can be used instead. This is also in Permission->getPermissions()
+		if ( is_array($data_diff) AND $this->isDataDifferent( 'status_id', $data_diff ) ) {
+			$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
+			$pf->clearCache( $this->getID(), $this->getCompany() );
+		}
 
 		if ( $this->getDeleted() == FALSE AND $this->getPermissionControl() !== FALSE ) {
 			Debug::text('Permission Group is set...', __FILE__, __LINE__, __METHOD__, 10);
@@ -3566,14 +3831,13 @@ class UserFactory extends Factory {
 				$puf = TTnew( 'PermissionUserFactory' ); /** @var PermissionUserFactory $puf */
 				$puf->setPermissionControl( $this->getPermissionControl() );
 				$puf->setUser( $this->getID() );
-
 				if ( $puf->isValid() ) {
 					if ( is_object( $puf->getPermissionControlObject() ) ) {
 						$puf->getPermissionControlObject()->touchUpdatedByAndDate();
 					}
 					$puf->Save();
 
-					//Clear permission class for this employee.
+					//Clear permission cache for this employee.
 					$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 					$pf->clearCache( $this->getID(), $this->getCompany() );
 				}
@@ -3949,8 +4213,9 @@ class UserFactory extends Factory {
 			unset($default_company_contact_user_id);
 		}
 
-		//If status is set to anything other than ACTIVE, logout user.
-		if ( $this->getStatus() != 10 ) {
+		//If status is changed TO or FROM Active, logout user. If they are changed from InActive to Terminated no need to logout user.
+		// Don't check LoginEnabled() here, as the permissions need to change when the status changes, so the user should still be logged out.
+		if ( is_array( $data_diff ) AND ( ( $this->isDataDifferent( 'status_id', $data_diff ) AND (  $this->getStatus() == 10 OR $data_diff['status_id'] == 10 ) ) OR ( $this->isDataDifferent( 'enable_login', $data_diff ) AND $this->getEnableLogin() == FALSE  ) ) )  {
 			$authentication = TTNew('Authentication'); /** @var Authentication $authentication */
 			$authentication->logoutUser( $this->getID() );
 		}
@@ -3990,6 +4255,7 @@ class UserFactory extends Factory {
 						case 'hire_date':
 						case 'birth_date':
 						case 'termination_date':
+						case 'login_expire_date':
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( TTDate::parseDateTime( $data[$key] ) );
 							}
@@ -4140,6 +4406,7 @@ class UserFactory extends Factory {
 						case 'hire_date':
 						case 'birth_date':
 						case 'termination_date':
+						case 'login_expire_date':
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = TTDate::getAPIDate( 'DATE', $this->$function() );
 							}
@@ -4165,6 +4432,7 @@ class UserFactory extends Factory {
 							unset($end_epoch);
 							break;
 						case 'password_reset_key': //Must not be returned to the API ever due to security risks.
+						case 'current_password':
 						case 'password':
 							break;
 						default:

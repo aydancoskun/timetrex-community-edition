@@ -972,14 +972,11 @@ class Form941Report extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		if ( isset( $this->tmp_data['pay_stub_entry'] ) == FALSE ) {
-			return TRUE;
-		}
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
-
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
+
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				foreach( $level_1 as $date_stamp => $row ) {
 					$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );

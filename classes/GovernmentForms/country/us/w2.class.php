@@ -44,7 +44,9 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 	public $xml_schema = '1040/IndividualIncomeTax/Common/IRSW2/IRSW2.xsd';
 	public $pdf_template = 'w2.pdf';
 
-	public $template_offsets = array(0, 0);
+	public $page_margins = array( 0, 50 ); //Adjust to fit in two windowed evelope.
+	public $template_offsets = array( 0, 0 ); //x, y - Only affects templates.
+
 
 	function getOptions( $name ) {
 		$retval = NULL;
@@ -1547,15 +1549,23 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				//Set the template used.
 				$template_schema[0]['template_page'] = $form_template_page;
 
-				if ( $this->getShowBackground() == TRUE AND $this->getType() == 'government' AND count( $records ) > 1 ) {
+				$bottom_template_offset = 380;
+
+				if ( $this->getShowBackground() == TRUE AND $this->getType() == 'government' ) {
 					$template_schema[0]['combine_templates'] = array(
-							array('template_page' => $form_template_page, 'x' => 0, 'y' => 0),
-							array('template_page' => $form_template_page, 'x' => 0, 'y' => 400) //Place two templates on the same page.
+							array('template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets( 'x' ) ), 'y' => ( 0 + $this->getTemplateOffsets( 'y' ) )),
 					);
+
+					if ( count( $records ) > 1 ) { //Only if more than 1 employee, show both top and bottom forms.
+						$template_schema[0]['combine_templates'][] =
+								array(
+										'template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets( 'x' ) ), 'y' => ( $bottom_template_offset + $this->getTemplateOffsets( 'y' ) ) //Place two templates on the same page.
+								);
+					}
 				} elseif ( $this->getShowInstructionPage() == TRUE AND $this->getType() == 'employee' ) {
 					$template_schema[0]['combine_templates'] = array(
-							array('template_page' => $form_template_page, 'x' => 0, 'y' => 0),
-							array('template_page' => ( $form_template_page + 1 ), 'x' => 0, 'y' => 400 ) //Place two templates on the same page.
+							array('template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets('x') ), 'y' => 0 + $this->getTemplateOffsets('y') ),
+							array('template_page' => ( $form_template_page + 1 ), 'x' => ( 0 + $this->getTemplateOffsets('x') ), 'y' => ( $bottom_template_offset + $this->getTemplateOffsets('y') ) ) //Place two templates on the same page.
 					);
 				}
 
@@ -1566,12 +1576,11 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 					$this->arrayToObject( $employee_data ); //Convert record array to object
 
 					for ( $i = 0; $i < $n; $i++ ) {
-						$this->page_offsets = array(0, 0);
+						$this->setTempPageOffsets( $this->getPageOffsets('x'), $this->getPageOffsets('y') );
 
 						if ( ( $employees_per_page == 1 AND $i > 0 )
-								OR ( $employees_per_page == 2 AND $e % 2 != 0 )
-						) {
-							$this->page_offsets = array(0, 400);
+								OR ( $employees_per_page == 2 AND $e % 2 != 0 ) ) {
+							$this->setTempPageOffsets( $this->getPageOffsets('x'), ( $bottom_template_offset + $this->getPageOffsets('y') ) );
 						}
 
 						foreach ( $template_schema as $field => $schema ) {

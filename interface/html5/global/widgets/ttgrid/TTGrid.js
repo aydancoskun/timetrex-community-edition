@@ -13,7 +13,9 @@ TTGrid = function( table_id, setup, column_info_array ) {
 		return;
 	}
 
-	if ( $( '#' + table_id )[0] == false ) {
+	table_div = $( '#' + table_id );
+
+	if ( table_div[0] == false ) {
 		Debug.Text( 'ERROR: table_id not found in DOM', 'TTGrid.js', 'TTGrid', 'constructor', 10 );
 		return;
 	}
@@ -21,7 +23,6 @@ TTGrid = function( table_id, setup, column_info_array ) {
 	var $this = this;
 	var max_height = null;
 	this.ui_id = table_id;
-
 
 	this.grid = null;
 
@@ -32,9 +33,10 @@ TTGrid = function( table_id, setup, column_info_array ) {
 		altRows: true,
 		data: [],
 		datatype: 'local',
+		//quickEmpty: 'true', //Default is 'quickest', might fix JS Exception: Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': parameter 2 is not of type 'Node', but causes this instead: TTGrid.js?v=11.6.1-20191108:99 Uncaught TypeError: Cannot read property 'cells' of undefined
 		sortable: false,
-		height: $( '#' + table_id ).parents( '.view' ).height(),
-		width: $( '#' + table_id ).parent().width(),
+		height: table_div.parents( '.view' ).height(),
+		width: table_div.parent().width(),
 		rowNum: 10000,
 		colNames: [],
 		colModel: column_info_array,
@@ -65,8 +67,8 @@ TTGrid = function( table_id, setup, column_info_array ) {
 
 	this.setup = setup;
 
-	$( '#' + table_id ).empty(); //should unbind all events bound to the grid.
-	this.grid = $( '#' + table_id ).jqGrid( setup );
+	table_div.empty(); //should unbind all events bound to the grid.
+	this.grid = table_div.jqGrid( setup );
 
 	LocalCacheData.resizeable_grids.push(this);
 
@@ -140,6 +142,14 @@ TTGrid = function( table_id, setup, column_info_array ) {
 	this.setGridParam = function( parameter_name, value ) {
 		return this.grid.setGridParam( parameter_name, value );
 	};
+
+	this.unload = function() {
+		if ( this.grid ) {
+			this.grid.jqGrid( 'GridUnload' );
+			this.grid = null;
+		}
+		return true;
+	},
 
 	this.clearGridData = function() {
 		this.grid.jqGrid( 'clearGridData', true );

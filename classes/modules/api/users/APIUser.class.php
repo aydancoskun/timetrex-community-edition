@@ -75,6 +75,7 @@ class APIUser extends APIFactory {
 			$data = array(
 							'company_id' => $company_id,
 							'legal_entity_id' => $udf_obj->getLegalEntity(),
+							'enable_login' => TRUE,
 							'status_id' => 10, //Active.
 							'title_id' => $udf_obj->getTitle(),
 							'employee_number' => $uf->getNextAvailableEmployeeNumber( $company_id ),
@@ -89,6 +90,7 @@ class APIUser extends APIFactory {
 							'default_branch_id' => $udf_obj->getDefaultBranch(),
 							'default_department_id' => $udf_obj->getDefaultDepartment(),
 							'permission_control_id' => $udf_obj->getPermissionControl(),
+							'terminated_permission_control_id' => $udf_obj->getTerminatedPermissionControl(),
 							'pay_period_schedule_id' => $udf_obj->getPayPeriodSchedule(),
 							'policy_group_id' => $udf_obj->getPolicyGroup(),
 							'currency_id' => $udf_obj->getCurrency(),
@@ -169,6 +171,10 @@ class APIUser extends APIFactory {
 	 */
 	function getUser( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
 
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user', 'view') OR $this->getPermissionObject()->Check('user', 'view_own') OR $this->getPermissionObject()->Check('user', 'view_child')  ) ) {
@@ -271,6 +277,15 @@ class APIUser extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
+		//If they have permissions to edit user records other than their own, make sure their status is Active.
+		if ( $this->getCurrentUserObject()->getStatus() != 10 AND ( $this->getPermissionObject()->Check('user', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_child') ) ) { //10=Active -- Make sure user record is active as well.
+			return $this->getPermissionObject()->PermissionDenied( FALSE, TTi18n::getText( 'Employee status must be Active to modify employees' ) );
 		}
 
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
@@ -507,6 +522,10 @@ class APIUser extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user', 'delete') OR $this->getPermissionObject()->Check('user', 'delete_own') OR $this->getPermissionObject()->Check('user', 'delete_child') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
@@ -622,7 +641,7 @@ class APIUser extends APIFactory {
 	 * @param string $type
 	 * @return array|bool
 	 */
-	function changePassword( $current_password, $new_password, $new_password2, $type = 'web' ) {
+	function changePassword( $current_password, $new_password, $new_password2, $type = 'user_name' ) {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getByIdAndCompanyId( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
 		if ( $ulf->getRecordCount() == 1 ) {
@@ -637,8 +656,13 @@ class APIUser extends APIFactory {
 										FALSE,
 										TTi18n::gettext('Current password is incorrect') .' (z)' );
 			} else {
+				$uf->setIsRequiredCurrentPassword( TRUE );
+				$uf->setCurrentPassword( $current_password );
+
 				switch ( strtolower($type) ) {
 					case 'quick_punch':
+					case 'quick_punch_id':
+					case 'phone_id':
 					case 'phone':
 						if ( $this->getPermissionObject()->Check('user', 'edit_own_phone_password') == FALSE ) {
 							return $this->getPermissionObject()->PermissionDenied();
@@ -646,13 +670,14 @@ class APIUser extends APIFactory {
 
 						$log_description = TTi18n::getText('Password - Quick Punch');
 						if ( $current_password != '' ) {
-							if ( $uf->checkPhonePassword($current_password) !== TRUE ) {
+							//if ( $uf->checkPhonePassword($current_password) !== TRUE ) {
+							if ( $uf->checkPassword($current_password) !== TRUE ) { //Check regular password, not phone password
 								Debug::text('Password check failed! Attempt: '. $authentication->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
-								sleep( ($authentication->rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
-
-								$uf->Validator->isTrue(	'current_password',
-														FALSE,
-														TTi18n::gettext('Current password is incorrect') );
+								sleep( ($authentication->rl->getAttempts() * 0.5) ); //If pa
+								//setCurrentPassword() above handles this validation error message now.ssword is incorrect, sleep for some time to slow down brute force attacks.
+//								$uf->Validator->isTrue(	'current_password',
+//														FALSE,
+//														TTi18n::gettext('Current password is incorrect') );
 							}
 						} else {
 							Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
@@ -671,42 +696,44 @@ class APIUser extends APIFactory {
 							}
 						}
 						break;
+					case 'user_name':
 					case 'web':
 						if ( $this->getPermissionObject()->Check('user', 'edit_own_password') == FALSE ) {
 							return $this->getPermissionObject()->PermissionDenied();
 						}
 
 						if ( $uf->getCompanyObject()->getLDAPAuthenticationType() == 0 ) {
-						$log_description = TTi18n::getText('Password - Web');
-						if ( $current_password != '' ) {
-							if ( $uf->checkPassword($current_password) !== TRUE ) {
-								Debug::text('Password check failed! Attempt: '. $authentication->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
-								sleep( ($authentication->rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
-								$uf->Validator->isTrue(	'current_password',
-														FALSE,
-														TTi18n::gettext('Current password is incorrect') );
-							}
-						} else {
-							Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
-							$uf->Validator->isTrue(	'current_password',
-													FALSE,
-													TTi18n::gettext('Current password is incorrect') );
-						}
-
-						if ( $new_password != '' OR $new_password2 != ''  ) {
-							if ( $new_password === $new_password2 ) {
-								$uf->setPassword($new_password);
+							$log_description = TTi18n::getText( 'Password - Web' );
+							if ( $current_password != '' ) {
+								if ( $uf->checkPassword( $current_password ) !== TRUE ) {
+									Debug::text( 'Password check failed! Attempt: ' . $authentication->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10 );
+									sleep( ( $authentication->rl->getAttempts() * 0.5 ) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
+									//setCurrentPassword() above handles this validation error message now.
+//									$uf->Validator->isTrue( 'current_password',
+//															FALSE,
+//															TTi18n::gettext( 'Current password is incorrect' ) );
+								}
 							} else {
-								$uf->Validator->isTrue(	'password',
+								Debug::Text( 'Current password not specified', __FILE__, __LINE__, __METHOD__, 10 );
+								$uf->Validator->isTrue( 'current_password',
 														FALSE,
-														TTi18n::gettext('Passwords don\'t match') );
+														TTi18n::gettext( 'Current password is incorrect' ) );
 							}
-						}
+
+							if ( $new_password != '' OR $new_password2 != '' ) {
+								if ( $new_password === $new_password2 ) {
+									$uf->setPassword( $new_password );
+								} else {
+									$uf->Validator->isTrue( 'password',
+															FALSE,
+															TTi18n::gettext( 'Passwords don\'t match' ) );
+								}
+							}
 						} else {
-							Debug::Text('LDAP Authentication is enabled, password changing is disabled! ', __FILE__, __LINE__, __METHOD__, 10);
-							$uf->Validator->isTrue(	'current_password',
-													   FALSE,
-													   TTi18n::getText('Please contact your administrator for instructions on changing your password.'). ' (LDAP)' );
+							Debug::Text( 'LDAP Authentication is enabled, password changing is disabled! ', __FILE__, __LINE__, __METHOD__, 10 );
+							$uf->Validator->isTrue( 'current_password',
+													FALSE,
+													TTi18n::getText( 'Please contact your administrator for instructions on changing your password.' ) . ' (LDAP)' );
 
 						}
 						break;
@@ -722,7 +749,13 @@ class APIUser extends APIFactory {
 
 					$authentication->rl->delete(); //Clear failed password rate limit upon successful login.
 
-					return $this->returnHandler( $uf->Save() ); //Single valid record
+					$retval = $uf->Save( FALSE ); //UserID is needed below.
+
+					//Logout all other sessions for this user.
+					$authentication = TTNew('Authentication'); /** @var Authentication $authentication */
+					$authentication->logoutUser( $uf->getID(), $type );
+
+					return $this->returnHandler( $retval ); //Single valid record
 				}
 			} else {
 				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $uf->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );

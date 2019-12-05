@@ -2215,62 +2215,6 @@ class Misc {
 	}
 
 	/**
-	 * Checks refer to help mitigate CSRF attacks.
-	 * @param bool $referer
-	 * @return bool
-	 */
-	static function checkValidReferer( $referer = FALSE ) {
-		global $config_vars;
-
-		if ( PRODUCTION == TRUE AND isset($config_vars['other']['enable_csrf_validation']) AND $config_vars['other']['enable_csrf_validation'] == TRUE ) {
-			if ( $referer == FALSE ) {
-				if ( isset($_SERVER['HTTP_ORIGIN']) AND $_SERVER['HTTP_ORIGIN'] != '' ) {
-					//IE9 doesn't send this, but if it exists use it instead as its likely more trustworthy.
-					//Debug::Text( 'Using Referer from Origin header...', __FILE__, __LINE__, __METHOD__, 10);
-					$referer = $_SERVER['HTTP_ORIGIN'];
-					if ( $referer == 'file://' ) { //Mobile App and some browsers can send the origin as: file://
-						return TRUE;
-					}
-				} elseif ( isset($_SERVER['HTTP_REFERER']) AND $_SERVER['HTTP_REFERER'] != '' ) {
-					Debug::Text( 'WARNING: CSRF check falling back for legacy browser... Referer: '. $_SERVER['HTTP_REFERER'], __FILE__, __LINE__, __METHOD__, 10);
-					$referer = $_SERVER['HTTP_REFERER'];
-				} else {
-					Debug::Text( 'WARNING: No HTTP_ORIGIN or HTTP_REFERER headers specified...', __FILE__, __LINE__, __METHOD__, 10);
-					$referer = '';
-				}
-			}
-
-			//Debug::Text( 'Raw Referer: '. $referer, __FILE__, __LINE__, __METHOD__, 10);
-			$referer = strtolower( parse_url( $referer, PHP_URL_HOST ) ); //Make sure we lowercase it, so case doesn't prevent a match.
-
-			//Use HTTP_HOST rather than getHostName() as the same site can be referenced with multiple different host names
-			//Especially considering on-site installs that default to 'localhost'
-			//If deployment ondemand is set, then we assume SERVER_NAME is correct and revert to using that instead of HTTP_HOST which has potential to be forged.
-			//Apache's UseCanonicalName On configuration directive can help ensure the SERVER_NAME is always correct and not masked.
-			if ( DEPLOYMENT_ON_DEMAND == FALSE AND isset( $_SERVER['HTTP_HOST'] ) ) {
-				$host_name = $_SERVER['HTTP_HOST'];
-			} elseif ( isset( $_SERVER['SERVER_NAME'] ) ) {
-				$host_name = $_SERVER['SERVER_NAME'];
-			} elseif ( isset( $_SERVER['HOSTNAME'] ) ) {
-				$host_name = $_SERVER['HOSTNAME'];
-			} else {
-				$host_name = '';
-			}
-			$host_name = ( $host_name != '' ) ? strtolower( parse_url( 'http://'.$host_name, PHP_URL_HOST ) ) : ''; //Need to add 'http://' so parse_url() can strip it off again. Also lowercase it so case differences don't prevent a match.
-			//Debug::Text( 'Parsed Referer: '. $referer .' Hostname: '. $host_name, __FILE__, __LINE__, __METHOD__, 10);
-
-			if ( $referer == $host_name OR $host_name == '' ) {
-				return TRUE;
-			}
-
-			Debug::Text( 'CSRF check failed... Parsed Referer: '. $referer .' Hostname: '. $host_name, __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
-		}
-
-		return TRUE;
-	}
-
-	/**
 	 * @param $host_name
 	 * @return string
 	 */
@@ -2860,14 +2804,16 @@ class Misc {
 			$loadavg_file = '/proc/loadavg';
 			if ( @file_exists( $loadavg_file ) AND is_readable( $loadavg_file ) ) {
 				//$buffer = '0 0 0';
-				$buffer = file_get_contents( $loadavg_file );
-				$load = explode(' ', $buffer);
+				$buffer = file_get_contents( $loadavg_file ); //In rare cases this can fail to be read.
+				if ( $buffer !== FALSE ) {
+					$load = explode( ' ', $buffer );
 
-				//$retval = max((float)$load[0], (float)$load[1], (float)$load[2]);
-				$retval = max((float)$load[0], (float)$load[1] ); //Only consider 1 and 5 minute load averages, so we don't block cron/reports for more than 5 minutes.
-				//Debug::text(' Load Average: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+					//$retval = max((float)$load[0], (float)$load[1], (float)$load[2]);
+					$retval = max( (float)$load[0], (float)$load[1] ); //Only consider 1 and 5 minute load averages, so we don't block cron/reports for more than 5 minutes.
+					//Debug::text(' Load Average: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
-				return $retval;
+					return $retval;
+				}
 			}
 		}
 
@@ -3292,32 +3238,32 @@ class Misc {
 
 		//This is for the full web interface
 		//IE < 11
-		//Edge < 13
-		//Firefox < 43 (52 is latest version on Windows XP)
-		//Chrome < 43 (49 is latest version on Windows XP)
-		//Safari < 7
-		//Opera < 12
+		//Edge < 14
+		//Firefox < 52 (52 is latest version on Windows XP)
+		//Chrome < 49 (49 is latest version on Windows XP)
+		//Safari < 9 - https://en.wikipedia.org/wiki/Safari_version_history
+		//Opera < 33 (Chrome v46) - https://help.opera.com/en/opera-version-history/
 		if ( $browser->getBrowser() == Browser::BROWSER_IE AND version_compare( $browser->getVersion(), 11, '<' ) ) {
 			$retval = TRUE;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_EDGE AND version_compare( $browser->getVersion(), 13, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_EDGE AND version_compare( $browser->getVersion(), 14, '<' ) ) {
 			$retval = TRUE;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_FIREFOX AND version_compare( $browser->getVersion(), 43, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_FIREFOX AND version_compare( $browser->getVersion(), 52, '<' ) ) {
 			$retval = TRUE;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_CHROME AND version_compare( $browser->getVersion(), 43, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_CHROME AND version_compare( $browser->getVersion(), 49, '<' ) ) {
 			$retval = TRUE;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_SAFARI AND version_compare( $browser->getVersion(), 7, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_SAFARI AND version_compare( $browser->getVersion(), 9, '<' ) ) {
 			$retval = TRUE;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_OPERA AND version_compare( $browser->getVersion(), 12, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_OPERA AND version_compare( $browser->getVersion(), 53, '<' ) ) {
 			$retval = TRUE;
 		}
 
@@ -3525,6 +3471,17 @@ class Misc {
 			}
 
 			return TRUE;
+		}
+	}
+
+	static function isMobileAppUserAgent() {
+		if ( isset($_SERVER['HTTP_USER_AGENT']) ) {
+			$useragent = $_SERVER['HTTP_USER_AGENT'];
+			if ( strpos( $useragent, 'TimeTrex Mobile App' ) !== FALSE ) {
+				return TRUE;
+			}
+		} else {
+			return FALSE;
 		}
 	}
 

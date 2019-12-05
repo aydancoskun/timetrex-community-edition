@@ -1314,7 +1314,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 				$pdf = $this->getPDFObject();
 
 				$pdf->setTextColor( 255, 0, 0 );
-				$pdf->setXY( 250 + $this->getPageOffsets( 'x' ), 495 + $this->getPageOffsets( 'y' ) );
+				$pdf->setXY( ( 250 + $this->getTempPageOffsets( 'x' ) + $this->getPageMargins( 'x') ), ( 495 + $this->getTempPageOffsets( 'y' ) + $this->getPageMargins( 'y') ) );
 
 				$pdf->Cell( 180, 10, 'WARNING: Mismatch with amounts deducted from employees by ' . $l5e_actual_diff, 1, 0, 'C', 1, FALSE, 1 );
 			}
@@ -1348,7 +1348,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			$pdf = $this->getPDFObject();
 
 			$pdf->setTextColor( 255, 0, 0 );
-			$pdf->setXY( 300 + $this->getPageOffsets( 'x' ), 638 + $this->getPageOffsets( 'y' ) );
+			$pdf->setXY( ( 300 + $this->getTempPageOffsets( 'x' ) +  $this->getPageMargins( 'x') ), ( 638 + $this->getTempPageOffsets( 'y' ) + $this->getPageMargins( 'y') ) );
 
 			$pdf->Cell( 130, 10, 'WARNING: Does not match total from Schedule B', 1, 0, 'C', 1, FALSE, 1 );
 		}
@@ -1387,7 +1387,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 
 				//Show warning on Page 2
 				$pdf->setTextColor( 255, 0, 0 );
-				$pdf->setXY( 375 + $this->getPageOffsets( 'x' ), 293 + $this->getPageOffsets( 'y' ) );
+				$pdf->setXY( ( 375 + $this->getTempPageOffsets( 'x' ) + $this->getPageMargins( 'x') ), ( 293 + $this->getTempPageOffsets( 'y' ) + $this->getPageMargins( 'y') ) );
 
 				$pdf->Cell( 160, 13, 'WARNING: Mismatch with Line 12', 1, 0, 'C', 1, FALSE, 1 );
 			}

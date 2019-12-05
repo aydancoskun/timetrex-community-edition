@@ -1120,7 +1120,7 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 
 				//Show warning on Page 2
 				$pdf->setTextColor( 255, 0, 0 );
-				$pdf->setXY( 155 + $this->getPageOffsets( 'x' ), 221 + $this->getPageOffsets( 'y' ) );
+				$pdf->setXY( ( 155 + $this->getTempPageOffsets( 'x' ) + $this->getPageMargins( 'x') ), ( 221 + $this->getTempPageOffsets( 'y' ) + $this->getPageMargins( 'y') ) );
 
 				$pdf->Cell( 165, 13, 'WARNING: Mismatch with Line 12', 1, 0, 'C', 1, FALSE, 1 );
 			}

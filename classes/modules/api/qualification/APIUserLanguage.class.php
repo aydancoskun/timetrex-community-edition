@@ -85,6 +85,10 @@ class APIUserLanguage extends APIFactory {
 	function getUserLanguage( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('user_language', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_language', 'view') OR $this->getPermissionObject()->Check('user_language', 'view_own') OR $this->getPermissionObject()->Check('user_language', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -168,6 +172,10 @@ class APIUserLanguage extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('user_language', 'enabled')
@@ -294,6 +302,10 @@ class APIUserLanguage extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('user_language', 'enabled')

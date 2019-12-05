@@ -182,6 +182,10 @@ class APIDepartment extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('department', 'enabled')
 				OR !( $this->getPermissionObject()->Check('department', 'edit') OR $this->getPermissionObject()->Check('department', 'edit_own') OR $this->getPermissionObject()->Check('department', 'edit_child') OR $this->getPermissionObject()->Check('department', 'add') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
@@ -295,6 +299,10 @@ class APIDepartment extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('department', 'enabled')

@@ -96,6 +96,10 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 	function getPayrollRemittanceAgencyEvent( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check( 'payroll_remittance_agency', 'enabled' )
 				OR !( $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'view' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'view_own' ) ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
@@ -159,9 +163,12 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check( 'payroll_remittance_agency', 'enabled' )
-				OR !( $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'edit' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'edit_own' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'add' ) )
-		) {
+				OR !( $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'edit' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'edit_own' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'add' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -273,9 +280,12 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check( 'payroll_remittance_agency', 'enabled' )
-				OR !( $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'delete' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'delete_own' ) )
-		) {
+				OR !( $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'delete' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'delete_own' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 

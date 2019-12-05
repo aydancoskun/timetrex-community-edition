@@ -13,7 +13,6 @@ HolidayViewController = BaseViewController.extend( {
 		this.navigation_label = $.i18n._( 'Holiday' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIHoliday' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true; //Hide some context menus
 		this.render();
 
 		if ( this.sub_view_mode ) {
@@ -29,6 +28,15 @@ HolidayViewController = BaseViewController.extend( {
 
 		//this.setSelectRibbonMenuIfNecessary( 'UserContact' )
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.mass_edit],
+			include: []
+		};
+
+		return context_menu_model;
 	},
 
 	buildEditViewUI: function() {

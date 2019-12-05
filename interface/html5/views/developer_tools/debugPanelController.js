@@ -407,26 +407,26 @@ function runUnitTests() {
 
 	QUnit.module( 'UUID Generation' );
 	var uuids = [];
-	QUnit.test( 'uuuid TIGHTLOOP (default logged in user seed)', function( assert ) {
+	QUnit.test( 'UUID TIGHTLOOP (default logged in user seed)', function( assert ) {
 		var max = 3000;
 		for ( var i = 0; i < max; i++ ) {
 			uuids.push( TTUUID.generateUUID() );
 		}
-		assert.ok( hasDuplicates( uuids ) == false, 'has duplicates' );
+		assert.ok( hasDuplicates( uuids, assert ) == false, 'Duplicate UUIDs!' );
 		for ( var i = 0; i < max; i++ ) {
 			assert.ok( TTUUID.isUUID( uuids[i] ), 'is UUID' );
 		}
 	} );
 
 	uuids = [];
-	QUnit.test( 'uuuid TIGHTLOOP (random seed)', function( assert ) {
+	QUnit.test( 'UUID TIGHTLOOP (random seed)', function( assert ) {
 		var user_id = LocalCacheData.loginUser.id;
 		LocalCacheData.loginUser.id = null;
 		var max = 3000;
 		for ( var i = 0; i < max; i++ ) {
 			uuids.push( TTUUID.generateUUID() );
 		}
-		assert.ok( hasDuplicates( uuids ) == false, 'has duplicates' );
+		assert.ok( hasDuplicates( uuids, assert ) == false, 'Duplicate UUIDs!' );
 		for ( var i = 0; i < max; i++ ) {
 			assert.ok( TTUUID.isUUID( uuids[i] ), 'is UUID' );
 		}
@@ -1030,12 +1030,12 @@ function runUnitTests() {
 	} );
 }
 
-function hasDuplicates( array ) {
+function hasDuplicates( array, assert ) {
 	var valuesSoFar = Object.create( null );
 	for ( var i = 0; i < array.length; ++i ) {
 		var value = array[i];
 		if ( value in valuesSoFar ) {
-			assert.ok( 1 == 2, value + ' is not unique' );
+			assert.ok( 1 == 2, value + ' Is not unique.' );
 			return true;
 		}
 		valuesSoFar[value] = true;

@@ -1,6 +1,6 @@
 PayStubAccountWizardController = BaseWizardController.extend( {
 
-	el: '.wizard',
+	el: '.wizard-bg',
 
 	init: function( options ) {
 		//this._super('initialize', options );

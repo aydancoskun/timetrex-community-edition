@@ -69,67 +69,8 @@ EmployeeViewController = BaseViewController.extend( {
 		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 		this.hierarchyControlAPI = new (APIFactory.getAPIClass( 'APIHierarchyControl' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
-
-		if ( this.edit_only_mode ) {
-			this.invisible_context_menu_dic[ContextMenuIconName.timesheet] = true; //Hide some context menus
-			this.invisible_context_menu_dic[ContextMenuIconName.schedule] = true; //Hide some context menus
-			this.invisible_context_menu_dic[ContextMenuIconName.pay_stub] = true; //Hide some context menus
-			this.invisible_context_menu_dic[ContextMenuIconName.pay_stub_amendment] = true; //Hide some context menus
-		}
-
 		this.render();
 
-		var context_menu_model = {
-			'exclude': [ContextMenuIconName.copy],
-			'include': [
-				{
-					label: $.i18n._( 'TimeSheet' ),
-					id: ContextMenuIconName.timesheet,
-					group: 'navigation',
-					icon: Icons.timesheet
-				},
-
-				{
-					label: $.i18n._( 'Schedule' ),
-					id: ContextMenuIconName.schedule,
-					group: 'navigation',
-					icon: Icons.schedule
-				},
-
-				{
-					label: $.i18n._( 'Pay<br>Stubs' ),
-					id: ContextMenuIconName.pay_stub,
-					group: 'navigation',
-					icon: Icons.pay_stubs
-				},
-
-				{
-					label: $.i18n._( 'Pay Stub<br>Amendments' ),
-					id: ContextMenuIconName.pay_stub_amendment,
-					group: 'navigation',
-					icon: Icons.pay_stub_amendment
-				},
-
-				{
-					label: $.i18n._( 'Map' ),
-					id: ContextMenuIconName.map,
-					group: 'other',
-					icon: Icons.map
-				},
-
-				{
-					label: $.i18n._( 'Import' ),
-					id: ContextMenuIconName.import_icon,
-					group: 'other',
-					icon: Icons.import_icon,
-					permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVEmployee' ),
-					sort_order: 8000
-				}
-
-			]
-		};
-		this.setContextMenuModel( context_menu_model );
 		this.buildContextMenu();
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
@@ -173,231 +114,70 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 	},
 
-	// buildContextMenuModels: function() {
-	//
-	// 	//Context Menu
-	// 	var menu = new RibbonMenu( {
-	// 		label: this.context_menu_name,
-	// 		id: this.viewId + 'ContextMenu',
-	// 		sub_menu_groups: []
-	// 	} );
-	//
-	// 	//menu group
-	// 	var editor_group = new RibbonSubMenuGroup( {
-	// 		label: $.i18n._( 'Editor' ),
-	// 		id: this.viewId + 'Editor',
-	// 		ribbon_menu: menu,
-	// 		sub_menus: []
-	// 	} );
-	//
-	// 	var navigation_group = new RibbonSubMenuGroup( {
-	// 		label: $.i18n._( 'Navigation' ),
-	// 		id: this.viewId + 'navigation',
-	// 		ribbon_menu: menu,
-	// 		sub_menus: []
-	// 	} );
-	//
-	// 	var other_group = new RibbonSubMenuGroup( {
-	// 		label: $.i18n._( 'Other' ),
-	// 		id: this.viewId + 'other',
-	// 		ribbon_menu: menu,
-	// 		sub_menus: []
-	// 	} );
-	//
-	// 	var add = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'New' ),
-	// 		id: ContextMenuIconName.add,
-	// 		group: editor_group,
-	// 		icon: Icons.new_add,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var view = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'View' ),
-	// 		id: ContextMenuIconName.view,
-	// 		group: editor_group,
-	// 		icon: Icons.view,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var edit = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Edit' ),
-	// 		id: ContextMenuIconName.edit,
-	// 		group: editor_group,
-	// 		icon: Icons.edit,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var mass_edit = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Mass<br>Edit' ),
-	// 		id: ContextMenuIconName.mass_edit,
-	// 		group: editor_group,
-	// 		icon: Icons.mass_edit,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var del = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Delete' ),
-	// 		id: ContextMenuIconName.delete_icon,
-	// 		group: editor_group,
-	// 		icon: Icons.delete_icon,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var delAndNext = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Delete<br>& Next' ),
-	// 		id: ContextMenuIconName.delete_and_next,
-	// 		group: editor_group,
-	// 		icon: Icons.delete_and_next,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	// var copy = new RibbonSubMenu( {
-	// 	// 	label: $.i18n._( 'Copy' ),
-	// 	// 	id: ContextMenuIconName.copy,
-	// 	// 	group: editor_group,
-	// 	// 	icon: Icons.copy_as_new,
-	// 	// 	permission_result: true,
-	// 	// 	permission: null
-	// 	// } );
-	//
-	// 	var copy_as_new = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Copy<br>as New' ),
-	// 		id: ContextMenuIconName.copy_as_new,
-	// 		group: editor_group,
-	// 		icon: Icons.copy,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var save = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Save' ),
-	// 		id: ContextMenuIconName.save,
-	// 		group: editor_group,
-	// 		icon: Icons.save,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var save_and_continue = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Save<br>& Continue' ),
-	// 		id: ContextMenuIconName.save_and_continue,
-	// 		group: editor_group,
-	// 		icon: Icons.save_and_continue,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var save_and_next = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Save<br>& Next' ),
-	// 		id: ContextMenuIconName.save_and_next,
-	// 		group: editor_group,
-	// 		icon: Icons.save_and_next,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var save_and_copy = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Save<br>& Copy' ),
-	// 		id: ContextMenuIconName.save_and_copy,
-	// 		group: editor_group,
-	// 		icon: Icons.save_and_copy,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var save_and_new = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Save<br>& New' ),
-	// 		id: ContextMenuIconName.save_and_new,
-	// 		group: editor_group,
-	// 		icon: Icons.save_and_new,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var cancel = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Cancel' ),
-	// 		id: ContextMenuIconName.cancel,
-	// 		group: editor_group,
-	// 		icon: Icons.cancel,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var timesheet = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'TimeSheet' ),
-	// 		id: ContextMenuIconName.timesheet,
-	// 		group: navigation_group,
-	// 		icon: Icons.timesheet,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var schedule_view = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Schedule' ),
-	// 		id: ContextMenuIconName.schedule,
-	// 		group: navigation_group,
-	// 		icon: Icons.schedule,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var pay_stub_view = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Pay<br>Stubs' ),
-	// 		id: ContextMenuIconName.pay_stub,
-	// 		group: navigation_group,
-	// 		icon: Icons.pay_stubs,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var pay_stub_amendments = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Pay Stub<br>Amendments' ),
-	// 		id: ContextMenuIconName.pay_stub_amendment,
-	// 		group: navigation_group,
-	// 		icon: Icons.pay_stub_amendment,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var map = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Map' ),
-	// 		id: ContextMenuIconName.map,
-	// 		group: other_group,
-	// 		icon: Icons.map,
-	// 		permission_result: true,
-	// 		permission: null
-	// 	} );
-	//
-	// 	var import_csv = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Import' ),
-	// 		id: ContextMenuIconName.import_icon,
-	// 		group: other_group,
-	// 		icon: Icons.import_icon,
-	// 		permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVEmployee' ),
-	// 		permission: null,
-	// 		sort_order: 8000
-	// 	} );
-	//
-	// 	var export_csv = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Export' ),
-	// 		id: ContextMenuIconName.export_excel,
-	// 		group: other_group,
-	// 		icon: Icons.export_excel,
-	// 		permission_result: true,
-	// 		permission: null,
-	// 		sort_order: 9000
-	// 	} );
-	//
-	// 	return [menu];
-	//
-	// },
+	getCustomContextMenuModel: function() {
+		var context_menu_model = {
+			'exclude': [ContextMenuIconName.copy],
+			'include': [
+				{
+					label: $.i18n._( 'TimeSheet' ),
+					id: ContextMenuIconName.timesheet,
+					group: 'navigation',
+					icon: Icons.timesheet
+				},
+
+				{
+					label: $.i18n._( 'Schedule' ),
+					id: ContextMenuIconName.schedule,
+					group: 'navigation',
+					icon: Icons.schedule
+				},
+
+				{
+					label: $.i18n._( 'Pay<br>Stubs' ),
+					id: ContextMenuIconName.pay_stub,
+					group: 'navigation',
+					icon: Icons.pay_stubs
+				},
+
+				{
+					label: $.i18n._( 'Pay Stub<br>Amendments' ),
+					id: ContextMenuIconName.pay_stub_amendment,
+					group: 'navigation',
+					icon: Icons.pay_stub_amendment
+				},
+				{
+					label: $.i18n._( 'Map' ),
+					id: ContextMenuIconName.map,
+					group: 'other',
+					icon: Icons.map
+				},
+
+				{
+					label: $.i18n._( 'Import' ),
+					id: ContextMenuIconName.import_icon,
+					group: 'other',
+					icon: Icons.import_icon,
+					permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVEmployee' ),
+					sort_order: 8000
+				}
+			]
+		};
+
+		if ( this.edit_only_mode ) {
+			context_menu_model.exclude.push(
+				ContextMenuIconName.timesheet,
+				ContextMenuIconName.schedule,
+				ContextMenuIconName.pay_stub,
+				ContextMenuIconName.pay_stub_amendment,
+				ContextMenuIconName.map,
+				ContextMenuIconName.import_icon,
+				ContextMenuIconName.export_excel
+			);
+		}
+
+
+		return context_menu_model;
+	},
 
 	openEditView: function( id ) {
 		if ( this.edit_only_mode ) {
@@ -1158,6 +938,32 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 	},
 
+	setDefaultUserName: function() {
+		if ( this.is_add == true ) {
+			var first_name_widget = this.edit_view_ui_dic['first_name'];
+			var last_name_widget = this.edit_view_ui_dic['last_name'];
+
+			var user_name_widget = this.edit_view_ui_dic['user_name'];
+			user_name_widget.setValue( first_name_widget.getValue().toLowerCase() +'.'+ last_name_widget.getValue().toLowerCase() );
+			this.current_edit_record.user_name = user_name_widget.getValue();
+		}
+	},
+
+	// setDefaultQuickPunch: function() {
+	// 	if ( this.is_add == true ) {
+	// 		var home_phone_widget = this.edit_view_ui_dic['home_phone'];
+	// 		clean_home_phone = home_phone_widget.getValue().replace(/\D/g,'');
+	//
+	// 		var quick_punch_id_widget = this.edit_view_ui_dic['phone_id'];
+	// 		quick_punch_id_widget.setValue( clean_home_phone.substring( ( clean_home_phone.length - 7 ) ) );
+	// 		this.current_edit_record.phone_id = quick_punch_id_widget.getValue();
+	//
+	// 		var quick_punch_password_widget = this.edit_view_ui_dic['phone_password'];
+	// 		quick_punch_password_widget.setValue( quick_punch_id_widget.getValue().substring( ( quick_punch_id_widget.getValue().length - 4 ) ) );
+	// 		this.current_edit_record.phone_password = quick_punch_password_widget.getValue();
+	// 	}
+	// },
+
 	onFormItemChange: function( target, doNotValidate ) {
 		var $this = this;
 
@@ -1185,22 +991,29 @@ EmployeeViewController = BaseViewController.extend( {
 				var widget = this.edit_view_ui_dic['first_name_1'];
 				widget.setValue( target.getValue() );
 				this.current_edit_record.first_name_1 = target.getValue();
+				this.setDefaultUserName();
 				break;
 			case 'last_name':
 				widget = this.edit_view_ui_dic['last_name_1'];
 				widget.setValue( target.getValue() );
 				this.current_edit_record.last_name_1 = target.getValue();
+				this.setDefaultUserName();
 				break;
 			case 'first_name_1':
 				widget = this.edit_view_ui_dic['first_name'];
 				widget.setValue( target.getValue() );
 				this.current_edit_record.first_name = target.getValue();
+				this.setDefaultUserName();
 				break;
 			case 'last_name_1':
 				widget = this.edit_view_ui_dic['last_name'];
 				widget.setValue( target.getValue() );
 				this.current_edit_record.last_name = target.getValue();
+				this.setDefaultUserName();
 				break;
+			// case 'home_phone':
+			// 	this.setDefaultQuickPunch();
+			// 	break;
 			case 'country':
 				widget = this.edit_view_ui_dic['province'];
 				widget.setValue( null );
@@ -1449,10 +1262,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 	onAddClick: function() {
 		var $this = this;
-		this.is_viewing = false;
-		this.is_edit = false;
-		this.is_add = true;
-		LocalCacheData.current_doing_context_action = 'new';
+		this.setCurrentEditViewState('new');
 		$this.openEditView();
 
 		$this.api['get' + $this.api.key_name + 'DefaultData']( this.select_company_id, {
@@ -1518,111 +1328,11 @@ EmployeeViewController = BaseViewController.extend( {
 
 	},
 
-	onViewClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		$this.is_viewing = true;
-		$this.is_edit = false;
-		$this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'view';
-
-		$this.openEditView();
-
-		var filter = {};
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-
-		if ( Global.isSet( editId ) ) {
-			var selectedId = editId;
-		} else {
-			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
-			}
-		}
-
-		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
+	getAPIFilters: function () {
+		var filter = this._super('getAPIFilters');
 		filter.filter_data.company_id = this.select_company_id;
 
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-				if ( !result_data ) {
-					result_data = [];
-				}
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				$this.current_edit_record = result_data;
-
-				$this.initEditView();
-
-			}
-		} );
-
-	},
-
-	onEditClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-		if ( Global.isSet( editId ) ) {
-			var selectedId = editId;
-		} else {
-			if ( this.is_viewing ) {
-				selectedId = this.current_edit_record.id;
-			} else if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
-			}
-		}
-
-		this.is_viewing = false;
-		this.is_edit = true;
-		this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'edit';
-		$this.openEditView();
-		var filter = {};
-
-		filter.filter_data = {};
-		filter.filter_data.id = [selectedId];
-		filter.filter_data.company_id = this.select_company_id;
-
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-
-				if ( !result_data ) {
-					result_data = [];
-				}
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				if ( $this.sub_view_mode && $this.parent_key ) {
-					result_data[$this.parent_key] = $this.parent_value;
-				}
-
-				$this.current_edit_record = result_data;
-
-				$this.initEditView();
-
-			}
-		} );
-
+		return filter;
 	},
 
 	search: function( set_default_menu, page_action, page_number, callBack ) {
@@ -1990,6 +1700,7 @@ EmployeeViewController = BaseViewController.extend( {
 			'tab_employee': { 'label': $.i18n._( 'Employee' ) },
 			'tab_contact_info': { 'label': $.i18n._( 'Contact Info' ) },
 			'tab_hierarchy': { 'label': $.i18n._( 'Hierarchy' ), 'display_on_mass_edit': false },
+			'tab_login': { 'label': $.i18n._( 'Login' ) },
 			'tab_wage': {
 				'label': $.i18n._( 'Wage' ),
 				'init_callback': 'initSubWageView',
@@ -2001,7 +1712,7 @@ EmployeeViewController = BaseViewController.extend( {
 				'display_on_mass_edit': false
 			},
 			'tab_payment_methods': {
-				'label': $.i18n._( 'Payment Methods' ),
+				'label': $.i18n._( 'Pay Methods' ),
 				'init_callback': 'initSubPaymentMethodsView',
 				'display_on_mass_edit': false
 			},
@@ -2048,17 +1759,16 @@ EmployeeViewController = BaseViewController.extend( {
 			this.setNavigation();
 		}
 
-		//Tab 0 start
-
+		//Employee Tab start
 		var tab_employee = this.edit_view_tab.find( '#tab_employee' );
-
 		var tab_employee_column1 = tab_employee.find( '.first-column' );
 		var tab_employee_column2 = tab_employee.find( '.second-column' );
 
 		this.edit_view_tabs[0] = [];
 		this.edit_view_tabs[0].push( tab_employee_column1 );
+		this.edit_view_tabs[0].push( tab_employee_column2 );
 
-//		Company
+		//Company
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APICompany' )),
@@ -2070,13 +1780,6 @@ EmployeeViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Company' ), form_item_input, tab_employee_column1 );
 		form_item_input.setEnabled( false );
-
-////		//Company`
-////
-//		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-//		form_item_input.TText( {field: 'company'} );
-//		this.addEditFieldToColumn( $.i18n._( 'Company' ), form_item_input, tab_employee_column1, '' );
-
 
 		//Legal Entity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -2091,15 +1794,28 @@ EmployeeViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Legal Entity' ), form_item_input, tab_employee_column1 );
 
 		//Status
-
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_employee_column1 );
 
+		//First Name
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'first_name', width: 200 } );
+		this.addEditFieldToColumn( $.i18n._( 'First Name' ), form_item_input, tab_employee_column1, '' );
+
+		//Last Name
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'last_name', width: 200 } );
+		this.addEditFieldToColumn( $.i18n._( 'Last Name' ), form_item_input, tab_employee_column1 );
+
+		//Employee Number
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'employee_number', width: 90 } );
+		this.addEditFieldToColumn( $.i18n._( 'Employee Number' ), form_item_input, tab_employee_column1 );
+
 		//Permission Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPermissionControl' )),
 			allow_multiple_selection: false,
@@ -2114,7 +1830,6 @@ EmployeeViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Permission Group' ), form_item_input, tab_employee_column1 );
 
 		//Pay Period Schedule
-
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPayPeriodSchedule' )),
@@ -2128,7 +1843,6 @@ EmployeeViewController = BaseViewController.extend( {
 			field: 'pay_period_schedule_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period Schedule' ), form_item_input, tab_employee_column1 );
-
 
 		//Policy Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -2145,53 +1859,8 @@ EmployeeViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Policy Group' ), form_item_input, tab_employee_column1 );
 
-		//Currency
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY,
-			customSearchFilter: (function( args ) {
-				return $this.setCompanyIdFilter( args );
-			}),
-			show_search_inputs: true,
-			field: 'currency_id',
-			set_empty: true
-		} );
-		this.addEditFieldToColumn( $.i18n._( 'Currency' ), form_item_input, tab_employee_column1 );
-
-		//User Name
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( { field: 'user_name', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'User Name' ), form_item_input, tab_employee_column1 );
-
-		//Password
-
-		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
-
-		form_item_input.TTextInput( { field: 'password', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'Password' ), form_item_input, tab_employee_column1 );
-
-		//Password Confirm
-
-		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
-
-		form_item_input.TTextInput( { field: 'password_confirm', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'Confirm Password' ), form_item_input, tab_employee_column1 );
-
-		//Employee Number
-
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( { field: 'employee_number', width: 90 } );
-		this.addEditFieldToColumn( $.i18n._( 'Employee Number' ), form_item_input, tab_employee_column1 );
-
 		//Title
-
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
 			allow_multiple_selection: false,
@@ -2207,36 +1876,24 @@ EmployeeViewController = BaseViewController.extend( {
 
 		//Second Column Start
 
-		//First Name
+		//Currency
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.CURRENCY,
+			customSearchFilter: (function( args ) {
+				return $this.setCompanyIdFilter( args );
+			}),
+			show_search_inputs: true,
+			field: 'currency_id',
+			set_empty: true
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Currency' ), form_item_input, tab_employee_column2 );
 
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'first_name', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'First Name' ), form_item_input, tab_employee_column2, '' );
-
-		//Last Name
-
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( { field: 'last_name', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'Last Name' ), form_item_input, tab_employee_column2 );
-
-		//Quick Punch ID
-
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( { field: 'phone_id', width: 90 } );
-		this.addEditFieldToColumn( $.i18n._( 'Quick Punch ID' ), form_item_input, tab_employee_column2 );
-
-		//Quick Punch Password
-
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( { field: 'phone_password', width: 90 } );
-		this.addEditFieldToColumn( $.i18n._( 'Quick Punch Password' ), form_item_input, tab_employee_column2 );
 
 		//Default Branch
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
 			allow_multiple_selection: false,
@@ -2252,7 +1909,6 @@ EmployeeViewController = BaseViewController.extend( {
 
 		//Department
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
 			allow_multiple_selection: false,
@@ -2290,15 +1946,15 @@ EmployeeViewController = BaseViewController.extend( {
 				field: 'default_job_id'
 			} );
 
-			var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+			var default_job_description = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			job_coder.TTextInput( { field: 'job_quick_search', disable_keyup_event: true } );
 			job_coder.addClass( 'job-coder' );
 
-			widgetContainer.append( job_coder );
-			widgetContainer.append( form_item_input );
-			this.addEditFieldToColumn( $.i18n._( 'Default Job' ), [form_item_input, job_coder], tab_employee_column2, '', widgetContainer, true );
+			default_job_description.append( job_coder );
+			default_job_description.append( form_item_input );
+			this.addEditFieldToColumn( $.i18n._( 'Default Job' ), [form_item_input, job_coder], tab_employee_column2, '', default_job_description, true );
 
 			if ( !this.show_job_ui ) {
 				this.detachElement( 'default_job_id' );
@@ -2324,23 +1980,23 @@ EmployeeViewController = BaseViewController.extend( {
 				field: 'default_job_item_id'
 			} );
 
-			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+			default_task_description = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_item_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			job_item_coder.TTextInput( { field: 'job_item_quick_search', disable_keyup_event: true } );
 			job_item_coder.addClass( 'job-coder' );
 
-			widgetContainer.append( job_item_coder );
-			widgetContainer.append( form_item_input );
-			this.addEditFieldToColumn( $.i18n._( 'Default Task' ), [form_item_input, job_item_coder], tab_employee_column2, '', widgetContainer, true );
+			default_task_description.append( job_item_coder );
+			default_task_description.append( form_item_input );
+			this.addEditFieldToColumn( $.i18n._( 'Default Task' ), [form_item_input, job_item_coder], tab_employee_column2, '', default_task_description, true );
 
 			if ( !this.show_job_item_ui ) {
 				this.detachElement( 'default_job_item_id' );
 			}
 		}
+
 		//Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
 		form_item_input.AComboBox( {
 			tree_mode: true,
 			allow_multiple_selection: false,
@@ -2353,7 +2009,6 @@ EmployeeViewController = BaseViewController.extend( {
 
 		// Ethnicity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIEthnicGroup' )),
 			allow_multiple_selection: false,
@@ -2367,33 +2022,41 @@ EmployeeViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Ethnicity' ), form_item_input, tab_employee_column2 );
 
+		//SIN
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'sin', width: 90 } );
+		this.addEditFieldToColumn( $.i18n._( 'SIN / SSN' ), form_item_input, tab_employee_column2 );
+
+		//Birth Date
+		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+		form_item_input.TDatePicker( { field: 'birth_date' } );
+		this.addEditFieldToColumn( $.i18n._( 'Birth Date' ), form_item_input, tab_employee_column2 );
+
 		//Hire Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
 		form_item_input.TDatePicker( { field: 'hire_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Hire Date' ), form_item_input, tab_employee_column2 );
 
 		//Termination Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
 		form_item_input.TDatePicker( { field: 'termination_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Termination Date' ), form_item_input, tab_employee_column2 );
 
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
-
 		form_item_input.TTagInput( { field: 'tag', object_type_id: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_employee_column2, '', null, null, true );
 
-		//Tab 1 start
-
+		//Contact Tab start
 		var tab_contact_info = this.edit_view_tab.find( '#tab_contact_info' );
-
 		var tab_contact_info_column1 = tab_contact_info.find( '.first-column' );
 		var tab_contact_info_column2 = tab_contact_info.find( '.second-column' );
 
-		// Photo
+		this.edit_view_tabs[1] = [];
+		this.edit_view_tabs[1].push( tab_contact_info_column1 );
+		this.edit_view_tabs[1].push( tab_contact_info_column2 );
 
+		// Photo
 		if ( typeof FormData == 'undefined' ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER );
 			this.file_browser = form_item_input.TImageBrowser( {
@@ -2464,134 +2127,100 @@ EmployeeViewController = BaseViewController.extend( {
 
 		//Middle Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'middle_name', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Middle Name' ), form_item_input, tab_contact_info_column1 );
 
 		//Last Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'last_name_1', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Last Name' ), form_item_input, tab_contact_info_column1 );
 
-		//Sex
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
-		form_item_input.TComboBox( { field: 'sex_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.sex_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab_contact_info_column1 );
-
 		//Home Address(Line 1)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'address1', width: '100%' } );
-		this.addEditFieldToColumn( $.i18n._( 'Home Address(Line 1)' ), form_item_input, tab_contact_info_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Home Address (Line 1)' ), form_item_input, tab_contact_info_column1 );
 		form_item_input.parent().width( '45%' );
 
 		//Home Address(Line 2)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'address2', width: '100%' } );
-		this.addEditFieldToColumn( $.i18n._( 'Home Address(Line 2)' ), form_item_input, tab_contact_info_column1 );
-
+		this.addEditFieldToColumn( $.i18n._( 'Home Address (Line 2)' ), form_item_input, tab_contact_info_column1 );
 		form_item_input.parent().width( '45%' );
 
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'city', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_contact_info_column1 );
 
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'country', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_contact_info_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'province' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_contact_info_column1 );
 
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'postal_code', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_contact_info_column1, '' );
 
 		//Column 2
 
+		//Gender
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( { field: 'sex_id' } );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.sex_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab_contact_info_column2 );
+
 		//Work Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'work_phone', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Work Phone' ), form_item_input, tab_contact_info_column2, '' );
 
 		//Work Phone Ext
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'work_phone_ext' } );
 		form_item_input.css( 'width', '50' );
 		this.addEditFieldToColumn( $.i18n._( 'Work Phone Ext' ), form_item_input, tab_contact_info_column2 );
 
 		//Home Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'home_phone', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Home Phone' ), form_item_input, tab_contact_info_column2 );
 
 		//Mobile Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'mobile_phone', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Mobile Phone' ), form_item_input, tab_contact_info_column2 );
 
 		//Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'fax_phone', width: 200 } );
-
 		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_contact_info_column2 );
 
 		//Work Email
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'work_email', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Work Email' ), form_item_input, tab_contact_info_column2, '', null, true );
 
 		//Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'home_email', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Home Email' ), form_item_input, tab_contact_info_column2, '', null, true );
 
-		//Birth Date
-		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
-		form_item_input.TDatePicker( { field: 'birth_date' } );
-		this.addEditFieldToColumn( $.i18n._( 'Birth Date' ), form_item_input, tab_contact_info_column2 );
-
-		//Sin
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( { field: 'sin', width: 90 } );
-		this.addEditFieldToColumn( $.i18n._( 'SIN / SSN' ), form_item_input, tab_contact_info_column2 );
-
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-
-		form_item_input.TTextArea( { field: 'note', width: '100%' } );
-
+		form_item_input.TTextArea( { field: 'note', width: '100%', rows: 4 } );
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_contact_info_column2, '', null, null, true );
-
 		form_item_input.parent().width( '45%' );
 
-		//Tab 2 start
+		//Hierarchy Tab start
 		var tab_hierarchy = this.edit_view_tab.find( '#tab_hierarchy' );
-
 		var tab_hierarchy_column1 = tab_hierarchy.find( '.first-column' );
 
 		this.edit_view_tabs[2] = [];
@@ -2602,8 +2231,7 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.hierarchy_options_dic = {};
 			var data = res.getResult();
 			for ( var key in data ) {
-				if ( parseInt( key ) === 200 &&
-						Global.getProductEdition() != 25 ) {
+				if ( parseInt( key ) === 200 && Global.getProductEdition() != 25 ) {
 					continue;
 				}
 				$this.hierarchy_options_dic[key] = Global.buildRecordArray( data[key] );
@@ -2634,6 +2262,80 @@ EmployeeViewController = BaseViewController.extend( {
 			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.hierarchy-div' ).NoHierarchyBox( { related_view_controller: this } );
 			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.hierarchy-div' ).css( 'display', 'block' );
 		}
+
+		//Login Tab start
+		var tab_login = this.edit_view_tab.find( '#tab_login' );
+		var tab_login_column1 = tab_login.find( '.first-column' );
+		var tab_login_column2 = tab_login.find( '.second-column' );
+
+		this.edit_view_tabs[3] = [];
+		this.edit_view_tabs[3].push( tab_login_column1 );
+		this.edit_view_tabs[3].push( tab_login_column2 );
+
+		//Only show this field if they are editing the currently logged in user record.
+		if ( LocalCacheData.loginUser && LocalCacheData.loginUser.id && LocalCacheData.loginUser.id == this.getEditSelectedRecordId() ) {
+			// Current Password
+			form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
+			form_item_input.TPasswordInput( { field: 'current_password', width: 200 } );
+			this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab_login_column1 );
+		}
+
+		//Login Enabled
+		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
+		form_item_input.TCheckbox( { field: 'enable_login' } );
+		this.addEditFieldToColumn( $.i18n._( 'Login Enabled' ), form_item_input, tab_login_column1 );
+
+		//User Name
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'user_name', width: 200 } );
+		this.addEditFieldToColumn( $.i18n._( 'User Name' ), form_item_input, tab_login_column1 );
+
+		//Password
+		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
+		form_item_input.TTextInput( { field: 'password', width: 200 } );
+		this.addEditFieldToColumn( $.i18n._( 'Change Password' ), form_item_input, tab_login_column1 );
+
+		//Password Confirm
+		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
+		form_item_input.TTextInput( { field: 'password_confirm', width: 200 } );
+		this.addEditFieldToColumn( $.i18n._( 'Confirm Password' ), form_item_input, tab_login_column1 );
+
+		//Quick Punch ID
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'phone_id', width: 90 } );
+		quick_punch_id_description = $( '<div class=\'widget-h-box\'></div>' );
+		quick_punch_id_description.append( form_item_input );
+		quick_punch_id_description.append( $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'Optional' ) + ' )</span>' ) );
+		this.addEditFieldToColumn( $.i18n._( 'Quick Punch ID' ), form_item_input, tab_login_column2, '', quick_punch_id_description );
+
+		//Quick Punch Password
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'phone_password', width: 90 } );
+		this.addEditFieldToColumn( $.i18n._( 'Quick Punch Password' ), form_item_input, tab_login_column2 );
+
+		//Login Expire Date
+		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+		form_item_input.TDatePicker( { field: 'login_expire_date' } );
+		login_expire_date_description = $( '<div class=\'widget-h-box\'></div>' );
+		login_expire_date_description.append( form_item_input );
+		login_expire_date_description.append( $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'Leave blank to never expire' ) + ' )</span>' ) );
+		this.addEditFieldToColumn( $.i18n._( 'Login Expire Date' ), form_item_input, tab_login_column2, '', login_expire_date_description );
+
+		//Terminated Permission Group
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIPermissionControl' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.PERMISSION_CONTROL,
+			show_search_inputs: true,
+			field: 'terminated_permission_control_id',
+			customSearchFilter: (function( args ) {
+				return $this.setCompanyIdFilter( args );
+			}),
+			set_empty: true
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Terminated Permission Group' ), form_item_input, tab_login_column2 );
+
 		TTPromise.resolve( 'employeeEditView', 'openEditView' );
 
 	},

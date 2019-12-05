@@ -1017,6 +1017,13 @@ abstract class Factory {
 	/**
 	 * @return int|bool
 	 */
+	function getAffectedRows() {
+		return $this->db->Affected_Rows();
+	}
+
+	/**
+	 * @return int|bool
+	 */
 	function getRecordCount() {
 		if ( isset($this->rs->_numOfRows) ) { //Check a deep variable to make sure it is in fact a valid ADODB record set, just in case some other object is passed in.
 			return $this->rs->RecordCount();
@@ -2931,7 +2938,7 @@ abstract class Factory {
 
 			$query = 'DELETE FROM '. $this->getTable() .' WHERE id in ('. $this->getListSQL( $ids, $ph, 'uuid' ) .')';
 			$this->ExecuteSQL($query, $ph);
-			Debug::text('Bulk Delete Query: '. $query .' Affected Rows: '. $this->db->Affected_Rows() .' IDs: '. count($ph), __FILE__, __LINE__, __METHOD__, 9);
+			Debug::text('Bulk Delete Query: '. $query .' Affected Rows: '. $this->getAffectedRows() .' IDs: '. count($ph), __FILE__, __LINE__, __METHOD__, 9);
 
 			return TRUE;
 		}

@@ -56,9 +56,9 @@ class APIAuthentication extends APIFactory {
 	 * @return array
 	 */
 	function PunchLogin( $user_name = NULL, $password = NULL ) {
-		global $config_vars;
+		global $config_vars, $authentication;
 		Debug::Text('Quick Punch ID: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
-		$authentication = new Authentication();
+
 		if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == 1 ) ) {
 			Debug::text('WARNING: Installer is enabled... Normal logins are disabled!', __FILE__, __LINE__, __METHOD__, 10);
 			//When installer is enabled, just display down for maintenance message to user if they try to login.
@@ -173,8 +173,7 @@ class APIAuthentication extends APIFactory {
 	 * @return array|null
 	 */
 	function Login( $user_name = NULL, $password = NULL, $type = 'USER_NAME') {
-		global $config_vars;
-		$authentication = new Authentication();
+		global $config_vars, $authentication;
 
 		Debug::text('User Name: '. $user_name .' Password Length: '. strlen($password) .' Type: '. $type, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -227,9 +226,9 @@ class APIAuthentication extends APIFactory {
 					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 					$ulf->getByUserName( $user_name );
 					if ( $ulf->getRecordCount() == 1 ) {
-						$u_obj = $ulf->getCurrent();
+						$u_obj = $ulf->getCurrent(); /** @var UserFactory $u_obj */
 
-						if ( $u_obj->checkPassword($password, FALSE) == TRUE ) {
+						if ( $u_obj->checkPassword($password, FALSE, FALSE) == TRUE ) {
 							if ( $u_obj->isFirstLogin() == TRUE AND $u_obj->isCompromisedPassword() == TRUE ) {
 								$error_message = TTi18n::gettext('Welcome to %1, since this is your first time logging in, we ask that you change your password to something more secure', array(APPLICATION_NAME) );
 								$error_column = 'password';
@@ -243,6 +242,8 @@ class APIAuthentication extends APIFactory {
 									$error_message = TTi18n::gettext('Your password has exceeded its maximum age specified by your company\'s password policy and must be changed immediately');
 									$error_column = 'password';
 								}
+							} elseif ( $u_obj->getEnableLogin() == FALSE ) {
+								$error_message = TTi18n::gettext('Sorry, your login is currently disabled, please contact your supervisor or manager to request access.');
 							}
 						} else {
 							if ( $u_obj->checkLoginPermissions() == FALSE ) {
@@ -264,15 +265,19 @@ class APIAuthentication extends APIFactory {
 
 	/**
 	 * @param string $user_id UUID
-	 * @param string $client_id UUID
+	 * @param string $invoice_invoice_client_id UUID
 	 * @param null $ip_address
 	 * @return array|bool
 	 */
-	function newSession( $user_id, $client_id = NULL, $ip_address = NULL ) {
+	function newSession( $user_id, $invoice_invoice_client_id = NULL, $ip_address = NULL, $user_agent = NULL, $client_id = NULL, $end_point_id = NULL ) {
 		global $authentication;
 
 		if ( is_object($authentication) AND $authentication->getSessionID() != '' ) {
 			Debug::text('Session ID: '. $authentication->getSessionID(), __FILE__, __LINE__, __METHOD__, 10);
+
+			if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+				return $this->getPermissionObject()->AuthenticationTypeDenied();
+			}
 
 			if ( $this->getPermissionObject()->Check('company', 'view') AND $this->getPermissionObject()->Check('company', 'login_other_user') ) {
 				if ( TTUUID::isUUID( $user_id ) == FALSE ) { //If username is used, lookup user_id
@@ -289,8 +294,20 @@ class APIAuthentication extends APIFactory {
 				if ( $ulf->getRecordCount() == 1 ) {
 					$new_session_user_obj = $ulf->getCurrent();
 
-					Debug::Text('Login as different user: '. $user_id .' IP Address: '. $ip_address, __FILE__, __LINE__, __METHOD__, 10);
-					$new_session_id = $authentication->newSession( $user_id, $ip_address );
+					if ( $client_id == '' ) {
+						$client_id = 'Browser-TimeTrex';
+					}
+
+					if ( $end_point_id == '' ) {
+						$end_point_id = 'json/api';
+					}
+
+					if ( $user_agent == '' ) {
+						$user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : NULL;
+					}
+
+					Debug::Text('Login as different user: '. $user_id .' IP Address: '. $ip_address .' Client ID: '. $client_id .' End Point ID: '. $end_point_id .' User Agent: '. $user_agent, __FILE__, __LINE__, __METHOD__, 10);
+					$new_session_id = $authentication->newSession( $user_id, $ip_address, $user_agent, $client_id, $end_point_id );
 
 					$retarr = array(
 									'session_id' => $new_session_id,
@@ -325,6 +342,10 @@ class APIAuthentication extends APIFactory {
 
 		if ( is_object($authentication) AND $authentication->getSessionID() != '' ) {
 			Debug::text('Session ID: '. $authentication->getSessionID(), __FILE__, __LINE__, __METHOD__, 10);
+
+			if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+				return $this->getPermissionObject()->AuthenticationTypeDenied();
+			}
 
 			if ( $this->getPermissionObject()->Check('company', 'view') AND $this->getPermissionObject()->Check('company', 'login_other_user') ) {
 				if ( TTUUID::isUUID( $user_id ) == FALSE ) { //If username is used, lookup user_id
@@ -380,14 +401,13 @@ class APIAuthentication extends APIFactory {
 	 * @return int
 	 */
 	function getSessionIdle() {
-		global $config_vars;
+		global $authentication;
 
-		if ( isset($config_vars['other']['web_session_timeout']) AND $config_vars['other']['web_session_timeout'] != '' ) {
-			return (int)$config_vars['other']['web_session_timeout'];
-		} else {
+		if ( !is_object( $authentication ) ) {
 			$authentication = new Authentication();
-			return $authentication->getIdle();
 		}
+
+		return $authentication->getIdleTimeout();
 	}
 
 	/**
@@ -396,17 +416,14 @@ class APIAuthentication extends APIFactory {
 	 * @return bool
 	 */
 	function isLoggedIn( $touch_updated_date = TRUE, $type = 'USER_NAME' ) {
-		global $authentication, $config_vars;
+		global $authentication;
 
 		$session_id = getSessionID();
 
 		if ( $session_id != '' ) {
 			$authentication = new Authentication();
 
-			Debug::text('AMF Session ID: '. $session_id .' Source IP: '. Misc::getRemoteIPAddress() .' Touch Updated Date: '. (int)$touch_updated_date, __FILE__, __LINE__, __METHOD__, 10);
-			if ( isset($config_vars['other']['web_session_timeout']) AND $config_vars['other']['web_session_timeout'] != '' ) {
-				$authentication->setIdle( (int)$config_vars['other']['web_session_timeout'] );
-			}
+			Debug::text('Session ID: '. $session_id .' Source IP: '. Misc::getRemoteIPAddress() .' Touch Updated Date: '. (int)$touch_updated_date, __FILE__, __LINE__, __METHOD__, 10);
 			if ( $authentication->Check( $session_id, $type, $touch_updated_date ) === TRUE ) {
 				return TRUE;
 			}
@@ -790,13 +807,17 @@ class APIAuthentication extends APIFactory {
 			if ( $u_obj->getCompanyObject()->getStatus() == 10 ) {
 				Debug::text( 'Attempting to change password for: ' . $user_name, __FILE__, __LINE__, __METHOD__, 10 );
 
+				$u_obj->setIsRequiredCurrentPassword( TRUE );
+				$u_obj->setCurrentPassword( $current_password );
+
 				if ( $current_password != '' ) {
 					if ( $u_obj->checkPassword( $current_password, FALSE ) !== TRUE ) { //Disable password policy checking on current password.
 						Debug::text( 'Password check failed! Attempt: ' . $rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10 );
-						//sleep( ( $rl->getAttempts() * 0.5 ) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
-						$u_obj->Validator->isTrue( 'current_password',
-												   FALSE,
-												   TTi18n::gettext( 'Current User Name or Password is incorrect' ) );
+						sleep( ( $rl->getAttempts() * 0.5 ) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
+						//setCurrentPassword() above handles this validation error message now.
+//						$u_obj->Validator->isTrue( 'current_password',
+//												   FALSE,
+//												   TTi18n::gettext( 'Current User Name or Password is incorrect' ) );
 					}
 				} else {
 					Debug::Text( 'Current password not specified', __FILE__, __LINE__, __METHOD__, 10 );
@@ -840,7 +861,11 @@ class APIAuthentication extends APIFactory {
 					TTLog::addEntry( $u_obj->getID(), 20, TTi18n::getText( 'Password - Web (Password Policy)' ), NULL, $u_obj->getTable() );
 					$rl->delete(); //Clear failed password rate limit upon successful login.
 
-					$retval = $u_obj->Save();
+					$retval = $u_obj->Save( FALSE ); //UserID is needed below.
+
+					//Logout all other sessions for this user.
+					$authentication = TTNew('Authentication'); /** @var Authentication $authentication */
+					$authentication->logoutUser( $u_obj->getID() );
 
 					unset( $current_user );
 
@@ -882,7 +907,7 @@ class APIAuthentication extends APIFactory {
 			$ulf->getByHomeEmailOrWorkEmail( $email );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$user_obj = $ulf->getCurrent();
-				if ( $user_obj->getStatus() == 10 ) { //Only allow password resets on active employees.
+				if ( $user_obj->getEnableLogin() == TRUE ) { //Only allow password resets when logins are enabled.
 					//Check if company is using LDAP authentication, if so deny password reset.
 					if ( $user_obj->getCompanyObject()->getLDAPAuthenticationType() == 0 ) {
 						if ( $user_obj->sendPasswordResetEmail() == TRUE ) {
@@ -905,6 +930,12 @@ class APIAuthentication extends APIFactory {
 				//Error
 				Debug::Text('DID NOT FIND USER! Returned: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 				$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (a)') );
+
+				//If password was incorrect, sleep for some specified period of time to help delay brute force attacks.
+				if ( PRODUCTION == TRUE ) {
+					Debug::Text('Email address for password reset was incorrect, sleeping for random amount of time...', __FILE__, __LINE__, __METHOD__, 10);
+					usleep( rand( 750000, 1500000 ) );
+				}
 			}
 
 			Debug::text('Reset Password Failed! Attempt: '. $rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);

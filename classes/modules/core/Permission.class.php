@@ -57,7 +57,7 @@ class Permission {
 
 		$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 
-		$cache_id = 'permission_all'.$user_id.$company_id;
+		$cache_id = 'permission_all_'.$user_id.'_'.$company_id; //This is also in UserFactory->postSave()
 		$perm_arr = $plf->getCache($cache_id);
 		//Debug::Arr($perm_arr, 'Cached Perm Arr:', __FILE__, __LINE__, __METHOD__, 9);
 		if ( $perm_arr === FALSE ) {
@@ -76,11 +76,31 @@ class Permission {
 				$perm_arr['_system']['level'] = $p_obj->getColumn('level');
 
 				$plf->saveCache($perm_arr, $cache_id);
+				//Debug::Text('  Caching permissions for: User ID: '. $user_id .' Company ID: '. $company_id .' Total Permissions: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9);
 			}
 		}
 
 		$this->cached_permissions[$user_id][$company_id] = $perm_arr; //Populate local cache.
 		return $perm_arr;
+	}
+
+	/**
+	 * Check to make sure the authentication type is at least this level.
+	 * @param int $type_id
+	 * @return bool
+	 */
+	function checkAuthenticationType( $type_id ) {
+		global $authentication;
+
+		if ( is_object($authentication) ) {
+			if ( $authentication->getType() >= $type_id ) {
+				return TRUE;
+			}
+		} else {
+			return TRUE; //No authentication object to check against, return TRUE.
+		}
+
+		return FALSE;
 	}
 
 	/**
@@ -141,7 +161,7 @@ class Permission {
 			$company_id = $current_company->getId();
 		}
 
-		$cache_id = 'permission_level'.$user_id.$company_id; //This is cleared in PermissionFactory->clearCache() which is also called from PermissionControlFactory->postSave()
+		$cache_id = 'permission_level_'.$user_id.'_'.$company_id; //This is cleared in PermissionFactory->clearCache() which is also called from PermissionControlFactory->postSave()
 
 		$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 		$retval = $plf->getCache($cache_id);
@@ -195,7 +215,20 @@ class Permission {
 	 * @param string $description
 	 * @return bool
 	 */
-	function PermissionDenied( $result = FALSE, $description = 'Permission Denied' ) {
+	function AuthenticationTypeDenied( $result = FALSE, $description = NULL ) {
+		return $this->PermissionDenied( FALSE, TTi18n::getText('Authentication Method is not secure enough to perform this action.') );
+	}
+
+	/**
+	 * @param bool $result
+	 * @param string $description
+	 * @return bool
+	 */
+	function PermissionDenied( $result = FALSE, $description = NULL ) {
+		if ( $description === NULL ) {
+			$description = TTi18n::getText( 'Permission Denied' );
+		}
+
 		if ( $result !== TRUE ) {
 			Debug::Text('Permission Denied! Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
 			$af = TTnew('APIPermission'); /** @var APIPermission $af */

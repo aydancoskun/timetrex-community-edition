@@ -48,26 +48,6 @@ TopMenuManager.goToView = function( subMenuId, force_refresh ) {
 
 };
 
-TopMenuManager.goToPortalView = function( subMenuId, force_refresh ) {
-	if ( TopMenuManager.isCurrentView( subMenuId ) && force_refresh ) {
-		IndexViewController.instance.router.reloadView( subMenuId );
-	} else {
-		Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + subMenuId );
-		//see issue #2193
-		// var location =  Global.getBaseURL() + '#!m=' + subMenuId;
-		// if ( LocalCacheData.all_url_args ) {
-		// 	if ( LocalCacheData.all_url_args.company_id ) {
-		// 		for ( var key in LocalCacheData.all_url_args ) {
-		// 			if ( key !== 'm' ) {
-		// 				location = location + '&' + key + '=' + LocalCacheData.all_url_args[key];
-		// 			}
-		// 		}
-		// 		window.location = location;
-		// 	}
-		// }
-	}
-};
-
 TopMenuManager.initRibbonMenu = function() {
 	if ( !TopMenuManager.ribbon_menus ) {
 
@@ -77,100 +57,6 @@ TopMenuManager.initRibbonMenu = function() {
 		IndexViewController.setNotificationBar( 'login' );
 
 	}
-};
-
-TopMenuManager.initPortalRibbonMenu = function() {
-	if ( !TopMenuManager.ribbon_menus ) {
-
-		//when login and refresh, will go into this place, do session check here
-		TopMenuManager.buildPortalRibbonMenuModels();
-
-	}
-};
-
-TopMenuManager.buildPortalRibbonMenuModels = function() {
-	var permission = true;
-	//HR Menu
-	var hr_menu = new RibbonMenu( {
-		label: $.i18n._( 'HR' ),
-		id: 'hr_menu',
-		sub_menu_groups: []
-	} );
-
-	var my_account_menu = new RibbonMenu( {
-		label: $.i18n._( 'My Account' ),
-		id: 'myAccountMenu',
-		sub_menu_groups: []
-	} );
-
-	var logoutGroup = new RibbonSubMenuGroup( {
-		label: '',
-		id: 'logoutGroup',
-		ribbon_menu: my_account_menu,
-		sub_menus: []
-	} );
-
-	var recruitmentSubMenuGroup = new RibbonSubMenuGroup( {
-		label: $.i18n._( 'Recruitment' ),
-		id: 'recruitmentGroup',
-		ribbon_menu: hr_menu,
-		sub_menus: []
-	} );
-
-	if ( LocalCacheData.getLoginUser() ) {
-		var job_vacancy = new RibbonSubMenu( {
-			label: $.i18n._( 'Job<br>Vacancies' ),
-			id: 'PortalJobVacancy',
-			group: recruitmentSubMenuGroup,
-			icon: 'job_vacancies-35x35.png',
-			permission_result: true,
-			permission: true
-		} );
-
-		//var job_applicant = new RibbonSubMenu( {
-		//	label: $.i18n._( 'Job<br>Applicants' ),
-		//	id: 'JobApplicant',
-		//	group: recruitmentSubMenuGroup,
-		//	icon: 'job_applicant-35x35.png',
-		//	permission_result: true,
-		//	permission: true
-		//} );
-
-		//My Account group
-		var logout = new RibbonSubMenu( {
-			label: $.i18n._( 'Logout' ),
-			id: 'PortalLogout',
-			group: logoutGroup,
-			icon: 'logout-35x35.png',
-			permission_result: true,
-			permission: true
-		} );
-
-	} else {
-
-		job_vacancy = new RibbonSubMenu( {
-			label: $.i18n._( 'Job<br>Vacancies' ),
-			id: 'PortalJobVacancy',
-			group: recruitmentSubMenuGroup,
-			icon: 'job_vacancies-35x35.png',
-			permission_result: true,
-			permission: true
-		} );
-
-		//My Account group
-		logout = new RibbonSubMenu( {
-			label: $.i18n._( 'Login' ),
-			id: 'PortalLogout',
-			group: logoutGroup,
-			icon: 'logout-35x35.png',
-			permission_result: true,
-			permission: true
-		} );
-
-	}
-
-	TopMenuManager.ribbon_menus = [hr_menu, my_account_menu];
-
 };
 
 TopMenuManager.buildRibbonMenuModels = function() {
@@ -403,7 +289,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	var bank_account = new RibbonSubMenu( {
-		label: $.i18n._( 'Payment<br>Methods' ),
+		label: $.i18n._( 'Pay<br>Methods' ),
 		id: 'RemittanceDestinationAccount',
 		group: employeeSubMenuGroup,
 		icon: 'bank_accounts-35x35.png',

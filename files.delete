@@ -1310,6 +1310,11 @@
 
 /interface/html5/framework/sonic.js b/interface/html5/framework/sonic.js
 /interface/html5/framework/currency.min.js
+/interface/html5/framework/widgets/tag_input/
 
 /index.html
 /interface/global.js.php
+
+/interface/html5/views/portal/login/PortalLoginView.html
+/interface/html5/views/portal/login/PortalLoginViewController.js
+/interface/html5/views/portal/login/

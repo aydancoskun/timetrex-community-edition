@@ -94,6 +94,28 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	}
 
 	/**
+	 * Disables all logins past their expire date without going through UserFactory to avoid cases where we aren't able to save records due to validation failures.
+	 * @return $this
+	 */
+	function disableExpiredLogins( $login_expire_date ) {
+		$ph = array(
+				'login_expire_date' => $this->db->BindDate( $login_expire_date ),
+		);
+
+		//Login date must be fully passed before we disable login.
+		$query = '
+					UPDATE '. $this->getTable() .'
+					SET enable_login = 0
+					WHERE enable_login = 1
+						AND ( login_expire_date < ? AND login_expire_date IS NOT NULL )  
+						AND deleted = 0';
+
+		$this->rs = $this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
 	 * @param string $id UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
@@ -130,6 +152,14 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	 * @return $this
 	 */
 	function getByCompanyIdAndStatus( $company_id, $status, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $status == '') {
+			return FALSE;
+		}
+
 		$ph = array(
 			'company_id' => TTUUID::castUUID($company_id),
 			'status_id' => $status,
@@ -150,6 +180,54 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		return $this;
 	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $terminated_permission_control_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param int $page Page number of records to return for pagination
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return $this
+	 */
+	function getByCompanyIdAndTerminatedPermissionControl( $company_id, $terminated_permission_control_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $terminated_permission_control_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'status_id' => 'asc', 'last_name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+				'company_id' => TTUUID::castUUID($company_id),
+				'terminated_permission_control_id' => TTUUID::castUUID($terminated_permission_control_id),
+		);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where
+						company_id = ?
+						AND terminated_permission_control_id = ?
+						AND deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $this;
+	}
+
 
 	/**
 	 * @param string $id UUID
@@ -368,7 +446,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					from	'. $this->getTable() .' as a
 					LEFT JOIN	'. $cf->getTable() .' as cf ON ( a.company_id = cf.id )
 					where cf.status_id = 10
-						AND a.status_id = 10
+						AND a.enable_login = 1
 						AND ( lower(a.home_email) = ? OR lower(a.work_email) = ? )
 						AND a.deleted = 0';
 
@@ -490,6 +568,39 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					from	'. $this->getTable() .'
 					where	user_name = ?
 						AND status_id = ?
+						AND deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->rs = $this->ExecuteSQL( $query, $ph );
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $this;
+	}
+
+	/**
+	 * @param $user_name
+	 * @param $enable_login
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserListFactory
+	 */
+	function getByUserNameAndEnableLogin( $user_name, $enable_login, $where = NULL, $order = NULL) {
+		if ( $user_name == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+				'user_name' => TTi18n::strtolower( trim( $user_name ) ),
+				'enable_login' => (bool)$enable_login,
+		);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where	user_name = ?
+						AND enable_login = ?
 						AND deleted = 0';
 
 		$query .= $this->getWhereSQL( $where );

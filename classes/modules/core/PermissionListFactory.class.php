@@ -352,21 +352,27 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 
 		$pcf = new PermissionControlFactory();
 		$puf = new PermissionUserFactory();
+		$uf = new UserFactory();
 
+		//Make sure when the user is not ACTIVE that we switch to using the terminated permission group instead.
 		$query = '
-					select	a.*,
+					SELECT	a.*,
 							b.level as level
-					from	'. $this->getTable() .' as a,
+					FROM	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b,
-							'. $puf->getTable() .' as c
-					where b.id = a.permission_control_id
-						AND b.id = c.permission_control_id
-						AND b.company_id = ?
-						AND	c.user_id = ?
-						AND ( a.deleted = 0 AND b.deleted = 0 )
+							'. $puf->getTable() .' as c,
+							'. $uf->getTable() .' as uf
+					WHERE 
+						uf.company_id = ?
+						AND	uf.id = ?
+						AND uf.id = c.user_id
+						AND b.id = a.permission_control_id
+				        AND ( CASE WHEN uf.status_id = 10 THEN ( b.id = c.permission_control_id ) ELSE ( b.id = uf.terminated_permission_control_id ) END )											
+						AND ( a.deleted = 0 AND b.deleted = 0 AND uf.deleted = 0 )
 				';
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

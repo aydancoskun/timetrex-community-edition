@@ -154,12 +154,12 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 	/**
 	 * @param string $company_id UUID
 	 * @param int $object_type_id
-	 * @param string $id UUID
+	 * @param string $object_id UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|CompanyGenericMapListFactory
 	 */
-	function getByCompanyIDAndObjectTypeAndObjectID( $company_id, $object_type_id, $id, $where = NULL, $order = NULL) {
+	function getByCompanyIDAndObjectTypeAndObjectID( $company_id, $object_type_id, $object_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -168,11 +168,11 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 			return FALSE;
 		}
 
-		if ( $id == '') {
+		if ( $object_id == '') {
 			return FALSE;
 		}
 
-		$cache_id = md5( $company_id . serialize($object_type_id) . serialize($id) );
+		$cache_id = md5( $company_id . serialize( $object_type_id ) . serialize( $object_id ) );
 		//Debug::Text('Cache ID: '. $cache_id .' Company ID: '. $company_id .' Object Type: '. $object_type_id .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->rs = $this->getCache( $cache_id );
@@ -187,7 +187,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 						from	'. $this->getTable() .' as a
 						where	a.company_id = ?
 							AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
-							AND a.object_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
+							AND a.object_id in ('. $this->getListSQL( $object_id, $ph, 'uuid' ) .')
 						';
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );

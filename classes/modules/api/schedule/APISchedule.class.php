@@ -52,6 +52,7 @@ class APISchedule extends APIFactory {
 
 	/**
 	 * Get default schedule data for creating new schedulees.
+	 *     Also see APIRequestSchedule->getRequestScheduleDefaultData()
 	 * @param array $data
 	 * @return array
 	 */
@@ -414,6 +415,15 @@ class APISchedule extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getCurrentUserObject()->getStatus() != 10 ) { //10=Active -- Make sure user record is active as well.
+			return $this->getPermissionObject()->PermissionDenied( FALSE, TTi18n::getText( 'Employee status must be Active to modify schedules' ) );
+		}
+
+		if ( !$this->getPermissionObject()->Check('schedule', 'enabled')
+				OR !( $this->getPermissionObject()->Check('schedule', 'edit') OR $this->getPermissionObject()->Check('schedule', 'edit_own') OR $this->getPermissionObject()->Check('schedule', 'edit_child') OR $this->getPermissionObject()->Check('schedule', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {

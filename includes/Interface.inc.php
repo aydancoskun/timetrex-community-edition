@@ -94,10 +94,6 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 	Debug::text('Bypassing Authentication', __FILE__, __LINE__, __METHOD__, 10);
 	TTi18n::chooseBestLocale();
 } else {
-	if ( isset($config_vars['other']['web_session_timeout']) AND $config_vars['other']['web_session_timeout'] != '' ) {
-		$authentication->setIdle( (int)$config_vars['other']['web_session_timeout'] );
-	}
-
 	if ( $authentication->Check() === TRUE ) {
 		$profiler->startTimer( 'Interface.inc - Post-Authentication' );
 

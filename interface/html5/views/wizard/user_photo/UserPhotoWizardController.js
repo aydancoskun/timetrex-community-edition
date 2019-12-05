@@ -1,6 +1,6 @@
 UserPhotoWizardController = BaseWizardController.extend( {
 
-	el: '.wizard',
+	el: '.wizard-bg',
 
 	_required_files: [
 		'TImageBrowser', //only in the upload wizard

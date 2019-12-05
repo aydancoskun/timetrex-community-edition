@@ -21,19 +21,6 @@ DepartmentViewController = BaseViewController.extend( {
 
 		this.render();
 
-		var context_menu_model = {
-			'include': [
-				{
-					label: $.i18n._( 'Import' ),
-					id: ContextMenuIconName.import_icon,
-					group: 'other',
-					icon: Icons.import_icon,
-					permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVDepartment' ),
-					sort_order: 8000
-				},
-			],
-		};
-		this.setContextMenuModel( context_menu_model );
 		this.buildContextMenu();
 
 		this.initData();
@@ -188,21 +175,23 @@ DepartmentViewController = BaseViewController.extend( {
 		];
 	},
 
-	// buildContextMenuModels: function() {
-	// 	var menu = this._super( 'buildContextMenuModels' )[0];
-	//
-	// 	var import_csv = new RibbonSubMenu( {
-	// 		label: $.i18n._( 'Import' ),
-	// 		id: ContextMenuIconName.import_icon,
-	// 		group: this.getContextMenuGroupByName( menu, 'other' ),
-	// 		icon: Icons.import_icon,
-	// 		permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVDepartment' ),
-	// 		permission: null,
-	// 		sort_order: 8000
-	// 	} );
-	//
-	// 	return [menu];
-	// },
+	getCustomContextMenuModel: function() {
+		var context_menu_model = {
+			exclude: [],
+			include: [
+				{
+					label: $.i18n._( 'Import' ),
+					id: ContextMenuIconName.import_icon,
+					group: 'other',
+					icon: Icons.import_icon,
+					permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVDepartment' ),
+					sort_order: 8000
+				}
+			]
+		};
+
+		return context_menu_model;
+	},
 
 	onCustomContextClick: function( id ) {
 		switch ( id ) {

@@ -56,6 +56,7 @@ class PermissionFactory extends Factory {
 			case 'preset':
 				$retval = array(
 										//-1 => TTi18n::gettext('--'),
+										5 => TTi18n::gettext('Terminated Employee'),
 										10 => TTi18n::gettext('Regular Employee (Punch In/Out)'),
 										12 => TTi18n::gettext('Regular Employee (Manual Punch)'), //Can manually Add/Edit own punches/absences.
 										14 => TTi18n::gettext('Regular Employee (Manual TimeSheet)'), //Can use manual timesheet and punches.
@@ -114,14 +115,15 @@ class PermissionFactory extends Factory {
 				break;
 			case 'preset_level':
 				$retval = array(
-										10 => 1,
-										12 => 2,
-										14 => 3,
-										18 => 10,
-										20 => 15,
-										25 => 18,
-										30 => 20,
-										40 => 25,
+										5 => 5,
+										10 => 10, //Was: 1
+										12 => 20, //Was: 2
+										14 => 30, //Was: 3
+										18 => 40, //Was: 10
+										20 => 50, //Was: 15
+										25 => 70, //Was: 18
+										30 => 80, //Was: 20
+										40 => 100, //Was: 25
 									);
 				break;
 			case 'section_group':
@@ -308,7 +310,7 @@ class PermissionFactory extends Factory {
 										'user_preference' => TTi18n::gettext('Employee Preferences'),
 										'user_tax_deduction' => TTi18n::gettext('Employee Tax / Deductions'),
 										'user_contact' => TTi18n::gettext('Employee Contact'),
-										'remittance_destination_account' => TTi18n::gettext('Employee Payment Methods'),
+										'remittance_destination_account' => TTi18n::gettext('Employee Pay Methods'),
 
 										'schedule' => TTi18n::gettext('Schedule'),
 										'recurring_schedule' => TTi18n::gettext('Recurring Schedule'),
@@ -1654,6 +1656,147 @@ class PermissionFactory extends Factory {
 		}
 
 		$preset_permissions = array(
+							5 => //Role: Terminated Employee
+									array(
+											0 => //Module: System
+													array(
+															'system' => array(
+																	'login' => TRUE,
+															),
+															'user' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+																	'edit_own' => TRUE,
+																	'edit_own_password' => TRUE,
+																	'edit_own_phone_password' => TRUE,
+															),
+															'user_preference' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+																	'add' => TRUE,
+																	'edit_own' => TRUE,
+																	'delete_own' => TRUE,
+															),
+															'request' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+																	'add' => TRUE,
+																	'add_advanced' => TRUE,
+																	'edit_own' => FALSE,
+																	'delete_own' => FALSE,
+															),
+															'message' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+																	'add' => TRUE,
+																	'edit_own' => TRUE,
+																	'delete_own' => FALSE,
+															),
+															'help' =>	array(
+																	'enabled' => TRUE,
+																	'view' => TRUE,
+															),
+
+													),
+											10 => //Module: Scheduling
+													array(
+															'schedule' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+															),
+															'accrual' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE
+															),
+															'absence' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+															),
+													),
+											20 => //Module: Time & Attendance
+													array(
+															'punch' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+																	'add' => FALSE,
+																	'verify_time_sheet' => FALSE,
+																	'punch_in_out' => FALSE,
+																	'punch_timesheet' => TRUE,
+															),
+															'accrual' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE
+															),
+															'absence' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+															),
+
+													),
+											30 => //Module: Payroll
+													array(
+															'user' =>	array(
+																	'enabled' => TRUE,
+															),
+															'pay_stub' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+															),
+															'government_document' => array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+															),
+															'remittance_destination_account' => array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+																	'add' => TRUE,
+																	'edit_own' => FALSE,
+																	'delete_own' => FALSE,
+															),
+													),
+											40 => //Module: Job Costing
+													array(
+															'schedule' => array(
+																	'edit_job' => TRUE,
+																	'edit_job_item' => TRUE,
+															),
+															'punch' =>	array(
+																	'edit_job' => TRUE,
+																	'edit_job_item' => TRUE,
+																	'edit_quantity' => TRUE,
+																	'edit_bad_quantity' => TRUE,
+															),
+															'job' =>	array(
+																	'enabled' => TRUE,
+															),
+													),
+											50 => //Module: Document Management
+													array(
+															'document' =>	array(
+																	'enabled' => TRUE,
+																	'view' => TRUE,
+															),
+													),
+											60 => //Module: Invoicing
+													array(
+													),
+											70 => //Module: Human Resources
+													array(
+													),
+											75 => //Module: Recruitement
+													array(
+													),
+											80 => //Module: Expenses
+													array(
+															'user_expense' =>	array(
+																	'enabled' => TRUE,
+																	'view_own' => TRUE,
+																	'add' => FALSE,
+																	'edit_own' => FALSE,
+																	'delete_own' => FALSE,
+															),
+													),
+									),
 									10 => //Role: Regular Employee
 											array(
 													0 => //Module: System
@@ -3111,10 +3254,10 @@ class PermissionFactory extends Factory {
 	function clearCache( $user_id, $company_id ) {
 		Debug::Text(' Clearing Cache for User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 
-		$cache_id = 'permission_level'.$user_id.$company_id;
+		$cache_id = 'permission_level_'.$user_id.'_'.$company_id;
 		$retval = $this->removeCache( $cache_id );
 
-		$cache_id = 'permission_all'.$user_id.$company_id;
+		$cache_id = 'permission_all_'.$user_id.'_'.$company_id;
 		$retval = $this->removeCache( $cache_id );
 
 		return $retval;

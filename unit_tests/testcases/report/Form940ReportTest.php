@@ -65,15 +65,15 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createUserWageGroups( $this->company_id );
 
-		$dd->createPayrollRemittanceAgency( $this->company_id, $this->user_id[0], $this->legal_entity_id ); //Must go before createCompanyDeduction()
+		$dd->createPayrollRemittanceAgency( $this->company_id, NULL, $this->legal_entity_id ); //Must go before createCompanyDeduction()
 
 		//Company Deductions
-		$dd->createCompanyDeduction( $this->company_id, $this->user_id[0], $this->legal_entity_id );
+		$dd->createCompanyDeduction( $this->company_id, NULL, $this->legal_entity_id );
 
 		//Create multiple state tax/deductions.
 		$sp = TTNew('SetupPresets'); /** @var SetupPresets $sp */
 		$sp->setCompany( $this->company_id );
-		$sp->setUser( $this->user_id[0] );
+		$sp->setUser( NULL );
 		$sp->PayStubAccounts( 'US', 'CA' );
 		$sp->PayrollRemittanceAgencys( 'US', 'CA', NULL, NULL, $this->legal_entity_id );
 		$sp->CompanyDeductions( 'US', 'CA', NULL, NULL, $this->legal_entity_id );
@@ -209,12 +209,12 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 				if ( $i == 0 ) {
 					$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-2019') );
 				} else {
-					$end_date = ($end_date + ( (86400 * 14) ));
+					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}

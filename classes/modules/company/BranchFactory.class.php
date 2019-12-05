@@ -379,8 +379,7 @@ class BranchFactory extends Factory {
 	 * @return bool
 	 */
 	function setProvince( $value) {
-		$value = trim($value);
-		return $this->setGenericDataValue( 'province', $value );
+		return $this->setGenericDataValue( 'province', strtoupper( trim($value) ) );
 	}
 
 	/**
@@ -395,8 +394,7 @@ class BranchFactory extends Factory {
 	 * @return bool
 	 */
 	function setCountry( $value) {
-		$value = trim($value);
-		return $this->setGenericDataValue( 'country', $value );
+		return $this->setGenericDataValue( 'country', strtoupper( trim($value) ) );
 	}
 
 	/**

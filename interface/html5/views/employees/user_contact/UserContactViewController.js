@@ -28,7 +28,6 @@ UserContactViewController = BaseViewController.extend( {
 		this.ethnic_group_api = new (APIFactory.getAPIClass( 'APIEthnicGroup' ))();
 		this.document_object_type_id = 115;
 
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
 		this.render();
 
 		if ( this.sub_view_mode ) {
@@ -44,6 +43,15 @@ UserContactViewController = BaseViewController.extend( {
 
 		//this.setSelectRibbonMenuIfNecessary( 'UserContact' )
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.copy],
+			include: []
+		};
+
+		return context_menu_model;
 	},
 
 	initOptions: function() {

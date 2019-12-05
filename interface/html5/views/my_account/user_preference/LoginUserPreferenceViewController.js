@@ -36,19 +36,6 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
 		this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.add] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.view] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_icon] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-
 		this.render();
 
 		this.initData();
@@ -82,43 +69,16 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 	},
 
-	buildContextMenuModels: function() {
+	getCustomContextMenuModel: function() {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				ContextMenuIconName.save,
+				ContextMenuIconName.cancel
+			]
+		};
 
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var save = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save,
-			group: editor_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		return [menu];
-
+		return context_menu_model;
 	},
 
 	getUserPreferenceData: function( callBack ) {
@@ -294,42 +254,22 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		}
 	},
 
-	onSaveClick: function( ignoreWarning ) {
-		var $this = this;
-		var record = this.current_edit_record;
-		if ( !Global.isSet( ignoreWarning ) ) {
-			ignoreWarning = false;
+	onSaveDone: function( result ) {
+		if ( result.isValid() ) {
+
+			Global.setLanguageCookie( this.current_edit_record.language );
+			LocalCacheData.setI18nDic( null );
+
+			Global.updateUserPreference( function() {
+				window.location.reload( true );
+			}, $.i18n._( 'Updating preferences, reloading' ) + '...' );
+
+			IndexViewController.setNotificationBar( 'preference' );
+
+			return true;
+		} else {
+			return false;
 		}
-		LocalCacheData.current_doing_context_action = 'save';
-		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
-				if ( result.isValid() ) {
-					var result_data = result.getResult();
-					if ( result_data === true ) {
-						$this.refresh_id = $this.current_edit_record.id;
-					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-						$this.refresh_id = result_data;
-					}
-
-					Global.setLanguageCookie( $this.current_edit_record.language );
-					LocalCacheData.setI18nDic( null );
-
-					Global.updateUserPreference( function() {
-						window.location.reload( true );
-					}, $.i18n._( 'Updating preferences, reloading' ) + '...' );
-
-
-					$this.removeEditView();
-
-					IndexViewController.setNotificationBar( 'preference' );
-
-				} else {
-					$this.setErrorTips( result );
-					$this.setErrorMenu();
-				}
-
-			}
-		} );
 	},
 
 	setEditMenuSaveIcon: function( context_btn, pId ) {

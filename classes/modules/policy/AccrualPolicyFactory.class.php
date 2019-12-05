@@ -1249,7 +1249,8 @@ class AccrualPolicyFactory extends Factory {
 			}
 
 			$accrual_amount = $initial_accrual_balance; //Make the first accrual_amount match the initial accrual balance.
-			for( $epoch = $start_epoch; $epoch <= $end_epoch; $epoch += 86400) {
+			//for( $epoch = $start_epoch; $epoch <= $end_epoch; $epoch += 86400) {
+			foreach( TTDate::getDatePeriod( $start_epoch, $end_epoch, 'P1D' ) as $epoch ) {
 				$epoch = ( TTDate::getBeginDayEpoch( $epoch ) + 7200) ; //This is required because the epoch has to be slightly AFTER the pay period end date, which is 11:59PM.
 
 				//Make sure we pass the returned accrual_amount back into calcAccrualPolicyTime() as the new balance so rollover/maximum balances are all properly handled.

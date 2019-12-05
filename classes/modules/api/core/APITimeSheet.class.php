@@ -165,7 +165,7 @@ class APITimeSheet extends APIFactory {
 		}
 
 		$plf = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf */
-		$plf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $filter_data['filter_data'], $filter_data['filter_items_per_page'], $filter_data['filter_page'], NULL, $filter_data['filter_sort'] );
+		$plf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $filter_data['filter_data'], $filter_data['filter_items_per_page'], $filter_data['filter_page'], NULL, array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc', 'a.time_stamp' => 'asc', 'a.punch_control_id' => 'asc', 'a.status_id' => 'asc' ) ); //Order is critical to the timesheet layout.
 		Debug::Text('Punch Record Count: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $plf->getRecordCount() > 0 ) {
 			//Reduces data transfer by about half.

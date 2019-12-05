@@ -1,6 +1,6 @@
 PermissionWizardController = BaseWizardController.extend( {
 
-	el: '.wizard',
+	el: '.wizard-bg',
 	api_permission: null,
 
 	init: function( options ) {

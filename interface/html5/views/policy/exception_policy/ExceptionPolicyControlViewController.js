@@ -22,14 +22,21 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		this.api_exception_policy = new (APIFactory.getAPIClass( 'APIExceptionPolicy' ))();
 		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true; //Hide some context menus
-
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'ExceptionPolicyControl' );
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: [ContextMenuIconName.mass_edit],
+			include: []
+		};
+
+		return context_menu_model;
 	},
 
 	initOptions: function() {
@@ -97,6 +104,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			severity: $.i18n._( 'Severity' ),
 			grace: $.i18n._( 'Grace' ),
 			'watch_window': $.i18n._( 'Watch Window' ),
+			'demerit': $.i18n._( 'Demerit Points' ),
 			'email_notification': $.i18n._( 'Email Notification' )
 		};
 
@@ -119,8 +127,8 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 	},
 
 	_continueDoCopyAsNew: function() {
+		this.setCurrentEditViewState('new');
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
-		this.is_add = true;
 		if ( Global.isSet( this.edit_view ) ) {
 			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
 				this.editor.rows_widgets_array[i].current_edit_item.id = '';
@@ -291,6 +299,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 						c_row.watch_window.setValue( new_row.watch_window );
 					}
 
+					c_row.demerit.setValue( new_row.demerit );
 					c_row.email_notification_id.setValue( new_row.email_notification_id );
 
 					val.splice( j, 1 );
@@ -343,7 +352,6 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		widgets[form_item_input.getField()] = form_item_input;
 		row.children().eq( 0 ).append( form_item_input );
 		form_item_input.attr( 'exception_policy_id', (data.id && this.parent_controller.current_edit_record.id) ? data.id : '' );
-
 		this.setWidgetEnableBaseOnParentController( form_item_input );
 
 		//Code
@@ -363,9 +371,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		//Severity
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'severity_id', set_empty: false } );
-
 		this.setWidgetEnableBaseOnParentController( form_item_input );
-
 		form_item_input.setSourceData( Global.addFirstItemToArray( this.parent_controller.severity_array ) );
 		form_item_input.setValue( data.severity_id );
 		widgets[form_item_input.getField()] = form_item_input;
@@ -378,9 +384,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			form_item_input.setValue( data.grace );
 			widgets[form_item_input.getField()] = form_item_input;
 			row.children().eq( 4 ).append( form_item_input );
-
 			this.setWidgetEnableBaseOnParentController( form_item_input );
-
 		}
 
 		if ( data.is_enabled_watch_window ) {
@@ -390,9 +394,16 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			form_item_input.setValue( data.watch_window );
 			widgets[form_item_input.getField()] = form_item_input;
 			row.children().eq( 5 ).append( form_item_input );
-
 			this.setWidgetEnableBaseOnParentController( form_item_input );
 		}
+
+		//Demerits
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'demerit', width: 50, need_parser_sec: false } );
+		form_item_input.setValue( data.demerit );
+		widgets[form_item_input.getField()] = form_item_input;
+		row.children().eq( 6 ).append( form_item_input );
+		this.setWidgetEnableBaseOnParentController( form_item_input );
 
 		//Email Notification
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -400,8 +411,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		form_item_input.setSourceData( this.parent_controller.email_notification_array );
 		form_item_input.setValue( data.email_notification_id );
 		widgets[form_item_input.getField()] = form_item_input;
-		row.children().eq( 6 ).append( form_item_input );
-
+		row.children().eq( 7 ).append( form_item_input );
 		this.setWidgetEnableBaseOnParentController( form_item_input );
 
 		//Save current set item
@@ -445,10 +455,10 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 				data.watch_window = row.watch_window.getValue();
 			}
 
+			data.demerit = row.demerit.getValue();
 			data.email_notification_id = row.email_notification_id.getValue();
 
 			result.push( data );
-
 		}
 
 		return result;
@@ -478,52 +488,52 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		}
 	},
 
-	onSaveAndContinueResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
+	// onSaveAndContinueResult: function( result ) {
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	//
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
+	// 			$this.refresh_id = result_data;
+	// 		}
+	//
+	// 		$this.saveInsideEditorData( function() {
+	// 			$this.search( false );
+	// 			$this.onEditClick( $this.refresh_id, true );
+	//
+	// 			$this.onSaveAndContinueDone( result );
+	//
+	// 		} );
+	//
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
-				$this.refresh_id = result_data;
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.search( false );
-				$this.onEditClick( $this.refresh_id, true );
-
-				$this.onSaveAndContinueDone( result );
-
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
-
-	onSaveAndNewResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
-				$this.refresh_id = result_data;
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.search( false );
-				$this.onAddClick( true );
-
-			} );
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
+	// onSaveAndNewResult: function( result ) {
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	//
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) { // as new
+	// 			$this.refresh_id = result_data;
+	// 		}
+	//
+	// 		$this.saveInsideEditorData( function() {
+	// 			$this.search( false );
+	// 			$this.onAddClick( true );
+	//
+	// 		} );
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
 	onSaveAndCopyResult: function( result ) {
 		var $this = this;
@@ -548,29 +558,29 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		}
 	},
 
-	onSaveAndNextResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-				$this.refresh_id = result_data;
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.onRightArrowClick();
-				$this.search( false );
-				$this.onSaveAndNextDone( result );
-
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
+	// onSaveAndNextResult: function( result ) {
+	// 	var $this = this;
+	// 	if ( result.isValid() ) {
+	// 		var result_data = result.getResult();
+	// 		if ( result_data === true ) {
+	// 			$this.refresh_id = $this.current_edit_record.id;
+	//
+	// 		} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+	// 			$this.refresh_id = result_data;
+	// 		}
+	//
+	// 		$this.saveInsideEditorData( function() {
+	// 			$this.onRightArrowClick();
+	// 			$this.search( false );
+	// 			$this.onSaveAndNextDone( result );
+	//
+	// 		} );
+	//
+	// 	} else {
+	// 		$this.setErrorTips( result );
+	// 		$this.setErrorMenu();
+	// 	}
+	// },
 
 	saveInsideEditorData: function( callBack ) {
 

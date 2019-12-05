@@ -1,6 +1,6 @@
 QuickStartWizardController = BaseWizardController.extend( {
 
-	el: '.wizard',
+	el: '.wizard-bg',
 	selected_province_index: -1,
 	selected_country_index: -1,
 

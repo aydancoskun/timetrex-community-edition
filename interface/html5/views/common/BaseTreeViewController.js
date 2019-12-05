@@ -178,6 +178,7 @@ BaseTreeViewController = BaseViewController.extend( {
 
 	initLayout: function() {
 		var $this = this;
+		this.real_this = this.constructor.__super__; // this seems first entry point. needed where view controller is extended twice, Base->Tree-View, used with onViewClick _super
 
 		$this.getDefaultDisplayColumns( function() {
 			$this.setSelectLayout();
@@ -294,56 +295,25 @@ BaseTreeViewController = BaseViewController.extend( {
 		return array;
 	},
 
-	onViewClick: function( editId, noRefreshUI ) {
-		var $this = this;
+	doViewAPICall: function ( filter ) {
+		return this._super( 'doViewAPICall', filter, [filter, false, false] );
+	},
+	handleViewAPICallbackResult: function ( result ) {
+		return this.handleAPICallbackResult( result );
+	},
 
-		$this.is_viewing = true;
-		LocalCacheData.current_doing_context_action = 'view';
-		$this.openEditView();
+	handleAPICallbackResult: function ( result ) {
+		var result_data = result.getResult();
+		var record_id = this.getCurrentSelectedRecord();
+		result_data = Global.getParentIdByTreeRecord( Global.buildTreeRecord( result_data ), record_id );
+		result_data = result_data[0];
+		result_data.id = record_id;
 
-		var filter = {};
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-		var selectedId;
+		this._super( 'handleViewAPICallbackResult', result_data );
+	},
 
-		if ( Global.isSet( editId ) ) {
-			selectedId = editId;
-		} else {
-			if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
-			}
-		}
-
-		filter.filter_data = {};
-
-		this.api['get' + this.api.key_name]( filter, false, false, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-
-				result_data = Global.buildTreeRecord( result_data );
-
-				result_data = Global.getParentIdByTreeRecord( result_data, selectedId );
-
-				if ( !result_data ) {
-					result_data = [];
-				}
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				$this.current_edit_record = result_data;
-				$this.current_edit_record.id = selectedId;
-
-				$this.initEditView();
-			}
-		} );
+	handleEditAPICallbackResult: function ( result ) {
+		return this.handleAPICallbackResult( result );
 	},
 
 	onDeleteDone: function( result ) {
@@ -356,65 +326,8 @@ BaseTreeViewController = BaseViewController.extend( {
 		this.grid_select_id_array = [];
 	},
 
-	onEditClick: function( editId, noRefreshUI ) {
-		var $this = this;
-
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-		var selectedId;
-
-		if ( Global.isSet( editId ) ) {
-			selectedId = editId;
-		} else {
-
-			if ( this.is_viewing ) {
-				selectedId = this.current_edit_record.id;
-			} else if ( grid_selected_length > 0 ) {
-				selectedId = grid_selected_id_array[0];
-			} else {
-				return;
-			}
-		}
-
-		this.is_viewing = false;
-		LocalCacheData.current_doing_context_action = 'edit';
-		$this.openEditView();
-
-		var filter = {};
-
-		filter.filter_data = {};
-
-		this.api['get' + this.api.key_name]( filter, false, false, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-
-				result_data = Global.buildTreeRecord( result_data );
-
-				result_data = Global.getParentIdByTreeRecord( result_data, selectedId );
-
-				if ( !result_data ) {
-					result_data = [];
-				}
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					$this.onCancelClick();
-					return;
-				}
-
-				if ( $this.sub_view_mode && $this.parent_key ) {
-					result_data[$this.parent_key] = $this.parent_value;
-				}
-
-				$this.current_edit_record = result_data;
-				$this.current_edit_record.id = selectedId;
-
-				$this.initEditView();
-
-			}
-		} );
+	doEditAPICall: function ( filter ) {
+		return this._super( 'doEditAPICall', filter, [filter, false, false] );
 	},
 
 	_continueDoCopyAsNew: function() {

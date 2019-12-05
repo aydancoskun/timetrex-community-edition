@@ -63,9 +63,9 @@ if ( isset($_GET['Class']) AND $_GET['Class'] != '' ) {
 //$class_name = TTgetPluginClassName( $class_prefix.$class_factory );
 $soap_server = new SoapServer( NULL, array('uri' => 'urn:api', 'encoding' => 'UTF-8') );
 if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == FALSE ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) ) {
-	if ( isset( $_GET['SessionID'] ) AND $_GET['SessionID'] != '' ) {
-		$authentication = new Authentication();
+	$authentication = new Authentication();
 
+	if ( isset( $_GET['SessionID'] ) AND $_GET['SessionID'] != '' ) {
 		Debug::text( 'SOAP Session ID: ' . $_GET['SessionID'] . ' Source IP: ' . Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $authentication->Check( $_GET['SessionID'] ) === TRUE ) {
 			Debug::text( 'SOAP Class Factory: ' . $class_name, __FILE__, __LINE__, __METHOD__, 10 );

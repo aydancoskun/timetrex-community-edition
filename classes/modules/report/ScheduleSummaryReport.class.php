@@ -142,6 +142,7 @@ class ScheduleSummaryReport extends Report {
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
+										'-5040-page_break' => TTi18n::gettext('Page Break On'),
 							);
 
 				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -1657,7 +1658,7 @@ class ScheduleSummaryReport extends Report {
 			$this->pdf->SetTitle( $this->title );
 			$this->pdf->SetSubject( APPLICATION_NAME .' '. TTi18n::getText('Report') );
 
-			$this->pdf->setMargins( $this->config['other']['left_margin'], $this->config['other']['top_margin'], $this->config['other']['right_margin'] );
+			$this->pdf->setMargins( $this->config['other']['left_margin'], $this->config['other']['top_margin'], $this->config['other']['right_margin'] ); //Margins are ignored because we use setXY() to force the coordinates before each drawing and therefore ignores margins.
 			//Debug::Arr($this->config['other'], 'Margins: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$this->pdf->SetAutoPageBreak( FALSE, 0 );

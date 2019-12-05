@@ -709,6 +709,15 @@ class ROEReport extends Report {
 					$batch_id .= substr( $user_obj->getLastName(), 0, 9 ) . date('Ym', TTDate::parseDateTime( $row['pay_period_end_date'] ) );
 
 					$roe->addRecord( $ee_data );
+
+					if ( $format == 'pdf_form_publish_employee' ) {
+						// generate PDF for every employee and assign to each government document records
+						$this->getFormObject()->addForm( $roe );
+						GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 190, TTDate::parseDateTime( $row['pay_period_end_date'] ), $this->getFormObject()->output( 'PDF' ) );
+						$this->getFormObject()->clearForms();
+					}
+
+
 					unset( $ee_data );
 
 					$i++;
@@ -716,6 +725,11 @@ class ROEReport extends Report {
 				unset( $user_rows, $rows, $ulf, $user_obj, $title_obj, $contact_user_obj );
 
 				$this->getFormObject()->addForm( $roe );
+
+				if ( $format == 'pdf_form_publish_employee' ) {
+					$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $this->getUserObject()->getId() );
+					return $user_generic_status_batch_id;
+				}
 
 				$full_service_efile = FALSE;
 				if ( $format == 'efile_xml' ) {
@@ -823,7 +837,7 @@ class ROEReport extends Report {
 	 * @return bool
 	 */
 	function _postProcess( $format = NULL ) {
-		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' ) {
+		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml'  OR $format == 'pdf_form_publish_employee' ) {
 			Debug::Text('Skipping postProcess! Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		} else {
@@ -836,7 +850,7 @@ class ROEReport extends Report {
 	 * @return array|bool
 	 */
 	function _output( $format = NULL ) {
-		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' ) {
+		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'pdf_form_publish_employee' ) {
 			return $this->_outputPDFForm( $format );
 		} else {
 			return parent::_output( $format );

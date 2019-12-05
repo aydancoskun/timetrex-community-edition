@@ -98,6 +98,10 @@ class APILegalEntity extends APIFactory {
 	function getLegalEntity( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check('legal_entity', 'enabled')
 				OR !( $this->getPermissionObject()->Check('legal_entity', 'view') OR $this->getPermissionObject()->Check('legal_entity', 'view_own') ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
@@ -162,6 +166,10 @@ class APILegalEntity extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('legal_entity', 'enabled')
@@ -278,6 +286,10 @@ class APILegalEntity extends APIFactory {
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
+		}
+
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check('legal_entity', 'enabled')

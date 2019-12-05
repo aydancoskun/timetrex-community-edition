@@ -29,20 +29,6 @@ UserDefaultViewController = BaseViewController.extend( {
 		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 		this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.add] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.view] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_icon] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
-
 		this.render();
 		this.buildContextMenu();
 
@@ -73,6 +59,18 @@ UserDefaultViewController = BaseViewController.extend( {
 			}
 		} );
 
+	},
+
+	getCustomContextMenuModel: function () {
+		var context_menu_model = {
+			exclude: ['default'],
+			include: [
+				ContextMenuIconName.save,
+				ContextMenuIconName.cancel
+			]
+		};
+
+		return context_menu_model;
 	},
 
 	getUserDefaultData: function( callBack ) {
@@ -155,36 +153,6 @@ UserDefaultViewController = BaseViewController.extend( {
 			this.validate();
 		}
 
-	},
-
-	onSaveClick: function( ignoreWarning ) {
-		var $this = this;
-		var record = this.current_edit_record;
-		if ( !Global.isSet( ignoreWarning ) ) {
-			ignoreWarning = false;
-		}
-		LocalCacheData.current_doing_context_action = 'save';
-		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
-
-				if ( result.isValid() ) {
-					var result_data = result.getResult();
-					if ( result_data === true ) {
-						$this.refresh_id = $this.current_edit_record.id;
-					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-						$this.refresh_id = result_data;
-					}
-
-
-					$this.removeEditView();
-
-				} else {
-					$this.setErrorTips( result );
-					$this.setErrorMenu();
-				}
-
-			}
-		} );
 	},
 
 	setErrorMenu: function() {
@@ -305,6 +273,18 @@ UserDefaultViewController = BaseViewController.extend( {
 			field: 'permission_control_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Permission Group' ), form_item_input, tab_employee_id_column1, '' );
+
+		//Terminated Permission Group
+		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIPermissionControl' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.PERMISSION_CONTROL,
+			set_empty: true,
+			show_search_inputs: true,
+			field: 'terminated_permission_control_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Terminated Permission Group' ), form_item_input, tab_employee_id_column1, '' );
 
 		// Pay Period Schedule
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );

@@ -622,7 +622,7 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 
 		$amount1 = '510,9';
 		$amount2 = '90,9';
-		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
+		@$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
 
 
 		//
@@ -635,15 +635,15 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 
 		$amount1 = 510.9;
 		$amount2 = 90.9;
-		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
+		@$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
 
 		$amount1 = '510,9';
 		$amount2 = '90,9';
-		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
+		@$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
 
 		$amount1 = '123456710,9';
 		$amount2 = '90,9';
-		$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
+		@$this->assertEquals( bcadd( $amount1, $amount2, 2 ), 0.00 ); //BCMath fails handling floating point values with comma separator.
 
 		//Set locale back to the default so it doesn't affect other tests.
 		setlocale( LC_ALL, TTi18n::generateLocale( 'en_US' ) );
