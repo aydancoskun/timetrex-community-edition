@@ -786,6 +786,50 @@ class Misc {
 		return $value;
 	}
 
+
+	/**
+	 * Compares two float values for equality and greater/less than. Required because floats should never be compared directly due to epsilon differences
+	 *   For example: (float)845.92 + (float)14.3 != (float)860.22 -- Yet it does as far as a human is concerned.
+	 * @param $float1
+	 * @param $float2
+	 * @param string $operator
+	 * @return bool
+	 */
+	static function compareFloat( $float1, $float2, $operator = '==' ) {
+		$retval = FALSE;
+
+		$bc_comp_result = bccomp( $float1, $float2 );
+		switch ( $operator ) {
+			case '==':
+				if ( bccomp( $float1, $float2 ) === 0 ) {
+					$retval = TRUE;
+				}
+				break;
+			case '>=':
+				if ( $bc_comp_result >= 0 ) {
+					$retval = TRUE;
+				}
+				break;
+			case '<=':
+				if ( $bc_comp_result <= 0 ) {
+					$retval = TRUE;
+				}
+				break;
+			case '>':
+				if ( $bc_comp_result === 1 ) {
+					$retval = TRUE;
+				}
+				break;
+			case '<':
+				if ( $bc_comp_result === -1 ) {
+					$retval = TRUE;
+				}
+				break;
+		}
+
+		return $retval;
+	}
+
 	/**
 	 * Just a number format that looks like currency without currency symbol
 	 * can maybe be replaced by TTi18n::numberFormat()
@@ -819,7 +863,7 @@ class Misc {
 			//When using round() it returns a float, so large values like 100000000000000000000.00 get converted to scientific notation when passed to bcmath() due to the string conversion. Use number_format() instead.
 			//$retval = round( $value, $decimals );
 			//Could use bcadd( $value, 0, $decimals ) to round larger values perhaps?
-			$retval = number_format( $value, $decimals, '.', '' );
+			$retval = number_format( (float)$value, $decimals, '.', '' );
 		}
 
 		return $retval;
@@ -2567,11 +2611,12 @@ class Misc {
 	}
 
 	/**
+	 * Checks to see if the directory $path and $recurse_parent_levels number of parent paths are empty, and deletes them all going *UP* the tree. This will not go *DOWN* the tree.
 	 * @param $path
 	 * @param int $recurse_parent_levels
 	 * @return bool
 	 */
-	static function deleteEmptyDirectory( $path, $recurse_parent_levels = 0 ) {
+	static function deleteEmptyParentDirectory( $path, $recurse_parent_levels = 0 ) {
 		if ( $path == '' ) {
 			Debug::Text('Path is empty: '. $path, __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
@@ -2588,10 +2633,36 @@ class Misc {
 			$parent_dir = realpath( $path . DIRECTORY_SEPARATOR . '..' ); //Need to get parent directory before its deleted, otherwise realpath() fails.
 			rmdir( $path );
 			if ( $recurse_parent_levels > 0 ) {
-				return self::deleteEmptyDirectory( $parent_dir, ( $recurse_parent_levels - 1 ) );
+				return self::deleteEmptyParentDirectory( $parent_dir, ( $recurse_parent_levels - 1 ) );
 			}
 		} else {
 			Debug::Text('Skipping Non-Empty Directory: '. $path, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		return TRUE;
+	}
+
+	/**
+	 * Deletes all empty directories in $path and underneath (down) from it.
+	 * @param $path
+	 * @return bool
+	 */
+	static function deleteEmptyChildDirectory( $path ) {
+		if ( $path == '' ) {
+			Debug::Text('Path is empty: '. $path, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		if ( !is_dir( $path ) ) {
+			Debug::Text('Path is not a directory: '. $path, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $path, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
+		foreach ( $files as $file_obj ) {
+			if ( $file_obj->isDir() == TRUE ) {
+				Misc::deleteEmptyParentDirectory( $file_obj->getPathName() );
+			}
 		}
 
 		return TRUE;
@@ -2682,17 +2753,17 @@ class Misc {
 	static function isSubDirectory( $child_dir, $parent_dir ) {
 		//Make sure directories always end in trailing slash, otherwise paths like this will fail:
 		//  Child: /var/www/TimeTrex Parent: /var/www/TimeTrexTest
-		$child_dir = rtrim($child_dir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
-		$parent_dir = rtrim($parent_dir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
+		$child_dir = rtrim( $child_dir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
+		$parent_dir = rtrim( $parent_dir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
 		if ( strpos( $child_dir, $parent_dir ) === 0 ) {
 			return TRUE;
 		} else {
 			//When using realpath(), if the path does not exist it will return FALSE. In that case it can never be a sub directory.
 			$real_child_dir = realpath( $child_dir );
 			$real_parent_dir = realpath( $parent_dir );
-			if ( $real_child_dir !== FALSE AND $real_parent_dir !== FALSE AND strpos( $real_child_dir.DIRECTORY_SEPARATOR, $real_parent_dir.DIRECTORY_SEPARATOR ) === 0 ) { //Test realpaths incase they are relative or have "../" in them.
-			return TRUE;
-		}
+			if ( $real_child_dir !== FALSE AND $real_parent_dir !== FALSE AND strpos( $real_child_dir . DIRECTORY_SEPARATOR, $real_parent_dir . DIRECTORY_SEPARATOR ) === 0 ) { //Test realpaths incase they are relative or have "../" in them.
+				return TRUE;
+			}
 		}
 
 		return FALSE;
@@ -3870,7 +3941,7 @@ class Misc {
 	 * @return mixed
 	 * @throws Exception
 	 */
-	function Retry( $function, $retry_max_attempts = 3, $retry_sleep = 1 ) { //When changing function definition, also see APIFactory->RetryTransaction()
+	static function Retry( $function, $retry_max_attempts = 3, $retry_sleep = 1 ) { //When changing function definition, also see APIFactory->RetryTransaction()
 		$tmp_sleep = ( $retry_sleep * 1000000 );
 		$retry_attempts = 0;
 		while ( $retry_attempts < $retry_max_attempts ) {

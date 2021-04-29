@@ -120,6 +120,43 @@ class HolidayPolicyRecurringHolidayListFactory extends HolidayPolicyRecurringHol
 	}
 
 	/**
+	 * @param string $company_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HolidayPolicyRecurringHolidayListFactory
+	 */
+	function getByCompanyIdAndRecurringHolidayId( $company_id, $recurring_holiday_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $recurring_holiday_id == '') {
+			return FALSE;
+		}
+
+		$hpf = new HolidayPolicyFactory();
+
+		$ph = array(
+				'company_id' => TTUUID::castUUID($company_id),
+				'recurring_holiday_id' => TTUUID::castUUID($recurring_holiday_id)
+		);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $hpf->getTable() .' as hpf ON a.holiday_policy_id = hpf.id
+					where	hpf.company_id = ?
+						AND a.recurring_holiday_id = ?
+						AND ( hpf.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->rs = $this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
 	 * @param string $id UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )

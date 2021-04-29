@@ -55,7 +55,7 @@ extract	(FormVariables::GetVariables(
 												) ) );
 
 if ( $authentication->checkValidCSRFToken() == FALSE ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
-	echo TTi18n::getText( 'Invalid referrer, possible CSRF.' );
+	echo TTi18n::getText( 'Invalid CSRF token!' );
 	Debug::writeToLog();
 	exit;
 }

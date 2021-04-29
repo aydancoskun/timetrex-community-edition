@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
+
+<!--
+Description: 	AGR-1 Return Data Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<!-- @@@@ Definition of AGR-1 ComplexTypes @@@@  2011/June/22  Version# 1.11 (version #.yy)-->
 	<xsd:complexType name="AGR-1SlipType">
 		<xsd:sequence>
 			<xsd:element name="Detail_Record" type="AGR-1DetailRecType" maxOccurs="unbounded"/>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	T3M Return Complex and Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+
+	<xsd:simpleType name="T3MTrustTypeCode">
+		<xsd:annotation>
+			<xsd:documentation>Type of Trust: 51-Mining reclamation; 52-Waste disposal reclamation; 
+							  53-Quarry reclamation; 54-Pipeline reclamation.
+			</xsd:documentation>
+		</xsd:annotation>
+
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:length value="2"/>
+			<xsd:enumeration value="51"/>
+			<xsd:enumeration value="52"/>
+			<xsd:enumeration value="53"/>
+			<xsd:enumeration value="54"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="T3MIdentType">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeBase">
+       				<xsd:sequence>
+					<xsd:element ref="TrusteeLanguageCode" minOccurs="0"/>
+					<xsd:element ref="TrustFiscalPeriodEndDate"/>
+					<xsd:element ref="DeclaredTrustProvinceCode"/>
+					<xsd:element ref="TrustEffectiveDate"/>
+					<xsd:element ref="TrustExpiryDate" minOccurs="0"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<xsd:complexType name="T3MTaxSummaryType">
+		<xsd:sequence>
+			<xsd:element name="QualifyingEnvironmentalTrustTaxableIncomeAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="QualifyingEnvironmentalTrustFederalTaxPayableAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="QualifyingEnvironmentalTrustProvincialTaxPayableAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element ref="TotalTrustTaxPayableAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountPaidAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountBalanceAmount" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- T3M return -->
+	<xsd:complexType name="T3MReturnType">
+		<xsd:sequence>
+			<xsd:element name="TrustInformation" type="T3MIdentType"/>
+
+			<xsd:element name="QualifyingEnvironmentalTrustName" type="Length1to60TextType"/>
+
+			<xsd:element name="QualifyingEnvironmentalTrustTypeCode" type="T3MTrustTypeCode"/>
+
+			<xsd:element name="QualifyingEnvironmentalTrustBeneficiaryCount" type="Length1to15CountType" minOccurs="0"/>
+
+			<xsd:element name="TotalQualifyingEnvironmentalTrustContributionAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TotalQualifyingEnvironmentalTrustWithdrawAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+
+			<xsd:element name="TrustReturnTaxSummary" type="T3MTaxSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

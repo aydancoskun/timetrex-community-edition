@@ -156,28 +156,28 @@ class PayrollDeduction_US_MD extends PayrollDeduction_US {
 	//We will need to have the county tax rate passed into this class so the proper calculations can be made.
 	//
 	var $state_options = array(
-		20180601 => array( //01-Jun-2018
-						   'standard_deduction' => array(
-								   'minimum' => 1500,
-								   'maximum' => 2250,
-								   'rate'    => 0.15, //percent
-						   ),
-						   'allowance'          => 3200,
-		),
+			20180601 => array( //01-Jun-2018
+							   'standard_deduction' => array(
+									   'minimum' => 1500,
+									   'maximum' => 2250,
+									   'rate'    => 0.15, //percent
+							   ),
+							   'allowance'          => 3200,
+			),
 
-		//01-Jan-13: No Changes
-		//01-Jan-12: No Changes
-		//01-Jan-11: No Changes
-		//01-Jan-10: No Changes
-		//01-Jan-09: No Changes
-		20080101 => array( //2008
-						   'standard_deduction' => array(
-								   'minimum' => 1500,
-								   'maximum' => 2000,
-								   'rate'    => 0.15, //percent
-						   ),
-						   'allowance'          => 3200,
-		),
+			//01-Jan-13: No Changes
+			//01-Jan-12: No Changes
+			//01-Jan-11: No Changes
+			//01-Jan-10: No Changes
+			//01-Jan-09: No Changes
+			20080101 => array( //2008
+							   'standard_deduction' => array(
+									   'minimum' => 1500,
+									   'maximum' => 2000,
+									   'rate'    => 0.15, //percent
+							   ),
+							   'allowance'          => 3200,
+			),
 	);
 
 	function getStateAnnualTaxableIncome() {

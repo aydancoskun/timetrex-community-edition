@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	T1061 Return Data Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+
+	<xsd:complexType name="T1061TrustInfoType">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeBase">
+       				<xsd:sequence>
+					<xsd:element ref="TrustFiscalPeriodEndDate"/>
+					<xsd:element ref="TrustFilerName"/>
+					<xsd:element ref="TrustFilerMailingAddress" minOccurs="0"/>
+					<xsd:element ref="TrustFilerLanguageCode" minOccurs="0"/>
+					<xsd:element ref="RCAAARegistrationNumber"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+
+	<!-- T1061 return -->
+	<xsd:complexType name="T1061ReturnType">
+		<xsd:sequence>
+			<xsd:element name="TrustInformation" type="T1061TrustInfoType"/>
+			<xsd:element name="GroupReturnInclusionTrustCount" type="Length1to15CountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

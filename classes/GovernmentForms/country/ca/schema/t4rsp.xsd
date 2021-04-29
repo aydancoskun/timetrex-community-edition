@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
+
+<!--
+Description	T4RSP Return Complex and Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<!-- @@@@ Definition of T4rsp ComplexTypes @@@@  2011/June/22  Version# 1.11 (version #.yy)-->
 	<xsd:complexType name="T4RSPSlipType">
 		<xsd:all>
 			<xsd:element name="RCPNT_NM" type="NameType"/>
@@ -39,6 +45,7 @@
 			<xsd:element name="tx_yr" type="yearType"/>
 			<xsd:element name="slp_cnt" type="int7Type"/>
 			<xsd:element name="rpt_tcd" type="otherDataType"/>
+			<xsd:element name="fileramendmentnote" type="char1309Type" minOccurs="0"/> 
 			<xsd:element name="T4RSP_TAMT" type="T4rspTotalsType" minOccurs="0"/>
 		</xsd:all>
 	</xsd:complexType>

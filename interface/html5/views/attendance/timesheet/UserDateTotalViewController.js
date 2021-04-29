@@ -447,11 +447,6 @@ UserDateTotalViewController = BaseViewController.extend( {
 					widget.setEnabled( false );
 					widget.setValue( this.current_edit_record[key] );
 					break;
-				case 'override':
-					//Always default to true
-					this.current_edit_record.override = true;
-					widget.setValue( true );
-					break;
 				default:
 					if ( widget ) {
 						widget.setValue( this.current_edit_record[key] );

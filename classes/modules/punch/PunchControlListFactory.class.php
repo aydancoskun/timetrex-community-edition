@@ -71,12 +71,11 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 			return FALSE;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
-
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
+			$ph = array(
+					'id' => TTUUID::castUUID($id),
+			);
 
 			$query = '
 						select	*

@@ -491,6 +491,10 @@ InstallWizardController = BaseWizardController.extend( {
 					this.addEditFieldToColumn( $.i18n._( 'Base URL' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( { field: 'system_timezone' } );
+					this.addEditFieldToColumn( $.i18n._( 'System TimeZone' ), form_item_input, requirements_column2, '', null, true, true );
+
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( { field: 'base_dir' } );
 					this.addEditFieldToColumn( $.i18n._( 'PHP Open BaseDir' ), form_item_input, requirements_column2, '', null, true, true );
 
@@ -1548,6 +1552,14 @@ InstallWizardController = BaseWizardController.extend( {
 								edit_view_form_item_dic.hide();
 							} else {
 								widget.html( $.i18n._( 'PHP OPEN_BASEDIR setting' ) + ' ' + '(' + stepData[key].php_open_base_dir + ') ' + $.i18n._( 'does not include directory of PHP CLI binary' ) + ' ' + '(' + stepData[key].php_cli_directory + ')' );
+								widget.addClass( 'dataError' );
+							}
+							break;
+						case 'system_timezone':
+							if ( stepData[key] == 0 ) {
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'system_timezone in timetrex.ini.php is invalid!' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;

@@ -11,7 +11,9 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	tax_formula_type_array: null,
 	calculation_array: null,
 	account_amount_type_array: null,
+	yes_no_array: null,
 	federal_filing_status_array: null,
+	state_basic_filing_status_array: null,
 	apply_frequency_array: null,
 	apply_payroll_run_type_array: null,
 	length_of_service_unit_array: null,
@@ -120,7 +122,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'country', 'country', this.company_api );
 		this.initDropDownOption( 'apply_payroll_run_type' );
 
+		this.initDropDownOption( 'yes_no' );
+
+		this.initDropDownOption( 'form_w4_version' );
 		this.initDropDownOption( 'federal_filing_status' );
+		this.initDropDownOption( 'state_basic_filing_status' );
 		this.initDropDownOption( 'state_dc_filing_status' );
 		this.initDropDownOption( 'state_al_filing_status' );
 		this.initDropDownOption( 'state_ct_filing_status' );
@@ -131,7 +137,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'state_ma_filing_status' );
 		this.initDropDownOption( 'state_ga_filing_status' );
 		this.initDropDownOption( 'state_la_filing_status' );
-		this.initDropDownOption( 'state_me_filing_status' );
 		this.initDropDownOption( 'state_wv_filing_status' );
 		this.initDropDownOption( 'state_filing_status' );
 		this.initDropDownOption( 'tax_formula_type' );
@@ -243,14 +248,15 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			}
 		}
 
-		this.user_deduction_api.setUserDeduction( data, {
-			onResult: function() {
-				if ( Global.isSet( callBack ) ) {
-					callBack();
+		if ( data && data.length > 0 ) {
+			this.user_deduction_api.setUserDeduction( data, {
+				onResult: function () {
+					if ( Global.isSet( callBack ) ) {
+						callBack();
+					}
 				}
-			}
-		} );
-
+			} );
+		}
 	},
 
 	onContextMenuClick: function( context_btn, menu_name ) {
@@ -751,6 +757,9 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				this.onLegalEntityChange();
 				this.updateEmployeeData();
 				break;
+			case 'user_value10':
+				this.onFormW4VersionChange();
+				break;
 		}
 
 
@@ -966,6 +975,13 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.detachElement( 'df_14' );
 		this.detachElement( 'df_15' );
 
+		this.detachElement( 'df_20' );
+		this.detachElement( 'df_21' );
+		this.detachElement( 'df_22' );
+		this.detachElement( 'df_23' );
+		this.detachElement( 'df_24' );
+		this.detachElement( 'df_25' );
+
 		if ( !( Global.getProductEdition() >= 15 ) ) {
 			this.detachElement( 'df_100' );
 		}
@@ -1032,12 +1048,23 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		}
 	},
 
+	getColumnOptionsString: function( column_options_arr ) {
+		var column_options_string = '';
+		for ( i = 0; i < column_options_arr.length; i++ ) {
+			if ( i !== column_options_arr.length - 1 ) {
+				column_options_string += column_options_arr[i].fullValue + ':' + column_options_arr[i].label + ';';
+			} else {
+				column_options_string += column_options_arr[i].fullValue + ':' + column_options_arr[i].label;
+			}
+		}
+
+		return column_options_string;
+	},
+
 	/* jshint ignore:start */
 	buildEmployeeSettingGrid: function() {
 		var $this = this;
 		var column_info_array = [];
-		var column_options_string = '';
-		var columnOptions = [];
 
 		var column_info = {
 			name: 'user_name',
@@ -1519,29 +1546,37 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '100-US':
-				columnOptions = this.federal_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
+				//2020 Form W4
+				column_info = {
+					name: 'user_value9',
+					index: 'user_value9',
+					label: $.i18n._( 'Form W-4<br>Version' ),
+					width: 60,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {
+						defaultValue: 2019, //This is required to prevent a blank cell from appearing if they haven't saved the Tax/Deduction record since the upgrade.
+						value: this.getColumnOptionsString( this.form_w4_version_array ),
+						//dataEvents: [ {type: 'change', fn:function(e) { $this.onFormItemChange( e.target, true )}} ],
 					}
+				};
+				column_info_array.push( column_info );
 
-				}
-
+				//2019 Form W4
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
-					label: $.i18n._( 'Filing Status' ),
+					label: '&nbsp;&nbsp;&nbsp;&nbsp;' + $.i18n._( 'Filing Status' ) + '&nbsp;&nbsp;&nbsp;&nbsp;', //Add some padding on the filing status as the auto sizing of columns doesn't work properly here.
 					width: 100,
 					sortable: false,
 					formatter: 'select',
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.federal_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -1549,7 +1584,72 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					name: 'user_value2',
 					index: 'user_value2',
 					label: $.i18n._( 'Allowances' ),
-					width: 100,
+					width: 50,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
+				column_info_array.push( column_info );
+
+				//2020 Form W4
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Multiple Jobs or<br> Spouse Works' ),
+					width: 60,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {
+						defaultValue: 0, //This is required to prevent a blank cell from appearing if they haven't saved the Tax/Deduction record since the upgrade.
+						value: this.getColumnOptionsString( this.yes_no_array ) }
+				};
+				column_info_array.push( column_info );
+
+				column_info = {
+					name: 'user_value4',
+					index: 'user_value4',
+					label: $.i18n._( 'Claim<br>Dependents' ),
+					width: 50,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
+				column_info_array.push( column_info );
+
+				column_info = {
+					name: 'user_value5',
+					index: 'user_value5',
+					label: $.i18n._( 'Other<br>Income' ),
+					width: 50,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
+				column_info_array.push( column_info );
+
+				column_info = {
+					name: 'user_value6',
+					index: 'user_value6',
+					label: $.i18n._( 'Deductions' ),
+					width: 50,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
+				column_info_array.push( column_info );
+
+				column_info = {
+					name: 'user_value7',
+					index: 'user_value7',
+					label: $.i18n._( 'Extra<br>Withholding' ),
+					width: 50,
 					sortable: false,
 					title: false,
 					editable: true,
@@ -1558,18 +1658,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '100-CR':
-				columnOptions = this.federal_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1580,7 +1668,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_basic_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -1623,18 +1711,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-AL':
-				columnOptions = this.state_al_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1645,7 +1721,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_al_filing_status_array )  }
 				};
 				column_info_array.push( column_info );
 
@@ -1662,18 +1738,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-CT':
-				columnOptions = this.state_ct_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1684,23 +1748,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_ct_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 				break;
 			case '200-US-DC':
-				columnOptions = this.state_dc_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1711,7 +1763,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_dc_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -1728,18 +1780,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-DE':
-				columnOptions = this.state_de_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1750,7 +1790,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_de_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -1767,18 +1807,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-NJ':
-				columnOptions = this.state_nj_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1789,7 +1817,34 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_nj_filing_status_array ) }
+				};
+				column_info_array.push( column_info );
+
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
+				column_info_array.push( column_info );
+				break;
+			case '200-US-NM':
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: { value: this.getColumnOptionsString( this.federal_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -1806,18 +1861,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-NC':
-				columnOptions = this.state_nc_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1828,7 +1871,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_nc_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -1845,18 +1888,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-MA':
-				columnOptions = this.state_ma_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1867,7 +1898,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_ma_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -1884,18 +1915,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-MD':
-				columnOptions = this.state_dc_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1906,7 +1925,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_dc_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -1935,18 +1954,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-OK':
-				columnOptions = this.federal_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1957,7 +1964,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_basic_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -1974,18 +1981,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-GA':
-				columnOptions = this.state_ga_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -1996,7 +1991,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_ga_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -2113,18 +2108,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-LA':
-				columnOptions = this.state_la_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -2135,7 +2118,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_la_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -2163,58 +2146,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				};
 				column_info_array.push( column_info );
 				break;
-			case '200-US-ME':
-				columnOptions = this.state_me_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
-				column_info = {
-					name: 'user_value1',
-					index: 'user_value1',
-					label: $.i18n._( 'Filing Status' ),
-					width: 100,
-					sortable: false,
-					formatter: 'select',
-					editable: true,
-					title: false,
-					edittype: 'select',
-					editoptions: { value: column_options_string }
-				};
-				column_info_array.push( column_info );
-
-				column_info = {
-					name: 'user_value2',
-					index: 'user_value2',
-					label: $.i18n._( 'Allowances' ),
-					width: 100,
-					sortable: false,
-					title: false,
-					editable: true,
-					edittype: 'text'
-				};
-				column_info_array.push( column_info );
-				break;
 			case '200-US-WI':
-				columnOptions = this.federal_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -2225,7 +2157,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_basic_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -2242,18 +2174,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '200-US-WV':
-				columnOptions = this.state_wv_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -2264,7 +2184,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_wv_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -2280,20 +2200,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				};
 				column_info_array.push( column_info );
 				break;
-			case '200-US':
+			case '200-US': //Province/State Income TaxFormula
 			case '300-US':
-				columnOptions = this.state_filing_status_array;
-
-				for ( i = 0; i < columnOptions.length; i++ ) {
-
-					if ( i !== columnOptions.length - 1 ) {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
-					} else {
-						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
-					}
-
-				}
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -2304,7 +2212,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					editable: true,
 					title: false,
 					edittype: 'select',
-					editoptions: { value: column_options_string }
+					editoptions: { value: this.getColumnOptionsString( this.state_filing_status_array ) }
 				};
 				column_info_array.push( column_info );
 
@@ -2321,7 +2229,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case '300-US-IN':
-
 				column_info = {
 					name: 'user_value1',
 					index: 'user_value1',
@@ -2452,13 +2359,13 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				name: 'user_value10',
 				index: 'user_value10',
 				label: $.i18n._( 'Exempt' ),
-				width: 100,
+				width: 30,
 				sortable: false,
 				formatter: 'select',
 				editable: true,
 				title: false,
 				edittype: 'select',
-				editoptions: { value: '0:No;1:Yes' }
+				editoptions: { value: this.getColumnOptionsString( this.yes_no_array ) }
 			};
 			column_info_array.push( column_info );
 		}
@@ -2974,10 +2881,56 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					}
 					break;
 				case '100-US':
-				case '100-CR' :
+					//2020 Form W4
+					$this.attachElement( 'df_20' );
+					$this.edit_view_form_item_dic.df_20.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Form W-4 Version' ) + ': ' );
+					$this.edit_view_ui_dic.df_20.setSourceData( $this.form_w4_version_array );
+					$this.edit_view_ui_dic.df_20.setField( 'user_value9' );
+					$this.edit_view_ui_dic.df_20.setValue( $this.current_edit_record.user_value9 );
+
+					// 2019 and older Form W4
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.federal_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ': ' );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+
+					// 2020 and newer Form W4
+					$this.attachElement( 'df_21' );
+					$this.edit_view_form_item_dic.df_21.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Multiple Jobs or Spouse Works' ) + ': ' );
+					$this.edit_view_ui_dic.df_21.setSourceData( $this.yes_no_array );
+					$this.edit_view_ui_dic.df_21.setField( 'user_value3' );
+					$this.edit_view_ui_dic.df_21.setValue( $this.current_edit_record.user_value3 );
+
+					$this.attachElement( 'df_22' );
+					$this.edit_view_form_item_dic.df_22.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Claim Dependents' ) + ': ' );
+					$this.edit_view_ui_dic.df_22.setField( 'user_value4' );
+					$this.edit_view_ui_dic.df_22.setValue( $this.current_edit_record.user_value4 );
+
+					$this.attachElement( 'df_23' );
+					$this.edit_view_form_item_dic.df_23.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Other Income' ) + ': ' );
+					$this.edit_view_ui_dic.df_23.setField( 'user_value5' );
+					$this.edit_view_ui_dic.df_23.setValue( $this.current_edit_record.user_value5 );
+
+					$this.attachElement( 'df_24' );
+					$this.edit_view_form_item_dic.df_24.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Deductions' ) + ': ' );
+					$this.edit_view_ui_dic.df_24.setField( 'user_value6' );
+					$this.edit_view_ui_dic.df_24.setValue( $this.current_edit_record.user_value6 );
+
+					$this.attachElement( 'df_25' );
+					$this.edit_view_form_item_dic.df_25.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Extra Withholding' ) + ': ' );
+					$this.edit_view_ui_dic.df_25.setField( 'user_value7' );
+					$this.edit_view_ui_dic.df_25.setValue( $this.current_edit_record.user_value7 );
+					break;
+				case '100-CR':
+					$this.attachElement( 'df_14' );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_basic_filing_status_array );
 					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 
@@ -3001,7 +2954,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				//
 				case '200-US': //Province/State Income TaxFormula
 					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_filing_status_array );
 					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
@@ -3025,7 +2978,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					break;
 				case '200-US-AZ':
 					$this.attachElement( 'df_0' );
-					$this.edit_view_form_item_dic.df_0.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Percent' ) + ": " );
+					$this.edit_view_form_item_dic.df_0.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Percent' ) + ': ' );
 					$this.edit_view_ui_dic.df_0.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_0.setValue( $this.current_edit_record.user_value1 );
 					break;
@@ -3118,36 +3071,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					break;
 				case '200-US-MA':
 					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_ma_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
-
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-					break;
-				case '200-US-MD':
-					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_dc_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
-
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Amount' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'County Rate' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value3' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value3 );
-					break;case '200-US-ME' :
-					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_me_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_ma_filing_status_array );
 					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 
@@ -3155,6 +3080,23 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ': ' );
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+					break;
+				case '200-US-MD':
+					$this.attachElement( 'df_14' );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_dc_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Amount' ) + ': ' );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'County Rate' ) + ': ' );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value3' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value3 );
 					break;
 				case '200-US-NC':
 					$this.attachElement( 'df_14' );
@@ -3180,10 +3122,22 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 					break;
-				case '200-US-OK':
+				case '200-US-NM':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.federal_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ': ' );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+					break;
+				case '200-US-OK':
+					$this.attachElement( 'df_14' );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_basic_filing_status_array );
 					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 
@@ -3194,25 +3148,25 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					break;
 				case '200-US-OH':
 					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ': ' );
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 					break;
 				case '200-US-VA':
 					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ': ' );
 					$this.edit_view_ui_dic.df_1.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value1 );
 
 					$this.attachElement( 'df_2' );
-					$this.edit_view_form_item_dic.df_2.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Age 65/Blind' ) + ": " );
+					$this.edit_view_form_item_dic.df_2.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Age 65/Blind' ) + ': ' );
 					$this.edit_view_ui_dic.df_2.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value2 );
 					break;
 				case '200-US-WI':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.federal_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_basic_filing_status_array );
 					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 
@@ -3223,7 +3177,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					break;
 				case '200-US-WV':
 					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_wv_filing_status_array );
 					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
@@ -3233,7 +3187,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 					break;
-				case '300-US' :
+				case '300-US':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ': ' );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_filing_status_array );
@@ -3244,7 +3198,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ': ' );
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-
 					break;
 				case '300-US-IN' :
 					$this.attachElement( 'df_1' );
@@ -3305,6 +3258,28 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			}
 		}
 
+	},
+
+	//When its a 2020 or later Form W4, try to disable the Allowance field as its not on the form.
+	//  This is most important when using the Employee Settings tab though.
+	onFormW4VersionChange: function() {
+		if ( this.current_edit_record.calculation_id == 100 && this.current_edit_record.country == 'US' ) {
+			// if ( this.edit_view_ui_dic.df_20.getValue() == 2020 ) {
+			// 	this.edit_view_ui_dic.df_1.setEnabled( false );
+			// 	this.edit_view_ui_dic.df_21.setEnabled( true );
+			// 	this.edit_view_ui_dic.df_22.setEnabled( true );
+			// 	this.edit_view_ui_dic.df_23.setEnabled( true );
+			// 	this.edit_view_ui_dic.df_24.setEnabled( true );
+			// 	this.edit_view_ui_dic.df_25.setEnabled( true );
+			// } else {
+			// 	this.edit_view_ui_dic.df_1.setEnabled( true );
+			// 	this.edit_view_ui_dic.df_21.setEnabled( false );
+			// 	this.edit_view_ui_dic.df_22.setEnabled( false );
+			// 	this.edit_view_ui_dic.df_23.setEnabled( false );
+			// 	this.edit_view_ui_dic.df_24.setEnabled( false );
+			// 	this.edit_view_ui_dic.df_25.setEnabled( false );
+			// }
+		}
 	},
 
 	onApplyFrequencyChange: function() {
@@ -3428,7 +3403,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 		form_item_input.TTextArea( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_tax_deductions_column1, '', null, null, true );
-
 		form_item_input.parent().width( '45%' );
 
 		//Pay Stub Note (Public)
@@ -3436,9 +3410,13 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'pay_stub_entry_description', width: 300 } );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Note (Public)' ), form_item_input, tab_tax_deductions_column1 );
 
+		//Calculation Settings label
+		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Calculation Settings' ) } );
+		this.addEditFieldToColumn( null, form_item_input, tab_tax_deductions_column1, '', null, true, false, 'separated_2' );
+
 		//Calculation
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'calculation_id', set_empty: false, width: 400 } );
 		form_item_input.setSourceData( $this.calculation_array );
 		this.addEditFieldToColumn( $.i18n._( 'Calculation' ), form_item_input, tab_tax_deductions_column1, '', null, true );
@@ -3451,36 +3429,41 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		// Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'country', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		// Province
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'province' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
-		this.addEditFieldToColumn( $.i18n._( 'Province' ), form_item_input, tab_tax_deductions_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		// District
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'district', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
 		this.addEditFieldToColumn( $.i18n._( 'District' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		// Dynamic Field 0
-
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'df_0' } );
-
 		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 		var label = $( '<span class=\'widget-right-label\'> %</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( 'df_0', form_item_input, tab_tax_deductions_column1, '', widgetContainer, true );
+
+		//Dynamic Field 20 -- Form W-4 Version (Should go above Filing Status)
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( { field: 'df_20', set_empty: false } );
+		this.addEditFieldToColumn( 'df_20', form_item_input, tab_tax_deductions_column1, '', null, true );
+
+		//Dynamic Field 14 -- Filing Status
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( { field: 'df_14', set_empty: false } ); //Don't show empty value (NONE), so a filing status will always selected.
+		this.addEditFieldToColumn( 'df_14', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//  Dynamic Field 1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -3587,24 +3570,41 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		//Dynamic Field 12,13
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'df_12', width: 30 } );
-
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 		label = $( '<span class=\'widget-right-label\'> ' + ' ' + ' </span>' );
 
 		var widget_combo_box = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		widget_combo_box.TComboBox( { field: 'df_13' } );
 		widget_combo_box.setSourceData( Global.addFirstItemToArray( $this.look_back_unit_array ) );
-
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		widgetContainer.append( widget_combo_box );
-
 		this.addEditFieldToColumn( 'df_12', [form_item_input, widget_combo_box], tab_tax_deductions_column1, '', widgetContainer, true );
 
-		//Dynamic Field 14 -- Filing Status
+		//Dynamic Field 21 -- Multiple Jobs or Spouse Works
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( { field: 'df_14', set_empty: false } ); //Don't show empty value (NONE), so a filing status will always selected.
-		this.addEditFieldToColumn( 'df_14', form_item_input, tab_tax_deductions_column1, '', null, true );
+		form_item_input.TComboBox( { field: 'df_21', set_empty: false } );
+		this.addEditFieldToColumn( 'df_21', form_item_input, tab_tax_deductions_column1, '', null, true );
+
+		//  Dynamic Field 22
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'df_22' } );
+		this.addEditFieldToColumn( 'df_22', form_item_input, tab_tax_deductions_column1, '', null, true );
+
+		//  Dynamic Field 23
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'df_23' } );
+		this.addEditFieldToColumn( 'df_23', form_item_input, tab_tax_deductions_column1, '', null, true );
+
+		//  Dynamic Field 24
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'df_24' } );
+		this.addEditFieldToColumn( 'df_24', form_item_input, tab_tax_deductions_column1, '', null, true );
+
+		//  Dynamic Field 25
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'df_25' } );
+		this.addEditFieldToColumn( 'df_25', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		if ( !this.sub_view_mode ) {
 			//Pay Stub Account

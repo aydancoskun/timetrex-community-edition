@@ -41,6 +41,16 @@
 class PayrollDeduction_US_SC extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20200101 => array(
+					0 => array( //Uses Subtraction method constants.
+								array('income' => 2620, 'rate' => 0.8, 'constant' => 0),
+								array('income' => 5240, 'rate' => 3, 'constant' => 57.64),
+								array('income' => 7860, 'rate' => 4, 'constant' => 110.04),
+								array('income' => 10490, 'rate' => 5, 'constant' => 188.64),
+								array('income' => 13110, 'rate' => 6, 'constant' => 293.54),
+								array('income' => 13110, 'rate' => 7, 'constant' => 424.64),
+					),
+			),
 			20190101 => array(
 					0 => array( //Uses Subtraction method constants.
 								array('income' => 2450, 'rate' => 1.1, 'constant' => 0),
@@ -84,6 +94,11 @@ class PayrollDeduction_US_SC extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20200101 => array(
+					'standard_deduction_rate'    => 10, //Standard Deduction Rate of 10%
+					'standard_deduction_maximum' => 3820,
+					'allowance'                  => 2590,
+			),
 			20190101 => array(
 					'standard_deduction_rate'    => 10, //Standard Deduction Rate of 10%
 					'standard_deduction_maximum' => 3470,

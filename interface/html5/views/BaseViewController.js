@@ -839,7 +839,7 @@ BaseViewController = Backbone.View.extend( {
 					}
 				}
 
-				if ( !final_context_menu_model['icons'][x]['permission_result'] ) {
+				if ( final_context_menu_model['icons'][x].hasOwnProperty( 'permission_result') == false ) {
 					final_context_menu_model['icons'][x]['permission_result'] = true;
 				}
 				if ( !final_context_menu_model['icons'][x].hasOwnProperty( 'permission' ) == false ) {

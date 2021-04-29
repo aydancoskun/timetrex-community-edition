@@ -49,6 +49,22 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Claim Code Basic Amounts
 	*/
 	var $basic_claim_code_options = array(
+			20200101 => array( //01-Jan-2020:
+							   'CA' => array( 'min' => 12298, 'max' => 13229, 'phase_out_start' => 150473, 'phase_out_end' => 214368 ), //Federal - This is now phased out if net income is ~$150K or less, see Federal Basic Personal Amount (BPAF)
+							   'BC' => 10949,
+							   'AB' => 19369,
+							   'SK' => 16065,
+							   'MB' => 9838,
+							   'QC' => 0,
+							   'ON' => 10783,
+							   'NL' => 9498,
+							   'NB' => 10459,
+							   'NS' => 11481, //See NS.class.php, as there are a low and high basic claim amounts now.
+							   'PE' => 10000,
+							   'NT' => 15093,
+							   'YT' => 12298,
+							   'NU' => 16304,
+			),
 			20190101 => array( //01-Jan-2019:
 							   'CA' => 12069, //Federal
 							   'BC' => 10682,
@@ -391,6 +407,12 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		CPP settings
 	*/
 	var $cpp_options = array(
+			20200101 => array( //2020
+							   'maximum_pensionable_earnings'  => 58700,
+							   'basic_exemption'               => 3500,
+							   'employee_rate'                 => 0.0525,
+							   'employee_maximum_contribution' => 2898.00,
+			),
 			20190101 => array( //2019
 							   'maximum_pensionable_earnings'  => 57400,
 							   'basic_exemption'               => 3500,
@@ -493,6 +515,12 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		EI settings
 	*/
 	var $ei_options = array(
+			20200101 => array( //2020
+							   'maximum_insurable_earnings'    => 54200,
+							   'employee_rate'                 => 0.0158,
+							   'employee_maximum_contribution' => 856.36,
+							   'employer_rate'                 => 1.4,
+			),
 			20190101 => array( //2019
 							   'maximum_insurable_earnings'    => 53100,
 							   'employee_rate'                 => 0.0162,
@@ -595,6 +623,7 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Federal employment credit
 	*/
 	var $federal_employment_credit_options = array(
+			20200101 => array('credit' => 1245),
 			20190101 => array('credit' => 1222),
 			20180101 => array('credit' => 1195),
 			20170101 => array('credit' => 1178),
@@ -615,6 +644,13 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Federal Income Tax Rates
 	*/
 	var $federal_income_tax_rate_options = array(
+			20200101 => array(
+					array('income' => 48535, 'rate' => 15, 'constant' => 0),
+					array('income' => 97069, 'rate' => 20.5, 'constant' => 2669),
+					array('income' => 150473, 'rate' => 26, 'constant' => 8008),
+					array('income' => 214368, 'rate' => 29, 'constant' => 12522),
+					array('income' => 214368, 'rate' => 33, 'constant' => 21097),
+			),
 			20190101 => array(
 					array('income' => 47630, 'rate' => 15, 'constant' => 0),
 					array('income' => 95259, 'rate' => 20.5, 'constant' => 2620),
@@ -776,7 +812,14 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		$data = $this->getBasicClaimCodeData( $date );
 
 		if ( isset( $data['CA'] ) ) {
-			return $data['CA'];
+			//After 01-Jan-2020, BPAF variable was introduced, so see if the data is returned as an array or not.
+			if ( is_array( $data['CA'] ) ) {
+				$retval = $data['CA']['max'];
+			} else {
+				$retval = $data['CA'];
+			}
+
+			return $retval;
 		}
 
 		return FALSE;
@@ -951,7 +994,7 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 	private function getRateArray( $income, $type ) {
 		Debug::text( 'Calculating ' . $type . ' Taxes on: $' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$blank_arr = array( 'rate' => NULL, 'constant' => NULL );
+		$blank_arr = array('rate' => NULL, 'constant' => NULL);
 
 		if ( isset( $this->income_tax_rates[ $type ] ) ) {
 			$rates = $this->income_tax_rates[ $type ];

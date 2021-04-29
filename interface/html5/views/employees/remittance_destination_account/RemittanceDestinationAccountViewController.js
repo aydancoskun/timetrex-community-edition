@@ -457,6 +457,20 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
 					this.current_edit_record['value1'] = this.edit_view_ui_dic['value1_1'].getValue();
 					this.current_edit_record['value1_1'] = this.edit_view_ui_dic['value1_1'].getValue();
+				} else if ( $.inArray( country, ['AG', 'BS', 'BB', 'BZ', 'DO', 'GY', 'HT', 'JM', 'DM', 'GD', 'KN', 'LC', 'VC', 'SR', 'TT'] ) != -1 ) { //Carribbean countries.
+					this.attachElement( 'value1_1' ).text( $.i18n._( 'Institution' ) + ':' );
+					this.attachElement( 'value2' ).text( $.i18n._( 'Bank Transit' ) + ':' );
+					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
+					this.current_edit_record['value1'] = this.edit_view_ui_dic['value1_1'].getValue();
+					this.current_edit_record['value1_1'] = this.edit_view_ui_dic['value1_1'].getValue();
+				} else {
+					this.attachElement( 'value1_2' ).text( $.i18n._( 'Account Type' ) + ':' );
+					this.attachElement( 'value2' ).text( $.i18n._( 'Routing' ) + ':' );
+					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
+					if ( Global.isFalseOrNull( this.current_edit_record['value1'] ) ) {
+						this.current_edit_record['value1'] = this.edit_view_ui_dic['value1_2'].getValue();
+						this.current_edit_record['value1_2'] = this.edit_view_ui_dic['value1_2'].getValue();
+					}
 				}
 			}
 		}

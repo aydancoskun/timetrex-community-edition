@@ -55,8 +55,9 @@ if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']
 
 		$cjlf = new CronJobListFactory();
 		$job_arr = $cjlf->getArrayByListFactory( $cjlf->getAll() );
-		$total_jobs = count( $job_arr );
 		if ( is_array( $job_arr ) ) {
+			$total_jobs = count( $job_arr );
+
 			foreach ( $job_arr as $job_id => $job_name ) {
 				//Get each cronjob row again individually incase the status has changed.
 				$cjlf = new CronJobListFactory();
@@ -71,7 +72,10 @@ if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']
 					}
 				}
 			}
+		} else {
+			$total_jobs = 0;
 		}
+
 		echo "NOTE: Jobs are scheduled to run at specific times each day, therefore it is normal for only some jobs to be executed each time this file is run.\n";
 		echo "Jobs Executed: $executed_jobs of $total_jobs\n";
 		Debug::text( 'CRON: Jobs Executed: ' . $executed_jobs . ' of ' . $total_jobs, __FILE__, __LINE__, __METHOD__, 0 );

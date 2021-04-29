@@ -36,8 +36,8 @@
 
 
 //Each Year:
-//  Copy testcases/payroll_deduction/CAPayrollDeductionTest2019.csv to the new year. Clear out all lines but the header.
-//  Update below "$this->year = 2019;" to the new year.
+//  Copy testcases/payroll_deduction/CAPayrollDeductionCRATest2019.csv to the new year. Clear out all lines but the header.
+//  Update below "$this->year = 2020;" to the new year.
 //  Run: ./run_selenium.sh --filter CAPayrollDeductionCRACompareTest::testCRAToCSVFile <-- This will add lines to the above CSV file once its complete.
 //  Run: ./run_selenium.sh --filter CAPayrollDeductionCRACompareTest::testCRAFromCSVFile <-- This will test the PDOC numbers against our own.
 
@@ -78,7 +78,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 
 		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
 
-		$this->year = 2019;
+		$this->year = 2020;
 
 		$this->tax_table_file = dirname(__FILE__).'/../payroll_deduction/CAPayrollDeductionTest'. $this->year .'.csv';
 		$this->cra_deduction_test_csv_file = dirname($this->tax_table_file). DIRECTORY_SEPARATOR . 'CAPayrollDeductionCRATest'. $this->year .'.csv';
@@ -121,8 +121,8 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 
 
 				//$this->waitForElementPresent( '/html/body/main/div[1]/div[7]/p/a[1]' ); //waitForElementPresent doesn't exist.
-				$this->waitUntilByXPath( '/html/body/main/div[1]/div[7]/p/a[1]' );
-				$ae = $this->byXPath( '/html/body/main/div[1]/div[7]/p/a[1]' );
+				$this->waitUntilByXPath( '/html/body/main/div[1]/div[8]/p/a[1]' );
+				$ae = $this->byXPath( '/html/body/main/div[1]/div[8]/p/a[1]' );
 				Debug::text( 'Active Element Text: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 				$ae->click();
 
@@ -132,6 +132,8 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 				Debug::text( 'Active Element Text: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 				$ae->click();
 			} else {
+				usleep(500000);
+				$this->waitUntilByXPath( '//*[@id="payrollDeductionsResults_button_modifyCalculationButton"]' );
 				$ae = $this->byXPath( '//*[@id="payrollDeductionsResults_button_modifyCalculationButton"]' ); //Modify the current calculation
 				Debug::text( 'Active Element Text: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 				$ae->click();
@@ -181,6 +183,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 			$ae->click();
 
 			$this->waitUntilByXPath( '//*[@id="incomeAmount"]' );
+			usleep(500000);
 			$ae = $this->byId( 'incomeAmount' );
 			$ae->click();
 			$this->keys( $args['gross_income'] ); //Sometimes some keystrokes get missed, try putting a wait above here.
@@ -226,6 +229,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 				$this->keys( $args['ytd_ei'] );
 			}
 
+			usleep(500000);
 			$ae = $this->byId( 'payrollDeductionsStep3_button_calculate' );
 			Debug::text( 'Active Element Text: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 			$ae->click();

@@ -886,7 +886,8 @@ class RemittanceSummaryReport extends Report {
 
 							//Generate a consistent remote_id based on the exact time period, the remittance agency event, and batch ID.
 							//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
-							'remote_id' => TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $batch_id ) ),
+							//  This needs to take into account different start/end date periods, so we don't try to overwrite records from last year.
+							'remote_id' => TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $prae_obj->getStartDate() . $prae_obj->getEndDate() ) ),
 					),
 			);
 

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	T3GR Return Complex and Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+
+	<xsd:simpleType name="T3GRRegisteredPlanCodeType">
+		<xsd:annotation>
+			<xsd:documentation>Type of Trust: 05-RESPs; 06-RDSPs; 07-RRSPs; 08-RRIFs.
+			</xsd:documentation>
+		</xsd:annotation>
+
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:length value="2"/>
+			<xsd:enumeration value="05"/>
+			<xsd:enumeration value="06"/>
+			<xsd:enumeration value="07"/>
+			<xsd:enumeration value="08"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="RRSPPlanNumberType">
+		<xsd:restriction base="sdt:NumberType">
+			<xsd:pattern value="(RSP|RER) \d{3}-\d{3}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="RRIFPlanNumberType">
+		<xsd:restriction base="sdt:NumberType">
+			<xsd:pattern value="(RIF|FRR) \d{4}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="RESPPlanNumberType">
+		<xsd:restriction base="sdt:NumberType">
+			<xsd:pattern value="\d{7}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="RDSPPlanNumberType">
+		<xsd:restriction base="sdt:NumberType">
+			<xsd:pattern value="2\d{6}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="T3GRSpecimenPlanNumberType">
+		<xsd:union memberTypes="RRSPPlanNumberType RRIFPlanNumberType RESPPlanNumberType RDSPPlanNumberType"/>
+	</xsd:simpleType>
+
+	<xsd:complexType name="T3GRTaxSummaryType">
+		<xsd:sequence>
+			<xsd:element ref="TotalAcquireCorporationShareTaxPayableAmount" minOccurs="0"/>
+			<xsd:element name="SpecimenPlanNonQualifiedInvestmentTaxPayableAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="AdvantageTaxPayableAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="SecurityIndebtednessPropertyTaxPayableAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element ref="TotalTrustTaxPayableAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountPaidAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountBalanceAmount" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3GRIdentType">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeBasePlus">
+       				<xsd:sequence>
+					<xsd:element name="RegisteredPlanTypeCode" type="T3GRRegisteredPlanCodeType"/>
+					<xsd:element name="SpecimenPlanName" type="Length1to60TextType"/>
+					<xsd:element name="SpecimenPlanNumber" type="T3GRSpecimenPlanNumberType"/>
+					<xsd:element ref="TrustFilerMailingAddress" minOccurs="0"/>
+					<xsd:element ref="TrustBookRecordAddress" minOccurs="0"/>
+					<xsd:element name="TotalSpecimenPlanAssetAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<!-- T3GR return -->
+	<xsd:complexType name="T3GRReturnType">
+		<xsd:sequence>
+			<xsd:element name="TrustInformation" type="T3GRIdentType"/>
+
+			<xsd:element name="SpecimenPlanPreviousYearRegisteredPlanCount" type="Length1to15CountType" minOccurs="0"/>
+			<xsd:element name="SpecimenPlanNewRegisteredPlanCount" type="Length1to15CountType" minOccurs="0"/>
+			<xsd:element name="SpecimenPlanAmendmentRegisteredPlanCount" type="Length1to15CountType" minOccurs="0"/>
+			<xsd:element name="TotalSpecimenPlanRegisteredPlanCount" type="Length1to15CountType" minOccurs="0"/>
+			<xsd:element name="SpecimenPlanTerminationRegisteredPlanCount" type="Length1to15CountType" minOccurs="0"/>
+			<xsd:element name="NetSpecimenPlanRegisteredPlanCount" type="Length1to15CountType" minOccurs="0"/>
+			<xsd:element name="TotalSpecimenPlanTaxableRegisteredPlanCount" type="Length1to15CountType" minOccurs="0"/>
+
+			<xsd:element name="TrustReturnTaxSummary" type="T3GRTaxSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

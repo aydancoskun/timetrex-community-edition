@@ -75,16 +75,20 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 					'id' => TTUUID::castUUID($id),
 					);
 
-
-		$query = '
+		$this->rs = $this->getCache($id);
+		if ( $this->rs === FALSE ) {
+			$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 						AND deleted = 0';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+			$query .= $this->getWhereSQL( $where );
+			$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
+
+			$this->saveCache($this->rs, $id);
+		}
 
 		return $this;
 	}
@@ -140,21 +144,27 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 			return FALSE;
 		}
 
-		$ph = array(
+		$cache_id = $company_id.$id;
+		$this->rs = $this->getCache($cache_id);
+		if ( $this->rs === FALSE ) {
+			$ph = array(
 					'company_id' => TTUUID::castUUID($company_id),
 					'id' => TTUUID::castUUID($id),
-					);
+			);
 
-		$query = '
+			$query = '
 					select	*
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	company_id = ?
 						AND id = ?
 						AND deleted = 0';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+			$query .= $this->getWhereSQL( $where );
+			$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, $ph );
+			$this->rs = $this->ExecuteSQL( $query, $ph );
+
+			$this->saveCache($this->rs, $cache_id);
+		}
 
 		return $this;
 	}

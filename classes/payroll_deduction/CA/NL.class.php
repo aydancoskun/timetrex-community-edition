@@ -40,6 +40,13 @@
  */
 class PayrollDeduction_CA_NL extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
+			20200101 => array(
+					array('income' => 37929, 'rate' => 8.7, 'constant' => 0),
+					array('income' => 75858, 'rate' => 14.5, 'constant' => 2200),
+					array('income' => 135432, 'rate' => 15.8, 'constant' => 3186),
+					array('income' => 189604, 'rate' => 17.3, 'constant' => 5218),
+					array('income' => 189604, 'rate' => 18.3, 'constant' => 7114),
+			),
 			20190101 => array(
 					array('income' => 37591, 'rate' => 8.7, 'constant' => 0),
 					array('income' => 75181, 'rate' => 14.5, 'constant' => 2180),
@@ -152,13 +159,13 @@ class PayrollDeduction_CA_NL extends PayrollDeduction_CA {
 			V2 = 0
 
 			Where A >
-
 		*/
 
-		$A = $this->getAnnualTaxableIncome();
 		$V2 = 0;
 
-		if ( $this->getDate() >= 20160701 ) {
+		if ( $this->getDate() >= 20160701 AND $this->getDate() < 20200101 ) { //V2 was removed for NL as of 2020.
+			$A = $this->getAnnualTaxableIncome();
+
 			$tmp_V2_threshold = 1000;
 
 			if ( $A < 50000 ) {

@@ -1458,8 +1458,6 @@ class PunchFactory extends Factory {
 			return FALSE;
 		}
 
-		Debug::Text(' bChecking if we are in meal policy window/punch time...', __FILE__, __LINE__, __METHOD__, 10);
-
 		$mplf = TTnew( 'MealPolicyListFactory' ); /** @var MealPolicyListFactory $mplf */
 		if ( is_object( $this->getScheduleObject() )
 				AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() )
@@ -1472,7 +1470,7 @@ class PunchFactory extends Factory {
 			$start_epoch = $previous_epoch;
 		}
 
-		//Debug::Text('Meal Policy Record Count: '. $mplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Meal Policy Record Count: '. $mplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $mplf->getRecordCount() > 0 ) {
 			$mp_obj = $mplf->getCurrent();
 		}
@@ -1992,7 +1990,7 @@ class PunchFactory extends Factory {
 		if ( $file_name != '' AND $this->isImageExists() ) {
 			Debug::Text('Deleting Image... File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 			@unlink($file_name);
-			Misc::deleteEmptyDirectory( dirname( $file_name ), 4 ); //Recurse to $user_id parent level and remove empty directories.
+			Misc::deleteEmptyParentDirectory( dirname( $file_name ), 4 ); //Recurse to $user_id parent level and remove empty directories.
 		}
 
 		return TRUE;

@@ -2030,6 +2030,150 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group OvertimePolicy_testDailyOverTimePolicyD1
+	 */
+	function testDailyOverTimePolicyD1() {
+		global $dd;
+
+		//Test a single overtime policy active after 0hrs in the day, and a pay rate of $0/hr.
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 10 ); //$0/hr
+
+		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][0] );
+
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 10, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][0] );
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   NULL, //Holiday
+								   $policy_ids['overtime'], //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 8:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (12 * 3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['start_time_stamp'], strtotime($date_stamp.' 8:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['end_time_stamp'], strtotime($date_stamp.' 8:00PM') );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['hourly_rate'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['hourly_rate_with_burden'], 0 );
+		//Overtime 1
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 30 ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $policy_ids['pay_code'][0] );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (12 * 3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime($date_stamp.' 8:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime($date_stamp.' 8:00PM') );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['hourly_rate'], (0 * 21.50) );
+		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][1]['hourly_rate_with_burden'], FALSE ), Misc::MoneyFormat( (0 * 21.50 * 1.135), FALSE) ); //13.5%
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+		return TRUE;
+	}
+
+	/**
+	 * @group OvertimePolicy_testDailyOverTimePolicyD2
+	 */
+	function testDailyOverTimePolicyD2() {
+		global $dd;
+
+		//Test a single overtime policy active after 0hrs in the day, and a pay rate of 1.5x
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 200 ); //1.5x
+
+		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][0] );
+
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 10, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][0] );
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   NULL, //Holiday
+								   $policy_ids['overtime'], //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 8:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (12 * 3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['start_time_stamp'], strtotime($date_stamp.' 8:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['end_time_stamp'], strtotime($date_stamp.' 8:00PM') );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['hourly_rate'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['hourly_rate_with_burden'], 0 );
+		//Overtime 1
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 30 ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $policy_ids['pay_code'][0] );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (12 * 3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime($date_stamp.' 8:00AM') );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime($date_stamp.' 8:00PM') );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['hourly_rate'], (1.5 * 21.50) );
+		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][1]['hourly_rate_with_burden'], FALSE ), Misc::MoneyFormat( (1.5 * 21.50 * 1.135), FALSE) ); //13.5%
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+		return TRUE;
+	}
+
+	/**
 	 * @group OvertimePolicy_testWeeklyOverTimePolicyA
 	 */
 	function testWeeklyOverTimePolicyA() {
@@ -23927,5 +24071,50 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+//	function testUserFactoryCache() {
+//		//Make sure that UserFactory caches are cleared when saving a user record.
+//		//This is here since the setup/tearDown functions create user records already.
+//		// However this won't work when run in parallel. :(
+//		$ulf = new UserListFactory();
+//
+//		$ulf->removeCache( $this->user_id ); //Make sure we start with the cache cleared.
+//		$this->assertFalse( $ulf->getCache( $this->user_id ) ); //Confirm its cleared.
+//
+//		$ulf->getById( $this->user_id );
+//		if ( $ulf->getRecordCount() > 0 ) {
+//			$user_obj = $ulf->getCurrent();
+//			$old_data = $user_obj->data;
+//
+//			$this->assertNotFalse( $user_obj->getCache( $this->user_id ) );
+//
+//			$this->assertEquals( $user_obj->getNote(), FALSE );
+//			$user_obj->setNote('Test1');
+//			if ( $user_obj->isValid() ) {
+//				$user_obj->Save( FALSE );
+//
+//				$this->assertFalse( $user_obj->getCache( $this->user_id ) );
+//
+//				//Cache should be cleared at this point
+//				$ulf_b = new UserListFactory();
+//				$ulf_b->getById( $this->user_id );
+//				if ( $ulf_b->getRecordCount() > 0 ) {
+//				    $user_obj_b = $ulf_b->getCurrent();
+//					$new_data = $user_obj_b->data;
+//
+//					$this->assertNotEquals( $old_data, $new_data ); //Updated Date and NOTE fields would have changed.
+//					$this->assertEquals( $user_obj->getNote(), 'Test1' );
+//					$this->assertEquals( $user_obj->getNote(), $user_obj_b->getNote() );
+//				} else {
+//					$this->assertTrue( FALSE );
+//				}
+//
+//			} else {
+//				$this->assertTrue( FALSE );
+//			}
+//		} else {
+//			$this->assertTrue( FALSE );
+//		}
+//	}
 }
 ?>

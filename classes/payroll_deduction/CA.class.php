@@ -69,7 +69,10 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			) {
 				Debug::text( 'Using Basic Federal Claim Code Amount: ' . $this->getBasicFederalClaimCodeAmount() . ' (Previous Amount: ' . $this->data['federal_total_claim_amount'] . ') Date: ' . $this->getDate(), __FILE__, __LINE__, __METHOD__, 10 );
 
-				return $this->getBasicFederalClaimCodeAmount();
+				//Return BPAF which is calculated based on income.
+				//  However CompanyDeductionFactory->updateCompanyDeductionForTaxYear() doesn't know annual income when it updates claim amounts each year, so in that case just the basic amount is used.
+				return $this->getFederalBasicPersonalAmount();
+				//return $this->getBasicFederalClaimCodeAmount();
 			}
 		}
 
@@ -338,10 +341,60 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			//$A = ($P * ($I - $F - $F2 - $U1) ) - $HD - $F1;
 			$A = bcsub( bcsub( bcmul( $P, bcsub( bcsub( bcsub( $I, $F ), $F2 ), $U1 ) ), $HD ), $F1 );
 //			Debug::text( 'A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
-			Debug::text( 'P: '. $P .' I: '. $I .' U1: '. $U1 .' A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::text( 'P: ' . $P . ' I: ' . $I . ' U1: ' . $U1 . ' A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		return $A;
+	}
+
+	function getFederalBasicPersonalAmount() {
+		/*
+		Where NI* ≤ $150,473, BPAF = $13,229
+		Where $150,473 < NI* ≤ $214,368, BPAF** = $12,298 + [($13,229-$12,298) - ($13,229-$12,298) × Lesser of (1, (NI* – $150,473)/($214,368-$150,473))***]
+
+		* Variable NI represents Net Income = A + HD
+
+		** If the BPAF has three or more digits after the decimal point, increase the second digit after the decimal point by one if
+		the third digit is five or more, and drop the third digit. If the third digit after the decimal point is less than five, drop the third
+		digit
+
+		*** Note that there is no rounding on this division
+
+		 */
+
+		$BPAF = 0;
+
+		$basic_claim_code_data = $this->getBasicClaimCodeData( $this->getDate() ); // float OR after 01-Jan-2020: array( 'CA' => array( 'min' => 12298, 'max' => 13229, 'phase_out_start' => 150473, 'phase_out_end' => 214368 ) )
+		if ( isset( $basic_claim_code_data['CA'] ) ) {
+			$basic_personal_amount_data = $basic_claim_code_data['CA'];
+
+			if ( $this->getDate() >= 20200101 ) {
+				$NI = $this->getAnnualTaxableIncome(); //Net income for the year or ( A + HD )
+
+				if ( is_array($basic_personal_amount_data) ) {
+					if ( $NI <= $basic_personal_amount_data['phase_out_start'] ) {
+						$BPAF = $basic_personal_amount_data['max'];
+					} elseif ( $NI >= $basic_personal_amount_data['phase_out_end'] )  {
+						$BPAF = $basic_personal_amount_data['min'];
+					} else {
+						$tmp_NI_threshold = bcdiv( bcsub( $NI, $basic_personal_amount_data['phase_out_start'] ), bcsub( $basic_personal_amount_data['phase_out_end'], $basic_personal_amount_data['phase_out_start']) );
+						if ( $tmp_NI_threshold > 1 ) {
+							$tmp_NI_threshold = 1;
+						}
+
+						$BPAF = round( bcadd( $basic_personal_amount_data['min'], ( bcsub( bcsub( $basic_personal_amount_data['max'], $basic_personal_amount_data['min'] ), bcmul( bcsub( $basic_personal_amount_data['max'], $basic_personal_amount_data['min'] ), $tmp_NI_threshold ) ) ) ), 2 );
+						Debug::text( ' BPAF: '. $BPAF .' Min: '. $basic_personal_amount_data['min'] .' Max: '. $basic_personal_amount_data['max'] .' Phase Out: Start: '. $basic_personal_amount_data['phase_out_start'] .' End: '. $basic_personal_amount_data['phase_out_end'], __FILE__, __LINE__, __METHOD__, 10 );
+					}
+				}
+
+				unset($basic_claim_code_data);
+			} elseif ( is_numeric( $basic_personal_amount_data ) ) {
+				$BPAF = $basic_personal_amount_data; //Federal Basic Personal Amount
+			}
+		}
+
+		Debug::text( ' BPAF: '. $BPAF, __FILE__, __LINE__, __METHOD__, 10 );
+		return $BPAF;
 	}
 
 	function getFederalBasicTax() {
@@ -380,7 +433,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 //		Debug::text( 'K2: ' . $K2, __FILE__, __LINE__, __METHOD__, 10 );
 //		Debug::text( 'K3: ' . $K3, __FILE__, __LINE__, __METHOD__, 10 );
 //		Debug::text( 'K4: ' . $K4, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'A: ' . $A .' R: '. $R .' K: '. $K .' TC: '. $TC .' K1: '. $K1 .' K2: '. $K2 .' K3: '. $K3 .' K4: '. $K4, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'A: ' . $A . ' R: ' . $R . ' K: ' . $K . ' TC: ' . $TC . ' K1: ' . $K1 . ' K2: ' . $K2 . ' K3: ' . $K3 . ' K4: ' . $K4, __FILE__, __LINE__, __METHOD__, 10 );
 
 		//$T3 = ($R * $A) - $K - $K1 - $K2 - $K3 - $K4;
 		$T3 = bcsub( bcsub( bcsub( bcsub( bcsub( bcmul( $R, $A ), $K ), $K1 ), $K2 ), $K3 ), $K4 );
@@ -434,6 +487,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			0.155 * $1000
 		*/
 
+		//In 2020 they changed this formula somewhat, however based on the information we collect it seems to match the legacy formula exactly.
 		$tmp1_K4 = bcmul( $this->getData()->getFederalLowestRate(), $this->getAnnualTaxableIncome() );
 		$tmp2_K4 = bcmul( $this->getData()->getFederalLowestRate(), $this->getData()->getFederalEmploymentCreditAmount() );
 
@@ -491,9 +545,9 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		if ( $P_times_C > $this->getCPPEmployeeMaximumContribution() ) {
 			$P_times_C = $this->getCPPEmployeeMaximumContribution();
 		}
-		Debug::text( 'P_times_C: ' . $P_times_C .' C: '. $C .' P: '. $P, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'P_times_C: ' . $P_times_C . ' C: ' . $C . ' P: ' . $P, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( ( $this->getYearToDateCPPContribution() + $this->getEmployeeCPPForPayPeriod() ) >= $this->getCPPEmployeeMaximumContribution() ) {
+		if ( bcadd( $this->getYearToDateCPPContribution(), $this->getEmployeeCPPForPayPeriod() ) >= $this->getCPPEmployeeMaximumContribution() ) {
 			Debug::text( 'P_times_C in or after PP where maximum contribution is reached: ' . ( $this->getYearToDateCPPContribution() + $this->getEmployeeCPPForPayPeriod() ), __FILE__, __LINE__, __METHOD__, 10 );
 			$P_times_C = $this->getCPPEmployeeMaximumContribution();
 		}
@@ -535,7 +589,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		}
 		Debug::text( 'P_times_C: ' . $P_times_C, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( ( $this->getYearToDateEIContribution() + $this->getEmployeeEIForPayPeriod() ) >= $this->getEIEmployeeMaximumContribution() ) {
+		if ( bcadd( $this->getYearToDateEIContribution(), $this->getEmployeeEIForPayPeriod() ) >= $this->getEIEmployeeMaximumContribution() ) {
 			Debug::text( 'P_times_C in or after PP where maximum contribution is reached: ' . ( $this->getYearToDateEIContribution() + $this->getEmployeeEIForPayPeriod() ), __FILE__, __LINE__, __METHOD__, 10 );
 			$P_times_C = $this->getEIEmployeeMaximumContribution();
 		}
@@ -584,7 +638,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 //		Debug::text( 'V1: ' . $V1, __FILE__, __LINE__, __METHOD__, 10 );
 //		Debug::text( 'V2: ' . $V2, __FILE__, __LINE__, __METHOD__, 10 );
 //		Debug::text( 'S: ' . $S, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'T2: ' . $T2 .' T4: '. $T4 .' V1: '. $V1 .' V2: '. $V2 .' S: '. $S, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'T2: ' . $T2 . ' T4: ' . $T4 . ' V1: ' . $V1 . ' V2: ' . $V2 . ' S: ' . $S, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $T2;
 	}
@@ -615,7 +669,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 //		Debug::text( 'K2P: ' . $K2P, __FILE__, __LINE__, __METHOD__, 10 );
 //		Debug::text( 'K3P: ' . $K3P, __FILE__, __LINE__, __METHOD__, 10 );
 //		Debug::text( 'K4P: ' . $K4P, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'A: ' . $A .' V: '. $V .' KP: '. $KP .' TCP: '. $TCP .' K1P: '. $K1P .' K2P: '. $K2P .' K3P: '. $K3P .' K4P: '. $K3P, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'A: ' . $A . ' V: ' . $V . ' KP: ' . $KP . ' TCP: ' . $TCP . ' K1P: ' . $K1P . ' K2P: ' . $K2P . ' K3P: ' . $K3P . ' K4P: ' . $K3P, __FILE__, __LINE__, __METHOD__, 10 );
 
 		//$T4 = ($V * $A) - $KP - $K1P - $K2P - $K3P;
 		$T4 = bcsub( bcsub( bcsub( bcsub( bcsub( bcmul( $V, $A ), $KP ), $K1P ), $K2P ), $K3P ), $K4P );
@@ -686,7 +740,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 				$exemption = 0;
 			}
 
-			Debug::text( 'P: ' . $P .' I: '. $I, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::text( 'P: ' . $P . ' I: ' . $I, __FILE__, __LINE__, __METHOD__, 10 );
 
 			$CII = bcmul( $this->getCPPEmployeeRate(), bcsub( $I, $exemption ) );
 		}
@@ -728,7 +782,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			$C = 0;
 		}
 
-		Debug::text( 'D: '. $D .' C.I: '. $CI .' C.II: '. $CII .' C: ' . $C, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'D: ' . $D . ' C.I: ' . $CI . ' C.II: ' . $CII . ' C: ' . $C, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $C;
 	}
@@ -843,4 +897,5 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		return $array;
 	}
 }
+
 ?>

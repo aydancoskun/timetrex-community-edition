@@ -134,7 +134,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				field: 'user_status_id',
 				multiple: true,
 				basic_search: true,
-				adv_search: true,
+				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),

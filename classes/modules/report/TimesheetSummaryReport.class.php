@@ -883,7 +883,7 @@ class TimesheetSummaryReport extends Report {
 		$key = 0;
 
 		if ( isset($this->tmp_data['user_date_total']) ) {
-			$column_keys = array_keys( $this->getColumnDataConfig() );
+			$column_keys = array_keys( (array)$this->getColumnDataConfig() );
 
 			foreach( $this->tmp_data['user_date_total'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {

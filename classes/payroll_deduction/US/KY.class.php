@@ -54,43 +54,46 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 		),
 	);
 
-
 	var $state_options = array(
-			20190101 => array( //01-Jan-2019
-							   'standard_deduction' => 2590,
-							   'allowance'          => 0, //Removed as of 2018
+			20200101 => array(
+					'standard_deduction' => 2650,
+					'allowance'          => 0, //Removed as of 2018
 			),
-			20180101 => array( //01-Jan-2018
-							   'standard_deduction' => 2530,
-							   'allowance'          => 0, //Removed as of 2018
+			20190101 => array(
+					'standard_deduction' => 2590,
+					'allowance'          => 0, //Removed as of 2018
 			),
-			20170101 => array( //01-Jan-2017
-							   'standard_deduction' => 2480,
-							   'allowance'          => 10,
+			20180101 => array(
+					'standard_deduction' => 2530,
+					'allowance'          => 0, //Removed as of 2018
 			),
-			20160101 => array( //01-Jan-2016
-							   'standard_deduction' => 2460,
-							   'allowance'          => 20,
+			20170101 => array(
+					'standard_deduction' => 2480,
+					'allowance'          => 10,
 			),
-			20150101 => array( //01-Jan-2015
-							   'standard_deduction' => 2440,
-							   'allowance'          => 20,
+			20160101 => array(
+					'standard_deduction' => 2460,
+					'allowance'          => 20,
 			),
-			20140101 => array( //01-Jan-2014
-							   'standard_deduction' => 2400,
-							   'allowance'          => 20,
+			20150101 => array(
+					'standard_deduction' => 2440,
+					'allowance'          => 20,
 			),
-			20130101 => array( //01-Jan-2013
-							   'standard_deduction' => 2360,
-							   'allowance'          => 20,
+			20140101 => array(
+					'standard_deduction' => 2400,
+					'allowance'          => 20,
 			),
-			20120101 => array( //01-Jan-2012
-							   'standard_deduction' => 2290,
-							   'allowance'          => 20,
+			20130101 => array(
+					'standard_deduction' => 2360,
+					'allowance'          => 20,
 			),
-			20090101 => array( //01-Jan-2009
-							   'standard_deduction' => 2190,
-							   'allowance'          => 20,
+			20120101 => array(
+					'standard_deduction' => 2290,
+					'allowance'          => 20,
+			),
+			20090101 => array(
+					'standard_deduction' => 2190,
+					'allowance'          => 20,
 			),
 			20080101 => array(
 					'standard_deduction' => 2100,
@@ -153,7 +156,7 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
 		if ( $annual_income > 0 ) {
 			if ( $this->getDate() >= 20180101 ) { //Switched to flat rate 5%
-				$retval = bcmul( $annual_income, bcdiv( 5.0, 100 ) );
+				$retval = bcmul( $annual_income, 0.05 ); //5%
 			} else {
 				$rate = $this->getData()->getStateRate( $annual_income );
 				$prev_income = $this->getData()->getStateRatePreviousIncome( $annual_income );

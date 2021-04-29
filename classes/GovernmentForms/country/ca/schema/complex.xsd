@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
+
+<!--
+Description: 	COMPLEX TYPE DEFINITIONS
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<!--  @@@@     COMPLEX TYPE DEFINITIONS    @@@@  2011/June/22  Version# 1.11 (version #.yy)-->
 	<xsd:complexType name="CanadaAddressType">
 		<xsd:all>
 			<xsd:element name="addr_l1_txt" type="char30Type" minOccurs="0"/>
@@ -106,8 +112,9 @@
 			<xsd:element name="cntc_nm" type="char22Type"/>
 			<xsd:element name="cntc_area_cd" type="numeric3Type"/>
 			<xsd:element name="cntc_phn_nbr" type="phoneType"/>
-			<xsd:element name="cntc_extn_nbr" type="int5Type" minOccurs="0"/>
+			<xsd:element name="cntc_extn_nbr" type="int7Type" minOccurs="0"/>
 			<xsd:element name="cntc_email_area" type="char60Type"/>
+			<xsd:element name="sec_cntc_email_area" type="char60Type" minOccurs="0"/>
 		</xsd:all>
 	</xsd:complexType>
 	<xsd:complexType name="ContactType2">

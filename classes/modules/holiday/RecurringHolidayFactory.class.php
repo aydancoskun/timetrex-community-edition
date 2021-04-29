@@ -95,6 +95,9 @@ class RecurringHolidayFactory extends Factory {
 											1 => TTi18n::gettext('Yes - Previous Week Day'),
 											2 => TTi18n::gettext('Yes - Next Week Day'),
 											3 => TTi18n::gettext('Yes - Closest Week Day'),
+
+											10 => TTi18n::gettext('Split - Sat=Sat, Sun=Mon'),
+											20 => TTi18n::gettext('Split - Sat=Fri, Sun=Sun'),
 										);
 				break;
 			case 'columns':
@@ -603,6 +606,25 @@ class RecurringHolidayFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
+
+		//Don't allow deleting recurring holidays unless they are no longer in use by Holiday Policies and Remittances Agency's. Contributing Shift Policies use Holiday Policies not recurring holidays.
+		if ( $this->getDeleted() == TRUE ) {
+			$hprhlf = TTNew( 'HolidayPolicyRecurringHolidayListFactory' ); /** @var HolidayPolicyRecurringHolidayListFactory $hprhlf */
+			$hprhlf->getByCompanyIdAndRecurringHolidayId( $this->getCompany(), $this->getId() );
+			if ( $hprhlf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE( 'in_use',
+										  FALSE,
+										  TTi18n::gettext( 'This recurring holiday is currently in use' ) . ' ' . TTi18n::gettext( 'by holiday policies' ) );
+			}
+
+			$cgmlf = TTnew( 'CompanyGenericMapListFactory' ); /** @var CompanyGenericMapListFactory $cgmlf */
+			$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 5000, $this->getID() );
+			if ( $cgmlf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE( 'in_use',
+										  FALSE,
+										  TTi18n::gettext( 'This recurring holiday is currently in use' ) . ' ' . TTi18n::gettext( 'by remittance agencies' ) );
+			}
+		}
 
 		return TRUE;
 	}

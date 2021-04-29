@@ -481,14 +481,30 @@ class UserFactory extends Factory {
 	 * @return bool|int
 	 */
 	function getPermissionLevel() {
-		return $this->getPermissionObject()->getLevel( $this->getID(), $this->getCompany() );
+		//  If the user for some reason wasn't assigned to a permission group (could be removed from Company -> Permission Group),
+		//  then trying to assign them to a permission group from Edit Employee will always fail, because the UserFactory will think the user has a permission group, but getPermissionLevel() won't find anything because its not actually assigned yet, and will return level 1.
+		//  Therefore we must always go directly to the PermissionControl record and get the level directly from it, rather than $this->getPermissionObject()->getLevel( $this->getID(), $this->getCompany() )
+		if ( $this->getPermissionControl() != '' AND $this->getPermissionControl() != TTUUID::getZeroID() ) {
+			$pclf = TTnew('PermissionControlListFactory'); /** @var PermissionControlListFactory $pclf */
+			$pclf->getByIdAndCompanyId( $this->getPermissionControl(), $this->getCompany() );
+			if ( $pclf->getRecordCount() > 0 ) {
+				return $pclf->getCurrent()->getLevel();
+			}
+		}
+//		else {
+//			return $this->getPermissionObject()->getLevel( $this->getID(), $this->getCompany() );
+//		}
+
+		return 1;
 	}
 
 	function getTerminatedPermissionLevel() {
-		$pclf = TTnew('PermissionControlListFactory'); /** @var PermissionControlListFactory $pclf */
-		$pclf->getByIdAndCompanyId( $this->getTerminatedPermissionControl(), $this->getCompany() );
-		if ( $pclf->getRecordCount() > 0 ) {
-			return $pclf->getCurrent()->getLevel();
+		if ( $this->getTerminatedPermissionControl() != '' AND $this->getTerminatedPermissionControl() != TTUUID::getZeroID() ) {
+			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
+			$pclf->getByIdAndCompanyId( $this->getTerminatedPermissionControl(), $this->getCompany() );
+			if ( $pclf->getRecordCount() > 0 ) {
+				return $pclf->getCurrent()->getLevel();
+			}
 		}
 
 		return FALSE;
@@ -734,28 +750,33 @@ class UserFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getPromptForFeedback() {
-		global $config_vars;
+		global $config_vars, $current_user;
 		$epoch = time();
-
-		$feedback_rating = UserSettingFactory::getUserSetting( $this->getId(), 'feedback_rating' ); //-1, 0, 1
-		$feedback_rating_review = UserSettingFactory::getUserSetting( $this->getId(), 'feedback_rating_review' ); //0 or 1
 
 		if (
 //				TRUE OR //Helps with testing.
 				PRODUCTION == TRUE AND
 				( !isset($config_vars['other']['disable_feedback']) OR $config_vars['other']['disable_feedback'] == FALSE ) AND
 				( !isset($config_vars['other']['disable_feedback_prompt']) OR $config_vars['other']['disable_feedback_prompt'] == FALSE ) AND
+				( isset($current_user) AND is_object($current_user) ) AND  //Only bother with this check if the currently logged in user record is being returned, otherwise skip it in large loops through user records.
 				rand( 0, 99 ) < 3 AND //1=1 in 100 (1%), 3=3 in 100 (3%) [1 in 30], 10=10 in 100 (10%) chance
-				$this->getCreatedDate() <= ( $epoch - ( 180 * 86400 ) ) AND //Check that user was created more than 6 months ago. (this implies company was created at least 180days/6 months ago)
-				$this->getCurrentUserPermissionLevel() > 15 AND //Check permission level >= 15 so its above supervisor level.
-				( $feedback_rating == FALSE OR ( is_array( $feedback_rating ) AND TTDate::parseDateTime( $feedback_rating['updated_date'] ) <= ( $epoch - ( 120 * 86400 ) ) ) ) AND //Prompt at most once every 4 months (4x per year).
-				(
-						( $feedback_rating == FALSE OR ( is_array( $feedback_rating ) AND $feedback_rating['value'] != 1 ) ) OR //No feedback at all, or negative feedback.
-						( ( is_array( $feedback_rating ) AND $feedback_rating['value'] == 1 ) AND ( $feedback_rating_review == FALSE OR ( is_array( $feedback_rating_review ) AND $feedback_rating_review['value'] == 0 ) ) ) //Positive feedback, but no review.
-				)
-		) {
-			Debug::Text('Time to prompt user for feedback.', __FILE__, __LINE__, __METHOD__, 10);
-			return TRUE;
+				$this->getCreatedDate() <= ( $epoch - ( 180 * 86400 ) ) //Check that user was created more than 6 months ago. (this implies company was created at least 180days/6 months ago)
+			) {
+
+			//Calling getUserSetting() twice is slower, so do this after quicker initial checks have passed.
+			$feedback_rating = UserSettingFactory::getUserSetting( $this->getId(), 'feedback_rating' ); //-1, 0, 1
+			$feedback_rating_review = UserSettingFactory::getUserSetting( $this->getId(), 'feedback_rating_review' ); //0 or 1
+
+			if  ( $this->getCurrentUserPermissionLevel() >= 40 AND //Check permission level >= 40 so its above supervisor level.
+					( $feedback_rating == FALSE OR ( is_array( $feedback_rating ) AND TTDate::parseDateTime( $feedback_rating['updated_date'] ) <= ( $epoch - ( 120 * 86400 ) ) ) ) AND //Prompt at most once every 4 months (3x per year).
+					(
+							( $feedback_rating == FALSE OR ( is_array( $feedback_rating ) AND $feedback_rating['value'] != 1 ) ) OR //No feedback at all, or negative feedback.
+							( ( is_array( $feedback_rating ) AND $feedback_rating['value'] == 1 ) AND ( $feedback_rating_review == FALSE OR ( is_array( $feedback_rating_review ) AND $feedback_rating_review['value'] == 0 ) ) ) //Positive feedback, but no review.
+					)
+			) {
+				Debug::Text('Time to prompt user for feedback.', __FILE__, __LINE__, __METHOD__, 10);
+				return TRUE;
+			}
 		}
 
 		return FALSE;
@@ -2614,7 +2635,7 @@ class UserFactory extends Factory {
 				//Delete tmp files.
 				foreach(glob($dir.'*') as $filename) {
 					unlink($filename);
-					Misc::deleteEmptyDirectory( dirname( $filename ), 0 ); //Recurse to $user_id parent level and remove empty directories.
+					Misc::deleteEmptyParentDirectory( dirname( $filename ), 0 ); //Recurse to $user_id parent level and remove empty directories.
 				}
 			}
 		}
@@ -2824,7 +2845,9 @@ class UserFactory extends Factory {
 
 		//Allow Terminated Permission Group to be NONE (Zero UUID) only if the user is active.
 		if ( $this->getTerminatedPermissionControl() != '' AND ( ( $this->getStatus() == 10 AND $this->getTerminatedPermissionControl() != TTUUID::getZeroID() ) OR $this->getStatus() != 10 ) ) {
-			if ( $this->Validator->isError('terminated_permission_control_id') == FALSE AND $this->getTerminatedPermissionLevel() > $this->getPermissionLevel() ) {
+			//When validating for mass edit, we don't know what the user_id is yet, so skip this check as it will always fail.
+			if ( $this->Validator->getValidateOnly() == FALSE AND $this->Validator->isError('terminated_permission_control_id') == FALSE
+					AND $this->getPermissionControl() != '' AND $this->getPermissionControl() != TTUUID::getZeroID() AND $this->getTerminatedPermissionLevel() > $this->getPermissionLevel() ) {
 				$this->Validator->isTrue( 'terminated_permission_control_id',
 										  FALSE,
 										  TTi18n::gettext( 'Terminated Permission Group cannot be a higher level than Permission Group' )
@@ -3397,11 +3420,12 @@ class UserFactory extends Factory {
 			}
 		}
 
-		//Avoid logins from being actively used for long periods of time while the user record is non-active.
-		if ( $this->getStatus() != 10 AND $this->getLoginExpireDate() == '' ) {
+		//Make sure there isn't a case where the user record is terminated, logins are enabled, and no expire date exists.
+		//  Which would essentially allow the user to login to their terminated record forever in the future.
+		if ( $this->getEnableLogin() == TRUE AND $this->getStatus() != 10 AND $this->getLoginExpireDate() == '' ) {
 			$this->Validator->isTrue(		'login_expire_date',
 											 FALSE,
-											 TTi18n::gettext('Login Expire Date must be specified for all non-Active employees'));
+											 TTi18n::gettext('Login Expire Date must be specified for all non-Active employees who have their login enabled'));
 		}
 
 		// Last Login date
@@ -3671,7 +3695,7 @@ class UserFactory extends Factory {
 			}
 
 			if ( $this->getStatus() >= 12 AND $this->getTerminationDate() != '' ) { //Terminated/On Leave
-				if ( TTDate::getMiddleDayEpoch( $this->getTerminationDate() ) < TTDate::getMiddleDayEpoch( time() ) ) {
+				if ( is_array( $data_diff ) AND $this->isDataDifferent( 'termination_date', $data_diff ) AND TTDate::getMiddleDayEpoch( $this->getTerminationDate() ) < TTDate::getMiddleDayEpoch( time() ) ) {
 					$this->Validator->Warning( 'termination_date', TTi18n::gettext('When setting a termination date retroactively, you may need to recalculate this employees timesheet') );
 				}
 

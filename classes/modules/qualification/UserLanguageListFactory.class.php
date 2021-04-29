@@ -200,7 +200,8 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 			return FALSE;
 		}
 
-		$this->rs = $this->getCache($id.$user_id);
+		$cache_id = $id.$user_id;
+		$this->rs = $this->getCache($cache_id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
 						'id' => TTUUID::castUUID($id),
@@ -218,7 +219,7 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 
 			$this->rs = $this->ExecuteSQL($query, $ph);
 
-			$this->saveCache($this->rs, $id.$user_id);
+			$this->saveCache($this->rs, $cache_id);
 		}
 
 		return $this;
@@ -236,7 +237,8 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 			return FALSE;
 		}
 
-		$this->rs = $this->getCache($user_id.$qualification_id);
+		$cache_id = $user_id.$qualification_id;
+		$this->rs = $this->getCache($cache_id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
 						'user_id' => TTUUID::castUUID($user_id),
@@ -254,7 +256,7 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 
 			$this->rs = $this->ExecuteSQL($query, $ph);
 
-			$this->saveCache($this->rs, $user_id.$qualification_id);
+			$this->saveCache($this->rs, $cache_id);
 		}
 
 		return $this;

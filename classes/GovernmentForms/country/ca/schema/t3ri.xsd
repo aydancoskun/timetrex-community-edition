@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description: 	T3RI Return Data Element Types
+Contact: 	CRA
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+Revision History:
+June 2015	Initial creation.
+Oct 2016	Disallow negative amount in some financial fields
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+
+	<xsd:complexType name="T3RIFundInvestmentTrustType">
+		<xsd:sequence>
+			<xsd:group ref="T3RIFundInvestmentTrustTypeGroup"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:group name="T3RIFundInvestmentTrustTypeGroup">
+		<xsd:choice>
+			<xsd:element name="PooledFundTrust" type="PooledFundTrustype"/>
+			<xsd:element name="QuasiPooledFundTrust" type="QuasiPooledFundTrustype"/>
+			<xsd:element name="MutualFundTrust" type="NoSchedule2Type"/>
+			<xsd:element name="QuasiMutualFundTrust" type="OtherQuasitype"/>
+			<xsd:element name="InvestmentCorporation" type="NoSchedule2Type"/>
+			<xsd:element name="QuasiInvestmentCorporation" type="OtherQuasitype"/>
+			<xsd:element name="MutualFundCorporation" type="NoSchedule2Type"/>
+			<xsd:element name="QuasiMutualFundCorporation" type="OtherQuasitype"/>
+		</xsd:choice>
+	</xsd:group>
+
+	<!-- Trust Ident Information -->
+	<xsd:complexType name="T3RIIdentType">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialTrustFilerIdentTypeI">
+       				<xsd:sequence>
+					<xsd:element name="RegisteredPlanName" type="Length1to60TextType"/>
+					<xsd:element name="PlanRegistrationNumber" type="PlanRegistrationNumberType"/>
+					<xsd:element name="TrustFiscalPeriodStartDate" type="YYYYMMDDDateType"/>
+					<xsd:element name="TrustRevocationNotificationDate" type="YYYYMMDDDateType" minOccurs="0"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<!-- Schedule 2 Area A -->
+	<xsd:complexType name="MonthlyNonPrescribedInvestmentType">
+		<xsd:sequence>
+			<xsd:element ref="MonthNumber" minOccurs="0"/>
+			<xsd:element name="Description" type="Length1to60TextType" minOccurs="0"/>
+			<xsd:element name="AcquisitionFairMarketValueAmount" type="Decimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 2 Area B -->
+	<xsd:complexType name="MonthlyRegisteredInvestmentExcessSecurityType">
+		<xsd:sequence>
+			<xsd:element ref="MonthNumber" minOccurs="0"/>
+			<xsd:element name="DebtorName" type="Length1to60TextType" minOccurs="0"/>
+			<xsd:element name="AcquisitionFairMarketValueAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="CalculatedExcessAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TaxableAmount" type="Decimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 2 Area C -->
+	<xsd:complexType name="MonthlyRegisteredInvestmentExcessRealPropertyType">
+		<xsd:sequence>
+			<xsd:element ref="MonthNumber" minOccurs="0"/>
+			<xsd:element name="Description" type="Length1to60TextType" minOccurs="0"/>
+			<xsd:element name="ExcessAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="CalculatedExcessAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TaxableAmount" type="Decimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Pooled fund trust with Schedule 2 area B and C -->
+	<xsd:complexType name="PooledFundTrustype">
+		<xsd:sequence>
+			<xsd:element name="RegisteredInvestmentExcessSecurity" minOccurs="0" maxOccurs="1">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="MonthlySummary" type="MonthlyRegisteredInvestmentExcessSecurityType" maxOccurs ="12"/>
+						<xsd:element ref="TotalTaxableAmount" minOccurs="0"/>
+						<xsd:element ref="TotalTaxPayableAmount" minOccurs="0"/>
+					</xsd:sequence>
+				</xsd:complexType>
+   				<xsd:unique name="PooledFundTrustS2AreaB">
+					<xsd:selector xpath="MonthlySummary"/>
+					<xsd:field xpath="MonthNumber"/>
+				</xsd:unique>
+			</xsd:element>
+
+			<xsd:element name="RegisteredInvestmentExcessRealProperty" minOccurs="0" maxOccurs="1">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="MonthlySummary" type="MonthlyRegisteredInvestmentExcessRealPropertyType" maxOccurs ="12"/>
+
+						<xsd:element ref="TotalTaxableAmount" minOccurs="0"/>
+						<xsd:element ref="TotalTaxPayableAmount" minOccurs="0"/>
+					</xsd:sequence>
+				</xsd:complexType>
+   				<xsd:unique name="PooledFundTrustS2AreaC">
+					<xsd:selector xpath="MonthlySummary"/>
+					<xsd:field xpath="MonthNumber"/>
+				</xsd:unique>
+			</xsd:element>
+			<xsd:element name="TrustReturnTaxSummary" type="T3SpecialTaxSummaryTypeIII"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Quasi pooled fund trust with Schedule 2 area A area B -->
+	<xsd:complexType name="QuasiPooledFundTrustype">
+		<xsd:sequence>
+			<xsd:element name="NonPrescribedRegisteredInvestment" minOccurs="0">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="MonthlySummary" type="MonthlyNonPrescribedInvestmentType" maxOccurs ="12"/>
+						<xsd:element ref="TotalTaxableAmount" minOccurs="0"/>
+						<xsd:element ref="TotalTaxPayableAmount" minOccurs="0"/>
+					</xsd:sequence>
+				</xsd:complexType>
+   				<xsd:unique name="QuasiPooledFundTrustS2AreaA">
+					<xsd:selector xpath="MonthlySummary"/>
+					<xsd:field xpath="MonthNumber"/>
+				</xsd:unique>
+			</xsd:element>
+
+			<xsd:element name="RegisteredInvestmentExcessSecurity" minOccurs="0">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="MonthlySummary" type="MonthlyRegisteredInvestmentExcessSecurityType" maxOccurs ="12"/>
+						<xsd:element ref="TotalTaxableAmount" minOccurs="0"/>
+						<xsd:element ref="TotalTaxPayableAmount" minOccurs="0"/>
+					</xsd:sequence>
+				</xsd:complexType>
+   				<xsd:unique name="QuasiPooledFundTrustS2AreaB">
+					<xsd:selector xpath="MonthlySummary"/>
+					<xsd:field xpath="MonthNumber"/>
+				</xsd:unique>
+			</xsd:element>
+			<xsd:element name="TrustReturnTaxSummary" type="T3SpecialTaxSummaryTypeIII"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Other Quasi types with Schedule 2 area A -->
+	<xsd:complexType name="OtherQuasitype">
+		<xsd:sequence>
+			<xsd:element name="NonPrescribedRegisteredInvestment" minOccurs="0" maxOccurs="1">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="MonthlySummary" type="MonthlyNonPrescribedInvestmentType" maxOccurs ="12"/>
+						<xsd:element ref="TotalTaxableAmount" minOccurs="0"/>
+						<xsd:element ref="TotalTaxPayableAmount" minOccurs="0"/>
+					</xsd:sequence>
+				</xsd:complexType>
+   				<xsd:unique name="OtherQuasiS2AreaA">
+					<xsd:selector xpath="MonthlySummary"/>
+					<xsd:field xpath="MonthNumber"/>
+				</xsd:unique>
+			</xsd:element>
+			<xsd:element name="TrustReturnTaxSummary" type="T3SpecialTaxSummaryTypeIII"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Other types with no schedule 2 -->
+	<xsd:complexType name="NoSchedule2Type">
+		<xsd:sequence>
+			<xsd:element name="TrustReturnTaxSummary" type="T3SpecialTaxSummaryTypeIII"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:element name="TotalTaxableAmount" type="SignedDecimal15AmountType"/>
+	<xsd:element name="TotalTaxPayableAmount" type="Decimal15AmountType"/>
+
+	<!-- T3RI return -->
+	<xsd:complexType name="T3RIReturnType">
+		<xsd:sequence>
+			<xsd:element name="TrustInformation" type="T3RIIdentType"/>
+			<xsd:sequence>
+				<xsd:group ref="T3RIFundInvestmentTrustTypeGroup"/>
+			</xsd:sequence>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

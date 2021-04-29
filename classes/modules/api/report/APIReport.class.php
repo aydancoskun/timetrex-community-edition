@@ -147,6 +147,10 @@ class APIReport extends APIFactory {
 	 * @return array|bool
 	 */
 	function getReport( $config = FALSE, $format = 'pdf' ) {
+		if ( is_string( $format ) == FALSE OR $format == '' ) {
+			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Format is invalid') );
+		}
+
 		if ( Misc::isSystemLoadValid() == FALSE ) {
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Please try again later...') );
 		}

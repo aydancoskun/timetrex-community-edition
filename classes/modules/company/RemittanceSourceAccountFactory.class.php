@@ -79,7 +79,8 @@ class RemittanceSourceAccountFactory extends Factory {
 						20 => '1464',
 						30 => '1464', //CIBC
 						50 => '105',
-						70 => 'BEANSTREAM'
+						70 => 'BEANSTREAM',
+						1000 => 'CIBC_EPAY'
 				);
 				break;
 			case 'data_format_check_form': //data_format ID to CHECK class name mapping.
@@ -119,15 +120,21 @@ class RemittanceSourceAccountFactory extends Factory {
 								30 => TTi18n::gettext( 'Canada - EFT CIBC (1464-Byte)'),
 								//40 => TTi18n::gettext('Canada - EFT RBC (1464-Byte)'),
 								50 => TTi18n::gettext( 'Canada - EFT (105-Byte)' ),
-								//60 => TTi18n::gettext('Canada - HSBC EFT-PC (CSV)'),
-								70 => TTi18n::gettext( 'Bambora (CSV)' )
+								70 => TTi18n::gettext( 'Bambora (CSV)' ),
+
+								1000 => TTi18n::gettext( 'Caribbean - CIBC E-Pay (CSV)'),
 							);
 
 							if ( $params['country'] == 'US' ) {
 								$valid_keys = array(5, 10);
-							}elseif ( $params['country'] == 'CA' ) {
+							} elseif ( $params['country'] == 'CA' ) {
 								$valid_keys = array(5, 20, 30, 50, 70);
+							} elseif ( in_array( $params['country'], array( 'AG', 'BS', 'BB', 'BZ', 'DO', 'GY', 'HT', 'JM', 'DM', 'GD', 'KN', 'LC', 'VC', 'SR', 'TT' ) ) ) { //Carribbean countries.
+								$valid_keys = array( 1000 );
+							} else {
+								$valid_keys = array(10); //Default to US ACH format for all other countries.
 							}
+
 							break;
 					}
 
@@ -1105,7 +1112,7 @@ class RemittanceSourceAccountFactory extends Factory {
 				//Delete tmp files.
 				foreach(glob($dir.'*') as $filename) {
 					unlink($filename);
-					Misc::deleteEmptyDirectory( dirname( $filename ), 0 ); //Recurse to $user_id parent level and remove empty directories.
+					Misc::deleteEmptyParentDirectory( dirname( $filename ), 0 ); //Recurse to $user_id parent level and remove empty directories.
 				}
 			}
 		}

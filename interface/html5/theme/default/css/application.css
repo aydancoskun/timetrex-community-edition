@@ -2136,8 +2136,8 @@ progress::-moz-progress-bar {
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
     left: 0;
-    height: 45px;
-    line-height: 20px;
+    height: 100px;
+    line-height: 40px;
     margin-left: auto;
     margin-right: auto;
     position: absolute;
@@ -2151,6 +2151,7 @@ progress::-moz-progress-bar {
 
 .browser-banner .label {
     color: black;
+    font-size: 22px;
 }
 
 .browser-banner a {

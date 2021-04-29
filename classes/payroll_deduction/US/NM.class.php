@@ -41,6 +41,42 @@
 class PayrollDeduction_US_NM extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			//Matches Federal
+			//10=Single
+			//20=Married
+			//40=Head of Household
+			20200101 => array(
+					10 => array(
+							array('income' => 6200, 'rate' => 0, 'constant' => 0),
+							array('income' => 11700, 'rate' => 1.7, 'constant' => 0),
+							array('income' => 17200, 'rate' => 3.2, 'constant' => 93.50),
+							array('income' => 22200, 'rate' => 4.7, 'constant' => 269.50),
+							array('income' => 32200, 'rate' => 4.9, 'constant' => 504.50),
+							array('income' => 48200, 'rate' => 4.9, 'constant' => 994.50),
+							array('income' => 71200, 'rate' => 4.9, 'constant' => 1778.50),
+							array('income' => 71200, 'rate' => 4.9, 'constant' => 2905.50),
+					),
+					20 => array(
+							array('income' => 12400, 'rate' => 0, 'constant' => 0),
+							array('income' => 20400, 'rate' => 1.7, 'constant' => 0),
+							array('income' => 28400, 'rate' => 3.2, 'constant' => 136),
+							array('income' => 36400, 'rate' => 4.7, 'constant' => 392),
+							array('income' => 52400, 'rate' => 4.9, 'constant' => 768),
+							array('income' => 76400, 'rate' => 4.9, 'constant' => 1552),
+							array('income' => 112400, 'rate' => 4.9, 'constant' => 2728),
+							array('income' => 112400, 'rate' => 4.9, 'constant' => 4492),
+					),
+					40 => array(
+							array('income' => 9325, 'rate' => 0, 'constant' => 0),
+							array('income' => 17325, 'rate' => 1.7, 'constant' => 0),
+							array('income' => 25325, 'rate' => 3.2, 'constant' => 136),
+							array('income' => 33325, 'rate' => 4.7, 'constant' => 392),
+							array('income' => 49325, 'rate' => 4.9, 'constant' => 768),
+							array('income' => 73325, 'rate' => 4.9, 'constant' => 1552),
+							array('income' => 109325, 'rate' => 4.9, 'constant' => 2728),
+							array('income' => 109325, 'rate' => 4.9, 'constant' => 4492),
+					),
+			),
 			20190101 => array(
 					10 => array(
 							array('income' => 3700, 'rate' => 0, 'constant' => 0),
@@ -236,38 +272,39 @@ class PayrollDeduction_US_NM extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
-			//01-Jan-2019 - No Change
-			20180101 => array( //01-Jan-2018
-							   'allowance' => 4150,
-			),
-			//01-Jan-2017 - No Change
-			20160101 => array( //01-Jan-2016
-							   'allowance' => 4050,
-			),
-			20150101 => array( //01-Jan-2015
-							   'allowance' => 4000,
-			),
-			20140101 => array( //01-Jan-2014
-							   'allowance' => 3950,
-			),
-			20130101 => array( //01-Jan-2013
-							   'allowance' => 3900,
-			),
-			20120101 => array( //01-Jan-2012
-							   'allowance' => 3800,
-			),
-			20090101 => array( //01-Jan-2009
-							   'allowance' => 3650,
-			),
-			20080101 => array(
-					'allowance' => 3450,
-			),
-			20070101 => array(
-					'allowance' => 3450,
-			),
-			20060101 => array(
-					'allowance' => 3250,
-			),
+		//01-Jan-2020 - Allowances have been removed with 2020 federal W4 removal.
+		//01-Jan-2019 - No Change
+		20180101 => array(
+				'allowance' => 4150,
+		),
+		//01-Jan-2017 - No Change
+		20160101 => array(
+				'allowance' => 4050,
+		),
+		20150101 => array(
+				'allowance' => 4000,
+		),
+		20140101 => array(
+				'allowance' => 3950,
+		),
+		20130101 => array(
+				'allowance' => 3900,
+		),
+		20120101 => array(
+				'allowance' => 3800,
+		),
+		20090101 => array(
+				'allowance' => 3650,
+		),
+		20080101 => array(
+				'allowance' => 3450,
+		),
+		20070101 => array(
+				'allowance' => 3450,
+		),
+		20060101 => array(
+				'allowance' => 3250,
+		),
 	);
 
 	function getStateAnnualTaxableIncome() {
@@ -291,9 +328,9 @@ class PayrollDeduction_US_NM extends PayrollDeduction_US {
 		$allowance_arr = $retarr['allowance'];
 
 		$allowances = $this->getStateAllowance();
-
-		//As of 01-Jan-2019, the allowances is capped at 3, however they should still be reported properly.
-		if ( $this->getDate() >= 20190101 AND $allowances > 3 ) {
+		if ( $this->getDate() >= 20200101 ) {
+			$allowances = 0;
+		} elseif ( $this->getDate() >= 20190101 AND $allowances > 3 ) { //As of 01-Jan-2019, the allowances is capped at 3, however they should still be reported properly.
 			$allowances = 3;
 		}
 

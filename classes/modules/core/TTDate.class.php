@@ -2458,6 +2458,20 @@ class TTDate {
 						$epoch = $forward_epoch;
 					}
 					break;
+				case 10: //Split: Sat=Sat, Sun=Mon
+					if ( TTDate::getDayOfWeek( $epoch ) == 0 ) { //Sun, move forward one day to Mon.
+						$epoch += 86400;
+					} else {
+						break 2; //No Adjustment
+					}
+					break;
+				case 20: //Split: Sat=Fri, Sun=Sun
+					if ( TTDate::getDayOfWeek( $epoch ) == 6 ) { //Sat, move backward one day to Fri.
+						$epoch -= 86400;
+					} else {
+						break 2; //No Adjustment
+					}
+					break;
 			}
 		}
 
@@ -2584,6 +2598,11 @@ class TTDate {
 	 * @throws Exception
 	 */
 	public static function getDatePeriod( $start, $end, $interval = 'P1D', $include_end_date = TRUE ) {
+		if ( $start == '' OR $end == '' ) {
+			Debug::text('  ERROR: Unable to getDatePeriod without two timestamps...', __FILE__, __LINE__, __METHOD__, 10);
+			return array(); //This is usually called from a loop, so make sure we return a blank array.
+		}
+
 		if ( is_object( $start ) ) {
 			$start_date_obj = $start;
 		} else {

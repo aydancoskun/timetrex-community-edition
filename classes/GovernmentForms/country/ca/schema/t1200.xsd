@@ -1,0 +1,946 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="Submission" type="ReturnType" />
+	<xsd:complexType name="ReturnType">
+		<xsd:sequence>
+			<xsd:element name="T619" type="TransmitterType" />
+			<xsd:element name="FormVersion" type="FormVersionType" />
+			<xsd:element name="T1200" type="T1200Type" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="TransmitterType">
+		<xsd:all>
+			<xsd:element name="sbmt_ref_id" type="char8Type" />
+			<xsd:element name="rpt_tcd" type="otherDataType" />
+			<xsd:element name="trnmtr_nbr" type="transNbrType" />
+			<xsd:element name="trnmtr_tcd" type="indicator1-6Type" />
+			<xsd:element name="summ_cnt" type="int6Type" />
+			<xsd:element name="lang_cd" type="languageType" />
+			<xsd:element name="TRNMTR_NM" type="Line2Type" />
+			<xsd:element name="TRNMTR_ADDR" type="CanadaAddressType" />
+			<xsd:element name="CNTC" type="ContactType" />
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:simpleType name="FormVersionType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="17" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="T1200Type">
+		<xsd:sequence>
+			<!--Section A-F - Plan information -->
+			<xsd:element name="PlanInformation" type="PlanInformationType" />
+			<!--Section G - Contributions -->
+			<xsd:element name="Contributions" type="ContributionsType" minOccurs="0" />
+			<!--Section H - Membership information -->
+			<xsd:element name="MembershipInformation" type="MembershipInformationType" minOccurs="0" />
+			<!--Section I - Actuarial basis for going-concern valuation -->
+			<xsd:element name="ActuarialBasisGoingConcern" type="ActuarialBasisGoingConcernType" minOccurs="0" />
+			<!--Section J - Actuarial basis for solvency valuation -->
+			<xsd:element name="ActuarialBasisSolvency" type="ActuarialBasisSolvencyType" minOccurs="0" />
+			<!--Section K - Balance sheet information -->
+			<xsd:element name="BalanceSheetInformation" type="BalanceSheetInformationType" minOccurs="0" />
+			<!--Section L - Actuarial gains or losses -->
+			<xsd:element name="ActuarialGainsOrLosses" type="ActuarialGainsOrLossesType" minOccurs="0" />
+			<!--Section M-N - Subsequent events and statements of opinion -->
+			<xsd:element name="EventsAndOpinions" type="EventsAndOpinionsType" minOccurs="0" />
+			<!--Section O - Additional valuation information -->
+			<xsd:element name="AdditionalValuationInformation" type="AdditionalValuationInformationType" minOccurs="0" />
+			<!--Section P - Miscellaneous -->
+			<xsd:element name="Miscellaneous" type="MiscellaneousType" minOccurs="0" />
+			<!--Section R - Additional information -->
+			<xsd:element name="AdditionalInformationSectionR" type="AdditionalInformationSectionRType" minOccurs="0" />
+			<!--Section S - Additional information -->
+			<xsd:element name="AdditionalInformationSectionS" type="AdditionalInformationSectionSType" minOccurs="0" />
+			<!--Section T - Additional information -->
+			<xsd:element name="AdditionalInformationSectionT" type="AdditionalInformationSectionTType" minOccurs="0" />
+			<!--Section U - Additional information -->
+			<xsd:element name="AdditionalInformationSectionU" type="AdditionalInformationSectionUType" minOccurs="0" />
+			<!--Certification by actuary -->
+			<xsd:element name="CertificationByActuary" type="CertificationByActuaryType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PlanInformationType">
+		<xsd:sequence>
+			<!-- A -->
+			<xsd:element name="PlanName" type="String80Type" />
+			<!-- B -->
+			<xsd:element name="RegistrationNumber" type="RegistrationNumberType" />
+			<xsd:element name="Other" type="String15Type" minOccurs="0" />
+			<!-- C -->
+			<xsd:element name="DesignatedPlan" type="YesOrNoType" />
+			<!-- D -->
+			<xsd:element name="ValuationDate" type="DateType" />
+			<!-- E -->
+			<xsd:element name="EndDate" type="DateType" />
+			<!-- F -->
+			<xsd:element name="PurposeOfTheReport" type="PurposeOfTheReportType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PurposeOfTheReportType">
+		<xsd:choice>
+			<xsd:element name="InitialReport" type="CheckBoxType" />
+			<xsd:element name="Termination" type="CheckBoxType" />
+			<xsd:element name="RegularReport" type="CheckBoxType" />
+			<xsd:element name="Conversion" type="CheckBoxType" />
+			<xsd:element name="InterimReport" type="CheckBoxType" />
+			<xsd:element name="PartialTermination" type="CheckBoxType" />
+			<xsd:element name="OtherPurpose" type="String120Type" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="ContributionsType">
+		<xsd:sequence>
+			<!-- G -->
+			<xsd:element name="Period1" type="ContributionPeriodType" minOccurs="0" />
+			<xsd:element name="Period2" type="ContributionPeriodType" minOccurs="0" />
+			<xsd:element name="Period3" type="ContributionPeriodType" minOccurs="0" />
+			<xsd:element name="Period4" type="ContributionPeriodType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ContributionPeriodType">
+		<xsd:sequence>
+			<xsd:element name="PeriodStartDate" type="DateType" minOccurs="0" />
+			<xsd:element name="PeriodEndDate" type="DateType" minOccurs="0" />
+			<xsd:element name="MembersDefinedBenefit" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="EmployerDefinedBenefit" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="ExplicitExpenseAllowance" type="AmountType" minOccurs="0" />
+			<xsd:element name="MembersMoneyPurchase" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="EmployerMoneyPurchase" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="EmployerSpecialPayment" type="AmountType" minOccurs="0" />
+			<xsd:element name="MembersSpecialPayment" type="AmountType" minOccurs="0" />
+			<xsd:element name="FixedDefinedBenefit" type="AmountType" minOccurs="0" />
+			<xsd:element name="FixedMoneyPurchase" type="AmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="MembershipInformationType">
+		<xsd:sequence>
+			<!-- H -->
+			<xsd:element name="ActiveMembers" type="MemberType" minOccurs="0" />
+			<xsd:element name="AveragePensionableService" type="NonNegativeInt13Type" minOccurs="0" />
+			<xsd:element name="AverageSalary" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="RetiredMembers" type="MemberType" minOccurs="0" />
+			<xsd:element name="OtherParticipants" type="MemberType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="MemberType">
+		<xsd:sequence>
+			<xsd:element name="Number" type="NonNegativeInt13Type" minOccurs="0" />
+			<xsd:element name="AverageAge" type="NonNegativeInt3Type" minOccurs="0" />
+			<xsd:element name="AverageAnnualPension" type="NonNegativeAmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ActuarialBasisGoingConcernType">
+		<xsd:sequence>
+			<!-- I -->
+			<xsd:element name="AssetValuationMethod" type="AssetValuationMethodType" minOccurs="0" />
+			<xsd:element name="LiabilityValuationMethod" type="LiabilityValuationMethodType" minOccurs="0" />
+			<xsd:element name="ValuationInterestRateActiveMembers" type="RateGroupGoingConcernType" minOccurs="0" />
+			<xsd:element name="ValuationInterestRateRetiredMembers" type="RateGroupGoingConcernType" minOccurs="0" />
+			<xsd:element name="RateOfIndexationGoingConcern" type="RateGroupGoingConcernType" minOccurs="0" />
+			<xsd:element name="RateOfGeneralWage" type="RateGroupGoingConcernType" minOccurs="0" />
+			<xsd:element name="YMPEEscalationRate" type="RateGroupGoingConcernType" minOccurs="0" />
+			<xsd:element name="ITRMaximumPensionLimit" type="RateGroupGoingConcernType" minOccurs="0" />
+			<xsd:element name="RateOfCPIIncrease" type="RateGroupGoingConcernType" minOccurs="0" />
+			<xsd:element name="YearEscalationCommences" type="DateType" minOccurs="0" />
+			<xsd:element name="MortalityTable" type="MortalityTableGoingConcernType" minOccurs="0" />
+			<xsd:element name="ImprovementScale" type="ImprovementScaleType" minOccurs="0" />
+			<xsd:element name="MortalityTableAdjustment" type="MortalityTableAdjustmentType" minOccurs="0" />
+			<xsd:element name="AllowanceForPromotion" type="AllowanceForPromotionType" minOccurs="0" />
+			<xsd:element name="AllowanceForInvestmentExpenses" type="AllowanceForExpensesType" minOccurs="0" />
+			<xsd:element name="AllowanceForAdministrativeExpenses" type="AllowanceForExpensesType" minOccurs="0" />
+			<xsd:element name="MEPHoursPerMemberPerYear" type="NonNegativeInt16Type" minOccurs="0" />
+			<xsd:element name="WithdrawalScaleUsed" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="VariableRetirementRatesUsed" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="AssumedRetirementAge" type="NonNegativeInt3Type" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AssetValuationMethodType">
+		<xsd:choice>
+			<xsd:element name="Market" type="CheckBoxType" />
+			<xsd:element name="SmoothedMarket" type="CheckBoxType" />
+			<xsd:element name="Book" type="CheckBoxType" />
+			<xsd:element name="BookAndMarketCombination" type="CheckBoxType" />
+			<xsd:element name="OtherAsset" type="String120Type" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="LiabilityValuationMethodType">
+		<xsd:choice>
+			<xsd:element name="AccruedBenefit" type="CheckBoxType" />
+			<xsd:element name="EntryAgeNormal" type="CheckBoxType" />
+			<xsd:element name="IndividualLevelPremium" type="CheckBoxType" />
+			<xsd:element name="Aggregate" type="CheckBoxType" />
+			<xsd:element name="AttainedAge" type="CheckBoxType" />
+			<xsd:element name="OtherLiability" type="String120Type" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="RateGroupGoingConcernType">
+		<xsd:sequence>
+			<xsd:element name="InitialRate" type="RateType" minOccurs="0" />
+			<xsd:element name="NumberOfYears" type="NonNegativeInt3Type" minOccurs="0" />
+			<xsd:element name="UltimateRate" type="RateType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="MortalityTableGoingConcernType">
+		<xsd:sequence>
+			<xsd:element name="MortalityTable1994GAMStatic" type="CheckBoxType" minOccurs="0" />
+			<xsd:element name="MortalityTable1994GroupAnnuityReserving" type="CheckBoxType" minOccurs="0" />
+			<xsd:element name="MortalityTable1994UP" type="CheckBoxType" minOccurs="0" />
+			<xsd:element name="MortalityTable80Percentof1983GAM" type="CheckBoxType" minOccurs="0" />
+			<xsd:element name="CPM2014" type="CheckBoxType" minOccurs="0" />
+			<xsd:element name="CPM2014Publ" type="CheckBoxType" minOccurs="0" />
+			<xsd:element name="CPM2014Priv" type="CheckBoxType" minOccurs="0" />
+			<xsd:element name="OtherMortality" type="String120Type" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ImprovementScaleType">
+		<xsd:sequence>
+			<xsd:element name="ProjectionOfMortality" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="AssumptionOfGenerationalMortality" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="YearOfProjection" type="YearType" minOccurs="0" />
+			<xsd:element name="Scale" type="ScaleType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ScaleType">
+		<xsd:choice>
+			<xsd:element name="ScaleAA" type="CheckBoxType" />
+			<xsd:element name="ScaleCPMB" type="CheckBoxType" />
+			<xsd:element name="ScaleCPMB1D2014" type="CheckBoxType" />
+			<xsd:element name="OtherScale" type="String120Type" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="MortalityTableAdjustmentType">
+		<xsd:sequence>
+			<xsd:element name="MortalityTableAdjustmentMade" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="Male" type="RateType" minOccurs="0" />
+			<xsd:element name="Female" type="RateType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AllowanceForPromotionType">
+		<xsd:choice>
+			<xsd:element name="IncludedInRate" type="CheckBoxType" />
+			<xsd:element name="SeparateScale" type="CheckBoxType" />
+			<xsd:element name="NoAllowance" type="CheckBoxType" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="AllowanceForExpensesType">
+		<xsd:choice>
+			<xsd:element name="Implicit" type="CheckBoxType" />
+			<xsd:element name="Explicit" type="CheckBoxType" />
+			<xsd:element name="BothExplicitAndImplicit" type="CheckBoxType" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="ActuarialBasisSolvencyType">
+		<xsd:sequence>
+			<!-- J -->
+			<xsd:element name="LumpSumTransfer" type="RateGroupSolvencyType" minOccurs="0" />
+			<xsd:element name="PurchaseDeferredAnnuity" type="RateGroupSolvencyType" minOccurs="0" />
+			<xsd:element name="PurchaseImmediateAnnuity" type="RateGroupSolvencyType" minOccurs="0" />
+			<xsd:element name="RateOfIndexationSolvency" type="RateGroupSolvencyType" minOccurs="0" />
+			<xsd:element name="MortalityTableLumpSum" type="MortalityTableSolvencyType" minOccurs="0" />
+			<xsd:element name="MortalityTableAnnuityPurchase" type="MortalityTableSolvencyType" minOccurs="0" />
+			<xsd:element name="ImprovementScaleLumpSum" type="ScaleWithNoneType" minOccurs="0" />
+			<xsd:element name="ImprovementScaleAnnuityPurchase" type="ScaleWithNoneType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="RateGroupSolvencyType">
+		<xsd:sequence>
+			<xsd:element name="InitialRate" type="RateType" minOccurs="0" />
+			<xsd:element name="SelectPeriod" type="PeriodType" minOccurs="0" />
+			<xsd:element name="UltimateRate" type="RateType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="MortalityTableSolvencyType">
+		<xsd:choice>
+			<xsd:element name="MortalityTable1994UPGenerational" type="CheckBoxType" />
+			<xsd:element name="CPM2014Priv" type="CheckBoxType" />
+			<xsd:element name="CPM2014" type="CheckBoxType" />
+			<xsd:element name="CPM2014Publ" type="CheckBoxType" />
+			<xsd:element name="OtherMortality" type="String120Type" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="ScaleWithNoneType">
+		<xsd:choice>
+			<xsd:element name="ScaleAA" type="CheckBoxType" />
+			<xsd:element name="ScaleCPMB" type="CheckBoxType" />
+			<xsd:element name="ScaleCPMB1D2014" type="CheckBoxType" />
+			<xsd:element name="OtherScale" type="String120Type" />
+			<xsd:element name="None" type="CheckBoxType" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="BalanceSheetInformationType">
+		<xsd:sequence>
+			<!-- K -->
+			<xsd:element name="MarketValueOfAssets" type="AmountType" minOccurs="0" />
+			<xsd:element name="AmountOfContributions" type="AmountType" minOccurs="0" />
+			<xsd:element name="GoingConcernAssets" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="OptionalAncillaryContributionsGoingConcern" type="AmountType" minOccurs="0" />
+			<xsd:element name="ForActiveMembersGoingConcern" type="AmountType" minOccurs="0" />
+			<xsd:element name="ForRetiredMembersGoingConcern" type="AmountType" minOccurs="0" />
+			<xsd:element name="ForOtherParticipantsGoingConcern" type="AmountType" minOccurs="0" />
+			<xsd:element name="ForOptionalAncillaryBenefitsGoingConcern" type="AmountType" minOccurs="0" />
+			<xsd:element name="OtherReserveGoingConcern" type="AmountType" minOccurs="0" />
+			<xsd:element name="ExpensesGoingConcern" type="CheckBoxType" minOccurs="0" />
+			<xsd:element name="AdHocIndexing" type="CheckBoxType" minOccurs="0" />
+			<xsd:element name="ProvisionForAdverseDeviation" type="CheckBoxType" minOccurs="0" />
+			<xsd:element name="OtherReserveTypeGoingConcern" type="String120Type" minOccurs="0" />
+			<xsd:element name="NetFundedPositionSurplusDeficit" type="AmountType" minOccurs="0" />
+			<xsd:element name="AdditionalVoluntaryContributions" type="AmountType" minOccurs="0" />
+			<xsd:element name="MoneyPurchaseAssets" type="AmountType" minOccurs="0" />
+			<xsd:element name="SolvencyAssetsAdjusted" type="AmountType" minOccurs="0" />
+			<xsd:element name="AmountOfWindUp" type="AmountType" minOccurs="0" />
+			<xsd:element name="OptionalAncillaryContributionsSolvency" type="AmountType" minOccurs="0" />
+			<xsd:element name="ForActiveMembersSolvency" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="ForRetiredMembersSolvency" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="ForOtherParticipantsSolvency" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="ForOptionalAncillaryBenefitsSolvency" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="OtherReserveSolvency" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="ReserveType" type="ReserveTypeType" minOccurs="0" />
+			<xsd:element name="NetSolvencyPositionSurplusDeficit" type="AmountType" minOccurs="0" />
+			<xsd:element name="IncrementalCost" type="AmountType" minOccurs="0" />
+			<xsd:element name="GoingConcernLiabilities" type="YesOrNoOrNAType" minOccurs="0" />
+			<xsd:element name="SolvencyLiabilities" type="YesOrNoOrNAType" minOccurs="0" />
+			<xsd:element name="DiscountRateSensitivityGoingConcern" type="DiscountRateSensitivityType" minOccurs="0" />
+			<xsd:element name="DiscountRateSensitivityNormalCost" type="DiscountRateSensitivityType" minOccurs="0" />
+			<xsd:element name="DiscountRateSensitivitySolvency" type="DiscountRateSensitivityType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ReserveTypeType">
+		<xsd:choice>
+			<xsd:element name="ExpensesSolvency" type="CheckBoxType" />
+			<xsd:element name="OtherReserveTypeSolvency" type="String120Type" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="DiscountRateSensitivityType">
+		<xsd:sequence>
+			<xsd:element name="ChangeInPercentageOnePercentLower" type="RateType" />
+			<xsd:element name="ChangeInAmountOnePercentLower" type="AmountType" />
+			<xsd:element name="ChangeInAmountOnePercentHigher" type="AmountType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ActuarialGainsOrLossesType">
+		<xsd:sequence>
+			<!-- L -->
+			<xsd:element name="GainLossAnalysisDone" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="DateOfLastFiledReport" type="DateType" minOccurs="0" />
+			<xsd:element name="NetFundedPosition" type="AmountType" minOccurs="0" />
+			<xsd:element name="InterestOnSurplus" type="AmountType" minOccurs="0" />
+			<xsd:element name="SpecialPaymentsMade" type="AmountType" minOccurs="0" />
+			<xsd:element name="AmountsUsedForContributionHoliday" type="AmountType" minOccurs="0" />
+			<xsd:element name="ChangeInActuarialAssumptions" type="AmountType" minOccurs="0" />
+			<xsd:element name="ChangeInAssetValuationMethod" type="AmountType" minOccurs="0" />
+			<xsd:element name="ChangeInLiabilityValuationMethod" type="AmountType" minOccurs="0" />
+			<xsd:element name="PlanAmendmentsChanges" type="AmountType" minOccurs="0" />
+			<xsd:element name="InvestmentExperience" type="AmountType" minOccurs="0" />
+			<xsd:element name="RetirementExperience" type="AmountType" minOccurs="0" />
+			<xsd:element name="MortalityExperience" type="AmountType" minOccurs="0" />
+			<xsd:element name="WithdrawalExperience" type="AmountType" minOccurs="0" />
+			<xsd:element name="SalaryIncreaseExperience" type="AmountType" minOccurs="0" />
+			<xsd:element name="OptionalAncillaryContributionsForfeited" type="AmountType" minOccurs="0" />
+			<xsd:element name="MajorContributingSource" type="MajorContributingSourceType" minOccurs="0" maxOccurs="2" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="MajorContributingSourceType">
+		<xsd:sequence>
+			<xsd:element name="MajorContributingSourceName" type="String120Type" minOccurs="0" />
+			<xsd:element name="MajorContributingSourceAmount" type="AmountType" minOccurs="0" />
+			<xsd:element name="AllOtherSourcesCombined" type="AmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="EventsAndOpinionsType">
+		<xsd:sequence>
+			<!-- M -->
+			<xsd:element name="SubsequentsEvents" type="YesOrNoType" minOccurs="0" />
+			<!-- N -->
+			<xsd:element name="StatementsOfOpinionIncluded" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="StatementsOfOpinionQualified" type="YesOrNoType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AdditionalValuationInformationType">
+		<xsd:sequence>
+			<!-- O -->
+			<xsd:element name="AreBenefitsProvided" type="AreBenefitsProvidedType" minOccurs="0" />
+			<xsd:element name="EscalatedAdjustmentsIncluded" type="YesOrNoOrNAType" minOccurs="0" />
+			<xsd:element name="SolvencyDeficiencyPayment" type="AmountType" minOccurs="0" />
+			<xsd:element name="ExpiryDateOfLetterOfCredit" type="DateType" minOccurs="0" />
+			<xsd:element name="ExcludableBenefitsExcluded" type="ExcludableBenefitsExcludedType" minOccurs="0" />
+			<xsd:element name="DefinedBenefitBenefitAccruals" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="DefinedBenefitClosed" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="DefinedContributionBenefitAccruals" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="DefinedContributionClosed" type="YesOrNoType" minOccurs="0" />
+			<xsd:element name="AveragingMethodApplied" type="AveragingMethodAppliedType" minOccurs="0" />
+			<xsd:element name="AveragingMethodChanged" type="AveragingMethodChangedType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AreBenefitsProvidedType">
+		<xsd:choice>
+			<xsd:element name="Yes" type="AreBenefitsProvidedYesType"/>
+			<xsd:element name="No" type="CheckBoxType"/>
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="AreBenefitsProvidedYesType">
+		<xsd:sequence>
+			<xsd:element name="AssetValueOfAnnutiesGoingConcern" type="AmountType" minOccurs="0" />
+			<xsd:element name="LiabilityOfAnnutiesGoingConcern" type="AmountType" minOccurs="0" />
+			<xsd:element name="AssetValueOfAnnutiesGoingSolvency" type="AmountType" minOccurs="0" />
+			<xsd:element name="LiabilityOfAnnutiesGoingSolvency" type="AmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ExcludableBenefitsExcludedType">
+		<xsd:choice>
+			<xsd:element name="Yes" type="ExcludableBenefitsExcludedYesType"/>
+			<xsd:element name="No" type="CheckBoxType"/>
+			<xsd:element name="NA" type="CheckBoxType"/>
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="ExcludableBenefitsExcludedYesType">
+		<xsd:sequence>
+			<xsd:element name="TotalLiabilitiesExcluded" type="AmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AveragingMethodAppliedType">
+		<xsd:choice>
+			<xsd:element name="Yes" type="AveragingMethodAppliedYesType"/>
+			<xsd:element name="No" type="CheckBoxType"/>
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="AveragingMethodAppliedYesType">
+		<xsd:sequence>
+			<xsd:element name="AmountSolvencyAssetsAdjusted" type="AmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AveragingMethodChangedType">
+		<xsd:choice>
+			<xsd:element name="Yes" type="AveragingMethodChangedYesType"/>
+			<xsd:element name="No" type="CheckBoxType"/>
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="AveragingMethodChangedYesType">
+		<xsd:sequence>
+			<xsd:element name="ChangeInMethodIncreases" type="AmountType" minOccurs="0" />
+			<xsd:element name="ChangeInMethodDecreases" type="AmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="MiscellaneousType">
+		<xsd:sequence>
+			<!-- P -->
+			<xsd:element name="PriorYearCreditBalance" type="AmountType" minOccurs="0" />
+			<xsd:element name="TransferRatio" type="TransferRatioType" minOccurs="0" />
+			<xsd:element name="PBGFLiabilities" type="AmountType" minOccurs="0" />
+			<xsd:element name="PBGFAssessmentBase" type="AmountType" minOccurs="0" />
+			<xsd:element name="AmountOfAdditionalLiability" type="AmountType" minOccurs="0" />
+			<xsd:element name="NumberOfOntarioPlanBeneficiaries" type="AmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AdditionalInformationSectionRType">
+		<xsd:sequence>
+			<!-- R -->
+			<xsd:element name="SurplusDeficitGoingConcernBasis" type="AmountType" minOccurs="0" />
+			<xsd:element name="SurplusDeficitWindUpBasis" type="AmountType" minOccurs="0" />
+			<xsd:element name="SurplusDeficitMaximumFundingValuation" type="AmountType" minOccurs="0" />
+			<xsd:element name="ExcessSurplusGoingConcernBasis" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="ExcessSurplusMaximumFundingValuation" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="DesignatedPlanEmployerNormalCost" type="NormalCostType" minOccurs="0" />
+			<xsd:element name="MinimumSurplusGoingConcernBasis" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="MinimumSurplusWindUpBasis" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="UnfundedLiability" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="NormalCost" type="NormalCostType" minOccurs="0" />
+			<xsd:element name="EmployeesContributingOverLimit" type="YesOrNoType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="NormalCostType">
+		<xsd:sequence>
+			<xsd:element name="Period1" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="Period2" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="Period3" type="NonNegativeAmountType" minOccurs="0" />
+			<xsd:element name="Period4" type="NonNegativeAmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AdditionalInformationSectionSType">
+		<xsd:sequence>
+			<!-- S -->
+			<xsd:element name="DateValuationReportPrepared" type="DateType" minOccurs="0" />
+			<xsd:element name="ValueOfAdditionalLiabilitiesFundingBasis" type="AmountType" minOccurs="0" />
+			<xsd:element name="ValueOfAdditionalLiabilitiesSolvencyBasis" type="AmountType" minOccurs="0" />
+			<xsd:element name="SurplusAssetsThatCanBeAllocated" type="AmountType" minOccurs="0" />
+			<xsd:element name="SpecialPayments" type="AmountType" minOccurs="0" />
+			<xsd:element name="TotalOfTheLettersOfCredit" type="AmountType" minOccurs="0" />
+			<xsd:element name="InsuredAnnuitiesFromAnInsurer" type="AmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AdditionalInformationSectionTType">
+		<xsd:sequence>
+			<!-- T -->
+			<xsd:element name="ReserveOnAFundingBasis" type="AmountType" minOccurs="0" />
+			<xsd:element name="DeficiencyAttributableToTheEmployer" type="AmortizationPaymentsType" minOccurs="0" />
+			<xsd:element name="FundingDeficiencyPayableByMembers" type="AmortizationPaymentsType" minOccurs="0" />
+			<xsd:element name="FundingDeficiencyPayableByEmployer" type="AmortizationPaymentsType" minOccurs="0" />
+			<xsd:element name="StabilizationFundValue" type="AmountType" minOccurs="0" />
+			<xsd:element name="StabilizationContributionsMembers" type="StabilizationContributionsType" minOccurs="0" />
+			<xsd:element name="StabilizationContributionsEmployer" type="StabilizationContributionsType" minOccurs="0" />
+			<xsd:element name="TechnicalFundingDeficiencyPayableByMembers" type="AmortizationPaymentsType" minOccurs="0" />
+			<xsd:element name="TechnicalFundingDeficiencyPayableByEmployer" type="AmortizationPaymentsType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AdditionalInformationSectionUType">
+		<xsd:sequence>
+			<!-- U -->
+			<xsd:element name="TargetLevelOfStabilizationProvision" type="RateType" minOccurs="0" />
+			<xsd:element name="StabilizationContributionsMembers" type="StabilizationContributionsType" minOccurs="0" />
+			<xsd:element name="StabilizationContributionsEmployer" type="StabilizationContributionsType" minOccurs="0" />
+			<xsd:element name="TechnicalFundingDeficiencyPayableByMembers" type="AmortizationPaymentsType" minOccurs="0" />
+			<xsd:element name="TechnicalFundingDeficiencyPayableByEmployer" type="AmortizationPaymentsType" minOccurs="0" />
+			<xsd:element name="StabilizationFundingDeficiencyPayableByMembers" type="AmortizationPaymentsType" minOccurs="0" />
+			<xsd:element name="StabilizationFundingDeficiencyPayableByEmployer" type="AmortizationPaymentsType" minOccurs="0" />
+			<xsd:element name="ImprovementSolvencyDeficiencyPayableByMembers" type="AmortizationPaymentsType" minOccurs="0" />
+			<xsd:element name="ImprovementSolvencyDeficiencyPayableByEmployer" type="AmortizationPaymentsType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="StabilizationContributionsType">
+		<xsd:sequence>
+			<xsd:element name="Period1" type="AmountType" minOccurs="0" />
+			<xsd:element name="Period2" type="AmountType" minOccurs="0" />
+			<xsd:element name="Period3" type="AmountType" minOccurs="0" />
+			<xsd:element name="Period4" type="AmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AmortizationPaymentsType">
+		<xsd:sequence>
+			<xsd:element name="PresentValue" type="AmountType" minOccurs="0" />
+			<xsd:element name="Period1" type="AmountType" minOccurs="0" />
+			<xsd:element name="Period2" type="AmountType" minOccurs="0" />
+			<xsd:element name="Period3" type="AmountType" minOccurs="0" />
+			<xsd:element name="Period4" type="AmountType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="CertificationByActuaryType">
+		<xsd:sequence>
+			<xsd:element name="NameOfActuary" type="String120Type" />
+			<xsd:element name="NameOfFirm" type="String120Type" />
+			<xsd:element name="TelephoneNumber" type="String120Type" />
+			<xsd:element name="EmailAddress" type="String120Type" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="YesOrNoType">
+		<xsd:choice>
+			<xsd:element name="Yes" type="CheckBoxType" />
+			<xsd:element name="No" type="CheckBoxType" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType  name="YesOrNoOrNAType">
+		<xsd:choice>
+			<xsd:element name="Yes" type="CheckBoxType" />
+			<xsd:element name="No" type="CheckBoxType" />
+			<xsd:element name="NA" type="CheckBoxType" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:simpleType name="RegistrationNumberType">
+		<xsd:restriction base="xsd:string">
+			<xsd:length value="7" />
+			<xsd:whiteSpace value="preserve" />
+			<xsd:pattern value="[0-9]*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="AmountType">
+		<xsd:restriction base="xsd:decimal">
+			<xsd:minInclusive value="-9999999999999.99" />
+			<xsd:maxInclusive value="9999999999999.99" />
+			<xsd:fractionDigits value="2"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="NonNegativeAmountType">
+		<xsd:restriction base="xsd:decimal">
+			<xsd:minInclusive value="0" />
+			<xsd:maxInclusive value="9999999999999.99" />
+			<xsd:fractionDigits value="2"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="NonNegativeInt3Type">
+		<xsd:restriction base="xsd:decimal">
+			<xsd:minInclusive value="0" />
+			<xsd:maxInclusive value="999" />
+			<xsd:fractionDigits value="0"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="NonNegativeInt13Type">
+		<xsd:restriction base="xsd:decimal">
+			<xsd:minInclusive value="0" />
+			<xsd:maxInclusive value="9999999999999" />
+			<xsd:fractionDigits value="0"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="NonNegativeInt16Type">
+		<xsd:restriction base="xsd:decimal">
+			<xsd:minInclusive value="0" />
+			<xsd:maxInclusive value="9999999999999999" />
+			<xsd:fractionDigits value="0"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="TransferRatioType">
+		<xsd:restriction base="xsd:decimal">
+			<xsd:minInclusive value="0"/>
+			<xsd:maxInclusive value="9.999"/>
+			<xsd:fractionDigits value="3"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="RateType">
+		<xsd:restriction base="xsd:decimal">
+			<xsd:minInclusive value="-999.99"/>
+			<xsd:maxInclusive value="999.99"/>
+			<xsd:fractionDigits value="2"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="PeriodType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[1234]" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="YearType">
+		<xsd:restriction base="xsd:gYear">
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="DateType">
+		<xsd:restriction base="xsd:date">
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="CheckBoxType">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="0" />
+			<xsd:whiteSpace value="collapse" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="String15Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1" />
+			<xsd:maxLength value="15" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="String80Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1" />
+			<xsd:maxLength value="80" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="String120Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1" />
+			<xsd:maxLength value="120" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- Infodec defined types below this point -->
+	<xsd:simpleType name="char8Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="8"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="otherDataType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="A"/>
+			<xsd:enumeration value="M"/>
+			<xsd:enumeration value="O"/>
+			<xsd:enumeration value="a"/>
+			<xsd:enumeration value="m"/>
+			<xsd:enumeration value="o"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="transNbrType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="(MM|mm)\d{6}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="indicator1-6Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[1-6]{1}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="int6Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{1,6}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="languageType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="E"/>
+			<xsd:enumeration value="F"/>
+			<xsd:enumeration value="e"/> 
+			<xsd:enumeration value="f"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="Line2Type">
+		<xsd:all>
+			<xsd:element name="l1_nm" type="char30Type"/>
+			<xsd:element name="l2_nm" type="char30Type" minOccurs="0"/>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="CanadaAddressType">
+		<xsd:all>
+			<xsd:element name="addr_l1_txt" type="char30Type" minOccurs="0"/>
+			<xsd:element name="addr_l2_txt" type="char30Type" minOccurs="0"/>
+			<xsd:element name="cty_nm" type="char28Type" minOccurs="0"/>
+			<xsd:element name="prov_cd" type="provinceStateType" minOccurs="0"/>
+			<xsd:element name="cntry_cd" type="countryType" minOccurs="0"/>
+			<xsd:element name="pstl_cd" type="pcType" minOccurs="0"/>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="ContactType">
+		<xsd:all>
+			<xsd:element name="cntc_nm" type="char22Type"/>
+			<xsd:element name="cntc_area_cd" type="numeric3Type"/>
+			<xsd:element name="cntc_phn_nbr" type="phoneType"/>
+			<xsd:element name="cntc_extn_nbr" type="int7Type" minOccurs="0"/>
+			<xsd:element name="cntc_email_area" type="char60Type" minOccurs="0"/>
+			<xsd:element name="sec_cntc_email_area" type="char60Type" minOccurs="0"/>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:simpleType name="char30Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="30"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="char28Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="28"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="provinceType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ON"/>
+			<xsd:enumeration value="on"/>
+			<xsd:enumeration value="On"/>
+			<xsd:enumeration value="NS"/>
+			<xsd:enumeration value="ns"/>
+			<xsd:enumeration value="Ns"/>
+			<xsd:enumeration value="PE"/>
+			<xsd:enumeration value="pe"/>
+			<xsd:enumeration value="Pe"/>
+			<xsd:enumeration value="NB"/>
+			<xsd:enumeration value="nb"/>
+			<xsd:enumeration value="Nb"/>
+			<xsd:enumeration value="QC"/>
+			<xsd:enumeration value="qc"/>
+			<xsd:enumeration value="Qc"/>
+			<xsd:enumeration value="MB"/>
+			<xsd:enumeration value="mb"/>
+			<xsd:enumeration value="Mb"/>
+			<xsd:enumeration value="MA"/>
+			<xsd:enumeration value="ma"/>
+			<xsd:enumeration value="Ma"/>
+			<xsd:enumeration value="SK"/>
+			<xsd:enumeration value="sk"/>
+			<xsd:enumeration value="Sk"/>
+			<xsd:enumeration value="SA"/>
+			<xsd:enumeration value="sa"/>
+			<xsd:enumeration value="Sa"/>
+			<xsd:enumeration value="AB"/>
+			<xsd:enumeration value="ab"/>
+			<xsd:enumeration value="Ab"/>
+			<xsd:enumeration value="AL"/>
+			<xsd:enumeration value="al"/>
+			<xsd:enumeration value="Al"/>
+			<xsd:enumeration value="BC"/>
+			<xsd:enumeration value="bc"/>
+			<xsd:enumeration value="Bc"/>
+			<xsd:enumeration value="NT"/>
+			<xsd:enumeration value="nt"/>
+			<xsd:enumeration value="Nt"/>
+			<xsd:enumeration value="YT"/>
+			<xsd:enumeration value="yt"/>
+			<xsd:enumeration value="Yt"/>
+			<xsd:enumeration value="NL"/>
+			<xsd:enumeration value="nl"/>
+			<xsd:enumeration value="Nl"/>
+			<xsd:enumeration value="NF"/>
+			<xsd:enumeration value="nf"/>
+			<xsd:enumeration value="Nf"/>
+			<xsd:enumeration value="LB"/>
+			<xsd:enumeration value="lb"/>
+			<xsd:enumeration value="Lb"/>
+			<xsd:enumeration value="PQ"/>
+			<xsd:enumeration value="pq"/>
+			<xsd:enumeration value="Pq"/>
+			<xsd:enumeration value="QU"/>
+			<xsd:enumeration value="qu"/>
+			<xsd:enumeration value="Qu"/>
+			<xsd:enumeration value="NU"/>
+			<xsd:enumeration value="nu"/>
+			<xsd:enumeration value="Nu"/>
+			<xsd:enumeration value="NN"/>
+			<xsd:enumeration value="nn"/>
+			<xsd:enumeration value="Nn"/>
+			<xsd:enumeration value="US"/>
+			<xsd:enumeration value="us"/>
+			<xsd:enumeration value="Us"/>
+			<xsd:enumeration value="ZZ"/>
+			<xsd:enumeration value="zz"/>
+			<xsd:enumeration value="Zz"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="provinceStateType">
+		<xsd:union memberTypes="provinceType stateType"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="stateType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="AL"/>
+			<xsd:enumeration value="al"/>
+			<xsd:enumeration value="NV"/>
+			<xsd:enumeration value="nv"/>
+			<xsd:enumeration value="AK"/>
+			<xsd:enumeration value="ak"/>
+			<xsd:enumeration value="NH"/>
+			<xsd:enumeration value="nh"/>
+			<xsd:enumeration value="AZ"/>
+			<xsd:enumeration value="az"/>
+			<xsd:enumeration value="NJ"/>
+			<xsd:enumeration value="nj"/>
+			<xsd:enumeration value="AR"/>
+			<xsd:enumeration value="ar"/>
+			<xsd:enumeration value="NM"/>
+			<xsd:enumeration value="nm"/>
+			<xsd:enumeration value="CA"/>
+			<xsd:enumeration value="ca"/>
+			<xsd:enumeration value="NY"/>
+			<xsd:enumeration value="ny"/>
+			<xsd:enumeration value="CO"/>
+			<xsd:enumeration value="co"/>
+			<xsd:enumeration value="NC"/>
+			<xsd:enumeration value="nc"/>
+			<xsd:enumeration value="CT"/>
+			<xsd:enumeration value="ct"/>
+			<xsd:enumeration value="ND"/>
+			<xsd:enumeration value="nd"/>
+			<xsd:enumeration value="DE"/>
+			<xsd:enumeration value="de"/>
+			<xsd:enumeration value="OH"/>
+			<xsd:enumeration value="oh"/>
+			<xsd:enumeration value="DC"/>
+			<xsd:enumeration value="dc"/>
+			<xsd:enumeration value="OK"/>
+			<xsd:enumeration value="ok"/>
+			<xsd:enumeration value="FL"/>
+			<xsd:enumeration value="fl"/>
+			<xsd:enumeration value="OR"/>
+			<xsd:enumeration value="or"/>
+			<xsd:enumeration value="GA"/>
+			<xsd:enumeration value="ga"/>
+			<xsd:enumeration value="PA"/>
+			<xsd:enumeration value="pa"/>
+			<xsd:enumeration value="HI"/>
+			<xsd:enumeration value="hi"/>
+			<xsd:enumeration value="RI"/>
+			<xsd:enumeration value="ri"/>
+			<xsd:enumeration value="ID"/>
+			<xsd:enumeration value="id"/>
+			<xsd:enumeration value="SC"/>
+			<xsd:enumeration value="sc"/>
+			<xsd:enumeration value="IL"/>
+			<xsd:enumeration value="il"/>
+			<xsd:enumeration value="SD"/>
+			<xsd:enumeration value="sd"/>
+			<xsd:enumeration value="IN"/>
+			<xsd:enumeration value="in"/>
+			<xsd:enumeration value="TN"/>
+			<xsd:enumeration value="tn"/>
+			<xsd:enumeration value="IA"/>
+			<xsd:enumeration value="ia"/>
+			<xsd:enumeration value="TX"/>
+			<xsd:enumeration value="tx"/>
+			<xsd:enumeration value="KS"/>
+			<xsd:enumeration value="ks"/>
+			<xsd:enumeration value="UT"/>
+			<xsd:enumeration value="ut"/>
+			<xsd:enumeration value="KY"/>
+			<xsd:enumeration value="ky"/>
+			<xsd:enumeration value="VT"/>
+			<xsd:enumeration value="vt"/>
+			<xsd:enumeration value="LA"/>
+			<xsd:enumeration value="la"/>
+			<xsd:enumeration value="VA"/>
+			<xsd:enumeration value="va"/>
+			<xsd:enumeration value="ME"/>
+			<xsd:enumeration value="me"/>
+			<xsd:enumeration value="WA"/>
+			<xsd:enumeration value="wa"/>
+			<xsd:enumeration value="MD"/>
+			<xsd:enumeration value="md"/>
+			<xsd:enumeration value="WV"/>
+			<xsd:enumeration value="wv"/>
+			<xsd:enumeration value="MA"/>
+			<xsd:enumeration value="ma"/>
+			<xsd:enumeration value="WI"/>
+			<xsd:enumeration value="wi"/>
+			<xsd:enumeration value="MI"/>
+			<xsd:enumeration value="mi"/>
+			<xsd:enumeration value="WY"/>
+			<xsd:enumeration value="wy"/>
+			<xsd:enumeration value="MN"/>
+			<xsd:enumeration value="mn"/>
+			<xsd:enumeration value="MS"/>
+			<xsd:enumeration value="ms"/>
+			<xsd:enumeration value="MO"/>
+			<xsd:enumeration value="mo"/>
+			<xsd:enumeration value="MT"/>
+			<xsd:enumeration value="mt"/>
+			<xsd:enumeration value="NE"/>
+			<xsd:enumeration value="ne"/>
+			<xsd:enumeration value="PR"/>
+			<xsd:enumeration value="pr"/>
+			<xsd:enumeration value="AS"/>
+			<xsd:enumeration value="as"/>
+			<xsd:enumeration value="FM"/>
+			<xsd:enumeration value="fm"/>
+			<xsd:enumeration value="GU"/>
+			<xsd:enumeration value="gu"/>
+			<xsd:enumeration value="MH"/>
+			<xsd:enumeration value="mh"/>
+			<xsd:enumeration value="MP"/>
+			<xsd:enumeration value="mp"/>
+			<xsd:enumeration value="PW"/>
+			<xsd:enumeration value="pw"/>
+			<xsd:enumeration value="VI"/>
+			<xsd:enumeration value="vi"/>
+			<xsd:enumeration value="ZZ"/>
+			<xsd:enumeration value="zz"/>
+		</xsd:restriction>
+	</xsd:simpleType>	
+	<xsd:simpleType name="countryType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\p{L}{3}|\p{N}{3}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="pcType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="10"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="char22Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="22"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="numeric3Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{3}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="phoneType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{3}-\d{4}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="int7Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{1,7}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="char60Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="60"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+</xsd:schema>

@@ -217,7 +217,19 @@ Debug.load = function() {
 window.addEventListener( 'keydown', function( e ) {
 	var evt = e ? e : event;
 	var keyCode = evt.keyCode;
-	//CTRL+ALT+SHIFT+F12(123)
+
+	//CTRL+ALT+SHIFT+F11(122) -- Enable API call tracing to browser console
+	if ( evt.ctrlKey && evt.shiftKey && evt.altKey && keyCode == 122 ) {
+		if ( Global.enable_api_tracing && Global.enable_api_tracing == true ) {
+			alert( 'API Tracing is disabled.');
+			Global.enable_api_tracing = false;
+		} else {
+			alert( 'API Tracing is enabled, please open your browsers developer console to view.');
+			Global.enable_api_tracing = true;
+		}
+	}
+
+	//CTRL+ALT+SHIFT+F12(123) -- Developer Tools
 	if ( evt.ctrlKey && evt.shiftKey && evt.altKey && keyCode == 123 ) {
 		Debug.showPanel();
 	}

@@ -2816,9 +2816,13 @@ class CalculatePolicy {
 					//Even if the combined_rate is lower, if the input UDT record is not overtime, then we know some UDT records were skipped over likely due to differential criteria OT policies that only matched the middle of a shift.
 					//  See Unit Test: OvertimePolicy_testDifferentialDailyOverTimePolicyE1
 					//  Some of these checks are also in: $this->calculateOverTimePolicy()
-					if (	(
-								!is_array( $prev_policy_data ) //On the first run, prev_policy_data is always FALSE, so don't bother checking $prev_policy_data['combined_rate'] as it doesn't exist and triggers PHP NOTICE errors.
-								OR
+					//
+					//  Also there is a case where the first OT policy might have a $0/hr rate of pay, and 0x accrual rate, but it should still be triggered since the OT policies rate comparison is only against other OT policies, not regular time.
+					//  See Unit Test: OvertimePolicy_testDailyOverTimePolicyD1 and OvertimePolicy_testDailyOverTimePolicyD2
+					if (
+							$prev_policy_data == FALSE //On the first run, prev_policy_data is always FALSE, so don't bother checking $prev_policy_data['combined_rate'] as it doesn't exist and triggers PHP NOTICE errors.
+							OR
+							(
 								( $current_trigger_time_arr['combined_rate'] > $prev_policy_data['combined_rate'] )
 								OR
 								( $current_trigger_time_arr['combined_rate'] == $prev_policy_data['combined_rate'] AND $current_trigger_time_arr['calculation_order'] <= $prev_policy_data['calculation_order'] )

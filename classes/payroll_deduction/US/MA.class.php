@@ -49,43 +49,49 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 	*/
 
 	var $state_options = array(
-			20190101 => array( //01-Jan-19
+			20200101 => array(
+					'rate'                => 5.00,
+					'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
+					'federal_tax_maximum' => 2000,
+					'minimum_income'      => 8000,
+			),
+			20190101 => array(
 							   'rate'                => 5.05,
 							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
 							   'federal_tax_maximum' => 2000,
 							   'minimum_income'      => 8000,
 			),
-			20160101 => array( //01-Jan-16
+			20160101 => array(
 							   'rate'                => 5.10,
 							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
 							   'federal_tax_maximum' => 2000,
 							   'minimum_income'      => 8000,
 			),
-			20150101 => array( //01-Jan-15
+			20150101 => array(
 							   'rate'                => 5.15,
 							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
 							   'federal_tax_maximum' => 2000,
 							   'minimum_income'      => 8000,
 			),
-			20140101 => array( //01-Jan-14
+			20140101 => array(
 							   'rate'                => 5.20,
 							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
 							   'federal_tax_maximum' => 2000,
 							   'minimum_income'      => 8000,
 			),
-			20120101 => array( //01-Jan-12
+			20120101 => array(
 							   'rate'                => 5.25,
 							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
 							   'federal_tax_maximum' => 2000,
 							   'minimum_income'      => 8000,
 			),
-			20090101 => array( //01-Jan-09
+			20090101 => array(
 							   'rate'                => 5.30,
 							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
 							   'federal_tax_maximum' => 2000,
 							   'minimum_income'      => 8000,
 			),
-			20060101 => array( //01-Jan-06
+			20060101 => array(
 							   'rate'                => 5.30,
 							   'standard_deduction'  => array(
 									   10 => 0,

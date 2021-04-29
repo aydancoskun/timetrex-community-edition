@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	Common Simple, Complex and Element Types for T3 Special returns
+Contact: 	CRA
+Last updated 	Ocotber 2018
+Version#:	1.18 (version #.yy)
+Revision History:
+May 2015	Initial Creation.
+Oct 2016	Schema changes for T3D, T3P and T3RI
+Apr 2017	Schema changes for T3 general
+-->
+
+<xsd:schema xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" 
+	xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+
+	<!--================= Simple Types =======================-->
+
+	<xsd:simpleType name="SummaryCodeTypeII">
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:length value="1"/>
+			<xsd:enumeration value="A"/>
+			<xsd:enumeration value="M"/>
+			<xsd:enumeration value="O"/>
+			<xsd:enumeration value="C"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="LanguageTypeI">
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:length value="1"/>
+			<xsd:enumeration value="E"/>
+			<xsd:enumeration value="F"/>
+			<xsd:enumeration value="A"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="PlanRegistrationNumberType">
+		<xsd:restriction base="sdt:NumberType">
+			<xsd:pattern value="\d{7}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!--================== Complex Types =======================-->
+
+	<xsd:complexType name="TrustAssetTransferType">
+		<xsd:sequence>
+			<xsd:element name="TransfereeName" type="Length1to60TextType"/>
+			<xsd:element name="TransferDate" type="YYYYMMDDDateType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Trust Ident Informaion for Trustee -->
+	<xsd:complexType name="T3SpecialIdentTypeBase">
+		<xsd:sequence>
+			<xsd:element name="SummaryReportTypeCode" type="SummaryCodeTypeII"/>
+			<xsd:element ref="TrustAccountNumber"/>
+			<xsd:element name="TrusteeName" type="TwoLinedLength30NameType"/>
+			<xsd:element name="TrusteeMailingAddress" type="CountryCodeAddressType"/>
+			<xsd:element name="TrusteePhoneNumber" type="ThreeFieldPhoneNumberType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3SpecialIdentTypeBasePlus">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeBase">
+       				<xsd:sequence>
+					<xsd:element ref="TrusteeLanguageCode" minOccurs="0"/>
+					<xsd:element ref="TrustFiscalPeriodEndDate" minOccurs="0"/>
+					<xsd:element ref="FirstYearFilingIndicator" minOccurs="0"/>
+					<xsd:element ref="DeclaredTrustProvinceCode"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<xsd:complexType name="T3SpecialIdentTypeI">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeBasePlus">
+       				<xsd:sequence>
+					<xsd:element ref="TrustEffectiveDate" minOccurs="0"/>
+					<xsd:element ref="TrustExpiryDate" minOccurs="0"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<xsd:complexType name="T3SpecialIdentTypeII">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeI">
+       				<xsd:sequence>
+					<xsd:element ref="TrustBookRecordAddress" minOccurs="0"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<xsd:complexType name="T3SpecialIdentTypeIIPlusOtherTrusteesName">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeII">
+       				<xsd:sequence>
+					<xsd:element name="RegisteredPlanTrustOtherTrusteeNameGroup" type="Length1to60TextType" minOccurs="0"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<xsd:complexType name="T3SpecialIdentTypeIII">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeIIPlusOtherTrusteesName">
+       				<xsd:sequence>
+					<xsd:element name="TrustAssetTransfer" type="TrustAssetTransferType" minOccurs="0"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<xsd:complexType name="T3SpecialIdentTypeIV">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeIII">
+       				<xsd:sequence>
+					<xsd:element name="RegisteredPlanName" type="Length1to60TextType"/>
+					<xsd:element name="PlanRegistrationNumber" type="PlanRegistrationNumberType"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<xsd:complexType name="T3SpecialIdentTypeV">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeIV">
+       				<xsd:sequence>
+					<xsd:element name="TrustRevocationDate" type="YYYYMMDDDateType" minOccurs="0"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Trust Ident Informaion for Trust Filer -->
+	<xsd:complexType name="T3SpecialTrustFilerIdentTypeBase">
+		<xsd:sequence>
+			<xsd:element name="SummaryReportTypeCode" type="SummaryCodeTypeII"/>
+			<xsd:element ref="TrustAccountNumber"/>
+			<xsd:element ref="TrustFilerName"/>
+			<xsd:element ref="TrustFilerMailingAddress"/>
+			<xsd:element name="TrustFilerPhoneNumber" type="ThreeFieldPhoneNumberType"/>
+			<xsd:element ref="TrustFilerLanguageCode" minOccurs="0"/>
+			<xsd:element ref="TrustFiscalPeriodEndDate"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="T3SpecialTrustFilerIdentTypeI">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialTrustFilerIdentTypeBase">
+       				<xsd:sequence>
+					<xsd:element ref="FirstYearFilingIndicator" minOccurs="0"/>
+					<xsd:element ref="DeclaredTrustProvinceCode"/>
+					<xsd:element ref="TrustEffectiveDate" minOccurs="0"/>
+					<xsd:element ref="TrustExpiryDate" minOccurs="0"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+
+	<!-- T3 special returns summary of tax or refund -->
+	<xsd:complexType name="T3SpecialTaxSummaryType">
+		<xsd:sequence>
+			<xsd:element ref="TotalAcquireCorporationShareTaxPayableAmount" minOccurs="0"/>
+			<xsd:element ref="TotalTrustTaxPayableAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountPaidAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountBalanceAmount"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="T3SpecialTaxSummaryTypeI">
+		<xsd:sequence>
+			<xsd:element ref="TotalTrustTaxPayableAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountPaidAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountBalanceAmount" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3SpecialTaxSummaryTypeII">
+		<xsd:sequence>
+			<xsd:element ref="TotalAcquireCorporationShareTaxPayableAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountPaidAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountBalanceAmount" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- T3 special tax summary: non negative payable or paid amount -->
+	<xsd:complexType name="T3SpecialTaxSummaryTypeIII">
+		<xsd:sequence>
+			<xsd:element name="TotalTrustTaxPayableAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TrustAccountPaidAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TrustAccountBalanceAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- T3 special tax summary: non negative payable and balance amount -->
+	<xsd:complexType name="T3SpecialTaxSummaryTypeIV">
+		<xsd:sequence>
+			<xsd:element name="TotalAcquireCorporationShareTaxPayableAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element ref="TrustAccountPaidAmount" minOccurs="0"/>
+			<xsd:element name="TrustAccountBalanceAmount" type="Decimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!--================== Element Types =======================-->
+
+	<xsd:element name="TrustAccountNumber" type="TrustNumberTypeII"/>
+	<xsd:element name="TrustFiscalPeriodEndDate" type="YYYYMMDDDateType"/>
+	<xsd:element name="FirstYearFilingIndicator" type="YesNoCodeType"/>
+	<xsd:element name="DeclaredTrustProvinceCode" type="ProvinceCodeType"/>
+	<xsd:element name="TrusteeLanguageCode" type="LanguageTypeI"/>
+	<xsd:element name="TrustEffectiveDate" type="YYYYMMDDDateType"/>
+	<xsd:element name="TrustExpiryDate" type="YYYYMMDDDateType"/>
+	<xsd:element name="TrustBookRecordAddress" type="CountryCodeAddressType"/>
+	<xsd:element name="TrustFilerName" type="TwoLinedLength30NameType"/>
+	<xsd:element name="TrustFilerMailingAddress" type="CountryCodeAddressType"/>
+	<xsd:element name="TrustFilerLanguageCode" type="LanguageTypeI"/>
+	<xsd:element name="RCAAARegistrationNumber" type="BNType"/>
+
+	<xsd:element name="MonthNumber" type="sdt:MonthType"/>
+	<xsd:element name="TotalAcquireCorporationShareTaxPayableAmount" type="SignedDecimal15AmountType"/>
+	<xsd:element name="TotalTrustTaxPayableAmount" type="SignedDecimal15AmountType"/>
+	<xsd:element name="TrustAccountPaidAmount" type="SignedDecimal15AmountType"/>
+	<xsd:element name="TrustAccountBalanceAmount" type="SignedDecimal15AmountType"/>
+
+
+	<!--================== Trust Type Codes =======================-->
+
+	<!-- Code Number for the type of trust -->
+	<xsd:simpleType name="TrustTypeCodeType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				Testamentary trusts:						
+				001	Spousal or common law partner trust					
+				900	Other testamentary					
+				901	Lifetime Benefit trust					
+				903	Graduated Rate Estate					
+				904	Qualified Disability trust					
+			
+				Non-Testamentary trusts						
+							
+				011	Spousal or common law partner trust					
+				012	Unit trust					
+				013	Mutual fund trust					
+				014	Communal organization trust					
+				015	Employee benefit plans trust					
+				019	Employee trust					
+				020	Blind/revocable trust					
+				021	Personal trust					
+				022	Joint spousal or common law partner trust					
+				023	Alter ego trust					
+				024	Master trust										
+				032	Tax-free savings account (TFSA)					
+				033	Employee life and health trust (ELHT)					
+				161	Insurance segregated fund fully registered trust					
+				162	Insurance segregated fund partially registered trust					
+				163	Insurance segregated fund non registered					
+				180	Non-profit organization trust - subsection 149(5) trust					
+				181	Non-profit organization trust - subsection 149(1)(1) trust					
+				300	Other trust					
+				301	Registered retirement savings plan trust (RRSP) to report tax payable on an advantage under section 207.05 of the Act					
+				302	Registered retirement income fund trust (RRIF) to report tax payable on an advantage under section 207.05 of the Act					
+				303	Registered disability savings plan (RDSP) trust to report tax payable on an advantage under section 207.05 of the Act						
+				304	Real estate investment trust (REIF)					
+				305	Health and welfare trust (HWT)					
+				306	Salary deferral arrangement trust (SDA)					
+				314	Environmental quality act trust described in paragraph 149(1)(z.1) of the Act					
+				315	Nuclear fuel waste Act trust described in paragraph 149(1)(z.2) of the Act					
+				316	Hepatitis C trust described in paragraph 81(1)(g.3) of the Act					
+				317	Indian residential schools trust described in paragraph 81(1)(g.3) of the Act
+				318 Tax-free savings account (TFSA) trust described in paragraph 146.2(5) of the Act
+				319 Registered education savings plan (RESP) trust
+			</xsd:documentation>
+		</xsd:annotation>
+
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:length value="3"/>
+			<xsd:enumeration value="001"/>
+			<xsd:enumeration value="900"/>
+			<xsd:enumeration value="901"/>
+			<xsd:enumeration value="903"/>
+			<xsd:enumeration value="904"/>
+			<xsd:enumeration value="011"/>
+			<xsd:enumeration value="012"/>
+			<xsd:enumeration value="013"/>
+			<xsd:enumeration value="014"/>
+			<xsd:enumeration value="015"/>
+			<xsd:enumeration value="019"/>
+			<xsd:enumeration value="020"/>
+			<xsd:enumeration value="021"/>
+			<xsd:enumeration value="022"/>
+			<xsd:enumeration value="023"/>
+			<xsd:enumeration value="024"/>
+			<xsd:enumeration value="032"/>
+			<xsd:enumeration value="033"/>
+			<xsd:enumeration value="161"/>
+			<xsd:enumeration value="162"/>
+			<xsd:enumeration value="163"/>
+			<xsd:enumeration value="180"/>
+			<xsd:enumeration value="181"/>
+			<xsd:enumeration value="300"/>
+			<xsd:enumeration value="301"/>
+			<xsd:enumeration value="302"/>
+			<xsd:enumeration value="303"/>
+			<xsd:enumeration value="304"/>
+			<xsd:enumeration value="305"/>
+			<xsd:enumeration value="306"/>
+			<xsd:enumeration value="314"/>
+			<xsd:enumeration value="315"/>
+			<xsd:enumeration value="316"/>
+			<xsd:enumeration value="317"/>
+			<xsd:enumeration value="318"/>
+			<xsd:enumeration value="319"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+</xsd:schema>

@@ -348,16 +348,28 @@ abstract class Factory {
 		//See ContributingPayCodePolicyFactory() ->getPayCode() for comments on a bug with caching...
 		Debug::text('Attempting to remove cache: '. $cache_id, __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_object($this->cache) ) {
+			$retval = FALSE;
+
 			if ( $group_id == '' ) {
 				$group_id = $this->getTable(TRUE);
 			}
+
+			//When using retryTransaction(), we set onlyMemoryCaching=TRUE.
+			//  However Cache_Lite won't remove cache from persistent storage in that case. So whenever removing caching, set onlyMemoryCaching=FALSE so memory and persistent caches are cleared.
+			$current_cache_memory_state = $this->cache->_onlyMemoryCaching;
+			$this->cache->_onlyMemoryCaching = FALSE;
+
 			if ( $cache_id != '' ) {
 				Debug::text('Removing cache: '. $cache_id .' Group Id: '. $group_id, __FILE__, __LINE__, __METHOD__, 10);
-				return $this->cache->remove( $cache_id, $group_id );
+				$retval = $this->cache->remove( $cache_id, $group_id );
 			} elseif ( $group_id != '' ) {
 				Debug::text('Removing cache group: '. $group_id, __FILE__, __LINE__, __METHOD__, 10);
-				return $this->cache->clean( $group_id );
+				$retval = $this->cache->clean( $group_id );
 			}
+
+			$this->cache->_onlyMemoryCaching = $current_cache_memory_state;
+
+			return $retval;
 		}
 
 		return FALSE;
@@ -1564,7 +1576,9 @@ abstract class Factory {
 				if ( !is_array($args) ) {
 					$args = (array)$args;
 				}
-				if ( isset($args) AND isset($args[0]) AND !in_array( TTUUID::getNotExistID(), $args) AND !in_array( -1, $args ) ) { //Check for -1 as well for backwards compatibily with INT ID lists.
+
+				//Always use strict mode when calling in_array(), otherwise if we pass in array( (int)0 ) as the args, it will match in_array( TTUUID::getNotExistID(), $args ).
+				if ( isset($args) AND isset($args[0]) AND !in_array( TTUUID::getNotExistID(), $args, TRUE ) AND !in_array( -1, $args, TRUE ) AND !in_array( '-1', $args, TRUE ) ) { //Check for -1 as well for backwards compatibily with INT ID lists.
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						if ( strtolower($type) == 'not_uuid_list' ) {
 							$query_stub = $columns . ' NOT IN (?)';
@@ -1605,7 +1619,8 @@ abstract class Factory {
 					$args = array_flip( array_change_key_case( array_flip( $args ), $text_case ) );
 				}
 
-				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args) AND !in_array( strtoupper( TTUUID::getNotExistID() ), $args) AND !in_array( TTUUID::getNotExistID(), $args) AND !in_array( '00', $args) ) {
+				//Always use strict mode when calling in_array(), otherwise if we pass in array( (int)0 ) as the args, it will match in_array( TTUUID::getNotExistID(), $args ).
+				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args, TRUE ) AND !in_array( '-1', $args, TRUE ) AND !in_array( strtoupper( TTUUID::getNotExistID() ), $args, TRUE ) AND !in_array( TTUUID::getNotExistID(), $args, TRUE ) AND !in_array( '00', $args, TRUE ) ) {
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$query_stub = $sql_text_case_function.'('. $columns .') IN (?)';
 					}
@@ -1618,7 +1633,8 @@ abstract class Factory {
 					$args = (array)$args;
 				}
 
-				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args) AND !in_array( '00', $args) ) {
+				//Always use strict mode when calling in_array(), otherwise if we pass in array( (int)0 ) as the args, it will match in_array( TTUUID::getNotExistID(), $args ).
+				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args, TRUE ) AND !in_array( '-1', $args, TRUE ) AND !in_array( '00', $args) ) {
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$query_stub = $columns .' IN (?)';
 					}
@@ -1671,7 +1687,9 @@ abstract class Factory {
 				if ( !is_array($args) ) {
 					$args = (array)$args;
 				}
-				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args) ) {
+
+				//Always use strict mode when calling in_array(), otherwise if we pass in array( (int)0 ) as the args, it will match in_array( TTUUID::getNotExistID(), $args ).
+				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args, TRUE ) AND !in_array( '-1', $args, TRUE ) ) {
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$query_stub = $columns .' IN (?)';
 					}
@@ -1696,7 +1714,9 @@ abstract class Factory {
 				if ( !is_array($args) ) {
 					$args = (array)$args;
 				}
-				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args) ) {
+
+				//Always use strict mode when calling in_array(), otherwise if we pass in array( (int)0 ) as the args, it will match in_array( TTUUID::getNotExistID(), $args ).
+				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args, TRUE ) AND !in_array( '-1', $args, TRUE ) ) {
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$query_stub = $columns .' NOT IN (?)';
 					}
@@ -1753,7 +1773,9 @@ abstract class Factory {
 				if ( !is_array($args) ) {
 					$args = (array)$args;
 				}
-				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args) ) {
+
+				//Always use strict mode when calling in_array(), otherwise if we pass in array( (int)0 ) as the args, it will match in_array( TTUUID::getNotExistID(), $args ).
+				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args, TRUE ) AND !in_array( '-1', $args, TRUE ) ) {
 					foreach( $args as $tmp_arg ) {
 						if ( TTDate::isValidDate( $tmp_arg ) ) {
 							$converted_args[] = $this->db->bindDate( (int)$tmp_arg );
@@ -2609,7 +2631,8 @@ abstract class Factory {
 			$retry_max_attempts = 1;
 		}
 
-		$current_cache_state = $this->cache->_caching;
+		//$current_cache_state = $this->cache->_caching;
+		$current_cache_memory_state = $this->cache->_onlyMemoryCaching;
 
 		$tmp_sleep = ( $retry_sleep * 1000000 );
 		$retry_attempts = 0;
@@ -2620,13 +2643,15 @@ abstract class Factory {
 
 				unset( $e ); //Clear any exceptions on retry.
 
-				$this->cache->_caching = FALSE; //Disable caching when retrying blocks of transaction, since we can't rollback cached data.
+				//$this->cache->_caching = FALSE; //Disable caching when retrying blocks of transaction, since we can't rollback cached data.
+				$this->cache->_onlyMemoryCaching = TRUE; //Disable persistent caching and switch to memory caching only when retrying blocks of transaction, this allows us to clear all memory cache on rollback below.
 
 				Debug::text( '==================START: TRANSACTION BLOCK===================================', __FILE__, __LINE__, __METHOD__, 10 );
 				$retval = $transaction_function(); //This function should call StartTransaction() at the beginning, and CommitTransaction() at the end.
 				Debug::text( '==================END: TRANSACTION BLOCK=====================================', __FILE__, __LINE__, __METHOD__, 10 );
 
-				$this->cache->_caching = $current_cache_state;
+				//$this->cache->_caching = $current_cache_state;
+				$this->cache->_onlyMemoryCaching = $current_cache_memory_state;
 			} catch ( Exception $e ) {
 				if ( $is_nested_retry_transaction == TRUE ) {
 					//If we are inside a nested retry transaction block that fails, we can't fail/retry just part of the transaction,
@@ -2637,6 +2662,10 @@ abstract class Factory {
 					throw new NestedRetryTransaction( $e ); //'SQL exception in Nested RetryTransaction...'
 				} else {
 					if ( $this->isSQLExceptionRetryable( $e ) == TRUE ) {
+						//Quick way to clear all memory cache on retry.
+						$this->cache->_memoryCachingArray = array();
+						$this->cache->_memoryCachingCounter = 0;
+
 						//When we get here, fail transaction should already be called.
 						// But if it hasn't, call it again just in case.
 						if ( $this->db->_transOK == TRUE ) {
@@ -2702,7 +2731,7 @@ abstract class Factory {
 	 */
 	function isDataDifferent( $key, $data_diff, $type_id = NULL, $new_data = NULL ) {
 		// Must use array_key_exists as there could be a NULL value which is old value and is different of course.
-		if ( array_key_exists( $key, $data_diff ) == TRUE ) {
+		if ( is_array( $data_diff ) AND array_key_exists( $key, $data_diff ) == TRUE ) {
 			$retval = FALSE;
 
 			$old_data = $data_diff[$key];

@@ -44,10 +44,11 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	//
 	function setFederalFilingStatus( $value ) {
 		//Check for invalid value, default to single if found.
-		if ( $value > 20 ) {
+		if ( in_array( $value, array(10, 20, 40) ) == FALSE ) {
 			$value = 10; //Single
 		}
-		$this->data['federal_filing_status'] = $value;
+
+		$this->data['federal_filing_status'] = (int)$value;
 
 		return TRUE;
 	}
@@ -69,6 +70,82 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function getFederalAllowance() {
 		if ( isset( $this->data['federal_allowance'] ) ) {
 			return $this->data['federal_allowance'];
+		}
+
+		return FALSE;
+	}
+
+	function setFederalFormW4Version( $value ) {
+		//Check for invalid value, default to single if found.
+		if ( in_array( $value, array(2019, 2020) ) == FALSE ) {
+			$value = 2019; //Default to 2019 version.
+		}
+
+		$this->data['federal_form_w4_version'] = (string)$value; //2019 or 2010
+
+		return TRUE;
+	}
+
+	function getFederalFormW4Version() {
+		if ( isset( $this->data['federal_form_w4_version'] ) ) {
+			return $this->data['federal_form_w4_version'];
+		}
+
+		return 2019; //Default to 2019 version if not set.
+	}
+
+
+	function setFederalMultipleJobs( $value ) {
+		$this->data['federal_multiple_jobs'] = (bool)$value; //Boolean Yes/No
+
+		return TRUE;
+	}
+
+	function getFederalMultipleJobs() {
+		if ( isset( $this->data['federal_multiple_jobs'] ) ) {
+			return $this->data['federal_multiple_jobs'];
+		}
+
+		return FALSE;
+	}
+
+	function setFederalClaimDependents( $value ) {
+		$this->data['federal_claim_dependents'] = $value;
+
+		return TRUE;
+	}
+
+	function getFederalClaimDependents() {
+		if ( isset( $this->data['federal_claim_dependents'] ) ) {
+			return $this->data['federal_claim_dependents'];
+		}
+
+		return FALSE;
+	}
+
+	function setFederalOtherIncome( $value ) {
+		$this->data['federal_other_income'] = $value;
+
+		return TRUE;
+	}
+
+	function getFederalOtherIncome() {
+		if ( isset( $this->data['federal_other_income'] ) ) {
+			return $this->data['federal_other_income'];
+		}
+
+		return FALSE;
+	}
+
+	function setFederalDeductions( $value ) {
+		$this->data['federal_deductions'] = $value;
+
+		return TRUE;
+	}
+
+	function getFederalDeductions() {
+		if ( isset( $this->data['federal_deductions'] ) ) {
+			return $this->data['federal_deductions'];
 		}
 
 		return FALSE;
@@ -459,25 +536,55 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		}
 
 		$annual_taxable_income = $this->getAnnualTaxableIncome();
-		$annual_allowance = bcmul( $this->getFederalAllowanceAmount( $this->getDate() ), $this->getFederalAllowance() );
+		if ( $this->getDate() >= 20200101 AND $this->getFederalFormW4Version() == 2020 ) { //See Form W4 Version check below as well.
+			$annual_taxable_income = bcadd( $annual_taxable_income, $this->getFederalOtherIncome() );
 
-		Debug::text( 'Annual Taxable Income: ' . $annual_taxable_income, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'Allowance: ' . $annual_allowance, __FILE__, __LINE__, __METHOD__, 10 );
+			$filing_status_adjustment = 0;
+			if ( $this->getFederalMultipleJobs() == FALSE ) {
+				if ( $this->getFederalFilingStatus() == 20 ) { //Married Filing Jointly
+					$filing_status_adjustment = bcmul( $this->getFederalAllowanceAmount( $this->getDate() ), 3 ); //$12,600 (4,200 * 3 )
+				} else {
+					$filing_status_adjustment = bcmul( $this->getFederalAllowanceAmount( $this->getDate() ), 2 ); //$8,400 ( 4,200 * 2 )
+				}
+			}
+			Debug::text( 'Filing Status Adjustment: ' . $filing_status_adjustment . ' W4 Deductions: ' . $this->getFederalDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $annual_taxable_income > $annual_allowance ) {
-			$modified_annual_taxable_income = bcsub( $annual_taxable_income, $annual_allowance );
-			$rate = $this->getData()->getFederalRate( $modified_annual_taxable_income );
-			$federal_constant = $this->getData()->getFederalConstant( $modified_annual_taxable_income );
-			$federal_rate_income = $this->getData()->getFederalRatePreviousIncome( $modified_annual_taxable_income );
-
-			$retval = bcadd( bcmul( bcsub( $modified_annual_taxable_income, $federal_rate_income ), $rate ), $federal_constant );
+			$annual_taxable_income = bcsub( bcsub( $annual_taxable_income, $filing_status_adjustment ), $this->getFederalDeductions() );
+			Debug::text( '2020 W4 - Annual Taxable Income: ' . $annual_taxable_income . ' Other Income: ' . $this->getFederalOtherIncome() . ' ', __FILE__, __LINE__, __METHOD__, 10 );
 		} else {
-			Debug::text( 'Income is less then allowance: ', __FILE__, __LINE__, __METHOD__, 10 );
+			$annual_allowance = bcmul( $this->getFederalAllowanceAmount( $this->getDate() ), $this->getFederalAllowance() );
+			Debug::text( 'Legacy W4 - Annual Taxable Income: ' . $annual_taxable_income . 'Allowance: ' . $annual_allowance, __FILE__, __LINE__, __METHOD__, 10 );
 
-			$retval = 0;
+			if ( $annual_taxable_income > $annual_allowance ) {
+				$annual_taxable_income = bcsub( $annual_taxable_income, $annual_allowance );
+			} else {
+				Debug::text( 'Income is less then allowance: ', __FILE__, __LINE__, __METHOD__, 10 );
+				$annual_taxable_income = 0;
+			}
 		}
 
-		if ( $retval < 0 ) {
+		if ( $annual_taxable_income > 0 ) {
+			Debug::text( 'Annual Taxable Income: ' . $annual_taxable_income, __FILE__, __LINE__, __METHOD__, 10 );
+			$rate = $this->getData()->getFederalRate( $annual_taxable_income );
+			$federal_constant = $this->getData()->getFederalConstant( $annual_taxable_income );
+			$federal_rate_income = $this->getData()->getFederalRatePreviousIncome( $annual_taxable_income );
+
+			$retval = bcadd( bcmul( bcsub( $annual_taxable_income, $federal_rate_income ), $rate ), $federal_constant );
+
+			if ( $this->getDate() >= 20200101 AND $this->getFederalFormW4Version() == 2020 ) {  //See Form W4 Version check above as well.
+				$additional_deduction = 0;
+				if ( $this->getFederalAdditionalDeduction() > 0 ) {
+					$additional_deduction = bcmul( $this->getFederalAdditionalDeduction(), $this->getAnnualPayPeriods() ); //Federal Deduction amount from 2020 W4 is *PER PAY PERIOD*
+				}
+
+				Debug::text( 'Claimed Dependent Amount: ' . $this->getFederalClaimDependents() . ' Additional Deduction: ' . $additional_deduction, __FILE__, __LINE__, __METHOD__, 10 );
+				$retval = bcsub( bcadd( $retval, $additional_deduction ), $this->getFederalClaimDependents() );
+			}
+
+			if ( $retval < 0 ) {
+				$retval = 0;
+			}
+		} else {
 			$retval = 0;
 		}
 
@@ -600,7 +707,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 		$threshold_income = $this->getMedicareAdditionalEmployerThreshold();
 		Debug::text( 'Threshold Income: ' . $threshold_income, __FILE__, __LINE__, __METHOD__, 10 );
-		if ( $threshold_income > 0 AND ( $this->getYearToDateGrossIncome() + $this->getGrossPayPeriodIncome() ) > $threshold_income ) {
+		if ( $threshold_income > 0 AND bcadd( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome() ) > $threshold_income ) {
 			if ( $this->getYearToDateGrossIncome() < $threshold_income ) {
 				$threshold_income = bcsub( bcadd( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome() ), $threshold_income );
 			} else {
@@ -676,7 +783,6 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	}
 
 	function getPayPeriodEmployeeTotalDeductions() {
-		//return $this->getPayPeriodTaxDeductions() + $this->getEmployeeCPP() + $this->getEmployeeEI();
 		return bcadd( bcadd( $this->getPayPeriodTaxDeductions(), $this->getEmployeeSocialSecurity() ), $this->getEmployeeMedicare() );
 	}
 

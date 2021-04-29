@@ -73,7 +73,7 @@ function postToURL( $url, $data = NULL, $raw_result = FALSE ) {
 	curl_setopt( $curl_connection, CURLOPT_FOLLOWLOCATION, 1 );
 	curl_setopt( $curl_connection, CURLOPT_REFERER, $url ); //**IMPORTANT: Referer should always be sent to avoid requests being rejected due to CSRF security checks.
 
-	//When sending JSON data to POST, it must be sent as JSON=<JSON DATA>
+	//When sending JSON data to POST, it must be sent as: json=<JSON DATA>
 	//<JSON DATA> should be an associative array with the first level being the number of arguments, where each argument can be of mixed type. ie:
 	// array(
 	//       0 => <ARG1>,

@@ -40,6 +40,13 @@
  */
 class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
+			20200101 => array(
+					array('income' => 44740, 'rate' => 5.05, 'constant' => 0),
+					array('income' => 89482, 'rate' => 9.15, 'constant' => 1834),
+					array('income' => 150000, 'rate' => 11.16, 'constant' => 3633),
+					array('income' => 220000, 'rate' => 12.16, 'constant' => 5133),
+					array('income' => 220000, 'rate' => 13.16, 'constant' => 7333),
+			),
 			20190101 => array(
 					array('income' => 43906, 'rate' => 5.05, 'constant' => 0),
 					array('income' => 87813, 'rate' => 9.15, 'constant' => 1800),
@@ -136,89 +143,95 @@ class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 		Provincial surtax
 	*/
 	var $provincial_surtax_options = array(
-			20190101 => array( //2019
-							   'income1' => 4740,
-							   'income2' => 6067,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20200101 => array(
+					'income1' => 4830,
+					'income2' => 6182,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20180101 => array( //2018
-							   'income1' => 4638,
-							   'income2' => 5936,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20190101 => array(
+					'income1' => 4740,
+					'income2' => 6067,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20170101 => array( //2017
-							   'income1' => 4556,
-							   'income2' => 5831,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20180101 => array(
+					'income1' => 4638,
+					'income2' => 5936,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20160101 => array( //2016
-							   'income1' => 4484,
-							   'income2' => 5739,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20170101 => array(
+					'income1' => 4556,
+					'income2' => 5831,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20150101 => array( //2015
-							   'income1' => 4418,
-							   'income2' => 5654,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20160101 => array(
+					'income1' => 4484,
+					'income2' => 5739,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20140101 => array( //2014
-							   'income1' => 4331,
-							   'income2' => 5543,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20150101 => array(
+					'income1' => 4418,
+					'income2' => 5654,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20130101 => array( //2013
-							   'income1' => 4289,
-							   'income2' => 5489,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20140101 => array(
+					'income1' => 4331,
+					'income2' => 5543,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20120101 => array( //2012
-							   'income1' => 4213,
-							   'income2' => 5392,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20130101 => array(
+					'income1' => 4289,
+					'income2' => 5489,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20110101 => array( //2011
-							   'income1' => 4078,
-							   'income2' => 5219,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20120101 => array(
+					'income1' => 4213,
+					'income2' => 5392,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20100101 => array( //2010
-							   'income1' => 4006,
-							   'income2' => 5127,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20110101 => array(
+					'income1' => 4078,
+					'income2' => 5219,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20090101 => array( //2009
-							   'income1' => 4257,
-							   'income2' => 5370,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20100101 => array(
+					'income1' => 4006,
+					'income2' => 5127,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20080101 => array( //2008
-							   'income1' => 4162,
-							   'income2' => 5249,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20090101 => array(
+					'income1' => 4257,
+					'income2' => 5370,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20070101 => array( //2007
-							   'income1' => 4100,
-							   'income2' => 5172,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20080101 => array(
+					'income1' => 4162,
+					'income2' => 5249,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
-			20060101 => array( //2006
-							   'income1' => 4016,
-							   'income2' => 5065,
-							   'rate1'   => 0.20,
-							   'rate2'   => 0.36,
+			20070101 => array(
+					'income1' => 4100,
+					'income2' => 5172,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
+			),
+			20060101 => array(
+					'income1' => 4016,
+					'income2' => 5065,
+					'rate1'   => 0.20,
+					'rate2'   => 0.36,
 			),
 	);
 
@@ -226,47 +239,50 @@ class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 		Provincial tax reduction
 	*/
 	var $provincial_tax_reduction_options = array(
-			20190101 => array( //2019
-							   'amount' => 244,
+			20200101 => array(
+					'amount' => 249,
 			),
-			20180101 => array( //2018
-							   'amount' => 239,
+			20190101 => array(
+					'amount' => 244,
 			),
-			20170101 => array( //2017
-							   'amount' => 235,
+			20180101 => array(
+					'amount' => 239,
 			),
-			20160101 => array( //2016
-							   'amount' => 231,
+			20170101 => array(
+					'amount' => 235,
 			),
-			20150101 => array( //2015
-							   'amount' => 228,
+			20160101 => array(
+					'amount' => 231,
 			),
-			20140101 => array( //2014
-							   'amount' => 223,
+			20150101 => array(
+					'amount' => 228,
 			),
-			20130101 => array( //2013
-							   'amount' => 221,
+			20140101 => array(
+					'amount' => 223,
 			),
-			20120101 => array( //2012
-							   'amount' => 217,
+			20130101 => array(
+					'amount' => 221,
 			),
-			20110101 => array( //2011
-							   'amount' => 210,
+			20120101 => array(
+					'amount' => 217,
 			),
-			20100101 => array( //2010
-							   'amount' => 206,
+			20110101 => array(
+					'amount' => 210,
 			),
-			20090101 => array( //2009
-							   'amount' => 205,
+			20100101 => array(
+					'amount' => 206,
 			),
-			20080101 => array( //2008
-							   'amount' => 201,
+			20090101 => array(
+					'amount' => 205,
 			),
-			20070101 => array( //2007
-							   'amount' => 198,
+			20080101 => array(
+					'amount' => 201,
 			),
-			20060101 => array( //2006
-							   'amount' => 194,
+			20070101 => array(
+					'amount' => 198,
+			),
+			20060101 => array(
+					'amount' => 194,
 			),
 	);
 

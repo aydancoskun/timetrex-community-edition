@@ -1,9 +1,15 @@
 <?xml version="1.0"?>
+
+<!--
+Description	Definition of SimpleTypes
+Last updated 	October 
+Version#:	1.18 (version #.yy)
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<!-- @@@@@ Definition of SimpleTypes @@@@@@@@  2011/June/22  Version# 1.11 (version #.yy)-->
 	<!--                                                                                  -->
-	<!--                    String definitions                                    -->
-	<!--                                                                                   -->
+	<!--                    String definitions                                            -->
+	<!--                                                                                  -->
 	<xsd:simpleType name="slipDataType">
 		<xsd:restriction base="xsd:string">
 			<xsd:enumeration value="A"/>
@@ -312,6 +318,9 @@
 			<xsd:pattern value="(\p{L}{1}[0-9]{8})"/>
 		</xsd:restriction>
 	</xsd:simpleType>
+	<xsd:simpleType name="BNTrustType">
+			<xsd:union memberTypes="bnType trustType"/>
+	</xsd:simpleType>
 	<xsd:simpleType name="finType">
 		<xsd:restriction base="xsd:string">
 			<xsd:pattern value="(\p{L}{2}[0-9]{7})"/>
@@ -430,11 +439,13 @@
 	</xsd:simpleType>
 	<xsd:simpleType name="int11Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="11"/>
 			<xsd:pattern value="\d{1,11}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="signedInt11Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="12"/>
 			<xsd:pattern value="(\d{1,11})|(-\d{1,11})"/>
 		</xsd:restriction>
 	</xsd:simpleType>
@@ -450,6 +461,7 @@
 	</xsd:simpleType>
 	<xsd:simpleType name="signedInt13Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="14"/>
 			<xsd:pattern value="(\d{1,13})|(-\d{1,13})"/>
 		</xsd:restriction>
 	</xsd:simpleType>
@@ -460,6 +472,7 @@
 	</xsd:simpleType>
 	<xsd:simpleType name="signedInt15Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="16"/>
 			<xsd:pattern value="(\d{1,15})|(-\d{1,15})"/>
 		</xsd:restriction>
 	</xsd:simpleType>
@@ -489,21 +502,25 @@
 	<!--                                                                     -->
 	<xsd:simpleType name="decimal6Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="7"/>
 			<xsd:pattern value="\d{0,4}\.\d{2}|\d{0,4},\d{2}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="decimal7Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="8"/>
 			<xsd:pattern value="\d{0,5}\.\d{2}|\d{0,5},\d{2}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="decimal9Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="10"/>
 			<xsd:pattern value="\d{0,7}\.\d{2}|\d{0,7},\d{2}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="signedDecimal9Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="11"/>
 			<xsd:pattern value="(-\d{0,7}\.\d{2}|\d{0,7}\.\d{2})|(-\d{0,7},\d{2}|\d{0,7},\d{2})"/>
 		</xsd:restriction>
 	</xsd:simpleType>
@@ -519,41 +536,49 @@
 	</xsd:simpleType>
 	<xsd:simpleType name="decimal10Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="11"/>
 			<xsd:pattern value="\d{0,8}\.\d{2}|\d{0,8},\d{2}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="decimal11Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="12"/>
 			<xsd:pattern value="\d{0,9}\.\d{2}|\d{0,9},\d{2}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="signedDecimal11Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="13"/>
 			<xsd:pattern value="(-\d{0,9}\.\d{2}|\d{0,9}\.\d{2})|(-\d{0,9},\d{2}|\d{0,9},\d{2})"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="decimal12Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="13"/>
 			<xsd:pattern value="\d{0,10}\.\d{2}|\d{0,10},\d{2}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="decimal13Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="14"/>
 			<xsd:pattern value="\d{0,11}\.\d{2}|\d{0,11},\d{2}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="signedDecimal13Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="15"/>
 			<xsd:pattern value="(-\d{0,11}\.\d{2}|\d{0,11}\.\d{2})|(-\d{0,11},\d{2}|\d{0,11},\d{2})"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="decimal14Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="15"/>
 			<xsd:pattern value="\d{0,12}\.\d{2}|\d{0,12},\d{2}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="decimal15Type">
 		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="16"/>
 			<xsd:pattern value="\d{0,13}\.\d{2}|\d{0,13},\d{2}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
@@ -573,6 +598,11 @@
 	<xsd:simpleType name="char3Type">
 		<xsd:restriction base="xsd:string">
 			<xsd:pattern value="\p{L}{3}|\p{N}{3}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+		<xsd:simpleType name="char2ANType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\w{2}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:simpleType name="char3ANType">
@@ -651,12 +681,12 @@
 			<xsd:maxLength value="60"/>
 		</xsd:restriction>
 	</xsd:simpleType>
-	<!--xsd:simpleType name="char60EmailType">
+	<xsd:simpleType name="char1309Type">
 		<xsd:restriction base="xsd:string">
-			<xsd:pattern value="[\p{L}\p{N}\-_]+@[\p{L}\p{N}\-_]+\.\p{L}{2,4}"/>
-			<xsd:maxLength value="60"/>
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="1309"/>
 		</xsd:restriction>
-	</xsd:simpleType-->
+	</xsd:simpleType>
 	<!--                                                                                        -->
 	<!-- Indicator  definitions (1-5,1-4,0-3,0-2,1-2,1-3-4,)	 	-->
 	<!--                                                                                      	-->

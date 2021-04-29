@@ -30,7 +30,7 @@ AccrualViewController = BaseViewController.extend( {
 		this.table_name_key = 'accrual';
 		this.context_menu_name = $.i18n._( 'Accruals' );
 		this.navigation_label = $.i18n._( 'Accrual' ) + ':';
-		
+
 		this.api = new (APIFactory.getAPIClass( 'APIAccrual' ))();
 		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
 		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
@@ -80,9 +80,9 @@ AccrualViewController = BaseViewController.extend( {
 
 		this.initDropDownOption( 'type', null, null, function( res ) {
 			var result = res.getResult();
+			$this.system_type_array = result;
 			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['type_id'] ) {
 				$this.basic_search_field_ui_dic['type_id'].setSourceData( Global.buildRecordArray( result ) );
-				$this.system_type_array = result;
 			}
 		} );
 

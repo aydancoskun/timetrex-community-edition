@@ -48,6 +48,52 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
 		//Constants are calculated strange from the Government, just use their values. Remember to add all constant values from bottom to top together for each bracket. ie: 16 + 37 + 63 + 95, ...
+		20200101 => array(
+				10 => array(
+						array('income' => 1073, 'rate' => 1.5, 'constant' => 0),
+						array('income' => 2146, 'rate' => 2.0, 'constant' => 16),
+						array('income' => 3219, 'rate' => 2.5, 'constant' => 37),
+						array('income' => 4292, 'rate' => 3.0, 'constant' => 64),
+						array('income' => 5365, 'rate' => 3.5, 'constant' => 96),
+						array('income' => 6438, 'rate' => 4.0, 'constant' => 134),
+						array('income' => 7511, 'rate' => 4.5, 'constant' => 177),
+						array('income' => 8584, 'rate' => 5.0, 'constant' => 225),
+						array('income' => 8584, 'rate' => 5.4, 'constant' => 279),
+				),
+				20 => array(
+						array('income' => 1073, 'rate' => 1.5, 'constant' => 0),
+						array('income' => 2146, 'rate' => 2.0, 'constant' => 16),
+						array('income' => 3219, 'rate' => 2.5, 'constant' => 37),
+						array('income' => 4292, 'rate' => 3.0, 'constant' => 64),
+						array('income' => 5365, 'rate' => 3.5, 'constant' => 96),
+						array('income' => 6438, 'rate' => 4.0, 'constant' => 134),
+						array('income' => 7511, 'rate' => 4.5, 'constant' => 177),
+						array('income' => 8584, 'rate' => 5.0, 'constant' => 225),
+						array('income' => 8584, 'rate' => 5.4, 'constant' => 279),
+				),
+				30 => array(
+						array('income' => 1073, 'rate' => 1.5, 'constant' => 0),
+						array('income' => 2146, 'rate' => 2.0, 'constant' => 16),
+						array('income' => 3219, 'rate' => 2.5, 'constant' => 37),
+						array('income' => 4292, 'rate' => 3.0, 'constant' => 64),
+						array('income' => 5365, 'rate' => 3.5, 'constant' => 96),
+						array('income' => 6438, 'rate' => 4.0, 'constant' => 134),
+						array('income' => 7511, 'rate' => 4.5, 'constant' => 177),
+						array('income' => 8584, 'rate' => 5.0, 'constant' => 225),
+						array('income' => 8584, 'rate' => 5.4, 'constant' => 279),
+				),
+				40 => array(
+						array('income' => 1073, 'rate' => 1.5, 'constant' => 0),
+						array('income' => 2146, 'rate' => 2.0, 'constant' => 16),
+						array('income' => 3219, 'rate' => 2.5, 'constant' => 37),
+						array('income' => 4292, 'rate' => 3.0, 'constant' => 64),
+						array('income' => 5365, 'rate' => 3.5, 'constant' => 96),
+						array('income' => 6438, 'rate' => 4.0, 'constant' => 134),
+						array('income' => 7511, 'rate' => 4.5, 'constant' => 177),
+						array('income' => 8584, 'rate' => 5.0, 'constant' => 225),
+						array('income' => 8584, 'rate' => 5.4, 'constant' => 279),
+				),
+		),
 		20190101 => array(
 				10 => array(
 						array('income' => 1053, 'rate' => 1.5, 'constant' => 0),
@@ -69,7 +115,7 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 						array('income' => 6318, 'rate' => 4.0, 'constant' => 132),
 						array('income' => 7371, 'rate' => 4.5, 'constant' => 174),
 						array('income' => 8424, 'rate' => 5.0, 'constant' => 221),
-						array('income' => 8424, 'rate' => 5.4, 'constant' => 267),
+						array('income' => 8424, 'rate' => 5.4, 'constant' => 274),
 				),
 				30 => array(
 						array('income' => 1053, 'rate' => 1.5, 'constant' => 0),
@@ -80,7 +126,7 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 						array('income' => 6318, 'rate' => 4.0, 'constant' => 132),
 						array('income' => 7371, 'rate' => 4.5, 'constant' => 174),
 						array('income' => 8424, 'rate' => 5.0, 'constant' => 221),
-						array('income' => 8424, 'rate' => 5.4, 'constant' => 267),
+						array('income' => 8424, 'rate' => 5.4, 'constant' => 274),
 				),
 				40 => array(
 						array('income' => 1053, 'rate' => 1.5, 'constant' => 0),
@@ -91,7 +137,7 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 						array('income' => 6318, 'rate' => 4.0, 'constant' => 132),
 						array('income' => 7371, 'rate' => 4.5, 'constant' => 174),
 						array('income' => 8424, 'rate' => 5.0, 'constant' => 221),
-						array('income' => 8424, 'rate' => 5.4, 'constant' => 267),
+						array('income' => 8424, 'rate' => 5.4, 'constant' => 274),
 				),
 		),
 		20180101 => array(
@@ -251,6 +297,14 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20200101 => array(
+					'standard_deduction' => array(
+							'10' => 12400.00,
+							'20' => 12400.00,
+							'30' => 24800.00,
+							'40' => 18650.00,
+					),
+			),
 			20190101 => array(
 					'standard_deduction'  => array(
 							'10' => 12200.00,
@@ -258,17 +312,11 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 							'30' => 24400.00,
 							'40' => 18350.00,
 					),
-					'allowance'           => array( //Removed in 2018.
-													'10' => array(2100.00, 1200.00, 1200.00),
-													'20' => array(2100.00, 1200.00, 1200.00),
-													'30' => array(2100.00, 2100.00, 1200.00),
-													'40' => array(3500.00, 1200.00, 1200.00),
-					),
 					'federal_tax_maximum' => array( //Removed in 2019.
-							'10' => 5000.00,
-							'20' => 5000.00,
-							'30' => 10000.00,
-							'40' => 5000.00,
+													'10' => 5000.00,
+													'20' => 5000.00,
+													'30' => 10000.00,
+													'40' => 5000.00,
 					),
 			),
 			20180101 => array(
@@ -279,10 +327,10 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 							'40' => 18000.00,
 					),
 					'allowance'           => array( //Removed in 2018.
-							'10' => array(2100.00, 1200.00, 1200.00),
-							'20' => array(2100.00, 1200.00, 1200.00),
-							'30' => array(2100.00, 2100.00, 1200.00),
-							'40' => array(3500.00, 1200.00, 1200.00),
+													'10' => array(2100.00, 1200.00, 1200.00),
+													'20' => array(2100.00, 1200.00, 1200.00),
+													'30' => array(2100.00, 2100.00, 1200.00),
+													'40' => array(3500.00, 1200.00, 1200.00),
 					),
 					'federal_tax_maximum' => array(
 							'10' => 5000.00,

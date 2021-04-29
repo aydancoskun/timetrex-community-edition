@@ -132,7 +132,8 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 			return FALSE;
 		}
 
-		$this->rs = $this->getCache($id.$user_id);
+		$cache_id = $id.$user_id;
+		$this->rs = $this->getCache($cache_id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
 						'id' => TTUUID::castUUID($id),
@@ -150,7 +151,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 
 			$this->rs = $this->ExecuteSQL($query, $ph);
 
-			$this->saveCache($this->rs, $id.$user_id);
+			$this->saveCache($this->rs, $cache_id);
 		}
 
 		return $this;

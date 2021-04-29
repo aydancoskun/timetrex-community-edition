@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	T3S Return Complex and Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+
+	<!-- T3S return -->
+	<xsd:complexType name="T3SIdentType">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeIIPlusOtherTrusteesName">
+       				<xsd:sequence>
+					<xsd:element name="RegisteredPlanName" type="Length1to60TextType"/>
+					<xsd:element name="PlanRegistrationNumber" type="PlanRegistrationNumberType"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<xsd:complexType name="T3SReturnType">
+		<xsd:sequence>
+			<xsd:element name="TrustInformation" type="T3SIdentType"/>
+			<xsd:element name="TrustReturnTaxSummary" type="T3SpecialTaxSummaryTypeII"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

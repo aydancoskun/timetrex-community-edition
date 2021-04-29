@@ -218,21 +218,21 @@ class PayrollDeduction_US_DC extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
-			20180101 => array( //01-Jan-2018
-							   'allowance' => 4150,
+			20180101 => array(
+					'allowance' => 4150,
 			),
-			20150101 => array( //01-Jan-2015
-							   'allowance' => 1775,
+			20150101 => array(
+					'allowance' => 1775,
 			),
 			//01-Jan-2014 - No Changes.
 			//01-Jan-2013 - No Changes.
 			//01-Jan-2012 - No Changes.
 			//01-Jan-2011 - No Changes.
-			20100101 => array( //01-Jan-2010
-							   'allowance' => 1675,
+			20100101 => array(
+					'allowance' => 1675,
 			),
-			20090101 => array( //01-Jan-09
-							   'allowance' => 1750,
+			20090101 => array(
+					'allowance' => 1750,
 			),
 			20060101 => array(
 					'allowance' => 1500,

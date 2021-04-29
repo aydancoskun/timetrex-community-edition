@@ -53,21 +53,56 @@ class PayrollDeduction_US_NY_YONKERS extends PayrollDeduction_US_NY {
 	*/
 
 	var $district_income_tax_rate_options = array(
-			20180101 => array(
+			20200101 => array(
 					10 => array( //Often the same as New York State (NYS) tables.
+								 array('income' => 8500, 'rate' => 4.0, 'constant' => 0),
+								 array('income' => 11700, 'rate' => 4.5, 'constant' => 340),
+								 array('income' => 13900, 'rate' => 5.25, 'constant' => 484),
+								 array('income' => 21400, 'rate' => 5.90, 'constant' => 600),
+								 array('income' => 80650, 'rate' => 6.09, 'constant' => 1042),
+								 array('income' => 96800, 'rate' => 6.41, 'constant' => 4650),
+								 array('income' => 107650, 'rate' => 7.45, 'constant' => 5686),
+								 array('income' => 157650, 'rate' => 7.95, 'constant' => 6494),
+								 array('income' => 215400, 'rate' => 6.91, 'constant' => 10469),
+								 array('income' => 265400, 'rate' => 9.25, 'constant' => 14459),
+								 array('income' => 1077550, 'rate' => 7.35, 'constant' => 19084),
+								 array('income' => 1127550, 'rate' => 52.08, 'constant' => 78777),
+								 array('income' => 1127550, 'rate' => 9.62, 'constant' => 104817),
+					),
+					20 => array(
 							array('income' => 8500, 'rate' => 4.0, 'constant' => 0),
 							array('income' => 11700, 'rate' => 4.5, 'constant' => 340),
 							array('income' => 13900, 'rate' => 5.25, 'constant' => 484),
 							array('income' => 21400, 'rate' => 5.90, 'constant' => 600),
-							array('income' => 80650, 'rate' => 6.21, 'constant' => 1042),
-							array('income' => 96800, 'rate' => 6.49, 'constant' => 4721),
-							array('income' => 107650, 'rate' => 7.52, 'constant' => 5770),
-							array('income' => 157650, 'rate' => 8.02, 'constant' => 6585),
-							array('income' => 215400, 'rate' => 6.99, 'constant' => 10595),
-							array('income' => 265400, 'rate' => 8.90, 'constant' => 14632),
-							array('income' => 1077550, 'rate' => 7.35, 'constant' => 19082),
-							array('income' => 1127550, 'rate' => 52.08, 'constant' => 78775),
-							array('income' => 1127550, 'rate' => 9.62, 'constant' => 104815),
+							array('income' => 80650, 'rate' => 6.09, 'constant' => 1042),
+							array('income' => 96800, 'rate' => 6.41, 'constant' => 4650),
+							array('income' => 107650, 'rate' => 7.46, 'constant' => 5686),
+							array('income' => 157650, 'rate' => 7.96, 'constant' => 6495),
+							array('income' => 211550, 'rate' => 7.94, 'constant' => 10475),
+							array('income' => 323200, 'rate' => 6.91, 'constant' => 14755),
+							array('income' => 373200, 'rate' => 10.19, 'constant' => 22470),
+							array('income' => 1077550, 'rate' => 7.35, 'constant' => 27565),
+							array('income' => 2155350, 'rate' => 7.65, 'constant' => 79334),
+							array('income' => 2205350, 'rate' => 94.54, 'constant' => 161786),
+							array('income' => 2205350, 'rate' => 9.62, 'constant' => 209056),
+					),
+			),
+			//20190101 - No Change
+			20180101 => array(
+					10 => array( //Often the same as New York State (NYS) tables.
+								 array('income' => 8500, 'rate' => 4.0, 'constant' => 0),
+								 array('income' => 11700, 'rate' => 4.5, 'constant' => 340),
+								 array('income' => 13900, 'rate' => 5.25, 'constant' => 484),
+								 array('income' => 21400, 'rate' => 5.90, 'constant' => 600),
+								 array('income' => 80650, 'rate' => 6.21, 'constant' => 1042),
+								 array('income' => 96800, 'rate' => 6.49, 'constant' => 4721),
+								 array('income' => 107650, 'rate' => 7.52, 'constant' => 5770),
+								 array('income' => 157650, 'rate' => 8.02, 'constant' => 6585),
+								 array('income' => 215400, 'rate' => 6.99, 'constant' => 10595),
+								 array('income' => 265400, 'rate' => 8.90, 'constant' => 14632),
+								 array('income' => 1077550, 'rate' => 7.35, 'constant' => 19082),
+								 array('income' => 1127550, 'rate' => 52.08, 'constant' => 78775),
+								 array('income' => 1127550, 'rate' => 9.62, 'constant' => 104815),
 					),
 					20 => array(
 							array('income' => 8500, 'rate' => 4.0, 'constant' => 0),
@@ -344,6 +379,7 @@ class PayrollDeduction_US_NY_YONKERS extends PayrollDeduction_US_NY {
 	);
 
 	var $district_options = array(
+		//2020 - No Change
 		//2019 - No Change
 		//2018 - No Change
 		20170101 => array( // 01-Jan-2017

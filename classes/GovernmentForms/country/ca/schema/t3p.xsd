@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description: 	T3P Return Data Element Types
+Contact: 	CRA
+Date created: 	October 2018
+Version#:	1.18 (version #.yy)
+Revision History:
+June 2015	Initial creation.
+Oct 2016	Disallow negative amount for some financial fields
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+
+	<xsd:complexType name="T3POtherAmountType">
+		<xsd:sequence>
+			<xsd:element name="Description" type="Length1to60TextType"/>
+			<xsd:element name="Amount" type="Decimal15AmountType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3PDisbursementsAndLossesType">
+		<xsd:sequence>
+			<xsd:element name="PensionBenefitPaidAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="PensionBenefitSettlementAnnuityPurchaseAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="EarningIncomeAdministrationCostExpenseAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="PropertyCapitalLossAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="OtherDisbursement" type="T3POtherAmountType" minOccurs="0"/>
+			<xsd:element name="TotalDisbursementLossAmount" type="Decimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3PReceiptsAndGainsType">
+		<xsd:sequence>
+			<xsd:annotation>
+				<xsd:documentation>Investment income includes interest, divdends, etc.</xsd:documentation>
+			</xsd:annotation>
+
+			<xsd:element name="EmployeeCurrentServiceContributionAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="EmployeePastServiceContributionAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="EmployeeCurrentServiceEmployerContributionAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="EmployeePastServiceEmployerContributionAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="InvestmentIncomeAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="PropertyCapitalGainAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="OtherReceiptGain" type="T3POtherAmountType" minOccurs="0"/>
+			<xsd:element name="TotalReceiptGainAmount" type="Decimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- T3P schedule 2 -->
+	<xsd:complexType name="T3PSchedule2Type">
+		<xsd:sequence>
+			<xsd:element name="EmployeePensionPlanTrustDisbursementLoss" type="T3PDisbursementsAndLossesType" minOccurs="0"/>
+			<xsd:element name="EmployeePensionPlanTrustReceiptGain" type="T3PReceiptsAndGainsType" minOccurs="0"/>
+			<xsd:element name="NetEmployeePensionPlanChangeAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- T3P return -->
+	<xsd:complexType name="T3PReturnType">
+		<xsd:sequence>
+			<xsd:element name="TrustInformation" type="T3SpecialIdentTypeIV"/>
+			<xsd:element name="Schedule2" type="T3PSchedule2Type" minOccurs="0"/>
+			<xsd:element name="TrustReturnTaxSummary" type="T3SpecialTaxSummaryTypeIV"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

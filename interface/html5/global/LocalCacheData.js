@@ -322,7 +322,6 @@ LocalCacheData.setUniqueCountryArray = function( val ) {
 };
 
 LocalCacheData.getSessionID = function() {
-
 	var result = LocalCacheData.getLocalCache( Global.getSessionIDKey() );
 	if ( !result ) {
 		result = '';
@@ -332,7 +331,6 @@ LocalCacheData.getSessionID = function() {
 };
 
 LocalCacheData.setSessionID = function( val ) {
-
 	LocalCacheData.setLocalCache( Global.getSessionIDKey(), val );
 };
 

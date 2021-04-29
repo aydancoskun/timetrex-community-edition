@@ -624,6 +624,39 @@ require( [
 
 		};
 
+		//When the user switched away from, then back again to our tab, make sure the session is still the same so they don't get two different login sessions confused.
+		function handleVisibilityChange() {
+			var is_hidden = document.hidden;
+			var cookie_session_id = getCookie( Global.getSessionIDKey() );
+
+			Debug.Text( 'Tab Visibility Change: ' + is_hidden +' Session ID: '+ LocalCacheData.getSessionID(), 'main.js', '', 'handleVisibilityChange', 10 );
+
+			if ( is_hidden == false ) {
+				//Check to make sure our session_id matches what the server returns.
+				if ( cookie_session_id != LocalCacheData.getSessionID() ) {
+					Debug.Text( 'Session ID has changed out from out underneath us! Session ID: Memory: '+ LocalCacheData.getSessionID() +' Cookie: '+ cookie_session_id, 'main.js', '', 'handleVisibilityChange', 1 );
+
+					var api = new ( APIFactory.getAPIClass( 'APIMisc' ) )();
+					api.isLoggedIn( false, {
+						onResult: function ( result ) {
+							var result_data = result.getResult();
+
+							if ( result_data === true ) {
+								TAlertManager.showAlert( $.i18n._( 'It appears that you have logged in from another web browser window or tab.<br><br>Please be patient while the session is resumed here...' ), 'Session Changed', function () {
+									Global.sendAnalyticsEvent( 'session', 'session:changed', 'session:changed' );
+									window.location.reload( true );
+								});
+							} else {
+								//Don't do Logout here, as we need to display a "Session Expired" message to the user, which is triggered from the ServiceCaller.
+								api.ping( { onResult: function () {} } );
+							}
+						}
+					} );
+				}
+			}
+		}
+		window.addEventListener('visibilitychange', handleVisibilityChange );
+
 		window.addEventListener('beforeunload', function (e) {
 			// Note that Google recommends against the following, as it affects page caching, but we dont want caching anyway: https://developers.google.com/web/updates/2018/07/page-lifecycle-api#the-beforeunload-event
 			Global.sendAnalyticsEvent( 'browser', 'browser:beforeunload', 'browser:beforeunload' );

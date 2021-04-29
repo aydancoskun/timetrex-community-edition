@@ -137,13 +137,12 @@ class PayrollDeduction_US_GA extends PayrollDeduction_US {
 			),
 	);
 
+	//10 => 'Single',
+	//20 => 'Married - Filing Separately',
+	//30 => 'Married - Joint One Income',
+	//40 => 'Married - Joint Two Incomes',
+	//50 => 'Head of Household',
 	var $state_options = array(
-//			10 => 'Single',
-//			20 => 'Married - Filing Separately',
-//			30 => 'Married - Joint One Income',
-//			40 => 'Married - Joint Two Incomes',
-//			50 => 'Head of Household',
-
 			20190101 => array(
 					'standard_deduction'  => array(
 							'10' => 4600.00,

@@ -245,7 +245,8 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$this->rs = $this->getCache( $company_id.$is_base );
+		$cache_id = $company_id.$is_base;
+		$this->rs = $this->getCache( $cache_id );
 		if ( $this->rs === FALSE ) {
 			$ph = array(
 						'company_id' => TTUUID::castUUID($company_id),
@@ -262,7 +263,7 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 
 			$this->rs = $this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs, $company_id.$is_base);
+			$this->saveCache($this->rs, $cache_id);
 		}
 
 		return $this;

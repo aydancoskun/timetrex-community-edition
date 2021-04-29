@@ -89,7 +89,7 @@ $eft->save('/tmp/eft01.txt');
  */
 class EFT {
 
-	var $file_format_options = array( '1464', '105', 'HSBC', 'BEANSTREAM', 'ACH' );
+	var $file_format_options = array( '1464', '105', 'BEANSTREAM', 'ACH', 'CIBC_EPAY' );
 	var $file_format = NULL; //File format
 	var $line_ending = "\r\n";
 
@@ -337,7 +337,7 @@ class EFT {
 	 * @return bool
 	 */
 	function setFileCreationNumber( $value) {
-		if ( $this->isNumeric( $value ) AND strlen( $value ) <= 4 ) {
+		if ( ( $this->isNumeric( $value ) AND strlen( $value ) <= 4 ) OR $value == 'TEST' ) { //RBC requires this to be 'TEST' when testing.
 			$this->header_data['file_creation_number'] = $value;
 
 			return TRUE;
@@ -755,14 +755,14 @@ class EFT {
 			case 105:
 				$file_format_obj = new EFT_File_Format_105($this->header_data, $this->data);
 				break;
-//			case 'HSBC':
-//				$file_format_obj = new EFT_File_Format_HSBC($this->data);
-//				break;
 			case 'BEANSTREAM':
 				$file_format_obj = new EFT_File_Format_BEANSTREAM($this->data);
 				break;
 			case 'ACH':
 				$file_format_obj = new EFT_File_Format_ACH($this->header_data, $this->data);
+				break;
+			case 'CIBC_EPAY':
+				$file_format_obj = new EFT_File_Format_CIBC_EPAY($this->data);
 				break;
 			default:
 				Debug::Text('Format does not exist: '. $this->getFileFormat(), __FILE__, __LINE__, __METHOD__, 10);
@@ -2211,4 +2211,108 @@ class EFT_File_Format_BEANSTREAM Extends EFT {
 	}
 }
 
+/**
+ * @package Modules\Other
+ */
+class EFT_File_Format_CIBC_EPAY Extends EFT {
+	var $data = NULL;
+
+	/**
+	 * EFT_File_Format_CIBC_EPAY constructor.
+	 * @param null $data
+	 */
+	function __construct( $data ) {
+		Debug::Text(' EFT_File_Format_CIBC_EPAY Contruct... ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$this->data = $data;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return array|bool
+	 */
+	private function compileRecords() {
+		//gets all Detail records.
+
+		if ( count($this->data) == 0 ) {
+			Debug::Text('No data for D Record:', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		foreach ( $this->data as $key => $record ) {
+			//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);
+
+			$line[] = substr( str_replace( ',', '', $record->getName() ), 0, 30); //Strip out any commas.
+
+			if ( strlen( $record->getTransit() ) == 8 ) { //Parse an 8 digit routing number to bank code / branch code
+				$line[] = $this->padRecord( substr( $record->getInstitution(), 0, 3), 3, 'N' );
+				$line[] = $this->padRecord( substr( $record->getTransit(), 3, 5), 5, 'N' );
+			} else {
+				$line[] = $this->padRecord( $record->getInstitution(), 3, 'N' );
+				$line[] = $this->padRecord( $record->getTransit(), 5, 'N' );
+			}
+
+			$line[] = $record->getAccount();
+
+			$line[] = $record->getAmount();
+
+			//Transaction code used to default to 22 (checkings account) always.
+			$transaction_type = (int)substr( $record->getInstitution(), 0, 2);
+			if ( $transaction_type == 22 ) { //Institution defaults to '000' if its not set, so assume its a checkings account in that case.
+				$transaction_type = 1; //1=Current A/C (checking)
+			} elseif ( $transaction_type == 32 ) {
+				$transaction_type = 2; //2=Savings
+			} else {
+				$transaction_type = 9; //9=System Determines
+			}
+
+			$line[] = $transaction_type; //Account Type code - 1=Current A/C (checking), 2=Savings, 9=System Determines
+
+			$line[] = 51; //Transaction Code - 51=FCIB Salary
+
+			$line[] = date( 'dmy', $record->getDueDate() ); //Value Date
+
+			if ( $record->getCurrencyISOCode() == 'USD' ) {
+				$line[] = '01'; //Currency Code - 00=Local, 01=US Dollars
+			} else {
+				$line[] = '00'; //Currency Code - 00=Local, 01=US Dollars
+			}
+
+			$line[] = NULL; //Originator Acct #
+
+			$line[] = substr( $record->getOriginatorReferenceNumber(), 0, 10 );
+
+			$d_record = implode(',', $line);
+			Debug::Text('D Record:'. $d_record .' - Length: '. strlen($d_record), __FILE__, __LINE__, __METHOD__, 10);
+
+			$retval[] = $d_record;
+
+			unset($line);
+			unset($d_record);
+		}
+
+		if ( isset($retval) ) {
+			return $retval;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @return bool|string
+	 */
+	function _compile() {
+		//Processes all the data, padding it.
+		$compiled_data = @implode("\r\n", $this->compileRecords() );
+
+		if ( strlen( $compiled_data ) >= 25 ) {
+			return $compiled_data;
+		}
+
+		Debug::Text('Not enough compiled data!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+}
 ?>

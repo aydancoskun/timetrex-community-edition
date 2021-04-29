@@ -1524,6 +1524,126 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals(  Option::getByValue( 'TEST3', $options ), 30 );
 	}
+
+	function testFloatComparison() {
+		$float1 = (float)845.92;
+		$float2 = (float)14.3;
+		$float3 = (float)860.22;
+		$added_floats = ( $float1 + $float2 ); //860.22
+
+		if ( $added_floats == $float3 ) {
+			$this->assertTrue( FALSE ); //This is to show the float comparison problem. Actual value should be opposite of this.
+		} else {
+			$this->assertTrue( TRUE );
+		}
+
+		if ( $added_floats >= $float3 ) {
+			$this->assertTrue( FALSE ); //This is to show the float comparison problem. Actual value should be opposite of this.
+		} else {
+			$this->assertTrue( TRUE );
+		}
+
+		$this->assertEquals( bccomp( $added_floats, $float3 ), 0 ); //0=Equal
+		$this->assertEquals( bccomp( $added_floats, (float)860.22 ), 0 ); //0=Equal
+		$this->assertEquals( bccomp( $added_floats, (float)860.21 ), 1 ); //1=Greater Than
+		$this->assertEquals( bccomp( $added_floats, (float)860.23 ), -1 ); //-1=Less Than
+
+		$this->assertEquals( Misc::compareFloat( $added_floats, $float3, '==' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '==' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.21, '==' ), FALSE );
+
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '>=' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.21, '>=' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.01, '>=' ), TRUE );
+
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '<=' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.23, '<=' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.33, '<=' ), TRUE );
+
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '>' ), FALSE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.21, '>' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.01, '>' ), TRUE );
+
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '<' ), FALSE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.23, '<' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.33, '<' ), TRUE );
+	}
+
+	function testStripDuplicateSlashes() {
+		$this->assertEquals( Environment::stripDuplicateSlashes('http://www.domain.com//test//test2//test3/api.php'), 'http://www.domain.com/test/test2/test3/api.php' );
+		$this->assertEquals( Environment::stripDuplicateSlashes('www.domain.com//test//test2//test3/api.php'), 'www.domain.com/test/test2/test3/api.php' );
+		$this->assertEquals( Environment::stripDuplicateSlashes('/api//json//api.php'), '/api/json/api.php' );
+		$this->assertEquals( Environment::stripDuplicateSlashes('//api//json//api.php'), '/api/json/api.php' );
+		$this->assertEquals( Environment::stripDuplicateSlashes('//////api///////json//////api.php'), '/api/json/api.php' );
+	}
+
+	function testAuthenticationParseEndPointAPI() {
+		global $config_vars;
+		define('TIMETREX_JSON_API', TRUE ); //Need to have at least API define() set.
+
+		$authentication = new Authentication;
+
+		$config_vars['path']['base_url'] = '/interface';
+		$this->assertEquals( $authentication->parseEndPointID( '/api/json/api.php' ), 'json/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/soap/api.php' ), 'soap/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/report/api.php' ), 'report/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/time_clock/api.php' ), 'time_clock/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/soap/server.php' ), 'soap/server' );
+
+		$config_vars['path']['base_url'] = '/interface/';
+		$this->assertEquals( $authentication->parseEndPointID( '/api/json/api.php' ), 'json/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/soap/api.php' ), 'soap/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/report/api.php' ), 'report/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/time_clock/api.php' ), 'time_clock/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/soap/server.php' ), 'soap/server' );
+
+		$config_vars['path']['base_url'] = '/interface//';
+		$this->assertEquals( $authentication->parseEndPointID( '/api/json/api.php' ), 'json/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/soap/api.php' ), 'soap/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/report/api.php' ), 'report/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/time_clock/api.php' ), 'time_clock/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/soap/server.php' ), 'soap/server' );
+
+		$config_vars['path']['base_url'] = '//interface//';
+		$this->assertEquals( $authentication->parseEndPointID( '/api/json/api.php' ), 'json/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/soap/api.php' ), 'soap/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/report/api.php' ), 'report/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/time_clock/api.php' ), 'time_clock/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/soap/server.php' ), 'soap/server' );
+
+		$config_vars['path']['base_url'] = '/interface//////';
+		$this->assertEquals( $authentication->parseEndPointID( '/api/json/api.php' ), 'json/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/soap/api.php' ), 'soap/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/report/api.php' ), 'report/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/time_clock/api.php' ), 'time_clock/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/soap/server.php' ), 'soap/server' );
+
+		$config_vars['path']['base_url'] = '//////interface//////';
+		$this->assertEquals( $authentication->parseEndPointID( '/api/json/api.php' ), 'json/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/soap/api.php' ), 'soap/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/report/api.php' ), 'report/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/api/time_clock/api.php' ), 'time_clock/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/soap/server.php' ), 'soap/server' );
+
+		$config_vars['path']['base_url'] = '/timetrex/interface';
+		$this->assertEquals( $authentication->parseEndPointID( '/timetrex//api/json/api.php' ), 'json/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/timetrex//api/soap/api.php' ), 'soap/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/timetrex//api/report/api.php' ), 'report/api' );
+		$this->assertEquals( $authentication->parseEndPointID( '/timetrex//api/time_clock/api.php' ), 'time_clock/api' );
+	}
+
+	function testAuthenticationParseEndPointLegacySOAP() {
+		global $config_vars;
+		define('TIMETREX_LEGACY_SOAP_API', TRUE ); //Its possible TIMETREX_JSON_API is still defined when this run, if the above function runs first.
+
+		$authentication = new Authentication;
+
+		$config_vars['path']['base_url'] = '/interface';
+		$this->assertEquals( $authentication->parseEndPointID( '/soap/server.php' ), 'soap/server' );
+
+		$config_vars['path']['base_url'] = '/timetrex/interface';
+		$this->assertEquals( $authentication->parseEndPointID( '/timetrex//soap/server.php' ), 'soap/server' );
+	}
 }
 ?>
 

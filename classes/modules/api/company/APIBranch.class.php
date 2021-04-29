@@ -101,10 +101,6 @@ class APIBranch extends APIFactory {
 	function getBranch( $data = NULL, $disable_paging = FALSE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
-			return $this->getPermissionObject()->AuthenticationTypeDenied();
-		}
-
 		if ( !$this->getPermissionObject()->Check('branch', 'enabled')
 				OR !( $this->getPermissionObject()->Check('branch', 'view') OR $this->getPermissionObject()->Check('branch', 'view_own') OR $this->getPermissionObject()->Check('branch', 'view_child')	 ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();

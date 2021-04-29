@@ -41,6 +41,16 @@
 class PayrollDeduction_US_CO extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+		20200101 => array(
+				10 => array(
+						array('income' => 4000, 'rate' => 0, 'constant' => 0),
+						array('income' => 4000, 'rate' => 4.63, 'constant' => 0),
+				),
+				20 => array(
+						array('income' => 8000, 'rate' => 0, 'constant' => 0),
+						array('income' => 8000, 'rate' => 4.63, 'constant' => 0),
+				),
+		),
 		//2018 - No Change
 		20170101 => array(
 				10 => array(
@@ -116,20 +126,20 @@ class PayrollDeduction_US_CO extends PayrollDeduction_US {
 
 	var $state_options = array(
 		//2018 - No Change
-		20170101 => array( //2017
-						   'allowance' => 4050,
+		20170101 => array(
+				'allowance' => 4050,
 		),
-		20150101 => array( //2015
-						   'allowance' => 4000,
+		20150101 => array(
+				'allowance' => 4000,
 		),
-		20130101 => array( //2013
-						   'allowance' => 3900,
+		20130101 => array(
+				'allowance' => 3900,
 		),
-		20110101 => array( //2011
-						   'allowance' => 3700,
+		20110101 => array(
+				'allowance' => 3700,
 		),
-		20090101 => array( //2009
-						   'allowance' => 3650,
+		20090101 => array(
+				'allowance' => 3650,
 		),
 		20070101 => array(
 				'allowance' => 3400,
@@ -163,7 +173,11 @@ class PayrollDeduction_US_CO extends PayrollDeduction_US {
 
 		$allowance_arr = $retarr['allowance'];
 
-		$retval = bcmul( $this->getStateAllowance(), $allowance_arr );
+		if ( $this->getDate() >= 20200101 ) { //Allowances discontined with Federal 2020 W4 change.
+			$retval = 0;
+		} else {
+			$retval = bcmul( $this->getStateAllowance(), $allowance_arr );
+		}
 
 		Debug::text( 'State Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 

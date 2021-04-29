@@ -408,10 +408,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l6, 258.00 );
 		$this->assertEquals( $form_objs->objs[0]->l7, 25266.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 151.5960 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 151.60 );
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 151.5960 );
-		$this->assertEquals( $form_objs->objs[0]->l14, 151.5960 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 151.60 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 151.60 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 1111.7040 );
 
 
@@ -491,7 +492,8 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l8, 210.00 );
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 210.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, 210.00 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 210.00 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 151.5960 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 428.2960 );
 
@@ -598,7 +600,8 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l8, 210.00 );
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 210.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, 210.00 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 210.00 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 1111.7040 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 428.2960 );
 

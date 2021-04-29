@@ -301,7 +301,7 @@ class UserWageFactory extends Factory {
 	 */
 	function isValidEffectiveDate( $epoch) {
 		//Check to see if this is the first default wage entry, or if we are editing the first record.
-		if ( $this->getWageGroup() != TTUUID::getZeroID() ) { //If we aren't the default wage group, return valid always.
+		if ( TTUUID::isUUID( $this->getWageGroup() ) AND $this->getWageGroup() != TTUUID::getZeroID() ) { //If we aren't the default wage group, return valid always.
 			return TRUE;
 		}
 
@@ -699,10 +699,19 @@ class UserWageFactory extends Factory {
 	/**
 	 * @return bool
 	 */
-	function preSave() {
+	function preValidate() {
 		if ( $this->getType() == 10 ) { //Hourly
 			$this->setWeeklyTime( NULL );
 			$this->setHourlyRate( $this->getWage() ); //Match hourly rate to wage.
+		} else {
+			//Salary wage types
+			if ( $this->getWeeklyTime() == '' ) {
+				$this->setWeeklyTime( ( 40 * 3600 ) ); //Default to 40hrs/week
+			}
+
+			if ( $this->getHourlyRate() == '' OR $this->getHourlyRate() <= 0 ) {
+				$this->setHourlyRate( $this->calcHourlyRate( $this->getWeeklyTime() ) ); //Calculate hourly rate if its not specified.
+			}
 		}
 
 		return TRUE;

@@ -655,7 +655,7 @@ class LegalEntityFactory extends Factory {
 			//Delete tmp files.
 			foreach(glob($dir.'*') as $filename) {
 				unlink($filename);
-				Misc::deleteEmptyDirectory( dirname( $filename ), 0 ); //Recurse to $user_id parent level and remove empty directories.
+				Misc::deleteEmptyParentDirectory( dirname( $filename ), 0 ); //Recurse to $user_id parent level and remove empty directories.
 			}
 		}
 

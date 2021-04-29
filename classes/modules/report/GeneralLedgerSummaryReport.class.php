@@ -1046,7 +1046,7 @@ class GeneralLedgerSummaryReport extends Report {
 				//Expand account based on percent distribution.
 				Debug::Text( 'Found punch distribution variables...', __FILE__, __LINE__, __METHOD__, 10 );
 				$retarr = array();
-				if ( is_array( $distribution_arr ) AND count( $distribution_arr ) > 0 ) {
+				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL AND is_array( $distribution_arr ) AND count( $distribution_arr ) > 0 ) {
 					$retarr = array_merge(
 							$this->calcPercentDistribution( 'credit', $psen_data, $distribution_arr, $branch_code_map, $department_code_map, $job_code_map, $job_item_code_map, $replace_arr ),
 							$this->calcPercentDistribution( 'debit', $psen_data, $distribution_arr, $branch_code_map, $department_code_map, $job_code_map, $job_item_code_map, $replace_arr )

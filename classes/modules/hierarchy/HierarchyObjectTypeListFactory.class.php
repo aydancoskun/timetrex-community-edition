@@ -134,19 +134,18 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 			return FALSE;
 		}
 
-		$strict_order = TRUE;
-		if ( $order == NULL ) {
-			//$order = array('b.last_name' => 'asc');
-			$strict_order = FALSE;
-		}
-
 		$cache_id = $id.$object_type_id;
-
-		$hcf = new HierarchyControlFactory();
-		$hotf = new HierarchyObjectTypeFactory();
-
 		$this->rs = $this->getCache($cache_id);
 		if ( $this->rs === FALSE ) {
+			$hcf = new HierarchyControlFactory();
+			$hotf = new HierarchyObjectTypeFactory();
+
+			$strict_order = TRUE;
+			if ( $order == NULL ) {
+				//$order = array('b.last_name' => 'asc');
+				$strict_order = FALSE;
+			}
+
 			$ph = array(
 						'id' => TTUUID::castUUID($id),
 						'object_type_id' => (int)$object_type_id,

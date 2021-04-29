@@ -70,14 +70,16 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 	 * @return bool|UserReviewListFactory
 	 */
 	function getById( $id, $where = NULL, $order = NULL ) {
-
 		if ( $id == '' ) {
 			return FALSE;
 		}
-		$urcf = new UserReviewControlFactory();
+
 		$this->rs = $this->getCache( $id );
 		if ( $this->rs === FALSE ) {
+			$urcf = new UserReviewControlFactory();
+
 			$ph = array( 'id' => TTUUID::castUUID($id), );
+
 			$query = '
 						select	a.*
 						from	' . $this->getTable() . ' as a
@@ -87,6 +89,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 			$this->rs = $this->ExecuteSQL( $query, $ph );
+
 			$this->saveCache( $this->rs, $id );
 		}
 
@@ -178,16 +181,19 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 	 * @return bool|UserReviewListFactory
 	 */
 	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL ) {
-
 		if ( $id == '' ) {
 			return FALSE;
 		}
+
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
+
 		$kf = new KPIFactory();
 		$urcf = new UserReviewControlFactory();
+
 		$ph = array( 'id' => TTUUID::castUUID($id), 'company_id' => TTUUID::castUUID($company_id), );
+
 		$query = '
 					select	a.*
 					from	' . $this->getTable() . ' as a

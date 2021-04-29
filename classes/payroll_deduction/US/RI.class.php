@@ -41,6 +41,18 @@
 class PayrollDeduction_US_RI extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20200101 => array(
+					10 => array(
+							array('income' => 65250, 'rate' => 3.75, 'constant' => 0),
+							array('income' => 148350, 'rate' => 4.75, 'constant' => 2446.88),
+							array('income' => 148350, 'rate' => 5.99, 'constant' => 6394.13),
+					),
+					20 => array(
+							array('income' => 65250, 'rate' => 3.75, 'constant' => 0),
+							array('income' => 148350, 'rate' => 4.75, 'constant' => 2446.88),
+							array('income' => 148350, 'rate' => 5.99, 'constant' => 6394.13),
+					),
+			),
 			20190101 => array(
 					10 => array(
 							array('income' => 64050, 'rate' => 3.75, 'constant' => 0),
@@ -260,39 +272,43 @@ class PayrollDeduction_US_RI extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
-			//01-Jan-19: No Change
-			20180101 => array( //01-Jan-18
-							   'allowance'           => 1000,
-							   'allowance_threshold' => 227050, //If annual income more than this, allowance is 0.
-			),
-			20180101 => array( //01-Jan-18
-							   'allowance'           => 1000,
-							   'allowance_threshold' => 221800, //If annual income more than this, allowance is 0.
-			),
-			20170101 => array( //01-Jan-17
-							   'allowance'           => 1000,
-							   'allowance_threshold' => 217350, //If annual income more than this, allowance is 0.
-			),
-			//01-Jan-12: No Change
-			20110101 => array( //01-Jan-11
-							   'allowance' => 1000,
-			),
-			//01-Jan-10: No Change
-			20090101 => array( //01-Jan-09
-							   'allowance' => 3650,
-			),
-			20080101 => array(
-					'allowance' => 3500,
-			),
-			20070101 => array(
-					'allowance' => 3400,
-			),
-			20060101 => array(
-					'allowance' => 3200,
-			),
-			20060625 => array(
-					'allowance' => 3300,
-			),
+		20200101 => array(
+				'allowance'           => 1000,
+				'allowance_threshold' => 231500, //If annual income more than this, allowance is 0.
+		),
+		//01-Jan-19: No Change
+		20180101 => array(
+				'allowance'           => 1000,
+				'allowance_threshold' => 227050, //If annual income more than this, allowance is 0.
+		),
+		20180101 => array(
+				'allowance'           => 1000,
+				'allowance_threshold' => 221800, //If annual income more than this, allowance is 0.
+		),
+		20170101 => array(
+				'allowance'           => 1000,
+				'allowance_threshold' => 217350, //If annual income more than this, allowance is 0.
+		),
+		//01-Jan-12: No Change
+		20110101 => array(
+				'allowance' => 1000,
+		),
+		//01-Jan-10: No Change
+		20090101 => array(
+				'allowance' => 3650,
+		),
+		20080101 => array(
+				'allowance' => 3500,
+		),
+		20070101 => array(
+				'allowance' => 3400,
+		),
+		20060101 => array(
+				'allowance' => 3200,
+		),
+		20060625 => array(
+				'allowance' => 3300,
+		),
 	);
 
 	function getStateAnnualTaxableIncome() {

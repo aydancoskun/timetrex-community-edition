@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
+
+<!--
+Description	RRSP Return Complex and Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<!-- @@@@ Definition of RRSP ComplexTypes @@@@  2010/Oct/13  Version# 2.10-->
 	<xsd:complexType name="RRSPSlipType">
 		<xsd:all>
 			<xsd:element name="RCPNT_NM" type="NameType"/>
@@ -26,6 +32,7 @@
 		<xsd:all>
 			<xsd:element name="bn" type="ccraType3"/>
 			<xsd:element name="rpt_tcd" type="otherDataType"/>
+			<xsd:element name="fileramendmentnote" type="char1309Type" minOccurs="0"/>
 			<xsd:element name="tx_yr" type="yearType"/>
 			<xsd:element name="rrsp_spcmn_nbr" type="char20Type" minOccurs="0"/>
 			<xsd:element name="slp_cnt" type="int7Type"/>

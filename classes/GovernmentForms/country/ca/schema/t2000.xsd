@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	T2000 Return Data Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+
+	<!-- T2000 Trust Information -->
+	<xsd:complexType name="T2000TrustInfoType">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialTrustFilerIdentTypeBase">
+				<xsd:sequence>
+					<xsd:element name="TrustReturnFilerClientIdentifier" type="SINType"/>
+					<xsd:element name="TrustReturnAssociationName" type="Length1to60TextType"/>
+				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+
+	</xsd:complexType>
+
+	<!-- Period 1 (for agreements before July 14, 1990) Trust Acquired Corporation Share Tax -->
+	<xsd:complexType name="Period1TrustAcquiredCorporationShareTaxType">
+		<xsd:sequence>
+			<xsd:element name="SharePaymentAmount" type="SignedDecimal15AmountType" minOccurs ="0"/>
+			<xsd:element ref="ShareTaxPayableAmount" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Period 2 (for agreements after July 13, 1990 but before 1993) Trust Acquired Corporation Share Tax -->
+	<xsd:complexType name="Period2TrustAcquiredCorporationShareTaxType">
+		<xsd:sequence>
+			<xsd:element ref="ShareFairMarketValueAmount" minOccurs ="0"/>
+			<xsd:element ref="ShareTaxPayableAmount" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Period 3 (for agreements after 1992 but before April 26, 1995) Trust Acquired Corporation Share Tax -->
+	<xsd:complexType name="Period3TrustAcquiredCorporationShareTaxType">
+		<xsd:sequence>
+			<xsd:element ref="ShareFairMarketValueAmount" minOccurs ="0"/>
+			<xsd:element ref="ShareDividendPaymentAmount" minOccurs ="0"/>
+			<xsd:element ref="ShareDividendReceiveAmount" minOccurs ="0"/>
+			<xsd:element name="ShareFairMarketValueTaxCalculationAmount" type="SignedDecimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="ShareExcessDividendAmount" type="SignedDecimal15AmountType" minOccurs ="0"/>
+			<xsd:element ref="ShareTaxPayableAmount" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Period 4 (for agreements after April 25, 1995) Trust Acquired Corporation Share Tax -->
+	<xsd:complexType name="Period4TrustAcquiredCorporationShareTaxType">
+		<xsd:sequence>
+			<xsd:element ref="ShareDividendPaymentAmount" minOccurs ="0"/>
+			<xsd:element ref="ShareDividendReceiveAmount" minOccurs ="0"/>
+			<xsd:element ref="ShareTaxPayableAmount" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Monthly period Trust Acquired Corporation Share Tax -->
+	<xsd:complexType name="MonthlyPeriodTrustAcquiredCorporationShareTaxType">
+		<xsd:sequence>
+			<xsd:element ref="MonthNumber" minOccurs ="0"/>
+			<xsd:element name="Period1" type="Period1TrustAcquiredCorporationShareTaxType" minOccurs ="0"/>
+			<xsd:element name="Period2" type="Period2TrustAcquiredCorporationShareTaxType" minOccurs ="0"/>
+			<xsd:element name="Period3" type="Period3TrustAcquiredCorporationShareTaxType" minOccurs ="0"/>
+			<xsd:element name="Period4" type="Period4TrustAcquiredCorporationShareTaxType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:element name="ShareTaxPayableAmount" type="SignedDecimal15AmountType"/>
+	<xsd:element name="ShareFairMarketValueAmount" type="SignedDecimal15AmountType"/>
+	<xsd:element name="ShareDividendPaymentAmount" type="SignedDecimal15AmountType"/>
+	<xsd:element name="ShareDividendReceiveAmount" type="SignedDecimal15AmountType"/>
+
+	<xsd:element name="TrustAcquiredCorporationShareTax">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="MonthlyAmount" type="MonthlyPeriodTrustAcquiredCorporationShareTaxType" maxOccurs ="12"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	   	<xsd:unique name="testUnique">
+			<xsd:selector xpath="MonthlyAmount"/>
+			<xsd:field xpath="MonthNumber"/>
+		</xsd:unique>
+	</xsd:element>
+
+	<!-- Period 4 (for agreements after April 25, 1995) Trust Acquired Corporation Share Tax -->
+	<xsd:complexType name="TotalTrustAcquiredCorporationShareTaxType">
+		<xsd:sequence>
+			<xsd:element name="Period1ShareTaxPayableAmount" type="SignedDecimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="Period2ShareTaxPayableAmount" type="SignedDecimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="Period3ShareTaxPayableAmount" type="SignedDecimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="Period4ShareTaxPayableAmount" type="SignedDecimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- T2000 return -->
+	<xsd:complexType name="T2000ReturnType">
+		<xsd:sequence>
+			<xsd:element name="TrustInformation" type="T2000TrustInfoType"/>
+			<xsd:element ref="TrustAcquiredCorporationShareTax"/>
+			<xsd:element name="TotalTrustAcquiredCorporationShareTax" type="TotalTrustAcquiredCorporationShareTaxType"/>
+			<xsd:element name="TrustReturnTaxSummary" type="T3SpecialTaxSummaryTypeII"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

@@ -359,14 +359,21 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		} else if ( type_id == 3000 ) {
             this.attachElement('last_transaction_number').text($.i18n._('Last Batch Number') + ':');
 
-			if ( country == 'US' ) { //ACH (american eft)
+			if ( country == 'US' ) { //ACH
                 this.attachElement('value2').text($.i18n._('Routing') + ':');
                 this.attachElement('value3').text($.i18n._('Account') + ':');
-            } else if ( country == 'CA' ) { //canadian eft
+            } else if ( country == 'CA' ) { //Canadian EFT
                 this.attachElement('value1').text($.i18n._('Institution') + ':');
                 this.attachElement('value2').text($.i18n._('Bank Transit') + ':');
                 this.attachElement('value3').text($.i18n._('Account') + ':');
-            }
+			} else if ( $.inArray( country, ['AG', 'BS', 'BB', 'BZ', 'DO', 'GY', 'HT', 'JM', 'DM', 'GD', 'KN', 'LC', 'VC', 'SR', 'TT'] ) != -1 ) { //Carribbean countries.
+				this.attachElement('value1').text($.i18n._('Institution') + ':');
+				this.attachElement('value2').text($.i18n._('Bank Transit') + ':');
+				this.attachElement('value3').text($.i18n._('Account') + ':');
+			} else {
+				this.attachElement('value2').text($.i18n._('Routing') + ':');
+				this.attachElement('value3').text($.i18n._('Account') + ':');
+			}
 		}
 
 		$( '#tab_advanced_content_div .edit-view-form-item-div .edit-view-form-item-label-div' ).css( 'border-top-left-radius', '0px' );

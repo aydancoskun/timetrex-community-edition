@@ -263,24 +263,31 @@ class Authentication {
 		return FALSE;
 	}
 
-	function parseEndPointID( $value = NULL ) {
-		if ( $value == NULL AND isset($_SERVER['SCRIPT_NAME']) AND $_SERVER['SCRIPT_NAME'] != '' ) {
-			$value = Environment::stripDuplicateSlashes( $_SERVER['SCRIPT_NAME'] );
+	function parseEndPointID( $end_point_id = NULL ) {
+		if ( $end_point_id == NULL AND isset( $_SERVER['SCRIPT_NAME']) AND $_SERVER['SCRIPT_NAME'] != '' ) {
+			$end_point_id = $_SERVER['SCRIPT_NAME'];
 		}
+
+		$end_point_id = Environment::stripDuplicateSlashes( $end_point_id );
 
 		//If the SCRIPT_NAME is something like upload_file.php, or APIGlobal.js.php, assume its the JSON API
 		// soap/server.php is a SOAP end-point.
 		//   This is also set in parseEndPointID() and getClientIDHeader()
-		if ( $value == '' OR ( strpos( $value, 'api' ) === FALSE AND strpos( $value, 'soap/server.php' ) === FALSE ) ) {
-			$value = 'json/api';
+		//   /api/json/api.php should be: json/api
+		//   /api/soap/api.php should be: soap/api
+		//   /api/report/api.php should be: report/api
+		//   /soap/server.php should be: soap/server
+		//   See MiscTest::testAuthenticationParseEndPoint() for unit tests.
+		if ( $end_point_id == '' OR ( strpos( $end_point_id, 'api' ) === FALSE AND strpos( $end_point_id, 'soap/server.php' ) === FALSE ) ) {
+			$retval = 'json/api';
 		} else {
-			$value = Environment::stripDuplicateSlashes( str_replace( array( dirname( Environment::getAPIBaseURL() ) . '/', '.php'), '', $value ) );
+			$retval = Environment::stripDuplicateSlashes( str_replace( array( dirname( Environment::getAPIBaseURL() ) . '/', '.php'), '', $end_point_id ) );
 		}
 
-		$value = strtolower( trim( $value, '/' ) ); //Strip leading and trailing slashes.
-		//Debug::text('End Point: '. $value .' API Base URL: '. Environment::getAPIBaseURL(), __FILE__, __LINE__, __METHOD__, 10);
+		$retval = strtolower( trim( $retval, '/' ) ); //Strip leading and trailing slashes.
+		//Debug::text('End Point: '. $retval .' Input: '. $value .' API Base URL: '. Environment::getAPIBaseURL(), __FILE__, __LINE__, __METHOD__, 10);
 
-		return $value;
+		return $retval;
 	}
 
 	/**
@@ -438,7 +445,7 @@ class Authentication {
 		}
 
 		$new_session_id = $this->genSessionID();
-		Debug::text('Duplicating session to User ID: '. $object_id .' Original SessionID: '. $this->getSessionID() .' New Session ID: '. $new_session_id .' IP Address: '. $ip_address, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Duplicating session to User ID: '. $object_id .' Original SessionID: '. $this->getSessionID() .' New Session ID: '. $new_session_id .' IP Address: '. $ip_address .' Type: '. $this->getType() .' End Point: '. $end_point_id .' Client ID: '. $client_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$authentication = new Authentication();
 		$authentication->setType( $this->getType() );

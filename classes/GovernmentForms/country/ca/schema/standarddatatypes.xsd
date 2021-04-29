@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!-- 
-Description: CRA-wide Standard Data Types to be imported into all CRA schemas. (Includes ISO 15000-5 CCTS Core Data Types + CRA synonyms and additions)
-Contact: CRA ITB Data Architecture team
-Date created: March 2008
-Updates:
-version:2-0-0, date:2010-07-13, change: schema now uses ISO-8859-1 charset (1-0-0 uses UTF-8)
-version:2-1-0, date:2013-07-25, change: added URIType 
-version:2-2-0, date:2013-09-09, change: added SimpleTextType and TokenMessageType 
-- -->
+
+<!--
+Description	CRA-wide Standard Data Types to be imported into all CRA schemas. (Includes ISO 15000-5 CCTS Core Data Types + CRA synonyms and additions)
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
 <xsd:schema 
 xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" 
@@ -119,7 +117,6 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-2-0
 			</xsd:extension>
 		</xsd:simpleContent>
 	</xsd:complexType>
-	
 	<xsd:simpleType name="MonthType">
 		<xsd:restriction base="xsd:token">
 			<xsd:enumeration value="01"/>
@@ -138,7 +135,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-2-0
 	</xsd:simpleType>
 	<xsd:complexType name="NameType">
 		<xsd:simpleContent>
-			<xsd:extension base="xsd:string">
+			<xsd:extension base="sdt:SimpleTextType">
 				<xsd:attribute ref="xml:lang" use="optional"/>
 			</xsd:extension>
 		</xsd:simpleContent>

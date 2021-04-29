@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	T3 General Return Data Element Types
+Contact: 	CRA
+Last updated 	Ocotber 2018
+Version#:	1.18 (version #.yy)
+Revision History:
+Dec 2015	Initial creation.
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+	<xsd:include schemaLocation="t3genschedules.xsd"/>
+
+
+	<!-- Trust Ident Information for Trustee -->
+	<xsd:complexType name="DesignatedAboriginalSettlementLandResidenceInformationType">
+		<xsd:sequence>
+			<xsd:element name="SettlementLandName" type="Length1to60TextType"/>
+			<xsd:element name="SettlementLandNumber" type="Length5NumberType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<xsd:complexType name="TestamentaryTrustInformationType">
+		<xsd:sequence>
+			<xsd:element name="TestatorDeathDate" type="YYYYMMDDDateType"/>
+			<xsd:element name="TestatorSIN" type="SINType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="InterVivosTrustInformationType">
+		<xsd:sequence>
+			<xsd:element name="TrustCreateDate" type="YYYYMMDDDateType"/>
+			<xsd:element name="NonProfitOrganizationBN" type="BNType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:simpleType name="TrustDocumentFilingMethodCodeType">
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:enumeration value="WITHT3APP"/>
+			<xsd:enumeration value="WITHT1"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:group name="FirstYearFilingIndicatorGroup">
+		<xsd:choice>
+			<xsd:element name="TrustPreviousGeneralIncomeTaxReturnTaxYear" type="sdt:YearType" minOccurs="0"/>
+			<xsd:element name="TrustDocumentFilingMethod" type="TrustDocumentFilingMethodCodeType" minOccurs="0"/>
+		</xsd:choice>
+	</xsd:group>
+
+	<!-- Temporary types for e-NIL, to be removed when e-GEN is filed -->
+	<xsd:simpleType name="OriginalSummaryCodeType">
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:length value="1"/>
+			<xsd:enumeration value="O"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="ZeroNumberType">
+		<xsd:restriction base="sdt:NumberType">
+			<xsd:pattern value="[0]"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="ZeroDecimalAmountType">
+		<xsd:restriction base="sdt:AmountType">
+		    <xsd:pattern value="[0][.][0][0]"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+
+	<xsd:complexType name="T3GenIdentType">
+		<xsd:sequence>
+			<xsd:element name="SummaryReportTypeCode" type="OriginalSummaryCodeType"/>
+			<xsd:element name="TaxYearEndTrustResidenceCountryCode" type="ccms:CountryCodeType" minOccurs="0"/>
+			<xsd:element name="TrustCanadianResidenceProvinceCode" type="ProvinceCodeType" minOccurs="0"/>
+			<xsd:element name="TrustName" type="Length1to60TextType"/>
+			<xsd:element ref="TrustAccountNumber"/>
+			<xsd:element name="TrusteeName" type="Length1to60TextType"/>
+			<xsd:element name="TrusteeMailingAddress" type="CountryCodeAddressType"/>
+			<xsd:element name="TrusteePhoneNumber" type="ThreeFieldPhoneNumberType" minOccurs="0"/>
+			<xsd:element name="NonTrusteeContactName" type="Length1to60TextType" minOccurs="0"/>
+			<xsd:element name="NonTrusteeContactMailingAddress" type="CountryCodeAddressType" minOccurs="0"/>
+			<xsd:element name="NonTrusteeContactPhoneNumber" type="ThreeFieldPhoneNumberType" minOccurs="0"/>
+			<xsd:element name="DesignatedAboriginalSettlementLandResidenceInformation" type="DesignatedAboriginalSettlementLandResidenceInformationType" minOccurs="0"/>
+			<xsd:element name="TrustBusinessIncomeProvince" type="Length1to60TextType" minOccurs="0"/>
+			<xsd:element name="TrustCanadianResidentStartDate" type="YYYYMMDDDateType" minOccurs="0"/>
+			<xsd:element name="TrustCanadianResidentEndDate" type="YYYYMMDDDateType" minOccurs="0"/>
+			<xsd:element name="TrustDeemedCanadianResidentIndicator" type="YesNoCodeType" minOccurs="0"/>
+			<xsd:element name="TrustForeignResidentCountry" type="Length1to60TextType" minOccurs="0"/>
+			<xsd:element name="TrustCorrespondenceLanguageCode" type="LanguageTypeI" minOccurs="0"/>
+			<xsd:element name="TrustTypeCode" type="TrustTypeCodeType"/>
+			<xsd:element name="TrustTypeDescription" type="Length1to60TextType" minOccurs="0"/>
+			<xsd:element name="TestamentaryTrustInformation" type="TestamentaryTrustInformationType" minOccurs="0"/>
+			<xsd:element name="InterVivosTrustInformation" type="InterVivosTrustInformationType" minOccurs="0"/>
+			<xsd:element name="TrustFiscalPeriodStartDate" type="YYYYMMDDDateType"/>
+			<xsd:element ref="TrustFiscalPeriodEndDate"/>
+			<xsd:element ref="FirstYearFilingIndicator" minOccurs="0"/>
+			<xsd:group ref="FirstYearFilingIndicatorGroup" minOccurs="0"/>
+			<xsd:element name="TrustFinalGeneralIncomeTaxReturnIndicator" type="YesNoCodeType" minOccurs="0"/>
+			<xsd:element name="TrustWindupDate" type="YYYYMMDDDateType" minOccurs="0"/>
+			<xsd:element name="TrustForeignPropertyCostExceedingIndicator" type="YesNoCodeType" minOccurs="0"/>
+
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3GenOtherInfoType">
+		<xsd:sequence>
+			<xsd:element name="ElectingTrustIndicator" type="YesNoCodeType"/>
+			<xsd:element name="TrustNonResidentIncomeElectionYear" type="sdt:YearType" minOccurs="0"/>
+
+			<xsd:element name="TrustIncomeBeneficiaryAllocationRequiredIndicator" type="YesNoCodeType"/>
+			<xsd:element name="TrustNonCashAssetBeneficiaryDistributionIndicator" type="YesNoCodeType"/>
+			<xsd:element name="TrustBeneficiaryChangeIndicator" type="YesNoCodeType"/>
+
+
+			<xsd:element name="TrustDeemedDispositionBeneficiaryDeathIndicator" type="YesNoCodeType"/>
+			<xsd:element name="TrustDeemedDispositionBeneficiaryDeathDate" type="YYYYMMDDDateType" minOccurs="0"/>
+
+			<xsd:element name="TrustNonArmsLengthDebtTransactionIndicator" type="YesNoCodeType"/>
+			<xsd:element name="TrustNonArmsLengthDebtTransactionYear" type="sdt:YearType" minOccurs="0"/>
+
+			<xsd:element name="TrustCapitalIncomeInterestOwnershipChangeIndicator" type="YesNoCodeType"/>
+			<xsd:element name="TrustCapitalIncomeInterestOwnershipChangeYear" type="sdt:YearType" minOccurs="0"/>
+
+			<xsd:element name="TrustPrivateCorporationShareHolderIndicator" type="YesNoCodeType"/>
+
+			<xsd:element name="TrustAdditionalContributionPropertyReceiptIndicator" type="YesNoCodeType"/>
+			<xsd:element name="TrustAdditionalContributionPropertyReceiptYear" type="sdt:YearType" minOccurs="0"/>
+
+			<xsd:element name="PublicTrustIndicator" type="YesNoCodeType"/>
+			<xsd:element name="TrustInternationalFinancialReportingStandardIndicator" type="YesNoCodeType"/>
+			<xsd:element name="TrustLossRestrictionEventIndicator" type="YesNoCodeType"/>
+			<xsd:element name="TrustLossRestrictionEventDate" type="YYYYMMDDDateType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<xsd:complexType name="T3GenTotalIncomeType">
+		<xsd:sequence>
+			<xsd:element name="TaxableCapitalGainAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="PensionIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TaxableCanadianCorporationActualDividendAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="ForeignInvestmentIncomeAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+			<xsd:element name="OtherInvestmentIncomeAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+			<xsd:element name="BusinessGrossIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="BusinessNetIncomeAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+			<xsd:element name="FarmingFishingGrossIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="FarmingFishingNetIncomeAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+			<xsd:element name="RealEstatePropertyRentalGrossIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="RealEstatePropertyRentalNetIncomeAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+			<xsd:element name="AgriInvestFund2IncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TrustBeneficiarySpouseAliveCommunalOrganizationAgriInvestFund2IncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="DeemedPropertyDispositionNetIncomeAmount" type="ZeroNumberType" minOccurs="0"/>
+			<xsd:element name="OtherIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3GenNetIncomeType">
+		<xsd:sequence>
+			<xsd:element name="InvestmentFeeInterestPaidAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TrusteeFeeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NonDeductibleTrusteeFeeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="AllowableBusinessInvestmentLossAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="GrossIncomeOtherDeductionAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TrustTaxableBeneficiaryPropertyExpenseBenefitAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TrustTaxableOtherBeneficiaryBenefitAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TrustAllocationIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TrustRetainedAllocationIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TrustDeductibleAllocationIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TrustRetainedDividendGrossUpAmount" type="ZeroNumberType" minOccurs="0"/>
+			<xsd:element name="NetIncomeAmount" type="SignedLength1to13NumberType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3GenTaxableIncomeType">
+		<xsd:sequence>
+			<xsd:element name="NonCapitalLossCarryforwardAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NetCapitalLossCarryforwardAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NetIncomeOtherDeductionDescription" type="Length1to60TextType" minOccurs="0"/>
+			<xsd:element name="NetIncomeOtherDeductionAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TaxableIncomeAmount" type="ZeroNumberType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3GenTaxSummaryType">
+		<xsd:sequence>
+			<xsd:element name="TotalTaxPayableAmount" type="ZeroDecimalAmountType"/>
+			<xsd:element name="IncomeTaxBalanceAmount" type="ZeroDecimalAmountType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<!-- T3General return -->
+	<xsd:complexType name="T3GenReturnType">
+		<xsd:sequence>
+			<xsd:element name="TrustIdentInformation" type="T3GenIdentType"/>
+			<xsd:element name="TrustOtherInformation" type="T3GenOtherInfoType"/>
+			<xsd:element name="TrustTotalIncome" type="T3GenTotalIncomeType"/>
+			<xsd:element name="TrustNetIncome" type="T3GenNetIncomeType"/>
+			<xsd:element name="TrustTaxableIncome" type="T3GenTaxableIncomeType"/>
+			<xsd:element name="TrustTaxSummary" type="T3GenTaxSummaryType"/>
+			<xsd:element name="Schedule1" type="T3GenSchedule1Type" minOccurs="0"/>
+			<xsd:element name="Schedule8" type="T3GenSchedule8Type" minOccurs="0"/>
+			<xsd:element name="Schedule9" type="T3GenSchedule9Type" minOccurs="0"/>
+			<xsd:element name="Schedule12" type="T3GenSchedule12Type" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

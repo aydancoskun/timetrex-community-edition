@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
+
 <!--
-Description: Canada Revenue Agency Common Structures 
-	Used to present data types that are common to multiple CRA internal or external user groups   
-Contact: CRA, ITB, Solutions, ITAS, Data Architecture 
-Date created: March 2013 
-Updates:
-
+Description: 	Canada Revenue Agency Common Structures - Used to present data types that are common to multiple CRA internal or external user groups   
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
 -->
-<xsd:schema 
-xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" 
-xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0"
-xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" 
-elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0">
-	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
 
+<xsd:schema targetNamespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
 	<xsd:element name="TaxationCentreCode">
 		<xsd:simpleType>
 			<xsd:restriction base="sdt:CodeType">
@@ -28,55 +21,50 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 			</xsd:restriction>
 		</xsd:simpleType>
 	</xsd:element>
-
 	<xsd:complexType name="GivenNameType">
-		<xsd:simpleContent>
-			<xsd:annotation>
-				<xsd:documentation> 
+		<xsd:annotation>
+			<xsd:documentation> 
 			This type is provided to ensure consistent naming across CRA XML schemas
 				</xsd:documentation>
-			</xsd:annotation>
-			<xsd:restriction base="sdt:NameType">
-			</xsd:restriction>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:restriction base="sdt:NameType"/>
 		</xsd:simpleContent>
 	</xsd:complexType>
-	
 	<xsd:element name="GivenName">
 		<xsd:complexType>
-			<xsd:simpleContent>
-				<xsd:annotation>
+			<xsd:annotation>
 				<xsd:documentation>
 			This element is provided to ensure consistent naming across CRA XML schemas
 				</xsd:documentation>
-				</xsd:annotation>
+			</xsd:annotation>
+			<xsd:simpleContent>
 				<xsd:restriction base="ccms:GivenNameType"/>
 			</xsd:simpleContent>
 		</xsd:complexType>
 	</xsd:element>
 	<xsd:complexType name="FamilyNameType">
-		<xsd:simpleContent>
-			<xsd:annotation>
-				<xsd:documentation>
+		<xsd:annotation>
+			<xsd:documentation>
 			This type is provided to ensure consistent naming across CRA XML schemas
 				</xsd:documentation>
-			</xsd:annotation>
-			<xsd:restriction base="sdt:NameType">
-			</xsd:restriction>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:restriction base="sdt:NameType"/>
 		</xsd:simpleContent>
 	</xsd:complexType>
 	<xsd:element name="FamilyName">
 		<xsd:complexType>
-			<xsd:simpleContent>
-				<xsd:annotation>
+			<xsd:annotation>
 				<xsd:documentation>
 			This element is provided to ensure consistent naming across CRA XML schemas
 				</xsd:documentation>
-				</xsd:annotation>
+			</xsd:annotation>
+			<xsd:simpleContent>
 				<xsd:restriction base="ccms:FamilyNameType"/>
 			</xsd:simpleContent>
 		</xsd:complexType>
 	</xsd:element>
-	
 	<xsd:simpleType name="SINType">
 		<xsd:annotation>
 			<xsd:documentation xml:lang="en">STANDARD CRA-SPECIFIC GLOBAL CONSTRUCTS SIN. Must pass MOD-10 check.</xsd:documentation>
@@ -89,10 +77,9 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 	</xsd:simpleType>
 	<xsd:element name="SocialInsuranceNumber">
 		<xsd:simpleType>
-				<xsd:restriction base="ccms:SINType"/>
+			<xsd:restriction base="ccms:SINType"/>
 		</xsd:simpleType>
 	</xsd:element>
-
 	<xsd:element name="ProvinceTerritoryCode">
 		<xsd:annotation>
 			<xsd:documentation xml:lang="en">Must be one of the following abbreviations: NL - Newfoundland, PE - Prince Edward Island, NS - Nova Scotia, NB - New Brunswick, QC - Quebec, ON - Ontario, MB - Manitoba, SK - Saskatchewan, AB - Alberta, BC - British Columbia, YT - Yukon, NU - Nunavut, NT - Northwest Territories</xsd:documentation>
@@ -106,8 +93,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 	</xsd:element>
 	<xsd:element name="CanadianPostalCode">
 		<xsd:simpleType>
-			<xsd:restriction base="ccms:CanadianPostalCodeType">
-			</xsd:restriction>
+			<xsd:restriction base="ccms:CanadianPostalCodeType"/>
 		</xsd:simpleType>
 	</xsd:element>
 	<xsd:simpleType name="CanadianPostalCodeType">
@@ -146,7 +132,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 			</xsd:restriction>
 		</xsd:simpleType>
 	</xsd:element>
-<!-- common name structures names of varying length  -->	
+	<!-- common name structures names of varying length  -->
 	<xsd:complexType name="Name30CharacterType">
 		<xsd:simpleContent>
 			<xsd:restriction base="sdt:NameType">
@@ -189,17 +175,16 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 			</xsd:restriction>
 		</xsd:simpleContent>
 	</xsd:complexType>
-	
-<!--  Common text field structures of varying length -->
-	<xsd:simpleType name="NAICSCodeType" >
+	<!--  Common text field structures of varying length -->
+	<xsd:simpleType name="NAICSCodeType">
 		<xsd:annotation>
 			<xsd:documentation> 
 		North American Industrial Classification System  
 		   </xsd:documentation>
 		</xsd:annotation>
-			<xsd:restriction base="sdt:CodeType">
-				<xsd:maxLength value="6"/>
-			</xsd:restriction>
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:maxLength value="6"/>
+		</xsd:restriction>
 	</xsd:simpleType>
 	<xsd:complexType name="Character30TextType">
 		<xsd:simpleContent>
@@ -248,13 +233,13 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 			<xsd:element ref="ccms:FieldCode"/>
 			<xsd:element ref="ccms:FieldAmount"/>
 		</xsd:sequence>
-	</xsd:complexType>	
+	</xsd:complexType>
 	<xsd:complexType name="FieldCodeTextType">
 		<xsd:sequence>
 			<xsd:element ref="ccms:FieldCode"/>
 			<xsd:element ref="ccms:FieldText"/>
 		</xsd:sequence>
-	</xsd:complexType>	
+	</xsd:complexType>
 	<xsd:complexType name="FieldCodeText60Type">
 		<xsd:sequence>
 			<xsd:element ref="ccms:FieldCode"/>
@@ -268,12 +253,10 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 			<xsd:element ref="ccms:FieldAmount"/>
 		</xsd:sequence>
 	</xsd:complexType>
-	
 	<xsd:element name="FieldCode" type="sdt:CodeType"/>
 	<xsd:element name="FieldText" type="sdt:TextType"/>
 	<xsd:element name="Character60Text" type="ccms:Character60TextType"/>
 	<xsd:element name="FieldAmount" type="sdt:AmountType"/>
-
 	<xsd:simpleType name="OneTwoCodeType">
 		<xsd:restriction base="sdt:CodeType">
 			<xsd:enumeration value="1"/>
@@ -281,7 +264,6 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 		</xsd:restriction>
 		<!-- example: Yes-No or English-French indicators  -->
 	</xsd:simpleType>
-	
 	<xsd:simpleType name="YesNoCodeType">
 		<xsd:restriction base="sdt:CodeType">
 			<xsd:enumeration value="Y"/>
@@ -290,8 +272,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 			<xsd:enumeration value="n"/>
 		</xsd:restriction>
 	</xsd:simpleType>
-	
-	<xsd:element name="BN15" type="ccms:BN15Type" />
+	<xsd:element name="BN15" type="ccms:BN15Type"/>
 	<xsd:simpleType name="BN15Type">
 		<xsd:restriction base="sdt:NumberType">
 			<xsd:pattern value="([0-9]{9}\p{L}{2}[0-9]{4})"/>
@@ -305,42 +286,40 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 		</xsd:sequence>
 	</xsd:complexType>
 	<!--  -->
-	<xsd:element name="TrustNumber" type="ccms:TrustNumberType" />
+	<xsd:element name="TrustNumber" type="ccms:TrustNumberType"/>
 	<xsd:simpleType name="TrustNumberType">
 		<xsd:restriction base="sdt:NumberType">
 			<xsd:pattern value="(\p{L}{1}[0-9]{8})"/>
 		</xsd:restriction>
 	</xsd:simpleType>
-	<xsd:element name="BNRoot" type="ccms:BNRootType" />
+	<xsd:element name="BNRoot" type="ccms:BNRootType"/>
 	<xsd:simpleType name="BNRootType">
-			<xsd:annotation>
+		<xsd:annotation>
 			<xsd:documentation xml:lang="en"> The BN is a 9-digit business identifier used in Canada to which businesses can register program accounts with the Canada Revenue Agency (CRA).
 		   </xsd:documentation>
 		</xsd:annotation>
-			<xsd:restriction base="sdt:NumberType">
-				<xsd:pattern value="\d{9}"/>
-			</xsd:restriction>
-		</xsd:simpleType>
-	
-	<!--  BNProgramID -->
-	<xsd:element name="BNProgramID" type="ccms:BNProgramIDType" />
-	<xsd:simpleType name="BNProgramIDType" >
-			<xsd:restriction base="xsd:string">
-	      		<xsd:length value="2"/>
-	    	</xsd:restriction>
+		<xsd:restriction base="sdt:NumberType">
+			<xsd:pattern value="\d{9}"/>
+		</xsd:restriction>
 	</xsd:simpleType>
-
+	<!--  BNProgramID -->
+	<xsd:element name="BNProgramID" type="ccms:BNProgramIDType"/>
+	<xsd:simpleType name="BNProgramIDType">
+		<xsd:restriction base="xsd:string">
+			<xsd:length value="2"/>
+		</xsd:restriction>
+	</xsd:simpleType>
 	<!--  -->
-	<xsd:element name="BNProgramAccountReferenceNumber" type="ccms:BNProgramAccountReferenceNumberType" />
+	<xsd:element name="BNProgramAccountReferenceNumber" type="ccms:BNProgramAccountReferenceNumberType"/>
 	<xsd:simpleType name="BNProgramAccountReferenceNumberType">
 		<xsd:annotation>
 			<xsd:documentation xml:lang="en"> Uniquely identifies the account's participation within a given program through the Business Number system.</xsd:documentation>
 		</xsd:annotation>
-			<xsd:restriction base="sdt:NumberType">
-				<xsd:pattern value="\d{4}"/>
-			</xsd:restriction>
+		<xsd:restriction base="sdt:NumberType">
+			<xsd:pattern value="\d{4}"/>
+		</xsd:restriction>
 	</xsd:simpleType>
-		<xsd:simpleType name="CountryCodeType">
+	<xsd:simpleType name="CountryCodeType">
 		<xsd:restriction base="sdt:CodeType">
 			<xsd:pattern value="\p{L}{3}"/>
 		</xsd:restriction>
@@ -473,7 +452,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 	<xsd:simpleType name="CanadianProvinceTerritoryCodeType">
 		<xsd:annotation>
 			<xsd:documentation xml:lang="en">Must be one of the following abbreviations: NL - Newfoundland, PE - Prince Edward Island, NS - Nova Scotia, NB - New Brunswick, QC - Quebec, ON - Ontario, MB - Manitoba, SK - Saskatchewan, AB - Alberta, BC - British Columbia, YT - Yukon, NU - Nunavut, NT - Northwest Territories</xsd:documentation>
-            <xsd:documentation xml:lang="fr">Doit être l'une des abréviations suivantes: NL - Terre-Neuve-et-Labrador, PE - Île-du-Prince-Édouard, NS - Nouvelle-Écosse, NB - Nouveau-Brunswick, QC - Québec, ON - Ontario, MB - Manitoba, SK - Saskatchewan, AB - Alberta, BC - Colombie-Britannique, YT - Yukon, NU - Nunavut, NT - Territoires du Nord-Ouest</xsd:documentation>   		
+			<xsd:documentation xml:lang="fr">Doit être l'une des abréviations suivantes: NL - Terre-Neuve-et-Labrador, PE - Île-du-Prince-Édouard, NS - Nouvelle-Écosse, NB - Nouveau-Brunswick, QC - Québec, ON - Ontario, MB - Manitoba, SK - Saskatchewan, AB - Alberta, BC - Colombie-Britannique, YT - Yukon, NU - Nunavut, NT - Territoires du Nord-Ouest</xsd:documentation>
 			<xsd:documentation>
 		The values of US and ZZ are included in case they are needed to satisfy certain business requirements
 			</xsd:documentation>
@@ -554,6 +533,4 @@ elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0
 	<xsd:simpleType name="ProvinceTerritoryStateCodeType">
 		<xsd:union memberTypes="ccms:CanadianProvinceTerritoryCodeType ccms:USAStateCodeType"/>
 	</xsd:simpleType>
-
-
 </xsd:schema>

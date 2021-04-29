@@ -41,7 +41,23 @@
 class PayrollDeduction_US_MN extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
-			20190101  => array(
+			20200101 => array(
+					10 => array(
+							array('income' => 3800, 'rate' => 0, 'constant' => 0),
+							array('income' => 30760, 'rate' => 5.35, 'constant' => 0),
+							array('income' => 92350, 'rate' => 6.80, 'constant' => 1442.36),
+							array('income' => 168200, 'rate' => 7.85, 'constant' => 5630.48),
+							array('income' => 168200, 'rate' => 9.85, 'constant' => 11584.71),
+					),
+					20 => array(
+							array('income' => 11900, 'rate' => 0, 'constant' => 0),
+							array('income' => 51310, 'rate' => 5.35, 'constant' => 0),
+							array('income' => 168470, 'rate' => 6.80, 'constant' => 2108.44),
+							array('income' => 285370, 'rate' => 7.85, 'constant' => 10075.32),
+							array('income' => 285370, 'rate' => 9.85, 'constant' => 19251.97),
+					),
+			),
+			20190101 => array(
 					10 => array(
 							array('income' => 2400, 'rate' => 0, 'constant' => 0),
 							array('income' => 28920, 'rate' => 5.35, 'constant' => 0),
@@ -57,7 +73,7 @@ class PayrollDeduction_US_MN extends PayrollDeduction_US {
 							array('income' => 282200, 'rate' => 9.85, 'constant' => 19551.04),
 					),
 			),
-			20180101  => array(
+			20180101 => array(
 					10 => array(
 							array('income' => 2350, 'rate' => 0, 'constant' => 0),
 							array('income' => 28240, 'rate' => 5.35, 'constant' => 0),
@@ -252,34 +268,35 @@ class PayrollDeduction_US_MN extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
-			20190101 => array( //01-Jan-19
-							   'allowance' => 4150, //No Change in 2019.
+			20200101 => array(
+					'allowance' => 4300,
 			),
-			20180101 => array( //01-Jan-18
-							   'allowance' => 4150,
+			//01-Jan-19 - No Change
+			20180101 => array(
+					'allowance' => 4150,
 			),
 			//01-Jan-17 - No Change
-			20160101 => array( //01-Jan-16
-							   'allowance' => 4050,
+			20160101 => array(
+					'allowance' => 4050,
 			),
-			20150101 => array( //01-Jan-15
-							   'allowance' => 4000,
+			20150101 => array(
+					'allowance' => 4000,
 			),
-			20140101 => array( //01-Jan-14
-							   'allowance' => 3950,
+			20140101 => array(
+					'allowance' => 3950,
 			),
-			20130101 => array( //01-Jan-13
-							   'allowance' => 3900,
+			20130101 => array(
+					'allowance' => 3900,
 			),
-			20120101 => array( //01-Jan-12
-							   'allowance' => 3800,
+			20120101 => array(
+					'allowance' => 3800,
 			),
-			20110101 => array( //01-Jan-11
-							   'allowance' => 3700,
+			20110101 => array(
+					'allowance' => 3700,
 			),
 			//01-Jan-10: No Change
-			20090101 => array( //01-Jan-09
-							   'allowance' => 3650,
+			20090101 => array(
+					'allowance' => 3650,
 			),
 			20080101 => array(
 					'allowance' => 3500,

@@ -1706,7 +1706,7 @@ class Report {
 	 */
 	function pageBreak() {
 		$this->profiler->startTimer( 'pageBreak' );
-		if ( is_array( $this->getPageBreakConfig() ) AND count( $this->getPageBreakConfig() ) > 0 ) {
+		if ( is_array( $this->data ) AND is_array( $this->getPageBreakConfig() ) AND count( $this->getPageBreakConfig() ) > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0, NULL, TTi18n::getText('Inserting Page Breaks...') );
 
 			$this->data = array_values( $this->data );

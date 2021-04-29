@@ -110,9 +110,9 @@ class CompanyDeductionFactory extends Factory {
 										'200-US-IN' => '200-US-IN',
 										'200-US-IA' => '200-US-OH',
 										'200-US-KS' => '200-US-WI',
-										'200-US-KY' => '200-US-OH',
+										'200-US-KY' => '',
 										'200-US-LA' => '200-US-LA',
-										'200-US-ME' => '200-US-ME',
+										'200-US-ME' => '200-US-WI',
 										'200-US-MD' => '200-US-MD', //Has district taxes too
 										'200-US-MA' => '200-US-MA',
 										'200-US-MI' => '200-US-OH',
@@ -123,9 +123,9 @@ class CompanyDeductionFactory extends Factory {
 										'200-US-NE' => '200-US-WI',
 										'200-US-NV' => '',
 										'200-US-NH' => '',
-										'200-US-NM' => '200-US-WI',
+										'200-US-NM' => '200-US-NM', //Single, Married, HoH
 										'200-US-NJ' => '200-US-NJ',
-										'200-US-NY' => '100-US', //Just Single/Married are options
+										'200-US-NY' => '200-US-WI', //Just Single/Married are options
 										'200-US-NC' => '200-US-NC',
 										'200-US-ND' => '200-US-WI',
 										'200-US-OH' => '200-US-OH',
@@ -331,7 +331,26 @@ class CompanyDeductionFactory extends Factory {
 										20 => TTi18n::gettext('Always Special (Cummulative Averaging)'),
 									);
 				break;
+			case 'yes_no':
+				$retval = array(
+						0 => TTi18n::gettext('No'),
+						1 => TTi18n::gettext('Yes'),
+				);
+				break;
+			case 'form_w4_version':
+				$retval = array(
+						2019 => TTi18n::gettext('2019 or earlier'),
+						2020 => TTi18n::gettext('2020 or later'),
+				);
+				break;
 			case 'federal_filing_status': //US
+				$retval = array(
+														10 => TTi18n::gettext('Single or Married Filing Separately'),
+														20 => TTi18n::gettext('Married Filing Jointly'),
+														40 => TTi18n::gettext('Head of Household'),
+									);
+				break;
+			case 'state_basic_filing_status': //US
 				$retval = array(
 														10 => TTi18n::gettext('Single'),
 														20 => TTi18n::gettext('Married'),
@@ -381,10 +400,10 @@ class CompanyDeductionFactory extends Factory {
 				break;
 			case 'state_al_filing_status':
 				$retval = array(
-														10 => TTi18n::gettext('Status "S": Claiming $1500'),
-														20 => TTi18n::gettext('Status "M": Claiming $3000'),
+														10 => TTi18n::gettext('Status "S"'),
+														20 => TTi18n::gettext('Status "M"'),
 														30 => TTi18n::gettext('Status "0"'),
-														40 => TTi18n::gettext('Head of Household'),
+														40 => TTi18n::gettext('Status "H"'),
 														50 => TTi18n::gettext('Status "MS"')
 									);
 				break;
@@ -402,13 +421,6 @@ class CompanyDeductionFactory extends Factory {
 				$retval = array(
 														10 => TTi18n::gettext('Standard'),
 														20 => TTi18n::gettext('Optional Two Earners'),
-									);
-				break;
-			case 'state_me_filing_status':
-				$retval = array(
-														10 => TTi18n::gettext('Single'),
-														20 => TTi18n::gettext('Married'),
-														30 => TTi18n::gettext('Married with 2 incomes'),
 									);
 				break;
 			case 'state_de_filing_status':

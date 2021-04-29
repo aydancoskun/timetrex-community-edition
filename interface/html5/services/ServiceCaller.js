@@ -1,7 +1,6 @@
 $.xhrPool = [];
 
 var ServiceCaller = Backbone.Model.extend( {
-
 	getOptions: function() {
 		if ( !arguments || arguments.length < 2 ) {
 			return;
@@ -144,10 +143,26 @@ var ServiceCaller = Backbone.Model.extend( {
 
 	},
 
+	prettyPrintAPIArguments: function( apiArgs ) {
+		if ( apiArgs && apiArgs.json ) {
+			retval = [];
+			args = JSON.parse( apiArgs.json );
+			for( var property_name in args ) {
+				arg = args[property_name];
+				retval.push( JSON.stringify( arg, null, 2 ) ); //Pretty print JSON
+			}
+
+			return retval.join(', ');
+		}
+
+		return null;
+	},
+
 	call: function( className, function_name, responseObject, apiArgs ) {
 		var $this = this;
 		var message_id;
-		var url = ServiceCaller.getURLWithSessionId( 'Class=' + className + '&Method=' + function_name + '&v=2' );
+		var base_url = ServiceCaller.getURLWithSessionId( 'Class=' + className + '&Method=' + function_name + '&v=2' );
+		var url = base_url;
 		if ( LocalCacheData.all_url_args ) {
 			if ( LocalCacheData.all_url_args.hasOwnProperty('user_id') ) {
 				url = url + '&user_id=' + LocalCacheData.all_url_args.user_id;
@@ -344,6 +359,30 @@ var ServiceCaller = Backbone.Model.extend( {
 				},
 				success: function( result ) {
 					//Debug.Arr(result, 'Response from API. message_id: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
+
+					if ( Global.enable_api_tracing == true ) {
+						api_trace_label = '%cAPI Request:%c ' + className + '->' + function_name +'(...) [Expand for Details]';
+						console.groupCollapsed( api_trace_label, 'font-weight: bold', 'font-weight: normal' );
+						console.log( '%c' + className + '->' + function_name + '%c(' + $this.prettyPrintAPIArguments( apiArgs ) + ')', 'font-weight: bold', 'font-weight: normal' );
+
+						api_trace_raw_request_label = '%cRaw Request:%c [Expand for Details]';
+						console.groupCollapsed( api_trace_raw_request_label, 'font-weight: bold', 'font-weight: normal' );
+						console.log( '%cURL:%c ' + url, 'font-weight: bold', 'font-weight: normal' );
+						console.log( '%cRaw POST Body (non-URLEncoded):%c json=' + apiArgs.json + '', 'font-weight: bold', 'font-weight: normal' );
+						console.log( '%ccURL Command:%c curl -k -X POST --cookie "'+ Global.getSessionIDKey() +'=<SessionID>" --data-urlencode \'json=' + apiArgs.json + '\' "'+ base_url +'"', 'font-weight: bold', 'font-weight: normal' );
+						console.groupEnd( api_trace_raw_request_label );
+
+						api_trace_response_label = '%cResponse:%c [Expand for Details]';
+						console.groupCollapsed( api_trace_response_label, 'font-weight: bold', 'font-weight: normal' );
+						console.log( JSON.stringify( result, null, 2 ) );
+						console.groupEnd( api_trace_response_label );
+
+						console.groupEnd( api_trace_label );
+						delete api_trace_raw_request_label;
+						delete api_trace_response_label;
+						delete api_trace_label;
+					}
+
 					if ( !Global.isSet( result ) ) {
 						result = true;
 					}
@@ -490,11 +529,6 @@ var ServiceCaller = Backbone.Model.extend( {
 } );
 
 ServiceCaller.getURLWithSessionId = function( rest_url ) {
-	//Error: Object doesn't support property or method 'cookie' in /interface/html5/services/ServiceCaller.js?v=8.0.0-20150126-192230 line 326
-	if ( getCookie( Global.getSessionIDKey() ) ) {
-		LocalCacheData.setSessionID( '' );
-	}
-
 	if ( getCookie( 'js_debug' ) ) {
 		return ServiceCaller.baseUrl + '?' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID() + '&' + rest_url;
 	} else {

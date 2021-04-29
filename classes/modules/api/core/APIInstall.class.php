@@ -61,7 +61,7 @@ class APIInstall extends APIFactory {
 			$retval['install_mode'] = TRUE;
 			$license_text = $install_obj->getLicenseText();
 
-			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'license' ), 'pre_install.php'), "r");
+			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'license' ), 'pre_install.php'), 'r');
 			@fclose($handle);
 
 			if ( $license_text != FALSE ) {
@@ -91,7 +91,7 @@ class APIInstall extends APIFactory {
 				$install_obj->cleanCacheDirectory();
 			}
 
-			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array_merge( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'require'), $install_obj->getFailedRequirements( FALSE, array('clean_cache', 'file_permissions','file_checksums') ) ), 'pre_install.php'), "r");
+			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array_merge( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'require'), $install_obj->getFailedRequirements( FALSE, array('clean_cache', 'file_permissions','file_checksums') ) ), 'pre_install.php'), 'r');
 			@fclose($handle);
 
 			if ( $external_installer == 1 ) {
@@ -161,6 +161,7 @@ class APIInstall extends APIFactory {
 					'php_open_base_dir' => $install_obj->getPHPOpenBaseDir(),
 					'php_cli_directory' => $install_obj->getPHPCLIDirectory()
 				);
+				$retval['system_timezone'] = $install_obj->checkSystemTimeZone();
 				$retval['cli_executable'] = array(
 					'check_php_cli_binary' => $install_obj->checkPHPCLIBinary(),
 					'php_cli' => $install_obj->getPHPCLI()
@@ -297,7 +298,7 @@ class APIInstall extends APIFactory {
 				$data['priv_user'] = NULL;
 			}
 
-			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'database_config', 'priv_user' => $data['priv_user']), 'pre_install.php'), "r");
+			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'database_config', 'priv_user' => $data['priv_user']), 'pre_install.php'), 'r');
 			@fclose($handle);
 
 			return $this->returnHandler( $data );
@@ -339,7 +340,7 @@ class APIInstall extends APIFactory {
 				$retval['priv_user'] = NULL;
 			}
 
-			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'database_config', 'priv_user' => $retval['priv_user']), 'pre_install.php'), "r");
+			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'database_config', 'priv_user' => $retval['priv_user']), 'pre_install.php'), 'r');
 			@fclose($handle);
 
 			if ( $retval != FALSE ) {
@@ -540,7 +541,7 @@ class APIInstall extends APIFactory {
 			}
 
 			if ( $install_obj->checkDatabaseExists( $config_vars['database']['database_name'] ) == TRUE ) {
-				$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'database_schema'), 'pre_install.php'), "r");
+				$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'database_schema'), 'pre_install.php'), 'r');
 				@fclose($handle);
 
 				//Create SQL, always try to install every schema version, as
@@ -592,7 +593,7 @@ class APIInstall extends APIFactory {
 
 			$cache->clean(); //Clear all cache.
 
-			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'postupgrade'), 'pre_install.php'), "r");
+			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'postupgrade'), 'pre_install.php'), 'r');
 			@fclose($handle);
 
 			return $this->returnHandler( $retval );
@@ -628,7 +629,7 @@ class APIInstall extends APIFactory {
 
 			$cache->clean(); //Clear all cache.
 
-			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'done'), 'pre_install.php'), "r");
+			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'done'), 'pre_install.php'), 'r');
 			@fclose($handle);
 
 			$retval = array();
@@ -684,6 +685,14 @@ class APIInstall extends APIFactory {
 
 			$install_obj->writeConfigFile( $tmp_config_data );
 
+			if ( !isset($data['update_notify']) ) {
+				$data['update_notify'] = 1;
+			}
+
+			if ( !isset($data['anonymous_update_notify']) ) {
+				$data['anonymous_update_notify'] = 0;
+			}
+
 			//Write auto_update feature to system settings.
 			if ( ( isset($data['update_notify']) AND $data['update_notify'] == 1 )
 					OR getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL
@@ -700,7 +709,7 @@ class APIInstall extends APIFactory {
 				SystemSettingFactory::setSystemSetting( 'anonymous_update_notify', 0 );
 			}
 
-			$handle = fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'system_setting', 'update_notify' => (int)$data['update_notify'], 'anonymous_update_notify' => (int)$data['anonymous_update_notify']), 'pre_install.php'), "r");
+			$handle = fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'system_setting', 'update_notify' => (int)$data['update_notify'], 'anonymous_update_notify' => (int)$data['anonymous_update_notify']), 'pre_install.php'), 'r');
 			fclose($handle);
 
 			return $this->returnHandler( TRUE );
@@ -729,7 +738,7 @@ class APIInstall extends APIFactory {
 			$retval['time_zone'] = TTDate::detectSystemTimeZone(); //This is only used during initial install and not upgrades.
 			$retval['time_zone_options'] = Misc::trimSortPrefix( $upf->getOptions('time_zone') );
 
-			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'system_setting'), 'pre_install.php'), "r");
+			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'system_setting'), 'pre_install.php'), 'r');
 			@fclose($handle);
 
 			return $this->returnHandler( $retval );
@@ -821,7 +830,7 @@ class APIInstall extends APIFactory {
 
 			if ( $cf->isValid() ) {
 				if ( $cf->Save( FALSE ) ) {
-					$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'company'), 'pre_install.php'), "r");
+					$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'company'), 'pre_install.php'), 'r');
 					@fclose($handle);
 
 					$company_id = $cf->getId();
@@ -945,7 +954,7 @@ class APIInstall extends APIFactory {
 				}
 
 				if ( $uf->isValid() ) {
-					$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'user'), 'pre_install.php'), "r");
+					$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'user'), 'pre_install.php'), 'r');
 					@fclose($handle);
 
 					$user_id = $uf->getId();
@@ -1046,7 +1055,7 @@ class APIInstall extends APIFactory {
 
 			$retval['php_os'] = PHP_OS;
 
-			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'maintenance'), 'pre_install.php'), "r");
+			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'maintenance'), 'pre_install.php'), 'r');
 			@fclose($handle);
 
 			if ( $install_obj->ScheduleMaintenanceJobs() == 0 ) { //Add scheduled maintenance jobs to cron/schtask, if it succeeds move to next step automatically.

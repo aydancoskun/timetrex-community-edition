@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
+
 <!--
-Description: 	RRSP/RRIF Non-Qualified Investment Return Complex and Element Types
-Contact: 	CRA, ITB, PIECE, INFODEC MMPS
-Date created: 	March 2013
-Version#:	1.13 (version #.yy)
+Description	RRSP/RRIF Non-Qualified Investment Return Complex and Element Types
+Last updated 	October 
+Version#:	1.18 (version #.yy)
 -->
 
 <xsd:schema xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" 
@@ -102,7 +102,6 @@ Version#:	1.13 (version #.yy)
 			<xsd:element ref="TotalDisposedNonQualifiedInvestmentFairMarketValueAmount"/>
 		</xsd:all>
 	</xsd:complexType>
-	<xsd:element name="FilerAccountNumber" type="BNType"/>
 	<xsd:element name="FilerName" type="ThreeLinedLength35NameType"/>
 	<xsd:element name="FilerAddress" type="RequiredPostalCodeAddressType"/>
 	<xsd:element name="FilerContact" type="NQIFilerContactType"/>  					
@@ -119,7 +118,4 @@ Version#:	1.13 (version #.yy)
 			<xsd:element ref="ContactEmailAddress"/>
 		</xsd:all>
 	</xsd:complexType>
-	<xsd:element name="ContactFamilyName" type="ccms:Name30CharacterType"/>
-	<xsd:element name="ContactGivenName" type="ccms:Name30CharacterType"/>
-	<xsd:element name="ContactEmailAddress" type="ccms:Character60TextType"/>
 </xsd:schema>

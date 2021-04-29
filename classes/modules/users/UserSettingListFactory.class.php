@@ -134,14 +134,13 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		}
 
 		$cache_id = $user_id.$name;
-
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'name' => $name,
-					);
-
 		$this->rs = $this->getCache($cache_id);
 		if ( $this->rs === FALSE ) {
+			$ph = array(
+					'user_id' => TTUUID::castUUID($user_id),
+					'name' => $name,
+			);
+
 			$query = '
 						select	*
 						from	'. $this->getTable() .'

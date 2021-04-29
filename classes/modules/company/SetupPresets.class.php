@@ -1375,6 +1375,8 @@ class SetupPresets extends Factory {
 					//Industrial Insurance - Employee
 					//Industrial Insurance - Employer
 					//Employment Admin Fund
+					//Paid Family and Medical Leave - Employee
+					//Paid Family and Medical Leave - Employer
 					$this->createPayStubAccount(
 							array(
 									'company_id'     => $this->getCompany(),
@@ -1406,6 +1408,28 @@ class SetupPresets extends Factory {
 									'ps_order'       => 311,
 									'debit_account'  => 'Employment Admin Fund'. $gl_account_expense_suffix, //5424
 									'credit_account' => 'Employment Admin Fund'. $gl_account_payable_suffix, //2184
+							)
+					);
+					$this->createPayStubAccount(
+							array(
+									'company_id'     => $this->getCompany(),
+									'status_id'      => 10,
+									'type_id'        => 20,
+									'name'           => strtoupper( $province ) . ' - Paid Family and Medical Leave - Employee',
+									'ps_order'       => 216,
+									'debit_account'  => '',
+									'credit_account' => 'Paid Family and Medical Leave'. $gl_account_payable_suffix,
+							)
+					);
+					$this->createPayStubAccount(
+							array(
+									'company_id'     => $this->getCompany(),
+									'status_id'      => 10,
+									'type_id'        => 30,
+									'name'           => strtoupper( $province ) . ' - Paid Family and Medical Leave - Employer',
+									'ps_order'       => 316,
+									'debit_account'  => 'Paid Family and Medical Leave'. $gl_account_expense_suffix,
+									'credit_account' => 'Paid Family and Medical Leave'. $gl_account_payable_suffix,
 							)
 					);
 					break;
@@ -2055,7 +2079,7 @@ class SetupPresets extends Factory {
 															 'exclude_pay_stub_entry_account' => array(),
 													 ),
 													 array(
-															 'box'                            => 85, //(Code 85) - Employee-paid premiums for private health services plans (Optional), but may avoid requiring employee requiring supporting documents.
+															 'box'                            => 85, //(Code 85) - Employee-paid premiums for private health services plans (Optional - But required for the employee to take advantage of the tax savings when they file tax return at year end), but may avoid requiring employee requiring supporting documents.
 															 'include_pay_stub_entry_account' => array(
 																	 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Health Benefits Plan' ),
 																	 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Dental Benefits Plan' ),
@@ -2570,8 +2594,8 @@ class SetupPresets extends Factory {
 									$this->RecurringHolidays( $country, $le_obj->getProvince() );
 
 									$recurring_holiday_ids = array_merge(
-											$this->RecurringHolidaysByRegion( $country, $province, 10 ), //Include Gov't Holidays
-											$this->RecurringHolidaysByRegion( $country, $le_obj->getProvince(), 10 ) //Include Gov't Holidays - CRA only observes certain provincial holidays, they should be hard coded probably.
+											$this->RecurringHolidaysByRegion( $country, $province, 100 ), //Include federally recognized holidays by the CRA - https://www.canada.ca/en/revenue-agency/services/tax/public-holidays.html
+											$this->RecurringHolidaysByRegion( $country, $le_obj->getProvince(), 100 ) //Include provincially recognized holidays by the CRA - Since this is only called when no province is specified, we need to use the province from the legal entity.
 									);
 
 									if ( ( isset($config_vars['other']['demo_mode']) AND $config_vars['other']['demo_mode'] == TRUE ) ) {
@@ -2584,7 +2608,7 @@ class SetupPresets extends Factory {
 									}
 
 									$recurring_holiday_ids = array_merge(
-											$this->RecurringHolidaysByRegion( $country, $province, 10 ) //Include Gov't Holidays
+											$this->RecurringHolidaysByRegion( $country, $province, 100 ) //Include Gov't Holidays
 									);
 
 									if ( ( isset($config_vars['other']['demo_mode']) AND $config_vars['other']['demo_mode'] == TRUE ) ) {
@@ -3507,7 +3531,7 @@ class SetupPresets extends Factory {
 						case 'ak': //alaska
 							//Unemployment Insurance - Employee
 							//Unemployment Insurance - Employer
-							$company_state_unemployment_wage_base = $state_unemployment_wage_base = 39500; //Rate for: 20180101
+							$company_state_unemployment_wage_base = $state_unemployment_wage_base = 39900; //Rate for: 20190101
 							break;
 						case 'az': //arizona
 							//Unemployment Insurance - Employee
@@ -3540,7 +3564,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ar': //arkansas
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 10000; //Rate for: 20180101
+							$state_unemployment_wage_base = 7000; //Rate for: 20190101
 
 							break;
 						case 'ca': //california
@@ -3675,7 +3699,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'hi': //hawaii
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 45900; //Rate for: 20180101
+							$state_unemployment_wage_base = 46800; //Rate for: 20190101
 
 							//E&T Assessment
 							$this->createCompanyDeduction(
@@ -3755,7 +3779,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'id': //idaho
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 38200; //Rate for: 20180101
+							$state_unemployment_wage_base = 40000; //Rate for: 20190101
 
 							//Administrative Reserve
 							$this->createCompanyDeduction(
@@ -3830,7 +3854,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ia': //iowa
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 30600; //Rate for: 20190101
+							$state_unemployment_wage_base = 31600; //Rate for: 20200101
 
 							//Reserve Fund
 							$this->createCompanyDeduction(
@@ -3888,7 +3912,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ky': //kentucky
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 10500; //Rate for: 20190101
+							$state_unemployment_wage_base = 10800; //Rate for: 20200101
 							break;
 						case 'la': //louisiana
 							//Unemployment Insurance - Employee
@@ -3987,7 +4011,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'mn': //minnesota
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 34000; //Rate for: 20190101
+							$state_unemployment_wage_base = 35000; //Rate for: 20200101
 
 							//Workforce Enhancement Fee
 							$this->createCompanyDeduction(
@@ -4045,11 +4069,11 @@ class SetupPresets extends Factory {
 							break;
 						case 'mo': //missouri
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 12000; //Rate for: 20190101
+							$state_unemployment_wage_base = 11500; //Rate for: 20200101
 							break;
 						case 'mt': //montana
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 33000; //Rate for: 20190101
+							$state_unemployment_wage_base = 34100; //Rate for: 20200101
 
 							//Administrative Fund
 							$this->createCompanyDeduction(
@@ -4107,7 +4131,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'nv': //nevada
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 31200; //Rate for: 20190101
+							$state_unemployment_wage_base = 32500; //Rate for: 20200101
 
 							//Career Enhancement
 							$this->createCompanyDeduction(
@@ -4166,7 +4190,7 @@ class SetupPresets extends Factory {
 						case 'nj': //new jersey
 							//Unemployment Insurance - Employee
 							//Unemployment Insurance - Employer
-							$state_unemployment_wage_base = 33700; //Rate for: 20180101
+							$state_unemployment_wage_base = 35300; //Rate for: 20200101
 
 							//Disability Insurance - Employee
 							$this->createCompanyDeduction(
@@ -4346,7 +4370,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'nm': //new mexico
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 24800; //Rate for: 20190101
+							$state_unemployment_wage_base = 25800; //Rate for: 20200101
 
 							//State Trust Fund
 							$this->createCompanyDeduction(
@@ -4375,7 +4399,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ny': //new york
 							//Unemployment Insurance - Employee
-							$company_state_unemployment_wage_base = $state_unemployment_wage_base = 11400; //Rate for: 20190101
+							$company_state_unemployment_wage_base = $state_unemployment_wage_base = 11600; //Rate for: 20200101
 
 							//Reemployment Service Fund
 							$this->createCompanyDeduction(
@@ -4565,19 +4589,19 @@ class SetupPresets extends Factory {
 							break;
 						case 'nd': //north dakota
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 35500; //Rate for: 20180101
+							$state_unemployment_wage_base = 36400; //Rate for: 20190101
 							break;
 						case 'oh': //ohio
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 9500; //Rate for: 20180101
+							$state_unemployment_wage_base = 9000; //Rate for: 20200101
 							break;
 						case 'ok': //oklahoma
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 18100; //Rate for: 20190101
+							$state_unemployment_wage_base = 18700; //Rate for: 20200101
 							break;
 						case 'or': //oregon
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 39300; //Rate for: 20180101
+							$state_unemployment_wage_base = 42100; //Rate for: 20200101
 
 							//Workers Benefit - Employee
 							$this->createCompanyDeduction(
@@ -4776,7 +4800,7 @@ class SetupPresets extends Factory {
 											'calculation_order'              => 186,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper( $province ) . ' - Job Development Fund' ),
 											'user_value1'                    => 0.21, //Percent
-											'user_value2'                    => 23000, //WageBase Rate for: 20180101
+											'user_value2'                    => 23600, //WageBase Rate for: 20190101
 											'user_value3'                    => 0,
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
 											'exclude_pay_stub_entry_account' => array(
@@ -4981,11 +5005,11 @@ class SetupPresets extends Factory {
 							break;
 						case 'ut': //utah
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 34300; //Rate for: 20180101
+							$state_unemployment_wage_base = 36600; //Rate for: 20200101
 							break;
 						case 'vt': //vermont
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 15600; //Rate for: 20190101
+							$state_unemployment_wage_base = 16100; //Rate for: 20200101
 							break;
 						case 'va': //virginia
 							//Unemployment Insurance - Employee
@@ -4993,7 +5017,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'wa': //washington
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 49800; //Rate for: 20190101
+							$state_unemployment_wage_base = 52700; //Rate for: 20200101
 
 							//Industrial Insurance - Employee
 							$this->createCompanyDeduction(
@@ -5058,7 +5082,58 @@ class SetupPresets extends Factory {
 											'calculation_order'              => 186,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper( $province ) . ' - Employment Admin Fund' ),
 											'user_value1'                    => 0.00, //Percent
-											'user_value2'                    => $state_unemployment_wage_base, //WageBase
+											'user_value2'                    => $pd_obj->getSocialSecurityMaximumEarnings(), //WageBase
+											'user_value3'                    => 0,
+											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
+											'exclude_pay_stub_entry_account' => array(
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ),
+											),
+									)
+							);
+
+							//Paid Family and Medical Leave - Employee
+							$this->createCompanyDeduction(
+									array(
+											'company_id'                     => $this->getCompany(),
+											'legal_entity_id'                => $le_obj->getID(),
+											'status_id'                      => 10, //Enabled
+											'type_id'                        => 10, //Tax
+											'payroll_remittance_agency_id'   => $this->getPayrollRemittanceAgencyByLegalEntityAndAgencyID( $le_obj->getId(), '20:US:' . strtoupper( $province ) . ':00:0020' ), //Must go before name
+											'name'                           => strtoupper( $province ) . ' - Paid Family and Medical Leave - Employee',
+											'description'					 => '*NOTE: 0.2533% is the result of 63.33% of 0.4%',
+											'calculation_id'                 => 15,
+											'calculation_order'              => 187,
+											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - Paid Family and Medical Leave - Employee' ),
+											'user_value1'                    => 0.2533, //Percent - Default to 63.33% of 0.4% = 0.2533332%
+											'user_value2'                    => $pd_obj->getSocialSecurityMaximumEarnings(), //WageBase - Matches Social Security
+											'user_value3'                    => 0,
+											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
+											'exclude_pay_stub_entry_account' => array(
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ),
+											),
+									)
+							);
+							//Paid Family and Medical Leave - Employer
+							$this->createCompanyDeduction(
+									array(
+											'company_id'                     => $this->getCompany(),
+											'legal_entity_id'                => $le_obj->getID(),
+											'status_id'                      => 10, //Enabled
+											'type_id'                        => 10, //Tax
+											'payroll_remittance_agency_id'   => $this->getPayrollRemittanceAgencyByLegalEntityAndAgencyID( $le_obj->getId(), '20:US:' . strtoupper( $province ) . ':00:0020' ), //Must go before name
+											'name'                           => strtoupper( $province ) . ' - Paid Family and Medical Leave - Employer',
+											'description'					 => '*NOTE: This should be 0.4% if the employer is paying 100% of premiums, or 0.1467% (36.67% of 0.4%) if the employer is paying 36.67% of premiums.',
+											'calculation_id'                 => 15,
+											'calculation_order'              => 188,
+											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper( $province ) . ' - Paid Family and Medical Leave - Employer' ),
+											'user_value1'                    => 0.00, //Percent - Default to 0% as employers less than 50EE don't need to pay anything. However this would either be 0.4% or ( 0.4%×36.67% ) = 0.1467%
+											'user_value2'                    => $pd_obj->getSocialSecurityMaximumEarnings(), //WageBase - Matches Social Security
 											'user_value3'                    => 0,
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
 											'exclude_pay_stub_entry_account' => array(
@@ -5069,6 +5144,7 @@ class SetupPresets extends Factory {
 											),
 									)
 							);
+
 							break;
 						case 'wv': //west virginia
 							//Unemployment Insurance - Employee
@@ -5080,7 +5156,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'wy': //wyoming
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 24400; //Rate for: 20190101
+							$state_unemployment_wage_base = 26400; //Rate for: 20200101
 
 							//Employment Support Fund
 							$this->createCompanyDeduction(
@@ -5251,7 +5327,7 @@ class SetupPresets extends Factory {
 	/**
 	 * @param null $country
 	 * @param null $province
-	 * @param null $type_id
+	 * @param null $type_id 10=Province/State recognized Government only Holidays, 100=Federally recognized only holidays.
 	 * @return array
 	 */
 	function RecurringHolidaysByRegion( $country = NULL, $province = NULL, $type_id = NULL ) {
@@ -5306,283 +5382,331 @@ class SetupPresets extends Factory {
 			Debug::text( 'Country: ca Province: '. $province, __FILE__, __LINE__, __METHOD__, 10 );
 			switch ( $province ) {
 				case 'bc':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) {
+						$retval = (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'British Columbia Day%', $province );
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'British Columbia Day%', $province ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Family Day%', $province )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'British Columbia Day%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Family Day%', $province )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 				case 'ab':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Family Day%', $province )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Family Day%', $province )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 				case 'mb':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
-							//(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ), //Partial holiday, paid 1.5x but not paid time off.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
+								//(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ), //Partial holiday, paid 1.5x but not paid time off.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Louis Riel Day%', $province )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Louis Riel Day%', $province )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 
 					break;
 				case 'qc':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Patriot\'s Day%', $province ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'St. Jean Baptiste Day%', $province ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Patriot\'s Day%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'St. Jean Baptiste Day%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country )
 
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 				case 'nl':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 				case 'nu':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+						$retval = (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Civic Holiday%', $province );
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Civic Holiday%', $province ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Nunavut Day%', $province )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Civic Holiday%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Nunavut Day%', $province )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 				case 'nt':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+						$retval = (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Civic Holiday%', $province );
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Civic Holiday%', $province ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Aboriginal Day%', $province )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Civic Holiday%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Aboriginal Day%', $province )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 				case 'nb':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+						$retval = (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Brunswick Day%', $province );
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Family Day%', $province ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Brunswick Day%', $province )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Family Day%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Brunswick Day%', $province )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 				case 'ns':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							//(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ), //Partial holiday, paid 1.5x but not paid time off.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								//(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ), //Partial holiday, paid 1.5x but not paid time off.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Heritage Day%', $province )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Heritage Day%', $province )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 				case 'on':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+						$retval = (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Civic Holiday%', $province );
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Family Day%', $province ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Civic Holiday%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Family Day%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country )
+							);
+						}
 					}
 					break;
 				case 'pe':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+						$retval = (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Civic Holiday%', $province );
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Islander Day%', $province )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Civic Holiday%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Islander Day%', $province )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 				case 'yt':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Discovery Day%', $province ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Aboriginal Day%', $province )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Discovery Day%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Aboriginal Day%', $province )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 				case 'sk':
-					$retval = array_merge(
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
+					if ( $type_id == 100 ) { //CRA provincially recognized holidays
+						$retval = (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Saskatchewan Day%', $province );
+					} else {
+						$retval = array_merge(
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'New Year%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Good Friday%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Victoria Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Canada Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Labo%r Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Thanksgiving Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Remembrance Day%', $country ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Christmas Day%', $country ),
 
-							//Province Specific.
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Family Day%', $province ),
-							(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Saskatchewan Day%', $province )
-					);
-
-					if ( $type_id == 10 ) { //Government Only holidays.
-						$retval = array_merge( $retval,
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
-											   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+								//Province Specific.
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Family Day%', $province ),
+								(array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Saskatchewan Day%', $province )
 						);
+
+						if ( $type_id == 10 ) { //Government Only holidays.
+							$retval = array_merge( $retval,
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Easter Monday%', $country ),
+												   (array)$this->getRecurringHolidayByCompanyIDAndNameAndPrefix( 'Boxing Day%', $country )
+							);
+						}
 					}
 					break;
 			}
@@ -10556,9 +10680,16 @@ class SetupPresets extends Factory {
 
 			//Permissions
 			$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
-			$pclf->getByCompanyIdAndLevel( $this->getCompanyObject()->getID(), 1 );
+			$pclf->getByCompanyIdAndLevel( $this->getCompanyObject()->getID(), 10, 1, NULL, NULL, array( 'level' => 'desc' ) );
 			if ( $pclf->getRecordCount() > 0 ) {
 				$udf->setPermissionControl( $pclf->getCurrent()->getID() );
+			}
+
+			//Terminated Permissions
+			$pclf = TTnew('PermissionControlListFactory'); /** @var PermissionControlListFactory $pclf */
+			$pclf->getByCompanyIdAndLevel( $this->getCompanyObject()->getID(), 5, 1, NULL, NULL, array( 'level' => 'desc' ) );
+			if ( $pclf->getRecordCount() > 0 ) {
+				$udf->setTerminatedPermissionControl( $pclf->getCurrent()->getID() );
 			}
 
 			//Currency

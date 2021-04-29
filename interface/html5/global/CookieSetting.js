@@ -12,13 +12,20 @@ function getCookie( name ) {
 }
 
 //NOTE: Setting cookie value to "null" does not delete it, and can cause checks like: if ( getCookie('SessionID') ) {} to still succeed.
-function setCookie( name, value, expire_days, path, domain ) {
+function setCookie( name, value, expire_days, path, domain, secure ) {
 	if ( !path && LocalCacheData && LocalCacheData.cookie_path ) {
 		path = LocalCacheData.cookie_path;
 	}
 
 	if ( !expire_days ) {
 		expire_days = 30;
+	}
+
+	//If secure flag is not specified, try to default to secure when using SSL.
+	if ( typeof secure === 'undefined' ) {
+		if ( APIGlobal.pre_login_data && APIGlobal.pre_login_data.is_ssl && APIGlobal.pre_login_data.is_ssl == true ) {
+			secure = true;
+		}
 	}
 
 	var d = new Date();
@@ -28,6 +35,9 @@ function setCookie( name, value, expire_days, path, domain ) {
 	cookie_str = name + '=' + value + '; ' + expires + '; path=' + path;
 	if ( domain ) {
 		cookie_str += '; domain=' + domain;
+	}
+	if ( secure ) {
+		cookie_str += '; secure';
 	}
 
 	document.cookie = cookie_str;

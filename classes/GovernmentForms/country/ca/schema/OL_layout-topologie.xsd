@@ -1,7 +1,12 @@
 <?xml version="1.0"?>
-<!-- edited with XML Spy v4.4 U (http://www.xmlspy.com) by John West (Canada Customs and Revenue Agency) -->
+
+<!--
+Description	OL Layout Topologie (T5013) - Common Record Layout
+Last updated 	Ocotber 2018
+Version#:	1.18 (version #.yy)
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:olsbr="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/olsbr/1-0-1">
-	<!-- @@@@@@ Include Related Schemas @@@@@@ Version# 2.8-2008 -->
 	<xsd:include schemaLocation="simple.xsd"/>
 	<xsd:include schemaLocation="complex.xsd"/>
 	<xsd:include schemaLocation="t5013.xsd"/>

@@ -4652,9 +4652,16 @@ class DemoData {
 
 		//Permissions
 		$pclf = TTnew('PermissionControlListFactory'); /** @var PermissionControlListFactory $pclf */
-		$pclf->getByCompanyIdAndLevel( $company_id, 1 );
+		$pclf->getByCompanyIdAndLevel( $company_id, 10, 1, NULL, NULL, array( 'level' => 'desc' ) );
 		if ( $pclf->getRecordCount() > 0 ) {
 			$udf->setPermissionControl( $pclf->getCurrent()->getID() );
+		}
+
+		//Terminated Permissions
+		$pclf = TTnew('PermissionControlListFactory'); /** @var PermissionControlListFactory $pclf */
+		$pclf->getByCompanyIdAndLevel( $company_id, 5, 1, NULL, NULL, array( 'level' => 'desc' ) );
+		if ( $pclf->getRecordCount() > 0 ) {
+			$udf->setTerminatedPermissionControl( $pclf->getCurrent()->getID() );
 		}
 
 		//Currency
@@ -8535,20 +8542,20 @@ class DemoData {
 				}
 			} else {
 				Debug::Text('NOTICE: Skipping invoices...', __FILE__, __LINE__, __METHOD__, 10);
-				$client_group_ids[] = 0;
-				$product_group_ids[] = 0;
-				$client_ids = range(0, 10);
-				$invoice_district_ids[] = 0;
-				$client_contact_ids[] = 0;
-				$product_ids[10] = 0;
-				$product_ids[20] = 0;
-				$product_ids[30] = 0;
-				$product_ids[40] = 0;
-				$product_ids[50] = 0;
-				$area_policy_ids[] = 0;
-				$tax_policy_ids[] = 0;
-				$shipping_policy_ids[] = 0;
-				$invoice_ids[] = 0;
+				$client_group_ids[] = TTUUID::getZeroID();
+				$product_group_ids[] = TTUUID::getZeroID();
+				$client_ids = array_fill( 0, 10, TTUUID::getZeroID() );
+				$invoice_district_ids[] = TTUUID::getZeroID();
+				$client_contact_ids[] = TTUUID::getZeroID();
+				$product_ids[10] = array_fill( 0, 5, TTUUID::getZeroID() );
+				$product_ids[20] = array_fill( 0, 5, TTUUID::getZeroID() );
+				$product_ids[30] = array_fill( 0, 5, TTUUID::getZeroID() );
+				$product_ids[40] = array_fill( 0, 5, TTUUID::getZeroID() );
+				$product_ids[50] = array_fill( 0, 5, TTUUID::getZeroID() );
+				$area_policy_ids[] = TTUUID::getZeroID();
+				$tax_policy_ids[] = TTUUID::getZeroID();
+				$shipping_policy_ids[] = TTUUID::getZeroID();
+				$invoice_ids[] = TTUUID::getZeroID();
 			}
 
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	T3ATH-IND Return Complex and Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+
+
+	<!-- T3ATH-IND Athelete Name -->
+	<xsd:complexType name="T3ATHTrustInfoType">
+   		<xsd:complexContent>
+     			<xsd:extension base="T3SpecialIdentTypeBasePlus">
+       				<xsd:sequence>
+						<xsd:element ref="TrustEffectiveDate"/>
+						<xsd:element ref="TrustExpiryDate" minOccurs="0"/>
+						<xsd:element ref="TrustBookRecordAddress" minOccurs="0"/>
+						<xsd:element ref="RCAAARegistrationNumber"/>
+       				</xsd:sequence>
+     			</xsd:extension>
+   		</xsd:complexContent>
+	</xsd:complexType> 
+
+	<xsd:complexType name="T3ATHAthleteInfoType">
+		<xsd:sequence>
+			<xsd:element name="AmateurAthleteName" type="SurGivenNameType"/>
+			<xsd:element name="AmateurAthleteAddress" type="CountryCodeAddressType"/>
+			<xsd:element name="AmateurAthleteSIN" type="SINType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- T3ATH-IND calculating Part XII.2 tax and Part XIII non-resident withholding tax -->
+	<xsd:complexType name="T3ATHTaxCalculationType">
+		<xsd:sequence>
+			<xsd:element name="BenefitAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="DeemedAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TaxableAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3ATHTaxSummaryType">
+		<xsd:sequence>
+			<xsd:element ref="TotalAcquireCorporationShareTaxPayableAmount" minOccurs="0"/>
+			<xsd:element name="NonResidentAthleteDistributionTaxPayableAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element ref="TotalTrustTaxPayableAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountPaidAmount" minOccurs="0"/>
+			<xsd:element ref="TrustAccountBalanceAmount" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType> 
+
+	<!-- T3PATH-IND return -->
+	<xsd:complexType name="T3ATHINDReturnType">
+		<xsd:sequence>
+			<xsd:element name="TrustInformation" type="T3ATHTrustInfoType"/>
+			<xsd:element name="AmateurAthleteInformation" type="T3ATHAthleteInfoType"/>
+			<xsd:element name="NonResidentAmateurAthleteDistributionAmounts" type="T3ATHTaxCalculationType" minOccurs="0"/>
+			<xsd:element name="NonResidentWithholdingTaxPayerRemittanceNumber" type="Length1to9TextType" minOccurs="0"/>
+			<xsd:element name="TrustReturnTaxSummary" type="T3ATHTaxSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

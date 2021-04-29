@@ -40,6 +40,14 @@
  */
 class PayrollDeduction_CA_BC extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
+			20200101 => array(
+					array('income' => 41725, 'rate' => 5.06, 'constant' => 0),
+					array('income' => 83451, 'rate' => 7.7, 'constant' => 1102),
+					array('income' => 95812, 'rate' => 10.5, 'constant' => 3438),
+					array('income' => 116344, 'rate' => 12.29, 'constant' => 5153),
+					array('income' => 157748, 'rate' => 14.7, 'constant' => 7957),
+					array('income' => 157748, 'rate' => 16.8, 'constant' => 11270),
+			),
 			20190101 => array(
 					array('income' => 40707, 'rate' => 5.06, 'constant' => 0),
 					array('income' => 81416, 'rate' => 7.7, 'constant' => 1075),
@@ -204,113 +212,119 @@ class PayrollDeduction_CA_BC extends PayrollDeduction_CA {
 		Provincial tax reduction
 	*/
 	var $provincial_tax_reduction_options = array(
-			20190101 => array( //2019
-							   'income1' => 20668,
-							   'income2' => 33702,
-							   'amount'  => 464,
-							   'rate'    => 0.0356,
+			20200101 => array(
+					'income1' => 21185,
+					'income2' => 34556,
+					'amount'  => 476,
+					'rate'    => 0.0356,
 			),
-			20180101 => array( //2018
-							   'income1' => 20144,
-							   'income2' => 32868.72,
-							   'amount'  => 453,
-							   'rate'    => 0.0356,
+			20190101 => array(
+					'income1' => 20668,
+					'income2' => 33702,
+					'amount'  => 464,
+					'rate'    => 0.0356,
 			),
-			20170101 => array( //2017
-							   'income1' => 19749,
-							   'income2' => 32220.91,
-							   'amount'  => 444,
-							   'rate'    => 0.0356,
+			20180101 => array(
+					'income1' => 20144,
+					'income2' => 32868.72,
+					'amount'  => 453,
+					'rate'    => 0.0356,
 			),
-			20160701 => array( //2016 (Jul 1)
-							   'income1' => 19629,
-							   'income2' => 31673.20,
-							   'amount'  => 436,
-							   'rate'    => 0.0362,
+			20170101 => array(
+					'income1' => 19749,
+					'income2' => 32220.91,
+					'amount'  => 444,
+					'rate'    => 0.0356,
 			),
-			20160101 => array( //2016
-							   'income1' => 19171,
-							   'income2' => 31628.14,
-							   'amount'  => 436,
-							   'rate'    => 0.035,
+			20160701 => array( //01-Jul-2016
+				   'income1' => 19629,
+				   'income2' => 31673.20,
+				   'amount'  => 436,
+				   'rate'    => 0.0362,
 			),
-			20150701 => array( //2015 (Jul 1)
-							   'income1' => 19673,
-							   'income2' => 31567.74,
-							   'amount'  => 452,
-							   'rate'    => 0.038,
+			20160101 => array(
+					'income1' => 19171,
+					'income2' => 31628.14,
+					'amount'  => 436,
+					'rate'    => 0.035,
 			),
-			20150101 => array( //2015
-							   'income1' => 18327,
-							   'income2' => 31202,
-							   'amount'  => 412,
-							   'rate'    => 0.032,
+			20150701 => array( //01-Jul-2015
+				   'income1' => 19673,
+				   'income2' => 31567.74,
+				   'amount'  => 452,
+				   'rate'    => 0.038,
 			),
-			20140101 => array( //2014
-							   'income1' => 18200,
-							   'income2' => 30981.25,
-							   'amount'  => 409,
-							   'rate'    => 0.032,
+			20150101 => array(
+					'income1' => 18327,
+					'income2' => 31202,
+					'amount'  => 412,
+					'rate'    => 0.032,
 			),
-			20130101 => array( //2013
-							   'income1' => 18181,
-							   'income2' => 30962.25,
-							   'amount'  => 409,
-							   'rate'    => 0.032,
+			20140101 => array(
+					'income1' => 18200,
+					'income2' => 30981.25,
+					'amount'  => 409,
+					'rate'    => 0.032,
 			),
-			20120101 => array( //2012
-							   'income1' => 17913,
-							   'income2' => 30506.75,
-							   'amount'  => 403,
-							   'rate'    => 0.032,
+			20130101 => array(
+					'income1' => 18181,
+					'income2' => 30962.25,
+					'amount'  => 409,
+					'rate'    => 0.032,
 			),
-			20110101 => array( //2011
-							   'income1' => 17493,
-							   'income2' => 29805.50,
-							   'amount'  => 394,
-							   'rate'    => 0.032,
+			20120101 => array(
+					'income1' => 17913,
+					'income2' => 30506.75,
+					'amount'  => 403,
+					'rate'    => 0.032,
 			),
-			20100101 => array( //2010
-							   'income1' => 17354,
-							   'income2' => 29541.50,
-							   'amount'  => 390,
-							   'rate'    => 0.032,
+			20110101 => array(
+					'income1' => 17493,
+					'income2' => 29805.50,
+					'amount'  => 394,
+					'rate'    => 0.032,
 			),
-			20090101 => array( //2009
-							   'income1' => 17285,
-							   'income2' => 29441.25,
-							   'amount'  => 389,
-							   'rate'    => 0.032,
+			20100101 => array(
+					'income1' => 17354,
+					'income2' => 29541.50,
+					'amount'  => 390,
+					'rate'    => 0.032,
 			),
-			20080101 => array( //2008
-							   'income1' => 16946,
-							   'income2' => 28852.25,
-							   'amount'  => 381,
-							   'rate'    => 0.032,
+			20090101 => array(
+					'income1' => 17285,
+					'income2' => 29441.25,
+					'amount'  => 389,
+					'rate'    => 0.032,
 			),
-			20070701 => array( //2007 (July)
-							   'income1' => 16646,
-							   'income2' => 28364.75,
-							   'amount'  => 375,
-							   'rate'    => 0.032,
+			20080101 => array(
+					'income1' => 16946,
+					'income2' => 28852.25,
+					'amount'  => 381,
+					'rate'    => 0.032,
 			),
-			20070101 => array( //2007 (Jan)
-							   'income1' => 16646,
-							   'income2' => 27062.67,
-							   'amount'  => 375,
-							   'rate'    => 0.032,
+			20070701 => array( //07-Jul-2007
+				   'income1' => 16646,
+				   'income2' => 28364.75,
+				   'amount'  => 375,
+				   'rate'    => 0.032,
 			),
-			20060101 => array( //2006
-							   'income1' => 16336,
-							   'income2' => 26558.22,
-							   'amount'  => 368,
-							   'rate'    => 0.032,
+			20070101 => array(
+					'income1' => 16646,
+					'income2' => 27062.67,
+					'amount'  => 375,
+					'rate'    => 0.032,
 			),
-			20050101 => array( //2005
-							   'income1' => 16000,
-							   'income2' => 26000,
-							   'amount'  => 360,
-							   'rate'    => 0.032,
+			20060101 => array(
+					'income1' => 16336,
+					'income2' => 26558.22,
+					'amount'  => 368,
+					'rate'    => 0.032,
+			),
+			20050101 => array(
+					'income1' => 16000,
+					'income2' => 26000,
+					'amount'  => 360,
+					'rate'    => 0.032,
 			),
 	);
 

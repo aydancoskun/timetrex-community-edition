@@ -214,9 +214,21 @@ EmployeeViewController = BaseViewController.extend( {
 				if ( $this_obj.edit_only_mode ) {
 					$('.edit-view-tab-bar').css('opacity', 1);
 				}
-
-
 			} );
+		}
+	},
+
+	setEditViewDataDone: function() {
+		this.showCurrentPasswordField();
+		this._super( 'setEditViewDataDone' );
+	},
+
+	showCurrentPasswordField: function() {
+		//Only show this field if they are editing the currently logged in user record.
+		if ( ( this.is_edit == true || this.edit_only_mode ) && LocalCacheData.loginUser && LocalCacheData.loginUser.id && this.current_edit_record && this.current_edit_record.id && LocalCacheData.loginUser.id == this.current_edit_record.id ) {
+			this.attachElement( 'current_password' );
+		} else {
+			this.detachElement( 'current_password' );
 		}
 	},
 
@@ -2272,13 +2284,10 @@ EmployeeViewController = BaseViewController.extend( {
 		this.edit_view_tabs[3].push( tab_login_column1 );
 		this.edit_view_tabs[3].push( tab_login_column2 );
 
-		//Only show this field if they are editing the currently logged in user record.
-		if ( LocalCacheData.loginUser && LocalCacheData.loginUser.id && LocalCacheData.loginUser.id == this.getEditSelectedRecordId() ) {
-			// Current Password
-			form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
-			form_item_input.TPasswordInput( { field: 'current_password', width: 200 } );
-			this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab_login_column1 );
-		}
+		// Current Password - This is shown/hidden in setCurrentPasswordField()
+		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
+		form_item_input.TPasswordInput( { field: 'current_password', width: 200 } );
+		this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab_login_column1, '', null, true );
 
 		//Login Enabled
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );

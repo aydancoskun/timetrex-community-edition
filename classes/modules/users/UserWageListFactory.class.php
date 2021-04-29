@@ -172,7 +172,8 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$this->rs = $this->getCache($id.$user_id);
+		$cache_id = $id.$user_id;
+		$this->rs = $this->getCache($cache_id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
 						'id' => TTUUID::castUUID($id),
@@ -190,7 +191,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 
 			$this->rs = $this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs, $id.$user_id);
+			$this->saveCache($this->rs, $cache_id);
 		}
 
 		return $this;

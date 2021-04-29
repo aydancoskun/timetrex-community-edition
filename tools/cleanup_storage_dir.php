@@ -63,6 +63,9 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 	//Top level storage dir.
 	$storage_dir = Environment::getStorageBasePath();
 
+	//Remove all directories first.
+	Misc::deleteEmptyChildDirectory( $storage_dir );
+
 	//
 	//Loop through all storage directories finding orphaned files.
 	//
@@ -77,7 +80,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 	$i = 0;
 	foreach ( $files as $file ) {
 		if ( $file->isFile() == TRUE ) {
-			$punch_id = str_replace( pathinfo( $file->getFileName(), PATHINFO_EXTENSION ), '', $file->getFilename() );
+			$punch_id = str_replace( '.'.pathinfo( $file->getFileName(), PATHINFO_EXTENSION ), '', $file->getFilename() );
 			$plf->getById( $punch_id );
 			if ( $plf->getRecordCount() == 0 OR ( $plf->getRecordCount() == 1 AND (bool)$plf->getCurrent()->getHasImage() == FALSE ) ) {
 				echo 'Path+File: ' . $file->getPathName() . ' File: ' . $file->getFilename() . ' Punch ID: ' . $punch_id . ' File mTime: '. TTDate::getDate('DATE+TIME', filectime( $file->getPathName() ) ) . "\n";
@@ -90,6 +93,9 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 					@unlink( $file->getPathName() );
 					$i++;
 				}
+			} else {
+				echo '  Punch still exists, leaving image alone. Punch ID: '. $punch_id ."\n";
+				Debug::Text('  Punch still exists, leaving image alone. Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 	}

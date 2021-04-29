@@ -98,7 +98,6 @@ class PayStubEntryAccountLinkListFactory extends PayStubEntryAccountLinkFactory 
 		}
 
 		$this->rs = $this->getCache($company_id);
-
 		if ( $this->rs === FALSE ) {
 			$ph = array(
 						'company_id' => TTUUID::castUUID($company_id),

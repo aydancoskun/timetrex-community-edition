@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	T3 General Schedules Data Element Types
+Contact: 	CRA
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+Revision History:
+Dec 2015	Initial creation.
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+	<xsd:include schemaLocation="t3general.xsd"/>
+
+	<!-- Schedule 1 -->
+	<!-- Schedule 1 - Types -->
+	<xsd:complexType name="CapitalPropertyDispositionType">
+		<xsd:sequence>
+			<xsd:element name="GrossDispositionAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NetDispositionAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PersonalUsePropertyDispositionType">
+		<xsd:sequence>
+			<xsd:element name="GrossDispositionAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="DispositionCapitalGainAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ListedPersonalPropertyDispositionType">
+		<xsd:sequence>
+			<xsd:element name="GrossDispositionAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NetDispositionAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+			<xsd:element name="DeemedOtherYearListedPersonalPropertyDispositionCapitalLossAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 1 - Disposition of capital property -->
+	<xsd:complexType name="T3GenSchedule1Type">
+		<xsd:sequence>
+			<!-- Qualified small busines corporation shares -->
+			<xsd:element name="QualifiedSmallBusinessCorporationShareDisposition" type="CapitalPropertyDispositionType" minOccurs="0"/>
+
+			<!-- Qualified farm or fishing property -->
+			<xsd:element name="QualifiedFarmFishingPropertyDisposition" type="CapitalPropertyDispositionType" minOccurs="0"/>
+
+			<!-- mutual funds units and other shares -->
+			<xsd:element name="UnitShareDisposition" type="CapitalPropertyDispositionType" minOccurs="0"/>
+
+			<!-- Bonds, debentures, promissory notes, and other similar properties -->
+			<xsd:element name="BondDebenturePromissoryNoteDisposition" type="CapitalPropertyDispositionType" minOccurs="0"/>
+
+			<!-- Real estate and depreciable prperty -->
+			<xsd:element name="RealEstatePropertyDisposition" type="CapitalPropertyDispositionType" minOccurs ="0"/>
+
+			<!-- Personal-use property -->
+			<xsd:element name="PersonalUsePropertyDisposition" type="PersonalUsePropertyDispositionType" minOccurs ="0"/>
+
+			<!-- Listed personal property (LPP) -->
+			<xsd:element name="ListedPersonalPropertyDisposition" type="ListedPersonalPropertyDispositionType" minOccurs="0"/>
+
+			<!-- Information slips - capital gains (or losses) -->
+			<xsd:element name="InformationSlipCapitalGainLossAmount" type="SignedLength1to13NumberType" minOccurs ="0"/>
+
+
+			<!-- Capital losses from a reduction in business investment loss  -->
+			<xsd:element name="BusinessInvestmentLossConvertedCapitalLossAmount" type="Length1to13NumberType" minOccurs="0"/>
+			
+			<!-- Reserves from line 4, column 3 of schedule 2  -->
+			<xsd:element name="TotalPreviousCurrentYearCapitalPropertyDispositionReserveDifferenceAmount" minOccurs="0">
+				<!-- Temporary type for e-NIL, to be changed when e-GEN is filed -->
+				<xsd:simpleType>
+					<xsd:restriction base="sdt:NumberType">
+						<xsd:pattern value="[0]"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+				 
+			<!-- Capital gains from gifts of other capital property -->
+			<xsd:element name="NonEligibleCapitalPropertyGiftCapitalGainAmount" type="Length1to13NumberType" minOccurs="0"/>
+
+			<!-- Total capital losses transferred under subsection 164(6) -->
+			<xsd:element name="FinalIndividualIncomeTaxReturnTransferredCapitalLossAmount" type="Length1to13NumberType" minOccurs="0"/>
+
+			<!-- Non-Qualified investments for TFSA, RRSP, RRIF, and RDSP trusts -->
+			<xsd:element name="NonQualifiedInvestmentDisposition" type="CapitalPropertyDispositionType" minOccurs ="0"/>
+
+			<!-- Total taxable capital gains or net capital losses -->
+			<xsd:element name="TotalTaxableCapitalGainNetCapitalLossAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>	
+
+
+	<!-- Schedule 8 -->
+	<!-- Schedule 8 Part A Types -->
+	<xsd:complexType name="TaxableCanadianCorporationDividendIncomeType">
+		<xsd:sequence>
+			<xsd:element name="ActualNonEligibleDividendAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="ActualEligibleDividendAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="InvestmentExpensesType">
+		<xsd:sequence>
+			<xsd:element name="LoanInterestAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="ManagementFeeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="CounselFeeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="OtherExpenseAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 8 Part A - Investment income and carrying charges -->
+	<xsd:complexType name="InvestmentIncomeAndCarryingChargesType">
+		<xsd:sequence>
+			<xsd:element name="TaxableCanadianCorporationDividendIncome" type="TaxableCanadianCorporationDividendIncomeType" minOccurs="0"/>
+			<xsd:element name="InvestmentExpense" type="InvestmentExpensesType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 8 Part B Gross-up amount of dividends retained or not designated by the trust -->
+	<xsd:complexType name="RetainedDividendGrossUpType">
+		<xsd:sequence>
+			<xsd:element name="NonResidentBeneficiaryAllocationEligibleDividendAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NonResidentBeneficiaryAllocationNonEligibleDividendAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 8 Investment Income, Carrying Charges, and Gross-up Amount of Dividends retained by the Trust -->
+	<xsd:complexType name="T3GenSchedule8Type">
+		<xsd:sequence>
+			<xsd:element name="InvestmentIncomeAndCarryingCharges" type="InvestmentIncomeAndCarryingChargesType" minOccurs="0"/>
+			<xsd:element name="RetainedDividendGrossUp" type="RetainedDividendGrossUpType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<!-- Schedule 9 -->
+	<!-- Schedule 9 Types -->
+	<!-- Temporary type for e-NIL, to be removed when e-GEN is filed -->
+	<xsd:complexType name="ZeroIncomeAllocationType">
+		<xsd:sequence>
+			<xsd:element name="ResidentBeneficiaryAmount" type="ZeroNumberType" minOccurs="0"/>
+			<xsd:element name="NonResidentBeneficiaryAmount" type="ZeroNumberType" minOccurs="0"/>
+			<xsd:element name="PreferredBeneficiaryElectionAmount" type="ZeroNumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="IncomeAllocationType">
+		<xsd:sequence>
+			<xsd:element name="ResidentBeneficiaryAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NonResidentBeneficiaryAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="PreferredBeneficiaryElectionAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="IncomeAllocationLessPreferredBeneficiaryType">
+		<xsd:sequence>
+			<xsd:element name="ResidentBeneficiaryAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NonResidentBeneficiaryAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="IncomeAllocationLessNonResidentType">
+		<xsd:sequence>
+			<xsd:element name="ResidentBeneficiaryAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="PreferredBeneficiaryElectionAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="OtherIncomeAllocationType">
+		<xsd:sequence>
+			<xsd:element name="ResidentBeneficiaryAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NonResidentBeneficiaryAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+			<xsd:element name="PreferredBeneficiaryElectionAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="SignedIncomeAllocationType">
+		<xsd:sequence>
+			<xsd:element name="ResidentBeneficiaryAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NonResidentBeneficiaryAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+			<xsd:element name="PreferredBeneficiaryElectionAmount" type="SignedLength1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="IncomeAllocationResidentType">
+		<xsd:sequence>
+			<xsd:element name="ResidentBeneficiaryAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 9 Part A Types -->
+	<xsd:complexType name="IncomeAllocationDesignationStatementType">
+		<xsd:sequence>
+			<xsd:element name="IncomeAllocationBeneficiaryCount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="ResidentBeneficiaryAllocationNonSlipIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NonTaxableBeneficiaryAllocationIncomeAmount" type="Length1to13NumberType" minOccurs ="0"/>
+			<xsd:element name="SecurityTransactionStatementAllocationTaxableCapitalGainAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="SlipIndividualAttributedAmountIndicator" type="YesNoCodeType" minOccurs="0"/>
+			<xsd:element name="IncomeEqualAllocationIndicator" type="YesNoCodeType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="IncomeAllocationDesignationType">
+		<xsd:sequence>
+			<xsd:element name="TaxableCapitalGain" type="OtherIncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="LumpSumPensionIncome" type="IncomeAllocationLessPreferredBeneficiaryType" minOccurs="0"/>
+			<xsd:element name="ActualNonEligibleDividend" type="IncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="ForeignBusinessIncome" type="OtherIncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="ForeignNonBusinessIncome" type="OtherIncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="OtherIncome" type="OtherIncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="ActualEligibleDividendAmount" type="IncomeAllocationType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 9 Part A - Total income allocations and designations to beneficiaries -->
+	<xsd:complexType name="TotalIncomeAllocationDesignationType">
+		<xsd:sequence>
+			<xsd:element name="IncomeAllocationDesignationStatement" type="IncomeAllocationDesignationStatementType" minOccurs="0"/>
+			<xsd:element name="IncomeAllocationDesignation" type="IncomeAllocationDesignationType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 9 Part B -->
+	<xsd:complexType name="OtherAmountDesignationSummaryType">
+		<xsd:sequence>
+			<xsd:element name="EligibleTaxableCapitalGain" type="ZeroIncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="QualifyingPensionIncome" type="IncomeAllocationResidentType" minOccurs="0"/>
+			<xsd:element name="TaxableNonEligibleDividend" type="IncomeAllocationLessNonResidentType" minOccurs ="0"/>
+			<xsd:element name="ForeignBusinessIncomeTaxPaid" type="IncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="ForeignNonBusinessIncomeTaxPaid" type="IncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="EligibleDeathBenefit" type="IncomeAllocationLessPreferredBeneficiaryType" minOccurs ="0"/>
+			<xsd:element name="InsuranceSegregatedFundNetCapitalLoss" type="IncomeAllocationLessPreferredBeneficiaryType" minOccurs="0"/>
+			<xsd:element name="PartXII2TaxCredit" type="IncomeAllocationResidentType" minOccurs="0"/>
+			<xsd:element name="NonEligibleDividendTaxCredit" type="IncomeAllocationLessNonResidentType" minOccurs ="0"/>
+			<xsd:element name="InvestmentCostExpenditure" type="SignedIncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="InvestmentTaxCredit" type="SignedIncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="CostBaseAdjustment" type="SignedIncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="OtherCredit" type="IncomeAllocationType" minOccurs="0"/>
+			<xsd:element name="YouthQualifyingAnnuityPensionIncome" type="IncomeAllocationLessPreferredBeneficiaryType" minOccurs="0"/>
+			<xsd:element name="TransferrableRetiringAllowance" type="IncomeAllocationLessPreferredBeneficiaryType" minOccurs="0"/>
+			<xsd:element name="EligibleCharitableDonation" type="IncomeAllocationLessPreferredBeneficiaryType" minOccurs="0"/>
+			<xsd:element name="TaxableEligibleDividend" type="IncomeAllocationLessNonResidentType" minOccurs="0"/>
+			<xsd:element name="EligibleDividendTaxCredit" type="IncomeAllocationLessNonResidentType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 9 Income Allocation and Designations to Beneficiaries -->
+	<xsd:complexType name="T3GenSchedule9Type">
+		<xsd:sequence>
+			<xsd:element name="TotalIncomeAllocationDesignation" type="TotalIncomeAllocationDesignationType" minOccurs="0"/>
+			<xsd:element name="OtherAmountDesignationSummary" type="OtherAmountDesignationSummaryType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<!-- Schedule 12 Types -->
+	<!-- Schedule 12 Part 1 C, D -->
+	<xsd:complexType name="PropertyInvestmentType">
+		<xsd:sequence>
+			<xsd:element name="CapitalCostAllowanceCarryingChargeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="PreDeductionAdjustmentNetIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- Schedule 12 Part 1 E -->
+	<xsd:complexType name="NaturalResourceInvestmentType">
+		<xsd:sequence>
+			<xsd:element name="NaturalResourceDeductionAllowanceCarryingChargeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="PreDeductionAdjustmentResourceProductionIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="NaturalResourcePropertyIncomeAmount" type="Length1to13NumberType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 12 Part 1 - Calculating net adjusted taxable income for minimum tax -->
+	<xsd:complexType name="MinimumTaxNetAdjustedTaxableIncomeType">
+		<xsd:sequence>
+			<xsd:element name="TrustRetainedNonTaxableCapitalGainAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="RentalPropertyInvestment" type="PropertyInvestmentType" minOccurs="0"/>
+			<xsd:element name="FilmPropertyInvestment" type="PropertyInvestmentType" minOccurs="0"/>
+			<xsd:element name="NaturalResourceInvestment" type="NaturalResourceInvestmentType" minOccurs="0"/>
+			<xsd:element name="TrustLimitedPartnershipTaxShelterLossAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TrustLimitedPartnershipNetCarryingChargeAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="FirstGroupPriorYearAdjustedNonCapitalLossCarryforwardAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="SecondGroupPriorYearAdjustedNonCapitalLossCarryforwardAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="PriorYearAdjustedNetCapitalLossCarryforwardAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="TaxableIncomeBasicExemptionAmount" type="Length1to13NumberType" minOccurs="0"/>
+			<xsd:element name="MinimumTaxNetAdjustedTaxableIncomeAmount">
+				<!-- Temporary type for e-NIL, to be changed when e-GEN is filed -->
+				<xsd:simpleType>
+					<xsd:restriction base="sdt:NumberType">
+						<xsd:pattern value="[0]"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 12 Part 7 - Calculating the total minimum tax carryover -->
+	<xsd:complexType name="MinimumTaxCarryoverType">
+		<xsd:sequence>
+			<xsd:element name="PriorYearMinimumTaxCarryoverAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="ExpiredPriorYearUnappliedMinimumTaxCarryoverAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="NextYearAvailableMinimumTaxCarryoverAmount" type="Decimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 12 - Minimum Tax -->
+	<xsd:complexType name="T3GenSchedule12Type">
+		<xsd:sequence>
+			<!-- Part 1 -->
+			<xsd:element name="TrustMinimumTaxNetAdjustedTaxableIncome" type="MinimumTaxNetAdjustedTaxableIncomeType" minOccurs="0"/>
+			<!-- Part 7 -->
+			<xsd:element name="TrustMinimumTaxCarryover" type="MinimumTaxCarryoverType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+</xsd:schema>

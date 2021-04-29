@@ -1253,7 +1253,7 @@ class T4SummaryReport extends Report {
 							'total_employees' => (int)$output_data['data']['metadata']['t4s']['total_employees'],
 							'subject_wages'   => $output_data['data']['metadata']['t4s']['l14'],
 							'taxable_wages'   => $output_data['data']['metadata']['t4s']['l14'],
-							'amount_withheld' => $output_data['data']['metadata']['t4s']['l22'],
+							'amount_withheld' => $output_data['data']['metadata']['t4s']['l80'], //Total Deductions
 							'amount_due'      => $output_data['data']['metadata']['t4s']['balance'],
 							'due_date'        => $prae_obj->getDueDate(),
 							'extra_data'      => $output_data['data']['metadata'],
@@ -1263,7 +1263,9 @@ class T4SummaryReport extends Report {
 
 							//Generate a consistent remote_id based on the exact time period, the remittance agency event, and batch ID.
 							//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
-							'remote_id' => TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $batch_id ) ),
+							//  This needs to take into account different start/end date periods, so we don't try to overwrite records from last year.
+							'remote_id' => TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $prae_obj->getStartDate() . $prae_obj->getEndDate() ) ),
+
 					),
 			);
 

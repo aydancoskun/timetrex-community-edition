@@ -818,7 +818,7 @@ class Import {
 				}
 			}
 
-			Misc::deleteEmptyDirectory( $dir, 0 ); //Recurse to $user_id parent level and remove empty directories.
+			Misc::deleteEmptyParentDirectory( $dir, 0 ); //Recurse to $user_id parent level and remove empty directories.
 		}
 
 		return TRUE;

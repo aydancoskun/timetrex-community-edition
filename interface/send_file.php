@@ -71,7 +71,7 @@ if ( $object_type != 'primary_company_logo' AND $object_type != 'copyright' AND 
 	require_once(Environment::getBasePath() .'includes/Interface.inc.php');
 
 	if ( $authentication->checkValidCSRFToken() == FALSE ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
-		echo TTi18n::getText( 'Invalid referrer, possible CSRF.' );
+		echo TTi18n::getText( 'Invalid CSRF token!' );
 		Debug::writeToLog();
 		exit;
 	}

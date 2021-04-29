@@ -1,4 +1,11 @@
 <?xml version="1.0"?>
+
+<!--
+Description	T5008 Return Complex and Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<!-- @@@@ Definition of T5008 ComplexTypes @@@@  2011/June/22  Version# 1.11 (version #.yy)-->
 	<xsd:complexType name="T5008SlipType">
@@ -64,6 +71,7 @@
 			<xsd:element name="tot_sttl_amt" type="signedInt15Type"/>
 			<xsd:element name="slp_cnt" type="int7Type"/>
 			<xsd:element name="rpt_tcd" type="otherDataType"/>
+			<xsd:element name="fileramendmentnote" type="char1309Type" minOccurs="0"/>
 		</xsd:all>
 	</xsd:complexType>
 </xsd:schema>

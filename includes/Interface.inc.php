@@ -34,37 +34,12 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-//CSP headers break many things at this stage, unless "unsafe" is used for almost everything.
-//Header('Content-Security-Policy: default-src *; script-src \'self\' *.google-analytics.com *.google.com');
-header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.google.com; img-src \'self\' *.timetrex.com *.google-analytics.com *.google.com data:');
+//
+//Primary purpose of this include now is to just setup the $current_user, $current_user_prefs and $current_company globals when accessing pages outside of the API, such as send_file.php and upload_file.php.
+//
 
-//Help prevent XSS or frame clickjacking.
-Header('X-XSS-Protection: 1; mode=block');
-Header('X-Frame-Options: SAMEORIGIN');
+forceNoCacheHeaders(); //Send headers to disable caching.
 
-//Reduce MIME-TYPE security risks.
-header('X-Content-Type-Options: nosniff');
-
-if ( isset($config_vars['other']['force_ssl']) AND ( $config_vars['other']['force_ssl'] == TRUE ) AND Misc::isSSL(TRUE) == TRUE ) {
-	header('Strict-Transport-Security: max-age=31536000; includeSubdomains');
-}
-
-if ( !isset($disable_cache_control) ) {
-	//Turn caching off.
-	header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-	header('Last-Modified: ' . gmdate("D, d M Y H:i:s") . ' GMT');
-	//Can Break IE with downloading PDFs over SSL.
-	// IE gets: "file could not be written to cache"
-	// It works on some IE installs though.
-	// Comment out No-Cache and Pragma: No-Cache to fix issue.
-	header('Cache-Control: no-cache'); //Adding FALSE here breaks IE.
-	header('Cache-Control: post-check=0,pre-check=0');
-	header('Cache-Control: max-age=0');
-	header('Pragma: public');
-}
-
-//Do not overwrite a previously sent content-type header, this breaks WAP.
-header('Content-Type: text/html; charset=UTF-8');
 
 //Skip this step if disable_database_connection is enabled or the user is going through the installer still
 $clf = new CompanyListFactory();
@@ -110,17 +85,11 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 			$current_company = $clf->getByID( $current_user->getCompany() )->getCurrent();
 		}
 
-		$db_time_zone_error = FALSE;
 		$current_user_prefs = $current_user->getUserPreferenceObject();
 
 		//If user doesnt have any preferences set, we need to bootstrap the preference object.
 		if ( $current_user_prefs->getUser() == '' ) {
 			$current_user_prefs->setUser( $current_user->getId() );
-		}
-
-		if ( $current_user_prefs->setDateTimePreferences() == FALSE ) {
-			//Setting timezone failed, alert user to this fact.
-			$db_time_zone_error = TRUE;
 		}
 
 		/*
@@ -142,6 +111,7 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 		} else {
 			Debug::text('User Preference Language matches cookie!', __FILE__, __LINE__, __METHOD__, 10);
 		}
+
 		if ( isset($_GET['language']) AND $_GET['language'] != '' ) {
 			TTi18n::setLocale( $_GET['language'] ); //Sets master locale
 		} else {
@@ -150,24 +120,7 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 			TTi18n::setLocale(); //Sets master locale
 		}
 
-//		//Handle station functionality
-//		if ( isset( $_COOKIE['StationID'] ) ) {
-//			Debug::text('Station ID Cookie found! '. $_COOKIE['StationID'], __FILE__, __LINE__, __METHOD__, 10);
-//
-//			$slf = new StationListFactory();
-//			$slf->getByStationIdandCompanyId( $_COOKIE['StationID'], $current_company->getId() );
-//			$current_station = $slf->getCurrent();
-//			unset($slf);
-//			if ( $current_station->isNew() ) {
-//				Debug::text('Station ID is NOT IN DB!! '. $_COOKIE['StationID'], __FILE__, __LINE__, __METHOD__, 10);
-//			}
-//		} else {
-//			Debug::text('No Station cookie defined... User ID: '. $current_user->getId(), __FILE__, __LINE__, __METHOD__, 10);
-//			$current_station = NULL; //No station cookie defined, make sure we at least initialize the variable.
-//		}
-		//Debug::Arr($current_station, 'Current Station Object: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::text('Current Company: '. $current_company->getName(), __FILE__, __LINE__, __METHOD__, 10);
-
 		$profiler->stopTimer( 'Interface.inc - Post-Authentication' );
 	} else {
 		Debug::text('User NOT Authenticated!', __FILE__, __LINE__, __METHOD__, 10);

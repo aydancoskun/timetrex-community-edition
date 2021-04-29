@@ -1,6 +1,17 @@
 <?xml version="1.0"?>
+
+<!--
+Description	Layout topologie - Common Record Layout
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+Revision History:
+Jan 2016	Add T3 special returns.
+Jan 2017	Add T3 general return.
+
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<!-- @@@@@@ Include Related Schemas @@@@@@  2011/June/22  Version# 1.11 (version #.yy)-->
+	<!-- @@@@@@ Include Related Schemas @@@@@@  2015/Septemner/29  Version# 1.11 (version #.yy)-->
 	<xsd:include schemaLocation="simple.xsd"/>
 	<xsd:include schemaLocation="complex.xsd"/>
 	<xsd:include schemaLocation="t4.xsd"/>
@@ -25,6 +36,19 @@
 	<xsd:include schemaLocation="tfsa-celi.xsd"/>
 	<xsd:include schemaLocation="prpp-rpac.xsd"/>
 	<xsd:include schemaLocation="rrsp-rrif-nqi.xsd"/>
+	<xsd:include schemaLocation="partxviii.xsd"/>
+	<xsd:include schemaLocation="t3d.xsd"/>
+	<xsd:include schemaLocation="t3p.xsd"/>
+	<xsd:include schemaLocation="t3s.xsd"/>
+	<xsd:include schemaLocation="t3ri.xsd"/>
+	<xsd:include schemaLocation="t3ath-ind.xsd"/>
+	<xsd:include schemaLocation="t3m.xsd"/>
+	<xsd:include schemaLocation="t3gr.xsd"/>
+	<xsd:include schemaLocation="t3prp.xsd"/>
+	<xsd:include schemaLocation="t1061.xsd"/>
+	<xsd:include schemaLocation="t2000.xsd"/>
+	<xsd:include schemaLocation="t3general.xsd"/>
+	<xsd:include schemaLocation="partxix.xsd"/>
 	<xsd:include schemaLocation="frms.xsd"/>
 	<!-- @@@@    Common Record Layout     @@@@ -->
 	<xsd:element name="Submission" type="ReturnType"/>

@@ -1014,7 +1014,7 @@ class fileupload {
 				$error_message[2] = "Maximum file size exceeded. File may be no larger than " . $this->max_filesize/1000 . " KB (" . $this->max_filesize . " bytes).";
 				$error_message[3] = "Maximum image size exceeded. Image may be no more than " . $this->max_image_width . " x " . $this->max_image_height . " pixels.";
 				$error_message[4] = "Only " . str_replace(",", " or ", $this->acceptable_mime_types) . " files may be uploaded.";
-				$error_message[5] = "File '" . $this->destination_dir . $this->file['name'] . "' already exists.";
+				$error_message[5] = "File '" . $this->destination_dir . ( isset($this->file['name']) ? $this->file['name'] : NULL ) . "' already exists.";
 				$error_message[6] = "Permission denied. Unable to copy file to '" . $this->destination_dir . "'";
 				$error_message[7] = "Filenames ending with " . str_replace(",", " or ", $this->reject_extensions) . " may not be uploaded";
 				$error_message[8] = "Setup error. Form must contain: method=\"POST\" enctype=\"multipart/form-data\"";

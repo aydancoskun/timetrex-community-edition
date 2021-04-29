@@ -404,9 +404,15 @@ class HolidayFactory extends Factory {
 	 * @return bool
 	 */
 	function postSave() {
-		//ReCalculate Recurring Schedule records based on this holiday, assuming its in the future.
-		if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) >= TTDate::getMiddleDayEpoch( time() ) OR TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) >= TTDate::getMiddleDayEpoch( time() ) ) {
-			Debug::text('Holiday is today or in the future, try to recalculate recurring schedules on this date: '. TTDate::getDate('DATE', $this->getDateStamp() ) .' Old Date: '. TTDate::getDate('DATE', $this->getOldDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+		//ReCalculate Recurring Schedule records based on this holiday, assuming its not older than a week.
+		//   Since recurring schedules still exist for up to a week in the past typically, we still want to recalculate them if the holiday has already past,
+		//   otherwise the schedule won't be updated and when the user tries to manually delete the scheduled absence shift, it will appear like its not being deleted because the recurring schedule will still show it.
+		$cutoff_date = TTDate::incrementDate( TTDate::getMiddleDayEpoch( time() ), -1, 'week' );
+		Debug::text('Cutoff Date: '. TTDate::getDate('DATE', $cutoff_date ), __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) >= TTDate::getMiddleDayEpoch( $cutoff_date )
+				OR ( $this->getOldDateStamp() != '' AND TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) >= TTDate::getMiddleDayEpoch( $cutoff_date ) ) ) {
+			Debug::text('Holiday is less than a week old, or in the future, try to recalculate recurring schedules on this date: '. TTDate::getDate('DATE', $this->getDateStamp() ) .' Old Date: '. TTDate::getDate('DATE', $this->getOldDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
 			$date_ranges = array();
 			if ( $this->getOldDateStamp() != '' AND TTDate::getMiddleDayEpoch( $this->getDateStamp() ) != TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) ) {
@@ -448,7 +454,7 @@ class HolidayFactory extends Factory {
 				}
 			}
 		} else {
-			Debug::text('Holiday is not in the future...', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Holiday is older than a week or not in the future...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return TRUE;

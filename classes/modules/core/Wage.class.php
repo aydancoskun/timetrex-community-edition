@@ -209,9 +209,13 @@ class Wage {
 	 * @return string
 	 */
 	function getMaximumPayPeriodWage( $user_wage_obj ) {
-		Debug::text('Absolute Maximum Pay Period NO Advance: User Wage ID: '. $user_wage_obj->getId() .' Annual Wage: '. $user_wage_obj->getAnnualWage() .' Annual Pay Periods: '. $this->getPayPeriodScheduleObject()->getAnnualPayPeriods(), __FILE__, __LINE__, __METHOD__, 10);
-		$maximum_pay_period_wage = bcdiv( $user_wage_obj->getAnnualWage(), $this->getPayPeriodScheduleObject()->getAnnualPayPeriods() );
-		Debug::text('Absolute Maximum Pay Period Wage: '. $maximum_pay_period_wage, __FILE__, __LINE__, __METHOD__, 10);
+		if ( is_object( $user_wage_obj ) AND is_object( $this->getPayPeriodScheduleObject() ) AND $this->getPayPeriodScheduleObject()->getAnnualPayPeriods() > 0 ) {
+			$maximum_pay_period_wage = bcdiv( $user_wage_obj->getAnnualWage(), $this->getPayPeriodScheduleObject()->getAnnualPayPeriods() );
+			Debug::text( 'Absolute Maximum Pay Period (NO Advance): Wage: '. $maximum_pay_period_wage .' User Wage ID: ' . $user_wage_obj->getId() . ' Annual Wage: ' . $user_wage_obj->getAnnualWage() . ' Annual Pay Periods: ' . $this->getPayPeriodScheduleObject()->getAnnualPayPeriods(), __FILE__, __LINE__, __METHOD__, 10 );
+		} else {
+			Debug::text( 'WARNING: Pay Period Schedule does not exist, or annual pay periods is 0...', __FILE__, __LINE__, __METHOD__, 10 );
+			$maximum_pay_period_wage = 0;
+		}
 
 		return $maximum_pay_period_wage;
 	}
@@ -237,7 +241,6 @@ class Wage {
 			//$pos_sum = $advance_pos_sum + ($full_pos_sum / 2);
 			$pos_sum = bcadd( $advance_pos_sum, bcdiv( $full_pos_sum, 2 ) );
 		} else {
-			//$pay_period_end_date =
 			$pos_sum = $psalf->getAmountSumByUserIdAndTypeIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), 10, TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
 		}
 		//$neg_sum = $psalf->getAmountSumByUserIdAndTypeIdAndTaxExemptAndAuthorizedAndStartDateAndEndDate( $this->getUser(), 20, FALSE, TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() )*-1;

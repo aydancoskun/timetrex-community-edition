@@ -1989,6 +1989,10 @@ class TimesheetDetailReport extends Report {
 	 * @return array|bool
 	 */
 	function timesheetHandleDayGaps( $start_date, $end_date, $format, $columns, $column_widths, $user_data, $data, $prev_data ) {
+		if ( $start_date == '' OR $end_date == '' ) {
+			return FALSE;
+		}
+
 		//Debug::Text('FOUND GAP IN DAYS!', __FILE__, __LINE__, __METHOD__, 10);
 		$blank_row_data = FALSE;
 
@@ -2005,7 +2009,7 @@ class TimesheetDetailReport extends Report {
 			//Need to handle pay periods switching in the middle of a string of blank rows.
 			$blank_row_time_stamp = TTDate::getMiddleDayEpoch($date);
 			//Debug::Text('Blank row timestamp: '. TTDate::getDate('DATE+TIME', $blank_row_time_stamp ) .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $prev_data['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
-			if ( $blank_row_time_stamp >= $prev_data['pay_period_end_date'] ) {
+			if ( !isset($prev_data['pay_period_end_date']) OR $blank_row_time_stamp >= $prev_data['pay_period_end_date'] ) {
 				//Debug::Text('aBlank row timestamp: '. TTDate::getDate('DATE+TIME', $blank_row_time_stamp ) .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $prev_data['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 				$tmp_data = $data;
 			} else {

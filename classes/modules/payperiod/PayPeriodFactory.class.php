@@ -1410,6 +1410,10 @@ class PayPeriodFactory extends Factory {
 	function preSave() {
 		$this->StartTransaction();
 
+		if ( $this->isNew() == TRUE ) {
+			$this->is_new = TRUE;
+		}
+
 		if ( $this->getStatus() == FALSE ) {
 			$this->setStatus( 10 ) ;
 		}
@@ -1516,18 +1520,19 @@ class PayPeriodFactory extends Factory {
 			//  This can help avoid issues with users changing pay period dates and not importing the data manually.
 			//  FIXME: It would be nice to only do this if the start OR end date change, but we can't determine that for certain right now.
 			//  **This causes UNIT TESTs to fail due to deadlock, so disable this functionality during those tests.
+			//  Another case is a manual pay period schedule where multiple pay periods exist, and the user adding a new pay period when data already exists in that pay period.
+			//    In this case we should automatically import data whenever the pay period is new.
 			if ( $this->getEnableImportData() == TRUE AND $this->getStatus() == 10 ) { //Only consider open pay periods.
 				$ppslf = TTnew('PayPeriodScheduleListFactory'); /** @var PayPeriodScheduleListFactory $ppslf */
 				$ppslf->getByCompanyId( $this->getCompany() );
-				if ( $ppslf->getRecordCount() == 1 ) {
-					Debug::text('Only one PP schedule, importing data...', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $ppslf->getRecordCount() == 1 OR ( isset($this->is_new) AND $this->is_new == TRUE ) ) {
+					Debug::text('Only one PP schedule, or is a new record... Importing data... Record Count: '. $ppslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 					$this->importData( FALSE, $this->getID() );
 				}
 			}
 
 			if ( $this->getEnableImportOrphanedData() == TRUE ) {
 				$this->importOrphanedData();
-				//$this->importData();
 			}
 		}
 

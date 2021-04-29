@@ -445,68 +445,71 @@ class ROEReport extends Report {
 		$rlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' ROE Total Rows: '. $rlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $rlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-		foreach( $rlf as $key => $r_obj ) {
-			$this->tmp_data['roe'][$r_obj->getUser()] = (array)$r_obj->getObjectAsArray(); //Don't pass $this->getColumnDataConfig() here as no columns are sent from Flex so it breaks the report.
-			if ( $r_obj->isPayPeriodWithNoEarnings() == TRUE ) {
-				$this->tmp_data['roe'][$r_obj->getUser()]['pay_period_earnings'] = $r_obj->combinePostTerminationPayPeriods( $r_obj->getInsurableEarningsByPayPeriod( '15c' ) );
-			}
-			//Box 17A, Vacation pay in last pay period
-			$vacation_pay = $r_obj->getLastPayPeriodVacationEarnings();
-			if ( $vacation_pay > 0 ) {
-				$this->tmp_data['roe'][$r_obj->getUser()]['vacation_pay'] = $vacation_pay;
-			}
-
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-		}
-		//Debug::Arr($this->tmp_data['roe'], 'ROE Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		//Filter the below user list based on the users that actually have ROEs above.
-		$filter_data['id'] = array_keys($this->tmp_data['roe']);
-
-		//Get user data for joining.
-		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-		foreach ( $ulf as $key => $u_obj ) {
-			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray(); //Don't pass $this->getColumnDataConfig() here as no columns are sent from Flex so it breaks the report.
-			$this->tmp_data['user'][$u_obj->getId()]['user_id'] = $u_obj->getId();
-			$this->tmp_data['user'][$u_obj->getId()]['legal_entity_id'] = $u_obj->getLegalEntity();
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-		}
-		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-
-		unset($filter_data['id'], $filter_data['roe_id']); //Remove this filter so we don't cause problems with below queries.
-
-		//Get legal entity data for joining.
-		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
-		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		//Debug::Text( ' User Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
-		if ( $lelf->getRecordCount() > 0 ) {
-			foreach ( $lelf as $key => $le_obj ) {
-				if ( $format == 'html' OR $format == 'pdf' ) {
-					$this->tmp_data['legal_entity'][$le_obj->getId()] = Misc::addKeyPrefix( 'legal_entity_', (array)$le_obj->getObjectAsArray( Misc::removeKeyPrefix( 'legal_entity_', $this->getColumnDataConfig() ) ) );
-					$this->tmp_data['legal_entity'][$le_obj->getId()]['legal_entity_id'] = $le_obj->getId();
-				} else {
-					$this->form_data['legal_entity'][$le_obj->getId()] = $le_obj;
+		if ( $rlf->getRecordCount() > 0 ) {
+			foreach ( $rlf as $key => $r_obj ) {
+				$this->tmp_data['roe'][ $r_obj->getUser() ] = (array)$r_obj->getObjectAsArray(); //Don't pass $this->getColumnDataConfig() here as no columns are sent from Flex so it breaks the report.
+				if ( $r_obj->isPayPeriodWithNoEarnings() == TRUE ) {
+					$this->tmp_data['roe'][ $r_obj->getUser() ]['pay_period_earnings'] = $r_obj->combinePostTerminationPayPeriods( $r_obj->getInsurableEarningsByPayPeriod( '15c' ) );
 				}
+				//Box 17A, Vacation pay in last pay period
+				$vacation_pay = $r_obj->getLastPayPeriodVacationEarnings();
+				if ( $vacation_pay > 0 ) {
+					$this->tmp_data['roe'][ $r_obj->getUser() ]['vacation_pay'] = $vacation_pay;
+				}
+
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
-		}
+			//Debug::Arr($this->tmp_data['roe'], 'ROE Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->tmp_data['remittance_agency'] = array();
+			//Filter the below user list based on the users that actually have ROEs above.
+			$filter_data['id'] = array_keys($this->tmp_data['roe']);
 
-		$filter_data['agency_id'] = array('10:CA:00:00:0010',  '10:CA:00:00:0020'); //CA Service Canada (ROE)
-		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
-		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		//Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
-		if ( $ralf->getRecordCount() > 0 ) {
-			foreach ( $ralf as $key => $ra_obj ) {
-				$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$ra_obj->parseAgencyID( NULL, 'id')] = $ra_obj;
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			//Get user data for joining.
+			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+			$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+			Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+			if ( $ulf->getRecordCount() > 0 ) {
+				foreach ( $ulf as $key => $u_obj ) {
+					$this->tmp_data['user'][ $u_obj->getId() ] = (array)$u_obj->getObjectAsArray(); //Don't pass $this->getColumnDataConfig() here as no columns are sent from Flex so it breaks the report.
+					$this->tmp_data['user'][ $u_obj->getId() ]['user_id'] = $u_obj->getId();
+					$this->tmp_data['user'][ $u_obj->getId() ]['legal_entity_id'] = $u_obj->getLegalEntity();
+					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				}
+				//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			unset($filter_data['id'], $filter_data['roe_id']); //Remove this filter so we don't cause problems with below queries.
+
+			//Get legal entity data for joining.
+			$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
+			$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+			//Debug::Text( ' User Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
+			if ( $lelf->getRecordCount() > 0 ) {
+				foreach ( $lelf as $key => $le_obj ) {
+					if ( $format == 'html' OR $format == 'pdf' ) {
+						$this->tmp_data['legal_entity'][$le_obj->getId()] = Misc::addKeyPrefix( 'legal_entity_', (array)$le_obj->getObjectAsArray( Misc::removeKeyPrefix( 'legal_entity_', $this->getColumnDataConfig() ) ) );
+						$this->tmp_data['legal_entity'][$le_obj->getId()]['legal_entity_id'] = $le_obj->getId();
+					} else {
+						$this->form_data['legal_entity'][$le_obj->getId()] = $le_obj;
+					}
+					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				}
+			}
+
+			$this->tmp_data['remittance_agency'] = array();
+
+			$filter_data['agency_id'] = array('10:CA:00:00:0010',  '10:CA:00:00:0020'); //CA Service Canada (ROE)
+			$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
+			$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+			//Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
+			if ( $ralf->getRecordCount() > 0 ) {
+				foreach ( $ralf as $key => $ra_obj ) {
+					$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$ra_obj->parseAgencyID( NULL, 'id')] = $ra_obj;
+					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				}
 			}
 		}
 
@@ -819,16 +822,18 @@ class ROEReport extends Report {
 				$this->clearFormObject();
 				unset( $file_output );
 			}
+
+			$zip_filename = explode( '.', $file_name );
+			if ( isset( $zip_filename[ ( count( $zip_filename ) - 1 ) ] ) ) {
+				$zip_filename = str_replace( '.', '', str_replace( $zip_filename[ ( count( $zip_filename ) - 1 ) ], '', $file_name ) ) . '.zip';
+			} else {
+				$zip_filename = str_replace( '.', '', $file_name ) . '.zip';
+			}
+
+			return Misc::zip( $file_arr, $zip_filename, TRUE );
 		}
 
-		$zip_filename = explode( '.', $file_name );
-		if ( isset( $zip_filename[ ( count( $zip_filename ) - 1 ) ] ) ) {
-			$zip_filename = str_replace( '.', '', str_replace( $zip_filename[ ( count( $zip_filename ) - 1 ) ], '', $file_name ) ) . '.zip';
-		} else {
-			$zip_filename = str_replace( '.', '', $file_name ) . '.zip';
-		}
-
-		return Misc::zip( $file_arr, $zip_filename, TRUE );
+		return FALSE;
 	}
 
 	/**

@@ -719,6 +719,80 @@ class CAPayrollDeductionTest2019 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '128.67' );
 	}
 
+	function testCA_2019a_MAXEI_MAXCPPa2() {
+		Debug::text('CA - MAXEI/MAXCPP - Beginning of 01-Jan-2019: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('CA', 'AB');
+		$pd_obj->setDate(strtotime('04-Nov-2019'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+
+		$pd_obj->setFederalTotalClaimAmount( 12069 );
+		$pd_obj->setProvincialTotalClaimAmount( 19369 );
+		$pd_obj->setWCBRate( 0.18 );
+
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setYearToDateCPPContribution( 2511.82 );
+		$pd_obj->setYearToDateEIContribution( 845.92 ); //Test with this pay stub reaching the maximum limit.
+
+		$pd_obj->setEmployeeCPPForPayPeriod( 126.35 );
+		$pd_obj->setEmployeeEIForPayPeriod( 14.30 );
+
+		$pd_obj->setGrossPayPeriodIncome( 2612.12 );
+
+		//var_dump($pd_obj->getArray());
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2612.12' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '126.35' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '126.35' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '14.30' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '20.02' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '337.21' ); //Should match the same federal amount in the below function.
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '172.83' );
+	}
+
+	function testCA_2019a_MAXEI_MAXCPPa3() {
+		Debug::text('CA - MAXEI/MAXCPP - Beginning of 01-Jan-2019: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('CA', 'AB');
+		$pd_obj->setDate(strtotime('04-Nov-2019'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+
+		$pd_obj->setFederalTotalClaimAmount( 12069 );
+		$pd_obj->setProvincialTotalClaimAmount( 19369 );
+		$pd_obj->setWCBRate( 0.18 );
+
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setYearToDateCPPContribution( $pd_obj->getCPPEmployeeMaximumContribution() );
+		$pd_obj->setYearToDateEIContribution( $pd_obj->getEIEmployeeMaximumContribution() ); //Test with this pay stub past the maximum limit.
+
+//		$pd_obj->setEmployeeCPPForPayPeriod( 126.35 );
+//		$pd_obj->setEmployeeEIForPayPeriod( 14.30 );
+
+		$pd_obj->setGrossPayPeriodIncome( 2612.12 );
+
+		//var_dump($pd_obj->getArray());
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2612.12' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '0.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '0.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '0.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '0.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '337.21' ); //Should match the same federal amount in the above function.
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '172.83' );
+	}
+
 	function testCA_2019a_MAXEI_MAXCPPb() {
 		Debug::text('CA - MAXEI/MAXCPP - Beginning of 01-Jan-2019: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -924,13 +998,8 @@ class CAPayrollDeductionTest2019 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '16.45' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '46.42' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '64.99' );
-
-		//Below should be: 389.13, however because we call setEmployeeCPPForPayPeriod( 16.45 ) with a specific amount (lower than what it normally would be because we are approaching the maximum CPP limt),
-		// that amount has to be used which causes the Fed/Prov. tax to be increased due to getEmployeeCPPForPayPeriod() being lower than expected.
-		// In the normal formula it never takes the maximum CPP limit into account when calculating the per pay period CPP amount. But we have to do that currently to handle things like RRSP contributions that are calculated on tax vs. CPP different.
-		// At least until we have a way of passing in annual gross income separate from F=RRSP amount.
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '402.52' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '155.99' ); //Should be: 151.48
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '389.13' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '151.48' );
 	}
 
 	function testCA_2019a_MAXEI_MAXCPPg() {

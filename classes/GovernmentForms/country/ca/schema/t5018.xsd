@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Description	T5018 Return Complex and Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<!-- @@@@ Definition of T5018 ComplexTypes @@@@  2011/June/22  Version# 1.11 (version #.yy)-->
 	<xsd:complexType name="T5018SlipType">
@@ -25,6 +32,7 @@
 			<xsd:element name="slp_cnt" type="int7Type"/>
 			<xsd:element name="tot_sbctrcr_amt" type="decimal14Type"/>
 			<xsd:element name="rpt_tcd" type="otherDataType"/>
+			<xsd:element name="fileramendmentnote" type="char1309Type" minOccurs="0"/>
 		</xsd:all>
 	</xsd:complexType>
 </xsd:schema>

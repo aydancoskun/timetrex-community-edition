@@ -556,6 +556,9 @@ class PermissionControlFactory extends Factory {
 	}
 
 	function postSave() {
+		$this->removeCache( $this->getID() );
+		$this->removeCache( $this->getCompany().$this->getID() ); //Used in PermissionControlListFactory::getByIdAndCompanyId()
+
 		$pf = TTnew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 
 		$clear_cache_user_ids = array_merge( (array)$this->getUser(), (array)$this->tmp_previous_user_ids);

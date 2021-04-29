@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	T3D Return Complex and Element Types
+Contact: 	CRA
+Last updated 	Oct. 2018
+Version#:	1.18 (version #.yy)
+Revision History:
+May 2015	Initial creation.
+Oct 2016	Disallow negative amount for some financial fields
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" schemaLocation="standarddatatypes.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" schemaLocation="cracommonstructures.xsd"/>
+	<xsd:include schemaLocation="lemmcommontypes.xsd"/>
+	<xsd:include schemaLocation="t3specialtypes.xsd"/>
+
+
+	<!-- Schedual 1 Area A - Non-qualifed investments acquired in the tax year -->
+	<xsd:complexType name="NonQualifiedInvestmentType">
+		<xsd:sequence>
+			<xsd:element name="Description" type="Length1to60TextType" minOccurs ="0"/>
+			<xsd:element name="AcquisitionDate" type="YYYYMMDDDateType" minOccurs ="0"/>
+			<xsd:element name="AcquisitionFairMarketValueAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="Schedule1AreaAType">
+		<xsd:sequence>
+			<xsd:element name="Investment" type="NonQualifiedInvestmentType" maxOccurs ="2"/>
+			<xsd:element name="TotalInvestmentTaxPayableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 1 Area B - Trust property used as security for a loan in the tax year -->
+	<xsd:complexType name="SecurityLoanTrustPropertyType">
+		<xsd:sequence>
+			<xsd:element name="Description" type="Length1to60TextType" minOccurs ="0"/>
+			<xsd:element name="SecurityLoanFirstDate" type="YYYYMMDDDateType" minOccurs ="0"/>
+			<xsd:element name="SecurityLoanFirstDateFairMarketValueAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="Schedule1AreaBType">
+		<xsd:sequence>
+			<xsd:element name="Property" type="SecurityLoanTrustPropertyType" maxOccurs ="2"/>
+			<xsd:element name="TotalPropertyTaxPayableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 1 Area C - Purchase or sale for inadequate consideration -->
+	<xsd:complexType name="DisposedTrustPropertyType">
+		<xsd:sequence>
+			<xsd:element name="Description" type="Length1to60TextType" minOccurs ="0"/>
+			<xsd:element name="DispositionDate" type="YYYYMMDDDateType" minOccurs ="0"/>
+			<xsd:element name="DispositionDateFairMarketValueAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="DispositionProceedAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="DispositionTaxableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="Schedule1AreaCSection1Type">
+		<xsd:sequence>
+			<xsd:element name="Property" type="DisposedTrustPropertyType" maxOccurs ="2"/>
+			<xsd:element name="TotalPropertyDispositionTaxableAmount" type="SignedDecimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<xsd:complexType name="AcquiredTrustPropertyType">
+		<xsd:sequence>
+			<xsd:element name="Description" type="Length1to60TextType" minOccurs ="0"/>
+			<xsd:element name="AcquisitionDate" type="YYYYMMDDDateType" minOccurs ="0"/>
+			<xsd:element name="AcquisitionAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="AcquisitionDateFairMarketValueAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="AcquisitionTaxableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="Schedule1AreaCSection2Type">
+		<xsd:sequence>
+			<xsd:element name="Property" type="AcquiredTrustPropertyType" maxOccurs ="2"/>
+			<xsd:element name="TotalPropertyAcquisitionTaxableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="Schedule1AreaCType">
+		<xsd:sequence>
+			<xsd:element name="DispositionBelowFairMarketValue" type="Schedule1AreaCSection1Type" minOccurs ="0"/>
+			<xsd:element name="AcquisitionAboveFairMarketValue" type="Schedule1AreaCSection2Type" minOccurs ="0"/>
+			<xsd:element name="TotalTaxableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="TotalTaxPayableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="Schedule1Type">
+		<xsd:sequence>
+			<xsd:element name="TrustNonQualifiedAcquisition" type="Schedule1AreaAType" minOccurs ="0"/>
+			<xsd:element name="SecurityLoanTrust" type="Schedule1AreaBType" minOccurs ="0"/>
+			<xsd:element name="TrustPropertyInadequateConsiderationDispostionAcquisition" type="Schedule1AreaCType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<!-- Schedule 2 - Tax under subsection 204.1(3) on excess amount -->
+
+	<!-- Schedule 2 Area A, B -->
+	<xsd:complexType name="MonthlyBeneficiaryContributionType">
+		<xsd:sequence>
+			<xsd:element ref="MonthNumber" minOccurs ="0"/>
+			<xsd:element name="PreviousMonthContributionBalanceAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="CurrentMonthContributionAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="YearToDateContributionAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="CurrentMonthContributionReturnedAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="CurrentMonthContributionBalanceAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="CurrentMonthGiftAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="BeneficiaryExcessType">
+		<xsd:sequence>
+			<xsd:element name="MonthlySummary" type="MonthlyBeneficiaryContributionType" maxOccurs ="12"/>
+			<xsd:element name="TotalBeneficiaryContributionTaxableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="TotalBeneficiaryGiftTaxableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 4 -->
+	<xsd:complexType name="MonthlyNonQualifiedPropertyType">
+		<xsd:sequence>
+			<xsd:element ref="MonthNumber" minOccurs ="0"/>
+			<xsd:element name="AcquisitionFairMarketValueAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="AcquisitionFairMarketValueTaxableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="TaxableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- Schedule 5 -->
+	<xsd:complexType name="NonQualifiedTrustInvestmentDispositionType">
+		<xsd:sequence>
+			<xsd:element name="Description" type="Length1to60TextType" minOccurs ="0"/>
+			<xsd:element name="AcquisitionDate" type="YYYYMMDDDateType" minOccurs ="0"/>
+			<xsd:element name="AcquisitionTaxAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="DispositionDate" type="YYYYMMDDDateType" minOccurs ="0"/>
+			<xsd:element name="ProceedAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="TaxRefundAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="Schedule5AreaAType">
+		<xsd:sequence>
+			<xsd:element name="Investment" type="NonQualifiedTrustInvestmentDispositionType" maxOccurs ="1"/>
+			<xsd:element name="TotalTaxRefundAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="SecurityLoanTrustPropertyRecoveryType">
+		<xsd:sequence>
+			<xsd:element name="Description" type="Length1to60TextType" minOccurs ="0"/>
+			<xsd:element name="SecurityLoanFirstDate" type="YYYYMMDDDateType" minOccurs ="0"/>
+			<xsd:element name="UsageTaxAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="SecurityLoanExpiryDate" type="YYYYMMDDDateType" minOccurs ="0"/>
+			<xsd:element name="UsageNetLossAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element name="TaxRefundAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="Schedule5AreaBType">
+		<xsd:sequence>
+			<xsd:element name="Property" type="SecurityLoanTrustPropertyRecoveryType" maxOccurs ="1"/>
+			<xsd:element name="TotalTaxRefundAmount" type="Decimal15AmountType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<xsd:complexType name="InitialNonQualifiedTrustInvestmentDispositionType">
+		<xsd:sequence>
+			<xsd:element name="PreviousTaxAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="BaseAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="ProceedAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="NetBaseAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="PreviousTaxRefundAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="NonRefundableTaxAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TotalTaxRefundAmount" type="Decimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="Schedule5Type">
+		<xsd:sequence>
+			<xsd:element name="NonQualifiedTrustInvestmentDisposition" type="Schedule5AreaAType" minOccurs ="0"/>
+			<xsd:element name="SecurityLoanTrustPropertyRecovery" type="Schedule5AreaBType" minOccurs ="0"/>
+			<xsd:element name="InitialNonQualifiedTrustInvestmentDisposition" type="InitialNonQualifiedTrustInvestmentDispositionType" minOccurs ="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3DRefundSummaryType">
+		<xsd:sequence>
+			<xsd:element name="TotalNonQualifiedInvestmentDispositionTaxRefundAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TotalSecurityLoanPropertyTaxRefundAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TotalInitialNonQualifiedInvestmentDispositionTaxRefundAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="SubTotal" type="SignedDecimal15AmountType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="T3DTaxSummaryType">
+		<xsd:sequence>
+			<xsd:element ref="TotalAcquireCorporationShareTaxPayableAmount" minOccurs="0"/>
+			<xsd:element name="TotalTrustTaxPayableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element ref="TrustAccountPaidAmount" minOccurs="0"/>
+			<xsd:element name="TotalDeferredProfitSharingPlanTaxUnpaidAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TotalDeferredProfitSharingPlanTaxRefundAmount" type="Decimal15AmountType" minOccurs ="0"/>
+			<xsd:element ref="TrustAccountBalanceAmount" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- T3D return -->
+	<xsd:complexType name="T3DReturnType">
+		<xsd:sequence>
+			<xsd:element name="TrustInformation" type="T3SpecialIdentTypeV"/>
+			<xsd:element name="Schedule1" type="Schedule1Type" minOccurs="0"/>
+
+			<xsd:element name="Schedule2" minOccurs="0">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="BeneficiaryExcessContributionYearText" type="Length1to60TextType" minOccurs ="0"/>
+						<xsd:element name="BeneficiaryName" type="Length1to60TextType" minOccurs ="0"/>
+						<xsd:element name="BeneficiarySocialInsuranceNumber" type="SINType" minOccurs ="0"/>
+
+						<xsd:element name="BeneficiaryExcess" type="BeneficiaryExcessType" minOccurs ="0"/>
+						<xsd:element name="TotalTrustExcessTaxableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+						<xsd:element name="TotalTrustExcessTaxPayableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+					</xsd:sequence>
+				</xsd:complexType>
+   				<xsd:unique name="TestUniqueS2">
+					<xsd:selector xpath="MonthlyBeneficiaryContribution"/>
+					<xsd:field xpath="MonthNumber"/>
+				</xsd:unique>
+			</xsd:element>
+
+			<xsd:element name="Schedule4" minOccurs="0">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="MonthlyNonQualifiedProperty" type="MonthlyNonQualifiedPropertyType" maxOccurs ="12"/>
+						<xsd:element name="TotalNonQualifiedPropertyTaxableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+						<xsd:element name="TotalNonQualifiedPropertyTaxPayableAmount" type="Decimal15AmountType" minOccurs ="0"/>
+					</xsd:sequence>
+
+				</xsd:complexType>
+   				<xsd:unique name="TestUniqueS4">
+					<xsd:selector xpath="MonthlyNonQualifiedPropertyTax"/>
+					<xsd:field xpath="MonthNumber"/>
+				</xsd:unique>
+ 			</xsd:element>
+
+			<xsd:element name="Schedule5" type="Schedule5Type" minOccurs="0"/>
+			<xsd:element name="TrustReturnTaxSummary" type="T3DTaxSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

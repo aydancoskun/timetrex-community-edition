@@ -41,6 +41,18 @@
 class PayrollDeduction_US_ME extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20200101 => array(
+					10 => array(
+							array('income' => 22200, 'rate' => 5.8, 'constant' => 0),
+							array('income' => 52600, 'rate' => 6.75, 'constant' => 1288),
+							array('income' => 52600, 'rate' => 7.15, 'constant' => 3340),
+					),
+					20 => array(
+							array('income' => 44450, 'rate' => 5.8, 'constant' => 0),
+							array('income' => 105200, 'rate' => 6.75, 'constant' => 2578),
+							array('income' => 105200, 'rate' => 7.15, 'constant' => 6679),
+					),
+			),
 			20190101 => array(
 					10 => array(
 							array('income' => 21850, 'rate' => 5.8, 'constant' => 0),
@@ -231,29 +243,40 @@ class PayrollDeduction_US_ME extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
-			20190101 => array( //01-Jan-19
-							   'allowance'                    => 4200,
-							   'standard_deduction'           => array(
-									   '10' => 9350,
-									   '20' => 21550,
-							   ),
-							   'standard_deduction_threshold' => array(
-									   '10' => array(81450, 156450, 75000), //Min/Max/Divisor
-									   '20' => array(162950, 312950, 150000), //Min/Max/Divsor
-							   ),
+			20200101 => array(
+					'allowance'                    => 4300,
+					'standard_deduction'           => array(
+							'10' => 9550,
+							'20' => 21950,
+					),
+					'standard_deduction_threshold' => array(
+							'10' => array(82900, 157900, 75000), //Min/Max/Divisor
+							'20' => array(165800, 315800, 150000), //Min/Max/Divsor
+					),
 			),
-			20180101 => array( //01-Jan-18
-							   'allowance'                    => 4150,
-							   'standard_deduction'           => array(
-									   '10' => 8950,
-									   '20' => 20750,
-							   ),
-							   'standard_deduction_threshold' => array(
-									   '10' => array(71100, 142200, 75000), //Min/Max/Divisor
-									   '20' => array(142200, 292200, 150000), //Min/Max/Divsor
-							   ),
+			20190101 => array(
+					'allowance'                    => 4200,
+					'standard_deduction'           => array(
+							'10' => 9350,
+							'20' => 21550,
+					),
+					'standard_deduction_threshold' => array(
+							'10' => array(81450, 156450, 75000), //Min/Max/Divisor
+							'20' => array(162950, 312950, 150000), //Min/Max/Divsor
+					),
 			),
-			20170101 => array( //01-Jan-17 - Standard Deduction formula seems to have changed slightly in 2017.
+			20180101 => array(
+					'allowance'                    => 4150,
+					'standard_deduction'           => array(
+							'10' => 8950,
+							'20' => 20750,
+					),
+					'standard_deduction_threshold' => array(
+							'10' => array(71100, 142200, 75000), //Min/Max/Divisor
+							'20' => array(142200, 292200, 150000), //Min/Max/Divsor
+					),
+			),
+			20170101 => array( //Standard Deduction formula seems to have changed slightly in 2017.
 							   'allowance'                    => 4050,
 							   'standard_deduction'           => array(
 									   '10' => 8750,
@@ -264,17 +287,17 @@ class PayrollDeduction_US_ME extends PayrollDeduction_US {
 									   '20' => array(140000, 290000, 150000), //Min/Max/Divsor
 							   ),
 			),
-			20160101 => array( //01-Jan-16
-							   'allowance' => 4050,
+			20160101 => array(
+					'allowance' => 4050,
 			),
-			20150101 => array( //01-Jan-15
-							   'allowance' => 4000,
+			20150101 => array(
+					'allowance' => 4000,
 			),
-			20140101 => array( //01-Jan-14
-							   'allowance' => 3950,
+			20140101 => array(
+					'allowance' => 3950,
 			),
-			20130101 => array( //01-Jan-13
-							   'allowance' => 3900,
+			20130101 => array(
+					'allowance' => 3900,
 			),
 			//01-Jan-12: No Change.
 			//01-Jan-11: No Change.

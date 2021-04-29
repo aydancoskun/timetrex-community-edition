@@ -47,6 +47,56 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 	*/
 
 	var $state_income_tax_rate_options = array(
+			20200101 => array(
+					10 => array(
+							array('income' => 8809, 'rate' => 1.1, 'constant' => 0),
+							array('income' => 20883, 'rate' => 2.2, 'constant' => 96.90),
+							array('income' => 32960, 'rate' => 4.4, 'constant' => 362.53),
+							array('income' => 45753, 'rate' => 6.6, 'constant' => 893.92),
+							array('income' => 57824, 'rate' => 8.8, 'constant' => 1738.26),
+							array('income' => 295373, 'rate' => 10.23, 'constant' => 2800.51),
+							array('income' => 354445, 'rate' => 11.33, 'constant' => 27101.77),
+							array('income' => 590742, 'rate' => 12.43, 'constant' => 33794.63),
+							array('income' => 1000000, 'rate' => 13.53, 'constant' => 63166.35),
+							array('income' => 1000000, 'rate' => 14.63, 'constant' => 118538.96),
+					),
+					20 => array(
+							array('income' => 8809, 'rate' => 1.1, 'constant' => 0),
+							array('income' => 20883, 'rate' => 2.2, 'constant' => 96.90),
+							array('income' => 32960, 'rate' => 4.4, 'constant' => 362.53),
+							array('income' => 45753, 'rate' => 6.6, 'constant' => 893.92),
+							array('income' => 57824, 'rate' => 8.8, 'constant' => 1738.26),
+							array('income' => 295373, 'rate' => 10.23, 'constant' => 2800.51),
+							array('income' => 354445, 'rate' => 11.33, 'constant' => 27101.77),
+							array('income' => 590742, 'rate' => 12.43, 'constant' => 33794.63),
+							array('income' => 1000000, 'rate' => 13.53, 'constant' => 63166.35),
+							array('income' => 1000000, 'rate' => 14.63, 'constant' => 118538.96),
+					),
+					30 => array(
+							array('income' => 17618, 'rate' => 1.1, 'constant' => 0),
+							array('income' => 41766, 'rate' => 2.2, 'constant' => 193.80),
+							array('income' => 65920, 'rate' => 4.4, 'constant' => 725.06),
+							array('income' => 91506, 'rate' => 6.6, 'constant' => 1787.84),
+							array('income' => 115648, 'rate' => 8.8, 'constant' => 3476.52),
+							array('income' => 590746, 'rate' => 10.23, 'constant' => 5601.02),
+							array('income' => 708890, 'rate' => 11.33, 'constant' => 54203.55),
+							array('income' => 1000000, 'rate' => 12.43, 'constant' => 67589.27),
+							array('income' => 1181484, 'rate' => 13.53, 'constant' => 103774.24),
+							array('income' => 1181484, 'rate' => 14.63, 'constant' => 128329.03),
+					),
+					40 => array( //These are different than 30 above.
+								 array('income' => 17629, 'rate' => 1.1, 'constant' => 0),
+								 array('income' => 41768, 'rate' => 2.2, 'constant' => 193.92),
+								 array('income' => 53843, 'rate' => 4.4, 'constant' => 724.98),
+								 array('income' => 66636, 'rate' => 6.6, 'constant' => 1256.28),
+								 array('income' => 78710, 'rate' => 8.8, 'constant' => 2100.62),
+								 array('income' => 401705, 'rate' => 10.23, 'constant' => 3163.13),
+								 array('income' => 482047, 'rate' => 11.33, 'constant' => 36205.52),
+								 array('income' => 803410, 'rate' => 12.43, 'constant' => 45308.27),
+								 array('income' => 1000000, 'rate' => 13.53, 'constant' => 85253.69),
+								 array('income' => 1000000, 'rate' => 14.63, 'constant' => 111852.32),
+					),
+			),
 			20190101 => array(
 					10 => array(
 							array('income' => 8544, 'rate' => 1.1, 'constant' => 0),
@@ -741,244 +791,269 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
-			20190101 => array( //01-Jan-19
-							   //Standard Deduction Table
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(4401, 4401),
-								   '20' => array(4401, 4401),
-								   '30' => array(4401, 8802),
-								   '40' => array(8802, 8802),
-							   ),
-							   //Exemption Allowance Table
-							   'allowance'          => array(
-									   '10' => 129.80,
-									   '20' => 129.80,
-									   '30' => 129.80,
-									   '40' => 129.80,
-							   ),
-							   //Low Income Exemption Table
-							   'minimum_income'     => array(
-								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(14573, 14573),
-								   '20' => array(14573, 14573),
-								   '30' => array(14573, 29146),
-								   '40' => array(29146, 29146),
-							   ),
+			20200101 => array(
+				//Standard Deduction Table
+				'standard_deduction' => array(
+					//First entry is 0,1 allowance, second is for 2 or more.
+					'10' => array(4537, 4537),
+					'20' => array(4537, 4537),
+					'30' => array(4537, 9074),
+					'40' => array(9074, 9074),
+				),
+				//Exemption Allowance Table - Annual amount for 1 allowance.
+				'allowance'          => array(
+						'10' => 134.20,
+						'20' => 134.20,
+						'30' => 134.20,
+						'40' => 134.20,
+				),
+				//Low Income Exemption Table
+				'minimum_income'     => array(
+					//First entry is 0,1 allowance, 2nd is 2 or more.
+					'10' => array(15042, 15042),
+					'20' => array(15042, 15042),
+					'30' => array(15042, 30083),
+					'40' => array(30083, 30083),
+				),
 			),
-			20180101 => array( //01-Jan-18
-							   //Standard Deduction Table
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(4236, 4236),
-								   '20' => array(4236, 4236),
-								   '30' => array(4236, 8472),
-								   '40' => array(8472, 8472),
-							   ),
-							   //Exemption Allowance Table
-							   'allowance'          => array(
-									   '10' => 125.40,
-									   '20' => 125.40,
-									   '30' => 125.40,
-									   '40' => 125.40,
-							   ),
-							   //Low Income Exemption Table
-							   'minimum_income'     => array(
-								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(14048, 14048),
-								   '20' => array(14048, 14048),
-								   '30' => array(14048, 28095),
-								   '40' => array(28095, 28095),
-							   ),
+			20190101 => array(
+				//Standard Deduction Table
+				'standard_deduction' => array(
+					//First entry is 0,1 allowance, second is for 2 or more.
+					'10' => array(4401, 4401),
+					'20' => array(4401, 4401),
+					'30' => array(4401, 8802),
+					'40' => array(8802, 8802),
+				),
+				//Exemption Allowance Table
+				'allowance'          => array(
+						'10' => 129.80,
+						'20' => 129.80,
+						'30' => 129.80,
+						'40' => 129.80,
+				),
+				//Low Income Exemption Table
+				'minimum_income'     => array(
+					//First entry is 0,1 allowance, 2nd is 2 or more.
+					'10' => array(14573, 14573),
+					'20' => array(14573, 14573),
+					'30' => array(14573, 29146),
+					'40' => array(29146, 29146),
+				),
 			),
-			20170101 => array( //01-Jan-17
-							   //Standard Deduction Table
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(4129, 4129),
-								   '20' => array(4129, 4129),
-								   '30' => array(4129, 8258),
-								   '40' => array(8258, 8258),
-							   ),
-							   //Exemption Allowance Table
-							   'allowance'          => array(
-									   '10' => 122.10,
-									   '20' => 122.10,
-									   '30' => 122.10,
-									   '40' => 122.10,
-							   ),
-							   //Low Income Exemption Table
-							   'minimum_income'     => array(
-								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(13687, 13687),
-								   '20' => array(13687, 13687),
-								   '30' => array(13687, 27373),
-								   '40' => array(27373, 27373),
-							   ),
+			20180101 => array(
+				//Standard Deduction Table
+				'standard_deduction' => array(
+					//First entry is 0,1 allowance, second is for 2 or more.
+					'10' => array(4236, 4236),
+					'20' => array(4236, 4236),
+					'30' => array(4236, 8472),
+					'40' => array(8472, 8472),
+				),
+				//Exemption Allowance Table
+				'allowance'          => array(
+						'10' => 125.40,
+						'20' => 125.40,
+						'30' => 125.40,
+						'40' => 125.40,
+				),
+				//Low Income Exemption Table
+				'minimum_income'     => array(
+					//First entry is 0,1 allowance, 2nd is 2 or more.
+					'10' => array(14048, 14048),
+					'20' => array(14048, 14048),
+					'30' => array(14048, 28095),
+					'40' => array(28095, 28095),
+				),
 			),
-			20160101 => array( //01-Jan-16
-							   //Standard Deduction Table
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(4044, 4044),
-								   '20' => array(4044, 4044),
-								   '30' => array(4044, 8088),
-								   '40' => array(8088, 8088),
-							   ),
-							   //Exemption Allowance Table
-							   'allowance'          => array(
-									   '10' => 119.90,
-									   '20' => 119.90,
-									   '30' => 119.90,
-									   '40' => 119.90,
-							   ),
-							   //Low Income Exemption Table
-							   'minimum_income'     => array(
-								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(13419, 13419),
-								   '20' => array(13419, 13419),
-								   '30' => array(13419, 26838),
-								   '40' => array(26838, 26838),
-							   ),
+			20170101 => array(
+				//Standard Deduction Table
+				'standard_deduction' => array(
+					//First entry is 0,1 allowance, second is for 2 or more.
+					'10' => array(4129, 4129),
+					'20' => array(4129, 4129),
+					'30' => array(4129, 8258),
+					'40' => array(8258, 8258),
+				),
+				//Exemption Allowance Table
+				'allowance'          => array(
+						'10' => 122.10,
+						'20' => 122.10,
+						'30' => 122.10,
+						'40' => 122.10,
+				),
+				//Low Income Exemption Table
+				'minimum_income'     => array(
+					//First entry is 0,1 allowance, 2nd is 2 or more.
+					'10' => array(13687, 13687),
+					'20' => array(13687, 13687),
+					'30' => array(13687, 27373),
+					'40' => array(27373, 27373),
+				),
 			),
-			20150101 => array( //01-Jan-15
-							   //Standard Deduction Table
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3992, 3992),
-								   '20' => array(3992, 3992),
-								   '30' => array(3992, 7984),
-								   '40' => array(7984, 7984),
-							   ),
-							   //Exemption Allowance Table
-							   'allowance'          => array(
-									   '10' => 118.80,
-									   '20' => 118.80,
-									   '30' => 118.80,
-									   '40' => 118.80,
-							   ),
-							   //Low Income Exemption Table
-							   'minimum_income'     => array(
-								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(13267, 13267),
-								   '20' => array(13267, 13267),
-								   '30' => array(13267, 26533),
-								   '40' => array(26533, 26533),
-							   ),
+			20160101 => array(
+				//Standard Deduction Table
+				'standard_deduction' => array(
+					//First entry is 0,1 allowance, second is for 2 or more.
+					'10' => array(4044, 4044),
+					'20' => array(4044, 4044),
+					'30' => array(4044, 8088),
+					'40' => array(8088, 8088),
+				),
+				//Exemption Allowance Table
+				'allowance'          => array(
+						'10' => 119.90,
+						'20' => 119.90,
+						'30' => 119.90,
+						'40' => 119.90,
+				),
+				//Low Income Exemption Table
+				'minimum_income'     => array(
+					//First entry is 0,1 allowance, 2nd is 2 or more.
+					'10' => array(13419, 13419),
+					'20' => array(13419, 13419),
+					'30' => array(13419, 26838),
+					'40' => array(26838, 26838),
+				),
 			),
-			20140101 => array( //01-Jan-14
-							   //Standard Deduction Table
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3906, 3906),
-								   '20' => array(3906, 3906),
-								   '30' => array(3906, 7812),
-								   '40' => array(7812, 7812),
-							   ),
-							   //Exemption Allowance Table
-							   'allowance'          => array(
-									   '10' => 116.60,
-									   '20' => 116.60,
-									   '30' => 116.60,
-									   '40' => 116.60,
-							   ),
-							   //Low Income Exemption Table
-							   'minimum_income'     => array(
-								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(12997, 12997),
-								   '20' => array(12997, 12997),
-								   '30' => array(12997, 25994),
-								   '40' => array(25994, 25994),
-							   ),
+			20150101 => array(
+				//Standard Deduction Table
+				'standard_deduction' => array(
+					//First entry is 0,1 allowance, second is for 2 or more.
+					'10' => array(3992, 3992),
+					'20' => array(3992, 3992),
+					'30' => array(3992, 7984),
+					'40' => array(7984, 7984),
+				),
+				//Exemption Allowance Table
+				'allowance'          => array(
+						'10' => 118.80,
+						'20' => 118.80,
+						'30' => 118.80,
+						'40' => 118.80,
+				),
+				//Low Income Exemption Table
+				'minimum_income'     => array(
+					//First entry is 0,1 allowance, 2nd is 2 or more.
+					'10' => array(13267, 13267),
+					'20' => array(13267, 13267),
+					'30' => array(13267, 26533),
+					'40' => array(26533, 26533),
+				),
 			),
-			20130101 => array( //01-Jan-13
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3841, 3841),
-								   '20' => array(3841, 3841),
-								   '30' => array(3841, 7682),
-								   '40' => array(7682, 7682),
-							   ),
-							   'allowance'          => array(
-									   '10' => 114.40,
-									   '20' => 114.40,
-									   '30' => 114.40,
-									   '40' => 114.40,
-							   ),
-							   'minimum_income'     => array(
-								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(12769, 12769),
-								   '20' => array(12769, 12769),
-								   '30' => array(12769, 25537),
-								   '40' => array(25537, 25537),
-							   ),
+			20140101 => array(
+				//Standard Deduction Table
+				'standard_deduction' => array(
+					//First entry is 0,1 allowance, second is for 2 or more.
+					'10' => array(3906, 3906),
+					'20' => array(3906, 3906),
+					'30' => array(3906, 7812),
+					'40' => array(7812, 7812),
+				),
+				//Exemption Allowance Table
+				'allowance'          => array(
+						'10' => 116.60,
+						'20' => 116.60,
+						'30' => 116.60,
+						'40' => 116.60,
+				),
+				//Low Income Exemption Table
+				'minimum_income'     => array(
+					//First entry is 0,1 allowance, 2nd is 2 or more.
+					'10' => array(12997, 12997),
+					'20' => array(12997, 12997),
+					'30' => array(12997, 25994),
+					'40' => array(25994, 25994),
+				),
 			),
-			20120101 => array( //01-Jan-12
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3769, 3769),
-								   '20' => array(3769, 3769),
-								   '30' => array(3769, 7538),
-								   '40' => array(7538, 7538),
-							   ),
-							   'allowance'          => array(
-									   '10' => 112.20,
-									   '20' => 112.20,
-									   '30' => 112.20,
-									   '40' => 112.20,
-							   ),
-							   'minimum_income'     => array(
-								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(12527, 12527),
-								   '20' => array(12527, 12527),
-								   '30' => array(12527, 25054),
-								   '40' => array(25054, 25054),
-							   ),
+			20130101 => array(
+					'standard_deduction' => array(
+						//First entry is 0,1 allowance, second is for 2 or more.
+						'10' => array(3841, 3841),
+						'20' => array(3841, 3841),
+						'30' => array(3841, 7682),
+						'40' => array(7682, 7682),
+					),
+					'allowance'          => array(
+							'10' => 114.40,
+							'20' => 114.40,
+							'30' => 114.40,
+							'40' => 114.40,
+					),
+					'minimum_income'     => array(
+						//First entry is 0,1 allowance, 2nd is 2 or more.
+						'10' => array(12769, 12769),
+						'20' => array(12769, 12769),
+						'30' => array(12769, 25537),
+						'40' => array(25537, 25537),
+					),
 			),
-			20110101 => array( //01-Jan-11
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3670, 3670),
-								   '20' => array(3670, 3670),
-								   '30' => array(3670, 7340),
-								   '40' => array(7340, 7340),
-							   ),
-							   'allowance'          => array(
-									   '10' => 108.90,
-									   '20' => 108.90,
-									   '30' => 108.90,
-									   '40' => 108.90,
-							   ),
+			20120101 => array(
+					'standard_deduction' => array(
+						//First entry is 0,1 allowance, second is for 2 or more.
+						'10' => array(3769, 3769),
+						'20' => array(3769, 3769),
+						'30' => array(3769, 7538),
+						'40' => array(7538, 7538),
+					),
+					'allowance'          => array(
+							'10' => 112.20,
+							'20' => 112.20,
+							'30' => 112.20,
+							'40' => 112.20,
+					),
+					'minimum_income'     => array(
+						//First entry is 0,1 allowance, 2nd is 2 or more.
+						'10' => array(12527, 12527),
+						'20' => array(12527, 12527),
+						'30' => array(12527, 25054),
+						'40' => array(25054, 25054),
+					),
 			),
-			20100101 => array( //01-Jan-10
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3637, 3637),
-								   '20' => array(3637, 3637),
-								   '30' => array(3637, 7274),
-								   '40' => array(7274, 7274),
-							   ),
-							   'allowance'          => array(
-									   '10' => 107.80,
-									   '20' => 107.80,
-									   '30' => 107.80,
-									   '40' => 107.80,
-							   ),
+			20110101 => array(
+					'standard_deduction' => array(
+						//First entry is 0,1 allowance, second is for 2 or more.
+						'10' => array(3670, 3670),
+						'20' => array(3670, 3670),
+						'30' => array(3670, 7340),
+						'40' => array(7340, 7340),
+					),
+					'allowance'          => array(
+							'10' => 108.90,
+							'20' => 108.90,
+							'30' => 108.90,
+							'40' => 108.90,
+					),
 			),
-			20091101 => array( //01-Nov-09
-							   'standard_deduction' => array(
-								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3692, 3692),
-								   '20' => array(3692, 3692),
-								   '30' => array(3692, 7384),
-								   '40' => array(7384, 7384),
-							   ),
-							   'allowance'          => array(
-									   '10' => 108.90,
-									   '20' => 108.90,
-									   '30' => 108.90,
-									   '40' => 108.90,
-							   ),
+			20100101 => array(
+					'standard_deduction' => array(
+						//First entry is 0,1 allowance, second is for 2 or more.
+						'10' => array(3637, 3637),
+						'20' => array(3637, 3637),
+						'30' => array(3637, 7274),
+						'40' => array(7274, 7274),
+					),
+					'allowance'          => array(
+							'10' => 107.80,
+							'20' => 107.80,
+							'30' => 107.80,
+							'40' => 107.80,
+					),
+			),
+			20091101 => array(
+					'standard_deduction' => array(
+						//First entry is 0,1 allowance, second is for 2 or more.
+						'10' => array(3692, 3692),
+						'20' => array(3692, 3692),
+						'30' => array(3692, 7384),
+						'40' => array(7384, 7384),
+					),
+					'allowance'          => array(
+							'10' => 108.90,
+							'20' => 108.90,
+							'30' => 108.90,
+							'40' => 108.90,
+					),
 			),
 			20090101 => array(
 					'standard_deduction' => array(

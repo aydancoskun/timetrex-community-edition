@@ -107,7 +107,7 @@ echo " 7...";
 //unset($test_template_c_sub_dir);
 
 echo " 9...";
-$handle = @fopen('http://www.timetrex.com/pre_install.php?os='. PHP_OS .'&php_version='. PHP_VERSION .'&redir='. (int)$redir .'&web_server='. urlencode( substr( $_SERVER['SERVER_SOFTWARE'], 0, 20 ) ) .'&external_installer='. $external_installer .'&url='. urlencode($_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'].$_SERVER['REQUEST_URI']), "r");
+$handle = @fopen('http://www.timetrex.com/pre_install.php?os='. PHP_OS .'&php_version='. PHP_VERSION .'&redir='. (int)$redir .'&web_server='. urlencode( substr( $_SERVER['SERVER_SOFTWARE'], 0, 20 ) ) .'&external_installer='. $external_installer .'&url='. urlencode($_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'].$_SERVER['REQUEST_URI']), 'r');
 @fclose($handle);
 
 echo " 10...";

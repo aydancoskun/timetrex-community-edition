@@ -499,7 +499,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory'); /** @var PayrollRemittanceAgencyEventListFactory $praelf */
 		$praelf->getByIdAndCompanyId( $prae_id, $this->getCurrentCompanyObject()->getId() );
 		if ( $praelf->getRecordCount() == 1 ) {
-			$prae_obj = $praelf->getCurrent();
+			$prae_obj = $praelf->getCurrent(); /** @var PayrollRemittanceAgencyEventFactory $prae_obj */
 
 			if ( $prae_obj->getStatus() == 15 ) { //15=Full Service
 				$retval = array(
@@ -508,11 +508,11 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 				);
 
 				if ( is_object( $prae_obj->getPayrollRemittanceAgencyObject() ) ) {
-					$pra_obj = $prae_obj->getPayrollRemittanceAgencyObject();
+					$pra_obj = $prae_obj->getPayrollRemittanceAgencyObject(); /** @var PayrollRemittanceAgencyFactory $pra_obj */
 
-					$rs_obj = $pra_obj->getRemittanceSourceAccountObject();
+					$rs_obj = $pra_obj->getRemittanceSourceAccountObject(); /** @var RemittanceSourceAccountFactory $rs_obj */
 
-					$le_obj = $rs_obj->getLegalEntityObject();
+					$le_obj = $rs_obj->getLegalEntityObject(); /** @var RemittanceSourceAccountFactory $le_obj */
 
 					if ( $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 ) { //3000=EFT/ACH, 5=TimeTrex EFT
 

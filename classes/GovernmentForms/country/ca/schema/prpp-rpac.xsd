@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
+
 <!--
-Description: 	PRPP Return Complex and Element Types
-Contact: 	CRA, ITB, PIECE, INFODEC MMPS
-Date created: 	March 2013
-Version#:	1.13 (version #.yy)
+Description	PRPP Return Complex and Element Types
+Last updated 	March 2013
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" 
@@ -52,6 +52,7 @@ Version#:	1.13 (version #.yy)
 		<xsd:all>
 			<xsd:element ref="AdministratorAccountNumber"/>
 			<xsd:element ref="SummaryReportTypeCode"/>
+			<xsd:element name="fileramendmentnote" type="Length1to1309TextType" minOccurs="0"/>
 			<xsd:element ref="TaxationYear"/>
 			<xsd:element ref="PooledRegisteredPensionPlanNumber"/>
 			<xsd:element ref="TotalSlipCount"/>

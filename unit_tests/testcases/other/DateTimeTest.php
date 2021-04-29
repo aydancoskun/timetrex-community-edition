@@ -1042,25 +1042,18 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function test_getNearestWeekDay() {
-		//case 0: //No adjustment
-		//	break 2;
-		//case 1: //Previous day
-		//	$epoch -= 86400;
-		//	break;
-		//case 2: //Next day
-		//	$epoch += 86400;
-		//	break;
-		//case 3: //Closest day
-
-
-		$date1 = strtotime('16-Jan-2010 12:00PM');
+		$date1 = strtotime('16-Jan-2010 12:00PM'); //Sat
 		$this->assertEquals( TTDate::getNearestWeekDay( $date1, 0 ), strtotime('16-Jan-2010 12:00PM') );
 		$this->assertEquals( TTDate::getNearestWeekDay( $date1, 1 ), strtotime('15-Jan-2010 12:00PM') );
 		$this->assertEquals( TTDate::getNearestWeekDay( $date1, 2 ), strtotime('18-Jan-2010 12:00PM') );
 		$this->assertEquals( TTDate::getNearestWeekDay( $date1, 3 ), strtotime('15-Jan-2010 12:00PM') );
+		$this->assertEquals( TTDate::getNearestWeekDay( $date1, 10 ), strtotime('16-Jan-2010 12:00PM') ); //Split Sat=Sat, Sun=Mon
+		$this->assertEquals( TTDate::getNearestWeekDay( $date1, 20 ), strtotime('15-Jan-2010 12:00PM') ); //Split Sat=Fri, Sun=Sun
 
-		$date2 = strtotime('17-Jan-2010 12:00PM');
+		$date2 = strtotime('17-Jan-2010 12:00PM'); //Sun
 		$this->assertEquals( TTDate::getNearestWeekDay( $date2, 3 ), strtotime('18-Jan-2010 12:00PM') );
+		$this->assertEquals( TTDate::getNearestWeekDay( $date2, 10 ), strtotime('18-Jan-2010 12:00PM') ); //Split Sat=Sat, Sun=Mon
+		$this->assertEquals( TTDate::getNearestWeekDay( $date2, 20 ), strtotime('17-Jan-2010 12:00PM') ); //Split Sat=Fri, Sun=Sun
 
 		$holidays = array(
 						TTDate::getBeginDayEpoch( strtotime('15-Jan-2010') )

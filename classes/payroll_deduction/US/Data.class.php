@@ -39,7 +39,6 @@
 * Other tax calculators:
 	http://payroll.intuit.com/paycheck_calculators/legacy/
 	http://www.paycheckcity.com/calculator/salary/
-	http://www.pensoft.com/freestuff/stateinformation.aspx
 	http://www.yourmoneypage.com/withhold/fedwh1.php
 
 	- List of tax table changes*****:
@@ -63,53 +62,54 @@
 //*CHECKAGAIN-* means document hasn't been updated and needs to be rechecked.
 
 //Change every year usually
-CHANGED:12-Dec-18				Federal          		- Google: Notice 1036 http://www.irs.gov/pub/irs-pdf/n1036.pdf
-CHANGED:11-Dec-18				'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
-CHANGED:11-Dec-18				'CA' => 'California' 	- http://www.edd.ca.gov/Payroll_Taxes/Rates_and_Withholding.htm *PIT Withholding schedules
-CHANGED:11-Dec-18				'ME' => 'Maine',		- https://www.maine.gov/revenue/forms/with/2019.htm -- Check each year on the right of the page.
-CHANGED:11-Dec-18				'NC' => 'North Carolina'- https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-forms-and-instructions *Income Tax Withholding Tables & Instructions for Employers, NC30
-CHANGED:11-Dec-18				'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
-CHANGED:11-Dec-18				'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Click on Withholding Formula to see update for each year.
-CHANGED:12-Dec-18				'KY' => 'Kentucky', 	- http://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method) - 2018 switched to flat rate 5%.
-CHANGED:14-Dec-18				'IL' => 'Illinois',		- https://www2.illinois.gov/rev/research/taxinformation/payroll/Pages/default.aspx *Booklet IL-700-T
-CHANGED:14-Dec-18				'SC' => 'South Carolina'- https://dor.sc.gov/tax/withholding/forms *Formula for Computing SC Withholding Tax WH-1603F
-CHANGED:20-Dec-18				'MN' => 'Minnesota',	- http://www.revenue.state.mn.us/businesses/withholding/Pages/Forms.aspx *2013 Minnesota Withholding Computer Formula - Calculator: https://www.mndor.state.mn.us/tp/withholdingtaxcalc/_/
-CHANGED:20-Dec-18				'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
-CHANGED:20-Dec-18				'OR' => 'Oregon',		- http://www.oregon.gov/DOR/programs/businesses/Pages/payroll-updates.aspx *Search: Withholdings Tax Formulas 2013
-CHANGED:20-Dec-18				'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/software_developers.php *Percentage Method Withholding Tables
-CHANGED:11-Dec-18				'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
-CHANGED:28-Dec-18 				'VT' => 'Vermont',		- http://tax.vermont.gov/business-and-corp/withholding-tax *Income Tax Withholding  Instructions, Tables, and Charts.
-*CHECKAGAIN-*:20-Dec-18			'AL' => 'Alabama' 		- https://revenue.alabama.gov/individual-corporate/taxes-administered-by-individual-corporate-income-tax/withholding-tax/ *Withholding Tax Tables and Instructions
-*CHECKAGAIN-*:20-Dec-18			'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
-*CHECKAGAIN-*:20-Dec-18			'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098
-NOCHANGE:10-Jan-19				'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
-NOCHANGE:19-Dec-18				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
-NOCHANGE:20-Dec-18				'OK' => 'Oklahoma',		- http://ok.gov/tax/Forms_&_Publications/Publications/Withholding/ *OW-2, Oklahoma Income Tax Withholding Tables
+*CHECKAGAIN-*:14-Dec-19			Federal          		- Google: Notice 1036 (No longer published in 2020 or after) http://www.irs.gov/pub/irs-pdf/n1036.pdf - https://www.irs.gov/forms-pubs/2020-percentage-method-tables-for-automated-payroll-systems
+CHANGED:14-Dec-19				'NC' => 'North Carolina'- https://www.ncdor.gov/documents/income-tax-withholding-tables-and-instructions-employers *Income Tax Withholding Tables & Instructions for Employers, NC30
+CHANGED:14-Dec-19				'OH' => 'Ohio',			- https://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions - Optional Computer Formula
+CHANGED:14-Dec-19				'KY' => 'Kentucky', 	- http://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method) - 2018 switched to flat rate 5%.
+CHANGED:14-Dec-19				'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
+CHANGED:14-Dec-19				'CA' => 'California' 	- http://www.edd.ca.gov/Payroll_Taxes/Rates_and_Withholding.htm *PIT Withholding schedules
+CHANGED:14-Dec-19				'ME' => 'Maine',		- https://www.maine.gov/revenue/forms/with/2020.htm -- Check each year on the right of the page.
+CHANGED:14-Dec-19				'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Click on Withholding Formula to see update for each year.
+CHANGED:14-Dec-19				'IL' => 'Illinois',		- https://www2.illinois.gov/rev/research/taxinformation/payroll/Pages/default.aspx *Booklet IL-700-T
+CHANGED:14-Dec-19				'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions
+CHANGED:14-Dec-19				'IA' => 'Iowa',			- https://tax.iowa.gov/withholding-tax-information *Iowa Withholding Tax Guide
+CHANGED:19-Dec-19				'SC' => 'South Carolina'- https://dor.sc.gov/tax/withholding/forms *Formula for Computing SC Withholding Tax WH-1603F
+CHANGED:19-Dec-19				'MN' => 'Minnesota',	- https://www.revenue.state.mn.us/withholding-tax *2013 Minnesota Withholding Computer Formula - Calculator: https://www.mndor.state.mn.us/tp/withholdingtaxcalc/_/
+CHANGED:19-Dec-19				'OR' => 'Oregon',		- http://www.oregon.gov/DOR/programs/businesses/Pages/payroll-updates.aspx *Search: Withholdings Tax Formulas 2013
+CHANGED:19-Dec-19				'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
+CHANGED:20-Dec-19 				'VT' => 'Vermont',		- http://tax.vermont.gov/business-and-corp/withholding-tax *Income Tax Withholding  Instructions, Tables, and Charts.
+CHANGED:20-Dec-19				'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-forms *Form: DR 1098
+CHANGED:26-Dec-19				'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/software_developers.php *Percentage Method Withholding Tables
+
+*CHECKAGAIN-*:14-Dec-19			'AL' => 'Alabama' 		- https://revenue.alabama.gov/individual-corporate/taxes-administered-by-individual-corporate-income-tax/withholding-tax/ *Withholding Tax Tables and Instructions
+*CHECKAGAIN-*:14-Dec-19			'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
+*CHECKAGAIN-*:14-Dec-19			'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
+NOCHANGE:19-Dec-19				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
 
 //Change less often
-CHANGED:11-Dec-18				'GA' => 'Georgia',		- http://dor.georgia.gov/withholding-tax-information or https://dor.georgia.gov/documents/2018-employers-tax-guide *Employers Tax Guide
-CHANGED:26-Dec-18				'MA' => 'Massachusetts' - http://www.mass.gov/dor/individuals/taxpayer-help-and-resources/tax-guides/withholding-tax-guide.html#calculate *Circular M
-*CHECKAGAIN-*:11-Dec-18			'DE' => 'Delaware',		- http://revenue.delaware.gov/services/WITBk.shtml *http://revenue.delaware.gov/services/wit_folder/section17.shtml
-*CHECKAGAIN-*:11-Dec-18			'HI' => 'Hawaii',		- http://tax.hawaii.gov/forms/a1_b1_5whhold/ *Employers Tax Guide (Booklet A)
-*CHECKAGAIN-*:11-Dec-18			'DC' => 'D.C.', 		- http://otr.cfo.dc.gov/page/income-tax-withholding-instructions-and-tables *Form: FR-230
-*CHECKAGAIN-*:11-Dec-18			'MD' => 'Maryland',		- http://taxes.marylandtaxes.gov/ *Maryland Withholding Guide* - Use 1.75% LOCAL INCOME TAX tables, *minus 1.75%*, manually calculate each bracket.  **PAY ATTENTION TO FILING STATUS AND WHICH SIDE ITS ON** Use tax_table_bracket_calculator.ods. See MD.class.php for more information.
-NOCHANGE:28-Dec-18				'NE' => 'Nebraska',		- http://www.revenue.nebraska.gov/withhold.html *Nebraska  Circular EN, Income Tax Withholding on Wages
-NOCHANGE:11-Dec-18				'WI' => 'Wisconsin',	- https://www.revenue.wi.gov/Pages/ISE/with-Home.aspx *Pub W-166, Method "B" calculation
+CHANGED:14-Dec-19				'MI' => 'Michigan',		- https://www.michigan.gov/taxes/0,4676,7-238-43519_43531---,00.html *Michigan Income Tax Withholding Guide 446-I
+CHANGED:20-Dec-19				'MA' => 'Massachusetts' - http://www.mass.gov/dor/individuals/taxpayer-help-and-resources/tax-guides/withholding-tax-guide.html#calculate *Circular M
+*CHECKAGAIN-*:14-Dec-19			'DE' => 'Delaware',		- http://revenue.delaware.gov/services/WITBk.shtml *http://revenue.delaware.gov/services/wit_folder/section17.shtml
+*CHECKAGAIN-*:14-Dec-19			'HI' => 'Hawaii',		- http://tax.hawaii.gov/forms/a1_b1_5whhold/ *Employers Tax Guide (Booklet A)
+*CHECKAGAIN-*:14-Dec-19			'DC' => 'D.C.', 		- http://otr.cfo.dc.gov/page/income-tax-withholding-instructions-and-tables *Form: FR-230
+NOCHANGE:20-Dec-19				'MD' => 'Maryland',		- http://taxes.marylandtaxes.gov/ *Maryland Withholding Guide* - Use 1.75% LOCAL INCOME TAX tables, *minus 1.75%*, manually calculate each bracket.  **PAY ATTENTION TO FILING STATUS AND WHICH SIDE ITS ON** Use tax_table_bracket_calculator.ods. See MD.class.php for more information.
+NOCHANGE:14-Dec-19				'WI' => 'Wisconsin',	- https://www.revenue.wi.gov/Pages/ISE/with-Home.aspx *Pub W-166, Method "B" calculation
+NOCHANGE:14-Dec-19				'OK' => 'Oklahoma',		- https://www.ok.gov/tax/Forms_&_Publications/Publications/Withholding/ *OW-2, Oklahoma Income Tax Withholding Tables
+NOCHANGE:14-Dec-19				'NE' => 'Nebraska',		- https://revenue.nebraska.gov/businesses/nebraska-circular-en-nebraska-income-tax-withholding-wages-pensions-and-annuities-and *Nebraska  Circular EN, Income Tax Withholding on Wages
+NOCHANGE:19-Dec-19				'GA' => 'Georgia',		- http://dor.georgia.gov/withholding-tax-information or https://dor.georgia.gov/documents/2018-employers-tax-guide *Employers Tax Guide
 
 //Rarely change
-CHANGED:11-Dec-18				'IA' => 'Iowa',			- https://tax.iowa.gov/withholding-tax-information-0 *Iowa Withholding Tax Guide
-CHANGED:14-Dec-18				'MI' => 'Michigan',		- http://www.michigan.gov/taxes/0,4676,7-238-43519_43531---,00.html *Michigan Income Tax Withholding Guide 446-I
-CHANGED:26-Dec-18				'MS' => 'Mississippi',	- http://www.dor.ms.gov/Business/Pages/Withholding-Tax.aspx *Pub 89-700
-*CHECKAGAIN-*:11-Dec-18			'AR' => 'Arkansas'		- https://www.dfa.arkansas.gov/income-tax/withholding-tax-branch/withholding-tax-forms-and-instructions/ *Witholding Tax Formula ***They use a minus calculation, so we have to manually calculate each bracket ourselves. Use tax_table_bracket_calculator.ods
-*CHECKAGAIN-*:14-Dec-18			'LA' => 'Louisiana',	- http://revenue.louisiana.gov/WithholdingTax *R-1210 or R-1306
-*CHECKAGAIN-*:11-Dec-18			'NJ' => 'New Jersey',	- http://www.state.nj.us/treasury/taxation/freqqite.shtml *Withholding Rate Tables
-*CHECKAGAIN-*:11-Dec-18			'PA' => 'Pennsylvania', - http://www.revenue.pa.gov/GeneralTaxInformation/Tax%20Types%20and%20Information/EmployerWithholding/Pages/default.aspx *Rev 415 - Employer Withholding Information
-CHANGED:01-May-19				'VA' => 'Virginia',		- http://www.tax.virginia.gov/content/withholding-tax *Employer Withholding Instructions
-*CHECKAGAIN-*:11-Dec-18			'WV' => 'West Virginia',- http://tax.wv.gov/Business/Withholding/Pages/WithholdingTaxForms.aspx *IT-100.1A
-*CHECKAGAIN-*:11-Dec-18			'UT' => 'Utah',			- http://tax.utah.gov/withholding *PUB 14, Withholding Tax Guide
-*CHECKAGAIN-*:11-Dec-18			'MT' => 'Montana',		- https://mtrevenue.gov/taxes/wage-withholding/ *Montana Withholding Tax Table and Guide link at the top.
-*CHECKAGAIN-*:11-Dec-18			'AZ' => 'Arizona',		- http://www.azdor.gov/Forms/Withholding.aspx *Form A4: Employees choose a straight percent to pick.
-NOCHANGE:02-Jan-19				'IN' => 'Indiana',		- http://www.in.gov/dor/4006.htm#withholding *Departmental Notice #1 DN01
+*CHECKAGAIN-*:14-Dec-19			'MS' => 'Mississippi',	- http://www.dor.ms.gov/Business/Pages/Withholding-Tax.aspx *Pub 89-700
+*CHECKAGAIN-*:14-Dec-19			'AR' => 'Arkansas'		- https://www.dfa.arkansas.gov/income-tax/withholding-tax-branch/withholding-tax-forms-and-instructions/ *Witholding Tax Formula ***They use a minus calculation, so we have to manually calculate each bracket ourselves. Use tax_table_bracket_calculator.ods
+*CHECKAGAIN-*:14-Dec-19			'LA' => 'Louisiana',	- http://revenue.louisiana.gov/WithholdingTax *R-1210 or R-1306
+*CHECKAGAIN-*:14-Dec-19			'NJ' => 'New Jersey',	- http://www.state.nj.us/treasury/taxation/freqqite.shtml *Withholding Rate Tables
+*CHECKAGAIN-*:14-Dec-19			'PA' => 'Pennsylvania', - http://www.revenue.pa.gov/GeneralTaxInformation/Tax%20Types%20and%20Information/EmployerWithholding/Pages/default.aspx *Rev 415 - Employer Withholding Information
+*CHECKAGAIN-*:14-Dec-19			'VA' => 'Virginia',		- http://www.tax.virginia.gov/content/withholding-tax *Employer Withholding Instructions
+*CHECKAGAIN-*:14-Dec-19			'WV' => 'West Virginia',- http://tax.wv.gov/Business/Withholding/Pages/WithholdingTaxForms.aspx *IT-100.1A
+*CHECKAGAIN-*:14-Dec-19			'UT' => 'Utah',			- http://tax.utah.gov/withholding *PUB 14, Withholding Tax Guide
+*CHECKAGAIN-*:14-Dec-19			'MT' => 'Montana',		- https://mtrevenue.gov/taxes/wage-withholding/ *Montana Withholding Tax Table and Guide link at the top.
+NOCHANGE:14-Dec-19				'IN' => 'Indiana',		- http://www.in.gov/dor/4006.htm#withholding *Departmental Notice #1 DN01
+NOCHANGE:14-Dec-19				'AZ' => 'Arizona',		- http://www.azdor.gov/Forms/Withholding.aspx *Form A-4: Employees choose a straight percent to pick.
 
 	'AK' => 'Alaska',		- NO STATE TAXES
 	'FL' => 'Florida',		- NO STATE TAXES
@@ -132,24 +132,30 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 	var $country_primary_currency = 'USD';
 
 	var $federal_allowance = array(
-			20190101 => 4200.00, //01-Jan-19
-			20180101 => 4150.00, //01-Jan-18
+			20200101 => 4300.00,
+			20190101 => 4200.00,
+			20180101 => 4150.00,
 			//01-Jan-17 - No Change.
-			20160101 => 4050.00, //01-Jan-16
-			20150101 => 4000.00, //01-Jan-15
-			20140101 => 3950.00, //01-Jan-14
-			20130101 => 3900.00, //01-Jan-13
-			20120101 => 3800.00, //01-Jan-12
-			20110101 => 3700.00, //01-Jan-11
+			20160101 => 4050.00,
+			20150101 => 4000.00,
+			20140101 => 3950.00,
+			20130101 => 3900.00,
+			20120101 => 3800.00,
+			20110101 => 3700.00,
 			//01-Jan-10 - No Change
-			20090101 => 3650.00, //01-Jan-09
-			20080101 => 3500.00, //01-Jan-08
-			20070101 => 3400.00, //01-Jan-07
-			20060101 => 3300.00  //01-Jan-06
+			20090101 => 3650.00,
+			20080101 => 3500.00,
+			20070101 => 3400.00,
+			20060101 => 3300.00,
 	);
 
 	//http://www.ssa.gov/pressoffice/factsheets/colafacts2013.htm
 	var $social_security_options = array(
+			20200101 => array( //2020
+							   'maximum_earnings' => 137700,
+							   'employee_rate'    => 6.2,
+							   'employer_rate'    => 6.2,
+			),
 			20190101 => array( //2019
 							   'maximum_earnings' => 132900,
 							   'employee_rate'    => 6.2,
@@ -247,6 +253,72 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 		Federal Income Tax Rates
 	*/
 	var $federal_income_tax_rate_options = array(
+			20200101 => array(
+					0 => array( //2019 W4 *OR* 2020 W4 and One Job
+								10 => array( //Single or Married Filing Separately
+											 array('income' => 3800, 'rate' => 0, 'constant' => 0),
+											 array('income' => 13675, 'rate' => 10, 'constant' => 0),
+											 array('income' => 43925, 'rate' => 12, 'constant' => 987.50),
+											 array('income' => 89325, 'rate' => 22, 'constant' => 4617.50),
+											 array('income' => 167100, 'rate' => 24, 'constant' => 14605.50),
+											 array('income' => 211150, 'rate' => 32, 'constant' => 33271.50),
+											 array('income' => 522200, 'rate' => 35, 'constant' => 47367.50),
+											 array('income' => 522200, 'rate' => 37, 'constant' => 156235),
+								),
+								20 => array( //Married Filing Jointly
+											 array('income' => 11900, 'rate' => 0, 'constant' => 0),
+											 array('income' => 31650, 'rate' => 10, 'constant' => 0),
+											 array('income' => 92150, 'rate' => 12, 'constant' => 1975),
+											 array('income' => 182950, 'rate' => 22, 'constant' => 9235),
+											 array('income' => 338500, 'rate' => 24, 'constant' => 29211),
+											 array('income' => 426600, 'rate' => 32, 'constant' => 66543),
+											 array('income' => 633950, 'rate' => 35, 'constant' => 94735),
+											 array('income' => 633950, 'rate' => 37, 'constant' => 167307.50),
+								),
+								40 => array( //Head of Household
+											 array('income' => 10050, 'rate' => 0, 'constant' => 0),
+											 array('income' => 24150, 'rate' => 10, 'constant' => 0),
+											 array('income' => 63750, 'rate' => 12, 'constant' => 1410),
+											 array('income' => 95550, 'rate' => 22, 'constant' => 6162),
+											 array('income' => 173350, 'rate' => 24, 'constant' => 13158),
+											 array('income' => 217400, 'rate' => 32, 'constant' => 31830),
+											 array('income' => 528450, 'rate' => 35, 'constant' => 45926),
+											 array('income' => 528450, 'rate' => 37, 'constant' => 154793.50),
+								),
+					),
+					1 => array( //2020 W4 *AND* Two or more jobs.
+								10 => array( //Single or Married Filing Separately
+											 array('income' => 6200, 'rate' => 0, 'constant' => 0),
+											 array('income' => 11138, 'rate' => 10, 'constant' => 0),
+											 array('income' => 26263, 'rate' => 12, 'constant' => 493.75),
+											 array('income' => 48963, 'rate' => 22, 'constant' => 2308.75),
+											 array('income' => 87850, 'rate' => 24, 'constant' => 7302.75),
+											 array('income' => 109875, 'rate' => 32, 'constant' => 16635.75),
+											 array('income' => 265400, 'rate' => 35, 'constant' => 23683.75),
+											 array('income' => 265400, 'rate' => 37, 'constant' => 78117.50),
+								),
+								20 => array( //Married Filing Jointly
+											 array('income' => 12400, 'rate' => 0, 'constant' => 0),
+											 array('income' => 22275, 'rate' => 10, 'constant' => 0),
+											 array('income' => 52525, 'rate' => 12, 'constant' => 987.50),
+											 array('income' => 97925, 'rate' => 22, 'constant' => 4617.50),
+											 array('income' => 175700, 'rate' => 24, 'constant' => 14605.50),
+											 array('income' => 219750, 'rate' => 32, 'constant' => 33271.50),
+											 array('income' => 323425, 'rate' => 35, 'constant' => 47367.50),
+											 array('income' => 323425, 'rate' => 37, 'constant' => 83653.75),
+								),
+								40 => array( //Head of Household
+											 array('income' => 9325, 'rate' => 0, 'constant' => 0),
+											 array('income' => 16375, 'rate' => 10, 'constant' => 0),
+											 array('income' => 36175, 'rate' => 12, 'constant' => 705),
+											 array('income' => 52075, 'rate' => 22, 'constant' => 3081),
+											 array('income' => 90975, 'rate' => 24, 'constant' => 6579),
+											 array('income' => 113000, 'rate' => 32, 'constant' => 15915),
+											 array('income' => 268525, 'rate' => 35, 'constant' => 22963),
+											 array('income' => 268525, 'rate' => 37, 'constant' => 77396.75),
+								),
+					),
+			),
 			20190101 => array(
 					10 => array( //Single
 								 array('income' => 3800, 'rate' => 0, 'constant' => 0),
@@ -576,11 +648,6 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 	}
 
 	function getData() {
-//		global $cache;
-//
-//		$country = $this->getCountry();
-//		$state = $this->getProvince();
-//		$district = $this->getDistrict();
 		$epoch = $this->getDate();
 
 		$federal_status = $this->getFederalFilingStatus();
@@ -606,6 +673,18 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 			$prev_constant = 0;
 
 			$federal_income_tax_rate_options = $this->getDataFromRateArray( $epoch, $this->federal_income_tax_rate_options );
+
+			$federal_multiple_jobs = (int)$this->getFederalMultipleJobs();
+			if ( isset( $federal_income_tax_rate_options[ $federal_multiple_jobs ] ) AND is_array( $federal_income_tax_rate_options[ $federal_multiple_jobs ] ) ) {
+				Debug::text( '  Found tax tables split by one or more jobs... Multiple Jobs setting: '. $federal_multiple_jobs, __FILE__, __LINE__, __METHOD__, 10 );
+				$federal_income_tax_rate_options = $federal_income_tax_rate_options[ $federal_multiple_jobs ];
+			}
+
+			//Since 2020 when the W4's changed, the tax tables were split based on if the employee has one or more jobs. So to keep pre-2020 unit tests working, if we don't find a tax table for the filing status revert back to Single filing status as that definitely does exist.
+			if ( !isset( $federal_income_tax_rate_options[ $federal_status ] ) ) {
+				$federal_status = 10; //Single
+			}
+
 			if ( !isset( $federal_income_tax_rate_options[ $federal_status ] ) AND isset( $federal_income_tax_rate_options[0] ) ) {
 				$federal_status = 0;
 			}
@@ -719,7 +798,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 	function getRateArray( $income, $type ) {
 		Debug::text( 'Calculating ' . $type . ' Taxes on: $' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$blank_arr = array( 'rate' => NULL, 'constant' => NULL, 'prev_income' => NULL, );
+		$blank_arr = array('rate' => NULL, 'constant' => NULL, 'prev_income' => NULL,);
 
 		if ( isset( $this->income_tax_rates[ $type ] ) ) {
 			$rates = $this->income_tax_rates[ $type ];

@@ -67,7 +67,7 @@ class APIUserTitle extends APIFactory {
 	}
 
 	/**
-	 * Get default UserTitle data for creating new UserTitlees.
+	 * Get default UserTitle data for creating new UserTitles.
 	 * @return array
 	 */
 	function getUserTitleDefaultData() {
@@ -83,7 +83,7 @@ class APIUserTitle extends APIFactory {
 	}
 
 	/**
-	 * Get UserTitle data for one or more UserTitlees.
+	 * Get UserTitle data for one or more UserTitles.
 	 * @param array $data filter data
 	 * @param bool $disable_paging
 	 * @return array
@@ -147,7 +147,7 @@ class APIUserTitle extends APIFactory {
 	}
 
 	/**
-	 * Validate UserTitle data for one or more UserTitlees.
+	 * Validate UserTitle data for one or more UserTitles.
 	 * @param array $data UserTitle data
 	 * @return array
 	 */
@@ -156,7 +156,7 @@ class APIUserTitle extends APIFactory {
 	}
 
 	/**
-	 * Set UserTitle data for one or more UserTitlees.
+	 * Set UserTitle data for one or more UserTitles.
 	 * @param array $data UserTitle data
 	 * @param bool $validate_only
 	 * @param bool $ignore_warning
@@ -345,7 +345,7 @@ class APIUserTitle extends APIFactory {
 	}
 
 	/**
-	 * Copy one or more UserTitlees.
+	 * Copy one or more UserTitles.
 	 * @param array $data UserTitle IDs
 	 * @return array
 	 */

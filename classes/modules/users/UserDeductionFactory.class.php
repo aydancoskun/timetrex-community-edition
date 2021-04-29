@@ -518,23 +518,14 @@ class UserDeductionFactory extends Factory {
 		//Calculates the deduction.
 		$cd_obj = $this->getCompanyDeductionObject();
 
-		if ( $this->getUserValue1() == '' ) {
-			$user_value1 = $cd_obj->getUserValue1();
-		} else {
-			$user_value1 = $this->getUserValue1();
-		}
-
-		if ( $this->getUserValue2() == '' ) {
-			$user_value2 = $cd_obj->getUserValue2();
-		} else {
-			$user_value2 = $this->getUserValue2();
-		}
-
-		if ( $this->getUserValue3() == '' ) {
-			$user_value3 = $cd_obj->getUserValue3();
-		} else {
-			$user_value3 = $this->getUserValue3();
-		}
+		$user_value1 = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
+		$user_value2 = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
+		$user_value3 = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
+		$user_value4 = ( ( $this->getUserValue4() == '' ) ? $cd_obj->getUserValue4() : $this->getUserValue4() );
+		$user_value5 = ( ( $this->getUserValue5() == '' ) ? $cd_obj->getUserValue5() : $this->getUserValue5() );
+		$user_value6 = ( ( $this->getUserValue6() == '' ) ? $cd_obj->getUserValue6() : $this->getUserValue6() );
+		$user_value7 = ( ( $this->getUserValue7() == '' ) ? $cd_obj->getUserValue7() : $this->getUserValue7() );
+		$user_value9 = ( ( $this->getUserValue9() == '' ) ? $cd_obj->getUserValue9() : $this->getUserValue9() );
 
 		if ( $transaction_date == '' ) {
 			$transaction_date = time();
@@ -556,7 +547,13 @@ class UserDeductionFactory extends Factory {
 					$pd_obj->setFederalTotalClaimAmount( $user_value1 );
 					$retval = $country_label .' - '. TTI18n::getText('Claim Amount').': $'. Misc::MoneyFormat( $pd_obj->getFederalTotalClaimAmount() );
 				} elseif ( $cd_obj->getCountry() == 'US' ) {
-					$retval = $country_label .' - '. TTI18n::getText('Filing Status') .': '. Option::getByKey( $user_value1, $cd_obj->getOptions('federal_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
+					$retval = $country_label .' - '. TTI18n::getText('Filing Status') .': '. Option::getByKey( $user_value1, $cd_obj->getOptions('federal_filing_status') );
+					if ( $user_value9 == 2020 ) {
+						$retval .= ' ' . TTI18n::getText( 'Claim Dependents' ) . ': ' . $user_value4;
+					} else {
+						$retval .= ' ' . TTI18n::getText( 'Allowances' ) . ': ' . (int)$user_value2;
+					}
+
 					if ( (int)$this->getUserValue10() >= 1 ) {
 						$retval .= ' '. TTI18n::getText('Exempt');
 					}
@@ -745,11 +742,7 @@ class UserDeductionFactory extends Factory {
 		Debug::Text('Company Deduction: ID: '. $cd_obj->getID() .' Name: '. $cd_obj->getName() .' Calculation ID: '. $cd_obj->getCalculation(), __FILE__, __LINE__, __METHOD__, 10);
 		switch ( $cd_obj->getCalculation() ) {
 			case 10: //Basic Percent
-				if ( $this->getUserValue1() == '' ) {
-					$percent = $cd_obj->getUserValue1();
-				} else {
-					$percent = $this->getUserValue1();
-				}
+				$percent = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
 				$percent = $this->Validator->stripNonFloat( $percent );
 
 				$amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
@@ -758,25 +751,13 @@ class UserDeductionFactory extends Factory {
 
 				break;
 			case 15: //Advanced Percent
-				if ( $this->getUserValue1() == '' ) {
-					$percent = $cd_obj->getUserValue1();
-				} else {
-					$percent = $this->getUserValue1();
-				}
+				$percent = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
 				$percent = $this->Validator->stripNonFloat( $percent );
 
-				if ( $this->getUserValue2() == '' ) {
-					$wage_base = $cd_obj->getUserValue2();
-				} else {
-					$wage_base = $this->getUserValue2();
-				}
+				$wage_base = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
 				$wage_base = $this->Validator->stripNonFloat( $wage_base );
 
-				if ( $this->getUserValue3() == '' ) {
-					$exempt_amount = $cd_obj->getUserValue3();
-				} else {
-					$exempt_amount = $this->getUserValue3();
-				}
+				$exempt_amount = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
 				$exempt_amount = $this->Validator->stripNonFloat( $exempt_amount );
 
 				//Annual Wage Base is the maximum earnings that an employee can earn before they are no longer eligible for this deduction
@@ -842,25 +823,13 @@ class UserDeductionFactory extends Factory {
 
 				break;
 			case 16: //Advanced Percent (w/Target)
-				if ( $this->getUserValue1() == '' ) {
-					$percent = $cd_obj->getUserValue1();
-				} else {
-					$percent = $this->getUserValue1();
-				}
+				$percent = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
 				$percent = $this->Validator->stripNonFloat( $percent );
 
-				if ( $this->getUserValue2() == '' ) {
-					$target_amount = $cd_obj->getUserValue2();
-				} else {
-					$target_amount = $this->getUserValue2();
-				}
+				$target_amount = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
 				$target_amount = $this->Validator->stripNonFloat( $target_amount );
 
-				if ( $this->getUserValue3() == '' ) {
-					$target_ytd_amount = $cd_obj->getUserValue3();
-				} else {
-					$target_ytd_amount = $this->getUserValue3();
-				}
+				$target_ytd_amount = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
 				$target_ytd_amount = $this->Validator->stripNonFloat( $target_ytd_amount );
 
 				Debug::Text('Percent: '. $percent .' Target Amount: '. $target_amount .' YTD Amount: '. $target_ytd_amount, __FILE__, __LINE__, __METHOD__, 10);
@@ -897,39 +866,19 @@ class UserDeductionFactory extends Factory {
 				unset($amount, $ytd_amount, $percent, $percent_amount, $filtered_amount, $filtered_ytd_amount, $target_amount, $target_ytd_amount);
 				break;
 			case 17: //Advanced Percent (Range Bracket)
-				if ( $this->getUserValue1() == '' ) {
-					$percent = $cd_obj->getUserValue1();
-				} else {
-					$percent = $this->getUserValue1();
-				}
+				$percent = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
 				$percent = $this->Validator->stripNonFloat( $percent );
 
-				if ( $this->getUserValue2() == '' ) {
-					$min_wage = $cd_obj->getUserValue2();
-				} else {
-					$min_wage = $this->getUserValue2();
-				}
+				$min_wage = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
 				$min_wage = $this->Validator->stripNonFloat( $min_wage );
 
-				if ( $this->getUserValue3() == '' ) {
-					$max_wage = $cd_obj->getUserValue3();
-				} else {
-					$max_wage = $this->getUserValue3();
-				}
+				$max_wage = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
 				$max_wage = $this->Validator->stripNonFloat( $max_wage );
 
-				if ( $this->getUserValue4() == '' ) {
-					$annual_deduction_amount = $cd_obj->getUserValue4();
-				} else {
-					$annual_deduction_amount = $this->getUserValue4();
-				}
+				$annual_deduction_amount = ( ( $this->getUserValue4() == '' ) ? $cd_obj->getUserValue4() : $this->getUserValue4() );
 				$annual_deduction_amount = $this->Validator->stripNonFloat( $annual_deduction_amount );
 
-				if ( $this->getUserValue5() == '' ) {
-					$annual_fixed_amount = $cd_obj->getUserValue5();
-				} else {
-					$annual_fixed_amount = $this->getUserValue5();
-				}
+				$annual_fixed_amount = ( ( $this->getUserValue5() == '' ) ? $cd_obj->getUserValue5() : $this->getUserValue5() );
 				$annual_fixed_amount = $this->Validator->stripNonFloat( $annual_fixed_amount );
 
 				$min_wage = bcdiv( $min_wage, $annual_pay_periods);
@@ -958,32 +907,16 @@ class UserDeductionFactory extends Factory {
 
 				break;
 			case 18: //Advanced Percent (Tax Bracket)
-				if ( $this->getUserValue1() == '' ) {
-					$percent = $cd_obj->getUserValue1();
-				} else {
-					$percent = $this->getUserValue1();
-				}
+				$percent = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
 				$percent = $this->Validator->stripNonFloat( $percent );
 
-				if ( $this->getUserValue2() == '' ) {
-					$wage_base = $cd_obj->getUserValue2();
-				} else {
-					$wage_base = $this->getUserValue2();
-				}
+				$wage_base = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
 				$wage_base = $this->Validator->stripNonFloat( $wage_base );
 
-				if ( $this->getUserValue3() == '' ) {
-					$exempt_amount = $cd_obj->getUserValue3();
-				} else {
-					$exempt_amount = $this->getUserValue3();
-				}
+				$exempt_amount = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
 				$exempt_amount = $this->Validator->stripNonFloat( $exempt_amount );
 
-				if ( $this->getUserValue4() == '' ) {
-					$annual_deduction_amount = $cd_obj->getUserValue4();
-				} else {
-					$annual_deduction_amount = $this->getUserValue4();
-				}
+				$annual_deduction_amount = ( ( $this->getUserValue4() == '' ) ? $cd_obj->getUserValue4() : $this->getUserValue4() );
 				$annual_deduction_amount = $this->Validator->stripNonFloat( $annual_deduction_amount );
 
 				Debug::Text('Percent: '. $percent .' Wage Base: '. $wage_base .' Exempt Amount: '. $exempt_amount, __FILE__, __LINE__, __METHOD__, 10);
@@ -1042,39 +975,19 @@ class UserDeductionFactory extends Factory {
 					Wage between 10, 001 - 20, 000 calculate 15% + $1000 (10% of 10, 000 as per above)
 					Wage between 20, 001 - 30, 000 calculate 20% + $2500 (10% of 10, 000 as first bracket, and 15% of 10, 000 as per 2nd bracket)
 				*/
-				if ( $this->getUserValue1() == '' ) {
-					$percent = $cd_obj->getUserValue1();
-				} else {
-					$percent = $this->getUserValue1();
-				}
+				$percent = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
 				$percent = $this->Validator->stripNonFloat( $percent );
 
-				if ( $this->getUserValue2() == '' ) {
-					$min_wage = $cd_obj->getUserValue2();
-				} else {
-					$min_wage = $this->getUserValue2();
-				}
+				$min_wage = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
 				$min_wage = $this->Validator->stripNonFloat( $min_wage );
 
-				if ( $this->getUserValue3() == '' ) {
-					$max_wage = $cd_obj->getUserValue3();
-				} else {
-					$max_wage = $this->getUserValue3();
-				}
+				$max_wage = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
 				$max_wage = $this->Validator->stripNonFloat( $max_wage );
 
-				if ( $this->getUserValue4() == '' ) {
-					$annual_deduction_amount = $cd_obj->getUserValue4();
-				} else {
-					$annual_deduction_amount = $this->getUserValue4();
-				}
+				$annual_deduction_amount = ( ( $this->getUserValue4() == '' ) ? $cd_obj->getUserValue4() : $this->getUserValue4() );
 				$annual_deduction_amount = $this->Validator->stripNonFloat( $annual_deduction_amount );
 
-				if ( $this->getUserValue5() == '' ) {
-					$annual_fixed_amount = $cd_obj->getUserValue5();
-				} else {
-					$annual_fixed_amount = $this->getUserValue5();
-				}
+				$annual_fixed_amount = ( ( $this->getUserValue5() == '' ) ? $cd_obj->getUserValue5() : $this->getUserValue5() );
 				$annual_fixed_amount = $this->Validator->stripNonFloat( $annual_fixed_amount );
 
 				$min_wage = bcdiv( $min_wage, $annual_pay_periods);
@@ -1103,11 +1016,7 @@ class UserDeductionFactory extends Factory {
 
 				break;
 			case 20: //Fixed amount
-				if ( $this->getUserValue1() == '' ) {
-					$amount = $cd_obj->getUserValue1();
-				} else {
-					$amount = $this->getUserValue1();
-				}
+				$amount = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
 				$amount = $this->Validator->stripNonFloat( $amount );
 
 				$retval = $amount;
@@ -1115,32 +1024,16 @@ class UserDeductionFactory extends Factory {
 
 				break;
 			case 30: //Fixed Amount (Range Bracket)
-				if ( $this->getUserValue1() == '' ) {
-					$fixed_amount = $cd_obj->getUserValue1();
-				} else {
-					$fixed_amount = $this->getUserValue1();
-				}
+				$fixed_amount = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
 				$fixed_amount = $this->Validator->stripNonFloat( $fixed_amount );
 
-				if ( $this->getUserValue2() == '' ) {
-					$min_wage = $cd_obj->getUserValue2();
-				} else {
-					$min_wage = $this->getUserValue2();
-				}
+				$min_wage = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
 				$min_wage = $this->Validator->stripNonFloat( $min_wage );
 
-				if ( $this->getUserValue3() == '' ) {
-					$max_wage = $cd_obj->getUserValue3();
-				} else {
-					$max_wage = $this->getUserValue3();
-				}
+				$max_wage = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
 				$max_wage = $this->Validator->stripNonFloat( $max_wage );
 
-				if ( $this->getUserValue4() == '' ) {
-					$annual_deduction_amount = $cd_obj->getUserValue4();
-				} else {
-					$annual_deduction_amount = $this->getUserValue4();
-				}
+				$annual_deduction_amount = ( ( $this->getUserValue4() == '' ) ? $cd_obj->getUserValue4() : $this->getUserValue4() );
 				$annual_deduction_amount = $this->Validator->stripNonFloat( $annual_deduction_amount );
 
 				$min_wage = bcdiv( $min_wage, $annual_pay_periods);
@@ -1164,18 +1057,10 @@ class UserDeductionFactory extends Factory {
 
 				break;
 			case 52: //Fixed Amount (w/Limit)
-				if ( $this->getUserValue1() == '' ) {
-					$fixed_amount = $cd_obj->getUserValue1();
-				} else {
-					$fixed_amount = $this->getUserValue1();
-				}
+				$fixed_amount = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
 				$fixed_amount = $this->Validator->stripNonFloat( $fixed_amount );
 
-				if ( $this->getUserValue2() == '' ) {
-					$target_amount = $cd_obj->getUserValue2();
-				} else {
-					$target_amount = $this->getUserValue2();
-				}
+				$target_amount = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
 				$target_amount = $this->Validator->stripNonFloat( $target_amount );
 
 				Debug::Text('Fixed Amount: '. $fixed_amount .' Target Amount: '. $target_amount, __FILE__, __LINE__, __METHOD__, 10);
@@ -1194,65 +1079,17 @@ class UserDeductionFactory extends Factory {
 
 				break;
 			case 69: // Custom Formulas
-				if ( $this->getUserValue1() == '' ) {
-					$user_value1 = $cd_obj->getUserValue1();
-				} else {
-					$user_value1 = $this->getUserValue1();
-				}
+				$user_value1 = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
+				$user_value2 = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
+				$user_value3 = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
+				$user_value4 = ( ( $this->getUserValue4() == '' ) ? $cd_obj->getUserValue4() : $this->getUserValue4() );
+				$user_value5 = ( ( $this->getUserValue5() == '' ) ? $cd_obj->getUserValue5() : $this->getUserValue5() );
+				$user_value6 = ( ( $this->getUserValue6() == '' ) ? $cd_obj->getUserValue6() : $this->getUserValue6() );
+				$user_value7 = ( ( $this->getUserValue7() == '' ) ? $cd_obj->getUserValue7() : $this->getUserValue7() );
+				$user_value8 = ( ( $this->getUserValue8() == '' ) ? $cd_obj->getUserValue8() : $this->getUserValue8() );
+				$user_value9 = ( ( $this->getUserValue9() == '' ) ? $cd_obj->getUserValue9() : $this->getUserValue9() );
+				$user_value10 = ( ( $this->getUserValue10() == '' ) ? $cd_obj->getUserValue10() : $this->getUserValue10() );
 
-				if ( $this->getUserValue2() == '' ) {
-					$user_value2 = $cd_obj->getUserValue2();
-				} else {
-					$user_value2 = $this->getUserValue2();
-				}
-
-				if ( $this->getUserValue3() == '' ) {
-					$user_value3 = $cd_obj->getUserValue3();
-				} else {
-					$user_value3 = $this->getUserValue3();
-				}
-
-				if ( $this->getUserValue4() == '' ) {
-					$user_value4 = $cd_obj->getUserValue4();
-				} else {
-					$user_value4 = $this->getUserValue4();
-				}
-
-				if ( $this->getUserValue5() == '' ) {
-					$user_value5 = $cd_obj->getUserValue5();
-				} else {
-					$user_value5 = $this->getUserValue5();
-				}
-
-				if ( $this->getUserValue6() == '' ) {
-					$user_value6 = $cd_obj->getUserValue6();
-				} else {
-					$user_value6 = $this->getUserValue6();
-				}
-
-				if ( $this->getUserValue7() == '' ) {
-					$user_value7 = $cd_obj->getUserValue7();
-				} else {
-					$user_value7 = $this->getUserValue7();
-				}
-
-				if ( $this->getUserValue8() == '' ) {
-					$user_value8 = $cd_obj->getUserValue8();
-				} else {
-					$user_value8 = $this->getUserValue8();
-				}
-
-				if ( $this->getUserValue9() == '' ) {
-					$user_value9 = $cd_obj->getUserValue9();
-				} else {
-					$user_value9 = $this->getUserValue9();
-				}
-
-				if ( $this->getUserValue10() == '' ) {
-					$user_value10 = $cd_obj->getUserValue10();
-				} else {
-					$user_value10 = $this->getUserValue10();
-				}
 				// evaluate math expressions as the company_value1 and user_value1-10 defined by user.
 				$company_value1 = $cd_obj->getCompanyValue1(); // Custom Formula
 
@@ -1681,20 +1518,15 @@ class UserDeductionFactory extends Factory {
 
 				break;
 			case 100: //Federal Income Tax
-				if ( $this->getUserValue1() == '' ) {
-					$user_value1 = $cd_obj->getUserValue1();
-				} else {
-					$user_value1 = $this->getUserValue1();
-				}
-
-				if ( $this->getUserValue2() == '' ) {
-					$user_value2 = $cd_obj->getUserValue2();
-				} else {
-					$user_value2 = $this->getUserValue2();
-				}
-
-				Debug::Text('UserValue1: '. $user_value1, __FILE__, __LINE__, __METHOD__, 10);
-				Debug::Text('UserValue2: '. $user_value2, __FILE__, __LINE__, __METHOD__, 10);
+				$user_value1 = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
+				$user_value2 = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
+				$user_value3 = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
+				$user_value4 = ( ( $this->getUserValue4() == '' ) ? $cd_obj->getUserValue4() : $this->getUserValue4() );
+				$user_value5 = ( ( $this->getUserValue5() == '' ) ? $cd_obj->getUserValue5() : $this->getUserValue5() );
+				$user_value6 = ( ( $this->getUserValue6() == '' ) ? $cd_obj->getUserValue6() : $this->getUserValue6() );
+				$user_value7 = ( ( $this->getUserValue7() == '' ) ? $cd_obj->getUserValue7() : $this->getUserValue7() );
+				$user_value9 = ( ( $this->getUserValue9() == '' ) ? $cd_obj->getUserValue9() : $this->getUserValue9() );
+				Debug::Text('UserValue: 1: '. $user_value1 .' 2: '. $user_value2 .' 3: '. $user_value3 .' 4: '. $user_value4 .' 5: '. $user_value5 .' 6: '. $user_value6 .' 7: '. $user_value7 .' 9: '. $user_value9, __FILE__, __LINE__, __METHOD__, 10);
 
 				$amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
 
@@ -1782,12 +1614,23 @@ class UserDeductionFactory extends Factory {
 					}
 					unset( $cdlf );
 				} elseif ( $cd_obj->getCountry() == 'US' ) {
+					$user_value2 = $this->Validator->stripNonFloat( $user_value2 );
+					//UserValue3 is boolean.
+					$user_value4 = $this->Validator->stripNonFloat( $user_value4 );
+					$user_value5 = $this->Validator->stripNonFloat( $user_value5 );
+					$user_value6 = $this->Validator->stripNonFloat( $user_value6 );
+					$user_value7 = $this->Validator->stripNonFloat( $user_value7 );
+
 					//US
+					$pd_obj->setFederalFormW4Version( $user_value9 );
 					$pd_obj->setFederalFilingStatus( $user_value1 );
 					$pd_obj->setFederalAllowance( $user_value2 );
-					if ( (int)$this->getUserValue10() >= 1 ) {
-						$pd_obj->setFederalTaxExempt( TRUE );
-					}
+					$pd_obj->setFederalMultipleJobs( ( ( (int)$user_value3 >= 1 ) ? TRUE : FALSE ) );
+					$pd_obj->setFederalClaimDependents( $user_value4 );
+					$pd_obj->setFederalOtherIncome( $user_value5 );
+					$pd_obj->setFederalDeductions( $user_value6 );
+					$pd_obj->setFederalAdditionalDeduction( $user_value7 );
+					$pd_obj->setFederalTaxExempt( ( ( (int)$this->getUserValue10() >= 1 ) ? TRUE : FALSE ) );
 				} elseif ( $cd_obj->getCountry() == 'CR' ) {
 					//CR
 					$pd_obj->setFederalFilingStatus( $user_value1 ); //Single/Married
@@ -1802,27 +1645,10 @@ class UserDeductionFactory extends Factory {
 
 				break;
 			case 200: //Province Income Tax
-				if ( $this->getUserValue1() == '' ) {
-					$user_value1 = $cd_obj->getUserValue1();
-				} else {
-					$user_value1 = $this->getUserValue1();
-				}
-
-				if ( $this->getUserValue2() == '' ) {
-					$user_value2 = $cd_obj->getUserValue2();
-				} else {
-					$user_value2 = $this->getUserValue2();
-				}
-
-				if ( $this->getUserValue3() == '' ) {
-					$user_value3 = $cd_obj->getUserValue3();
-				} else {
-					$user_value3 = $this->getUserValue3();
-				}
-
-				Debug::Text('UserValue1: '. $user_value1, __FILE__, __LINE__, __METHOD__, 10);
-				Debug::Text('UserValue2: '. $user_value2, __FILE__, __LINE__, __METHOD__, 10);
-				Debug::Text('UserValue3: '. $user_value3, __FILE__, __LINE__, __METHOD__, 10);
+				$user_value1 = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
+				$user_value2 = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
+				$user_value3 = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
+				Debug::Text('UserValue: 1: '. $user_value1 .' 2: '. $user_value2 .' 3: '. $user_value3, __FILE__, __LINE__, __METHOD__, 10);
 
 				$amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
 
@@ -1964,27 +1790,10 @@ class UserDeductionFactory extends Factory {
 
 				break;
 			case 300: //District Income Tax
-				if ( $this->getUserValue1() == '' ) {
-					$user_value1 = $cd_obj->getUserValue1();
-				} else {
-					$user_value1 = $this->getUserValue1();
-				}
-
-				if ( $this->getUserValue2() == '' ) {
-					$user_value2 = $cd_obj->getUserValue2();
-				} else {
-					$user_value2 = $this->getUserValue2();
-				}
-
-				if ( $this->getUserValue3() == '' ) {
-					$user_value3 = $cd_obj->getUserValue3();
-				} else {
-					$user_value3 = $this->getUserValue3();
-				}
-
-				Debug::Text('UserValue1: '. $user_value1, __FILE__, __LINE__, __METHOD__, 10);
-				Debug::Text('UserValue2: '. $user_value2, __FILE__, __LINE__, __METHOD__, 10);
-				Debug::Text('UserValue3: '. $user_value3, __FILE__, __LINE__, __METHOD__, 10);
+				$user_value1 = ( ( $this->getUserValue1() == '' ) ? $cd_obj->getUserValue1() : $this->getUserValue1() );
+				$user_value2 = ( ( $this->getUserValue2() == '' ) ? $cd_obj->getUserValue2() : $this->getUserValue2() );
+				$user_value3 = ( ( $this->getUserValue3() == '' ) ? $cd_obj->getUserValue3() : $this->getUserValue3() );
+				Debug::Text('UserValue: 1: '. $user_value1 .' 2: '. $user_value2 .' 3: '. $user_value3, __FILE__, __LINE__, __METHOD__, 10);
 
 				$amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
 

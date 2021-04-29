@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
+
+<!--
+Description	TFSA Return Complex and Element Types
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<!-- @@@@ Definition of TFSA ComplexTypes @@@@  2011/June/22  Version# 1.11 (version #.yy)-->
 	<xsd:complexType name="TFSASlipType">
 		<xsd:sequence>
 			<xsd:element name="TFSA_TRANS" type="TFSASlipTransactionType" minOccurs="0" maxOccurs="unbounded"/>
@@ -115,6 +121,7 @@
 		<xsd:all>
 			<xsd:element name="bn" type="bnType"/>
 			<xsd:element name="summ_tcd" type="otherDataType"/>
+			<xsd:element name="fileramendmentnote" type="char1309Type" minOccurs="0"/>
 			<xsd:element name="rpt_yr" type="yearType"/>
 			<xsd:element name="tfsa_pln_id" type="numeric8Type"/>
 			<xsd:element name="slp_cnt" type="int7Type"/>

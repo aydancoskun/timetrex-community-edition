@@ -116,15 +116,19 @@ function moveUpgradeFiles( $upgrade_staging_latest_dir ) {
 }
 
 function setAutoUpgradeFailed( $value = 1 ) {
-	SystemSettingFactory::setSystemSetting( 'auto_upgrade_failed', $value );
-	if ( $value == 1 ) {
-		Debug::Text('ERROR: AutoUpgrade Failed, setting failed flag...', __FILE__, __LINE__, __METHOD__, 10);
-	} else {
-		Debug::Text('AutoUpgrade Success, clearing failed flag...', __FILE__, __LINE__, __METHOD__, 10);
+	//When upgrading from pre-UUID versions, its possible if a failure occurs before the schema version upgrade has fully completed,
+	// setSystemSetting() will then fail with a PHP fatal error saying it can't find class TTUUID, preventing the error log from being captured.
+	if ( class_exists('TTUUID') == TRUE ) {
+		SystemSettingFactory::setSystemSetting( 'auto_upgrade_failed', $value );
+		if ( $value == 1 ) {
+			Debug::Text( 'ERROR: AutoUpgrade Failed, setting failed flag...', __FILE__, __LINE__, __METHOD__, 10 );
+		} else {
+			Debug::Text( 'AutoUpgrade Success, clearing failed flag...', __FILE__, __LINE__, __METHOD__, 10 );
 
-		//Clear other messages that likely aren't valid anymore.
-		SystemSettingFactory::setSystemSetting( 'valid_install_requirements', 1 );
-		SystemSettingFactory::setSystemSetting( 'new_version', 0 );
+			//Clear other messages that likely aren't valid anymore.
+			SystemSettingFactory::setSystemSetting( 'valid_install_requirements', 1 );
+			SystemSettingFactory::setSystemSetting( 'new_version', 0 );
+		}
 	}
 
 	return TRUE;
@@ -635,7 +639,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 							$latest_unattended_upgrade_tool = $upgrade_staging_latest_dir . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'unattended_upgrade.php';
 							if ( file_exists( $latest_unattended_upgrade_tool ) ) {
 								if ( is_executable( $php_cli ) ) {
-									$command = '"'.$php_cli .'" "'. $latest_unattended_upgrade_tool .'" --config "'. CONFIG_FILE .'" --pre_requirements_update'; //Make each part is quoted in case there are spaces in the paths.
+									$command = '"'. $php_cli .'" -d opcache.enable_cli=0 "'. $latest_unattended_upgrade_tool .'" --config "'. CONFIG_FILE .'" --pre_requirements_update'; //Make each part is quoted in case there are spaces in the paths.
 									system( $command, $exit_code );
 									Debug::Text('Running pre-requirements update... Command: '. $command .' Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10);
 									if ( $exit_code == 0 ) {
@@ -643,7 +647,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 										$handle = @fopen('http://www.timetrex.com/'. URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_pre_requirements' ), 'pre_install.php'), 'r');
 										@fclose($handle);
 
-										$command = '"'.$php_cli .'" "'. $latest_unattended_upgrade_tool .'" --config "'. CONFIG_FILE .'" --requirements_only'; //Make each part is quoted in case there are spaces in the paths.
+										$command = '"'. $php_cli .'" -d opcache.enable_cli=0 "'. $latest_unattended_upgrade_tool .'" --config "'. CONFIG_FILE .'" --requirements_only'; //Make each part is quoted in case there are spaces in the paths.
 										system( $command, $exit_code );
 										Debug::Text('Checking new version system requirements... Command: '. $command .' Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10);
 										if ( $exit_code == 0 ) {
@@ -658,11 +662,16 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 
 											$global_class_map['TTUUID'] = 'core/TTUUID.class.php'; //Need to manually map the TTUUID class as it may be required by autoloaded classes in this process.
 
+											//Clear OPCACHE to help try to avoid calling ourself with opcached files from the old version.
+											if ( function_exists('opcache_reset') ) {
+												opcache_reset();
+											}
+
 											//Run separate process to finish stage2 of installer so it can be run with the new scripts.
 											//This allows us more flexibility if an error occurs to finish the install or have the latest version correct problems.
 											echo "Launching Stage 2...\n";
 											sleep(5);
-											$command = $php_cli .' '. __FILE__ .' --config '. CONFIG_FILE .' --stage2';
+											$command = '"'. $php_cli .'" -d opcache.enable_cli=0 "'. __FILE__ .'" --config "'. CONFIG_FILE .'" --stage2'; //Disable opcache on CLI
 
 											//Pass along force argument if it was originally supplied.
 											if ( $full_force == TRUE ) {

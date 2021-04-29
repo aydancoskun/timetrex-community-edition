@@ -48,13 +48,8 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		var $this = this;
 		this.initDropDownOption( 'status' );
 		this.initDropDownOption( 'type' );
-//		this.initDropDownOption( 'agency' );
 		this.initDropDownOption( 'payment_frequency' );
 		this.initDropDownOption( 'report_frequency' );
-//		this.initDropDownOption( 'day_of_week', 'payment_frequency_day_of_week' );
-//		this.initDropDownOption( 'week_interval', 'payment_frequency_week' );
-//		this.initDropDownOption( 'frequency_week', 'payment_frequency_week' );
-//		this.initDropDownOption( 'frequency_week', 'report_frequency_week' );
 		this.initDropDownOption( 'country', 'country', this.company_api );
 		this.api.getOptions( 'always_week_day', {
 			onResult: function( res ) {
@@ -209,7 +204,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		this.current_edit_record[key] = c_value;
 
 		if ( key === 'country' || key === 'type_id' || key === 'province' || key === 'district' ) {
-			this.getAgencyOptions();
+
 			if ( key != 'province' ) {
 				this.detachElement( 'province' );
 				this.eSetProvince( this.current_edit_record['country'] );
@@ -240,7 +235,6 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 	onAgencyIdChange: function() {
 		var id_field_array_api_params = { 'agency_id': this.edit_view_ui_dic.agency_id.getValue() };
 		var id_field_array = this.api.getOptions( 'agency_id_field_labels', id_field_array_api_params, { async: false } ).getResult();
-
 
 		this.detachElement( 'primary_identification' );
 		this.detachElement( 'secondary_identification' );
@@ -461,14 +455,13 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
 		this.onTypeChange();
-		var $this = this;
-		TTPromise.wait( null, null, function() {
-			$this.detachElement( 'province' );
-			$this.detachElement( 'district' );
-			$this.eSetProvince( $this.current_edit_record['country'] );
-			$this.setDistrict( $this.current_edit_record['country'], $this.current_edit_record['province'] );
-			$this.getAgencyOptions();
-		} );
+
+		this.detachElement( 'province' );
+		this.detachElement( 'district' );
+		this.eSetProvince( this.current_edit_record['country'] );
+		this.setDistrict( this.current_edit_record['country'], this.current_edit_record['province'] );
+
+		this.getAgencyOptions();
 	},
 
 	buildEditViewUI: function() {

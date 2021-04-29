@@ -471,8 +471,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
-
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

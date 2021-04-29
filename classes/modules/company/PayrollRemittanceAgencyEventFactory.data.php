@@ -8910,32 +8910,7 @@ return array(
 																	   ),
 										 ),
 								 ),
-								 'RI941QM' => array(
-										 'form_code'        => 'RI-941QM',
-										 'form_name'        => TTi18n::getText( 'RI-941QM Payment' ),
-										 'form_description' => TTi18n::getText( 'Rhode Island Withholding Tax Return (Quartermonthly)' ),
-										 'note'             => '',
-										 'tax_codes'        => array('INCOME', 'SS', 'MEDICARE'),
-										 'filing_methods'   => array('PRINT'),
-										 'payment_methods'  => array('CHECK'),
-										 'flags'            => array(
-												 'include_w2'          => FALSE,
-												 'file_zero_wage'      => TRUE,
-												 'file_zero_liability' => TRUE,
-												 'auto_file'           => FALSE,
-												 'auto_pay'            => FALSE,
-										 ),
-										 'frequency'        => array( //Due within 3 banking days after the last day of the quartermonthly period. Quarter monthly periods are monthly dates running from the 1st through 7th, 8th through 15th, 16th through 22nd and the 23rd through the last day of the month.
 
-																	  //Quarter-Monthly
-																	  array(
-																			  'status_id'           => 20, //Disabled
-																			  'frequency_id'        => 62000, //Quarter-Monthly
-																			  'due_date_delay_days' => 3,
-																			  'reminder_days'       => 14,
-																	  ),
-										 ),
-								 ),
 								 'RI941Q'  => array(
 										 'form_code'        => 'RI-941Q',
 										 'form_name'        => TTi18n::getText( 'RI-941Q Payment' ),
@@ -8986,7 +8961,58 @@ return array(
 																	  ),
 										 ),
 								 ),
-								 'RI941D'  => array(
+								 'RI941W'  => array(
+										 'form_code'        => 'RI-941W',
+										 'form_name'        => TTi18n::getText( 'RI-941W Payment' ),
+										 'form_description' => TTi18n::getText( 'Rhode Island Withholding Tax Return (Weekly)' ),
+										 'note'             => '',
+										 'tax_codes'        => array('INCOME', 'SS', 'MEDICARE'),
+										 'filing_methods'   => array('PRINT'),
+										 'payment_methods'  => array('CHECK'),
+										 'flags'            => array(
+												 'include_w2'          => FALSE,
+												 'file_zero_wage'      => TRUE,
+												 'file_zero_liability' => TRUE,
+												 'auto_file'           => FALSE,
+												 'auto_pay'            => FALSE,
+										 ),
+										 'frequency'        => array(    //Weekly
+																		 array(
+																				 'status_id'           => 20, //Disabled
+																				 'frequency_id'        => 5100, //Weekly
+																				 'day_of_week'         => 1, //Mon
+																				 'due_date_delay_days' => 0,
+																				 'reminder_days'       => 2,
+																		 ),
+										 ),
+								 ),
+								 'RI941QM' => array( //DISCONTINUED 01-Jan-2020, replaced by Weekly.
+													 'form_code'        => 'RI-941QM',
+													 'form_name'        => TTi18n::getText( 'RI-941QM Payment' ),
+													 'form_description' => TTi18n::getText( 'Rhode Island Withholding Tax Return (Quartermonthly)' ),
+													 'note'             => '',
+													 'tax_codes'        => array('INCOME', 'SS', 'MEDICARE'),
+													 'filing_methods'   => array('PRINT'),
+													 'payment_methods'  => array('CHECK'),
+													 'flags'            => array(
+															 'include_w2'          => FALSE,
+															 'file_zero_wage'      => TRUE,
+															 'file_zero_liability' => TRUE,
+															 'auto_file'           => FALSE,
+															 'auto_pay'            => FALSE,
+													 ),
+													 'frequency'        => array( //Due within 3 banking days after the last day of the quartermonthly period. Quarter monthly periods are monthly dates running from the 1st through 7th, 8th through 15th, 16th through 22nd and the 23rd through the last day of the month.
+
+																				  //Quarter-Monthly
+																				  array(
+																						  'status_id'           => 20, //Disabled
+																						  'frequency_id'        => 62000, //Quarter-Monthly
+																						  'due_date_delay_days' => 3,
+																						  'reminder_days'       => 14,
+																				  ),
+													 ),
+								 ),
+								 'RI941D'  => array( //DISCONTINUED 01-Jan-2020, replaced by Weekly.
 										 'form_code'        => 'RI-941D',
 										 'form_name'        => TTi18n::getText( 'RI-941D Payment' ),
 										 'form_description' => TTi18n::getText( 'Rhode Island Withholding Tax Return (Daily)' ),
@@ -10223,6 +10249,31 @@ return array(
 										 'form_code'        => '5208 A',
 										 'form_name'        => TTi18n::getText( '5208 A Filing' ),
 										 'form_description' => TTi18n::getText( 'Quarterly Tax and Wage Detail Reports' ),
+										 'note'             => '',
+										 'tax_codes'        => array('UI'),
+										 'filing_methods'   => array('EFILE'),
+										 'payment_methods'  => array('CHECK', 'EPAY'),
+										 'flags'            => array(
+												 'include_w2'          => FALSE,
+												 'file_zero_wage'      => TRUE,
+												 'file_zero_liability' => TRUE,
+												 'auto_file'           => FALSE,
+												 'auto_pay'            => FALSE,
+										 ),
+										 'frequency'        => array(  //Quarterly - Due the last day of the month following the end of the quarter. (April 30, July 31, October 31, and January 31)
+																	   array(
+																			   'status_id'            => 10, //Enabled
+																			   'frequency_id'         => 3000, //Quarterly
+																			   'quarter_month'        => 1,
+																			   'primary_day_of_month' => 31, //Last day
+																			   'reminder_days'        => 14,
+																	   ),
+										 ),
+								 ),
+								 'PaidFamilyMedicalLeave' => array(
+										 'form_code'        => 'PaidFamilyMedicalLeave',
+										 'form_name'        => TTi18n::getText( 'Paid Family and Medical Leave Filing' ),
+										 'form_description' => TTi18n::getText( 'Quarterly Wage and Hours Reports' ),
 										 'note'             => '',
 										 'tax_codes'        => array('UI'),
 										 'filing_methods'   => array('EFILE'),

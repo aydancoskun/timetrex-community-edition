@@ -41,6 +41,8 @@ include_once( 'US.class.php' );
  * @package GovernmentForms
  */
 class GovernmentForms_US_940 extends GovernmentForms_US {
+
+	//Testing requirements for Form 940: https://www.irs.gov/e-file-providers/tax-year-2018-94x-mef-ats-information
 	public $xml_schema = '94x/94x/IRS940.xsd';
 	public $pdf_template = '940.pdf';
 
@@ -1015,7 +1017,8 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 		if ( $this->l13 != '' ) {
 			return $value;
 		} else {
-			return 0; //If no deposit amount is specified, assume they deposit the amount calculated.
+			$this->l13 = $this->l12; //If no deposit amount is specified, assume they deposit the amount calculated.
+			return $this->l13;
 		}
 
 		return FALSE;
@@ -1053,7 +1056,7 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 
 	function calcL8( $value, $schema ) {
 		//FUTA tax before adjustments
-		$this->l8 = bcmul( $this->l7, $this->futa_tax_before_adjustment_rate );
+		$this->l8 = round( bcmul( $this->l7, $this->futa_tax_before_adjustment_rate ), 2 );
 
 		return $this->l8;
 	}
@@ -1061,7 +1064,7 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 	function calcL9( $value, $schema ) {
 		//If line 9 is specified, line 10 and 11 don't apply.
 		if ( $this->l9 == TRUE ) {
-			$this->l9 = bcmul( $this->l7, $this->futa_tax_rate );
+			$this->l9 = round( bcmul( $this->l7, $this->futa_tax_rate ), 2);
 			$this->l10 = NULL;
 			$this->l11 = NULL;
 
@@ -1255,9 +1258,9 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 		}
 
 		if ( isset( $this->l13 ) ) {
-
 			$xml->IRS940->addChild( 'TotalTaxDepositedAmt', $this->l13 );
 		}
+
 		if ( $this->calcL14( NULL, NULL ) >= 0 ) {
 			$xml->IRS940->addChild( 'BalanceDue', $this->calcL14( NULL, NULL ) );
 		} elseif ( $this->calcL15( NULL, NULL ) >= 0 ) {

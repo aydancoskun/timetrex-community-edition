@@ -41,40 +41,45 @@
 class PayrollDeduction_US_IL extends PayrollDeduction_US {
 
 	var $state_options = array(
-			20190101 => array( // 01-Jan-2019
-							   'rate'             => 4.95,
-							   'line_1_allowance' => 2275,
-							   'line_2_allowance' => 1000,
+			20200101 => array(
+					'rate'             => 4.95,
+					'line_1_allowance' => 2325,
+					'line_2_allowance' => 1000,
 			),
-			20180101 => array( // 01-Jan-2018
-							   'rate'             => 4.95,
-							   'line_1_allowance' => 2225,
-							   'line_2_allowance' => 1000,
+			20190101 => array(
+					'rate'             => 4.95,
+					'line_1_allowance' => 2275,
+					'line_2_allowance' => 1000,
 			),
-			20170701 => array( // 01-Jul-2017
-							   'rate'             => 4.95,
-							   'line_1_allowance' => 2175,
-							   'line_2_allowance' => 1000,
+			20180101 => array(
+					'rate'             => 4.95,
+					'line_1_allowance' => 2225,
+					'line_2_allowance' => 1000,
 			),
-			20160101 => array( // 01-Jan-2016
-							   'rate'             => 3.75,
-							   'line_1_allowance' => 2175,
-							   'line_2_allowance' => 1000,
+			20170701 => array(
+					'rate'             => 4.95,
+					'line_1_allowance' => 2175,
+					'line_2_allowance' => 1000,
 			),
-			20150101 => array( // 01-Jan-2015
-							   'rate'             => 3.75,
-							   'line_1_allowance' => 2150,
-							   'line_2_allowance' => 1000,
+			20160101 => array(
+					'rate'             => 3.75,
+					'line_1_allowance' => 2175,
+					'line_2_allowance' => 1000,
 			),
-			20140101 => array( // 01-Jan-2014
-							   'rate'             => 5.0,
-							   'line_1_allowance' => 2125,
-							   'line_2_allowance' => 1000,
+			20150101 => array(
+					'rate'             => 3.75,
+					'line_1_allowance' => 2150,
+					'line_2_allowance' => 1000,
 			),
-			20130101 => array( // 01-Jan-2013
-							   'rate'             => 5.0,
-							   'line_1_allowance' => 2100,
-							   'line_2_allowance' => 1000,
+			20140101 => array(
+					'rate'             => 5.0,
+					'line_1_allowance' => 2125,
+					'line_2_allowance' => 1000,
+			),
+			20130101 => array(
+					'rate'             => 5.0,
+					'line_1_allowance' => 2100,
+					'line_2_allowance' => 1000,
 			),
 			20060101 => array(
 					'rate'             => 3.0,

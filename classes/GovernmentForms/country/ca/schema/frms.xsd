@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Description	List of Form Type Choices	
+Last updated 	October 2018
+Version#:	1.18 (version #.yy)
+Revision History:
+Jan 2016	Add T3 special returns.
+Jan 2017	Add T3 general return.
+-->
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<!--@@@@@@  List of Form Type Choices   @@@@@@  2011/Sept/28  Version# 1.12 (version #.yy)-->
 	<xsd:complexType name="ReturnChoiceType">
 		<xsd:choice>
 			<xsd:element name="T4" type="T4ReturnType" minOccurs="0">
@@ -32,10 +41,23 @@
 			<xsd:element name="SAFER" type="SAFERReturnType" minOccurs="0"/>
 			<xsd:element name="NR4" type="NR4ReturnType" minOccurs="0"/>
 			<xsd:element name="TFSA" type="TFSAReturnType" minOccurs="0"/>
-
-			<!-- New form types for 2014 -->
 			<xsd:element name="PRPP" type="PRPPReturnType" minOccurs="0"/>
-			<xsd:element name="RRSPOrRRIFNonQualifiedInvestment" type="RRSPOrRRIFNQIReturnType" minOccurs="0"/>			
+			<xsd:element name="RRSPOrRRIFNonQualifiedInvestment" type="RRSPOrRRIFNQIReturnType" minOccurs="0"/>	
+			<xsd:element name="PartXVIII" type="PartXVIIIReturnType" minOccurs="0"/>
+			<!-- New form types for 2016 -->
+			<xsd:element name="T3D" type="T3DReturnType" minOccurs="0"/>
+			<xsd:element name="T3P" type="T3PReturnType" minOccurs="0"/>
+			<xsd:element name="T3S" type="T3SReturnType" minOccurs="0"/>
+			<xsd:element name="T3RI" type="T3RIReturnType" minOccurs="0"/>
+			<xsd:element name="T3ATH-IND" type="T3ATHINDReturnType" minOccurs="0"/>
+			<xsd:element name="T3M" type="T3MReturnType" minOccurs="0"/>
+			<xsd:element name="T3GR" type="T3GRReturnType" minOccurs="0"/>
+			<xsd:element name="T3PRP" type="T3PRPReturnType" minOccurs="0"/>
+			<xsd:element name="T1061" type="T1061ReturnType" minOccurs="0"/>
+			<xsd:element name="T2000" type="T2000ReturnType" minOccurs="0"/>
+			<!-- New form types for 2018 -->
+			<xsd:element name="T3GEN" type="T3GenReturnType" minOccurs="0"/>
+			<xsd:element name="PartXIX" type="PartXIXReturnType" minOccurs="0"/>	
 		</xsd:choice>
 	</xsd:complexType>
 	<xsd:complexType name="T4ReturnType">
@@ -168,6 +190,18 @@
 		<xsd:sequence>
 			<xsd:element name="RRSPOrRRIFNQISlip" type="RRSPOrRRIFNQISlipType" maxOccurs="unbounded"/>
 			<xsd:element name="RRSPOrRRIFNQISummary" type="RRSPOrRRIFNQISummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PartXVIIIReturnType">
+		<xsd:sequence>
+			<xsd:element name="PartXVIIISlip" type="PartXVIIISlipType" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="PartXVIIISummary" type="PartXVIIISummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PartXIXReturnType">
+		<xsd:sequence>
+			<xsd:element name="PartXIXSlip" type="PartXIXSlipType" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="PartXIXSummary" type="PartXIXSummaryType"/>
 		</xsd:sequence>
 	</xsd:complexType>
 </xsd:schema>

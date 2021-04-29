@@ -44,11 +44,16 @@ class Environment {
 	static protected $template_compile_dir = 'templates_c';
 
 	/**
+	 * Remove duplicate slashes from URLs and file paths.
 	 * @param $path
 	 * @return mixed
 	 */
 	static function stripDuplicateSlashes( $path ) {
-		return preg_replace('/([^:])(\/{2,})/', '$1/', $path);
+		if ( strpos( $path, ':' ) === FALSE ) {
+			return preg_replace( '/\/+/', '/', $path ); //Handle file paths, including ones that start with duplicate slashes, ie: //tmp/test.php
+		} else {
+			return preg_replace( '/([^:])(\/{2,})/', '$1/', $path ); //Handle URLs without replacing http:// or https:// at the beginning.
+		}
 	}
 
 	/**
@@ -119,11 +124,11 @@ class Environment {
 		global $config_vars;
 
 		//If "interface" appears in the base URL, replace it with API directory
-		$base_url = str_replace( array('/interface', '/api'), '', $config_vars['path']['base_url']);
+		$base_url = str_replace( array('/interface', '/api'), '', rtrim( $config_vars['path']['base_url'], '/' ) );
 
 		if ( $api == '' ) {
-			if ( defined('TIMETREX_AMF_API') AND TIMETREX_AMF_API == TRUE ) {
-				$api = 'amf';
+			if ( defined('TIMETREX_LEGACY_SOAP_API') AND TIMETREX_LEGACY_SOAP_API == TRUE ) {
+				return self::stripDuplicateSlashes( $base_url.'/soap/' );
 			} elseif ( defined('TIMETREX_SOAP_API') AND TIMETREX_SOAP_API == TRUE )	 {
 				$api = 'soap';
 			} elseif ( defined('TIMETREX_JSON_API') AND TIMETREX_JSON_API == TRUE )	 {

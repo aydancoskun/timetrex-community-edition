@@ -1135,6 +1135,32 @@ class Install {
 	/**
 	 * @return int
 	 */
+	function checkSystemTimeZone() {
+		// Return
+		//
+		// 0 = OK
+		// 1 = Invalid
+
+		$retval = 0;
+
+		if ( isset($this->config_vars['other']['system_timezone']) AND $this->config_vars['other']['system_timezone'] != '' ) {
+			$current_time_zone = date_default_timezone_get();
+
+			$php_timezone_result = @date_default_timezone_set( $this->config_vars['other']['system_timezone'] );
+			if ( $php_timezone_result !== TRUE ) {
+				Debug::Text('ERROR: Invalid timezone for PHP: '. $this->config_vars['other']['system_timezone'], __FILE__, __LINE__, __METHOD__, 10);
+				$retval = 1;
+			}
+
+			@date_default_timezone_set( $current_time_zone );
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * @return int
+	 */
 	function checkFilePermissions() {
 		// Return
 		//
@@ -1145,9 +1171,6 @@ class Install {
 			return 0; //Skip permission checks.
 		}
 
-		//Some systems, especially Windows with really poor virus scanners, will spend 12-24hrs checking permissions, exceeding the maximum execution and likely not triggering visible errors to the user.
-		// Try to exit out much earlier if we detect poor performance.
-		//$maximum_run_time = 10800; //3 hours - About 1.0s per file. This needs to be fairly high as there could be many cache files that its checking during weekly maintenance. Install/Upgrades clear the cache, so it shouldn't be a problem in that case.
 		$start_time = time();
 
 		$is_root_user = Misc::isCurrentOSUserRoot();
@@ -1156,32 +1179,51 @@ class Install {
 			Debug::Text('Current user is root, attempt to fix any permissions that fail... New User: '. $web_server_user, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		$dirs = array();
+		//Always check the main directory first.
+		$main_dir = realpath( dirname( __FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR );
+
+		$dirs = array( $main_dir );
 
 		//Make sure we check all files inside the log, storage, and cache directories, in case some files were created with the incorrect permissions and can't be overwritten.
-		if ( isset($this->config_vars['cache']['dir']) ) {
+		// However if these dirs are all sub-dirs off the main dir, don't bother adding them, as they will be checked when recursively iterating over the main dir anyways.
+		if ( isset($this->config_vars['cache']['dir']) AND Misc::isSubDirectory( $this->config_vars['cache']['dir'], $main_dir ) == FALSE ) {
 			$dirs[] = $this->config_vars['cache']['dir'];
 		}
-		if ( isset($this->config_vars['path']['log']) ) {
+		if ( isset($this->config_vars['path']['log']) AND Misc::isSubDirectory( $this->config_vars['path']['log'], $main_dir ) == FALSE ) {
 			$dirs[] = $this->config_vars['path']['log'];
 		}
-		if ( isset($this->config_vars['path']['storage']) ) {
+		if ( isset($this->config_vars['path']['storage']) AND Misc::isSubDirectory( $this->config_vars['path']['storage'], $main_dir ) == FALSE ) {
 			$dirs[] = $this->config_vars['path']['storage'];
 		}
-
-		$dirs[] = realpath( dirname( __FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR );
 
 		if ( PHP_SAPI != 'cli' ) { //Don't bother updating progress bar when being run from the CLI.
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), 10000, NULL, TTi18n::getText( 'Check File Permission...' ) );
 		}
 
 		$i = 0;
+		$d = 0;
+		$files_checked = 0;
 		foreach( $dirs as $dir ) {
-			Debug::Text('Checking directory readable/writable: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
+			$x = 0;
+			$random_num = rand( 75, 150 ); //Use random numbers so we can skip files at random and hopefully eventually check them all at some point.
+
+			Debug::Text('Checking directory readable/writable: '. $dir .' Random Num: '. $random_num, __FILE__, __LINE__, __METHOD__, 10);
 			if ( is_dir( $dir ) AND is_readable( $dir ) ) {
 				try {
 					$rdi = new RecursiveDirectoryIterator( $dir, RecursiveIteratorIterator::SELF_FIRST );
 					foreach ( new RecursiveIteratorIterator( $rdi ) as $file_name => $cur ) {
+						//If we have checked more than 10,000 files in a single directory, only check roughly every 100th random file after that to avoid this from taking forever if they have hundreds of thousands or millions of punch_images.
+						// Always run full loop when $i % 100 == 0 so we update the progress bar at the bottom.
+						// Only start skipping checks in directories other than the main TimeTrex directory, as that is typically the most important for upgrades anyways..
+						if ( $d > 0 AND $x > 10000 AND ( $x % $random_num ) != 0 AND ( $i % 100 ) != 0 ) {
+							//Debug::Text('  Skipping: ('. $i .'-'. $x.')'. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+							$i++;
+							$x++;
+							continue;
+						}
+						//Debug::Text('  Checking: ('. $i .'-'. $x.')'. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+
+
 						//Check if its "." or current directory, and format it as a directory, so file_exists() doesn't fail below.
 						// If /var/cache/timetrex/ is chmod 660, file_exists() returns FALSE on '/var/cache/timetrex/.' but TRUE on '/var/cache/timetrex/'
 						if ( strcmp( basename($file_name), '.') == 0 ) {
@@ -1222,19 +1264,17 @@ class Install {
 							return 1; //Invalid
 						}
 
-						//Ignore for now as it could slow due to the infinite loop caused by: C:\TimeTrex\cache\upgrade_staging\latest_version\interface\html5\views\payroll\pay_stub_transaction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-						//if ( ( $i % 10 ) == 0 AND ( time() - $start_time ) > $maximum_run_time ) {
-						//	Debug::Text('Exceeded maximum run time of: '. $maximum_run_time .' Files Checked: '. $i .' in: '. round( time() - $start_time ) .'s', __FILE__, __LINE__, __METHOD__, 10);
-						//	$this->setExtendedErrorMessage( 'checkFilePermissions', 'Poor system performance, unable to check all files... Files Checked: '. $i .' in: '. round( time() - $start_time ) .'s' );
-						//	return 1; //Invalid
-						//}
-
 						//Do this last, as it can take a long time on some systems using a slow file system.
-						if ( PHP_SAPI != 'cli' AND ( $i % 100 ) == 0 )  {
-							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+						if ( $i > 0 AND ( $i % 1000 ) == 0 )  {
+							Debug::Text('  Batch Completed: '. $i .' Current File: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+							if ( PHP_SAPI != 'cli' ) {
+								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+							}
 						}
 
 						$i++;
+						$x++;
+						$files_checked++;
 					}
 					unset($cur); //code standards
 				} catch( Exception $e ) {
@@ -1246,6 +1286,9 @@ class Install {
 				$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not Readable: '. $dir );
 				return 1;
 			}
+
+			Debug::Text('  Done Checking directory readable/writable: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
+			$d++;
 		}
 
 		if ( PHP_SAPI != 'cli' ) {
@@ -1254,7 +1297,7 @@ class Install {
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 		}
 
-		Debug::Text('All Files/Directories ('. $i .') are readable/writable! Files Checked: '. $i .' in: '. ( time() - $start_time ) .'s', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('All Files/Directories ('. $i .') are readable/writable! Files Checked: '. $files_checked .'/'. $i .'('. round( ( ( $files_checked / $i ) * 100 ) ) .'%) in: '. ( time() - $start_time ) .'s', __FILE__, __LINE__, __METHOD__, 10);
 		return 0;
 	}
 
@@ -1853,17 +1896,6 @@ class Install {
 	/**
 	 * @return int
 	 */
-	//function checkMCRYPT() {
-	//	if ( function_exists('mcrypt_module_open') ) {
-	//		return 0;
-	//	}
-	//
-	//	return 1;
-	//}
-
-	/**
-	 * @return int
-	 */
 	function checkOpenSSL() {
 		//FIXME: Automated installer on OSX/Linux doesnt compile SSL into PHP.
 		if ( function_exists('openssl_encrypt') OR strtoupper( substr(PHP_OS, 0, 3) ) !== 'WIN' ) {
@@ -2250,6 +2282,7 @@ class Install {
 			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('file_checksums', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkFileChecksums()]++;
 			}
+			$retarr[$this->checkSystemTimeZone()]++;
 		}
 
 		$retarr[$this->checkPHPSafeMode()]++;
@@ -2260,7 +2293,6 @@ class Install {
 
 		if ( $this->getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$retarr[$this->checkPEARValidate()]++;
-			//$retarr[$this->checkMCRYPT()]++;
 		}
 
 		//Debug::Arr($retarr, 'RetArr: ', __FILE__, __LINE__, __METHOD__, 9);
@@ -2417,6 +2449,9 @@ class Install {
 					$retarr[] = 'WFileChecksums';
 				}
 			}
+			if ( $fail_all == TRUE OR $this->checkSystemTimeZone() != 0 ) {
+				$retarr[] = 'SystemTimeZone';
+			}
 		}
 
 		if ( $fail_all == TRUE OR $this->checkPHPSafeMode() != 0 ) {
@@ -2439,10 +2474,6 @@ class Install {
 			if ( $fail_all == TRUE OR $this->checkPEARValidate() != 0 ) {
 				$retarr[] = 'PEARVal';
 			}
-
-			//if ( $fail_all == TRUE OR $this->checkMCRYPT() != 0 ) {
-			//	$retarr[] = 'MCRYPT';
-			//}
 		}
 
 		if ( isset($retarr) ) {

@@ -42,6 +42,7 @@ include_once( 'US.class.php' );
  */
 class GovernmentForms_US_941 extends GovernmentForms_US {
 
+	//Testing requirements for Form 941: https://www.irs.gov/e-file-providers/tax-year-2018-94x-mef-ats-information
 	public $xml_schema = '94x/94x/IRS941.xsd';
 
 	public $pdf_template = '941.pdf';
