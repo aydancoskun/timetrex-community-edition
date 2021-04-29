@@ -100,6 +100,8 @@ class EFT {
 
 	var $compiled_data = null;
 
+	var $split_debit_credit_batches = false; //Determine if ACH batches can only contain one type of record (ie: debits or credits)
+
 	/**
 	 * EFT constructor.
 	 * @param null $options
@@ -179,6 +181,27 @@ class EFT {
 		}
 
 		return false;
+	}
+
+	/**
+	 * @return bool|null
+	 */
+	function getIsBalanced() {
+		if ( isset( $this->is_balanced ) ) {
+			return $this->is_balanced;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param $data
+	 * @return bool
+	 */
+	function setIsBalanced( $data ) {
+		$this->is_balanced = (bool)$data;
+
+		return true;
 	}
 
 	/**
@@ -598,7 +621,7 @@ class EFT {
 				$b->record_data['type'] = false;
 			}
 
-			if ( $a->record_data['type'] == $b->record_data['type'] ) {
+			if ( $this->split_debit_credit_batches == false || $a->record_data['type'] == $b->record_data['type'] ) {
 				if ( !isset( $a->record_data['service_code'] ) ) {
 					$a->record_data['service_code'] = false;
 				}
@@ -1030,7 +1053,13 @@ class EFT_record extends EFT {
 	 * @return string
 	 */
 	function getBatchKey() {
-		return trim( $this->getBusinessNumber() . $this->getType() . $this->getServiceCode() . $this->getEntryDescription() . $this->getDueDate() );
+		$retval = $this->getBusinessNumber() . $this->getServiceCode() . $this->getEntryDescription() . $this->getDueDate();
+
+		if ( $this->split_debit_credit_batches == true ) {
+			$retval .= $this->getType();
+		}
+
+		return trim( $retval );
 	}
 
 	/**

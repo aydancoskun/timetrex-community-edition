@@ -1,4 +1,4 @@
-Version: 12.1.2 Generated: Thu Apr 16 09:50:23 PDT 2020
+Version: 12.1.3 Generated: Wed Apr 22 14:34:32 PDT 2020
 4ccaffb218c4dc3364f42de77fe7a6b54b8a8411  ./install_cron.sh
 bf7bba4d3b08e6f62ac80ec8045d8269247725b6  ./favicon.ico
 dbc97f63ebc5a17e1d75a36a750b9f68724488c5  ./maint/MiscDaily.php
@@ -1061,7 +1061,7 @@ aa9a1cbf992033889abe52be0520ba97b5714177  ./classes/modules/qualification/UserSk
 03deb16b4da175eb2363d75072842905c9e668e8  ./classes/modules/qualification/QualificationFactory.class.php
 99afd65381c3ae518f39a40b70f11f65621a2966  ./classes/modules/qualification/QualificationGroupFactory.class.php
 de0b41c8160d50d6c4123a0c60ea70108b61d33b  ./classes/modules/other/TimeTrexPaymentServices.class.php
-d0b3449f178ce44af9017125fc16a63a92b04f4c  ./classes/modules/other/EFT.class.php
+8d7bb69f035f6d7f3d3b26ded9d43bcf7d6cc22a  ./classes/modules/other/EFT.class.php
 7b4ce9b9166e9c8758a734d01b3ac03724084b05  ./classes/modules/other/Telnet.class.php
 36a84dde72ed2c74dc40fda31b1cfdce56bdd517  ./classes/modules/other/PaymentServicesClientAPI.class.php
 666d066640d563d6a22815f1e89bd692a15b4e8e  ./classes/modules/other/SugarCRM.class.php
@@ -2992,6 +2992,7 @@ abb4655f631053790c857e3ecf51851cc038b581  ./unit_tests/testcases/other/SystemLog
 e57cd4ff60268a50a93d17e371297a93700e3c4d  ./unit_tests/testcases/other/PayPeriodScheduleTest.php
 a92ac10d9ca7725d08272242ea3a37ff240ce421  ./unit_tests/testcases/other/PayrollRemittanceAgencyEventTest.php
 d8cd743ccd2a953ed741ec8650e46d68b4f562d0  ./unit_tests/testcases/other/DateTimeTest.php
+736073bb49842e5315fe9d5f6d25e3e7c7045f38  ./unit_tests/testcases/other/EFTTest.php
 559d2784beea26e1d5743346d1ac5310287e8607  ./unit_tests/testcases/other/ExceptionTest.php
 a21e47fe2a7e592a1cf8980df2cabddaf145c830  ./unit_tests/testcases/other/PermissionTest.php
 cd2854605d9e7fbef83677458637fc0f74a21716  ./unit_tests/testcases/other/ValidatorTest.php
@@ -3017,7 +3018,7 @@ f5c5250e333f6b58f491377d202e779ef07d0d08  ./unit_tests/beautifier_filters/unit_t
 3b5aa25fdf1992bd2ddfd83cde8dffdbbbfc2cf7  ./UPGRADE.txt
 081bb84488f87faa2f483b09a0ac4be75cf8f507  ./includes/Database.inc.php
 62568be32922995c2ef0665b07485b02fc7d4da3  ./includes/CLI.inc.php
-c4884d51cc0e5e816c2cbb99fe129d358eb74c9c  ./includes/global.inc.php
+c59b9a6a32b7145597f703150c0bd9acb8335666  ./includes/global.inc.php
 f0d921abf5d8e75b7503eca7ffd837077f7d8f06  ./includes/ClassMap.inc.php
 ce0c5189e6f5e914845fde52eebf01d3b050a0f4  ./includes/Interface.inc.php
 64f4befc8d46686ddda1dd9e7caede9950cab3c4  ./includes/TableMap.inc.php
