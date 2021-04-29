@@ -654,6 +654,7 @@ class ROEReport extends Report {
 						$roef->setPayPeriodType( $row['pay_period_type_id'] );
 
 						$ee_data = array(
+								'payroll_reference_number' => $user_obj->getEmployeeNumber(),
 								'first_name'           => $user_obj->getFirstName(),
 								'middle_name'          => $user_obj->getMiddleName(),
 								'last_name'            => $user_obj->getLastName(),

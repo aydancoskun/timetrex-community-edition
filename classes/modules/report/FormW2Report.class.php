@@ -1100,7 +1100,7 @@ class FormW2Report extends Report {
 							$user_obj = $ulf->getCurrent();
 
 							$ee_data = array(
-									'control_number'      => $i + 1,
+									'control_number'      => ( $i + 1 ),
 									'first_name'          => $user_obj->getFirstName(),
 									'middle_name'         => $user_obj->getMiddleName(),
 									'last_name'           => $user_obj->getLastName(),
@@ -1230,7 +1230,6 @@ class FormW2Report extends Report {
 									Debug::Text( '  No wages in eFile State: '. $fw2->efile_state .' Skipping...', __FILE__, __LINE__, __METHOD__, 10 );
 									continue;
 								}
-
 							}
 
 							$fw2->addRecord( $ee_data );

@@ -1382,6 +1382,15 @@ class PayStubFactory extends Factory {
 			}
 		} //PSLF is used lower down.
 
+		//Check to see if they are changing the transaction date between years, as that can cause taxes to need to be recalculated
+		//  for example if they reached a tax limit in 2019, but it restarts in 2020, but they change the transaction date from 2020 back to 2019 without recalculating the pay stub.
+		$data_diff = $this->getDataDifferences();
+		if ( $this->isDataDifferent( 'transaction_date', $data_diff ) == TRUE AND $this->getGenericOldDataValue( 'transaction_date' ) != FALSE AND TTDate::getYear( $this->getTransactionDate() ) != TTDate::getYear( TTDate::strtotime( $this->getGenericOldDataValue( 'transaction_date' ) ) ) ) {
+			$this->Validator->isTrue(		'transaction_date',
+											 FALSE,
+											 TTi18n::gettext('Transaction Date cannot be modified to a different year as it would result in tax/deductions being incorrect'));
+		}
+
 		if ( $this->getDeleted() == FALSE AND $this->getStatus() == 100 AND $this->getStartDate() != '' ) { //Opening Balance
 			//Check for any earlier pay stubs so Opening Balance Pay Stubs must be first.
 			$pslf->getLastPayStubByUserIdAndStartDateAndRun( $this->getUser(), $this->getStartDate(), $this->getRun() );

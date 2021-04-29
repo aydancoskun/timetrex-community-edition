@@ -592,8 +592,11 @@ class Form940Report extends Report {
 						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['state'][$state]['excess_payments'] = 0;
 					}
 
-					$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'] = Misc::calculateMultipleColumns( $row['psen_ids'], $form_data['state_total_payments'][ $state ]['include_pay_stub_entry_account'], $form_data['state_total_payments'][ $state ]['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] = bcsub( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['exempt_payments'] );
+					$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] = Misc::calculateMultipleColumns( $row['psen_ids'], $form_data['state_total_payments'][ $state ]['include_pay_stub_entry_account'], $form_data['state_total_payments'][ $state ]['exclude_pay_stub_entry_account'] );
+
+					//Total Payments must include net payments plus all exempt payments, as its later subtracted out on Line 7.
+					$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'] = bcadd( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['exempt_payments'] );
+
 					$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] = $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['adjustment_tax'] = 0;
 
 					//Need to total up payments for each employee so we know when we exceed the limit.
@@ -649,12 +652,16 @@ class Form940Report extends Report {
 	}
 
 	function handleLine10Amount( $filter_data, $setup_data ) {
-		if ( TTDate::getDays( $filter_data['end_date'] - $filter_data['start_date'] ) < 360 ) {
-			Debug::Text( ' Report is for less than the entire year, so ignore Line 10 as it can cause problems with Line 17 and per quarter break down.', __FILE__, __LINE__, __METHOD__, 10 );
+		if ( TTDate::getMonthDifference( $filter_data['start_date'], $filter_data['end_date'] ) < 9.5 ) { //Must be at least into the 4th quarter
+			Debug::Text( ' Report is for less than 4 quarters, so ignore Line 10 as it can cause problems with Line 17 and per quarter break down.', __FILE__, __LINE__, __METHOD__, 10 );
 			$setup_data['line_10'] = NULL;
 		}
 
 		return $setup_data;
+	}
+
+	function getForm940SACreditReductionRatesForUnitTests() {
+		return array( 'NY' => 0.014, 'CA' => 0.024 );
 	}
 
 	/**
@@ -668,6 +675,7 @@ class Form940Report extends Report {
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
 		$setup_data = $this->handleLine10Amount( $filter_data, $this->getFormConfig() );
+		//$setup_data['enable_credit_reduction_test'] = TRUE; //TEST ONLY - Forces bogus credit reduction calculations.
 
 		if ( isset($setup_data['total_payments']) ) {
 			unset($setup_data['total_payments'], $form_data['total_payments']); //Ignore any total_payment include/exclude coming from the UI. As its determined from remittance agency data below.
@@ -676,7 +684,6 @@ class Form940Report extends Report {
 		if ( !isset($setup_data['line_10']) ) {
 			$setup_data['line_10'] = NULL;
 		}
-
 
 
 		$payments_over_cutoff = $this->getF940Object()->payment_cutoff_amount; //Need to get this from the government form.
@@ -815,25 +822,26 @@ class Form940Report extends Report {
 
 			if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
 				$excluded_wage_avg = NULL;
-				if ( $setup_data['line_10'] > 0 ) {
-					//Because they had to fill out a separate worksheet which we don't deal with, just average the excluded wages over each loop iteration.
-					$excluded_wage_divisor = 0;
-					foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
-						foreach($data_a as $date_stamp => $data_b) {
-							$excluded_wage_divisor++;
-						}
-					}
-					$excluded_wage_avg = bcdiv( $setup_data['line_10'], $excluded_wage_divisor );
-					Debug::Text(' Excluded Wage Avg: '. $excluded_wage_avg .' Divisor: '. $excluded_wage_divisor, __FILE__, __LINE__, __METHOD__, 10);
-					unset($user_id, $data_a, $data_b, $date_stamp);
-				}
+				//The proper way to handle this is as per the 940 instructions Part 5: "To figure your FUTA tax liability for the fourth quarter, complete Form 940 through line 12. Then copy the amount from line 12 onto line 17. Lastly, subtract the sum of lines 16a through 16c from line 17 and enter the result on line 16d."
+				//  Which is handled in the 940.class.php.
+//				if ( $setup_data['line_10'] > 0 ) {
+//					//Because they had to fill out a separate worksheet which we don't deal with, just average the excluded wages over each loop iteration.
+//					$excluded_wage_divisor = 0;
+//					foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
+//						foreach($data_a as $date_stamp => $data_b) {
+//							$excluded_wage_divisor++;
+//						}
+//					}
+//					$excluded_wage_avg = bcdiv( $setup_data['line_10'], $excluded_wage_divisor );
+//					Debug::Text(' Excluded Wage Avg: '. $excluded_wage_avg .' Divisor: '. $excluded_wage_divisor, __FILE__, __LINE__, __METHOD__, 10);
+//					unset($user_id, $data_a, $data_b, $date_stamp);
+//				}
 
 				//Get the Form 940 Schedula A object, so we can pull out credit reduction rates from it.
 				$f940sa = $this->getFormObject()->getFormObject( '940sa', 'US' );
-				if ( !defined( 'UNIT_TEST_MODE' ) OR UNIT_TEST_MODE === FALSE ) { //When in unit test mode don't clear form objects so we can run asserts against them.
-					$state_credit_reduction_rates = $f940sa->credit_reduction_rates;
-				} else {
-					$state_credit_reduction_rates = array( 'NY' => 0.014, 'CA' => 0.024 ); //Force credit reduction during unit tests.
+				$state_credit_reduction_rates = $f940sa->credit_reduction_rates;
+				if ( isset($setup_data['enable_credit_reduction_test']) AND $setup_data['enable_credit_reduction_test'] == TRUE ) { //When in unit test mode don't clear form objects so we can run asserts against them.
+					$state_credit_reduction_rates = $f940sa->credit_reduction_rates = $this->getForm940SACreditReductionRatesForUnitTests(); //Force credit reduction during unit tests.
 				}
 
 				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
@@ -1061,6 +1069,10 @@ class Form940Report extends Report {
 							$f940sa->setDebug(FALSE);
 							$f940sa->setShowBackground( $show_background );
 
+							if ( isset($setup_data['enable_credit_reduction_test']) AND $setup_data['enable_credit_reduction_test'] == TRUE ) { //When in unit test mode don't clear form objects so we can run asserts against them.
+								$f940sa->credit_reduction_rates = $this->getForm940SACreditReductionRatesForUnitTests(); //Force credit reduction during unit tests.
+							}
+
 							$f940sa->year = $f940->year;
 							$f940sa->ein = $f940->ein;
 							$f940sa->name = $f940->name;
@@ -1069,6 +1081,7 @@ class Form940Report extends Report {
 							$f940sa->state_amounts = $state_amounts;
 
 							$f940->l11 = $f940sa->calcTotal(); //Pass the Schedule A total back to the Form 940 on line 11.
+							Debug::Arr($f940sa, 'Form 940SA object: ', __FILE__, __LINE__, __METHOD__, 10);
 						}
 					}
 					unset( $state, $tmp_state_data );
@@ -1127,21 +1140,22 @@ class Form940Report extends Report {
 					$f940->l15b = TRUE;
 
 					if ( isset($this->form_data['quarter'][$legal_entity_id][1]['after_adjustment_tax']) ) {
-						$f940->l16a = $this->form_data['quarter'][$legal_entity_id][1]['after_adjustment_tax'];
+						$f940->l16a = round( $this->form_data['quarter'][$legal_entity_id][1]['after_adjustment_tax'], 2);
 					}
 					if ( isset($this->form_data['quarter'][$legal_entity_id][2]['after_adjustment_tax']) ) {
-						$f940->l16b = $this->form_data['quarter'][$legal_entity_id][2]['after_adjustment_tax'];
+						$f940->l16b = round( $this->form_data['quarter'][$legal_entity_id][2]['after_adjustment_tax'], 2);
 					}
 					if ( isset($this->form_data['quarter'][$legal_entity_id][3]['after_adjustment_tax']) ) {
-						$f940->l16c = $this->form_data['quarter'][$legal_entity_id][3]['after_adjustment_tax'];
+						$f940->l16c = round( $this->form_data['quarter'][$legal_entity_id][3]['after_adjustment_tax'], 2);
 					}
 					if ( isset($this->form_data['quarter'][$legal_entity_id][4]['after_adjustment_tax']) ) {
-						$f940->l16d = $this->form_data['quarter'][$legal_entity_id][4]['after_adjustment_tax'];
+						$f940->l16d = round( $this->form_data['quarter'][$legal_entity_id][4]['after_adjustment_tax'], 2);
 					}
 				} else {
 					Debug::Arr($this->data, 'Invalid Form Data: ', __FILE__, __LINE__, __METHOD__, 10);
 				}
 
+				Debug::Arr($f940, 'Form 940 object: ', __FILE__, __LINE__, __METHOD__, 10);
 				$this->getFormObject()->addForm( $f940 );
 
 				if ( isset($f940sa) AND is_object( $f940sa ) ) {

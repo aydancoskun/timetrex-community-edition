@@ -1507,6 +1507,116 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		return FALSE;
 	}
 
+	//This takes a single employee record and moves state/locality data from rows c, d, e, f, ... into rows a,b.
+	// Because it changes the data, it can be run multiple times on the same input data.
+	function handleThreeOrMoreStateData( $data ) {
+		//Clear all variables that should be empty when generating multiple W2 forms. (everything except box a thru f)
+		$data['l1'] = NULL;
+		$data['l2'] = NULL;
+		$data['l3'] = NULL;
+		$data['l4'] = NULL;
+		$data['l5'] = NULL;
+		$data['l6'] = NULL;
+		$data['l7'] = NULL;
+		$data['l8'] = NULL;
+		$data['l9'] = NULL;
+		$data['l10'] = NULL;
+		$data['l11'] = NULL;
+
+		$data['l12a'] = NULL;
+		$data['l12a_code'] = NULL;
+		$data['l12b'] = NULL;
+		$data['l12b_code'] = NULL;
+		$data['l12c'] = NULL;
+		$data['l12c_code'] = NULL;
+		$data['l12d'] = NULL;
+		$data['l12d_code'] = NULL;
+
+		$data['l14a'] = NULL;
+		$data['l14a_name'] = NULL;
+		$data['l14b'] = NULL;
+		$data['l14b_name'] = NULL;
+		$data['l14c'] = NULL;
+		$data['l14c_name'] = NULL;
+		$data['l14d'] = NULL;
+		$data['l14d_name'] = NULL;
+
+		//Clear all variables for State rows 'a' and 'b'
+		foreach ( range( 'a', 'b' ) as $z ) { //Skip A/B in range, since those are always what we copy the d, c, e, ... data too.
+			$data[ 'l15' . $z . '_state_id' ] = NULL;
+			$data[ 'l15' . $z . '_state' ] = NULL;
+			$data[ 'l16' . $z ] = NULL;
+			$data[ 'l17' . $z ] = NULL;
+			$data[ 'l20' . $z . '_district' ] = NULL;
+			$data[ 'l18' . $z ] = NULL;
+			$data[ 'l19' . $z ] = NULL;
+		}
+
+		$data_changed = FALSE;
+
+		//Copy non-NULL data from rows c, d to rows a, b
+		$destination_position = 'a';
+		foreach ( range( 'c', 'z' ) as $z ) { //Skip A/B in range, since those are always what we copy the d, c, e, ... data too.
+			if ( !( $data[ 'l15' . $z . '_state_id' ] == NULL AND $data[ 'l15' . $z . '_state' ] == NULL
+					AND $data[ 'l16' . $z ] == NULL AND $data[ 'l17' . $z ] == NULL
+					AND $data[ 'l20' . $z . '_district' ] == NULL AND $data[ 'l18' . $z ] == NULL AND $data[ 'l19' . $z ] == NULL ) ) {
+				Debug::Text( 'Found 3+ State Info, moving to position: '. $destination_position, __FILE__, __LINE__, __METHOD__,10);
+
+				$data_changed = TRUE;
+
+				$data[ 'l15' . $destination_position . '_state_id' ] = $data[ 'l15' . $z . '_state_id' ];
+				$data[ 'l15' . $destination_position . '_state' ] = $data[ 'l15' . $z . '_state' ];
+				$data[ 'l16' . $destination_position ] = $data[ 'l16' . $z ];
+				$data[ 'l17' . $destination_position ] = $data[ 'l17' . $z ];
+				$data[ 'l20' . $destination_position . '_district' ] = $data[ 'l20' . $z . '_district' ];
+				$data[ 'l18' . $destination_position ] = $data[ 'l18' . $z ];
+				$data[ 'l19' . $destination_position ] = $data[ 'l19' . $z ];
+
+				//Clear all variables.
+				$data[ 'l15' . $z . '_state_id' ] = NULL;
+				$data[ 'l15' . $z . '_state' ] = NULL;
+				$data[ 'l16' . $z ] = NULL;
+				$data[ 'l17' . $z ] = NULL;
+				$data[ 'l20' . $z . '_district' ] = NULL;
+				$data[ 'l18' . $z ] = NULL;
+				$data[ 'l19' . $z ] = NULL;
+
+				$destination_position++;
+				if ( $destination_position == 'c' ) {
+					break;
+				}
+			}
+		}
+
+		if ( $data_changed == TRUE ) {
+			return $data;
+		}
+
+		return FALSE;
+	}
+
+	//This takes a single employee record that has three or more states/localities and splits them into multiple records to simplify generating the PDFs.
+	function handleMultipleForms( $records ) {
+		$tmp_records = array();
+		if ( is_array( $records ) AND count( $records ) > 0 ) {
+			foreach ( $records as $employee_data ) {
+				$tmp_records[] = $employee_data;
+
+				$tmp_record = $employee_data;
+				do {
+					$tmp_record = $this->handleThreeOrMoreStateData( $tmp_record  );
+					if ( is_array($tmp_record) ) {
+						$tmp_records[] = $tmp_record;
+					}
+				} while ( is_array( $tmp_record ) );
+			}
+		}
+
+		$this->clearRecords();
+		$this->setRecords( $tmp_records );
+		return $this->getRecords();
+	}
+
 	function _outputPDF() {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
@@ -1538,13 +1648,11 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		}
 
 		//Get location map, start looping over each variable and drawing
-		$records = $this->getRecords();
+		$records = $this->handleMultipleForms( $this->getRecords() );
 
 		if ( is_array( $records ) AND count( $records ) > 0 ) {
-
 			$template_schema = $this->getTemplateSchema();
 
-//			$total_templates = count( $form_template_pages );
 			foreach ( $form_template_pages as $key => $form_template_page ) {
 				//Set the template used.
 				$template_schema[0]['template_page'] = $form_template_page;
@@ -1572,7 +1680,6 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				$e = 0;
 				foreach ( $records as $employee_data ) {
 					//Debug::Arr($employee_data, 'Employee Data: ', __FILE__, __LINE__, __METHOD__,10);
-					$employee_data['control_number'] = ( $e + 1 );
 					$this->arrayToObject( $employee_data ); //Convert record array to object
 
 					for ( $i = 0; $i < $n; $i++ ) {
@@ -1593,12 +1700,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 					}
 
 					$e++;
-
 				}
-
-//				if ( $this->getType() == 'employee' AND $key < ( $total_templates - 1 ) )  {
-//					$this->addPage(); //Add blank page separator between each type of form.
-//				}
 			}
 		}
 

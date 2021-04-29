@@ -2282,6 +2282,12 @@ abstract class Factory {
 
 		$query = 'SELECT '. $column_str .' FROM '. $this->table .' WHERE '. $where_clause;
 		if ( $id == NULL AND isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] == TRUE ) {
+			//When caching empty record sets, always write to persistent cache as it doesn't matter if we are inside a retry transaction for this or not, this data will always be the same.
+			$current_cache_memory_state = $this->cache->_onlyMemoryCaching;
+			if ( $current_cache_memory_state == FALSE AND ( !isset($config_vars['cache']['only_memory_cache_enable']) OR $config_vars['cache']['only_memory_cache_enable'] == FALSE ) ) {
+				$this->cache->_onlyMemoryCaching = FALSE;
+			}
+
 			//Try to use Cache Lite instead of ADODB, to avoid cache write errors from causing a transaction rollback, especially important for serializable transactions. It should be faster too.
 			$cache_id = 'empty_rs_'. $this->table; //No need to add $id to the end as its always NULL here, but we may need to handle different columns that may be passed in with a md5() perhaps?
 			$rs = $this->getCache($cache_id);
@@ -2290,6 +2296,8 @@ abstract class Factory {
 				$rs = $this->db->_rs2rs( $rs ); //Needed to include the _fieldObjects property for ADODB.
 				$this->saveCache( $this->serializeRS($rs), $cache_id); //Only run serializeRS() when passing to saveCache() otherwise it corrupts the $rs being returned in this function.
 			}
+
+			$this->cache->_onlyMemoryCaching = $current_cache_memory_state;
 
 //			try {
 //				$save_error_handlers = $this->db->IgnoreErrors(); //Prevent a cache write error from causing a transaction rollback.

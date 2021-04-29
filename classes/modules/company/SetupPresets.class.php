@@ -91,8 +91,24 @@ class SetupPresets extends Factory {
 	 */
 	function setUser( $id ) {
 		$this->data['user_id'] = $id;
+
+		//Force timezone settings to the user who will be assigned to everything like remittance agency events. This helps prevent Annual event frequencies from appearing like: 01-Jan-2019 to 01-Jan-2020 because they might be created in the wrong timezone.
+		$this->setTimeZone();
 	}
 
+	function setTimeZone() {
+		Debug::text( 'Switching to users timezone preferences... User ID: '. $this->getUser(), __FILE__, __LINE__, __METHOD__, 10 );
+
+		$user_obj = $this->getUserObject();
+		if ( is_object( $user_obj ) ) {
+			$user_preference_obj = $user_obj->getUserPreferenceObject();
+			if ( is_object( $user_preference_obj ) ) {
+				return $user_preference_obj->setDateTimePreferences();
+			}
+		}
+
+		return FALSE;
+	}
 
 	/**
 	 * @param $data

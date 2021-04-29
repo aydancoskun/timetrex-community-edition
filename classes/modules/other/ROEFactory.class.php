@@ -1057,7 +1057,7 @@ class ROEFactory extends Factory {
 		$absence_total_time = $udtlf->getAbsenceTimeSumByUserIDAndAbsenceIDAndStartDateAndEndDate( $this->getUser(), $absence_policy_ids, $insurable_hours_start_date, $this->getLastDate() );
 		Debug::text('Absence Total Time: '. $absence_total_time, __FILE__, __LINE__, __METHOD__, 10);
 
-		$total_hours = Misc::MoneyFormat( TTDate::getHours( $worked_total_time + $absence_total_time ), FALSE );
+		$total_hours = round( TTDate::getHours( $worked_total_time + $absence_total_time ) );
 		Debug::Text('Total Insurable Hours: '. $total_hours, __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_earnings = $this->getTotalInsurableEarnings();
@@ -1315,16 +1315,36 @@ class ROEFactory extends Factory {
 												TTi18n::gettext('Invalid comments'),
 												0,
 												1024);
-
-
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		//Make sure Final Pay Stub Transaction Date is equal or after Final End Date
-		if ( $this->getFinalPayStubTransactionDate() < $this->getFinalPayStubEndDate() ) {
-			$this->Validator->isTrue(		'final_pay_stub_transaction_date',
-											FALSE,
-											TTi18n::gettext('Final pay stub transaction date must be on or after final pay stub end date'));
+
+		if ( $this->getDeleted() == FALSE ) {
+			//Make sure Final Pay Stub Transaction Date is equal or after Final End Date
+			if ( $this->getFinalPayStubTransactionDate() < $this->getFinalPayStubEndDate() ) {
+				$this->Validator->isTrue(		'final_pay_stub_transaction_date',
+												 FALSE,
+												 TTi18n::gettext('Final pay stub transaction date must be on or after final pay stub end date'));
+			}
+
+			//This can't be determined here as we have to generate the final pay stub first, and we don't do that until postSave().
+			//  Add a warning to the ROE PDF instead.
+//			//Pay Period #1 (last pay period) must be more than the Vacation Pay, since vacation pay after termination needs to be included with their final earnings from when their last day worked is.
+//			$last_pay_period_vacation_earnings = $this->getLastPayPeriodVacationEarnings();
+//			if ( $last_pay_period_vacation_earnings > 0 ) {
+//				$insurable_earnings_by_pay_period = $this->getInsurableEarningsByPayPeriod( '15c' );
+//				if ( is_array( $insurable_earnings_by_pay_period ) ) {
+//					reset( $insurable_earnings_by_pay_period );
+//					$insurable_earnings_first_pay_period_key = key( $insurable_earnings_by_pay_period );
+//
+//					if ( $last_pay_period_vacation_earnings <= $insurable_earnings_by_pay_period[ $insurable_earnings_first_pay_period_key ]['amount'] ) {
+//						$this->Validator->isTrue( 'last_date',
+//												  FALSE,
+//												  TTi18n::gettext( 'Insurable Earnings in Pay Period 1 must be greater than any Vacation Pay in box 17a. In this case, Last Day For Which Paid should likely be the last day the employee worked and not include a pay period with just vacation pay' ) );
+//
+//					}
+//				}
+//			}
 		}
 
 		return TRUE;
@@ -1380,26 +1400,26 @@ class ROEFactory extends Factory {
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() > 0 ) {
 				Debug::Text('Setting User Termination Date', __FILE__, __LINE__, __METHOD__, 10);
-
 				$user_obj = $ulf->getCurrent();
 				$user_obj->setStatus(20); //Set status to terminated, now that pay stubs will always generate anyways.
 				$user_obj->setTerminationDate( $this->getLastDate() );
 				if ( $user_obj->isValid() ) {
 					$user_obj->Save();
-
 					UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Employee Record'), 30, TTi18n::gettext('Setting employee termination date to').': '. TTDate::getDate('DATE', $this->getLastDate() ), NULL );
 				}
 			}
 
 			//Warn user if employee has pay stubs or pay stub amendments after the Final Pay Stub End Date.
-			if ( $this->getFinalPayStubTransactionDate() != '' ) {$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
-			$pslf->getNextPayStubByUserIdAndTransactionDateAndRun( $this->getUser(), $this->getFinalPayStubTransactionDate(), 1);
-			Debug::Text('Pay Stubs after final: '. $pslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-			if ( $pslf->getRecordCount() > 0 ) {
-				UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Record of Employment'), 20, TTi18n::gettext('Pay stub exists after final pay stub transaction date, therefore this ROE may not be accurate'), NULL );
+			if ( $this->getFinalPayStubTransactionDate() != '' ) {
+				$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
+				$pslf->getNextPayStubByUserIdAndTransactionDateAndRun( $this->getUser(), $this->getFinalPayStubTransactionDate(), 1 );
+				Debug::Text( 'Pay Stubs after final: ' . $pslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+				if ( $pslf->getRecordCount() > 0 ) {
+					UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName( TRUE ) . ' - ' . TTi18n::gettext( 'Record of Employment' ), 20, TTi18n::gettext( 'Pay stub exists after final pay stub transaction date, therefore this ROE may not be accurate' ), NULL );
+				}
+				unset( $pslf );
 			}
-			unset($pslf);
-			}
+
 			$this->ReCalculate();
 		}
 

@@ -3309,13 +3309,63 @@ class Misc {
 
 		//This is for the full web interface
 		//IE < 11
-		//Edge < 14
+		//Edge < 14 - https://en.wikipedia.org/wiki/Microsoft_Edge
 		//Firefox < 52 (52 is latest version on Windows XP)
 		//Chrome < 49 (49 is latest version on Windows XP)
 		//Safari < 9 - https://en.wikipedia.org/wiki/Safari_version_history
 		//Opera < 33 (Chrome v46) - https://help.opera.com/en/opera-version-history/
-		if ( $browser->getBrowser() == Browser::BROWSER_IE AND version_compare( $browser->getVersion(), 11, '<' ) ) {
-			$retval = TRUE;
+		if ( $browser->getBrowser() == Browser::BROWSER_IE ) { //Any version of IE.
+			//Slowly Phase out IE 11 support from 20-Jan-2020 to 31-Jan-2020
+			$max_rollout_days = 11;
+			$initial_cutoff_date = TTDate::getBeginDayEpoch( strtotime('20-Jan-2020') );
+			$cutoff_remaining_days = floor( TTDate::getDays( ( time() - $initial_cutoff_date ) ) );
+			$days_remaining = ( $max_rollout_days - $cutoff_remaining_days );
+			if ( $days_remaining < 0 ) {
+				$days_remaining = 0;
+			}
+
+			if ( $max_rollout_days > 0 ) {
+				if ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.10 ) ) ) {
+					$percent_chance = 1;
+				} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.20 ) ) ) {
+					$percent_chance = 3;
+				} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.30 ) ) ) {
+					$percent_chance = 5;
+				} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.40 ) ) ) {
+					$percent_chance = 10;
+				} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.50 ) ) ) {
+					$percent_chance = 20;
+				} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.60 ) ) ) {
+					$percent_chance = 30;
+				} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.70 ) ) ) {
+					$percent_chance = 40;
+				} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.80 ) ) ) {
+					$percent_chance = 50;
+				} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.90 ) ) ) {
+					$percent_chance = 75;
+				} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 1.00 ) ) ) {
+					$percent_chance = 100;
+				}
+			} else {
+				$percent_chance = 100;
+			}
+
+			$identifier = $useragent.Misc::getRemoteIPAddress();
+			if ( isset($_COOKIE['StationID']) ) {
+				$identifier .= $_COOKIE['StationID'];
+			} elseif ( isset($_COOKIE['_ga']) ) {
+				$identifier .= $_COOKIE['_ga'];
+			}
+			srand( hexdec( substr( $identifier, 0, 10 ) ) );
+			$random_trigger = rand( 1, 100 );
+			if ( $random_trigger <= $percent_chance ) {
+				$retval = TRUE;
+			} else {
+				$retval = FALSE;
+			}
+			unset( $identifier, $random_trigger, $percent_chance);
+
+			//$retval = TRUE;
 		}
 
 		if ( $browser->getBrowser() == Browser::BROWSER_EDGE AND version_compare( $browser->getVersion(), 14, '<' ) ) {

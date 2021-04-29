@@ -154,6 +154,20 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 					),
 			),
 
+			'payroll_reference_number'       => array(
+					'coordinates' => array(
+							'x'      => 370,
+							'y'      => 58,
+							'h'      => 10,
+							'w'      => 210,
+							'halign' => 'R',
+					),
+					'font'        => array(
+							'size' => 12,
+							'type' => '',
+					),
+			),
+
 			//Employer Info
 			//Company information
 			'company_name' => array(
@@ -264,7 +278,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			'sin'              => array(
 					'coordinates' => array(
 							'x'      => 370,
-							'y'      => 137,
+							'y'      => 136,
 							'h'      => 10,
 							'w'      => 210,
 							'halign' => 'R',
@@ -451,8 +465,8 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 					),
 
 			),
-			//Insurable Earnings
 
+			//Insurable Earnings
 			'insurable_earnings'             => array(
 					'function'    => 'drawSplitDecimalFloat',
 					'coordinates' => array(
@@ -464,10 +478,10 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 									'halign' => 'R',
 							),
 							array(
-									'x'      => 238,
+									'x'      => 239,
 									'y'      => 298,
 									'h'      => 10,
-									'w'      => 14,
+									'w'      => 15,
 									'halign' => 'L',
 							),
 					),
@@ -477,7 +491,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 							//'text_color' => array( 255, 0, 0 ),
 					),
 			),
-			//Enter Code
+
 			'insurable_earnings_pay_periods' => array(
 					'function'    => array('filterInsurableEarningsPayPeriods', 'drawNormal'),
 					'coordinates' => array(
@@ -560,17 +574,17 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 
 			'vacation_pay' => array(
-					'function'    => 'drawSplitDecimalFloat',
+					'function'    => array( 'drawSplitDecimalFloat', 'showVacationPayWarning' ),
 					'coordinates' => array(
 							array(
-									'x'      => 512,
+									'x'      => 510,
 									'y'      => 351,
 									'h'      => 10,
 									'w'      => 42,
 									'halign' => 'R',
 							),
 							array(
-									'x'      => 551,
+									'x'      => 552,
 									'y'      => 351,
 									'h'      => 10,
 									'w'      => 16,
@@ -950,6 +964,25 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 		} else {
 			return '*' . TTi18n::getText( 'Includes PP: 1 to %1', array($retval) );
 		}
+	}
+
+	function showVacationPayWarning() {
+		if ( isset( $this->vacation_pay ) AND $this->vacation_pay > 0 AND isset($this->pay_period_earnings) AND is_array( $this->pay_period_earnings ) AND count( $this->pay_period_earnings ) > 0 AND isset($this->pay_period_earnings[0]) ) {
+			$last_pay_period_earnings = $this->pay_period_earnings[0];
+			Debug::Text( 'First PP Earnings: '. $last_pay_period_earnings .' Vacation Pay: ' . $this->vacation_pay, __FILE__, __LINE__, __METHOD__, 10 );
+
+			if ( $this->vacation_pay >= $last_pay_period_earnings ) {
+				Debug::Text( 'Vacation Pay equals or exceeds last PP earnings, which is not allowed, as there must also be some insurable earnings in that pay period too.', __FILE__, __LINE__, __METHOD__, 10 );
+				$pdf = $this->getPDFObject();
+
+				$pdf->setTextColor( 255, 0, 0 );
+				$pdf->setXY( ( 322 + $this->getTempPageOffsets( 'x' ) + $this->getPageMargins( 'x') ), ( 330 + $this->getTempPageOffsets( 'y' ) + $this->getPageMargins( 'y') ) );
+
+				$pdf->Cell( 249, 10, 'WARNING: Vacation pay must not match Pay Period #1 earnings', 1, 0, 'R', 1, FALSE, 1 );
+			}
+		}
+
+		return TRUE;
 	}
 
 	function _outputXML() {

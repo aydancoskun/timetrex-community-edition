@@ -52,8 +52,7 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 
 	public $futa_tax_rate = 0.054; //Line9
 
-	public $credit_reduction_states = array( 'VI' ); //Last Updated: Tax Year 2018
-	//public $credit_reduction_states = array('CA', 'VI'); //Last Updated: Tax Year 2017
+	//See 940sa.class.php for Credit Reduction States/Rates
 
 	public $line_16_cutoff_amount = 500; //Line16
 
@@ -812,7 +811,7 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 					),
 			),
 			'l16d' => array(
-					'function'    => array('filterL16', 'drawSplitDecimalFloat'),
+					'function'    => array( 'filterL16', 'calcL16d', 'drawSplitDecimalFloat'),
 					'coordinates' => array(
 							array(
 									'x'      => 346,
@@ -1103,10 +1102,23 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 		return FALSE;
 	}
 
+	//Calculate the 4th quarter amount by taking Line 12 and working backwards.
+	function calcL16d( $value, $schema ) {
+		//The proper way to handle this is as per the 940 instructions Part 5: "To figure your FUTA tax liability for the fourth quarter, complete Form 940 through line 12. Then copy the amount from line 12 onto line 17. Lastly, subtract the sum of lines 16a through 16c from line 17 and enter the result on line 16d."
+		if ( $this->l12 > $this->line_16_cutoff_amount ) {
+			$this->l16d = bcsub( $this->l12, bcadd( $this->l16a, bcadd( $this->l16b, $this->l16c ) ) );
+
+			return $this->l16d;
+		}
+
+		return FALSE;
+	}
+
 	function calcL17( $value, $schema ) {
 		//Total tax liability for the year
 		if ( $this->l12 > $this->line_16_cutoff_amount ) {
-			$this->l17 = bcadd( $this->l16a, bcadd( $this->l16b, bcadd( $this->l16c, $this->l16d ) ) );
+			//$this->l17 = bcadd( $this->l16a, bcadd( $this->l16b, bcadd( $this->l16c, $this->l16d ) ) );
+			$this->l17 = $this->l12;
 
 			return $this->l17;
 		}

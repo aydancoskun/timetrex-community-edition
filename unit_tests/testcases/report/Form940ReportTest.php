@@ -113,6 +113,14 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 100, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
 		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
 		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 11, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 12, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 13, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 14, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 19, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
 		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids ); //Different State
 		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids ); //Different State
 
@@ -198,7 +206,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createPayPeriods() {
-		$max_pay_periods = 14;
+		$max_pay_periods = 28;
 
 		$ppslf = new PayPeriodScheduleListFactory();
 		$ppslf->getById( $this->pay_period_schedule_id );
@@ -207,7 +215,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-2019') );
+					$end_date = TTDate::getEndDayEpoch( strtotime('23-Dec-2018') );
 				} else {
 					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
@@ -285,7 +293,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createPayStub( $user_id ) {
-		for( $i = 0; $i <= 12; $i++ ) { //Calculate pay stubs for each pay period.
+		for( $i = 0; $i <= 26; $i++ ) { //Calculate pay stubs for each pay period.
 			$cps = new CalculatePayStub();
 			$cps->setUser( $user_id );
 			$cps->setPayPeriod( $this->pay_period_objs[$i]->getId() );
@@ -296,9 +304,10 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Form940Report_testMonthlyDeposit
+	 * @group Form940Report_testMonthlyDepositSingleEmployeeCreditReductionA
 	 */
-	function testMonthlyDeposit() {
+	function testMonthlyDepositSingleEmployeeCreditReductionA() {
+
 		foreach( $this->user_id as $user_id ) {
 			//1st Quarter - Stay below 7000 FUTA limit
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
@@ -319,22 +328,55 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ), $user_id );
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ), $user_id );
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ), $user_id );
-			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.26, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ), $user_id );
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ), $user_id );
-			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.25, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ), $user_id );
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ), $user_id );
-			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.24, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ), $user_id );
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ), $user_id );
-			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.23, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ), $user_id );
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ), $user_id );
 
+			//3rd Quarter - All above 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.22, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.21, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.20, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.19, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.18, TTDate::getMiddleDayEpoch( $this->pay_period_objs[16]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[16]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.17, TTDate::getMiddleDayEpoch( $this->pay_period_objs[17]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[17]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.16, TTDate::getMiddleDayEpoch( $this->pay_period_objs[18]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[18]->getEndDate() ), $user_id );
+
+			//4th Quarter - All above 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.15, TTDate::getMiddleDayEpoch( $this->pay_period_objs[19]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[19]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.14, TTDate::getMiddleDayEpoch( $this->pay_period_objs[20]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[20]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.13, TTDate::getMiddleDayEpoch( $this->pay_period_objs[21]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[21]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.12, TTDate::getMiddleDayEpoch( $this->pay_period_objs[22]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[22]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.11, TTDate::getMiddleDayEpoch( $this->pay_period_objs[23]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[23]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.10, TTDate::getMiddleDayEpoch( $this->pay_period_objs[24]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[24]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.09, TTDate::getMiddleDayEpoch( $this->pay_period_objs[25]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[25]->getEndDate() ), $user_id );
+
 			//Extra pay period outside the 1st and 2nd quarter.
-			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ), $user_id );
-			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.01, TTDate::getMiddleDayEpoch( $this->pay_period_objs[26]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[26]->getEndDate() ), $user_id );
 
 			$this->createPayStub( $user_id );
-		}
 
+			break; //Only do a single employee.
+		}
 
 
 		//Generate Report for 1st Quarter
@@ -344,6 +386,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$form_config = $report_obj->getCompanyFormConfig();
 		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
@@ -356,43 +399,56 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
-		//var_dump($report_output);
+		//var_export($report_output);
 
-		$this->assertEquals( $report_output[0]['date_month'], 'January' );
-		$this->assertEquals( $report_output[0]['total_payments'], 5105.10 );
-		$this->assertEquals( $report_output[0]['exempt_payments'], 51.70 );
-		$this->assertEquals( $report_output[0]['excess_payments'], 0.00 );
-		$this->assertEquals( $report_output[0]['taxable_wages'], 5053.40 );
-		$this->assertEquals( $report_output[0]['before_adjustment_tax'], 30.32 );
-		$this->assertEquals( $report_output[0]['adjustment_tax'], 192.03 );
-		$this->assertEquals( $report_output[0]['after_adjustment_tax'], 222.35 );
-
-		$this->assertEquals( $report_output[1]['date_month'], 'February' );
-		$this->assertEquals( $report_output[1]['total_payments'], 10209.75 );
-		$this->assertEquals( $report_output[1]['exempt_payments'], 103.25 );
-		$this->assertEquals( $report_output[1]['excess_payments'], 0.00 );
-		$this->assertEquals( $report_output[1]['taxable_wages'], 10106.50 );
-		$this->assertEquals( $report_output[1]['before_adjustment_tax'], 60.64 );
-		$this->assertEquals( $report_output[1]['adjustment_tax'], 384.05 );
-		$this->assertEquals( $report_output[1]['after_adjustment_tax'], 444.69 );
-
-		$this->assertEquals( $report_output[2]['date_month'], 'March' );
-		$this->assertEquals( $report_output[2]['total_payments'], 10209.15 );
-		$this->assertEquals( $report_output[2]['exempt_payments'], 103.05 );
-		$this->assertEquals( $report_output[2]['excess_payments'], 0.00 );
-		$this->assertEquals( $report_output[2]['taxable_wages'], 10106.10 );
-		$this->assertEquals( $report_output[2]['before_adjustment_tax'], 60.64 );
-		$this->assertEquals( $report_output[2]['adjustment_tax'], 384.03 );
-		$this->assertEquals( $report_output[2]['after_adjustment_tax'], 444.67 );
-
-		//Total
-		$this->assertEquals( $report_output[3]['total_payments'], 25524.00 );
-		$this->assertEquals( $report_output[3]['exempt_payments'], 258.00 );
-		$this->assertEquals( $report_output[3]['excess_payments'], 0.00 );
-		$this->assertEquals( $report_output[3]['taxable_wages'], 25266.00 );
-		$this->assertEquals( $report_output[3]['before_adjustment_tax'], 151.60 );
-		$this->assertEquals( $report_output[3]['adjustment_tax'], 960.11 );
-		$this->assertEquals( $report_output[3]['after_adjustment_tax'], 1111.70 );
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '2042.01',
+								'exempt_payments' => '20.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.34',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '76.81',
+								'after_adjustment_tax' => '88.94',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '2041.89',
+								'exempt_payments' => '20.63',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.26',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '76.81',
+								'after_adjustment_tax' => '88.94',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '2041.77',
+								'exempt_payments' => '20.59',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.18',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '76.80',
+								'after_adjustment_tax' => '88.93',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '6125.67',
+								'exempt_payments' => '61.89',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '6063.78',
+								'before_adjustment_tax' => '36.38',
+								'adjustment_tax' => '230.42',
+								'after_adjustment_tax' => '266.81',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
 
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -403,17 +459,25 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey( '0', $form_objs->objs );
 		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
 
-		$this->assertEquals( $form_objs->objs[0]->l3, 25524.00 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 258.00 );
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 6125.67 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 61.89 );
 		$this->assertEquals( $form_objs->objs[0]->l5, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 258.00 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 25266.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 151.60 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 61.89 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 6063.78 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 36.38 );
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 151.60 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 151.60 );
+		$this->assertEquals( $form_objs->objs[0]->l11, 230.42 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 266.80 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 266.80 );
 		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 1111.7040 );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 266.81 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
 
 
 
@@ -424,6 +488,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$form_config = $report_obj->getCompanyFormConfig();
 		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -437,43 +502,157 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
-		//var_dump($report_output);
+		//var_export($report_output);
 
-		$this->assertEquals( $report_output[0]['date_month'], 'April' );
-		$this->assertEquals( $report_output[0]['total_payments'], 10208.55 );
-		$this->assertEquals( $report_output[0]['exempt_payments'], 102.85 );
-		$this->assertEquals( $report_output[0]['excess_payments'], 371.70 );
-		$this->assertEquals( $report_output[0]['taxable_wages'], 9734.00 );
-		$this->assertEquals( $report_output[0]['before_adjustment_tax'], 58.40 );
-		$this->assertEquals( $report_output[0]['adjustment_tax'], 369.89 );
-		$this->assertEquals( $report_output[0]['after_adjustment_tax'], 428.30 );
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '2041.65',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '1084.88',
+								'taxable_wages' => '936.22',
+								'before_adjustment_tax' => '5.62',
+								'adjustment_tax' => '35.58',
+								'after_adjustment_tax' => '41.19',
+						),
+				1 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '3062.37',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.56',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '2041.57',
+								'exempt_payments' => '20.56',
+								'excess_payments' => '2021.01',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '7145.59',
+								'exempt_payments' => '71.92',
+								'excess_payments' => '6137.45',
+								'taxable_wages' => '936.22',
+								'before_adjustment_tax' => '5.62',
+								'adjustment_tax' => '35.58',
+								'after_adjustment_tax' => '41.19',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
 
-		$this->assertEquals( $report_output[1]['date_month'], 'May' );
-		$this->assertEquals( $report_output[1]['total_payments'], 15312.15 );
-		$this->assertEquals( $report_output[1]['exempt_payments'], 154.05 );
-		$this->assertEquals( $report_output[1]['excess_payments'], 15158.10 );
-		$this->assertEquals( $report_output[1]['taxable_wages'], 0.00 );
-		$this->assertEquals( $report_output[1]['before_adjustment_tax'], 0.00 );
-		$this->assertEquals( $report_output[1]['adjustment_tax'], 0.00 );
-		$this->assertEquals( $report_output[1]['after_adjustment_tax'], 0.00 );
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
 
-		$this->assertEquals( $report_output[2]['date_month'], 'June' );
-		$this->assertEquals( $report_output[2]['total_payments'], 10208.10 );
-		$this->assertEquals( $report_output[2]['exempt_payments'], 102.70 );
-		$this->assertEquals( $report_output[2]['excess_payments'], 10105.40 );
-		$this->assertEquals( $report_output[2]['taxable_wages'], 0.00 );
-		$this->assertEquals( $report_output[2]['before_adjustment_tax'], 0.00 );
-		$this->assertEquals( $report_output[2]['adjustment_tax'], 0.00 );
-		$this->assertEquals( $report_output[2]['after_adjustment_tax'], 0.00 );
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
 
-		//Total
-		$this->assertEquals( $report_output[3]['total_payments'], 35728.80 );
-		$this->assertEquals( $report_output[3]['exempt_payments'], 359.60 );
-		$this->assertEquals( $report_output[3]['excess_payments'], 25635.20 );
-		$this->assertEquals( $report_output[3]['taxable_wages'], 9734.00 );
-		$this->assertEquals( $report_output[3]['before_adjustment_tax'], 58.40 );
-		$this->assertEquals( $report_output[3]['adjustment_tax'], 369.89 );
-		$this->assertEquals( $report_output[3]['after_adjustment_tax'], 428.30 );
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 13271.26 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 133.81 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 6137.45 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 6271.26 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 42 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 41.19 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, NULL );
+
+
+
+		//Generate Report for 3rd Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_3rd_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '2041.51',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '2020.96',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				1 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '2041.45',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.91',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '2041.41',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.87',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '6124.37',
+								'exempt_payments' => '61.63',
+								'excess_payments' => '6062.74',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
 
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -484,28 +663,137 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey( '0', $form_objs->objs );
 		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
 
-		$this->assertEquals( $form_objs->objs[0]->l3, 61252.80 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 617.60 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 25635.20 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 26252.80 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 35000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 210.00 );
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 19395.63 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 195.44 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 12200.19 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 12395.63 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 210.00 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 210.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
 		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 151.5960 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 428.2960 );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
 
 
 
-		//Generate Report for entire year
+		//Generate Report for 4th Quarter
 		$report_obj = new Form940Report();
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
 		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_4th_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '2041.43',
+								'exempt_payments' => '20.57',
+								'excess_payments' => '2020.86',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				1 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '3061.98',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.17',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '2041.27',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.73',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '7144.68',
+								'exempt_payments' => '71.92',
+								'excess_payments' => '7072.76',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+
+		//Generate Report for entire year with Line 10
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -513,75 +801,160 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 
 		$report_config['time_period']['time_period'] = 'custom_date';
 		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('30-Jun-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
-		//var_dump($report_output);
+		//var_export($report_output);
 
-		$this->assertEquals( $report_output[0]['date_month'], 'January' );
-		$this->assertEquals( $report_output[0]['total_payments'], 5105.10 );
-		$this->assertEquals( $report_output[0]['exempt_payments'], 51.70 );
-		$this->assertEquals( $report_output[0]['excess_payments'], 0.00 );
-		$this->assertEquals( $report_output[0]['taxable_wages'], 5053.40 );
-		$this->assertEquals( $report_output[0]['before_adjustment_tax'], 30.32 );
-		$this->assertEquals( $report_output[0]['adjustment_tax'], 192.03 ); //This is different from 1st and 2nd quarter due to 'line_10' above.
-		$this->assertEquals( $report_output[0]['after_adjustment_tax'], 222.35 ); //This is different from 1st and 2nd quarter due to 'line_10' above.
-
-		$this->assertEquals( $report_output[1]['date_month'], 'February' );
-		$this->assertEquals( $report_output[1]['total_payments'], 10209.75 );
-		$this->assertEquals( $report_output[1]['exempt_payments'], 103.25 );
-		$this->assertEquals( $report_output[1]['excess_payments'], 0.00 );
-		$this->assertEquals( $report_output[1]['taxable_wages'], 10106.50 );
-		$this->assertEquals( $report_output[1]['before_adjustment_tax'], 60.64 );
-		$this->assertEquals( $report_output[1]['adjustment_tax'], 384.05 );
-		$this->assertEquals( $report_output[1]['after_adjustment_tax'], 444.69 );
-
-		$this->assertEquals( $report_output[2]['date_month'], 'March' );
-		$this->assertEquals( $report_output[2]['total_payments'], 10209.15 );
-		$this->assertEquals( $report_output[2]['exempt_payments'], 103.05 );
-		$this->assertEquals( $report_output[2]['excess_payments'], 0.00 );
-		$this->assertEquals( $report_output[2]['taxable_wages'], 10106.10 );
-		$this->assertEquals( $report_output[2]['before_adjustment_tax'], 60.64 );
-		$this->assertEquals( $report_output[2]['adjustment_tax'], 384.03 );
-		$this->assertEquals( $report_output[2]['after_adjustment_tax'], 444.67 );
-
-		$this->assertEquals( $report_output[3]['date_month'], 'April' );
-		$this->assertEquals( $report_output[3]['total_payments'], 10208.55 );
-		$this->assertEquals( $report_output[3]['exempt_payments'], 102.85 );
-		$this->assertEquals( $report_output[3]['excess_payments'], 371.70 );
-		$this->assertEquals( $report_output[3]['taxable_wages'], 9734.00 );
-		$this->assertEquals( $report_output[3]['before_adjustment_tax'], 58.40 );
-		$this->assertEquals( $report_output[3]['adjustment_tax'], 369.89 );
-		$this->assertEquals( $report_output[3]['after_adjustment_tax'], 428.30 );
-
-		$this->assertEquals( $report_output[4]['date_month'], 'May' );
-		$this->assertEquals( $report_output[4]['total_payments'], 15312.15 );
-		$this->assertEquals( $report_output[4]['exempt_payments'], 154.05 );
-		$this->assertEquals( $report_output[4]['excess_payments'], 15158.10 );
-		$this->assertEquals( $report_output[4]['taxable_wages'], 0.00 );
-		$this->assertEquals( $report_output[4]['before_adjustment_tax'], 0.00 );
-		$this->assertEquals( $report_output[4]['adjustment_tax'], 0.00 );
-		$this->assertEquals( $report_output[4]['after_adjustment_tax'], 0.00 );
-
-		$this->assertEquals( $report_output[5]['date_month'], 'June' );
-		$this->assertEquals( $report_output[5]['total_payments'], 10208.10 );
-		$this->assertEquals( $report_output[5]['exempt_payments'], 102.70 );
-		$this->assertEquals( $report_output[5]['excess_payments'], 10105.40 );
-		$this->assertEquals( $report_output[5]['taxable_wages'], 0.00 );
-		$this->assertEquals( $report_output[5]['before_adjustment_tax'], 0.00 );
-		$this->assertEquals( $report_output[5]['adjustment_tax'], 0.00 );
-		$this->assertEquals( $report_output[5]['after_adjustment_tax'], 0.00 );
-
-		//Total
-		$this->assertEquals( $report_output[6]['total_payments'], 61252.80 );
-		$this->assertEquals( $report_output[6]['exempt_payments'], 617.60 );
-		$this->assertEquals( $report_output[6]['excess_payments'], 25635.20 );
-		$this->assertEquals( $report_output[6]['taxable_wages'], 35000.00 );
-		$this->assertEquals( $report_output[6]['before_adjustment_tax'], 210.00 );
-		$this->assertEquals( $report_output[6]['adjustment_tax'], 1330.00 );
-		$this->assertEquals( $report_output[6]['after_adjustment_tax'], 1540.00 );
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '2042.01',
+								'exempt_payments' => '20.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.34',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '76.81',
+								'after_adjustment_tax' => '88.94',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '2041.89',
+								'exempt_payments' => '20.63',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.26',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '76.81',
+								'after_adjustment_tax' => '88.94',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '2041.77',
+								'exempt_payments' => '20.59',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.18',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '76.80',
+								'after_adjustment_tax' => '88.93',
+						),
+				3 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '2041.65',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '1084.88',
+								'taxable_wages' => '936.22',
+								'before_adjustment_tax' => '5.62',
+								'adjustment_tax' => '35.58',
+								'after_adjustment_tax' => '41.19',
+						),
+				4 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '3062.37',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.56',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				5 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '2041.57',
+								'exempt_payments' => '20.56',
+								'excess_payments' => '2021.01',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				6 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '2041.51',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '2020.96',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				7 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '2041.45',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.91',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				8 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '2041.41',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.87',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				9 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '2041.43',
+								'exempt_payments' => '20.57',
+								'excess_payments' => '2020.86',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				10 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '3061.98',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.17',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				11 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '2041.27',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.73',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				12 =>
+						array (
+								'date_month' => 'Grand Total[12]:',
+								'total_payments' => '26540.31',
+								'exempt_payments' => '267.36',
+								'excess_payments' => '19272.95',
+								'taxable_wages' => '7000.00',
+								'before_adjustment_tax' => '42.00',
+								'adjustment_tax' => '266.00',
+								'after_adjustment_tax' => '308.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
 
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -592,18 +965,2872 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey( '0', $form_objs->objs );
 		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
 
-		$this->assertEquals( $form_objs->objs[0]->l3, 61252.80 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 617.60 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 25635.20 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 26252.80 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 35000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 210.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 210.00 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 210.00 );
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 478.77 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 478.77 );
 		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 1111.7040 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 428.2960 );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 266.81 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 41.19 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+		//Generate Report for entire year *without* Line 10
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		//$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
+		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '2042.01',
+								'exempt_payments' => '20.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.34',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '76.81',
+								'after_adjustment_tax' => '88.94',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '2041.89',
+								'exempt_payments' => '20.63',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.26',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '76.81',
+								'after_adjustment_tax' => '88.94',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '2041.77',
+								'exempt_payments' => '20.59',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.18',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '76.80',
+								'after_adjustment_tax' => '88.93',
+						),
+				3 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '2041.65',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '1084.88',
+								'taxable_wages' => '936.22',
+								'before_adjustment_tax' => '5.62',
+								'adjustment_tax' => '35.58',
+								'after_adjustment_tax' => '41.19',
+						),
+				4 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '3062.37',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.56',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				5 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '2041.57',
+								'exempt_payments' => '20.56',
+								'excess_payments' => '2021.01',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				6 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '2041.51',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '2020.96',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				7 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '2041.45',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.91',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				8 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '2041.41',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.87',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				9 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '2041.43',
+								'exempt_payments' => '20.57',
+								'excess_payments' => '2020.86',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				10 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '3061.98',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.17',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				11 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '2041.27',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.73',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				12 =>
+						array (
+								'date_month' => 'Grand Total[12]:',
+								'total_payments' => '26540.31',
+								'exempt_payments' => '267.36',
+								'excess_payments' => '19272.95',
+								'taxable_wages' => '7000.00',
+								'before_adjustment_tax' => '42.00',
+								'adjustment_tax' => '266.00',
+								'after_adjustment_tax' => '308.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 266.81 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 41.19 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Form940Report_testMonthlyDepositSingleEmployeeNoCreditReductionA
+	 */
+	function testMonthlyDepositSingleEmployeeNoCreditReductionA() {
+
+		foreach( $this->user_id as $user_id ) {
+			//1st Quarter - Stay below 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ), $user_id );
+
+			//2nd Quarter - Cross 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.26, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.25, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.24, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.23, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ), $user_id );
+
+			//3rd Quarter - All above 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.22, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.21, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.20, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.19, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.18, TTDate::getMiddleDayEpoch( $this->pay_period_objs[16]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[16]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.17, TTDate::getMiddleDayEpoch( $this->pay_period_objs[17]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[17]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.16, TTDate::getMiddleDayEpoch( $this->pay_period_objs[18]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[18]->getEndDate() ), $user_id );
+
+			//4th Quarter - All above 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.15, TTDate::getMiddleDayEpoch( $this->pay_period_objs[19]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[19]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.14, TTDate::getMiddleDayEpoch( $this->pay_period_objs[20]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[20]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.13, TTDate::getMiddleDayEpoch( $this->pay_period_objs[21]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[21]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.12, TTDate::getMiddleDayEpoch( $this->pay_period_objs[22]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[22]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.11, TTDate::getMiddleDayEpoch( $this->pay_period_objs[23]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[23]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.10, TTDate::getMiddleDayEpoch( $this->pay_period_objs[24]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[24]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.09, TTDate::getMiddleDayEpoch( $this->pay_period_objs[25]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[25]->getEndDate() ), $user_id );
+
+			//Extra pay period outside the 1st and 2nd quarter.
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.01, TTDate::getMiddleDayEpoch( $this->pay_period_objs[26]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[26]->getEndDate() ), $user_id );
+
+			$this->createPayStub( $user_id );
+
+			break; //Only do a single employee.
+		}
+
+
+		//Generate Report for 1st Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_1st_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '2042.01',
+								'exempt_payments' => '20.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.34',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '12.13',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '2041.89',
+								'exempt_payments' => '20.63',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.26',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '12.13',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '2041.77',
+								'exempt_payments' => '20.59',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.18',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '12.13',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '6125.67',
+								'exempt_payments' => '61.89',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '6063.78',
+								'before_adjustment_tax' => '36.38',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '36.38',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 6125.67 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 61.89 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 61.89 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 6063.78 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+
+		//Generate Report for 2nd Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_2nd_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '2041.65',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '1084.88',
+								'taxable_wages' => '936.22',
+								'before_adjustment_tax' => '5.62',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '5.62',
+						),
+				1 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '3062.37',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.56',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '2041.57',
+								'exempt_payments' => '20.56',
+								'excess_payments' => '2021.01',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '7145.59',
+								'exempt_payments' => '71.92',
+								'excess_payments' => '6137.45',
+								'taxable_wages' => '936.22',
+								'before_adjustment_tax' => '5.62',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '5.62',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 13271.26 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 133.81 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 6137.45 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 6271.26 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, NULL );
+
+
+
+		//Generate Report for 3rd Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_3rd_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '2041.51',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '2020.96',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				1 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '2041.45',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.91',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '2041.41',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.87',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '6124.37',
+								'exempt_payments' => '61.63',
+								'excess_payments' => '6062.74',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 19395.63 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 195.44 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 12200.19 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 12395.63 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+
+		//Generate Report for 4th Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_4th_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '2041.43',
+								'exempt_payments' => '20.57',
+								'excess_payments' => '2020.86',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				1 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '3061.98',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.17',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '2041.27',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.73',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '7144.68',
+								'exempt_payments' => '71.92',
+								'excess_payments' => '7072.76',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+
+		//Generate Report for entire year with Line 10
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
+		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '2042.01',
+								'exempt_payments' => '20.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.34',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '12.13',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '2041.89',
+								'exempt_payments' => '20.63',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.26',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '12.13',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '2041.77',
+								'exempt_payments' => '20.59',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.18',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '12.13',
+						),
+				3 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '2041.65',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '1084.88',
+								'taxable_wages' => '936.22',
+								'before_adjustment_tax' => '5.62',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '5.62',
+						),
+				4 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '3062.37',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.56',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				5 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '2041.57',
+								'exempt_payments' => '20.56',
+								'excess_payments' => '2021.01',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				6 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '2041.51',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '2020.96',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				7 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '2041.45',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.91',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				8 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '2041.41',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.87',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				9 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '2041.43',
+								'exempt_payments' => '20.57',
+								'excess_payments' => '2020.86',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				10 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '3061.98',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.17',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				11 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '2041.27',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.73',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				12 =>
+						array (
+								'date_month' => 'Grand Total[12]:',
+								'total_payments' => '26540.31',
+								'exempt_payments' => '267.36',
+								'excess_payments' => '19272.95',
+								'taxable_wages' => '7000.00',
+								'before_adjustment_tax' => '42.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '42.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 142.03 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 142.03 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+		//Generate Report for entire year *without* Line 10
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		//$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
+		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '2042.01',
+								'exempt_payments' => '20.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.34',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '12.13',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '2041.89',
+								'exempt_payments' => '20.63',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.26',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '12.13',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '2041.77',
+								'exempt_payments' => '20.59',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '2021.18',
+								'before_adjustment_tax' => '12.13',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '12.13',
+						),
+				3 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '2041.65',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '1084.88',
+								'taxable_wages' => '936.22',
+								'before_adjustment_tax' => '5.62',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '5.62',
+						),
+				4 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '3062.37',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.56',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				5 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '2041.57',
+								'exempt_payments' => '20.56',
+								'excess_payments' => '2021.01',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				6 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '2041.51',
+								'exempt_payments' => '20.55',
+								'excess_payments' => '2020.96',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				7 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '2041.45',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.91',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				8 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '2041.41',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.87',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				9 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '2041.43',
+								'exempt_payments' => '20.57',
+								'excess_payments' => '2020.86',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				10 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '3061.98',
+								'exempt_payments' => '30.81',
+								'excess_payments' => '3031.17',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				11 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '2041.27',
+								'exempt_payments' => '20.54',
+								'excess_payments' => '2020.73',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				12 =>
+						array (
+								'date_month' => 'Grand Total[12]:',
+								'total_payments' => '26540.31',
+								'exempt_payments' => '267.36',
+								'excess_payments' => '19272.95',
+								'taxable_wages' => '7000.00',
+								'before_adjustment_tax' => '42.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '42.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Form940Report_testMonthlyDepositManyEmployeesCreditReductionA
+	 */
+	function testMonthlyDepositManyEmployeesCreditReductionA() {
+
+		foreach( $this->user_id as $user_id ) {
+			//1st Quarter - Stay below 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ), $user_id );
+
+			//2nd Quarter - Cross 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.26, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.25, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.24, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.23, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ), $user_id );
+
+			//3rd Quarter - All above 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.22, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.21, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.20, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.19, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.18, TTDate::getMiddleDayEpoch( $this->pay_period_objs[16]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[16]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.17, TTDate::getMiddleDayEpoch( $this->pay_period_objs[17]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[17]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.16, TTDate::getMiddleDayEpoch( $this->pay_period_objs[18]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[18]->getEndDate() ), $user_id );
+
+			//4th Quarter - All above 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.15, TTDate::getMiddleDayEpoch( $this->pay_period_objs[19]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[19]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.14, TTDate::getMiddleDayEpoch( $this->pay_period_objs[20]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[20]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.13, TTDate::getMiddleDayEpoch( $this->pay_period_objs[21]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[21]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.12, TTDate::getMiddleDayEpoch( $this->pay_period_objs[22]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[22]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.11, TTDate::getMiddleDayEpoch( $this->pay_period_objs[23]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[23]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.10, TTDate::getMiddleDayEpoch( $this->pay_period_objs[24]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[24]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.09, TTDate::getMiddleDayEpoch( $this->pay_period_objs[25]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[25]->getEndDate() ), $user_id );
+
+			//Extra pay period outside the 1st and 2nd quarter.
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.01, TTDate::getMiddleDayEpoch( $this->pay_period_objs[26]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[26]->getEndDate() ), $user_id );
+
+			$this->createPayStub( $user_id );
+		}
+
+
+		//Generate Report for 1st Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_1st_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '26546.13',
+								'exempt_payments' => '268.71',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26277.42',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '998.54',
+								'after_adjustment_tax' => '1156.21',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '26544.57',
+								'exempt_payments' => '268.19',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26276.38',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '998.50',
+								'after_adjustment_tax' => '1156.16',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '26543.01',
+								'exempt_payments' => '267.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26275.34',
+								'before_adjustment_tax' => '157.65',
+								'adjustment_tax' => '998.46',
+								'after_adjustment_tax' => '1156.11',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '79633.71',
+								'exempt_payments' => '804.57',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '78829.14',
+								'before_adjustment_tax' => '472.97',
+								'adjustment_tax' => '2995.51',
+								'after_adjustment_tax' => '3468.48',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 79633.71 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 804.57 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 804.57 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 78829.14 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l11, 2995.51 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 3468.48 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 3468.48 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 3468.48 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+
+		//Generate Report for 2nd Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_2nd_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '26541.45',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '14103.44',
+								'taxable_wages' => '12170.86',
+								'before_adjustment_tax' => '73.03',
+								'adjustment_tax' => '462.49',
+								'after_adjustment_tax' => '535.52',
+						),
+				1 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '39810.81',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39410.28',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '26540.41',
+								'exempt_payments' => '267.28',
+								'excess_payments' => '26273.13',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '92892.67',
+								'exempt_payments' => '934.96',
+								'excess_payments' => '79786.85',
+								'taxable_wages' => '12170.86',
+								'before_adjustment_tax' => '73.03',
+								'adjustment_tax' => '462.49',
+								'after_adjustment_tax' => '535.52',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 172526.38 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 1739.53 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 79786.85 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 81526.38 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 546 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 535.52 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 3915.08 );
+
+
+
+		//Generate Report for 3rd Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_3rd_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '26539.63',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '26272.48',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				1 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '26538.85',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.83',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '26538.33',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.31',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '79616.81',
+								'exempt_payments' => '801.19',
+								'excess_payments' => '78815.62',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 252143.19 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 2540.72 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 158602.47 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 161143.19 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 4377.57 );
+
+
+
+		//Generate Report for 4th Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_4th_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '26538.59',
+								'exempt_payments' => '267.41',
+								'excess_payments' => '26271.18',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				1 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '39805.74',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39405.21',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '26536.51',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26269.49',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '92880.84',
+								'exempt_payments' => '934.96',
+								'excess_payments' => '91945.88',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 4377.57 );
+
+
+
+		//Generate Report for entire year with Line 10.
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
+		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '26546.13',
+								'exempt_payments' => '268.71',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26277.42',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '998.54',
+								'after_adjustment_tax' => '1156.21',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '26544.57',
+								'exempt_payments' => '268.19',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26276.38',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '998.50',
+								'after_adjustment_tax' => '1156.16',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '26543.01',
+								'exempt_payments' => '267.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26275.34',
+								'before_adjustment_tax' => '157.65',
+								'adjustment_tax' => '998.46',
+								'after_adjustment_tax' => '1156.11',
+						),
+				3 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '26541.45',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '14103.44',
+								'taxable_wages' => '12170.86',
+								'before_adjustment_tax' => '73.03',
+								'adjustment_tax' => '462.49',
+								'after_adjustment_tax' => '535.52',
+						),
+				4 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '39810.81',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39410.28',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				5 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '26540.41',
+								'exempt_payments' => '267.28',
+								'excess_payments' => '26273.13',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				6 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '26539.63',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '26272.48',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				7 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '26538.85',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.83',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				8 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '26538.33',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.31',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				9 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '26538.59',
+								'exempt_payments' => '267.41',
+								'excess_payments' => '26271.18',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				10 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '39805.74',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39405.21',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				11 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '26536.51',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26269.49',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				12 =>
+						array (
+								'date_month' => 'Grand Total[12]:',
+								'total_payments' => '345024.03',
+								'exempt_payments' => '3475.68',
+								'excess_payments' => '250548.35',
+								'taxable_wages' => '91000.00',
+								'before_adjustment_tax' => '546.00',
+								'adjustment_tax' => '3458.00',
+								'after_adjustment_tax' => '4004.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 546 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 5023.60 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 5023.60 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 3468.48 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 535.52 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 1019.60 );
+
+
+		//Generate Report for entire year with Line 10 *without line 10*
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		//$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
+		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '26546.13',
+								'exempt_payments' => '268.71',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26277.42',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '998.54',
+								'after_adjustment_tax' => '1156.21',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '26544.57',
+								'exempt_payments' => '268.19',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26276.38',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '998.50',
+								'after_adjustment_tax' => '1156.16',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '26543.01',
+								'exempt_payments' => '267.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26275.34',
+								'before_adjustment_tax' => '157.65',
+								'adjustment_tax' => '998.46',
+								'after_adjustment_tax' => '1156.11',
+						),
+				3 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '26541.45',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '14103.44',
+								'taxable_wages' => '12170.86',
+								'before_adjustment_tax' => '73.03',
+								'adjustment_tax' => '462.49',
+								'after_adjustment_tax' => '535.52',
+						),
+				4 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '39810.81',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39410.28',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				5 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '26540.41',
+								'exempt_payments' => '267.28',
+								'excess_payments' => '26273.13',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				6 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '26539.63',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '26272.48',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				7 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '26538.85',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.83',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				8 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '26538.33',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.31',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				9 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '26538.59',
+								'exempt_payments' => '267.41',
+								'excess_payments' => '26271.18',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				10 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '39805.74',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39405.21',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				11 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '26536.51',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26269.49',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				12 =>
+						array (
+								'date_month' => 'Grand Total[12]:',
+								'total_payments' => '345024.03',
+								'exempt_payments' => '3475.68',
+								'excess_payments' => '250548.35',
+								'taxable_wages' => '91000.00',
+								'before_adjustment_tax' => '546.00',
+								'adjustment_tax' => '3458.00',
+								'after_adjustment_tax' => '4004.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 546 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 3468.48 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 535.52 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 919.57 );
+
+		return TRUE;
+	}
+
+	/*
+	 * @group Form940Report_testMonthlyDepositManyEmployeesNoCreditReductionA
+	 */
+	function testMonthlyDepositManyEmployeesNoCreditReductionA() {
+
+		foreach( $this->user_id as $user_id ) {
+			//1st Quarter - Stay below 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ), $user_id );
+
+			//2nd Quarter - Cross 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.26, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.25, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.24, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.23, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ), $user_id );
+
+			//3rd Quarter - All above 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.22, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.21, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.20, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.19, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.18, TTDate::getMiddleDayEpoch( $this->pay_period_objs[16]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[16]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.17, TTDate::getMiddleDayEpoch( $this->pay_period_objs[17]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[17]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.16, TTDate::getMiddleDayEpoch( $this->pay_period_objs[18]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[18]->getEndDate() ), $user_id );
+
+			//4th Quarter - All above 7000 FUTA limit
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.15, TTDate::getMiddleDayEpoch( $this->pay_period_objs[19]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[19]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.14, TTDate::getMiddleDayEpoch( $this->pay_period_objs[20]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[20]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.13, TTDate::getMiddleDayEpoch( $this->pay_period_objs[21]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[21]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.12, TTDate::getMiddleDayEpoch( $this->pay_period_objs[22]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[22]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.11, TTDate::getMiddleDayEpoch( $this->pay_period_objs[23]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[23]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.10, TTDate::getMiddleDayEpoch( $this->pay_period_objs[24]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[24]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.09, TTDate::getMiddleDayEpoch( $this->pay_period_objs[25]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[25]->getEndDate() ), $user_id );
+
+			//Extra pay period outside the 1st and 2nd quarter.
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.01, TTDate::getMiddleDayEpoch( $this->pay_period_objs[26]->getEndDate() ), $user_id );
+			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[26]->getEndDate() ), $user_id );
+
+			$this->createPayStub( $user_id );
+		}
+
+
+		//Generate Report for 1st Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_1st_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '26546.13',
+								'exempt_payments' => '268.71',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26277.42',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '157.66',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '26544.57',
+								'exempt_payments' => '268.19',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26276.38',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '157.66',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '26543.01',
+								'exempt_payments' => '267.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26275.34',
+								'before_adjustment_tax' => '157.65',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '157.65',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '79633.71',
+								'exempt_payments' => '804.57',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '78829.14',
+								'before_adjustment_tax' => '472.97',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '472.97',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 79633.71 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 804.57 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 804.57 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 78829.14 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+
+		//Generate Report for 2nd Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_2nd_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '26541.45',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '14103.44',
+								'taxable_wages' => '12170.86',
+								'before_adjustment_tax' => '73.03',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '73.03',
+						),
+				1 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '39810.81',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39410.28',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '26540.41',
+								'exempt_payments' => '267.28',
+								'excess_payments' => '26273.13',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '92892.67',
+								'exempt_payments' => '934.96',
+								'excess_payments' => '79786.85',
+								'taxable_wages' => '12170.86',
+								'before_adjustment_tax' => '73.03',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '73.03',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 172526.38 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 1739.53 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 79786.85 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 81526.38 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+
+		//Generate Report for 3rd Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_3rd_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '26539.63',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '26272.48',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				1 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '26538.85',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.83',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '26538.33',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.31',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '79616.81',
+								'exempt_payments' => '801.19',
+								'excess_payments' => '78815.62',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 252143.19 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 2540.72 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 158602.47 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 161143.19 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+
+		//Generate Report for 4th Quarter
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_4th_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '26538.59',
+								'exempt_payments' => '267.41',
+								'excess_payments' => '26271.18',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				1 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '39805.74',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39405.21',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				2 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '26536.51',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26269.49',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				3 =>
+						array (
+								'date_month' => 'Grand Total[3]:',
+								'total_payments' => '92880.84',
+								'exempt_payments' => '934.96',
+								'excess_payments' => '91945.88',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+
+
+
+		//Generate Report for entire year with Line 10.
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
+		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '26546.13',
+								'exempt_payments' => '268.71',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26277.42',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '157.66',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '26544.57',
+								'exempt_payments' => '268.19',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26276.38',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '157.66',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '26543.01',
+								'exempt_payments' => '267.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26275.34',
+								'before_adjustment_tax' => '157.65',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '157.65',
+						),
+				3 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '26541.45',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '14103.44',
+								'taxable_wages' => '12170.86',
+								'before_adjustment_tax' => '73.03',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '73.03',
+						),
+				4 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '39810.81',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39410.28',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				5 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '26540.41',
+								'exempt_payments' => '267.28',
+								'excess_payments' => '26273.13',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				6 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '26539.63',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '26272.48',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				7 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '26538.85',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.83',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				8 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '26538.33',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.31',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				9 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '26538.59',
+								'exempt_payments' => '267.41',
+								'excess_payments' => '26271.18',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				10 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '39805.74',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39405.21',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				11 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '26536.51',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26269.49',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				12 =>
+						array (
+								'date_month' => 'Grand Total[12]:',
+								'total_payments' => '345024.03',
+								'exempt_payments' => '3475.68',
+								'excess_payments' => '250548.35',
+								'taxable_wages' => '91000.00',
+								'before_adjustment_tax' => '546.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '546.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
+		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 646.03 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 646.03 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 100.03 );
+
+		//Generate Report for entire year with Line 10 *without line 10*
+		$report_obj = new Form940Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		//$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
+		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$report_obj->setFormConfig( $form_config );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
+		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_export($report_output);
+
+		$should_match_arr = array (
+				0 =>
+						array (
+								'date_month' => 'January',
+								'total_payments' => '26546.13',
+								'exempt_payments' => '268.71',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26277.42',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '157.66',
+						),
+				1 =>
+						array (
+								'date_month' => 'February',
+								'total_payments' => '26544.57',
+								'exempt_payments' => '268.19',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26276.38',
+								'before_adjustment_tax' => '157.66',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '157.66',
+						),
+				2 =>
+						array (
+								'date_month' => 'March',
+								'total_payments' => '26543.01',
+								'exempt_payments' => '267.67',
+								'excess_payments' => '0.00',
+								'taxable_wages' => '26275.34',
+								'before_adjustment_tax' => '157.65',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '157.65',
+						),
+				3 =>
+						array (
+								'date_month' => 'April',
+								'total_payments' => '26541.45',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '14103.44',
+								'taxable_wages' => '12170.86',
+								'before_adjustment_tax' => '73.03',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '73.03',
+						),
+				4 =>
+						array (
+								'date_month' => 'May',
+								'total_payments' => '39810.81',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39410.28',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				5 =>
+						array (
+								'date_month' => 'June',
+								'total_payments' => '26540.41',
+								'exempt_payments' => '267.28',
+								'excess_payments' => '26273.13',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				6 =>
+						array (
+								'date_month' => 'July',
+								'total_payments' => '26539.63',
+								'exempt_payments' => '267.15',
+								'excess_payments' => '26272.48',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				7 =>
+						array (
+								'date_month' => 'August',
+								'total_payments' => '26538.85',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.83',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				8 =>
+						array (
+								'date_month' => 'September',
+								'total_payments' => '26538.33',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26271.31',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				9 =>
+						array (
+								'date_month' => 'October',
+								'total_payments' => '26538.59',
+								'exempt_payments' => '267.41',
+								'excess_payments' => '26271.18',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				10 =>
+						array (
+								'date_month' => 'November',
+								'total_payments' => '39805.74',
+								'exempt_payments' => '400.53',
+								'excess_payments' => '39405.21',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				11 =>
+						array (
+								'date_month' => 'December',
+								'total_payments' => '26536.51',
+								'exempt_payments' => '267.02',
+								'excess_payments' => '26269.49',
+								'taxable_wages' => '0.00',
+								'before_adjustment_tax' => '0.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '0.00',
+						),
+				12 =>
+						array (
+								'date_month' => 'Grand Total[12]:',
+								'total_payments' => '345024.03',
+								'exempt_payments' => '3475.68',
+								'excess_payments' => '250548.35',
+								'taxable_wages' => '91000.00',
+								'before_adjustment_tax' => '546.00',
+								'adjustment_tax' => '0.00',
+								'after_adjustment_tax' => '546.00',
+								'_total' => true,
+						),
+		);
+		$this->assertEquals( $report_output, $should_match_arr );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		//
+		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
+		//         Also don't forget to setup the Exempt Payments in the UI.
+		//
+		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
+		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
+		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
+		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
+		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
+		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
+		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
+		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
 
 		return TRUE;
 	}

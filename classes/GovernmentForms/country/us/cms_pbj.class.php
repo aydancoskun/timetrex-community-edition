@@ -41,7 +41,7 @@ include_once( 'US.class.php' );
  * @package GovernmentForms
  */
 class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
-	public $xml_schema = 'CMS/PBJ/nhpbj_2_00_0.xsd';
+	public $xml_schema = 'CMS/PBJ/nhpbj_4_00_0.xsd';
 
 	public function getFilterFunction( $name ) {
 		$variable_function_map = array(
@@ -93,11 +93,11 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 
 
 	function _outputXML() {
-		$xml = new SimpleXMLElement( '<nursingHomeData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nhpbj_2_00_0.xsd"></nursingHomeData>' );
+		$xml = new SimpleXMLElement( '<nursingHomeData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nhpbj_4_00_0.xsd"></nursingHomeData>' );
 		$this->setXMLObject( $xml );
 
 		$xml->addChild( 'header' );
-		$xml->header->addAttribute( 'fileSpecVersion', '2.00.0' );
+		$xml->header->addAttribute( 'fileSpecVersion', '4.00.0' );
 
 		$xml->header->addChild( 'facilityId', $this->facility_code );
 		$xml->header->addChild( 'stateCode', $this->state_code );

@@ -493,6 +493,27 @@ class Form1099MiscReport extends Report {
 	}
 
 	/**
+	 * @return mixed
+	 */
+	function getF1096Object() {
+		if ( !isset($this->form_obj['f1096']) OR !is_object($this->form_obj['f1096']) ) {
+			$this->form_obj['f1096'] = $this->getFormObject()->getFormObject( '1096', 'US' );
+			return $this->form_obj['f1096'];
+		}
+
+		return $this->form_obj['f1096'];
+	}
+
+	/**
+	 * @return bool
+	 */
+	function clearF1096Object() {
+		$this->form_obj['f1096'] = FALSE;
+
+		return TRUE;
+	}
+
+	/**
 	 * @return bool
 	 */
 	function clearRETURN1040Object() {
@@ -552,7 +573,7 @@ class Form1099MiscReport extends Report {
 					}
 				}
 			}
-			Debug::Arr($tax_deductions, 'Tax Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Arr($tax_deductions, 'Tax Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			Debug::Text('No Tax Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -693,9 +714,8 @@ class Form1099MiscReport extends Report {
 			}
 		}
 
-		//Get user data for joining.
-		//$ulf = TTnew( 'UserListFactory' );
-		$filter_data['type_id'] = array(10, 20); //federal and state
+		//Get remittance agency for joining.
+		$filter_data['type_id'] = array(10, 20); //federal, state
 		$filter_data['country'] = array('US'); //US federal
 		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
@@ -704,8 +724,12 @@ class Form1099MiscReport extends Report {
 		if ( $ralf->getRecordCount() > 0 ) {
 			foreach ( $ralf as $key => $ra_obj ) {
 				if ( $ra_obj->parseAgencyID( NULL, 'id') == 10 ) {
-					$province_id = ( $ra_obj->getType() == 20 ) ? $ra_obj->getProvince() : '00';
-					$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$province_id] = $ra_obj;
+					if ( in_array( $ra_obj->getType(), array(10, 20) ) ) {
+						$province_id = ( $ra_obj->getType() == 10 ) ? '00' : $ra_obj->getProvince();
+						$this->form_data['remittance_agency'][ $ra_obj->getLegalEntity() ][ $province_id ] = $ra_obj->getId(); //Map province to a specific remittance object below.
+					}
+
+					$this->form_data['remittance_agency_obj'][ $ra_obj->getId() ] = $ra_obj;
 				}
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
@@ -816,10 +840,22 @@ class Form1099MiscReport extends Report {
 					continue;
 				}
 
+				if ( isset( $this->form_data['remittance_agency'][$legal_entity_id]['00'] ) == FALSE ) {
+					Debug::Text( 'Missing Federal Remittance Agency: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
+					continue;
+				}
+
 				$x = 0; //Progress bar only.
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($user_rows), NULL, TTi18n::getText('Generating Forms...') );
 
 				$legal_entity_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
+
+				if ( is_object( $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ]['00'] ]) ) {
+					$contact_user_obj = $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ]['00'] ]->getContactUserObject();
+				}
+				if ( !isset( $contact_user_obj ) OR !is_object( $contact_user_obj ) ) {
+					$contact_user_obj = $this->getUserObject();
+				}
 
 				$f1099m = $this->getF1099MiscObject();
 				$f1099m->setDebug(FALSE);
@@ -834,7 +870,7 @@ class Form1099MiscReport extends Report {
 				$f1099m->company_city = $legal_entity_obj->getCity();
 				$f1099m->company_state = $legal_entity_obj->getProvince();
 				$f1099m->company_zip_code = $legal_entity_obj->getPostalCode();
-				$f1099m->payer_id = $this->form_data['remittance_agency'][$legal_entity_id]['00']->getPrimaryIdentification(); //Use Federal Remittance Agency always.
+				$f1099m->payer_id = $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ]['00'] ]->getPrimaryIdentification(); //Always use EIN from Federal Agency.
 
 				if ( isset( $this->form_data ) AND count( $this->form_data ) > 0 ) {
 					$i = 0;
@@ -869,16 +905,19 @@ class Form1099MiscReport extends Report {
 
 							foreach ( range( 'a', 'z' ) as $z ) {
 								//Make sure state information is included if its just local income taxes.
-								if ( isset( $row[ 'l18' . $z ] ) AND ( isset( $row[ 'l17' . $z . '_state' ] ) AND isset( $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l17' . $z . '_state' ] ] ) AND $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l17' . $z . '_state' ] ]->getType() == 20 ) ) {
-									$ee_data[ 'l17' . $z . '_state_id' ] = $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l17' . $z . '_state' ] ]->getPrimaryIdentification();
-									//$ee_data[ 'l17' . $z . '_state' ] = $row[ 'l17' . $z . '_state' ];
+								if ( ( ( isset( $row[ 'l16' . $z ] ) AND $row[ 'l16' . $z ] > 0 ) OR ( isset( $row[ 'l18' . $z ] ) AND $row[ 'l18' . $z ] > 0 ) )
+												AND ( isset( $row[ 'l17' . $z . '_state' ] )
+												AND isset( $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l17' . $z . '_state' ] ] )
+												AND isset( $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l17' . $z . '_state' ] ] ] )
+												AND $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l17' . $z . '_state' ] ] ]->getType() == 20 ) ) {
+									$ee_data[ 'l17' . $z . '_state_id' ] = $this->form_data['remittance_agency_obj'][ $this->form_data['remittance_agency'][ $legal_entity_id ][ $row[ 'l17' . $z . '_state' ] ] ]->getPrimaryIdentification();
 									$ee_data[ 'l17' . $z ] = $row[ 'l17' . $z . '_state' ];
 									if ( isset($ee_data['l17'.$z.'_state_id']) AND $ee_data['l17'.$z.'_state_id'] != '' ) {
 										$ee_data['l17'.$z] .= ' / '. $ee_data['l17'.$z.'_state_id'];
 									}
 								} else {
 									$ee_data[ 'l17' . $z . '_state_id' ] = NULL;
-									$ee_data[ 'l17' . $z . '_state' ] = NULL;
+									$ee_data[ 'l17' . $z ] = NULL;
 								}
 
 								//State income tax
@@ -917,6 +956,40 @@ class Form1099MiscReport extends Report {
 
 				$this->getFormObject()->addForm( $f1099m );
 
+				if ( $form_type == 'government' ) {
+					//Handle 1096 (Summary)
+					$f1096 = $this->getF1096Object();
+					$f1096->setShowBackground( $show_background );
+					$f1096->year = $f1099m->year;
+					$f1096->ein = $f1099m->payer_id;
+					$f1096->name = $f1099m->name;
+					$f1096->trade_name = $f1099m->trade_name;
+					$f1096->company_address1 = $f1099m->company_address1;
+					$f1096->company_address2 = $f1099m->company_address2;
+					$f1096->company_city = $f1099m->company_city;
+					$f1096->company_state = $f1099m->company_state;
+					$f1096->company_zip_code = $f1099m->company_zip_code;
+
+					$f1096->contact_name = $contact_user_obj->getFullName();
+					$f1096->contact_phone = $contact_user_obj->getWorkPhone();
+					$f1096->contact_phone_ext = $contact_user_obj->getWorkPhoneExt();
+					$f1096->contact_email = ( $contact_user_obj->getWorkEmail() != '' ) ? $contact_user_obj->getWorkEmail() : ( ( $contact_user_obj->getHomeEmail() != '' ) ? $contact_user_obj->getHomeEmail() : NULL );
+
+					$f1096->l3 = $f1099m->countRecords();
+
+					//Use sumRecords()/getRecordsTotal() so all amounts are capped properly.
+					$f1099m->sumRecords();
+					$total_row = $f1099m->getRecordsTotal();
+
+					Debug::Arr($total_row, 'Total Row Data: ', __FILE__, __LINE__, __METHOD__, 10);
+					if ( is_array( $total_row ) ) {
+						$f1096->l4 = ( isset( $total_row['l4'] ) AND $total_row['l4'] != 0 ) ? $total_row['l4'] : NULL;
+						$f1096->l5 = bcadd( bcadd( $total_row['l4'], $total_row['l6'] ), $total_row['l7'] ); //Instructions explain which boxes needed to be totaled here.
+					}
+
+					$this->getFormObject()->addForm( $f1096 );
+				}
+
 				if ( $format == 'efile' ) {
 					$output_format = 'EFILE';
 					if ( $f1099m->getDebug() == TRUE ) {
@@ -941,6 +1014,7 @@ class Form1099MiscReport extends Report {
 
 				$this->clearFormObject();
 				$this->clearF1099MiscObject();
+				$this->clearF1096Object();
 			}
 		}
 

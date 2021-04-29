@@ -1271,23 +1271,23 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				break;
 			case 2000: //Annually
 				$day_of_month = $this->getPrimaryDayOfMonth();
-				$days_in_month = TTDate::getDaysInMonth(mktime(0, 0, 0, $this->getPrimaryMonth(), 1, date('Y', ($last_due_date ) )));
+				$days_in_month = TTDate::getDaysInMonth( mktime( 0, 0, 0, $this->getPrimaryMonth(), 1, date( 'Y', $last_due_date ) ) );
 
-				if( $day_of_month > $days_in_month ) {
+				if ( $day_of_month > $days_in_month ) {
 					$day_of_month = $days_in_month;
 				}
 
-				$due_date = mktime(0, 0, 0, $this->getPrimaryMonth(), $day_of_month, date('Y', ($last_due_date ) ));
-				if ( $last_due_date >= $due_date) {
-					$due_date = TTDate::incrementDate($due_date, 1, 'year');
+				$due_date = mktime( 0, 0, 0, $this->getPrimaryMonth(), $day_of_month, date( 'Y', $last_due_date ) );
+				if ( $last_due_date >= $due_date ) {
+					$due_date = TTDate::incrementDate( $due_date, 1, 'year' );
 				}
 
-				$due_date_prev_year = TTDate::incrementDate($due_date, -1, 'year');
+				$due_date_prev_year = TTDate::incrementDate( $due_date, -1, 'year' );
 
 				$retval = array(
-						'due_date' => $due_date,
-						'start_date' => TTDate::getBeginYearEpoch($due_date_prev_year),
-						'end_date' => TTDate::getEndYearEpoch($due_date_prev_year),
+						'due_date'   => $due_date,
+						'start_date' => TTDate::getBeginYearEpoch( $due_date_prev_year ),
+						'end_date'   => TTDate::getEndYearEpoch( $due_date_prev_year ),
 				);
 				break;
 			case 2100: //year to date

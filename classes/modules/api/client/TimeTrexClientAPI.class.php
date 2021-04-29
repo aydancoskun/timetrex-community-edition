@@ -57,6 +57,11 @@ class TimeTrexClientAPI {
 	function __construct( $class = NULL, $url = NULL, $session_id = NULL) {
 		global $TIMETREX_URL, $TIMETREX_SESSION_ID;
 
+		if ( class_exists('SoapClient') == FALSE ) {
+			echo "ERROR: PHP SOAP extension is not installed and enabled, please correct this then try again.";
+			exit(255);
+		}
+
 		ini_set('default_socket_timeout', 3600);
 
 		if ( $url == '' ) {

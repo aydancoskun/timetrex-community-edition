@@ -141,7 +141,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 						'x'          => 395,
 						'y'          => 70,
 						'h'          => 20,
-						'w'          => 70,
+						'w'          => 68,
 						'halign'     => 'C',
 						'fill_color' => array(255, 255, 255),
 				),
@@ -483,8 +483,6 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 	}
 
 	function filterCompanyAddress( $value ) {
-		Debug::Text( 'Filtering company address: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
-
 		//Combine company address for multicell display.
 		$retarr[] = $this->company_address1;
 		if ( $this->company_address2 != '' ) {
@@ -506,8 +504,6 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 		if ( $this->address2 != '' ) {
 			$retarr[] = $this->address2;
 		}
-
-		//$retarr[] = $this->city. ', '.$this->state . ' ' . $this->zip_code;
 
 		return implode( "\n", $retarr );
 	}

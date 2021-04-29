@@ -204,6 +204,22 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 								),
 						),
 						//Column 2
+						'NY'  => array( //Used for unit tests
+								array(
+										'x'      => 361,
+										'y'      => 357,
+										'h'      => 14,
+										'w'      => 66,
+										'halign' => 'R',
+								),
+								array(
+										'x'      => 430,
+										'y'      => 357,
+										'h'      => 14,
+										'w'      => 15,
+										'halign' => 'C',
+								),
+						),
 						'VI'  => array(
 								array(
 										'x'      => 361,
@@ -262,6 +278,22 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 								),
 						),
 						//Column 2
+						'NY'  => array( //Used for unit tests.
+								array(
+										'x'      => 491,
+										'y'      => 357,
+										'h'      => 14,
+										'w'      => 66,
+										'halign' => 'R',
+								),
+								array(
+										'x'      => 560,
+										'y'      => 357,
+										'h'      => 14,
+										'w'      => 15,
+										'halign' => 'C',
+								),
+						),
 						'VI'  => array(
 								array(
 										'x'      => 491,
@@ -734,13 +766,14 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 		if ( isset($this->state_amounts) AND is_array($this->state_amounts) ) {
 			foreach ( $this->state_amounts as $state => $amount ) {
 				if ( isset( $this->credit_reduction_rates[ $state ] ) ) {
-					$state_credit_reduction[ $state ] = bcmul( $amount, $this->credit_reduction_rates[ $state ] );
+					$state_credit_reduction[ $state ] = round( bcmul( $amount, $this->credit_reduction_rates[ $state ] ), 2 );
 				}
 			}
 
 			$this->state_credit_reduction = $state_credit_reduction;
 		}
 
+		Debug::Arr($this->state_credit_reduction, 'Form 940SA State Credit Reduction Amounts: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $this->state_credit_reduction;
 	}
 
@@ -754,6 +787,9 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 			}
 		}
 
+		$this->total = round( $this->total, 2 );
+
+		Debug::Text('Form 940SA Total: '. $this->total, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->total;
 	}
 
