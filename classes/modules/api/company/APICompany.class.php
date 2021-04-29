@@ -813,6 +813,7 @@ class APICompany extends APIFactory {
 
 			if ( file_exists( $file_name ) ) {
 				unlink( $file_name );
+				TTLog::addEntry( $company_id, 30, TTi18n::getText( 'Logo' ), null, $f->getTable() );
 			}
 		}
 

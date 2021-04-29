@@ -1055,6 +1055,13 @@ class RemittanceDestinationAccountFactory extends Factory {
 												  false,
 												  TTi18n::gettext( 'Source Account is invalid, type mismatch' ) );
 					}
+
+					if ( $this->getStatus() == 10 && $this->getRemittanceSourceAccountObject()->getStatus() != 10 ) {
+						$this->Validator->isTrue( 'remittance_source_account_id',
+												  false,
+												  TTi18n::gettext( 'Source Account is disable, unable to link an enabled pay method to it' ) );
+					}
+
 				}
 			}
 

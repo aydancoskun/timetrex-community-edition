@@ -305,6 +305,7 @@ class UserSummaryReport extends Report {
 				}
 				$retval['password_updated_date'] = $retval['max_punch_time_stamp'] = 'time_stamp';
 				$retval['effective_date'] = $retval['last_login_date'] = 'date_stamp';
+				$retval['user_photo'] = 'html';
 				break;
 			case 'aggregates':
 				$retval = [];
@@ -922,7 +923,7 @@ class UserSummaryReport extends Report {
 				$this->tmp_data['user'][$u_obj->getId()]['employee_number_qrcode'] = new ReportCellQRcode( $this, 'U' . $this->tmp_data['user'][$u_obj->getId()]['employee_number'] );
 			}
 			if ( isset( $columns['user_photo'] ) && $u_obj->isPhotoExists() ) {
-				$this->tmp_data['user'][$u_obj->getId()]['user_photo'] = new ReportCellImage( $this, $u_obj->getPhotoFileName( $u_obj->getCompany(), $u_obj->getID(), false ) );
+				$this->tmp_data['user'][$u_obj->getId()]['user_photo'] = new ReportCellImage( $this, array( 'local_file' => $u_obj->getPhotoFileName( $u_obj->getCompany(), $u_obj->getID(), false ), 'url' => Environment::getBaseURL() . '/send_file.php?object_type=user_photo&object_id=' . $u_obj->getId() ) );
 			}
 
 			$this->tmp_data['user_preference'][$u_obj->getId()] = [];

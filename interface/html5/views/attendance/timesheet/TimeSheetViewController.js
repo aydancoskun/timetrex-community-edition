@@ -1330,9 +1330,9 @@ class TimeSheetViewController extends BaseViewController {
 		} );
 
 		if ( !PermissionManager.checkTopLevelPermission( 'Wage' ) ) {
-			this.wage_btn.parent().hide();
+			this.wage_btn.hide();
 		} else {
-			this.wage_btn.parent().show();
+			this.wage_btn.show();
 		}
 
 		this.timezone_btn = action_chooser_div.find( '#timezone' );
@@ -1344,10 +1344,10 @@ class TimeSheetViewController extends BaseViewController {
 			$this.onWageOrModeChange( 'timezone' );
 		} );
 
-		if ( !( PermissionManager.validate( 'punch', 'view' ) && PermissionManager.validate( 'punch', 'view_child' ) ) ) {
-			this.timezone_btn.parent().hide();
+		if ( !( PermissionManager.validate( 'punch', 'view' ) || PermissionManager.validate( 'punch', 'view_child' ) ) ) {
+			this.timezone_btn.hide();
 		} else {
-			this.timezone_btn.parent().show();
+			this.timezone_btn.show();
 		}
 
 		//Create Start Date Picker

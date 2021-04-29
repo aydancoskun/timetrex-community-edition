@@ -3416,7 +3416,7 @@ class Report {
 							}
 						}
 
-						if ( $this->config['other']['show_blank_values'] == true && $value == '' ) {
+						if ( $this->config['other']['show_blank_values'] == true && !is_object($value) && $value == '' ) {
 							//Update $row[$column] so the blank value gets put into the prev_row variable so we can check for it in the next loop.
 							$value = $row[$column] = $this->config['other']['blank_value_placeholder'];
 						}
@@ -4640,7 +4640,7 @@ class ReportCellImage extends ReportCell {
 	/**
 	 * ReportCellImage constructor.
 	 * @param object $report_obj
-	 * @param $image_file_name
+	 * @param string|array $image_file_name
 	 * @param bool $style
 	 */
 	function __construct( $report_obj, $image_file_name, $style = false ) {
@@ -4688,11 +4688,25 @@ class ReportCellImage extends ReportCell {
 			$height = $width;
 		}
 
+		//Images must be passed in as an array containing both a local file and URL, so they work with PDFs and HTML reports.
+		if ( is_array( $this->image_file_name ) ) {
+			if ( $format == 'pdf' ) {
+				$this->image_file_name = $this->image_file_name['local_file'];
+			} else if ( $format == 'html' ) {
+				$this->image_file_name = $this->image_file_name['url'];
+			}
+		}
+
 		if ( $format == 'pdf' ) {
 			return $this->report_obj->pdf->Image( $this->image_file_name, ( $this->report_obj->pdf->getX() + $max_width - $width ), '', $width, $height, '', '', 'T', false, 300, '', false, false, 0, true );
 		} else {
-			if ( $format == 'html' && $this->image_file_name != '' && file_exists( $this->image_file_name ) ) {
-				$image_html = '<img style="width: 100%; max-width: ' . $this->report_obj->_pdf_unitsToPixels( $width ) . ';" src="data:image/x-icon;base64,' . base64_encode( file_get_contents( $this->image_file_name ) ) . '">';
+			if ( $format == 'html' ) {
+				if ( strpos( $this->image_file_name, 'http') !== false || strpos( $this->image_file_name, '?') !== false ) { //URL passed in.
+					$image_html = '<img style="max-width: 150px; max-height: 150px;" src="' . $this->image_file_name . '&X-CSRF-Token=' . ( ( isset( $_COOKIE['CSRF-Token'] ) ) ? $_COOKIE['CSRF-Token'] : null ) . '">';
+				} else if ( $this->image_file_name != '' && file_exists( $this->image_file_name ) ) { //Local file name passed in.
+					$image_html = '<img style="width: 100%; max-width: ' . $this->report_obj->_pdf_unitsToPixels( $width ) . ';" src="data:image/x-icon;base64,' . base64_encode( file_get_contents( $this->image_file_name ) ) . '">';
+				}
+
 
 				return $image_html;
 			}

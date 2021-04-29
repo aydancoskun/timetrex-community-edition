@@ -4735,11 +4735,18 @@ class BaseViewController extends TTBackboneView {
 				case ContextMenuIconName.export_excel:
 					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
 					break;
+				default:
+					this.setCustomDefaultMenuIcon( id, context_btn, grid_selected_length );
+					break;
 			}
 
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
+
+	setCustomDefaultMenuIcon( id, context_btn, grid_selected_length ) {
+		return false; //FALSE tells setCustomDefaultMenuIcon() to keep processing.
 	}
 
 	setEditMenu() {

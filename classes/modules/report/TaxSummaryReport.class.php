@@ -682,15 +682,16 @@ class TaxSummaryReport extends Report {
 	 * @param $filter_data
 	 * @return array
 	 */
-	function getUserDeductionData( $company_id, $filter_data ) {
+	function getUserDeductionData( $company_id, $filter_data, $end_date ) {
 		//To help determine MaximumTaxableWages, we need to get the UserDeduction records and call getMaximumPayStubEntryAccountAmount().
 		$user_deduction_data = [];
 		$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 		$udlf->getByCompanyIdAndCompanyDeductionId( $company_id, $filter_data );
 		if ( $udlf->getRecordCount() > 0 ) {
 			foreach ( $udlf as $ud_obj ) {
-				if ( $ud_obj->getMaximumPayStubEntryAccountAmount() != false || $ud_obj->getRate() != false ) {
-					$user_deduction_data[$ud_obj->getCompanyDeduction()][$ud_obj->getUser()] = [ 'maximum_pay_stub_entry_amount' => $ud_obj->getMaximumPayStubEntryAccountAmount(), 'rate' => $ud_obj->getRate() ];
+				$tmp_maximum_pay_stub_entry_account_amount = $ud_obj->getMaximumPayStubEntryAccountAmount( $end_date );
+				if ( $tmp_maximum_pay_stub_entry_account_amount != false || $ud_obj->getRate() != false ) {
+					$user_deduction_data[$ud_obj->getCompanyDeduction()][$ud_obj->getUser()] = [ 'maximum_pay_stub_entry_amount' => $tmp_maximum_pay_stub_entry_account_amount, 'rate' => $ud_obj->getRate() ];
 				}
 			}
 		}
@@ -874,7 +875,7 @@ class TaxSummaryReport extends Report {
 			}
 
 			$company_deduction_data = $this->getCompanyDeductionData( $this->getUserObject()->getCompany(), $company_deduction_filter_data, $columns );
-			$user_deduction_data = $this->getUserDeductionData( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'] );
+			$user_deduction_data = $this->getUserDeductionData( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'], ( ( isset( $filter_data['end_date'] ) ) ? $filter_data['end_date'] : time() ) );
 			//Debug::Arr($user_deduction_data, 'User Deduction Maximum Amount Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( !isset( $filter_data['exclude_ytd_adjustment'] ) ) {
@@ -890,7 +891,7 @@ class TaxSummaryReport extends Report {
 			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pself->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 			if ( $pself->getRecordCount() > 0 ) {
 				if ( is_array( $company_deduction_data ) && count( $company_deduction_data ) > 0 ) {
-					Debug::Text( 'Found Company Deductions: ' . $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( 'Found PSE Records: ' . $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					foreach ( $company_deduction_data as $payroll_remittance_agency_id => $payroll_remittance_agency_data ) {
 						Debug::Text( '  Processing Remittance Agency: ' . $payroll_remittance_agency_id, __FILE__, __LINE__, __METHOD__, 10 );
 						foreach ( $payroll_remittance_agency_data as $cd_obj ) {

@@ -403,6 +403,20 @@ class AuthorizationFactory extends Factory {
 	}
 
 	/**
+	 * Checks to see if the currently logged in user is the only superior in the hierarchy at the current level.
+	 *   This would normally be paired with a isFinalAuthorization() check as well.
+	 * @return bool
+	 */
+	function isCurrentUserOnlySuperior() {
+		$hierarchy_current_level_user_ids = $this->getHierarchyCurrentLevelArray();
+		if ( count( $hierarchy_current_level_user_ids ) == 1 && in_array( $this->getCurrentUser(), $hierarchy_current_level_user_ids ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * @return null|object
 	 */
 	function getObjectHandler() {
@@ -528,13 +542,14 @@ class AuthorizationFactory extends Factory {
 		$this->obj_handler_obj = $this->getObjectHandlerObject();
 		if ( $this->getAuthorized() === true ) {
 			if ( $is_final_authorization === true ) {
-				if ( $this->getCurrentUser() != $this->obj_handler_obj->getUser() ) {
+				//If no other superiors exist in the hierarchy and we are at the top level, assume its authorized.
+				if ( $this->getCurrentUser() != $this->obj_handler_obj->getUser() || $this->isCurrentUserOnlySuperior() == true ) {
 					Debug::Text( '  Approving Authorization... Final Authorizing Object: ' . $this->getObject() . ' - Type: ' . $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10 );
 					$this->obj_handler_obj->setAuthorizationLevel( 1 );
 					$this->obj_handler_obj->setStatus( 50 ); //Active/Authorized
 					$this->obj_handler_obj->setAuthorized( true );
 				} else {
-					Debug::Text( '  Currently logged in user is authorizing (or submitting as new) their own request, not authorizing...', __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( '  Currently logged in user is authorizing (or submitting as new) their own request, when other superiors exist in the hierarchy, not authorizing...', __FILE__, __LINE__, __METHOD__, 10 );
 				}
 			} else {
 				Debug::text( '  Approving Authorization, moving to next level up...', __FILE__, __LINE__, __METHOD__, 10 );

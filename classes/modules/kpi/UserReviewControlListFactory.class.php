@@ -249,6 +249,10 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 			return false;
 		}
 
+		if ( isset( $filter_data['user_review_control_id'] ) ) {
+			$filter_data['id'] = $filter_data['user_review_control_id'];
+		}
+
 		if ( isset( $filter_data['user_review_control_status_id'] ) ) {
 			$filter_data['status_id'] = $filter_data['user_review_control_status_id'];
 		}

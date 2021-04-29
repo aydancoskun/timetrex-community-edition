@@ -123,6 +123,42 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 	}
 
 	/**
+	 * @param string $id   UUID
+	 * @param int $status_id   Status
+	 * @param int $limit   Limit the number of records returned
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RemittanceDestinationAccountListFactory
+	 */
+	function getByRemittanceSourceAccountIdAndStatusId( $id, $status_id, $limit = null, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
+		}
+
+		if ( $status_id == '' ) {
+			return false;
+		}
+
+		$ph = [
+				'remittance_source_account_id' => TTUUID::castUUID( $id ),
+				'status_id' => (int)$status_id,
+		];
+
+		$query = '
+					select	*
+					from	' . $this->getTable() . '
+					where	remittance_source_account_id = ?
+						AND status_id = ?
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
+
+		return $this;
+	}
+
+	/**
 	 * @param string $id              UUID
 	 * @param string $legal_entity_id UUID
 	 * @param int $limit              Limit the number of records returned

@@ -2933,11 +2933,11 @@ class PayStubFactory extends Factory {
 				Debug::Text( 'Destination Account ID: ' . $rda_obj->getId() . ' Amount Type: ' . $rda_obj->getAmountType() . ' Amount: ' . $rda_obj->getAmount() . ' Net Pay: ' . $net_pay, __FILE__, __LINE__, __METHOD__, 10 );
 
 				if ( $remaining_amount != 0 ) {
-					if ( is_object( $rda_obj->getRemittanceSourceAccountObject() ) ) {
+					if ( is_object( $rda_obj->getRemittanceSourceAccountObject() ) && $rda_obj->getRemittanceSourceAccountObject()->getStatus() == 10 ) { //10=Enabled
 						$pstf = TTnew( 'PayStubTransactionFactory' ); /** @var PayStubTransactionFactory $pstf */
 						$pstf->setPayStub( $this->getId() );
-						$pstf->setStatus( 10 ); //pending
-						$pstf->setType( 10 );   //enabled
+						$pstf->setStatus( 10 ); //10=Pending
+						$pstf->setType( 10 );   //10=Enabled
 						$pstf->setRemittanceSourceAccount( $rda_obj->getRemittanceSourceAccount() );
 						$pstf->setRemittanceDestinationAccount( $rda_obj->getId() );
 						$pstf->setCurrency( $rda_obj->getRemittanceSourceAccountObject()->getCurrency() );
@@ -2991,7 +2991,7 @@ class PayStubFactory extends Factory {
 							Debug::Text( ' Amount: ' . $amount . ' Remaining Amount: ' . $remaining_amount, __FILE__, __LINE__, __METHOD__, 10 );
 						}
 					} else {
-						Debug::Text( 'ERROR: No remittance source account!', __FILE__, __LINE__, __METHOD__, 10 );
+						Debug::Text( 'ERROR: No remittance source account, or its disabled! Skipping...', __FILE__, __LINE__, __METHOD__, 10 );
 					}
 				} else {
 					Debug::Text( 'Remaining Amount is 0... Skipping..', __FILE__, __LINE__, __METHOD__, 10 );

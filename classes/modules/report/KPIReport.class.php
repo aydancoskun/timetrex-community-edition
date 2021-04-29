@@ -63,7 +63,17 @@ class KPIReport extends Report {
 			return true;
 		}
 
-		return false;
+		//Debug::Text('Regular employee viewing their own review...', __FILE__, __LINE__, __METHOD__, 10);
+		//Regular employee printing review for themselves. Force specific config options.
+		$filter_config = $this->getFilterConfig();
+		if ( isset( $filter_config['user_review_control_id'] ) ) {
+			$user_review_control_id = $filter_config['user_review_control_id'];
+		} else {
+			$user_review_control_id = TTUUID::getZeroID();
+		}
+		$this->setFilterConfig( [ 'include_user_id' => [ $user_id ], 'user_review_control_id' => $user_review_control_id ] );
+
+		return true;
 	}
 
 	/**
@@ -475,7 +485,7 @@ class KPIReport extends Report {
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 		$columns['hire_date'] = $columns['start_date'] = $columns['end_date'] = $columns['due_date'] = true;
-		//$columns['status'] = $columns['type'] = $columns['note'] = $columns['rating'] = TRUE;
+
 		//Get user data for joining.
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
@@ -483,6 +493,15 @@ class KPIReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = Misc::addKeyPrefix( 'user.', (array)$u_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user.', $columns ) ) );
+
+			if ( strpos( $format, 'pdf_' ) !== false ) {
+				if ( !isset( $this->form_data['user'][$u_obj->getId()] ) ) {
+					$this->form_data['user'][$u_obj->getId()] = [];
+				}
+				//Make sure we merge this array with existing data and include all required fields for generating timesheets. This prevents slow columns from being returned.
+				$this->form_data['user'][$u_obj->getId()] += (array)$u_obj->getObjectAsArray( [ 'first_name' => true, 'last_name' => true, 'employee_number' => true, 'hire_date' => true, 'hire_date_age' => true, 'title' => true, 'user_group' => true, 'default_branch' => true, 'default_department' => true ] );
+			}
+
 			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
@@ -493,6 +512,15 @@ class KPIReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $klf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $klf as $key => $k_obj ) {
 			$this->tmp_data['kpi'][$k_obj->getId()] = Misc::addKeyPrefix( 'kpi.', (array)$k_obj->getObjectAsArray( Misc::removeKeyPrefix( 'kpi.', $columns ) ) );
+
+			if ( strpos( $format, 'pdf_' ) !== false ) {
+				if ( !isset( $this->form_data['kpi'][$k_obj->getId()] ) ) {
+					$this->form_data['kpi'][$k_obj->getId()] = [];
+				}
+				//Make sure we merge this array with existing data and include all required fields for generating timesheets. This prevents slow columns from being returned.
+				$this->form_data['kpi'][$k_obj->getId()] += (array)$k_obj->getObjectAsArray( [ 'name' => true, 'type' => true, 'type_id' => true, 'description' => true ] );
+			}
+
 			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
@@ -505,6 +533,14 @@ class KPIReport extends Report {
 			$this->tmp_data['user_review_control'][$urc_obj->getId()][$urc_obj->getUser()] = Misc::addKeyPrefix( 'user_review_control.', (array)$urc_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_review_control.', $columns ) ) );
 			$this->tmp_data['user_review_control'][$urc_obj->getId()][$urc_obj->getUser()]['total_review'] = 1;
 
+			if ( strpos( $format, 'pdf_' ) !== false ) {
+				if ( !isset( $this->form_data['user_review_control'][$urc_obj->getId()][$urc_obj->getUser()] ) ) {
+					$this->form_data['user_review_control'][$urc_obj->getId()][$urc_obj->getUser()] = [];
+				}
+				//Make sure we merge this array with existing data and include all required fields for generating timesheets. This prevents slow columns from being returned.
+				$this->form_data['user_review_control'][$urc_obj->getId()][$urc_obj->getUser()] += (array)$urc_obj->getObjectAsArray( [ 'status' => true, 'type' => true, 'term' => true, 'severity' => true, 'start_date' => true, 'end_date' => true, 'due_date' => true, 'rating' => true, 'note' => true, 'reviewer_user' => true ] );
+			}
+
 			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
@@ -514,6 +550,16 @@ class KPIReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $urlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $urlf as $key => $ur_obj ) {
 			$this->tmp_data['user_review'][$ur_obj->getUserReviewControl()][$ur_obj->getKPI()] = Misc::addKeyPrefix( 'user_review.', (array)$ur_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_review.', $columns ) ) );
+
+			if ( strpos( $format, 'pdf_' ) !== false ) {
+				if ( !isset( $this->form_data['user_review'][$ur_obj->getUserReviewControl()][$ur_obj->getKPI()] ) ) {
+					$this->form_data['user_review'][$ur_obj->getUserReviewControl()][$ur_obj->getKPI()] = [];
+				}
+				//Make sure we merge this array with existing data and include all required fields for generating timesheets. This prevents slow columns from being returned.
+				$this->form_data['user_review'][$ur_obj->getUserReviewControl()][$ur_obj->getKPI()] += (array)$this->form_data['kpi'][$ur_obj->getKPI()];
+				$this->form_data['user_review'][$ur_obj->getUserReviewControl()][$ur_obj->getKPI()] += (array)$ur_obj->getObjectAsArray( [ 'rating' => true, 'note' => true ] );
+			}
+
 			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
@@ -524,9 +570,10 @@ class KPIReport extends Report {
 
 	/**
 	 * PreProcess data such as calculating additional columns from raw data etc...
+	 * @param null $format
 	 * @return bool
 	 */
-	function _preProcess() {
+	function _preProcess( $format = null ) {
 		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['user_review_control'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		$key = 0;
@@ -556,9 +603,11 @@ class KPIReport extends Report {
 					} else {
 						$due_date_columns = [];
 					}
+
 					if ( isset( $this->tmp_data['user'][$user_id] ) && is_array( $this->tmp_data['user'][$user_id] ) ) {
 						$processed_data = array_merge( $processed_data, $this->tmp_data['user'][$user_id] );
 					}
+
 					if ( isset( $this->tmp_data['user_review'][$user_review_control_id] ) ) {
 						foreach ( $this->tmp_data['user_review'][$user_review_control_id] as $kpi_id => $kpi ) {
 							if ( is_array( $kpi ) ) {
@@ -571,7 +620,11 @@ class KPIReport extends Report {
 								$processed_data = array_merge( $processed_data, $this->tmp_data['kpi'][$kpi_id] );
 							}
 
-							$this->data[] = array_merge( $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
+							if ( strpos( $format, 'pdf_' ) === false ) {
+								$this->data[] = array_merge( $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
+							} else {
+								$this->form_data['review'][$user_id][$user_review_control_id][] = array_merge( [ 'kpi.id' => $kpi_id ], $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
+							}
 						}
 					} else {
 						//If no KPIs are assigned to a review, still display as much data as we can.
@@ -580,7 +633,11 @@ class KPIReport extends Report {
 							$processed_data = array_merge( $processed_data, $user_review_control );
 						}
 
-						$this->data[] = array_merge( $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
+						if ( strpos( $format, 'pdf_' ) === false ) {
+							$this->data[] = array_merge( $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
+						} else {
+							$this->form_data['review'][$user_id][$user_review_control_id][] = array_merge( [ 'kpi.id' => null ], $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
+						}
 					}
 				}
 				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
@@ -591,6 +648,348 @@ class KPIReport extends Report {
 
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return true;
+	}
+
+	/**
+	 * @param $user_data
+	 * @param $review_data
+	 * @return bool
+	 */
+	function reviewHeader( $user_data, $review_data ) {
+		$margins = $this->pdf->getMargins();
+		$current_company = $this->getUserObject()->getCompanyObject();
+
+		$border = 0;
+
+		$total_width = ( $this->pdf->getPageWidth() - $margins['left'] - $margins['right'] );
+
+		//Logo
+		$this->pdf->Image( $current_company->getLogoFileName( null, true, false, 'large' ), Misc::AdjustXY( 0, $margins['left'] ), Misc::AdjustXY( 1, $margins['top'] ), $this->pdf->pixelsToUnits( 167 ), $this->pdf->pixelsToUnits( 42 ), '', '', '', false, 300, '', false, false, 0, true );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 2 ) );
+
+		$this->pdf->SetFont( $this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 24 ) );
+		$this->pdf->Cell( $total_width, $this->_pdf_scaleSize( 10 ), TTi18n::gettext( 'Employee Review' ), $border, 0, 'C' );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 10 ) );
+		$this->pdf->SetFont( $this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 12 ) );
+		$this->pdf->Cell( $total_width, $this->_pdf_scaleSize( 5 ), $current_company->getName(), $border, 0, 'C' );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 5 ) + $this->_pdf_scaleSize( 2 ) );
+
+		//Generated Date/User top right.
+		$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 6 ) );
+		$this->pdf->setY( ( $this->pdf->getY() - $this->_pdf_fontSize( 6 ) ) );
+		$this->pdf->setX( ( $this->pdf->getPageWidth() - $margins['right'] - 50 ) );
+		$this->pdf->Cell( 50, $this->_pdf_scaleSize( 2 ), TTi18n::getText( 'Generated' ) . ': ' . TTDate::getDate( 'DATE+TIME', time() ), $border, 0, 'R', 0, '', 1 );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 2 ) );
+		$this->pdf->setX( ( $this->pdf->getPageWidth() - $margins['right'] - 50 ) );
+		$this->pdf->Cell( 50, $this->_pdf_scaleSize( 2 ), TTi18n::getText( 'Generated For' ) . ': ' . $this->getUserObject()->getFullName(), $border, 0, 'R', 0, '', 1 );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 5 ) );
+
+		$this->pdf->Rect( $this->pdf->getX(), ( $this->pdf->getY() - $this->_pdf_scaleSize( 2 ) ), $total_width, $this->_pdf_scaleSize( 37 ) );
+
+		$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 12 ) );
+		$this->pdf->Cell( 30, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Employee' ) . ':', $border, 0, 'R' );
+		$this->pdf->SetFont( $this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 12 ) );
+		$this->pdf->Cell( ( 70 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), $user_data['first_name'] . ' ' . $user_data['last_name'] . ' (#' . $user_data['employee_number'] . ')', $border, 0, 'L', 0, '', 1 );
+
+		$this->pdf->SetFont( '', '', $this->_pdf_fontSize( 12 ) );
+		$this->pdf->Cell( 40, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Title' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), ( $user_data['title'] != '' ) ? $user_data['title'] : '--', $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 5 ) );
+
+		$this->pdf->SetFont( '', '', $this->_pdf_fontSize( 12 ) );
+		$this->pdf->Cell( 30, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Hire Date' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 70 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), $user_data['hire_date'] .' ( '. $user_data['hire_date_age'] .' Years Ago )', $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Cell( 40, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Group' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), ( $user_data['user_group'] != '' ) ? $user_data['user_group'] : '--', $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 5 ) );
+
+		$this->pdf->Ln( $this->_pdf_scaleSize( 2 ) );
+		$this->pdf->Line( ( $this->pdf->getX() + $this->_pdf_scaleSize( 2 ) ), $this->pdf->getY(), ( $this->pdf->getX() + $total_width - $this->_pdf_scaleSize( 2 ) ), $this->pdf->getY() );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 2 ) );
+
+
+		$this->pdf->SetFont( '', '', $this->_pdf_fontSize( 12 ) );
+		$this->pdf->Cell( 30, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Type' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 70 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), $review_data['type'], $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Cell( 40, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Status' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), $review_data['status'], $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 5 ) );
+
+		$this->pdf->SetFont( '', '', $this->_pdf_fontSize( 12 ) );
+		$this->pdf->Cell( 30, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Severity' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 70 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), $review_data['severity'], $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Cell( 40, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Terms' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), $review_data['term'], $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 5 ) );
+
+		$this->pdf->SetFont( '', '', $this->_pdf_fontSize( 12 ) );
+		$this->pdf->Cell( 30, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Rating' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 70 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), ( $review_data['rating'] != '' ) ? $review_data['rating'] : '--', $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Cell( 40, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Reviewer' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), $review_data['reviewer_user'], $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 5 ) );
+
+		$this->pdf->SetFont( '', '', $this->_pdf_fontSize( 12 ) );
+		$this->pdf->Cell( 30, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Time Period' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 70 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), $review_data['start_date'] .' - '. $review_data['end_date'], $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Cell( 40, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Due Date' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize( 5 ), $review_data['due_date'], $border, 0, 'L', 0, '', 1 );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 5 ) );
+
+		$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 10 ) );
+		$this->pdf->Ln( $this->_pdf_scaleSize( 5 ) );
+
+		return true;
+	}
+
+	/**
+	 * @param $columns
+	 * @param $column_widths
+	 * @return bool
+	 */
+	function reviewKPIHeader( $columns, $column_widths ) {
+		$line_h = $this->_pdf_scaleSize( 5 );
+
+		$this->pdf->SetFont( $this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 10 ) );
+		$this->pdf->setFillColor( 220, 220, 220 );
+
+		$this->pdf->Cell( $column_widths['line'], $line_h, '#', 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['kpi.name'], $line_h, $columns['kpi.name'], 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['user_review.rating'], $line_h, $columns['user_review.rating'], 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['user_review.note'], $line_h, $columns['user_review.note'], 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Ln();
+
+		$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 10 ) );
+
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	function reviewAddPage() {
+		$this->reviewFooter();
+		$this->pdf->AddPage();
+
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	function reviewFooter() {
+		$margins = $this->pdf->getMargins();
+
+		$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 8 ) );
+
+		//Save x, y and restore after footer is set.
+		$x = $this->pdf->getX();
+		$y = $this->pdf->getY();
+
+		//Jump to end of page.
+		$this->pdf->setY( ( $this->pdf->getPageHeight() - $margins['bottom'] - $margins['top'] - 10 ) );
+
+		$this->pdf->Cell( ( $this->pdf->getPageWidth() - $margins['right'] ), $this->_pdf_fontSize( 5 ), TTi18n::getText( 'Page' ) . ' ' . $this->pdf->PageNo() . ' of ' . $this->pdf->getAliasNbPages(), 0, 0, 'C', 0 );
+		$this->pdf->Ln();
+
+		$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 6 ) );
+		$this->pdf->Cell( ( $this->pdf->getPageWidth() - $margins['right'] ), $this->_pdf_fontSize( 5 ), TTi18n::gettext( 'Generated By' ) . ' ' . APPLICATION_NAME . ' v' . APPLICATION_VERSION, 0, 0, 'C', 0 );
+
+		$this->pdf->setX( $x );
+		$this->pdf->setY( $y );
+
+		$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 10 ) );
+
+		return true;
+	}
+
+	/**
+	 * @param $user_data
+	 * @param $review_control_data
+	 * @return bool
+	 */
+	function reviewSignature( $user_data, $review_control_data ) {
+		$border = 0;
+
+		$this->reviewCheckPageBreak( 25, true );
+
+		$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 10 ) );
+		$this->pdf->setFillColor( 255, 255, 255 );
+		$this->pdf->Ln( 1 );
+
+		$line_h = $this->_pdf_scaleSize( 6 );
+
+		$this->pdf->Ln( $line_h );
+
+		$this->pdf->Cell( 40, $line_h, TTi18n::gettext( 'Employee Signature' ) . ':', $border, 0, 'L' );
+		$this->pdf->Cell( 60, $line_h, '_____________________________', $border, 0, 'C' );
+		$this->pdf->Cell( 40, $line_h, TTi18n::gettext( 'Reviewer Signature' ) . ':', $border, 0, 'R' );
+		$this->pdf->Cell( 60, $line_h, '_____________________________', $border, 0, 'C' );
+
+		$this->pdf->Ln( $line_h );
+		$this->pdf->Cell( 40, $line_h, '', $border, 0, 'R' );
+		$this->pdf->Cell( 60, $line_h, $user_data['first_name'] . ' ' . $user_data['last_name'], $border, 0, 'C' );
+		$this->pdf->Cell( 40, $line_h, '', $border, 0, 'R' );
+		$this->pdf->Cell( 60, $line_h, $review_control_data['reviewer_user'], $border, 0, 'C' );
+
+		return true;
+	}
+
+	/**
+	 * @param $height
+	 * @param bool $add_page
+	 * @return bool
+	 */
+	function reviewCheckPageBreak( $height, $add_page = true ) {
+		$margins = $this->pdf->getMargins();
+
+		if ( ( $this->pdf->getY() + $height ) > ( $this->pdf->getPageHeight() - $margins['bottom'] - $margins['top'] - 10 ) ) {
+			//Debug::Text('Detected Page Break needed...', __FILE__, __LINE__, __METHOD__, 10);
+			$this->reviewAddPage();
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param $format
+	 * @return bool|string
+	 */
+	function _outputPDFReview( $format ) {
+		Debug::Text( ' Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
+
+		if ( isset( $this->form_data ) && count( $this->form_data ) > 0 ) {
+			$this->pdf = new TTPDF( 'P', 'mm', 'LETTER', $this->getUserObject()->getCompanyObject()->getEncoding() );
+
+			$this->pdf->SetAuthor( APPLICATION_NAME );
+			$this->pdf->SetTitle( $this->title );
+			$this->pdf->SetSubject( APPLICATION_NAME . ' ' . TTi18n::getText( 'Report' ) );
+
+			$this->pdf->setMargins( $this->config['other']['left_margin'], $this->config['other']['top_margin'], $this->config['other']['right_margin'] ); //Margins are ignored because we use setXY() to force the coordinates before each drawing and therefore ignores margins.
+
+			$this->pdf->SetAutoPageBreak( false );
+
+			$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 10 ) );
+
+			$margins = $this->pdf->getMargins();
+			$total_width = ( $this->pdf->getPageWidth() - $margins['left'] - $margins['right'] );
+
+			//Use percentages so it properly scales to landscape mode.
+			$column_widths = [
+					'line'               => ( $total_width * 0.04 ),
+					'kpi.name'           => ( $total_width * 0.50 ),
+					'user_review.rating' => ( $total_width * 0.07 ),
+					'user_review.note'   => ( $total_width * 0.39 ),
+			];
+
+			$row_layout = [
+					'max_width'    => 50,
+					'cell_padding' => 2,
+					'height'       => 5,
+					'align'        => 'L',
+					'border'       => 0,
+					'fill'         => 1,
+					'stretch'      => 1,
+			];
+
+			$columns = [
+					'line' => '#',
+					'kpi.name'           => TTi18n::gettext( 'Key Performance Indicator' ),
+					'user_review.rating' => TTi18n::gettext( 'Rating' ),
+					'user_review.note'   => TTi18n::gettext( 'Note' ),
+			];
+
+			$border = 0;
+
+			foreach( $this->form_data['review'] as $user_id => $user_rows ) {
+				foreach( $user_rows as $user_review_control_id => $kpi_rows ) {
+					$i = 0;
+					$this->pdf->AddPage( 'P', 'LETTER' );
+
+					foreach( $kpi_rows as $key => $row ) {
+						$row['line'] = ($i + 1);
+
+						if ( $this->_pdf_checkMaximumPageLimit() == false ) {
+							Debug::Text( 'Exceeded maximum page count...', __FILE__, __LINE__, __METHOD__, 10 );
+							//Exceeded maximum pages, stop processing.
+							$this->_pdf_displayMaximumPageLimitError();
+							break;
+						}
+
+						if ( $i == 0 ) {
+							$this->reviewHeader( $this->form_data['user'][$user_id], $this->form_data['user_review_control'][$user_review_control_id][$user_id] );
+							$this->reviewKPIHeader( $columns, $column_widths );
+						}
+
+						$this->reviewCheckPageBreak( 15, true );
+
+						if ( isset($this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]) ) {
+							$description = ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['description'] != '' ) ? "\n(" . $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['description'] . ')' : '';
+							$row['kpi.name'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['name'] . $description;
+							$row['user_review.rating'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['rating'];
+							$row['user_review.note'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['note'];
+
+							$row_cell_height = $this->_pdf_getMaximumHeightFromArray( $columns, $row, $column_widths, 65, $this->_pdf_fontSize( $row_layout['height'] ) );
+							$this->pdf->MultiCell( $column_widths['line'], $row_cell_height, $row['line'], 1, 'C', 0, 0 );
+
+							$this->pdf->MultiCell( $column_widths['kpi.name'], $row_cell_height, $row['kpi.name'], 1, 'L', 0, 0, '', '', true, 0 );
+							if ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['type_id'] == 10  ) { //10=Scale
+								$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, ( $row['user_review.rating'] != '' ) ? Misc::removeTrailingZeros( $row['user_review.rating'], 0) : '--', 1, 'C', 0, 0, '', '', true, 0 );
+							} elseif ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['type_id'] == 20 ) { //20=Yes/No
+								$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, Misc::humanBoolean( $row['user_review.rating'] ), 1, 'C', 0, 0, '', '', true, 0 );
+							} else {
+								$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, ( $row['user_review.rating'] != '' ) ? $row['user_review.rating'] : '--', 1, 'C', 0, 0, '', '', true, 0 );
+							}
+
+							$this->pdf->MultiCell( $column_widths['user_review.note'], $row_cell_height, ( $row['user_review.note'] != '' ) ? $row['user_review.note'] : '--', 1, 'L', 0, 0, '', '', true, 0 );
+							$this->pdf->Ln( $row_cell_height );
+						}
+
+						$i++;
+					}
+
+					if ( $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'] != '' ) {
+						$row_cell_height = $this->pdf->getStringHeight( $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'], wordwrap( $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'], $total_width ) );
+
+						$this->reviewCheckPageBreak( $row_cell_height, true );
+
+						$this->pdf->Ln( 5 );
+						$this->pdf->SetFont( $this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 12 ) );
+						$this->pdf->Cell( 15, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Note' ) . ':', $border, 0, 'L' );
+						$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 10 ) );
+						$this->pdf->MultiCell( ( $total_width - 15 ), $row_cell_height, $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'], $border, 'L', 0, 0, '', '', true, 0 );
+						$this->pdf->Ln( $row_cell_height );
+					}
+
+					$this->reviewSignature( $this->form_data['user'][$user_id], $this->form_data['user_review_control'][$user_review_control_id][$user_id] );
+
+					$this->reviewFooter();
+				}
+			}
+
+			$output = $this->pdf->Output( '', 'S' );
+
+			return $output;
+
+		}
+
+		Debug::Text( 'No data to return...', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
+	}
+
+	/**
+	 * @param null $format
+	 * @return array|bool|string
+	 */
+	function _output( $format = null ) {
+		if ( $format == 'pdf_review_print' ) {
+			return $this->_outputPDFReview( $format );
+		} else {
+			return parent::_output( $format );
+		}
 	}
 }
 

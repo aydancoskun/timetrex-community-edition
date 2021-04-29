@@ -1870,7 +1870,7 @@ class UserDeductionFactory extends Factory {
 	 * Primary used in TaxSummary (Generic) report.
 	 * @return bool|mixed
 	 */
-	function getMaximumPayStubEntryAccountAmount() {
+	function getMaximumPayStubEntryAccountAmount( $end_date = null ) {
 		$retval = false;
 
 		$cd_obj = $this->getCompanyDeductionObject();
@@ -1901,6 +1901,37 @@ class UserDeductionFactory extends Factory {
 						$wage_base = $this->getUserValue2();
 					}
 					$retval = $this->Validator->stripNonFloat( $wage_base );
+					break;
+				case 84: //US - Social Security Formula (Employee)
+				case 85: //US - Social Security Formula (Employer)
+				case 90: //Canada - CPP Formula
+				case 91: //Canada - EI Formula
+					require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'payroll_deduction' . DIRECTORY_SEPARATOR . 'PayrollDeduction.class.php' );
+
+					switch ( $cd_obj->getCalculation() ) {
+						case 84: //US - Social Security Formula (Employee)
+						case 85: //US - Social Security Formula (Employer)
+							$pd_obj = new PayrollDeduction( 'US', null );
+							$pd_obj->setCompany( $cd_obj->getCompany() );
+							$pd_obj->setDate( $end_date );
+
+							$retval = $pd_obj->getSocialSecurityMaximumEarnings();
+							break;
+						case 90: //Canada - CPP Formula
+							$pd_obj = new PayrollDeduction( 'CA', null );
+							$pd_obj->setCompany( $cd_obj->getCompany() );
+							$pd_obj->setDate( $end_date );
+
+							$retval = $pd_obj->getCPPMaximumEarnings();
+							break;
+						case 91: //Canada - EI Formula
+							$pd_obj = new PayrollDeduction( 'CA', null );
+							$pd_obj->setCompany( $cd_obj->getCompany() );
+							$pd_obj->setDate( $end_date );
+
+							$retval = $pd_obj->getEIMaximumEarnings();
+							break;
+					}
 					break;
 			}
 		}

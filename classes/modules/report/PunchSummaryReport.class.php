@@ -919,8 +919,9 @@ class PunchSummaryReport extends Report {
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['in_updated_date'] = TTDate::strtotime( $p_obj->getColumn( 'punch_updated_date' ) );
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['in_updated_by'] = Misc::getFullName( $p_obj->getColumn( 'punch_updated_by_first_name' ), $p_obj->getColumn( 'punch_updated_by_middle_name' ), $p_obj->getColumn( 'punch_updated_by_last_name' ), false, false );
 
-					if ( $format == 'html' && $p_obj->getColumn( 'punch_has_image' ) == true ) {
-						$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['in_punch_image'] = '<img style="max-width: 150px; max-height: 150px;" src="' . Environment::getBaseURL() . '/send_file.php?object_type=punch_image&parent_id=' . $p_obj->getUser() . '&object_id=' . $p_obj->getColumn( 'punch_id' ) . '&X-CSRF-Token=' . ( ( isset( $_COOKIE['CSRF-Token'] ) ) ? $_COOKIE['CSRF-Token'] : null ) . '">';
+					if ( $p_obj->getColumn( 'punch_has_image' ) == true ) {
+						//$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['in_punch_image'] = '<img style="max-width: 150px; max-height: 150px;" src="' . Environment::getBaseURL() . '/send_file.php?object_type=punch_image&parent_id=' . $p_obj->getUser() . '&object_id=' . $p_obj->getColumn( 'punch_id' ) . '&X-CSRF-Token=' . ( ( isset( $_COOKIE['CSRF-Token'] ) ) ? $_COOKIE['CSRF-Token'] : null ) . '">';
+						$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['in_punch_image'] = new ReportCellImage( $this, array( 'local_file' => $p_obj->getImageFileName( null, $p_obj->getUser(), $p_obj->getColumn( 'punch_id' ) ), 'url' => Environment::getBaseURL() . '/send_file.php?object_type=punch_image&parent_id=' . $p_obj->getUser() . '&object_id=' . $p_obj->getColumn( 'punch_id' ) ) );
 					} else {
 						$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['in_punch_image'] = null;
 					}
@@ -946,8 +947,9 @@ class PunchSummaryReport extends Report {
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['out_updated_date'] = TTDate::strtotime( $p_obj->getColumn( 'punch_updated_date' ) );
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['out_updated_by'] = Misc::getFullName( $p_obj->getColumn( 'punch_updated_by_first_name' ), $p_obj->getColumn( 'punch_updated_by_middle_name' ), $p_obj->getColumn( 'punch_updated_by_last_name' ), false, false );
 
-					if ( $format == 'html' && $p_obj->getColumn( 'punch_has_image' ) == true ) {
-						$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['out_punch_image'] = '<img style="max-width: 150px; max-height: 150px;" src="' . Environment::getBaseURL() . '/send_file.php?object_type=punch_image&parent_id=' . $p_obj->getUser() . '&object_id=' . $p_obj->getColumn( 'punch_id' ) . '&X-CSRF-Token=' . ( ( isset( $_COOKIE['CSRF-Token'] ) ) ? $_COOKIE['CSRF-Token'] : null ) . '">';
+					if ( $p_obj->getColumn( 'punch_has_image' ) == true ) {
+						//$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['out_punch_image'] = '<img style="max-width: 150px; max-height: 150px;" src="' . Environment::getBaseURL() . '/send_file.php?object_type=punch_image&parent_id=' . $p_obj->getUser() . '&object_id=' . $p_obj->getColumn( 'punch_id' ) . '&X-CSRF-Token=' . ( ( isset( $_COOKIE['CSRF-Token'] ) ) ? $_COOKIE['CSRF-Token'] : null ) . '">';
+						$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['out_punch_image'] = new ReportCellImage( $this, array( 'local_file' => $p_obj->getImageFileName( null, $p_obj->getUser(), $p_obj->getColumn( 'punch_id' ) ), 'url' => Environment::getBaseURL() . '/send_file.php?object_type=punch_image&parent_id=' . $p_obj->getUser() . '&object_id=' . $p_obj->getColumn( 'punch_id' ) ) );
 					} else {
 						$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn( 'punch_control_id' )]['out_punch_image'] = null;
 					}

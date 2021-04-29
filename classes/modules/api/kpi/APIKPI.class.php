@@ -379,7 +379,7 @@ class APIKPI extends APIFactory {
 			Debug::Arr( $src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10 );
 			foreach ( $src_rows as $key => $row ) {
 				unset( $src_rows[$key]['id'], $src_rows[$key]['user'] );          //Clear fields that can't be copied
-				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
+				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'], false, 100 ); //Generate unique name
 			}
 
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);

@@ -17,7 +17,33 @@ class KPIReportViewController extends ReportBaseViewController {
 	}
 
 	getCustomContextMenuModel() {
-		return { include: ['default'] };
+		var context_menu_model = {
+			groups: {
+				review: {
+					label: $.i18n._( 'Review' ),
+					id: this.viewId + 'Review'
+				}
+			},
+			exclude: [],
+			include: [
+				{
+					label: $.i18n._( 'Print' ),
+					id: 'pdf_review_print',
+					group: 'review',
+					icon: Icons.print,
+				}
+			]
+		};
+
+		return context_menu_model;
 	}
 
+	onCustomContextClick( id ) {
+		switch ( id ) {
+			case 'pdf_review_print': //All report view
+				//this.onNavigationClick( id );
+				this.onViewClick( id );
+				break;
+		}
+	}
 }

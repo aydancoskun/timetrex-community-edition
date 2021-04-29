@@ -118,7 +118,7 @@ RibbonViewController = Backbone.View.extend( {
 
 					var ribbon_sub_menu = ribbon_sub_menu_array[y];
 
-					var sub_menu_ui_node = $( '<li><div class="ribbon-sub-menu-icon" id="' + ribbon_sub_menu.get( 'id' ) + '"><img src="' + ribbon_sub_menu.get( 'icon' ) + '" ><span class="ribbon-label">' + ribbon_sub_menu.get( 'label' ) + '</sapn></div></li>' );
+					var sub_menu_ui_node = $( '<li><div class="ribbon-sub-menu-icon" id="' + ribbon_sub_menu.get( 'id' ) + '"><img src="' + ribbon_sub_menu.get( 'icon' ) + '" ><span class="ribbon-label">' + ribbon_sub_menu.get( 'label' ) + '</span></div></li>' );
 
 					if ( ribbon_sub_menu.get( 'type' ) === RibbonSubMenuType.NAVIGATION ) {
 

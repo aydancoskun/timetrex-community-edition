@@ -1417,7 +1417,7 @@ class TTDate {
 
 		switch ( $round_type ) {
 			case 10: //Down
-				if ( $grace_time > 0 ) {
+				if ( $grace_time != 0 ) {
 					$epoch += $grace_time;
 				}
 				$epoch = ( $epoch - ( $epoch % $round_value ) );
@@ -1445,7 +1445,7 @@ class TTDate {
 				}
 				break;
 			case 30: //Up
-				if ( $grace_time > 0 ) {
+				if ( $grace_time != 0 ) {
 					$epoch -= $grace_time;
 				}
 				$epoch = ( (int)( ( $epoch + ( $round_value - 1 ) ) / $round_value ) * $round_value );

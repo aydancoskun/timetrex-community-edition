@@ -2648,7 +2648,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function isPhotoExists() {
-		return file_exists( $this->getPhotoFileName() );
+		return file_exists( $this->getPhotoFileName( null, null, false ) );
 	}
 
 	/**
@@ -2720,7 +2720,7 @@ class UserFactory extends Factory {
 	 */
 	function getStoragePath( $company_id = null, $user_id = null ) {
 		if ( $company_id == '' ) {
-			$company_id = $this->getID();
+			$company_id = $this->getCompany();
 		}
 
 		if ( $company_id == '' ) {

@@ -50,8 +50,8 @@ if ( ini_get( 'max_execution_time' ) < 1800 ) {
 	ini_set( 'max_execution_time', 1800 );
 }
 
-define( 'APPLICATION_VERSION', '12.3.0' );
-define( 'APPLICATION_VERSION_DATE', 1596610800 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("05-Aug-2020")."\n\n";'
+define( 'APPLICATION_VERSION', '12.4.0' );
+define( 'APPLICATION_VERSION_DATE', 1600326000 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("17-Sep-2020")."\n\n";'
 
 if ( strtoupper( substr( PHP_OS, 0, 3 ) ) == 'WIN' ) {
 	define( 'OPERATING_SYSTEM', 'WIN' );

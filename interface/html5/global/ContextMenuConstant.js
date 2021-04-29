@@ -105,6 +105,8 @@ ContextMenuIconName.map = 'mapIcon';
 
 ContextMenuIconName.edit_client = 'editClientIcon';
 
+ContextMenuIconName.client = 'clientIcon';
+
 ContextMenuIconName.edit_job_applicant = 'editJobApplicantIcon';
 
 ContextMenuIconName.client_contact = 'clientContactIcon';
@@ -239,8 +241,8 @@ Icons.swap = 'swap_shift-35x35.png';
 Icons.override = 'override-35x35.png';
 Icons.employee = 'employees-35x35.png';
 Icons.map = 'map-35x35.png';
-Icons.client_contact = 'employees-35x35.png';
-Icons.client = 'employees-35x35.png';
+Icons.client_contact = 'clients_contacts-35x35.png';
+Icons.client = 'clients-35x35.png';
 Icons.schedule = 'schedule-35x35.png';
 Icons.pay_stubs = 'pay_stubs-35x35.png';
 Icons.pay_period = 'pay_periods-35x35.png';

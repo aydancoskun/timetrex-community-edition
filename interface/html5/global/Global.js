@@ -4151,40 +4151,35 @@ Global.styleSandbox = function() {
 
 //#2351 - Used for logging in as employee/client or switching to sandbox mode.
 Global.NewSession = function( user_id, client_id ) {
-
 	var api_auth = TTAPI.APIAuthentication;
-	var $this = this;
-
 	api_auth.newSession( user_id, client_id, {
 		onResult: function( result ) {
-
 			if ( !result.isValid() ) {
 				return;
 			}
 
 			var result_data = result.getResult();
-			var current_session_id = getCookie( Global.getSessionIDKey() );
-			var url = result_data.url;
-			var host = Global.getHost();
-			var cookie_base_url = result_data.cookie_base_url;
+			if ( result_data && result_data.url ) {
+				var url = result_data.url;
+				if ( url.indexOf( 'http' ) === -1 ) {
+					url = window.location.protocol + '//' + url;
+				}
 
-			if ( url.indexOf( 'http' ) === -1 ) {
-				url = window.location.protocol + '//' + url;
+				var alternate_session_data = {
+					new_session_id: result_data.session_id,
+					previous_session_id: getCookie( Global.getSessionIDKey() ),
+					previous_session_url: Global.getBaseURL(),
+					previous_session_view: window.location.href.split( '#!m=' )[1],
+					previous_cookie_path: LocalCacheData.cookie_path
+				};
+
+				setCookie( 'AlternateSessionData', JSON.stringify( alternate_session_data ), 1, result_data.cookie_base_url, Global.getHost() );
+
+				Global.setURLToBrowser( url + 'html5/#!m=Login' );
+				Global.needReloadBrowser = true;
+			} else {
+				TAlertManager.showAlert( $.i18n._( 'ERROR: Unable to perform action, please contact your %s administrator immediately.', LocalCacheData.getApplicationName() ), $.i18n._( 'ERROR' ) );
 			}
-
-			var alternate_session_data = {
-				new_session_id: result_data.session_id,
-				previous_session_id: current_session_id,
-				previous_session_url: Global.getBaseURL(),
-				previous_session_view: window.location.href.split( '#!m=' )[1],
-				previous_cookie_path: LocalCacheData.cookie_path
-			};
-
-			var cookie_string = JSON.stringify( alternate_session_data );
-			setCookie( 'AlternateSessionData', cookie_string, 1, cookie_base_url, host );
-
-			Global.setURLToBrowser( url + 'html5/#!m=Login' );
-			Global.needReloadBrowser = true;
 		}
 	} );
 

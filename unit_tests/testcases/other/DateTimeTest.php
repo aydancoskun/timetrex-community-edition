@@ -803,6 +803,15 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::roundTime( 90.12345, 60, 10 ), (int)60 ); //Make sure partial seconds are stripped off.
 		$this->assertEquals( TTDate::roundTime( 90.00001, 60, 10 ), (int)60 ); //Make sure partial seconds are stripped off.
 		$this->assertEquals( TTDate::roundTime( 90.99999, 60, 10 ), (int)60 ); //Make sure partial seconds are stripped off.
+
+		//Test rounding with negative grace times.
+		$this->assertEquals( TTDate::roundTime( strtotime( '15-Apr-07 8:00 AM' ), ( 60 * 15 ), 10, 0 ), strtotime( '15-Apr-07 8:00 AM' ) ); //10=Down
+		$this->assertEquals( TTDate::roundTime( strtotime( '15-Apr-07 8:00 AM' ), ( 60 * 15 ), 10, 60 ), strtotime( '15-Apr-07 8:00 AM' ) ); //10=Down
+		$this->assertEquals( TTDate::roundTime( strtotime( '15-Apr-07 8:00 AM' ), ( 60 * 15 ), 10, -60 ), strtotime( '15-Apr-07 7:45 AM' ) ); //10=Down
+
+		$this->assertEquals( TTDate::roundTime( strtotime( '15-Apr-07 8:00 AM' ), ( 60 * 15 ), 30, 0 ), strtotime( '15-Apr-07 8:00 AM' ) ); //30=Up
+		$this->assertEquals( TTDate::roundTime( strtotime( '15-Apr-07 8:00 AM' ), ( 60 * 15 ), 30, 60 ), strtotime( '15-Apr-07 8:00 AM' ) ); //30=Up
+		$this->assertEquals( TTDate::roundTime( strtotime( '15-Apr-07 8:00 AM' ), ( 60 * 15 ), 30, -60 ), strtotime( '15-Apr-07 8:15 AM' ) ); //30=Up
 	}
 
 	function test_graceTime() {

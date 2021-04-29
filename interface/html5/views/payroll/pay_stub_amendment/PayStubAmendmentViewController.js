@@ -962,12 +962,15 @@ class PayStubAmendmentViewController extends BaseViewController {
 		form_item_input.TTextInput( { field: 'rate', width: 114, hasKeyEvent: true } );
 
 		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var get_hourly_rate_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px; height: 25px;\' type=\'button\' value=\'' + $.i18n._( 'Get Hourly Rate' ) + '\'></input>' );
-		get_hourly_rate_btn.click( function() {
-			$this.getUserHourlyRate();
-		} );
 		widgetContainer.append( form_item_input );
-		widgetContainer.append( get_hourly_rate_btn );
+
+		if ( !this.is_viewing ) {
+			var get_hourly_rate_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px; height: 25px;\' type=\'button\' value=\'' + $.i18n._( 'Get Hourly Rate' ) + '\'></input>' );
+			get_hourly_rate_btn.click( function() {
+				$this.getUserHourlyRate();
+			} );
+			widgetContainer.append( get_hourly_rate_btn );
+		}
 
 		this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab_pay_stub_amendment_column1, '', widgetContainer, true, null, null, true );
 

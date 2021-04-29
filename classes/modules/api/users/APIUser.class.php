@@ -913,6 +913,7 @@ class APIUser extends APIFactory {
 
 			if ( file_exists( $file_name ) ) {
 				unlink( $file_name );
+				TTLog::addEntry( $employee_id, 30, TTi18n::getText( 'Photo' ), null, $uf->getTable() );
 			}
 		}
 

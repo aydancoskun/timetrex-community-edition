@@ -222,6 +222,8 @@ if ( Misc::doesRequestExceedPHPMaxPostSize() == true ) { //Check PHP maximum pos
 									if ( $success == false ) {
 										Debug::Text( 'bUpload Failed! Unable to write data to: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
 										$error = TTi18n::gettext( 'Unable to upload photo' );
+									} else {
+										TTLog::addEntry( $current_company->getId(), 10, TTi18n::getText( 'Logo - Source: Web' ), null, $cf->getTable() );
 									}
 								} else {
 									Debug::Text( 'cUpload Failed! File too large: ' . $file_size, __FILE__, __LINE__, __METHOD__, 10 );
@@ -274,6 +276,8 @@ if ( Misc::doesRequestExceedPHPMaxPostSize() == true ) { //Check PHP maximum pos
 									if ( $success == false ) {
 										Debug::Text( 'bUpload Failed! Unable to write data to: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
 										$error = TTi18n::gettext( 'Unable to upload photo' );
+									} else {
+										TTLog::addEntry( $object_id, 10, TTi18n::getText( 'Logo - Source: Web' ), null, $lef->getTable() );
 									}
 								} else {
 									Debug::Text( 'cUpload Failed! File too large: ' . $file_size, __FILE__, __LINE__, __METHOD__, 10 );
@@ -336,6 +340,8 @@ if ( Misc::doesRequestExceedPHPMaxPostSize() == true ) { //Check PHP maximum pos
 											if ( $success == false ) {
 												Debug::Text( 'bUpload Failed! Unable to write data to: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
 												$error = TTi18n::gettext( 'Unable to upload photo' );
+											} else {
+												TTLog::addEntry( $object_id, 10, TTi18n::getText( 'Photo - Source: Web' ), null, $uf->getTable() );
 											}
 										} else {
 											Debug::Text( 'cUpload Failed! File too large: ' . $file_size, __FILE__, __LINE__, __METHOD__, 10 );

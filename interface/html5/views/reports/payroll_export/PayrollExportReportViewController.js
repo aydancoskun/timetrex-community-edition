@@ -1982,7 +1982,7 @@ class PayrollExportReportViewController extends ReportBaseViewController {
 			other[other.export_type] = {};
 			other[other.export_type].export_columns = { columns: this.getExportColumns( other.export_type ) };
 
-			if ( !this.export_setup_data.export_columns ) {
+			if ( !this.export_setup_data.export_columns || Global.isObject( this.export_setup_data.export_columns ) == false ) {
 				this.export_setup_data.export_columns = {};
 				this.export_setup_data.export_columns[other.export_type] = {};
 			}

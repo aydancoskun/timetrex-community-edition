@@ -55,7 +55,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
+		$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
 		$dd->createCurrency( $this->company_id, 10 );
 
@@ -85,6 +85,8 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
 		$this->user_id2 = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 		$this->user_id3 = $dd->createUser( $this->company_id, $this->legal_entity_id, 11 );
+		$this->user_id4 = $dd->createUser( $this->company_id, $this->legal_entity_id, 12, null, $this->branch_id2, $this->department_id2 );
+		//createUser( $company_id, $legal_entity_id, $type, $policy_group_id = null, $default_branch_id = null, $default_department_id = null, $default_currency_id = null, $user_group_id = null, $user_title_id = null, $ethnic_group_ids = null, $remittance_source_account_ids = null, $coordinates = null, $default_job_id = null, $default_job_item_id = null ) {
 
 		$this->policy_ids['accrual_policy_account'][20] = $dd->createAccrualPolicyAccount( $this->company_id, 20 ); //Vacation
 		$this->policy_ids['accrual_policy_account'][30] = $dd->createAccrualPolicyAccount( $this->company_id, 30 ); //Sick
@@ -3478,6 +3480,259 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 						break;
 					case 1:
 						$this->assertEquals( $this->user_id, $schedule_shift_arr['user_id'] );
+						$this->assertEquals( 32400, $schedule_shift_arr['total_time'] );
+						break;
+				}
+
+				$i++;
+			}
+		}
+	}
+
+	/**
+	 * Make sure absence shifts assigned to an employee don't fill recurring open shifts. Absence shifts assigned to OPEN employee do fill OPEN shifts though.
+	 * @group Schedule_testRecurringOpenScheduleFillF2
+	 */
+	function testRecurringOpenScheduleFillF2() {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
+			return true;
+		}
+
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								null,                                                                                 //Meal
+								null,                                                                                 //Exception
+								null,                                                                                 //Holiday
+								null,                                                                                 //OT
+								null,                                                                                 //Premium
+								null,                                                                                 //Round
+								[ $this->user_id4 ],                                                                   //Users
+								null,                                                                                 //Break
+								null,                                                                                 //Accrual
+								null,                                                                                 //Expense
+								[ $this->policy_ids['absence_policy'][10], $this->policy_ids['absence_policy'][30] ], //Absence
+								[ $this->policy_ids['regular'][10] ]                                                  //Regular
+		);
+
+		$start_epoch = TTDate::getBeginWeekEpoch( time() );
+		$end_epoch = TTDate::getBeginWeekEpoch( time() ); //One Day.
+
+		$schedule_policy_id = $this->createSchedulePolicy( [ 0 ], $this->policy_ids['absence_policy'][10], 0 ); //Full Shift Undertime
+
+		//Create three separate shifts that all either overlap or touch each other.
+		$recurring_schedule_template_id = $this->createRecurringScheduleTemplate( $this->company_id, 10, [ 'schedule_policy_id' => $schedule_policy_id, 'open_shift_multiplier' => 1 ] );
+		$dd->createRecurringSchedule( $this->company_id, $recurring_schedule_template_id, $start_epoch, $end_epoch, [ TTUUID::getZeroID() ] );
+		$dd->createRecurringSchedule( $this->company_id, $recurring_schedule_template_id, $start_epoch, $end_epoch, [ $this->user_id4 ] );
+
+		//Override each of the recurring shifts with a different user.
+		//$schedule_id = $this->createSchedule( $this->user_id4, $start_epoch, [
+		//		'status_id'          => 20, //Absent
+		//		'schedule_policy_id' => $schedule_policy_id,
+		//		'start_time'         => '6:00AM',
+		//		'end_time'           => '3:00PM',
+		//		'branch_id'			 => $this->branch_id2,
+		//		'department_id'		 => $this->department_id2,
+		//] );
+
+		//Populate global variables for current_user.
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+		$user_obj = $ulf->getById( $this->user_id4 )->getCurrent();
+		global $current_user, $current_company;
+		$current_user = $user_obj;
+		$current_company = $user_obj->getCompanyObject();
+
+		$sf = TTNew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
+		$schedule_arr = $sf->getScheduleArray( [ 'start_date' => $start_epoch, 'end_date' => $end_epoch ] );
+		//var_dump($schedule_arr);
+		$this->assertEquals( 1, count( $schedule_arr ) );
+		$this->assertEquals( 1, count( iterator_to_array( TTDate::getDatePeriod( $start_epoch, $end_epoch ) ) ) );
+
+		foreach ( TTDate::getDatePeriod( $start_epoch, $end_epoch ) as $date_epoch ) {
+			$this->assertArrayHasKey( TTDate::getISODateStamp( $date_epoch ), $schedule_arr );
+			$this->assertEquals( 1, count( $schedule_arr[TTDate::getISODateStamp( $date_epoch )] ) );
+			$i = 0;
+			foreach ( $schedule_arr[TTDate::getISODateStamp( $date_epoch )] as $schedule_shift_arr ) {
+				switch ( $i ) {
+					case 0:
+						$this->assertEquals( $this->user_id4, $schedule_shift_arr['user_id'] );
+						$this->assertEquals( 32400, $schedule_shift_arr['total_time'] );
+						break;
+				}
+
+				$i++;
+			}
+		}
+	}
+
+	/**
+	 * @group Schedule_testRecurringOpenScheduleFillF2B
+	 */
+	function testRecurringOpenScheduleFillF2B() {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
+			return true;
+		}
+
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								null,                                                                                 //Meal
+								null,                                                                                 //Exception
+								null,                                                                                 //Holiday
+								null,                                                                                 //OT
+								null,                                                                                 //Premium
+								null,                                                                                 //Round
+								[ $this->user_id4 ],                                                                   //Users
+								null,                                                                                 //Break
+								null,                                                                                 //Accrual
+								null,                                                                                 //Expense
+								[ $this->policy_ids['absence_policy'][10], $this->policy_ids['absence_policy'][30] ], //Absence
+								[ $this->policy_ids['regular'][10] ]                                                  //Regular
+		);
+
+		$start_epoch = TTDate::getBeginWeekEpoch( time() );
+		$end_epoch = TTDate::getBeginWeekEpoch( time() ); //One Day.
+
+		$schedule_policy_id = $this->createSchedulePolicy( [ 0 ], $this->policy_ids['absence_policy'][10], 0 ); //Full Shift Undertime
+
+		//Create three separate shifts that all either overlap or touch each other.
+		$recurring_schedule_template_id = $this->createRecurringScheduleTemplate( $this->company_id, 10, [ 'schedule_policy_id' => $schedule_policy_id, 'open_shift_multiplier' => 1 ] );
+		$dd->createRecurringSchedule( $this->company_id, $recurring_schedule_template_id, $start_epoch, $end_epoch, [ TTUUID::getZeroID() ] );
+		$dd->createRecurringSchedule( $this->company_id, $recurring_schedule_template_id, $start_epoch, $end_epoch, [ $this->user_id4 ] );
+
+		//Override each of the recurring shifts with a different user.
+		$schedule_id = $this->createSchedule( $this->user_id4, $start_epoch, [
+				'status_id'          => 10, //Absent
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => '6:00AM',
+				'end_time'           => '3:00PM',
+				'branch_id'			 => $this->branch_id,
+				'department_id'		 => $this->department_id,
+		] );
+
+		//Populate global variables for current_user.
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+		$user_obj = $ulf->getById( $this->user_id4 )->getCurrent();
+		global $current_user, $current_company;
+		$current_user = $user_obj;
+		$current_company = $user_obj->getCompanyObject();
+
+		$sf = TTNew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
+		$schedule_arr = $sf->getScheduleArray( [ 'start_date' => $start_epoch, 'end_date' => $end_epoch ] );
+		//var_dump($schedule_arr);
+		$this->assertEquals( 1, count( $schedule_arr ) );
+		$this->assertEquals( 1, count( iterator_to_array( TTDate::getDatePeriod( $start_epoch, $end_epoch ) ) ) );
+
+		foreach ( TTDate::getDatePeriod( $start_epoch, $end_epoch ) as $date_epoch ) {
+			$this->assertArrayHasKey( TTDate::getISODateStamp( $date_epoch ), $schedule_arr );
+			$this->assertEquals( 2, count( $schedule_arr[TTDate::getISODateStamp( $date_epoch )] ) );
+			$i = 0;
+			foreach ( $schedule_arr[TTDate::getISODateStamp( $date_epoch )] as $schedule_shift_arr ) {
+				switch ( $i ) {
+					case 0:
+						$this->assertEquals( TTUUID::getZeroID(), $schedule_shift_arr['user_id'] );
+						$this->assertEquals( 32400, $schedule_shift_arr['total_time'] );
+						break;
+					case 1:
+						$this->assertEquals( $this->user_id4, $schedule_shift_arr['user_id'] );
+						$this->assertEquals( 32400, $schedule_shift_arr['total_time'] );
+						break;
+				}
+
+				$i++;
+			}
+		}
+	}
+
+	/**
+	 * Make sure absence shifts assigned to an employee don't fill recurring open shifts. Absence shifts assigned to OPEN employee do fill OPEN shifts though.
+	 * @group Schedule_testRecurringOpenScheduleFillF3
+	 */
+	function testRecurringOpenScheduleFillF3() {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
+			return true;
+		}
+
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								null,                                                                                 //Meal
+								null,                                                                                 //Exception
+								null,                                                                                 //Holiday
+								null,                                                                                 //OT
+								null,                                                                                 //Premium
+								null,                                                                                 //Round
+								[ $this->user_id4 ],                                                                   //Users
+								null,                                                                                 //Break
+								null,                                                                                 //Accrual
+								null,                                                                                 //Expense
+								[ $this->policy_ids['absence_policy'][10], $this->policy_ids['absence_policy'][30] ], //Absence
+								[ $this->policy_ids['regular'][10] ]                                                  //Regular
+		);
+
+		$start_epoch = TTDate::getBeginWeekEpoch( time() );
+		$end_epoch = TTDate::getBeginWeekEpoch( time() ); //One Day.
+
+		$schedule_policy_id = $this->createSchedulePolicy( [ 0 ], $this->policy_ids['absence_policy'][10], 0 ); //Full Shift Undertime
+
+		//Create three separate shifts that all either overlap or touch each other.
+		$recurring_schedule_template_id = $this->createRecurringScheduleTemplate( $this->company_id, 10, [ 'schedule_policy_id' => $schedule_policy_id, 'open_shift_multiplier' => 1 ] );
+		$dd->createRecurringSchedule( $this->company_id, $recurring_schedule_template_id, $start_epoch, $end_epoch, [ TTUUID::getZeroID() ] );
+		$dd->createRecurringSchedule( $this->company_id, $recurring_schedule_template_id, $start_epoch, $end_epoch, [ $this->user_id4 ] );
+
+		//Override each of the recurring shifts with a different user.
+		$schedule_id = $this->createSchedule( $this->user_id4, $start_epoch, [
+				'status_id'          => 20, //Absent
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => '6:00AM',
+				'end_time'           => '3:00PM',
+				'branch_id'			 => $this->branch_id2,
+				'department_id'		 => $this->department_id2,
+		] );
+
+		//Populate global variables for current_user.
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+		$user_obj = $ulf->getById( $this->user_id4 )->getCurrent();
+		global $current_user, $current_company;
+		$current_user = $user_obj;
+		$current_company = $user_obj->getCompanyObject();
+
+		$sf = TTNew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
+		$schedule_arr = $sf->getScheduleArray( [ 'start_date' => $start_epoch, 'end_date' => $end_epoch ] );
+		//var_dump($schedule_arr);
+		$this->assertEquals( 1, count( $schedule_arr ) );
+		$this->assertEquals( 1, count( iterator_to_array( TTDate::getDatePeriod( $start_epoch, $end_epoch ) ) ) );
+
+		foreach ( TTDate::getDatePeriod( $start_epoch, $end_epoch ) as $date_epoch ) {
+			$this->assertArrayHasKey( TTDate::getISODateStamp( $date_epoch ), $schedule_arr );
+			$this->assertEquals( 2, count( $schedule_arr[TTDate::getISODateStamp( $date_epoch )] ) );
+			$i = 0;
+			foreach ( $schedule_arr[TTDate::getISODateStamp( $date_epoch )] as $schedule_shift_arr ) {
+				switch ( $i ) {
+					case 0:
+						$this->assertEquals( TTUUID::getZeroID(), $schedule_shift_arr['user_id'] );
+						$this->assertEquals( 32400, $schedule_shift_arr['total_time'] );
+						break;
+					case 1:
+						$this->assertEquals( $this->user_id4, $schedule_shift_arr['user_id'] );
 						$this->assertEquals( 32400, $schedule_shift_arr['total_time'] );
 						break;
 				}

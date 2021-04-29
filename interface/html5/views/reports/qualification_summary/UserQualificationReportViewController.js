@@ -19,7 +19,4 @@ class UserQualificationReportViewController extends ReportBaseViewController {
 	getCustomContextMenuModel() {
 		return { include: ['default'] };
 	}
-
-	/* jshint ignore:end */
-
 }

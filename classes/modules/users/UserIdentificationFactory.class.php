@@ -316,6 +316,36 @@ class UserIdentificationFactory extends Factory {
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
+		if ( $this->getDeleted() == false && ( $this->getType() == 70 || $this->getType() == 71 ) ) { //Face Images
+			if ( ( $this->getType() == 71 && $this->getNumber() == 4 ) || ( $this->getType() == 70 && $this->getNumber() == 0 ) ) { //Center image.
+				$u_obj = $this->getUserObject(); /** @var UserListFactory $u_obj */
+				if ( $u_obj->isPhotoExists() == false ) {
+					Debug::Text( 'Photo does not exist, using enrolled image for this user: ' . $u_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+					$dir = $u_obj->getStoragePath( $u_obj->getCompany(), $u_obj->getId() );
+					Debug::Text( '  Storage Path: ' . $dir, __FILE__, __LINE__, __METHOD__, 10 );
+					if ( isset( $dir ) ) {
+						@mkdir( $dir, 0700, true );
+						if ( @disk_free_space( $dir ) > ( strlen( $this->getValue() ) * 2 ) ) {
+							$file_name = $dir . DIRECTORY_SEPARATOR . TTUUID::castUUID( $u_obj->getId() ) . '.jpg';
+							$file_data = base64_decode( $this->getValue() );
+
+							$success = file_put_contents( $file_name, $file_data );
+							if ( $success == true ) {
+								TTLog::addEntry( $u_obj->getId(), 10, TTi18n::getText( 'Photo - Source: Face Enrollment' ), null, $u_obj->getTable() );
+								Debug::Text( 'User profile photo updated successfully!', __FILE__, __LINE__, __METHOD__, 10 );
+							} else {
+								Debug::Text( 'ERROR: Unable to write data to: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
+							}
+						} else {
+							Debug::Text( 'ERROR: Not enough disk space free, unable to save photo to user profile!', __FILE__, __LINE__, __METHOD__, 10 );
+						}
+					}
+				} else {
+					Debug::Text( 'User profile already has a photo, not overwriting with enrolled photo...', __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			}
+		}
+
 		return true;
 	}
 

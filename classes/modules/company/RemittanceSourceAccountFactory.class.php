@@ -1643,6 +1643,17 @@ class RemittanceSourceAccountFactory extends Factory {
 													TTi18n::gettext( 'Invalid account number, must be digits only' ) );
 					}
 				}
+			} else {
+				//Source account is disabled, make sure no active destination accounts are linked to it.
+				$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' ); /** @var RemittanceDestinationAccountListFactory $rdalf */
+				$rdalf->getByRemittanceSourceAccountIdAndStatusId( $this->getId(), 10, 1 ); //Limit 1.
+				if ( $rdalf->getRecordCount() > 0 ) {
+					$this->Validator->isTrue( 'status_id',
+											  false,
+											  TTi18n::gettext( 'Disabled remittance source account is currently in use by enabled employee pay methods' ) );
+				}
+				unset( $rdalf );
+
 			}
 		}
 

@@ -232,7 +232,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 							' . $uf->getTable() . ' as b
 					where	a.user_id = b.id
 						AND	b.company_id = ?
-						AND type_id in (' . $this->getListSQL( $type_id, $ph, 'int' ) . ')
+						AND a.type_id in (' . $this->getListSQL( $type_id, $ph, 'int' ) . ')
 						AND b.status_id = 10
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getSortSQL( $order, $strict );

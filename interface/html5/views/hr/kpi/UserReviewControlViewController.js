@@ -56,8 +56,21 @@ class UserReviewControlViewController extends BaseViewController {
 
 	getCustomContextMenuModel() {
 		var context_menu_model = {
+			groups: {
+				review: {
+					label: $.i18n._( 'Review' ),
+					id: this.viewId + 'Review'
+				}
+			},
 			exclude: [ContextMenuIconName.mass_edit],
-			include: []
+			include: [
+				{
+					label: $.i18n._( 'Print' ),
+					id: 'pdf_review_print',
+					group: 'review',
+					icon: Icons.print,
+				}
+			]
 		};
 
 		return context_menu_model;
@@ -1015,6 +1028,57 @@ class UserReviewControlViewController extends BaseViewController {
 		TTPromise.resolve( 'ReviewView', 'init' );
 	}
 
+	setDefaultMenuReportRelatedIcons( context_btn, grid_selected_length, pId ) {
+		if ( !this.payStubReportIconsValidate() ) {
+			context_btn.addClass( 'invisible-image' );
+		}
+
+		if ( grid_selected_length > 0 && this.viewOwnerOrChildPermissionValidate() ) {
+			context_btn.removeClass( 'disable-image' );
+		} else {
+			context_btn.addClass( 'disable-image' );
+		}
+	}
+
+	setCustomDefaultMenuIcon( id, context_btn, grid_selected_length ) {
+		switch ( id ) {
+			case 'pdf_review_print':
+				if ( grid_selected_length > 0 && this.viewOwnerOrChildPermissionValidate() ) {
+					context_btn.removeClass( 'disable-image' );
+				} else {
+					context_btn.addClass( 'disable-image' );
+				}
+
+				break;
+		}
+	}
+
+	doFormIFrameCall( postData ) {
+		Global.APIFileDownload( 'APIKPIReport', 'getKPIReport', postData );
+	}
+
+	onCustomContextClick( id ) {
+		var $this = this;
+
+		switch ( id ) {
+			case 'pdf_review_print':
+				var grid_selected_id_array;
+
+				var ids = [];
+				if ( $this.edit_view && $this.current_edit_record.id ) {
+					ids.push( $this.current_edit_record.id );
+				} else {
+					grid_selected_id_array = this.getGridSelectIdArray();
+					$.each( grid_selected_id_array, function( index, value ) {
+						var grid_selected_row = $this.getRecordFromGridById( value );
+						ids.push( grid_selected_row.id );
+					} );
+				}
+
+				this.doFormIFrameCall( { 0: { 'user_review_control_id': ids }, 1: 'pdf_review_print' } );
+				break;
+		}
+	}
 }
 
 UserReviewControlViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {

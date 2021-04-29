@@ -2036,13 +2036,19 @@ class StationFactory extends Factory {
 
 					$sf->setType( $type_id ); //Need to set thie before setModeFlag()
 
-					//Use the passed in station_id, as it will be the UDID and contain the type_id on the end.
-					//Add the type_id as the suffix to avoid conflicts if the user switches between kiosk and non-kiosk modes.
-					//Prevent stations from having the type_id appended to the end several times.
-					if ( substr( $station_id, ( strlen( $type_id ) * -1 ) ) != $type_id ) {
-						$station = $station_id . $type_id;
+					if ( empty( $station_id ) == true ) {
+						//If the station didn't pass in the UDID, generate our own Station ID, however this should never happen in the real-world.
+						$station = null; //Using NULL means we generate our own.
+						Debug::Text( 'ERROR: KIOSK station didnt pass in UDID of device, therefore forced to generate random Station ID. This should be fixed at the remote end!', __FILE__, __LINE__, __METHOD__, 10 );
 					} else {
-						$station = $station_id;
+						//Use the passed in station_id, as it will be the UDID and contain the type_id on the end.
+						//Add the type_id as the suffix to avoid conflicts if the user switches between kiosk and non-kiosk modes.
+						//Prevent stations from having the type_id appended to the end several times.
+						if ( substr( $station_id, ( strlen( $type_id ) * -1 ) ) != $type_id ) {
+							$station = $station_id . $type_id;
+						} else {
+							$station = $station_id;
+						}
 					}
 
 					if ( $description == '' ) {

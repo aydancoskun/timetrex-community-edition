@@ -12,8 +12,8 @@ var APIReturnHandler = Base.extend( {
 	},
 
 	isValid: function() {
-		if ( Global.isSet( this.get( 'result_data' ).api_retval ) ) {
-			return this.get( 'result_data' ).api_retval;
+		if ( Global.isSet( this.get( 'result_data' ).api_retval ) && this.get( 'result_data' ).api_retval === false ) {
+			return false;
 		}
 
 		return true;

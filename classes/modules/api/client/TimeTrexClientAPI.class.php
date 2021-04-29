@@ -631,8 +631,8 @@ class TimeTrexClientAPIReturnHandler {
 	 * @return bool
 	 */
 	function isValid() {
-		if ( isset( $this->result_data['api_retval'] ) ) {
-			return (bool)$this->result_data['api_retval'];
+		if ( isset( $this->result_data['api_retval'] ) && $this->result_data['api_retval'] == false ) {
+			return false;
 		}
 
 		return true;

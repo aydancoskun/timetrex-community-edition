@@ -570,6 +570,16 @@ class ScheduleShiftViewController extends BaseViewController {
 					break;
 			}
 
+			// #2831 Must check is_viewing, otherwise all fields are editable in View mode. Bug originated in 886a33c71174c10c0699cbf869a3cf2ebd200591
+			if ( this.is_viewing ) {
+				if ( Global.isSet( widget.setEnabled ) ) {
+					widget.setEnabled( false );
+				}
+			} else {
+				if ( Global.isSet( widget.setEnabled ) ) {
+					widget.setEnabled( true );
+				}
+			}
 		}
 	}
 

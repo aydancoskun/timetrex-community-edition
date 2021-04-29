@@ -2472,7 +2472,7 @@ class Misc {
 	 * @param bool $strict
 	 * @return bool|string
 	 */
-	static function generateCopyName( $name, $strict = false ) {
+	static function generateCopyName( $name, $strict = false, $max_length = 49 ) {
 		$name = str_replace( TTi18n::getText( 'Copy of' ), '', $name );
 
 		if ( $strict === true ) {
@@ -2481,7 +2481,7 @@ class Misc {
 			$retval = TTi18n::getText( 'Copy of' ) . ' ' . $name . ' [' . rand( 1, 99 ) . ']';
 		}
 
-		$retval = substr( $retval, 0, 49 ); //Make sure the name doesn't get too long.
+		$retval = substr( $retval, 0, $max_length ); //Make sure the name doesn't get too long.
 
 		return $retval;
 	}
@@ -3251,7 +3251,7 @@ class Misc {
 	 */
 	static function redirectUnSupportedBrowser() {
 		if ( self::isUnSupportedBrowser() == true ) {
-			Redirect::Page( URLBuilder::getURL( [ 'tt_version' => APPLICATION_VERSION, 'tt_edition' => getTTProductEdition() ], 'https://www.timetrex.com/supported_web_browsers.php' ) );
+			Redirect::Page( URLBuilder::getURL( [ 'tt_version' => APPLICATION_VERSION, 'tt_edition' => getTTProductEdition(), 'registration_key' => SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' ) ], 'https://www.timetrex.com/supported-web-browsers' ) );
 		}
 
 		return true;
