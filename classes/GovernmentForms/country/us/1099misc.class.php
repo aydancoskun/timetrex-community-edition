@@ -89,19 +89,6 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 		return true;
 	}
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [
-				'year' => 'isNumeric',
-				'ein'  => [ 'stripNonNumeric', 'isNumeric' ],
-		];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [
 			//
@@ -152,7 +139,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			],
 			[
 				//'template_page' => 2,
-				'function'      => [ 'filterSmallYear', 'drawNormal' ],
+				'function'      => [ 'draw' => [ 'filterSmallYear', 'drawNormal' ] ],
 				'value'         => $this->year,
 				'on_background' => true,
 				'coordinates'   => [
@@ -199,7 +186,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'company_address' => [
-					'function'    => [ 'filterCompanyAddress', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'filterCompanyAddress', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 48,
 							'y'      => 75,
@@ -215,7 +202,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			],
 
 			'name'           => [
-					'function'    => [ 'filterName', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'filterName', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 48,
 							'y'      => 205,
@@ -225,7 +212,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'address'        => [
-					'function'    => [ 'filterAddress', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'filterAddress', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 48,
 							'y'      => 250,
@@ -240,7 +227,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					'multicell'   => true,
 			],
 			'city'           => [
-					'function'    => [ 'filterCity', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'filterCity', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 48,
 							'y'      => 285,
@@ -260,7 +247,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			],
 
 			'l1' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 305,
 							'y'      => 72,
@@ -271,7 +258,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			],
 
 			'l2' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 305,
 							'y'      => 108,
@@ -281,7 +268,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l3' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 305,
 							'y'      => 138,
@@ -291,7 +278,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l4' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 405,
 							'y'      => 138,
@@ -301,7 +288,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l5' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 305,
 							'y'      => 180,
@@ -311,7 +298,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l6' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 405,
 							'y'      => 180,
@@ -321,7 +308,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l7' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 305,
 							'y'      => 228,
@@ -331,7 +318,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l8' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 405,
 							'y'      => 228,
@@ -341,7 +328,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l9' => [
-					'function'    => 'drawCheckBox',
+					'function'    => [ 'draw' => 'drawCheckBox' ],
 					'coordinates' => [
 							[
 									'x'      => 380,
@@ -354,7 +341,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			],
 
 			'l10' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 405,
 							'y'      => 263,
@@ -365,7 +352,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			],
 
 			'l13' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 305,
 							'y'      => 324,
@@ -375,7 +362,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l14' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 405,
 							'y'      => 324,
@@ -386,7 +373,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			],
 
 			'l15a' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 60,
 							'y'      => 360,
@@ -396,7 +383,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l15b' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 182,
 							'y'      => 360,
@@ -407,7 +394,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			],
 
 			'l16a' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 305,
 							'y'      => 350,
@@ -417,7 +404,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l16b' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 305,
 							'y'      => 362,
@@ -447,7 +434,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			],
 
 			'l18a' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 505,
 							'y'      => 350,
@@ -457,7 +444,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					],
 			],
 			'l18b' => [
-					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 505,
 							'y'      => 362,

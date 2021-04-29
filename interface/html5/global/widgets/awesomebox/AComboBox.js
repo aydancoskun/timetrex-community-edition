@@ -1674,7 +1674,7 @@
 			return true;
 		};
 
-		this.onADropDownSearch = function( targetName, page_action, default_select_item, callBack ) {
+		this.onADropDownSearch = function( targetName, page_action, default_select_item, callBack, trigger_form_item_change = true ) {
 			var this_val = this.getValue();
 			if ( targetName == 'select_grid' && this_val.length == 0 || ( targetName == 'select_grid' && this_val.length == 1 && this_val[0] == TTUUID.not_exist_id ) ) {
 				//#2353 - prevent bug where sorted empty select grid selects everything
@@ -1771,13 +1771,17 @@
 							a_dropdown && a_dropdown.setSelectItem( a_dropdown.getSelectItem() );
 							if ( default_select_item == 'first' ) {
 								$this.setValue( result_data[0] );
-								$this.trigger( 'formItemChange', [$this] );
+								if ( trigger_form_item_change == true ) {
+									$this.trigger( 'formItemChange', [$this] );
+								}
 								if ( callBack ) {
 									callBack( result_data[0] );
 								}
 							} else if ( default_select_item == 'last' ) {
 								$this.setValue( result_data[result_data.length - 1] );
-								$this.trigger( 'formItemChange', [$this] );
+								if ( trigger_form_item_change == true ) {
+									$this.trigger( 'formItemChange', [$this] );
+								}
 								if ( callBack ) {
 									callBack( result_data[result_data.length - 1] );
 								}

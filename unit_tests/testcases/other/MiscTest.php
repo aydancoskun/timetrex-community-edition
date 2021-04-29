@@ -1275,6 +1275,8 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( [ 'adjusted_amount' => 10, 'under_limit' => 0, 'over_limit' => 2 ], Misc::getAmountAroundLimit( 12, 90, 100 ) );
 		$this->assertEquals( [ 'adjusted_amount' => 10, 'under_limit' => 0, 'over_limit' => 40 ], Misc::getAmountAroundLimit( 50, 90, 100 ) );
 
+		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 0 ], Misc::getAmountAroundLimit( 0, 100, 100 ) );
+
 
 		//Test an example that may be used in a report to ensure the YTD amount never exceeds the limit.
 		$ytd_amount = 0;

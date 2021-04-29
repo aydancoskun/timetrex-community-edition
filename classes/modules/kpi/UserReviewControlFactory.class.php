@@ -63,6 +63,7 @@ class UserReviewControlFactory extends Factory {
 						35  => TTi18n::gettext( 'Accident/Injury' ),
 						37  => TTi18n::gettext( 'Background Check' ),
 						38  => TTi18n::gettext( 'Drug Test' ),
+						39  => TTi18n::gettext( 'Health/Immunization' ),
 						40  => TTi18n::gettext( 'Entrance Interview' ),
 						45  => TTi18n::gettext( 'Exit Interview' ),
 						100 => TTi18n::gettext( 'Miscellaneous' ),

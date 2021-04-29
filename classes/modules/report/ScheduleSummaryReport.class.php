@@ -250,6 +250,8 @@ class ScheduleSummaryReport extends Report {
 					'-1650-absence_policy'  => TTi18n::gettext( 'Absence Policy' ),
 					//'-1660-date_stamp' => TTi18n::gettext('Date'),
 
+					'-1690-start_end_time'   => TTi18n::gettext( 'Shift Times (Start & End)' ),
+
 					'-5000-schedule_note' => TTi18n::gettext( 'Note' ),
 
 					'-2000-scheduled_hour_of_day' => TTi18n::gettext( 'Hour Of Day' ),
@@ -312,6 +314,8 @@ class ScheduleSummaryReport extends Report {
 						if ( $column == 'absence_policy' || $column == 'schedule_policy' ) {
 							//Make sure these columns aren't formatted as they are strings.
 							unset( $retval[$column] );
+						} else if ( strpos( $column, 'start_end_time' ) !== false ) {
+							$retval[$column] = 'string';
 						} else if ( strpos( $column, 'start_time' ) !== false || strpos( $column, 'end_time' ) !== false ) {
 							$retval[$column] = 'time';
 						} else if ( strpos( $column, '_wage' ) !== false || strpos( $column, '_hourly_rate' ) !== false || strpos( $column, 'hourly_rate' ) !== false ) {
@@ -360,22 +364,6 @@ class ScheduleSummaryReport extends Report {
 					}
 				}
 				break;
-//			case 'aggregates':
-//				$retval = array();
-//				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
-//				if ( is_array($dynamic_columns ) ) {
-//					foreach( $dynamic_columns as $column ) {
-//						switch ( $column ) {
-//							default:
-//								if ( strpos($column, '_hourly_rate') !== FALSE OR strpos($column, 'hourly_rate') !== FALSE ) {
-//									$retval[$column] = 'avg';
-//								} else {
-//									$retval[$column] = 'sum';
-//								}
-//						}
-//					}
-//				}
-//				break;
 			case 'templates':
 				$retval = [
 						'-1010-by_employee+work+total_time'                 => TTi18n::gettext( 'Work Time by Employee' ),
@@ -912,6 +900,7 @@ class ScheduleSummaryReport extends Report {
 							//						'end_time' => TTDate::strtotime( $s_obj->getColumn('end_time') ),
 							'start_time'      => TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn( 'start_time' ) ), 86400 ), //This is required in: splitDataByHoursWorked()
 							'end_time'        => TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn( 'end_time' ) ), 86400 ), //This is required in: splitDataByHoursWorked()
+							'start_end_time'  => [ 'sort' => TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn( 'start_time' ) ), 86400 ) . TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn( 'end_time' ) ), 86400 ), 'display' => TTDate::getDate( 'TIME', TTDate::strtotime( $s_obj->getColumn( 'start_time' ) ) ) . ' - '. TTDate::getDate( 'TIME',  TTDate::strtotime( $s_obj->getColumn( 'end_time' ) ) ) ],
 
 							'user_wage_id'         => $s_obj->getColumn( 'user_wage_id' ),
 							'hourly_rate'          => Misc::MoneyFormat( $hourly_rate, false ), //This is required in: splitDataByHoursWorked()
@@ -1220,7 +1209,7 @@ class ScheduleSummaryReport extends Report {
 			}
 			$i = 0;
 			foreach ( $calendar_array as $calendar_day ) {
-				if ( ( $i == 0 && $new_page == true ) || $calendar_day['isNewMonth'] == true ) {
+				if ( ( $i == 0 && $new_page == true ) || $calendar_day['is_new_month'] == true ) {
 					$this->pdf->Cell( ( $column_widths['day'] * 0.75 ), $this->_pdf_scaleSize( 4 ), $calendar_day['month_name'], 'TBL', 0, 'L', 1, null, 1 );
 				} else {
 					$this->pdf->Cell( ( $column_widths['day'] * 0.75 ), $this->_pdf_scaleSize( 4 ), '', 'TBL', 0, 'L', 1 );

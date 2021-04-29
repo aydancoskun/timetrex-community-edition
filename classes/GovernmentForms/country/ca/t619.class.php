@@ -44,19 +44,6 @@ include_once( 'CA.class.php' );
 class GovernmentForms_CA_T619 extends GovernmentForms_CA {
 	public $xml_schema = 'layout-topologie.xsd';
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [
-			//'year' => 'isNumeric',
-			//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [];
 

@@ -45,19 +45,6 @@ class GovernmentForms_US_1096 extends GovernmentForms_US {
 
 	public $template_offsets = [ 0, 0 ];
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [
-				'year' => 'isNumeric',
-				'ein'  => [ 'stripNonNumeric', 'isNumeric' ],
-		];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [
 				[
@@ -175,7 +162,7 @@ class GovernmentForms_US_1096 extends GovernmentForms_US {
 						],
 				],
 				'ein'                => [
-						'function'    => [ 'formatEIN', 'drawNormal' ],
+						'function'    => [ 'prefilter' => [ 'stripNonNumeric', 'isNumeric' ], 'draw' => [ 'formatEIN', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 53,
 								'y'      => 250,
@@ -194,7 +181,7 @@ class GovernmentForms_US_1096 extends GovernmentForms_US {
 						],
 				],
 				'company_address'    => [
-						'function'    => [ 'filterCompanyAddress', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'filterCompanyAddress', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 66,
 								'y'      => 142,
@@ -209,7 +196,7 @@ class GovernmentForms_US_1096 extends GovernmentForms_US {
 						'multicell'   => true,
 				],
 				'company_city_state' => [
-						'function'    => [ 'filterCompanyCityStateZIP', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'filterCompanyCityStateZIP', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 66,
 								'y'      => 178,
@@ -270,7 +257,7 @@ class GovernmentForms_US_1096 extends GovernmentForms_US {
 				],
 				'form_type_1099misc' => [
 						'value'       => true,
-						'function'    => 'drawCheckBox',
+						'function'    => [ 'draw' => 'drawCheckBox' ],
 						'coordinates' => [
 								[
 										'x'      => 91,
@@ -287,7 +274,7 @@ class GovernmentForms_US_1096 extends GovernmentForms_US {
 				],
 
 				'l4' => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 345,
 								'y'      => 251,
@@ -297,7 +284,7 @@ class GovernmentForms_US_1096 extends GovernmentForms_US {
 						],
 				],
 				'l5' => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 445,
 								'y'      => 251,

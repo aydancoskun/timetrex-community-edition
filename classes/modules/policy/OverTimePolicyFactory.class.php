@@ -876,11 +876,18 @@ class OverTimePolicyFactory extends Factory {
 												   TTi18n::gettext( 'Contributing Shift Policy is invalid' )
 			);
 		}
+
 		// Trigger Time
+		if ( $this->Validator->getValidateOnly() == false && ( $this->getTriggerTime() === false || $this->getTriggerTime() === '' || $this->getTriggerTime() === null ) ) { //Must allow 0
+			$this->Validator->isTRUE( 'trigger_time',
+									  false,
+									  TTi18n::gettext( 'Active After time must be specified' )
+			);
+		}
 		if ( $this->getTriggerTime() !== false ) {
 			$this->Validator->isNumeric( 'trigger_time',
 										 $this->getTriggerTime(),
-										 TTi18n::gettext( 'Incorrect Trigger Time' )
+										 TTi18n::gettext( 'Incorrect Active After Time' )
 			);
 		}
 		// Adjusting Contributing Shift Policy

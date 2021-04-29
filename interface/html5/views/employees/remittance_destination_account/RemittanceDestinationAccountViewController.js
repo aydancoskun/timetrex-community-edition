@@ -374,6 +374,39 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 		return record;
 	}
 
+	getCustomContextMenuModel() {
+		var context_menu_model = {
+			exclude: [],
+			include: [{
+				label: $.i18n._( 'Import' ),
+				id: ContextMenuIconName.import_icon,
+				group: 'other',
+				icon: Icons.import_icon,
+				permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVEmployeeBankAccount' ),
+				permission: null,
+				sort_order: 8000
+			}]
+		};
+
+		return context_menu_model;
+	}
+
+	onCustomContextClick( id ) {
+		switch ( id ) {
+			case ContextMenuIconName.import_icon:
+				this.onImportClick();
+				break;
+		}
+	}
+
+	onImportClick() {
+		var $this = this;
+
+		IndexViewController.openWizard( 'ImportCSVWizard', 'RemittanceDestinationAccount', function() {
+			$this.search();
+		} );
+	}
+
 	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );

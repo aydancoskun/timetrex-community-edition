@@ -384,7 +384,7 @@ Login view:10
 
 // Detect if mobile, and add class on body for CSS to use.
 // Reason for doing this instead of using css media queries is so we dont have to guess suitable mobile device breakpoints. May change to breakpoints if this does not work out though.
-if ( Misc::detectMobileBrowser() ) { ?>
+if ( Misc::detectMobileBrowser() == true ) { ?>
 <body class="login-bg mobile-device-mode" oncontextmenu="return true;">
 <?php } else { ?>
 <body class="login-bg" oncontextmenu="return true;">

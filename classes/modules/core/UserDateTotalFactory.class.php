@@ -1771,7 +1771,7 @@ class UserDateTotalFactory extends Factory {
 			//Check that the user is allowed to be assigned to the absence policy
 			// Only do this when creating a new record, as the user may have had entries made then later have the absence policy disabled from the policy group.
 			//   In that case it would cause this record from not being saved properly then and possibly prevent recalculations from finishing.
-			if ( $this->getObjectType() == 50 && $this->getSourceObject() != '' && is_object( $this->getUserObject() ) ) {
+			if ( $this->getDeleted() == false && $this->getObjectType() == 50 && $this->getSourceObject() != '' && is_object( $this->getUserObject() ) ) {
 				$pglf = TTNew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 				$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [ 'user_id' => [ $this->getUser() ], 'absence_policy' => [ $this->getSourceObject() ] ] );
 				if ( $pglf->getRecordCount() == 0 ) {

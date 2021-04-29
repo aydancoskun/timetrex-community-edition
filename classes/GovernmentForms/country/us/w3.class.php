@@ -45,19 +45,6 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 
 	public $template_offsets = [ 0, 0 ];
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [
-				'year' => 'isNumeric',
-				'ein'  => [ 'stripNonNumeric', 'isNumeric' ],
-		];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [
 				[
@@ -114,7 +101,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 				//Finish initializing page 1.
 
 				'control_number'       => [
-						'function'    => [ 'filterControlNumber', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'filterControlNumber', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 100,
 								'y'      => 45,
@@ -124,7 +111,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'kind_of_payer'        => [
-						'function'    => 'drawCheckBox',
+						'function'    => [ 'draw' => 'drawCheckBox' ],
 						'coordinates' => [
 								'941'      => [
 										'x'      => 122,
@@ -183,7 +170,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'kind_of_employer'     => [
-						'function'    => [ 'strtolower', 'drawCheckBox' ],
+						'function'    => [ 'draw' => [ 'strtolower', 'drawCheckBox' ] ],
 						'coordinates' => [
 								'n' => [
 										'x'      => 367,
@@ -227,7 +214,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'third_party_sick_pay' => [
-						'function'    => 'drawCheckBox',
+						'function'    => [ 'draw' => 'drawCheckBox' ],
 						'coordinates' => [
 								[
 										'x'      => 540,
@@ -262,7 +249,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 									   ],
 				],
 				'ein'             => [
-						'function'    => [ 'formatEIN', 'drawNormal' ],
+						'function'    => [ 'prefilter' => [ 'stripNonNumeric', 'isNumeric' ], 'draw' => [ 'formatEIN', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 38,
 								'y'      => 140,
@@ -281,7 +268,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'company_address' => [
-						'function'    => [ 'filterCompanyAddress', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'filterCompanyAddress', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 38,
 								'y'      => 182,
@@ -360,7 +347,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l1'            => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 267,
 								'y'      => 117,
@@ -370,7 +357,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l2'            => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 422,
 								'y'      => 117,
@@ -380,7 +367,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l3'            => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 267,
 								'y'      => 140,
@@ -390,7 +377,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l4'            => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 422,
 								'y'      => 140,
@@ -400,7 +387,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l5'            => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 267,
 								'y'      => 165,
@@ -410,7 +397,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l6'            => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 422,
 								'y'      => 165,
@@ -420,7 +407,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l7'            => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 267,
 								'y'      => 189,
@@ -430,7 +417,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l8'            => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 422,
 								'y'      => 189,
@@ -440,7 +427,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l9'            => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 267,
 								'y'      => 213,
@@ -450,7 +437,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l10'           => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 422,
 								'y'      => 213,
@@ -460,7 +447,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l11'           => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 267,
 								'y'      => 236,
@@ -470,7 +457,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l12a'          => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 422,
 								'y'      => 236,
@@ -480,7 +467,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l12b'          => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 422,
 								'y'      => 261,
@@ -490,7 +477,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l13'           => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 267,
 								'y'      => 261,
@@ -500,7 +487,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l14'           => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 267,
 								'y'      => 284,
@@ -510,7 +497,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l16'           => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 38,
 								'y'      => 309,
@@ -520,7 +507,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l17'           => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 152,
 								'y'      => 309,
@@ -530,7 +517,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l18'           => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 267,
 								'y'      => 309,
@@ -540,7 +527,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 						],
 				],
 				'l19'           => [
-						'function'    => [ 'MoneyFormat', 'drawNormal' ],
+						'function'    => [ 'draw' => [ 'MoneyFormat', 'drawNormal' ] ],
 						'coordinates' => [
 								'x'      => 422,
 								'y'      => 309,

@@ -415,6 +415,7 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 
 		$query .= ( isset( $filter_data['user_id'] ) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : null;
 
+		$query .= ( isset( $filter_data['status_id'] ) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : null;
 		$query .= ( isset( $filter_data['code_id'] ) ) ? $this->getWhereClauseSQL( 'a.code_id', $filter_data['code_id'], 'numeric_list', $ph ) : null;
 		$query .= ( isset( $filter_data['pay_period_type_id'] ) ) ? $this->getWhereClauseSQL( 'a.pay_period_type_id', $filter_data['pay_period_type_id'], 'numeric_list', $ph ) : null;
 

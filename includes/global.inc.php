@@ -50,8 +50,8 @@ if ( ini_get( 'max_execution_time' ) < 1800 ) {
 	ini_set( 'max_execution_time', 1800 );
 }
 
-define( 'APPLICATION_VERSION', '12.4.0' );
-define( 'APPLICATION_VERSION_DATE', 1600326000 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("17-Sep-2020")."\n\n";'
+define( 'APPLICATION_VERSION', '12.4.2' );
+define( 'APPLICATION_VERSION_DATE', 1602658800 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("14-Oct-2020")."\n\n";'
 
 if ( strtoupper( substr( PHP_OS, 0, 3 ) ) == 'WIN' ) {
 	define( 'OPERATING_SYSTEM', 'WIN' );
@@ -291,7 +291,7 @@ function TTnew( $class_name ) { //Unlimited arguments are supported.
 //Force no caching of file.
 function forceNoCacheHeaders() {
 	//CSP headers break many things at this stage, unless "unsafe" is used for almost everything.
-	header( 'Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com; img-src \'self\' map.timetrex.com:3128 *.timetrex.com *.google-analytics.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com data: blob:' );
+	header( 'Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.googletagmanager.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com; img-src \'self\' map.timetrex.com:3128 *.timetrex.com *.google-analytics.com *.googletagmanager.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com data: blob:' );
 
 	//Help prevent XSS or frame clickjacking.
 	header( 'X-XSS-Protection: 1; mode=block' );

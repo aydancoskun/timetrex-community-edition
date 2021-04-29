@@ -725,6 +725,9 @@ class UserDeductionFactory extends Factory {
 		$cd_obj = $this->getCompanyDeductionObject();
 		/** @var CompanyDeductionFactory $cd_obj */
 
+
+		$pay_period_start_week_day = $pay_period_obj->getPayPeriodScheduleObject()->getStartWeekDay();
+
 		$annual_pay_periods = $pay_period_obj->getPayPeriodScheduleObject()->getAnnualPayPeriods();
 		if ( $annual_pay_periods <= 0 ) {
 			$annual_pay_periods = 1;
@@ -1143,7 +1146,7 @@ class UserDeductionFactory extends Factory {
 						Debug::Text( 'Employee Hourly Rate: ' . $employee_hourly_rate, __FILE__, __LINE__, __METHOD__, 10 );
 					}
 
-					if ( in_array( 'pay_period_worked_days', $formula_variables ) || in_array( 'pay_period_paid_days', $formula_variables ) ) {
+					if ( in_array( 'pay_period_worked_days', $formula_variables ) || in_array( 'pay_period_paid_days', $formula_variables ) || in_array( 'pay_period_worked_weeks', $formula_variables ) || in_array( 'pay_period_paid_weeks', $formula_variables ) ) {
 						$pay_period_days_worked = (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUser(), $pay_period_obj->getStartDate(), $pay_period_obj->getEndDate() );
 						$pay_period_days_absence = (array)$udtlf->getDaysPaidAbsenceByUserIDAndStartDateAndEndDate( $this->getUser(), $pay_period_obj->getStartDate(), $pay_period_obj->getEndDate() );
 					}
@@ -1167,16 +1170,22 @@ class UserDeductionFactory extends Factory {
 					}
 
 					if ( isset( $lookback_pay_stub_dates['first_pay_stub_start_date'] ) && isset( $lookback_pay_stub_dates['last_pay_stub_end_date'] )
-							&& in_array( 'lookback_pay_stub_worked_days', $formula_variables ) || in_array( 'lookback_pay_stub_paid_days', $formula_variables ) ) {
+							&& ( in_array( 'lookback_pay_stub_worked_days', $formula_variables ) || in_array( 'lookback_pay_stub_paid_days', $formula_variables ) || in_array( 'lookback_pay_stub_worked_weeks', $formula_variables ) || in_array( 'lookback_pay_stub_paid_weeks', $formula_variables )) ) {
 						Debug::Text( 'Lookback Pay Stub Dates... Start: ' . TTDate::getDate( 'DATE', $lookback_pay_stub_dates['first_pay_stub_start_date'] ) . ' End: ' . TTDate::getDate( 'DATE', $lookback_pay_stub_dates['last_pay_stub_end_date'] ), __FILE__, __LINE__, __METHOD__, 10 );
 						$lookback_pay_stub_days_worked = (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUser(), $lookback_pay_stub_dates['first_pay_stub_start_date'], $lookback_pay_stub_dates['last_pay_stub_end_date'] );
 						$lookback_pay_stub_days_absence = (array)$udtlf->getDaysPaidAbsenceByUserIDAndStartDateAndEndDate( $this->getUser(), $lookback_pay_stub_dates['first_pay_stub_start_date'], $lookback_pay_stub_dates['last_pay_stub_end_date'] );
+					} else {
+						$lookback_pay_stub_days_worked = [];
+						$lookback_pay_stub_days_absence = [];
 					}
 					if ( isset( $lookback_pay_stub_dates['first_pay_stub_start_date'] ) && isset( $lookback_pay_stub_dates['last_pay_stub_end_date'] )
-							&& in_array( 'lookback_pay_stub_worked_time', $formula_variables ) || in_array( 'lookback_pay_stub_paid_time', $formula_variables ) ) {
+							&& ( in_array( 'lookback_pay_stub_worked_time', $formula_variables ) || in_array( 'lookback_pay_stub_paid_time', $formula_variables ) ) ) {
 						Debug::Text( 'Lookback Pay Stub Dates... Start: ' . TTDate::getDate( 'DATE', $lookback_pay_stub_dates['first_pay_stub_start_date'] ) . ' End: ' . TTDate::getDate( 'DATE', $lookback_pay_stub_dates['last_pay_stub_end_date'] ), __FILE__, __LINE__, __METHOD__, 10 );
 						$lookback_pay_stub_worked_time = $udtlf->getWorkedTimeSumByUserIDAndStartDateAndEndDate( $this->getUser(), $lookback_pay_stub_dates['first_pay_stub_start_date'], $lookback_pay_stub_dates['last_pay_stub_end_date'] );
 						$lookback_pay_stub_absence_time = $udtlf->getPaidAbsenceTimeSumByUserIDAndStartDateAndEndDate( $this->getUser(), $lookback_pay_stub_dates['first_pay_stub_start_date'], $lookback_pay_stub_dates['last_pay_stub_end_date'] );
+					} else {
+						$lookback_pay_stub_worked_time = 0;
+						$lookback_pay_stub_absence_time = 0;
 					}
 
 					//Second pass to define variables.
@@ -1261,6 +1270,16 @@ class UserDeductionFactory extends Factory {
 									break;
 								case 'pay_period_paid_days':
 									$variables[$formula_variable] = count( array_unique( array_merge( $pay_period_days_worked, $pay_period_days_absence ) ) );
+									break;
+								case 'pay_period_worked_weeks':
+									$variables[$formula_variable] = $test = count( array_unique( array_map( function($epoch) use ($pay_period_start_week_day) {
+										return TTDate::getWeek( $epoch, $pay_period_start_week_day);
+									}, array_map( 'TTDate::strtotime', $pay_period_days_worked ) ) ) );
+									break;
+								case 'pay_period_paid_weeks':
+									$variables[$formula_variable] = $test = count( array_unique( array_map( function($epoch) use ($pay_period_start_week_day) {
+										return TTDate::getWeek( $epoch, $pay_period_start_week_day);
+									}, array_map( 'TTDate::strtotime', array_merge( $pay_period_days_worked, $pay_period_days_absence ) ) ) ) );
 									break;
 								case 'pay_period_worked_time':
 									$variables[$formula_variable] = $pay_period_worked_time;
@@ -1371,6 +1390,16 @@ class UserDeductionFactory extends Factory {
 									break;
 								case 'lookback_pay_stub_paid_days':
 									$variables[$formula_variable] = count( array_unique( array_merge( $lookback_pay_stub_days_worked, $lookback_pay_stub_days_absence ) ) );
+									break;
+								case 'lookback_pay_stub_worked_weeks':
+									$variables[$formula_variable] = $test = count( array_unique( array_map( function($epoch) use ($pay_period_start_week_day) {
+										return TTDate::getWeek( $epoch, $pay_period_start_week_day);
+									}, array_map( 'TTDate::strtotime', $lookback_pay_stub_days_worked ) ) ) );
+									break;
+								case 'lookback_pay_stub_paid_weeks':
+									$variables[$formula_variable] = $test = count( array_unique( array_map( function($epoch) use ($pay_period_start_week_day) {
+										return TTDate::getWeek( $epoch, $pay_period_start_week_day);
+									}, array_map( 'TTDate::strtotime', array_merge( $lookback_pay_stub_days_worked, $lookback_pay_stub_days_absence ) ) ) ) );
 									break;
 								case 'lookback_pay_stub_worked_time':
 									$variables[$formula_variable] = $lookback_pay_stub_worked_time;

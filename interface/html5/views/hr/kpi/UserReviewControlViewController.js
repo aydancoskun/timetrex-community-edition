@@ -290,8 +290,8 @@ class UserReviewControlViewController extends BaseViewController {
 
 		var args = {
 			serial: '#',
-			name: $.i18n._( 'Key Performance Indicator' ),
-			rating: $.i18n._( 'Rating' ),
+			name: $.i18n._( 'Key Performance Indicator' ) + '<br>(' + $.i18n._('Hover for Description') + ')',
+			rating: $.i18n._( 'Result' ),
 			note: $.i18n._( 'Note' )
 		};
 

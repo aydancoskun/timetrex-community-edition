@@ -43,19 +43,6 @@ include_once( 'US.class.php' );
 class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 	public $xml_schema = 'CMS/PBJ/nhpbj_4_00_0.xsd';
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [
-			//'year' => 'isNumeric',
-			//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [];
 

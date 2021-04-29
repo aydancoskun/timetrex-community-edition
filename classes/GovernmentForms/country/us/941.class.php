@@ -58,31 +58,6 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 
 	public $schedule_b_total = 0; //Total from F941 Schedule B so we can show a warning if it doesn't match.
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [
-				'year'        => 'isNumeric',
-				'ein'         => [ 'stripNonNumeric', 'isNumeric' ],
-				'l1'          => [ 'stripNonNumeric', 'isNumeric' ],
-				'l2'          => [ 'stripNonFloat', 'isNumeric' ],
-				'l3'          => [ 'stripNonFloat', 'isNumeric' ],
-				'l5a'         => [ 'stripNonFloat', 'isNumeric' ],
-				'l5b'         => [ 'stripNonFloat', 'isNumeric' ],
-				'l5c'         => [ 'stripNonFloat', 'isNumeric' ],
-				'l5d'         => [ 'stripNonFloat', 'isNumeric' ],
-				'l9'          => [ 'stripNonFloat', 'isNumeric' ],
-				'l11'         => [ 'stripNonFloat', 'isNumeric' ],
-				'l16_month_1' => [ 'stripNonFloat', 'isNumeric' ],
-				'l16_month_2' => [ 'stripNonFloat', 'isNumeric' ],
-				'l16_month_3' => [ 'stripNonFloat', 'isNumeric' ],
-		];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [
 			//Initialize page1, replace years on template.
@@ -160,7 +135,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'ein' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawChars', //custom drawing function.
+					'function'      => [ 'prefilter' => [ 'stripNonNumeric', 'isNumeric' ], 'draw' => 'drawChars' ], //custom drawing function.
 					'coordinates'   => [
 							[
 									'type'   => 'static', //static or relative
@@ -307,7 +282,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'quarter' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawCheckBox',
+					'function'      => [ 'draw' => 'drawCheckBox' ],
 					'coordinates'   => [
 							1 => [
 									'x'      => 413,
@@ -347,6 +322,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l1' => [
 					'page'          => 1,
 					'template_page' => 1,
+					'function'      => [ 'prefilter' => [ 'stripNonNumeric', 'isNumeric' ] ],
 					'coordinates'   => [
 							'x'      => 434,
 							'y'      => 298,
@@ -359,7 +335,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l2'  => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'prefilter' => [ 'stripNonFloat', 'isNumeric' ], 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -380,7 +356,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l3'  => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'prefilter' => [ 'stripNonFloat', 'isNumeric' ], 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -401,7 +377,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l4'  => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawCheckbox',
+					'function'      => [ 'draw' => 'drawCheckbox' ],
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -419,7 +395,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5a' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'prefilter' => [ 'stripNonFloat', 'isNumeric' ], 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 210,
@@ -440,7 +416,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5ai' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 210,
@@ -461,7 +437,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5aii' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 210,
@@ -482,7 +458,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5b' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'prefilter' => [ 'stripNonFloat', 'isNumeric' ], 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 210,
@@ -503,7 +479,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5c' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'prefilter' => [ 'stripNonFloat', 'isNumeric' ], 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 210,
@@ -524,7 +500,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5d' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'prefilter' => [ 'stripNonFloat', 'isNumeric' ], 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 210,
@@ -543,10 +519,10 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 					],
 			],
 
-			'l5a2' => [
+			'l5a2'   => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL5A2', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL5A2', 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 343,
@@ -567,7 +543,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5ai2' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL5Ai2', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL5Ai2', 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 343,
@@ -588,7 +564,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5aii2' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL5Aii2', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL5Aii2', 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 343,
@@ -609,7 +585,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5b2' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL5B2', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL5B2', 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 343,
@@ -630,7 +606,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5c2' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL5C2', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL5C2', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 343,
@@ -651,7 +627,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5d2' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL5D2', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL5D2', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 343,
@@ -672,7 +648,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5e'  => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL5e', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL5e', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -693,7 +669,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l5f'  => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'drawSplitDecimalFloat' ],
+					'function'      => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -714,7 +690,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l6'   => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL6', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL6', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -735,7 +711,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l7'   => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL7', 'drawSplitDecimalFloat', 'showL5Warning' ], //showL5Warning requires calcL7 to be run first.
+					'function'      => [ 'calc' => 'calcL7', 'draw' => [ 'drawSplitDecimalFloat', 'showL5Warning' ] ], //showL5Warning requires calcL7 to be run first.
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -756,7 +732,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l8'   => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -777,7 +753,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l9'   => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'prefilter' => [ 'stripNonFloat', 'isNumeric' ], 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -799,7 +775,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l10' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL10', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL10', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -818,51 +794,51 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 					],
 			],
 			'l11a' => [  //Qualified Small Busiess payroll tax credit.
-						'page'          => 1,
-						'template_page' => 1,
-						'function'      => 'drawSplitDecimalFloat',
-						'coordinates'   => [
-								[
-										'x'      => 434,
-										'y'      => 678,
-										'h'      => 14,
-										'w'      => 99,
-										'halign' => 'R',
-								],
-								[
-										'x'      => 539,
-										'y'      => 678,
-										'h'      => 14,
-										'w'      => 22,
-										'halign' => 'C',
-								],
-						],
-			],
-			'l11b' => [ //Nonrefundable portion of credit for qualified sick and family leave from Worksheet 1
 						 'page'          => 1,
 						 'template_page' => 1,
-						 'function'      => 'drawSplitDecimalFloat',
+						 'function'      => [ 'draw' => 'drawSplitDecimalFloat' ],
 						 'coordinates'   => [
 								 [
 										 'x'      => 434,
-										 'y'      => 701,
+										 'y'      => 678,
 										 'h'      => 14,
 										 'w'      => 99,
 										 'halign' => 'R',
 								 ],
 								 [
 										 'x'      => 539,
-										 'y'      => 701,
+										 'y'      => 678,
 										 'h'      => 14,
 										 'w'      => 22,
 										 'halign' => 'C',
 								 ],
 						 ],
 			],
+			'l11b' => [ //Nonrefundable portion of credit for qualified sick and family leave from Worksheet 1
+						'page'          => 1,
+						'template_page' => 1,
+						'function'      => [ 'draw' => 'drawSplitDecimalFloat' ],
+						'coordinates'   => [
+								[
+										'x'      => 434,
+										'y'      => 701,
+										'h'      => 14,
+										'w'      => 99,
+										'halign' => 'R',
+								],
+								[
+										'x'      => 539,
+										'y'      => 701,
+										'h'      => 14,
+										'w'      => 22,
+										'halign' => 'C',
+								],
+						],
+			],
 			'l11c' => [ //Nonrefundable portion of employee retention credit Worksheet 1
 						'page'          => 1,
 						'template_page' => 1,
-						'function'      => 'drawSplitDecimalFloat',
+						'function'      => [ 'draw' => 'drawSplitDecimalFloat' ],
 						'coordinates'   => [
 								[
 										'x'      => 434,
@@ -925,7 +901,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l11d' => [ //Nonrefundable portion of employee retention credit Worksheet 1
 						'page'          => 2,
 						'template_page' => 2,
-						'function'      => [ 'calcL11d', 'drawSplitDecimalFloat' ],
+						'function'      => [ 'calc' => 'calcL11d', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 						'coordinates'   => [
 								[
 										'x'      => 434,
@@ -947,7 +923,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l12' => [  //Total Tases after adjustments and credits
 						'page'          => 2,
 						'template_page' => 2,
-						'function'      => [ 'calcL12', 'drawSplitDecimalFloat', 'showSBMisMatchTotals' ],
+						'function'      => [ 'calc' => 'calcL12', 'draw' => [ 'drawSplitDecimalFloat', 'showSBMisMatchTotals' ] ],
 						'coordinates'   => [
 								[
 										'x'      => 434,
@@ -969,9 +945,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l13a'  => [
 					'page'            => 2,
 					'template_page'   => 2,
-					'function'        => [ 'calcL13a', 'drawSplitDecimalFloat' ],
+					'function'        => [ 'calc' => 'calcL13a', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 177,
@@ -991,9 +967,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l13b'  => [
 					'page'            => 2,
 					'template_page'   => 2,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 200,
@@ -1013,9 +989,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l13c'  => [
 					'page'            => 2,
 					'template_page'   => 2,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 223,
@@ -1035,9 +1011,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l13d'  => [
 					'page'            => 2,
 					'template_page'   => 2,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 246,
@@ -1057,9 +1033,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l13e'  => [
 					'page'            => 2,
 					'template_page'   => 2,
-					'function'        => [ 'calcL13e', 'drawSplitDecimalFloat' ],
+					'function'        => [ 'calc' => 'calcL13e', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 269,
@@ -1079,9 +1055,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l13f'  => [
 					'page'            => 2,
 					'template_page'   => 2,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 293,
@@ -1101,9 +1077,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l13g'  => [
 					'page'            => 2,
 					'template_page'   => 2,
-					'function'        => [ 'calcL13g', 'drawSplitDecimalFloat' ],
+					'function'        => [ 'calc' => 'calcL13g', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 316,
@@ -1124,9 +1100,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l14'  => [
 					'page'            => 2,
 					'template_page'   => 2,
-					'function'        => [ 'calcL14', 'drawSplitDecimalFloat' ],
+					'function'        => [ 'calc' => 'calcL14', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 340,
@@ -1146,7 +1122,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l15'  => [
 					'page'          => 2,
 					'template_page' => 2,
-					'function'      => [ 'calcL15', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL15', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 294,
@@ -1167,7 +1143,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l15a' => [
 					'page'          => 2,
 					'template_page' => 2,
-					'function'      => [ 'filterL15A', 'drawCheckbox' ],
+					'function'      => [ 'draw' => [ 'filterL15A', 'drawCheckbox' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 434,
@@ -1185,7 +1161,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l15b' => [
 					'page'          => 2,
 					'template_page' => 2,
-					'function'      => [ 'filterL15B', 'drawCheckbox' ],
+					'function'      => [ 'draw' => [ 'filterL15B', 'drawCheckbox' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 504,
@@ -1206,7 +1182,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l16'  => [
 					'page'          => 2,
 					'template_page' => 2,
-					'function'      => [ 'filterL16', 'drawCheckbox' ],
+					'function'      => [ 'draw' => [ 'filterL16', 'drawCheckbox' ] ],
 					'coordinates'   => [
 							'a' => [
 									'x'      => 106,
@@ -1240,7 +1216,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l16_month1'      => [
 					'page'          => 2,
 					'template_page' => 2,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'prefilter' => [ 'stripNonFloat', 'isNumeric' ], 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 224,
@@ -1261,7 +1237,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l16_month2'      => [
 					'page'          => 2,
 					'template_page' => 2,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'prefilter' => [ 'stripNonFloat', 'isNumeric' ], 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 224,
@@ -1282,7 +1258,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l16_month3'      => [
 					'page'          => 2,
 					'template_page' => 2,
-					'function'      => 'drawSplitDecimalFloat',
+					'function'      => [ 'prefilter' => [ 'stripNonFloat', 'isNumeric' ], 'draw' => 'drawSplitDecimalFloat' ],
 					'coordinates'   => [
 							[
 									'x'      => 224,
@@ -1303,7 +1279,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l16_month_total' => [
 					'page'          => 2,
 					'template_page' => 2,
-					'function'      => [ 'calcL16MonthTotal', 'drawSplitDecimalFloat', 'showL16MisMatchTotals' ],
+					'function'      => [ 'calc' => 'calcL16MonthTotal', 'draw' => [ 'drawSplitDecimalFloat', 'showL16MisMatchTotals' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 224,
@@ -1365,9 +1341,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l19'  => [
 					'page'            => 3,
 					'template_page'   => 3,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 182,
@@ -1387,9 +1363,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l20'  => [
 					'page'            => 3,
 					'template_page'   => 3,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 205,
@@ -1409,9 +1385,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l21'  => [
 					'page'            => 3,
 					'template_page'   => 3,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 229,
@@ -1431,9 +1407,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l22'  => [
 					'page'            => 3,
 					'template_page'   => 3,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 252,
@@ -1453,9 +1429,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l23'  => [
 					'page'            => 3,
 					'template_page'   => 3,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 275,
@@ -1475,9 +1451,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l24'  => [
 					'page'            => 3,
 					'template_page'   => 3,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 305,
@@ -1497,9 +1473,9 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l25'  => [
 					'page'            => 3,
 					'template_page'   => 3,
-					'function'        => [ 'drawSplitDecimalFloat' ],
+					'function'        => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'draw_zero_value' => true,
-					'coordinates'   => [
+					'coordinates'     => [
 							[
 									'x'      => 434,
 									'y'      => 334,
@@ -1541,7 +1517,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			[
 					'page'          => 5,
 					'template_page' => 5,
-					'function'      => 'drawPage3EIN',
+					'function'      => [ 'draw' => 'drawPage3EIN' ],
 					'coordinates'   => [
 							[
 									'x'      => 54,
@@ -1566,7 +1542,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			[
 					'page'          => 5,
 					'template_page' => 5,
-					'function'      => [ 'calcL14', 'drawSplitDecimalFloat' ],
+					'function'      => [ 'calc' => 'calcL14', 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'coordinates'   => [
 							[
 									'x'      => 423,
@@ -1636,7 +1612,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			[
 					'page'          => 5,
 					'template_page' => 5,
-					'function'      => [ 'drawPage3Quarter', 'drawCheckBox' ],
+					'function'      => [ 'draw' => [ 'drawPage3Quarter', 'drawCheckBox' ] ],
 					'coordinates'   => [
 							1 => [
 									'x'      => 49,
@@ -1791,7 +1767,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 
 			//Only show warning if Line 13a (Total Deposits for Quarter) is *not* specified. If it is specified assume they don't match what was expected and are making manual corrections/adjustments, so hide the warning.
 			//As a precaution, show warning if calculated vs. actual amount is off more than twice the fraction of cents value.
-			if ( ( ( isset( $this->l13a ) && (int)$this->l13a == 0 ) || !isset( $this->l13a ) ) && abs( $l5e_actual_diff ) > $threshold_diff ) { //Was: abs( $l5e_actual_diff ) > ( ( $this->l1 / 100 ) * 12 )
+			if ( ( ( isset( $this->l13a ) && (int)$this->l13a == 0 ) || !isset( $this->l13a ) || $this->l13a == $this->l12 ) && abs( $l5e_actual_diff ) > $threshold_diff ) { //Was: abs( $l5e_actual_diff ) > ( ( $this->l1 / 100 ) * 12 )
 				Debug::Text( 'L5e seems incorrect, show warning...', __FILE__, __LINE__, __METHOD__, 10 );
 				$pdf = $this->getPDFObject();
 
@@ -1851,9 +1827,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 	function calcL13a( $value, $schema ) {
-		if ( $this->l13a != '' ) {
-			$this->l13a = $value;
-		} else {
+		if ( !is_numeric( $this->l13a ) ) {
 			$this->l13a = $this->l12; //If no deposit amount is specified, assume they deposit the amount calculated.
 		}
 

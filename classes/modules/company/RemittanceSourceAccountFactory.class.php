@@ -491,7 +491,7 @@ class RemittanceSourceAccountFactory extends Factory {
 	 * @return int
 	 */
 	function getNextTransactionNumber() {
-		return ( $this->getLastTransactionNumber() + 1 );
+		return ( (int)$this->getLastTransactionNumber() + 1 );
 	}
 
 	/**
@@ -499,7 +499,7 @@ class RemittanceSourceAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setLastTransactionNumber( $value ) {
-		$value = trim( $value );
+		$value = trim( $value ); //This can be alphanumeric.
 
 		//Pull out only digits
 //		$value = $this->Validator->stripNonNumeric($value);

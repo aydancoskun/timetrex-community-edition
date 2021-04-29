@@ -875,6 +875,7 @@ class KPIReport extends Report {
 
 			$margins = $this->pdf->getMargins();
 			$total_width = ( $this->pdf->getPageWidth() - $margins['left'] - $margins['right'] );
+			$total_height = ( $this->pdf->getPageHeight() - $margins['bottom'] - $margins['top'] - 15 );
 
 			//Use percentages so it properly scales to landscape mode.
 			$column_widths = [
@@ -897,7 +898,7 @@ class KPIReport extends Report {
 			$columns = [
 					'line' => '#',
 					'kpi.name'           => TTi18n::gettext( 'Key Performance Indicator' ),
-					'user_review.rating' => TTi18n::gettext( 'Rating' ),
+					'user_review.rating' => TTi18n::gettext( 'Result' ),
 					'user_review.note'   => TTi18n::gettext( 'Note' ),
 			];
 
@@ -909,6 +910,7 @@ class KPIReport extends Report {
 					$this->pdf->AddPage( 'P', 'LETTER' );
 
 					foreach( $kpi_rows as $key => $row ) {
+						$is_review_first_page = false;
 						$row['line'] = ($i + 1);
 
 						if ( $this->_pdf_checkMaximumPageLimit() == false ) {
@@ -919,11 +921,12 @@ class KPIReport extends Report {
 						}
 
 						if ( $i == 0 ) {
+							$is_review_first_page = true;
 							$this->reviewHeader( $this->form_data['user'][$user_id], $this->form_data['user_review_control'][$user_review_control_id][$user_id] );
-							$this->reviewKPIHeader( $columns, $column_widths );
+							if ( isset($this->form_data['user_review'][$user_review_control_id]) && count($this->form_data['user_review'][$user_review_control_id]) > 0 ) { //Only show header if KPIs actually exist. The review might just be a general note.
+								$this->reviewKPIHeader( $columns, $column_widths );
+							}
 						}
-
-						$this->reviewCheckPageBreak( 15, true );
 
 						if ( isset($this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]) ) {
 							$description = ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['description'] != '' ) ? "\n(" . $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['description'] . ')' : '';
@@ -931,19 +934,26 @@ class KPIReport extends Report {
 							$row['user_review.rating'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['rating'];
 							$row['user_review.note'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['note'];
 
-							$row_cell_height = $this->_pdf_getMaximumHeightFromArray( $columns, $row, $column_widths, 65, $this->_pdf_fontSize( $row_layout['height'] ) );
+							$row_cell_height = $this->_pdf_getMaximumHeightFromArray( $columns, $row, $column_widths, 65, $this->_pdf_fontSize( $row_layout['height'] ), 0.75 ); //Seems to estimate a little too high, so shrink it down a bit. We force the text to always fit in the cell, so it will never be too small.
+							//Debug::Text( 'Max Row Height ('. $i .'): '. $row_cell_height, __FILE__, __LINE__, __METHOD__, 10 );
+							if ( $is_review_first_page == true && $row_cell_height > ( $total_height - 50 ) || $row_cell_height > $total_height ) { //Different max height on first page vs. 2nd page.
+								$row_cell_height = $total_height;
+							}
+							$this->reviewCheckPageBreak( $row_cell_height, true );
+
 							$this->pdf->MultiCell( $column_widths['line'], $row_cell_height, $row['line'], 1, 'C', 0, 0 );
 
-							$this->pdf->MultiCell( $column_widths['kpi.name'], $row_cell_height, $row['kpi.name'], 1, 'L', 0, 0, '', '', true, 0 );
+							$this->pdf->MultiCell( $column_widths['kpi.name'], $row_cell_height, $row['kpi.name'], 1, 'L', 0, 0, '', '', true, 0, false, true, 0, 'T', true );
+
 							if ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['type_id'] == 10  ) { //10=Scale
 								$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, ( $row['user_review.rating'] != '' ) ? Misc::removeTrailingZeros( $row['user_review.rating'], 0) : '--', 1, 'C', 0, 0, '', '', true, 0 );
 							} elseif ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['type_id'] == 20 ) { //20=Yes/No
 								$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, Misc::humanBoolean( $row['user_review.rating'] ), 1, 'C', 0, 0, '', '', true, 0 );
 							} else {
-								$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, ( $row['user_review.rating'] != '' ) ? $row['user_review.rating'] : '--', 1, 'C', 0, 0, '', '', true, 0 );
+								$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, ( $row['user_review.rating'] != '' ) ? $row['user_review.rating'] : TTi18n::getText('N/A'), 1, 'C', 0, 0, '', '', true, 0 );
 							}
 
-							$this->pdf->MultiCell( $column_widths['user_review.note'], $row_cell_height, ( $row['user_review.note'] != '' ) ? $row['user_review.note'] : '--', 1, 'L', 0, 0, '', '', true, 0 );
+							$this->pdf->MultiCell( $column_widths['user_review.note'], $row_cell_height, ( $row['user_review.note'] != '' ) ? $row['user_review.note'] : '--', 1, 'L', 0, 0, '', '', true, 0, false, true, 0, 'T', true );
 							$this->pdf->Ln( $row_cell_height );
 						}
 

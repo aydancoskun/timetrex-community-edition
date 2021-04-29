@@ -52,8 +52,23 @@ class ImportBranch extends Import {
 		$retval = null;
 		switch ( $name ) {
 			case 'columns':
+				global $current_company;
+
 				$bf = TTNew( 'BranchFactory' ); /** @var BranchFactory $bf */
 				$retval = $bf->getOptions( 'columns' );
+
+				if ( is_object( $current_company ) ) {
+					//Get custom fields for import data.
+					$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
+					$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $current_company->getID(), [ 4 ], [ 4 => '' ] );
+					if ( is_array( $other_field_names ) ) {
+						$retval = array_merge( (array)$retval, (array)$other_field_names );
+					}
+				}
+
+				$retval = Misc::trimSortPrefix( $retval );
+				Debug::Arr( $retval, 'ImportBranchColumns: ', __FILE__, __LINE__, __METHOD__, 10 );
+
 				break;
 			case 'import_options':
 				$retval = [

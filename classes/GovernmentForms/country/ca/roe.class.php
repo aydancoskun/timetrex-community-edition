@@ -117,19 +117,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 		return true;
 	}
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [
-				'year' => 'isNumeric',
-				//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [
 			//Initialize page1, replace years on template.
@@ -185,7 +172,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			],
 
 			'company_address'     => [
-					'function'    => [ 'filterCompanyAddress', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'filterCompanyAddress', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 35,
 							'y'      => 105,
@@ -244,7 +231,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			],
 
 			'employee_address' => [
-					'function'    => [ 'filterEmployeeAddress', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'filterEmployeeAddress', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 35,
 							'y'      => 180,
@@ -305,7 +292,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			],
 			//First Day Worked
 			'first_date'       => [
-					'function'    => [ 'filterDate', 'drawSegments' ],
+					'function'    => [ 'draw' => [ 'filterDate', 'drawSegments' ] ],
 					'coordinates' => [
 							[
 									'x'      => 490,
@@ -339,7 +326,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			//Last day paid
 
 			'last_date'           => [
-					'function'    => [ 'filterDate', 'drawSegments' ],
+					'function'    => [ 'draw' => [ 'filterDate', 'drawSegments' ] ],
 					'coordinates' => [
 							[
 									'x'      => 490,
@@ -371,7 +358,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 			//Pay Period End Date
 			'pay_period_end_date' => [
-					'function'    => [ 'filterDate', 'drawSegments' ],
+					'function'    => [ 'draw' => [ 'filterDate', 'drawSegments' ] ],
 					'coordinates' => [
 							[
 									'x'      => 490,
@@ -402,7 +389,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			],
 
 			'recall_date'        => [
-					'function'    => [ 'filterDate', 'drawSegments' ],
+					'function'    => [ 'draw' => [ 'filterDate', 'drawSegments' ] ],
 					'coordinates' => [
 							[
 									'x'      => 490,
@@ -435,7 +422,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 			// not returning
 			'not_returning'      => [
-					'function'    => 'drawCheckBox',
+					'function'    => [ 'draw' => [ 'drawCheckBox' ] ],
 					'coordinates' => [
 							[
 									'x'      => 423,
@@ -468,7 +455,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 			//Insurable Earnings
 			'insurable_earnings' => [
-					'function'    => 'drawSplitDecimalFloat',
+					'function'    => [ 'draw' => [ 'drawSplitDecimalFloat' ] ],
 					'coordinates' => [
 							[
 									'x'      => 180,
@@ -493,7 +480,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			],
 
 			'insurable_earnings_pay_periods' => [
-					'function'    => [ 'filterInsurableEarningsPayPeriods', 'drawNormal' ],
+					'function'    => [ 'draw' => [ 'filterInsurableEarningsPayPeriods', 'drawNormal' ] ],
 					'coordinates' => [
 							'x'      => 37,
 							'y'      => 304,
@@ -523,8 +510,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			],
 			//Further Information Contact Name
 			'created_user_full_name'         => [
-
-					'function' => 'drawPiecemeal',
+					'function' => [ 'draw' => [ 'drawPiecemeal' ] ],
 
 					'coordinates' => [
 							[
@@ -548,8 +534,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 					],
 			],
 			'created_user_work_phone'        => [
-
-					'function'    => 'drawPiecemeal',
+					'function'    => [ 'draw' => [ 'drawPiecemeal' ] ],
 					'coordinates' => [
 							[
 									'x'      => 330,
@@ -574,7 +559,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 
 			'vacation_pay' => [
-					'function'    => [ 'drawSplitDecimalFloat', 'showVacationPayWarning' ],
+					'function'    => [ 'draw' => [ 'drawSplitDecimalFloat', 'showVacationPayWarning' ] ],
 					'coordinates' => [
 							[
 									'x'      => 510,
@@ -613,7 +598,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 			//English
 			'english'      => [
-					'function'    => 'drawCheckBox',
+					'function'    => [ 'draw' => [ 'drawCheckBox' ] ],
 					'coordinates' => [
 							[
 									'x'      => 40,
@@ -630,7 +615,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			],
 
 			'created_date' => [
-					'function'    => [ 'filterDate', 'drawSegments' ],
+					'function'    => [ 'draw' => [ 'filterDate', 'drawSegments' ] ],
 					'coordinates' => [
 							[
 									'x'      => 490,
@@ -662,7 +647,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			],
 
 			'pay_period_earnings' => [
-					'function'    => 'drawGrid',
+					'function'    => [ 'draw' => [ 'drawGrid' ] ],
 					'grid'        => [
 							'column'     => 3, // total columns
 							'top_left_x' => 35, // start x
@@ -686,7 +671,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 					],
 			],
 			'statutory_holiday'   => [
-					'function'    => 'drawSplitDecimalFloatGrid',
+					'function'    => [ 'draw' => [ 'drawSplitDecimalFloatGrid' ] ],
 					'coordinates' => [
 							[
 									[
@@ -861,7 +846,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 			],
 			'other_monies'        => [
-					'function'    => 'drawSplitDecimalFloatGrid',
+					'function'    => [ 'draw' => [ 'drawSplitDecimalFloatGrid' ] ],
 					'coordinates' => [
 							[
 									[

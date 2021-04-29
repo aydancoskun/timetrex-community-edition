@@ -46,16 +46,6 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 	public $credit_percent = 0.50; //Multiplier for Line 1d
 	public $employer_medicare_rate = 0.0145; //1.45%
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [
 			//Initialize page1, replace years on template.
@@ -104,7 +94,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l1c' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL1C', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL1C', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 148,
@@ -116,7 +106,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l1d' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL1D', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL1D', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 159,
@@ -139,7 +129,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l1f' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL1F', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL1F', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 194,
@@ -162,7 +152,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l1h' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL1H', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL1H', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 222,
@@ -196,7 +186,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l1k' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL1K', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL1K', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 261,
@@ -208,7 +198,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l1l' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL1L', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL1L', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 278,
@@ -244,7 +234,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l2aii' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL2Aii', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL2Aii', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 341,
@@ -267,7 +257,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l2c' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL2C', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL2C', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 375,
@@ -279,7 +269,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l2d' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL2D', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL2D', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 386,
@@ -313,7 +303,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l2eii' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL2Eii', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL2Eii', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 433,
@@ -336,7 +326,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l2g' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL2G', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL2G', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 466,
@@ -348,7 +338,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l2h' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL2H', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL2H', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 477,
@@ -360,7 +350,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l2i' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL2I', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL2I', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 489,
@@ -372,7 +362,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l2j' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL2J', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL2J', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 506,
@@ -384,7 +374,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l2k' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL2k', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL2k', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 522,
@@ -442,7 +432,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l3e' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL3E', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL3E', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 638,
@@ -454,7 +444,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l3f' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL3F', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL3F', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 650,
@@ -466,7 +456,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l3g' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL3G', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL3G', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 661,
@@ -478,7 +468,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l3h' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL3H', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL3H', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 678,
@@ -490,7 +480,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l3i' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL3I', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL3I', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 445,
 							'y'      => 689,
@@ -502,7 +492,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l3j' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL3J', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL3J', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 706,
@@ -514,7 +504,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l3k' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => [ 'calcL3K', 'drawNormal' ],
+					'function'      => [ 'calc' => 'calcL3K', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
 							'x'      => 514,
 							'y'      => 722,

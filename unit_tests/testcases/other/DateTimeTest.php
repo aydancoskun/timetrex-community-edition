@@ -2128,8 +2128,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => true,
+								'is_new_month'        => false,
+								'is_new_week'         => true,
 						],
 				1  =>
 						[
@@ -2141,8 +2141,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				2  =>
 						[
@@ -2154,8 +2154,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				3  =>
 						[
@@ -2167,8 +2167,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				4  =>
 						[
@@ -2180,8 +2180,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				5  =>
 						[
@@ -2193,8 +2193,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				6  =>
 						[
@@ -2206,8 +2206,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				7  =>
 						[
@@ -2219,8 +2219,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => 'March',
 								'month_short_name'  => 'Mar',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => true,
+								'is_new_month'        => false,
+								'is_new_week'         => true,
 						],
 				8  =>
 						[
@@ -2232,8 +2232,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => 'March',
 								'month_short_name'  => 'Mar',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				9  =>
 						[
@@ -2245,8 +2245,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				10 =>
 						[
@@ -2258,8 +2258,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				11 =>
 						[
@@ -2271,8 +2271,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				12 =>
 						[
@@ -2284,8 +2284,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 				13 =>
 						[
@@ -2297,8 +2297,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 								'month_name'        => null,
 								'month_short_name'  => '',
 								'month'             => '3',
-								'isNewMonth'        => false,
-								'isNewWeek'         => false,
+								'is_new_month'        => false,
+								'is_new_week'         => false,
 						],
 		];
 

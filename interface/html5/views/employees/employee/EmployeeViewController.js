@@ -951,7 +951,8 @@ class EmployeeViewController extends BaseViewController {
 			var last_name_widget = this.edit_view_ui_dic['last_name'];
 
 			var user_name_widget = this.edit_view_ui_dic['user_name'];
-			user_name_widget.setValue( first_name_widget.getValue().toLowerCase() + '.' + last_name_widget.getValue().toLowerCase() );
+
+			user_name_widget.setValue( first_name_widget.getValue().toLowerCase().replace(/[^a-zA-Z_]/gi, '') + '.' + last_name_widget.getValue().toLowerCase().replace(/[^a-zA-Z_]/gi, '') );
 			this.current_edit_record.user_name = user_name_widget.getValue();
 		}
 	}

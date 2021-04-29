@@ -45,19 +45,6 @@ include_once( 'US.class.php' );
 class GovernmentForms_US_RETURN940 extends GovernmentForms_US {
 	public $xml_schema = '94x/94x/Return940.xsd';
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [
-			//'year' => 'isNumeric',
-			//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [];
 

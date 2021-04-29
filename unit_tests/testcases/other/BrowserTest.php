@@ -113,6 +113,31 @@ class BrowserTest extends PHPUnit_Framework_TestCase {
 
 		return true;
 	}
+
+	function testBrowserIOS() {
+		$browser = new Browser( 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/21.0 Mobile/16B92 Safari/605.1.15' );
+		$this->assertEquals( Browser::BROWSER_FIREFOX, $browser->getBrowser() );
+		$this->assertEquals( true, $browser->isMobile() );
+		$this->assertEquals( '21.0', $browser->getVersion() );
+
+		return true;
+	}
+
+	function testDetectMobileBrowser() {
+		$this->assertEquals( false, Misc::detectMobileBrowser( 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/4.0; InfoPath.2; SV1; .NET CLR 2.0.50727; WOW64)' ) );
+		$this->assertEquals( false, Misc::detectMobileBrowser( 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36' ) );
+		$this->assertEquals( false, Misc::detectMobileBrowser( 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134' ) );
+		$this->assertEquals( false, Misc::detectMobileBrowser( 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:54.0) Gecko/20100101 Firefox/54.0' ) );
+
+		$this->assertEquals( true, Misc::detectMobileBrowser( 'Mozilla/5.0 (Linux; Android 8.0.0; SM-N9500 Build/R16NW; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/63.0.3239.83 Mobile Safari/537.36 T7/10.13 baiduboxapp/10.13.0.11 (Baidu; P1 8.0.0)' ) );
+		$this->assertEquals( true, Misc::detectMobileBrowser( 'Mozilla/5.0 (Android 9; Mobile; rv:68.0) Gecko/68.0 Firefox/68.0' ) );
+		$this->assertEquals( true, Misc::detectMobileBrowser( 'Mozilla/5.0 (Linux; Android 7.1.2; AFTMM Build/NS6265; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.110 Mobile Safari/537.36' ) );
+		$this->assertEquals( true, Misc::detectMobileBrowser( 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/21.0 Mobile/16B92 Safari/605.1.15' ) );
+		$this->assertEquals( true, Misc::detectMobileBrowser( 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Mobile/15E148 Safari/604.1' ) );
+
+		return true;
+	}
+
 }
 
 ?>

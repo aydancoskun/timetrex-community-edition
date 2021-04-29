@@ -47,19 +47,6 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 
 	//public $credit_reduction_rates = array( 'CA' => 0.021, 'VI' => 0.021 ); //Tax Year: 2017
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [
-				'year' => 'isNumeric',
-				'ein'  => [ 'stripNonNumeric', 'isNumeric' ],
-		];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [
 			//Initialize page1, replace years on template.
@@ -101,7 +88,7 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 			'ein' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawChars', //custom drawing function.
+					'function'      => [ 'prefilter' => [ 'stripNonNumeric', 'isNumeric' ], 'draw' => 'drawChars' ], //custom drawing function.
 					'coordinates'   => [
 							[
 									'type'   => 'static', //static or relative
@@ -185,8 +172,8 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 			],
 
 			'state_amounts' => [
-					'function'    => [ 'calcStateCheckBoxes', 'drawSplitDecimalFloatGrid' ], //Calculate the state checkboxes as early as possible, otherwise the below state_checkboxes variable won't exist and it can't be calculated at that point.
-					'coordinates' => [
+					'function'      => [ 'calc' => 'calcStateCheckBoxes', 'draw' => [ 'drawSplitDecimalFloatGrid' ] ], //Calculate the state checkboxes as early as possible, otherwise the below state_checkboxes variable won't exist and it can't be calculated at that point.
+					'coordinates'   => [
 						//Column 1
 						'CA' => [
 								[
@@ -241,8 +228,8 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 			],
 
 			'state_credit_reduction_rate' => [
-					'function'    => [ 'calcStateCreditReductionRate', 'drawNormalGrid' ],
-					'coordinates' => [
+					'function'      => [ 'calc' => 'calcStateCreditReductionRate', 'draw' => [ 'drawNormalGrid' ] ],
+					'coordinates'   => [
 						//Column 1
 						//						'CA'  => array(
 						//						),
@@ -259,8 +246,8 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 			],
 
 			'state_credit_reduction' => [
-					'function'    => [ 'calcStateCreditReduction', 'drawSplitDecimalFloatGrid' ],
-					'coordinates' => [
+					'function'      => [ 'calc' => 'calcStateCreditReduction', 'draw' => [ 'drawSplitDecimalFloatGrid' ] ],
+					'coordinates'   => [
 						//Column 1
 						'CA' => [
 								[
@@ -315,7 +302,7 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 			],
 
 			'state_checkboxes' => [
-					'function'    => 'drawCheckBox',
+					'function'    => [ 'draw' => 'drawCheckBox' ],
 					'coordinates' => [
 						//State codes must be lower case.
 
@@ -703,8 +690,8 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 			],
 
 			'total' => [
-					'function'    => [ 'calcTotal', 'drawSplitDecimalFloat' ],
-					'coordinates' => [
+					'function'      => [ 'calc' => 'calcTotal', 'draw' => [ 'drawSplitDecimalFloat' ] ],
+					'coordinates'   => [
 							[
 									'x'      => 455,
 									'y'      => 722,

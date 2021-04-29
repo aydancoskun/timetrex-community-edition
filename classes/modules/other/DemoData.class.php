@@ -4193,7 +4193,7 @@ class DemoData {
 				break;
 			case 999: //Random user
 				$next_available_employee_number = $uf->getNextAvailableEmployeeNumber( $company_id );
-				srand( $this->getDate() + $this->getUserNamePostfix() + $type + $next_available_employee_number ); //Re-seed random number otherwise all random users will be exactly the same.
+				srand( (int)($this->getDate() + $this->getUserNamePostfix() + $type + $next_available_employee_number) ); //Re-seed random number otherwise all random users will be exactly the same.
 
 				$first_name = $this->getRandomFirstName();
 				$last_name = $this->getRandomLastName();
@@ -8138,7 +8138,7 @@ class DemoData {
 		$rdaf->setStatus( 10 ); //Enabled
 		$rdaf->setRemittanceSourceAccount( $remittance_source_account_id );
 
-		srand( $this->getDate() + $this->getUserNamePostfix() + $type_id );
+		srand( (int)($this->getDate() + $this->getUserNamePostfix() + $type_id) );
 		$amount_type_id = array_rand( $rdaf->getOptions( 'amount_type' ) ); //10=Percent or 20=Fixed
 
 		$rdaf->setAmountType( $amount_type_id );
@@ -8593,19 +8593,19 @@ class DemoData {
 				//Create Invoice
 				$x = 0;
 				foreach ( $client_ids as $client_id ) {
-					srand( $this->getDate() + $this->getUserNamePostfix() + $x + 0 ); //Different seed for each invoice
+					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + 0) ); //Different seed for each invoice
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], $product_ids[20][0], 100, [], $user_ids, $shipping_policy_ids );
 
-					srand( $this->getDate() + $this->getUserNamePostfix() + $x + 1 ); //Different seed for each invoice
+					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + 1) ); //Different seed for each invoice
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], [ $product_ids[10][0], $product_ids[10][1], $product_ids[10][2], $product_ids[10][3], $product_ids[10][4], $product_ids[20][0] ], 40, null, $user_ids, $shipping_policy_ids );
 
-					srand( $this->getDate() + $this->getUserNamePostfix() + $x + 2 ); //Different seed for each invoice
+					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + 2) ); //Different seed for each invoice
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], [ $product_ids[10][1], $product_ids[10][2], $product_ids[10][3] ], 40, null, $user_ids, $shipping_policy_ids );
 
-					srand( $this->getDate() + $this->getUserNamePostfix() + $x + 3 ); //Different seed for each invoice
+					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + 3) ); //Different seed for each invoice
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], [ $product_ids[10][0], $product_ids[10][4], $product_ids[20][0] ], 100, [], $user_ids, $shipping_policy_ids );
 
-					srand( $this->getDate() + $this->getUserNamePostfix() + $x + 4 ); //Different seed for each invoice
+					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + 4) ); //Different seed for each invoice
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], [ $product_ids[10][3], $product_ids[10][4] ], 100, [], $user_ids, $shipping_policy_ids );
 
 					$x++;
@@ -9046,7 +9046,7 @@ class DemoData {
 
 				$x = 1;
 				foreach ( $user_ids as $user_id ) {
-					srand( $this->getDate() + $this->getUserNamePostfix() + $x ); //Different seed for each user.
+					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x) ); //Different seed for each user.
 
 					//Pick random jobs/tasks that are used for the entire date range. So one employee isn't punching into 15 jobs.
 					$user_random_branch_ids = (array)array_flip( (array)array_rand( $branch_ids, 2 ) );
@@ -9065,7 +9065,7 @@ class DemoData {
 
 					$i = 1; //Start at 1 so $i % 5 == 0 doesn't match on the first iteration every time.
 					while ( $punch_date <= $end_date ) {
-						srand( $this->getDate() + $this->getUserNamePostfix() + $x + $i ); //Different seed for each user/date
+						srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + $i) ); //Different seed for each user/date
 
 						$date_stamp = TTDate::getDate( 'DATE', $punch_date );
 

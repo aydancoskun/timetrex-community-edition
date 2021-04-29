@@ -3524,19 +3524,25 @@ class Report {
 	 * @param array $column_widths
 	 * @param string $wrap_width UUID
 	 * @param int $min_height
+	 * @param int $multiplier Multiplier on the detected height in case its off slightly.
+	 * @param int $multiplier_threshold Threshold value as to when the multiplier should be used.
 	 * @return int
 	 */
-	function _pdf_getMaximumHeightFromArray( $columns, $column_options, $column_widths, $wrap_width, $min_height = 0 ) {
+	function _pdf_getMaximumHeightFromArray( $columns, $column_options, $column_widths, $wrap_width, $min_height = 0, $multiplier = 1, $multiplier_threshold = null ) {
 		$this->profiler->startTimer( 'Maximum Height' );
 		$max_height = $min_height;
+		$multiplier_threshold = ( $multiplier_threshold == '' ) ? $min_height * 5 : $multiplier_threshold;
 		foreach ( $columns as $column => $tmp ) {
-			$height = 0;
+			$height = ( $min_height + ( $min_height * substr_count( ( isset( $column_options[$column] ) ? $column_options[$column] : '' ), "\n" ) ) ); //If there are pre-mature line endings, this increases the height for at least each one of them.
 			if ( isset( $column_options[$column] ) && is_object( $column_options[$column] ) ) {
 				$height = $column_options[$column]->getColumnHeight();
 			} else if ( isset( $column_options[$column] ) && isset( $column_widths[$column] ) && $column_options[$column] != ''
 					&& strlen( $column_options[$column] ) > $wrap_width ) { //Make sure we only calculate stringHeight if we exceed the wrap_width, as its a slow operation.
 				$height = $this->pdf->getStringHeight( $column_widths[$column], wordwrap( $column_options[$column], $wrap_width ) );
-				//Debug::Text('Cell Height: '. $height .' Width: '. $column_widths[$column] .' Text: '. $column_options[$column], __FILE__, __LINE__, __METHOD__, 10);
+				if ( $height > $multiplier_threshold )  { //Only apply the multiplier if height is above threshold
+					$height = $height * $multiplier;
+				}
+				Debug::Text('Cell Height: '. $height .' Width: '. $column_widths[$column] .' Text: '. $column_options[$column], __FILE__, __LINE__, __METHOD__, 10);
 			}
 			if ( $height > $max_height ) {
 				$max_height = $height;

@@ -2574,15 +2574,15 @@ class TTDate {
 			$current_day_of_week = date( 'w', $i );
 
 			if ( $current_month != $prev_month && $i >= $start_date ) {
-				$isNewMonth = true;
+				$is_new_month = true;
 			} else {
-				$isNewMonth = false;
+				$is_new_month = false;
 			}
 
 			if ( $current_day_of_week == $start_day_of_week ) {
-				$isNewWeek = true;
+				$is_new_week = true;
 			} else {
-				$isNewWeek = false;
+				$is_new_week = false;
 			}
 
 			//Display only blank boxes if the date is before the filter start date, or after.
@@ -2605,8 +2605,8 @@ class TTDate {
 					'month_name'        => $month_name,
 					'month_short_name'  => substr( $month_name, 0, 3 ),
 					'month'             => $current_month,
-					'isNewMonth'        => $isNewMonth,
-					'isNewWeek'         => $isNewWeek,
+					'is_new_month'        => $is_new_month,
+					'is_new_week'         => $is_new_week,
 			];
 
 			$prev_month = $current_month;

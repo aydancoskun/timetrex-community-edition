@@ -43,19 +43,6 @@ include_once( 'US.class.php' );
 class GovernmentForms_US_941SB extends GovernmentForms_US {
 	public $pdf_template = '941sb.pdf';
 
-	public function getFilterFunction( $name ) {
-		$variable_function_map = [
-				'year' => 'isNumeric',
-				'ein'  => [ 'stripNonNumeric', 'isNumeric' ],
-		];
-
-		if ( isset( $variable_function_map[$name] ) ) {
-			return $variable_function_map[$name];
-		}
-
-		return false;
-	}
-
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [
 			//Initialize page1, replace years on template.
@@ -112,7 +99,7 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 			'ein' => [
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => 'drawChars', //custom drawing function.
+					'function'      => [ 'prefilter' => [ 'stripNonNumeric', 'isNumeric' ], 'draw' => 'drawChars' ], //custom drawing function.
 					'coordinates'   => [
 							[
 									'type'   => 'static', //static or relative
@@ -195,7 +182,7 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 					],
 			],
 			'year'    => [
-					'function'    => 'drawChars', //custom drawing function.
+					'function'    => [ 'prefilter' => 'isNumeric', 'draw' => 'drawChars' ], //custom drawing function.
 					'coordinates' => [
 							[
 									'type'   => 'static', //static or relative
@@ -233,7 +220,7 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 					],
 			],
 			'quarter' => [
-					'function'    => 'drawCheckBox',
+					'function'    => [ 'draw' => 'drawCheckBox' ],
 					'coordinates' => [
 							1 => [
 									'x'      => 412,
@@ -271,7 +258,7 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 			],
 
 			'month1' => [
-					'function'    => 'drawSplitDecimalFloatGrid',
+					'function'    => [ 'draw' => 'drawSplitDecimalFloatGrid' ],
 					'coordinates' => [
 						//Column 1
 						1  => [
@@ -780,7 +767,7 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 					],
 			],
 			'month2' => [
-					'function'    => 'drawSplitDecimalFloatGrid',
+					'function'    => [ 'draw' => 'drawSplitDecimalFloatGrid' ],
 					'coordinates' => [
 						//Column 1
 						1  => [
@@ -1288,7 +1275,7 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 					],
 			],
 			'month3' => [
-					'function'    => 'drawSplitDecimalFloatGrid',
+					'function'    => [ 'draw' => 'drawSplitDecimalFloatGrid' ],
 					'coordinates' => [
 						//Column 1
 						1  => [
@@ -1796,8 +1783,8 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 			],
 
 			'month1_total' => [
-					'function'    => [ 'calcMonth1Total', 'drawSplitDecimalFloat' ],
-					'coordinates' => [
+					'function'      => [ 'calc' => 'calcMonth1Total', 'draw' => [ 'drawSplitDecimalFloat' ] ],
+					'coordinates'   => [
 							[
 									'x'      => 442,
 									'y'      => 320,
@@ -1815,8 +1802,8 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 					],
 			],
 			'month2_total' => [
-					'function'    => [ 'calcMonth2Total', 'drawSplitDecimalFloat' ],
-					'coordinates' => [
+					'function'      => [ 'calc' => 'calcMonth2Total', 'draw' => [ 'drawSplitDecimalFloat' ] ],
+					'coordinates'   => [
 							[
 									'x'      => 442,
 									'y'      => 473,
@@ -1834,8 +1821,8 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 					],
 			],
 			'month3_total' => [
-					'function'    => [ 'calcMonth3Total', 'drawSplitDecimalFloat' ],
-					'coordinates' => [
+					'function'      => [ 'calc' => 'calcMonth3Total', 'draw' => [ 'drawSplitDecimalFloat' ] ],
+					'coordinates'   => [
 							[
 									'x'      => 442,
 									'y'      => 627,
@@ -1853,8 +1840,8 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 					],
 			],
 			'total'        => [
-					'function'    => [ 'calcTotal', 'drawSplitDecimalFloat' ],
-					'coordinates' => [
+					'function'      => [ 'calc' => 'calcTotal', 'draw' => [ 'drawSplitDecimalFloat' ] ],
+					'coordinates'   => [
 							[
 									'x'      => 442,
 									'y'      => 758,

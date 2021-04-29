@@ -1481,15 +1481,21 @@ class TimeSheetViewController extends BaseViewController {
 				var source_data = $this.employee_nav.getSourceData();
 				var current_open_page = $this.employee_nav.getCurrentOpenPage();
 				var next_select_item;
-				if ( source_data && selected_index < source_data.length - 1 ) {
-					next_select_item = $this.employee_nav.getItemByIndex( selected_index + 1 );
+				if ( source_data && selected_index < ( source_data.length - 1 ) ) {
+					next_select_item = $this.employee_nav.getItemByIndex( ( selected_index + 1 ) );
 					$this.employee_nav.setValue( next_select_item );
+					doNextDone();
 				} else if ( source_data && selected_index === source_data.length - 1 ) {
-					$this.employee_nav.onADropDownSearch( 'unselect_grid', current_open_page + 1, 'first' );
+					//onADropDownSearch() makes async calls, so we need to have a doNextDone() callback to trigger to avoid race conditions.
+					$this.employee_nav.onADropDownSearch( 'unselect_grid', ( current_open_page + 1 ), 'first', doNextDone, false ); //Skip triggering FormItemChange as we call search() ourself below anyways, and doing both can cause race conditions and incorrect data to be displayed.
 				} else {
 					next_select_item = $this.employee_nav.getItemByIndex( 0 );
 					$this.employee_nav.setValue( next_select_item );
+					doNextDone();
 				}
+			}
+
+			function doNextDone() {
 				if ( !$this.edit_view ) {
 					$this.reSetURL();
 				}
@@ -1510,26 +1516,32 @@ class TimeSheetViewController extends BaseViewController {
 
 			function doNext() {
 				var selected_index = $this.employee_nav.getSelectIndex();
-				var source_data = $this.employee_nav.getSourceData();
+				//var source_data = $this.employee_nav.getSourceData();
 				var current_open_page = $this.employee_nav.getCurrentOpenPage();
 				var next_select_item;
 				if ( selected_index > 0 ) {
-					next_select_item = $this.employee_nav.getItemByIndex( selected_index - 1 );
+					next_select_item = $this.employee_nav.getItemByIndex( ( selected_index - 1 ) );
 					$this.employee_nav.setValue( next_select_item );
+					doNextDone();
 				} else if ( current_open_page > 1 ) {
-					$this.employee_nav.onADropDownSearch( 'unselect_grid', current_open_page - 1, 'last' );
+					//onADropDownSearch() makes async calls, so we need to have a doNextDone() callback to trigger to avoid race conditions.
+					$this.employee_nav.onADropDownSearch( 'unselect_grid', ( current_open_page - 1 ), 'last', doNextDone, false ); //Skip triggering FormItemChange as we call search() ourself below anyways, and doing both can cause race conditions and incorrect data to be displayed.
 				} else {
 					// Error: TypeError: source_data is null in /interface/html5/framework/jquery.min.js?v=8.0.6-20150417-084000 line 2 > eval line 1691
 					next_select_item = $this.employee_nav.getItemByIndex( 0 );
 					$this.employee_nav.setValue( next_select_item );
+					doNextDone();
 				}
-				if ( !$this.edit_view ) {
-					$this.reSetURL();
+
+				function doNextDone() {
+					if ( !$this.edit_view ) {
+						$this.reSetURL();
+					}
+					$this.allow_auto_switch && ( $this.is_auto_switch = true );
+					$this.first_build = true;
+					$this.search();
+					$this.setEmployeeNavArrowsStatus();
 				}
-				$this.allow_auto_switch && ( $this.is_auto_switch = true );
-				$this.first_build = true;
-				$this.search();
-				$this.setEmployeeNavArrowsStatus();
 			}
 
 		} );

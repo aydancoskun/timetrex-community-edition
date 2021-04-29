@@ -86,17 +86,23 @@ class GovernmentForms_Base {
 	}
 
 	function Output( $type ) {
+		$this->calculate(); //Run all calculation functions prior to outputting anything.
 		switch ( strtolower( $type ) ) {
 			case 'pdf':
-				return $this->_outputPDF( $type );
+				$retval = $this->_outputPDF( $type );
 				break;
 			case 'xml':
-				return $this->_outputXML( $type );
+				$retval = $this->_outputXML( $type );
 				break;
 			case 'efile':
-				return $this->_outputEFILE();
+				$retval = $this->_outputEFILE();
+				break;
+			default:
+				$retval = false;
 				break;
 		}
+
+		return $retval;
 	}
 
 	function getRecords() {
@@ -121,24 +127,27 @@ class GovernmentForms_Base {
 		//This is also important for calculating totals, so we can cap maximum contributions and such and get totals based on those properly.
 		//preCalc functions can modify any other value in the record as well.
 		if ( is_array( $data ) ) {
-			if ( method_exists( $this, 'getPreCalcFunction' ) ) {
+			$template_schema = $this->getTemplateSchema();
+			if ( is_array( $template_schema ) ) {
 				foreach ( $data as $key => $value ) {
-					$filter_function = $this->getPreCalcFunction( $key );
-					if ( $filter_function != '' ) {
-						if ( !is_array( $filter_function ) ) {
-							$filter_function = (array)$filter_function;
-						}
-
-						foreach ( $filter_function as $function ) {
-							//Call function
-							if ( method_exists( $this, $function ) ) {
-								$value = $this->$function( $value, $key, $data );
+					if ( isset( $template_schema[$key]['function']['precalc'] ) ) {
+						$filter_function = $template_schema[$key]['function']['precalc'];
+						if ( $filter_function != '' ) {
+							if ( !is_array( $filter_function ) ) {
+								$filter_function = (array)$filter_function;
 							}
-						}
-						unset( $function );
-					}
 
-					$data[$key] = $value;
+							foreach ( $filter_function as $function ) {
+								//Call function
+								if ( method_exists( $this, $function ) ) {
+									$value = $this->$function( $value, $key, $data );
+								}
+							}
+							unset( $function );
+						}
+
+						$data[$key] = $value;
+					}
 				}
 			}
 
@@ -740,6 +749,36 @@ class GovernmentForms_Base {
 		return false;
 	}
 
+	//Run all calculate functions on their own.
+	//  This separates calculating values from the drawing process, so we can easily pull out calculated values before anything is drawn, as other forms may need that data.
+	function calculate() {
+		//Get location map, start looping over each variable and drawing
+		$template_schema = $this->getTemplateSchema();
+		if ( is_array( $template_schema ) ) {
+			foreach ( $template_schema as $field => $schema ) {
+				//If custom function is defined, pass off to that immediate.
+				//Else, try the generic drawing method.
+				if ( isset( $schema['function']['calc'] ) ) {
+					if ( !is_array( $schema['function']['calc'] ) ) {
+						$schema['function']['calc'] = (array)$schema['function']['calc'];
+					}
+					foreach ( $schema['function']['calc'] as $function ) {
+						if ( method_exists( $this, $function ) ) {
+							if ( !isset( $template_schema[$field]['value'] ) ) {
+								//$template_schema[$field]['value'] = ( isset( $this->{$field} ) ? $this->{$field} : null ); //This passes in the field value, which the calculate function can get on its own without a problem.
+								$template_schema[$field]['value'] = null;
+							}
+							$template_schema[$field]['value'] = $this->$function( $template_schema[$field]['value'], $schema );
+						}
+					}
+					unset( $function );
+				}
+			}
+		}
+
+		return true;
+	}
+
 	//Generic draw function that works strictly off the coordinate map.
 	//It checks for a variable specific function before running though, so we can handle more complex
 	//drawing functionality.
@@ -756,11 +795,11 @@ class GovernmentForms_Base {
 
 		//If custom function is defined, pass off to that immediate.
 		//Else, try the generic drawing method.
-		if ( isset( $schema['function'] ) ) {
-			if ( !is_array( $schema['function'] ) ) {
-				$schema['function'] = (array)$schema['function'];
+		if ( isset( $schema['function']['draw'] ) ) {
+			if ( !is_array( $schema['function']['draw'] ) ) {
+				$schema['function']['draw'] = (array)$schema['function']['draw'];
 			}
-			foreach ( $schema['function'] as $function ) {
+			foreach ( $schema['function']['draw'] as $function ) {
 				if ( method_exists( $this, $function ) ) {
 					$value = $this->$function( $value, $schema );
 				}
@@ -870,23 +909,26 @@ class GovernmentForms_Base {
 	 *
 	 */
 	function __set( $name, $value ) {
-		$filter_function = $this->getFilterFunction( $name );
-		if ( $filter_function != '' ) {
-			if ( !is_array( $filter_function ) ) {
-				$filter_function = (array)$filter_function;
-			}
+		$template_schema = $this->getTemplateSchema();
+		if ( is_array( $template_schema ) && isset( $template_schema[$name]['function']['prefilter'] ) ) {
+			$filter_function = $template_schema[$name]['function']['prefilter'];
+			if ( $filter_function != '' ) {
+				if ( !is_array( $filter_function ) ) {
+					$filter_function = (array)$filter_function;
+				}
 
-			foreach ( $filter_function as $function ) {
-				//Call function
-				if ( method_exists( $this, $function ) ) {
-					$value = $this->$function( $value );
+				foreach ( $filter_function as $function ) {
+					//Call function
+					if ( method_exists( $this, $function ) ) {
+						$value = $this->$function( $value );
 
-					if ( $value === false ) {
-						return false;
+						if ( $value === false ) {
+							return false;
+						}
 					}
 				}
+				unset( $function );
 			}
-			unset( $function );
 		}
 
 		$this->data[$name] = $value;

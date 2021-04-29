@@ -377,6 +377,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( -0.04, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 45324.23, $form_objs->objs[0]->l10 );
 		$this->assertEquals( 45324.23, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 
 
 		//Generate Report for 2nd Quarter
@@ -464,6 +465,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( -0.03, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 50518.60, $form_objs->objs[0]->l10 );
 		$this->assertEquals( 50518.60, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 
 
 		//Generate Report for entire year
@@ -661,6 +663,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 0.03, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 18165.60, $form_objs->objs[0]->l10 );
 		$this->assertEquals( 18165.60, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 
 
 		//Generate Report for 2nd Quarter
@@ -748,6 +751,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 0.04, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 25431.84, $form_objs->objs[0]->l10 );
 		$this->assertEquals( 25431.84, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 
 
 		//Generate Report for 3rd Quarter
@@ -835,6 +839,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l7 ); //Since the user reached the social security maximum contribution, we have to back out the fractions of the cent from previous quarters, at least to within 0.01.
 		$this->assertEquals( 17696.12, $form_objs->objs[0]->l10 );
 		$this->assertEquals( 17696.12, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 
 
 		//Generate Report for entire year
@@ -1030,6 +1035,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 118239.66, $form_objs->objs[0]->l10 );
 		$this->assertEquals( 118239.66, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 
 		return true;
 	}
@@ -1159,6 +1165,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( -0.04, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 45324.23, $form_objs->objs[0]->l10 );
 		$this->assertEquals( 45324.23, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 
 		//Schedule B
 		//var_dump($form_objs->objs[1]->data);
@@ -1265,6 +1272,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( -0.03, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 50518.60, $form_objs->objs[0]->l10 );
 		$this->assertEquals( 50518.60, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 
 		//Schedule B
 		//var_dump($form_objs->objs[1]->data);
@@ -1548,6 +1556,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l11c );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l11d );
 		$this->assertEquals( 2699.51, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l13c );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l13d );
 		$this->assertEquals( 2699.51, $form_objs->objs[0]->l13e );
@@ -1663,6 +1672,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l11c );
 		$this->assertEquals( 546.84, $form_objs->objs[0]->l11d );
 		$this->assertEquals( 3036.83, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 		$this->assertEquals( 5306.52, $form_objs->objs[0]->l13c );
 		$this->assertEquals( 441.07, $form_objs->objs[0]->l13d );
 		$this->assertEquals( 8784.42, $form_objs->objs[0]->l13e );
@@ -1670,18 +1680,19 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 
 		//Schedule B
 		//var_dump($form_objs->objs[1]->data);
-		$this->assertEquals( 433.85, $form_objs->objs[1]->month1[5] );
-		$this->assertEquals( 433.83, $form_objs->objs[1]->month1[19] );
-		$this->assertEquals( 867.68, $form_objs->objs[1]->month1_total );
+		//$this->assertEquals( 433.85, $form_objs->objs[1]->month1[5] );
+		$this->assertEquals( 0.00, $form_objs->objs[1]->month1[5] );
+		$this->assertEquals( 477.08, $form_objs->objs[1]->month1[19] );
+		$this->assertEquals( 477.08, $form_objs->objs[1]->month1_total );
 
-		$this->assertEquals( 433.83, $form_objs->objs[1]->month2[3] );
-		$this->assertEquals( 433.83, $form_objs->objs[1]->month2[17] );
-		$this->assertEquals( 433.83, $form_objs->objs[1]->month2[31] );
-		$this->assertEquals( 1301.49, $form_objs->objs[1]->month2_total );
+		$this->assertEquals( 511.95, $form_objs->objs[1]->month2[3] );
+		$this->assertEquals( 511.95, $form_objs->objs[1]->month2[17] );
+		$this->assertEquals( 511.95, $form_objs->objs[1]->month2[31] );
+		$this->assertEquals( 1535.85, $form_objs->objs[1]->month2_total );
 
-		$this->assertEquals( 433.83, $form_objs->objs[1]->month3[14] );
-		$this->assertEquals( 433.83, $form_objs->objs[1]->month3[28] );
-		$this->assertEquals( 867.66, $form_objs->objs[1]->month3_total );
+		$this->assertEquals( 511.95, $form_objs->objs[1]->month3[14] );
+		$this->assertEquals( 511.95, $form_objs->objs[1]->month3[28] );
+		$this->assertEquals( 1023.90, $form_objs->objs[1]->month3_total );
 
 		$this->assertEquals( 3036.83, $form_objs->objs[1]->total );
 		$this->assertEquals( $form_objs->objs[1]->total, $form_objs->objs[0]->l12 );
@@ -1951,6 +1962,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l11c );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l11d );
 		$this->assertEquals( 44394.15, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l13c );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l13d );
 		$this->assertEquals( 44394.15, $form_objs->objs[0]->l13e );
@@ -2066,15 +2078,16 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l11c );
 		$this->assertEquals( 1551.24, $form_objs->objs[0]->l11d );
 		$this->assertEquals( 48947.12, $form_objs->objs[0]->l12 );
-		$this->assertEquals( 52239.39, $form_objs->objs[0]->l13c );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
+		$this->assertEquals( 14486.08, $form_objs->objs[0]->l13c );
 		$this->assertEquals( 4041.16, $form_objs->objs[0]->l13d );
-		$this->assertEquals( 105227.67, $form_objs->objs[0]->l13e );
-		$this->assertEquals( 105227.67, $form_objs->objs[0]->l13g );
+		$this->assertEquals( 67474.36, $form_objs->objs[0]->l13e );
+		$this->assertEquals( 67474.36, $form_objs->objs[0]->l13g );
 
 		//Schedule B
 		//var_dump($form_objs->objs[1]->data);
-		$this->assertEquals( 7824.16, $form_objs->objs[1]->month1[5] );
-		$this->assertEquals( 7824.15, $form_objs->objs[1]->month1[19] );
+		$this->assertEquals( 7048.54, $form_objs->objs[1]->month1[5] );
+		$this->assertEquals( 8599.77, $form_objs->objs[1]->month1[19] );
 		$this->assertEquals( 15648.31, $form_objs->objs[1]->month1_total );
 
 		$this->assertEquals( 6603.72, $form_objs->objs[1]->month2[3] );
